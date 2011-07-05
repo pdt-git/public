@@ -174,8 +174,11 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					if(goal.getModule()!=null)
 						module ="'"+ goal.getModule()+ "'";
 					
+					String term = goal.getTermString();
+					String quotedTerm = Util.quoteAtom(term);
+					
 					String query = "find_primary_definition_visible_in('"
-						+enclFile+"','" + goal.getTermString() + "','" + goal.getFunctor()+"'," + goal.getArity()+ ","
+						+enclFile+"'," + quotedTerm+ ",'" + goal.getFunctor()+"'," + goal.getArity()+ ","
 						+module 
 						+",File,Line)";
 					Debug.info("open declaration: " + query);

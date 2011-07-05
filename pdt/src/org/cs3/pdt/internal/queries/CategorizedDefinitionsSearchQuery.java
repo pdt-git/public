@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
@@ -32,8 +33,12 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 		if (module.equals("''"))
 			module2 = "Module";
 		
+		String term = goal.getTermString();
+		//String term = Util.quoteAtom(origTerm);
+		
+		
 		String query = "find_definitions_categorized(" 
-			            + file + "," + goal.getLine() + "," + goal.getTermString() + ", Functor, Arity, "+ module2 + 
+			            + file + "," + goal.getLine() + "," + term + ", Functor, Arity, "+ module2 + 
 			            ", SearchCategory, DefiningModule, File, Line, PropertyList, ResultsCategory)";
 		return query;
 	}
