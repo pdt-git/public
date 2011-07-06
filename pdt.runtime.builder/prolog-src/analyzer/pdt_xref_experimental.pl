@@ -45,8 +45,8 @@ go :- % To list all results quickly call
 pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
    current_predicate(RefModule:F/A),     % For all defined predicates
    functor(RefHead,F,A),   
-   nth_clause(RefModule:RefHead,_,Ref),   % For all their clauses
-   '$xr_member'(Ref, X),                  % Get a term referenced by that clause
+   nth_clause(RefModule:RefHead,_N,Ref),   % For all their clauses
+   '$xr_member'(Ref, X),					% Get a term referenced by that clause
    extractModule(X,T,DefModule,RefHead,Kind).     % (via SWI-Prolog's internal xref data)
    
 %pdt_xref_data(DefModule:DefHead,RefModule:RefHead,Ref, Kind) :-
@@ -67,7 +67,11 @@ extractModule(_:T,_,_,_,_) :-
     !,
     fail.
 extractModule(DefModule:Term,Term,DefModule,_RefHead, call) :-
-    !.
+    !. 
+extractModule(Module:Term,Term,DefModule,_RefHead, call) :-
+    !,
+    declared_in_module(Module, Term, DefiningModule),
+    declared_in_module(DefModule, Term, DefiningModule).    
 extractModule(Term,Term,_DefModule,'$mode'(_, _), prologdoc) :-
     !.
 extractModule(Term,Term,_DefModule,_RefHead, termORmetacall) .      
