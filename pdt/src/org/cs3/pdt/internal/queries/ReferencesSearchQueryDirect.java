@@ -72,7 +72,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("RefFile"));
 		int line = Integer.parseInt((String) m.get("RefLine"));
 
-		PDTMatch match = createMatch(module, name, arity, file, line, properties, "definition");
+		PDTMatch match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
 		return match;
 	}
 	
