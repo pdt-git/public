@@ -187,7 +187,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
 			match = constructPrologMatchForAResult(m);
-			if (result != null) {
+			if ((result != null) && (match != null)) {
 				result.addMatch(match);
 			}
 		}
