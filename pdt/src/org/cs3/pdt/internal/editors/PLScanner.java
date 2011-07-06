@@ -242,6 +242,8 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 							+ file.getName()
 							+ "',Predicates)");
 
+			if (solutions == null)
+				return null;
 			String predicatesStr = (String) solutions.get("Predicates");
 			// swipl 5.8.x adds ", " between list elements when writing
 			// Strings/Streams:
