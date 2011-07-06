@@ -1,5 +1,6 @@
 :- module(modules_and_visibility, [	compute_visibility_graph/0,
-									visible_in_module/2]).
+									visible_in_module/2,
+									get_predicate_referenced_as/4]).
 
 :- use_module(parse_util).
 
@@ -30,6 +31,18 @@ build_export_edge(Functor/Arity,Directive):-
     assert(exporting(Module,Id,Directive)),
     !.
     
+%% 
+% get_predicate_referenced_as(+Module, +Functor, +Arity, ?PId)
+%
+get_predicate_referenced_as(Module, Functor, Arity, PId):-
+    predicateT_ri(Functor, Arity, _AModule,PId),
+    visible_in_module(PId, Module)
+    , !.
+get_predicate_referenced_as(Module, Functor, Arity, PId):-
+	visible_in_module_as(PId, Module, Functor,[Module]),    
+	predicateT(PId,_,_,Arity,_),
+	!.
+
 
 visible_in_module(Predicate,Module):-
     visible_in_module_as(Predicate,Module,_,[Module]).
