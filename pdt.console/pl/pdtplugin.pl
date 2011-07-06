@@ -434,7 +434,7 @@ find_pred_(Prefix,Module,Name,Arity,true) :-
     % rule out used built-ins, like =../2, in case the enclosing module is given (in this case the prefix might be empty):   
     ( nonvar(Module) ->
       ( functor(Term,Name,Arity),
-    	(Prefix \== ''; \+ built_in(Term)) )
+    	(Prefix \== ''; \+ predicate_property(Term, built_in)) )
       ; true
     ).
 
