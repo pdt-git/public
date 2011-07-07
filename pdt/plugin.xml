@@ -2,11 +2,7 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-     <extension
-         point="org.eclipse.ui.startup">
-      <startup class="org.cs3.pdt.internal.startup.StartUp"/>
-   </extension>
-
+ 
 	<extension
          point="org.eclipse.ui.views">
       <category
