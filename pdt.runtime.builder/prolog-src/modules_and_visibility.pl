@@ -42,6 +42,12 @@ get_predicate_referenced_as(Module, Functor, Arity, PId):-
 	visible_in_module_as(PId, Module, Functor,[Module]),    
 	predicateT(PId,_,_,Arity,_),
 	!.
+get_predicate_referenced_as(Module, Functor, Arity, Predefined):-
+    functor(Term, Functor, Arity),
+    predicate_property(Module:Term, built_in),
+    declared_in_module(Module, Term, DefModule),
+    Predefined = predefined(DefModule, Functor, Arity).
+    
 
 
 visible_in_module(Predicate,Module):-
