@@ -6,18 +6,74 @@
   <artifactId>jtransformer_projects</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <properties>
-		<tycho-version>0.12.0</tycho-version>
-  </properties>
- 
-  <!-- needed for findbugs -->
-   <repositories>
-    <repository>
-      <id>snapshots.codehaus</id>
-      <url>http://snapshots.repository.codehaus.org</url>
-    </repository>
-  </repositories>
 
+  <properties>
+	<tycho-version>0.12.0</tycho-version>
+	<tycho-groupid>org.eclipse.tycho</tycho-groupid>
+	<platform-version-name>indigo</platform-version-name>
+   	<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
+   	<wikitext-site>http://download.eclipse.org/tools/mylyn/update/weekly</wikitext-site>
+   	<swtbot-site>http://download.eclipse.org/technology/swtbot/${platform-version-name}/dev-build/update-site</swtbot-site>
+   	<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.7</eclipse-project-site>
+	<platform-version>[3.6,3.7)</platform-version>
+  </properties>
+
+  <!-- Add additional repository locations -->
+	<repositories>
+	<!-- needed for findbugs -->
+		<repository>
+		<id>snapshots.codehaus</id>
+		<url>http://snapshots.repository.codehaus.org</url>
+		</repository>
+ 
+		<!--  For Eclipse (depending on the variable ${platform-version-name}) -->
+		<repository>
+			<id>eclipse-p2</id>
+			<layout>p2</layout>
+			<url>${eclipse-site}</url>
+		</repository>
+		
+		<!--  Eclipse Projects P2 Repository (for project dependencies) -->
+		<repository>
+			<id>eclipse-p2-projects</id>
+			<url>http://download.eclipse.org/eclipse/updates/3.7</url>
+			<layout>p2</layout>
+		</repository>
+	</repositories>
+	<!--  Profiles:  Helios and Indigo, Default: Indigo -->
+	<profiles>
+		<profile>
+			<id>platform-helios</id>
+			<activation>
+				<property>
+					<name>platform-version-name</name>
+					<value>helios</value>
+				</property>
+			</activation>
+			<properties>
+				<eclipse-site>http://download.eclipse.org/releases/helios</eclipse-site>
+				<platform-version>[3.6,3.7)</platform-version>
+				<swtbot-site>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site</swtbot-site>
+				<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.6</eclipse-project-site>
+			</properties>
+		</profile>
+		<profile>
+			<id>platform-indigo</id>
+			<activation>
+				<property>
+					<name>platform-version-name</name>
+					<value>indigo</value>
+				</property>
+			</activation>
+			<properties>
+				<eclipse-site>http://download.eclipse.org/releases/indigo</eclipse-site>
+				<platform-version>[3.7,3.8)</platform-version>
+				<swtbot-site>http://download.eclipse.org/technology/swtbot/indigo/dev-build/update-site</swtbot-site>
+				<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.7</eclipse-project-site>
+			</properties>
+		</profile>
+	</profiles>
+	
   <build>
 	<sourceDirectory>src</sourceDirectory>
        <pluginManagement>
@@ -72,6 +128,16 @@
         <version>${tycho-version}</version>
         <extensions>true</extensions>
       </plugin>
+	  
+	    
+	  <plugin>
+		<groupId>org.sonatype.tycho</groupId>
+		<artifactId>target-platform-configuration</artifactId>
+		<version>${tycho-version}</version>
+		<configuration>
+			<resolver>p2</resolver>
+		</configuration>
+	</plugin>
       <!-- leads to a class cast exception ?!
        <plugin>
         <groupId>org.eclipse.tycho</groupId>
@@ -82,7 +148,7 @@
           <target>c:/temp/jt_site</target>
         </configuration>
       </plugin>  -->
-      
+   <!--   
 	  <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
@@ -100,6 +166,7 @@
 		  </includes>
         </configuration>
       </plugin>
+-->
 
 	  <!-- needed for findbugs -->
 
