@@ -12,20 +12,12 @@
 	<tycho-groupid>org.eclipse.tycho</tycho-groupid>
 	<platform-version-name>indigo</platform-version-name>
    	<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-   	<wikitext-site>http://download.eclipse.org/tools/mylyn/update/weekly</wikitext-site>
-   	<swtbot-site>http://download.eclipse.org/technology/swtbot/${platform-version-name}/dev-build/update-site</swtbot-site>
    	<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.7</eclipse-project-site>
 	<platform-version>[3.6,3.7)</platform-version>
   </properties>
 
   <!-- Add additional repository locations -->
 	<repositories>
-	<!-- needed for findbugs -->
-		<repository>
-		<id>snapshots.codehaus</id>
-		<url>http://snapshots.repository.codehaus.org</url>
-		</repository>
- 
 		<!--  For Eclipse (depending on the variable ${platform-version-name}) -->
 		<repository>
 			<id>eclipse-p2</id>
@@ -36,47 +28,14 @@
 		<!--  Eclipse Projects P2 Repository (for project dependencies) -->
 		<repository>
 			<id>eclipse-p2-projects</id>
-			<url>http://download.eclipse.org/eclipse/updates/3.7</url>
+			<url>${eclipse-project-site}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
-	<!--  Profiles:  Helios and Indigo, Default: Indigo -->
-	<profiles>
-		<profile>
-			<id>platform-helios</id>
-			<activation>
-				<property>
-					<name>platform-version-name</name>
-					<value>helios</value>
-				</property>
-			</activation>
-			<properties>
-				<eclipse-site>http://download.eclipse.org/releases/helios</eclipse-site>
-				<platform-version>[3.6,3.7)</platform-version>
-				<swtbot-site>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site</swtbot-site>
-				<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.6</eclipse-project-site>
-			</properties>
-		</profile>
-		<profile>
-			<id>platform-indigo</id>
-			<activation>
-				<property>
-					<name>platform-version-name</name>
-					<value>indigo</value>
-				</property>
-			</activation>
-			<properties>
-				<eclipse-site>http://download.eclipse.org/releases/indigo</eclipse-site>
-				<platform-version>[3.7,3.8)</platform-version>
-				<swtbot-site>http://download.eclipse.org/technology/swtbot/indigo/dev-build/update-site</swtbot-site>
-				<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.7</eclipse-project-site>
-			</properties>
-		</profile>
-	</profiles>
 	
   <build>
 	<sourceDirectory>src</sourceDirectory>
-       <pluginManagement>
+     <pluginManagement>
       <plugins>
         <plugin>
 			<groupId>org.eclipse.tycho</groupId>
@@ -89,150 +48,33 @@
                 
             </configuration>
         </plugin>
-		
-		 <!-- needed for findbugs -->
-<!--		
-		<plugin>  
-              <groupId>org.apache.maven.plugins</groupId>  
-              <artifactId>maven-pmd-plugin</artifactId>  
-              <version>2.5</version>  
-           </plugin>  -->
 
       </plugins>
     </pluginManagement>
     <plugins>
-    <!-- does not work, yet
-     <plugin>
-           <groupId>org.codehaus.mojo</groupId>
-           <artifactId>cobertura-maven-plugin</artifactId>
-           <version>2.3</version>
-           <configuration>
-               <formats>
-                   <format>xml</format>
-               </formats>
-           </configuration>
-           <executions>
-               <execution>
-                   <phase>package</phase>
-                   <goals>
-                       <goal>cobertura</goal>
-                   </goals>
-               </execution>
-           </executions>
-       </plugin>
-        -->
-
       <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-maven-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <extensions>true</extensions>
-      </plugin>
-	  
-	    
-	  <plugin>
 		<groupId>org.sonatype.tycho</groupId>
 		<artifactId>target-platform-configuration</artifactId>
 		<version>${tycho-version}</version>
 		<configuration>
 			<resolver>p2</resolver>
 		</configuration>
-	</plugin>
-      <!-- leads to a class cast exception ?!
-       <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-p2-plugin</artifactId>
-        <version>0.7.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <target>c:/temp/jt_site</target>
-        </configuration>
-      </plugin>  -->
-   <!--   
+	  </plugin>    
 	  <plugin>
         <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
+        <artifactId>tycho-maven-plugin</artifactId>
         <version>${tycho-version}</version>
-        <configuration>
-          <useUIHarness>true</useUIHarness>
-          <useUIThread>true</useUIThread>
-          <product>org.eclipse.sdk.ide</product>
-          <application>org.eclipse.ui.ide.workbench</application>
-		  <forkMode>pertest</forkMode>
-		  <argLine>-Xms256m -Xmx768m</argLine> <testFailureIgnore>false</testFailureIgnore>
-		  <skip>false</skip>
-		  <includes>
-			<include>**/*Test.java</include>
-		  </includes>
-        </configuration>
+        <extensions>true</extensions>
       </plugin>
--->
-
-	  <!-- needed for findbugs -->
-
-	   <!--<plugin>  
-           <groupId>org.codehaus.mojo</groupId>  
-           <artifactId>findbugs-maven-plugin</artifactId>  
-           <version>2.3.2</version>  
-           <configuration>  
-              <findbugsXmlOutput>true</findbugsXmlOutput>  
-              <failOnError>false</failOnError>  
-           </configuration>  
-           <executions>  
-              <execution>  
-                 <goals>  
-                    <goal>check</goal>  
-                 </goals>  
-              </execution>  
-           </executions>  
-        </plugin>  -->
-		
-<!--	  <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.6</version>
-           <configuration>  
-              <failOnViolation>false</failOnViolation>  			  
-			  <configLocation>checkstyle_checks.xml</configLocation>
-           </configuration>  
-		 <executions>  
-              <execution>  
-                 <goals>  
-                    <goal>check</goal>  
-                 </goals>  
-              </execution>  
-           </executions> 
-      </plugin>
-	-->  
-
-	<!-- needed for findbugs -->
-
-
-	<!--      <plugin>  
-           <groupId>org.apache.maven.plugins</groupId>  
-           <artifactId>maven-pmd-plugin</artifactId>  
-           <configuration>  
-              <sourceEncoding>utf-8</sourceEncoding>  
-              <minimumTokens>100</minimumTokens>  
-              <targetJdk>1.5</targetJdk>  
-              <format>xml</format>  
-              <failOnViolation>false</failOnViolation>  
-           </configuration>  
-           <executions>  
-              <execution>  
-                 <goals>  
-                    <goal>cpd-check</goal>  
-                 </goals>  
-              </execution>  
-           </executions>  
-        </plugin> -->
+	  
+	
 		
     </plugins>
   </build>
   <modules>
     <module>pdt</module>
-    <module>pdt.common</module>
     <module>pdt.common.ui</module>
+    <module>pdt.common</module>
     <module>pdt.console</module>
     <module>pdt.core</module>
     <module>pdt.feature</module>
@@ -242,7 +84,7 @@
     <module>pdt.runtime.socket</module>
     <module>pdt.runtime.socket.ui</module>
     <module>pdt.updatesite</module>
-    <module>../../share/workspace/org.cs3.lp.utils</module>
-    <module>../../share/workspace/org.cs3.lp.extension</module>
+    <module>org.cs3.lp.utils</module>
+    <module>org.cs3.lp.extension</module>
   </modules>
 </project>
