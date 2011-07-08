@@ -5,8 +5,8 @@
 
 :- use_module(org_cs3_lp_utils(utils4modules)).
 :- use_module(properties).
-%:- use_module('../parse_util').
-%:- use_module('../modules_and_visibility').
+:- use_module('../parse_util').
+:- use_module('../modules_and_visibility').
     /*********************************************
      * FIND REFERENCES TO A PARTICULAR PREDICATE *
      ********************************************/
@@ -51,19 +51,21 @@ pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
    extractModule(X,T,DefModule,RefHead,Kind).     % (via SWI-Prolog's internal xref data)
    
 %pdt_xref_data(DefModule:DefHead,RefModule:RefHead,Ref, Kind) :-
-%    format('Input: ~w:~w~n',[DefModule,DefHead]),
 %    functor(DefHead, DefFunctor, DefArity),
 %    modules_and_visibility:get_predicate_referenced_as(DefModule, DefFunctor, DefArity, DefId),
-%    parse_util:call_edge(DefId, RefLitId),
-%    parse_util:literaT(RefLitId, _, RefClauseId, _, _, _),
-%    parse_util:clauseT(RefClauseId, _, _, RefModule, RefFunctor, RefArity),
+%    (	DefId = predefined(DeclModule, Functor, Arity)
+%    ->	parse_util:call_built_in(Functor, Arity, DeclModule, RefLitId)
+%    ;	parse_util:call_edge(DefId, RefLitId)
+%    ),
+%    parse_util:literalT(RefLitId, _, RefClauseId, _, _, _),
+%    parse_util:clauseT(RefClauseId, _, RefModule, RefFunctor, RefArity),
 %    functor(RefHead, RefFunctor, RefArity),
-%    format('found: ~w:~w~n',[RefModule:RefHead]),
-%    predicate_property(RefHead, _),
-%    clause(RefHead, Ref),
-%    parse_util:termT(RefLitId, RefTerm),
-%    extractModule(RefTerm,DefHead,DefModule,RefHead,Kind).
-% muss noch built-ins berücksichtigen...
+%    predicate_property(RefModule:RefHead, _),
+%    clause(RefModule:RefHead, Ref),
+%	 parse_util:termT(RefLitId, RefTerm),
+%    extractModule(RefModule:RefTerm,DefHead,DeclModule,RefHead,Kind).
+	    
+      
 
 
 extractModule(_:T,_,_,_,_) :- 
