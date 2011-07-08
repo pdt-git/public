@@ -200,6 +200,11 @@ find_meta_vars_in_body(functor(Term,Functor,_), _Context, KnownMetaVars, MetaVar
     	;  	MetaVars = KnownMetaVars
     	)
     ).
+find_meta_vars_in_body(atom_concat(A,B,C), _Context, KnownMetaVars, AllMeta):-  % Term manipulation predicate
+    !,
+    free_vars_of([A,B,C],Candidates),
+    add_meta_vars(Candidates,KnownMetaVars,AllMeta).
+          
 find_meta_vars_in_body(( Term =.. List ), _Context, KnownMetaVars, MetaVars):-
     !,
     (	occurs_in(Term,KnownMetaVars)
@@ -320,7 +325,35 @@ check_unifier_list([A=B|Rest], OldMetas, Metas):-	%	TODO: p(A):- term(A,B)= term
 	check_unifier_list(Rest, Metas2, Metas). 
 
 
-
+%% free_vars_of(+List,-Free)
+%
+% Free contains the element of List that are free variables.
+% If there are none, Free is an empty list.  
+free_vars_of(List,Free) :-
+    ( setof( X, (member(X,List), var(X)), Free),  
+      !
+    ; Free = []
+    ).
+    
+    
+%% add_meta_vars(+Candidates,+KnownMeta,?AllMeta)
+%
+% Candidates and KnownMeta are lists of free variables.
+% If some variable from Candidates is in AllMeta all the
+% other candidates that do not occur in KnownMeta are 
+% prepended to KnownMeta yielding AllMeta.
+%
+% TODO (Eva): Dies in obigen Prädikaten nutzen um die vielen
+%  Fallunterscheidungen zu eliminieren. Zum Beispiel:
+%check_unifier_list([A=B|Rest], OldMetas, Metas):-	%	TODO: p(A):- term(A,B)= term(C,C), call(B)
+%	add_meta_vars([A,B],OldMeta,Metas2),			% 	funktioniert so nicht! 
+%	check_unifier_list(Rest, Metas2, Metas). 
+%
+add_meta_vars(Candidates,KnownMeta,AllMeta) :- 
+    select(Var,Candidates,OtherCandidates),
+    occurs_in(Var,KnownMeta), 
+    combine_sets_nonbinding(OtherCandidates, KnownMeta, AllMeta),
+    !.
 
 combine_sets_nonbinding([],Set,Set).
 combine_sets_nonbinding([E|Rest],OldSet,NewSet):-
@@ -349,14 +382,19 @@ add_var_to_set(Var, Set, NewSet):-
  * The comparision is done with == instead of =!
  */ 
 occurs_in(Var, Set):-
-	findall(	OldVar, 
-    			(	nth1(_, Set, OldVar),
-    				OldVar == Var
-    			),
-    			AllOldVar
-    		),
-    not(AllOldVar == []).  
-    
+	nth1(_, Set, OldVar),
+    OldVar == Var,
+    !.  
+
+%occurs_in(Var, Set):-
+%	findall(	OldVar, 
+%    			(	nth1(_, Set, OldVar),
+%    				OldVar == Var
+%    			),
+%    			AllOldVar
+%    		),
+%   not(AllOldVar == []).  
+   
 
 
 
