@@ -169,6 +169,14 @@ find_meta_vars_in_body(Module:Term, _, KnownMetaVars, MetaVars):-
     !, 
     find_meta_vars_in_body(Term, Module, KnownMetaVars, MetaVars).
     
+find_meta_vars_in_body((Cond -> Then ; Else), Context, KnownMetaVars, MetaVars):-
+    !,			%TODO: check ob das in jedem Fall stimmt - vor allem die Bedingung
+    find_meta_vars_in_body(Then, Context, KnownMetaVars, MetaVarsA),	
+    (	(KnownMetaVars \= MetaVarsA)										% for meta vars in the true case
+    ->	find_meta_vars_in_body(Cond, Context, MetaVarsA, MetaVars)		% the condition may be relevant
+    ;	find_meta_vars_in_body(Else, Context, KnownMetaVars, MetaVars)	% the else case does not 
+    ).																	% have bindings of the condition or true case
+   	      
 find_meta_vars_in_body((TermA, TermB), Context, KnownMetaVars, MetaVars):-
 	!, 														
    	find_meta_vars_in_body(TermB, Context, KnownMetaVars, MetaVarsB),		
@@ -178,7 +186,7 @@ find_meta_vars_in_body((TermA; TermB), Context, KnownMetaVars, MetaVars):-
     !, 
    	find_meta_vars_in_body(TermB, Context, KnownMetaVars, MetaVarsB),
    	find_meta_vars_in_body(TermA, Context, MetaVarsB, MetaVars).
-   	  
+   	
 find_meta_vars_in_body((TermA = TermB), _Context, KnownMetaVars, MetaVars):-
     !,
    	(	occurs_in(TermA, KnownMetaVars)
@@ -191,7 +199,7 @@ find_meta_vars_in_body((TermA = TermB), _Context, KnownMetaVars, MetaVars):-
    	),
    	check_inner_vars(TermA, TermB, MetaVars3, MetaVars).
    	
-find_meta_vars_in_body(functor(Term,Functor,_), _Context, KnownMetaVars, MetaVars):-  % Term manipulation predicate
+find_meta_vars_in_body(functor(Term,Functor,_), _Context, KnownMetaVars, MetaVars):-  
     !,
     (  occurs_in(Term,KnownMetaVars)
     -> add_var_to_set(Functor, KnownMetaVars, MetaVars)
@@ -200,7 +208,7 @@ find_meta_vars_in_body(functor(Term,Functor,_), _Context, KnownMetaVars, MetaVar
     	;  	MetaVars = KnownMetaVars
     	)
     ).
-find_meta_vars_in_body(atom_concat(A,B,C), _Context, KnownMetaVars, AllMeta):-  % Term manipulation predicate
+find_meta_vars_in_body(atom_concat(A,B,C), _Context, KnownMetaVars, AllMeta):-  
     !,
     free_vars_of([A,B,C],Candidates),
     add_meta_vars(Candidates,KnownMetaVars,AllMeta).
@@ -246,7 +254,7 @@ find_meta_vars_in_body(Term, Context, KnownMetaVars, MetaVars):-
     handel_meta_args(MetaArgs, Context, KnownMetaVars, MetaVars).
 
 find_meta_vars_in_body(_Term, _Context, MetaVars, MetaVars). 
-		% everything else is a direct call
+		% everything else is a direct call [aliasing]
       
       
 
@@ -348,6 +356,10 @@ free_vars_of(List,Free) :-
 %check_unifier_list([A=B|Rest], OldMetas, Metas):-	%	TODO: p(A):- term(A,B)= term(C,C), call(B)
 %	add_meta_vars([A,B],OldMeta,Metas2),			% 	funktioniert so nicht! 
 %	check_unifier_list(Rest, Metas2, Metas). 
+% 
+% Eva: Nein, durch diese Änderung würde man Ergebnisse verlieren.
+%		z.B. in pdt.runtime.builder/meta_finder_examples/simple.pl
+%		geht durch diese Änderung der Fall h(H) verloren.
 %
 add_meta_vars(Candidates,KnownMeta,AllMeta) :- 
     select(Var,Candidates,OtherCandidates),
@@ -384,19 +396,7 @@ add_var_to_set(Var, Set, NewSet):-
 occurs_in(Var, Set):-
 	nth1(_, Set, OldVar),
     OldVar == Var,
-    !.  
-
-%occurs_in(Var, Set):-
-%	findall(	OldVar, 
-%    			(	nth1(_, Set, OldVar),
-%    				OldVar == Var
-%    			),
-%    			AllOldVar
-%    		),
-%   not(AllOldVar == []).  
-   
-
-
+    !. 
 
 combine_meta_args([],[]):- !.    
 combine_meta_args([List],List):- !.
