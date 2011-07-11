@@ -64,7 +64,7 @@
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
 
-:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
+:- consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
 :- use_module(pdt_runtime_builder_analyzer(pdt_xref_experimental)).
 :- use_module(pdt_runtime_builder_analyzer(properties)).
 
@@ -95,7 +95,8 @@ pdt_reload(File):-
     
 pdt_reload(File):-
     write(File), nl,
-    make:reload_file(File).  % SWI Prolog library
+    make:reload_file(File).%,			% SWI Prolog library
+    %generate_factbase_with_metapred_analysis(File).  
 
 
 

@@ -7,9 +7,10 @@ smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, File, S
 smell_description('MissingMetaPredicateDeclaration', SmellDescription, QuickfixDescription):-
 	SmellDescription = 'Missing meta-predicate declation', 
 	QuickfixDescription = 'Add missing meta-predicate declaration'.
+	
 %    
 %QuickfixAction ist der Text, der unmittelbar vor dem Smell eingetragen werden muss (Zeilenumbruch muss mit angegeben werden)
-smell('MissingMetaPredicateDeclaration', File, Offset, 0, QuickfixAction) :-
+smell('MissdeclaredMetaPredicateDeclaration', File, Offset, 0, QuickfixAction) :-
     find_undeclared_meta_predicates_position(File, Offset, Spec),
     format(atom(QuickfixAction),':- meta_predicate(~w).~n', [Spec]).
     

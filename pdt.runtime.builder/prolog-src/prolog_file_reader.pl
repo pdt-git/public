@@ -29,6 +29,39 @@ generate_facts(Project):-
 	time(parse_bodies),
 	writeln('generate edges'),
 	time(derive_edges).    
+	
+%update_facts(File, Project):-				
+%	format('cleaning up facts for ~w~n',File),
+%	cleanup_nodes(File),
+%	cleanup_computed_facts,
+%    writeln('start parsing clauses'),			
+%	time(walking_file_list(Project,parse,1)),	
+%	writeln('generating loadgraph'),
+%	time(build_load_graph),
+%    writeln('generating predicates'),
+%	time(derive_all_predicates),
+%	writeln('genereating directive collections'),
+%	time(derive_onloads),
+%	writeln('compute_predicate_properties'),
+%	time(compute_all_predicate_properties),
+%	writeln('compute_visibilities'),
+%	time(compute_visibility_graph),
+%	writeln('parse literals'),
+%	time(parse_bodies),
+%	writeln('generate edges'),
+%	time(derive_edges).
+	
+update_facts(File, Project):-				
+	cleanup_nodes(File),
+	cleanup_computed_facts,
+   	walking_file_list(Project,parse,1),	
+	build_load_graph,
+    derive_all_predicates,
+	derive_onloads,
+	compute_all_predicate_properties,
+	compute_visibility_graph,
+	parse_bodies,
+	derive_edges.
         
 derive_edges:-
     forall( 
