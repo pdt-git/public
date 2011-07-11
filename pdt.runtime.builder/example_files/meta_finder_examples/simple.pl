@@ -57,6 +57,23 @@ l(L,M,C):-	%(only L not M is meta-argument, even if they would be aliased in the
 	;	call(L)
 	).
 	
+		
 	
 z(Z):-			%non_meta
 	Z = 4.
+	
+z1(Z1):-		%non_meta (parameter is only parameter of meta-call)	
+	call(bla(Z1)).
+	
+z2(Z2):-		%non_meta (parameter is only parameter of meta-call bound via term manipulation)
+    F =.. [bla,Z2],
+    call(F).
+    
+z3(Z3):-		%non_meta (parameter is only parameter of meta-call combined with unification)
+    bla(Z3) = Y,
+    call(Y).
+    
+z4(z3) :- 		%non_meta (paramter is only parameter of meta-call with some term manipulation)
+	functor(z3,F, A),
+    assert(aT(F, A)).
+    
