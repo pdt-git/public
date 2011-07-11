@@ -51,6 +51,7 @@ k(K):-			%meta-predicate-call in true-branch of a decision
     ;	fail
     ).
     
+:-meta_predicate(l(0,0,?)).
 l(L,M,C):-	%(only L not M is meta-argument, even if they would be aliased in the condition)
     (	bla(M,C) = bla(L,a) 	%meta-predicate-call in else-branch of decision
 	->	a
