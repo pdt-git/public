@@ -29,6 +29,15 @@ file_references_for_metacall(Module,MetaTerm,References):-
  *      (Original_argument_position, Argument).
  */
 is_metaterm(Module, Literal, MetaArguments) :-
+   \+(var(Literal)), !,
+   functor(Literal,Functor,Arity),	
+   visible_in_module(Module,Functor,Arity),
+   %predicate_property(Module:Literal,meta_predicate(MetaTerm)),
+   is_meta_pred(Module, Literal, MetaTerm),
+   Literal =.. [Functor|Args],
+   MetaTerm =.. [Functor|MetaArgs],
+   collect_meta_args(Args,MetaArgs, MetaArguments ).
+is_metaterm(Module, Literal, MetaArguments) :-
    visible_in_module(Module,Functor,Arity),
    functor(Literal,Functor,Arity),	
    %predicate_property(Module:Literal,meta_predicate(MetaTerm)),
