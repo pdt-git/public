@@ -57,7 +57,15 @@ l(L,M,C):-	%(only L not M is meta-argument, even if they would be aliased in the
 	->	a
 	;	call(L)
 	).
-	
+m(File,Functor,Arity):-    
+    file_name_extension(_,Ext,File),
+    prolog_file_type(Ext,prolog),
+    !,
+    functor(Term,Functor,Arity),
+    arg(1,Term,File),
+    (	catch(call(Term),_,true)
+    ;	true
+    ).
 		
 	
 z(Z):-			%non_meta
