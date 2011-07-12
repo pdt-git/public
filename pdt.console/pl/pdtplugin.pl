@@ -95,8 +95,8 @@ pdt_reload(File):-
     
 pdt_reload(File):-
     write(File), nl,
-    make:reload_file(File).%,			% SWI Prolog library
-    %generate_factbase_with_metapred_analysis(File).  
+    make:reload_file(File),			% SWI Prolog library
+    generate_factbase_with_metapred_analysis(File).  
 
 
 
