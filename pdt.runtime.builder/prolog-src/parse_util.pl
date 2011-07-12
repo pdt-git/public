@@ -88,7 +88,7 @@ cleanup_nodes:-
 	retractall(pos_and_vars(_,_,_)),	%should not be there, because they get removed when bodies are parsed
 	retractall(error(_,_,_)),
 	retractall(warning(_,_,_)),
-	clanup_computed_facts,
+	cleanup_computed_facts,
 	ctc_id_init.
 	
 cleanup_computed_facts:-
