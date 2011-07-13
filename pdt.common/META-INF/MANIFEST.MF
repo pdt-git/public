@@ -6,7 +6,4 @@ Bundle-Version: 0.2.3.qualifier
 Bundle-ClassPath: common.jar
 Export-Package: org.cs3.pl.common
 Require-Bundle: org.junit
-Import-Package: org.eclipse.jface.dialogs,
- org.eclipse.swt.widgets,
- org.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

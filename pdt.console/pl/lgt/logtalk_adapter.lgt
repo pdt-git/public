@@ -32,7 +32,7 @@
 	errors_and_warnings/4
 ]).
 
-:- uses(list, [length/2, member/2]).
+:- uses(list, [length/2, member/2, selectchk/3]).
 :- uses(meta, [map/3::maplist/3]).
 :- uses(utils4entities, [source_file_entity/3, entity_property/3]).
 
@@ -85,14 +85,24 @@ logtalk_reload(Directory, File, BaseName) :-
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/
 
-find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory, Entity, FullPath, Line, Properties, SearchCategory) :-
+find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2) :-
+	findall(
+		item(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2),
+		find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2),
+		Items0
+	),
+	filter_categorized_definitions(Items0, Items),
+	list::member(item(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2), Items).
+
+
+find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory, Entity, FullPath, Line, Properties, SearchCategory) :-
 	search_term_to_predicate_indicator(Term, Functor/Arity),
 	source_file_entity(EnclFile,ClickedLine,This),
 	decode(Term, This, Entity, _Kind, _Template, Location, Properties, SearchCategory),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
 
-find_definitions_categorized(_EnclFile, _ClickedLine, Term, Functor, Arity, _This, SearchCategory, Entity, FullPath, Line, Properties, other) :-
+find_definitions_categorized0(_EnclFile, _ClickedLine, Term, Functor, Arity, _This, SearchCategory, Entity, FullPath, Line, Properties, other) :-
 	search_term_to_predicate_indicator(Term, Functor/Arity),
 	(	current_object(Entity)
 	;	current_protocol(Entity)
@@ -103,11 +113,28 @@ find_definitions_categorized(_EnclFile, _ClickedLine, Term, Functor, Arity, _Thi
 	;	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
 		SearchCategory = definition
 	;	entity_property(Entity, _Kind, includes(Functor/Arity, Properties)),
-		SearchCategory = multifile
+		SearchCategory = (multifile)
 	),
 	entity_property(Entity, _Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties),
 	atom_concat(Directory, File, FullPath).
+
+filter_categorized_definitions([], []).
+filter_categorized_definitions([Item0| Items0], Items) :-
+	Item0 = item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, SearchCategory2),
+	SearchCategory2 \= other,
+	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, This, _, _, _, other), Items0, Items1),
+	!,
+	filter_categorized_definitions([Item0| Items1], Items).
+filter_categorized_definitions([Item0| Items0], Items) :-
+	Item0 = item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, SearchCategory2),
+	SearchCategory2 \= other,
+	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, other), Items0, Items1),
+	!,
+	filter_categorized_definitions([Item0| Items1], Items).
+filter_categorized_definitions([Item0| Items0], [Item0| Items]) :-
+	filter_categorized_definitions(Items0, Items).
+
 
 search_term_to_predicate_indicator(_::Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
 search_term_to_predicate_indicator(::Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
@@ -120,10 +147,11 @@ search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor
 :- multifile(pdtplugin:results_category_label/2).
 
 pdtplugin:results_category_label(declaration, 'Visible declaration').
-pdtplugin:results_category_label(definition, 'Visible definition').
-pdtplugin:results_category_label('overridden definition', 'Overridden definition').
-pdtplugin:results_category_label(multifile, 'Visible multifile definitions').
-pdtplugin:results_category_label(other, 'Other references').
+pdtplugin:results_category_label(definition, 'Called definition').
+pdtplugin:results_category_label(inherited, 'Called definition').
+pdtplugin:results_category_label(local, 'Local definition').
+pdtplugin:results_category_label((multifile), 'Visible multifile definitions').
+pdtplugin:results_category_label(other, 'Other declarations and definitions').
 
 
 %% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
@@ -652,6 +680,10 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 			entity_property(Primary, _, includes(Functor/Arity, Entity, Properties)),
 			SearchCategory = multifile
 		)
+	;	% local definition
+		Entity = This,
+		entity_property(This, Kind, defines(Functor/Arity, Properties)),
+		SearchCategory = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
@@ -707,7 +739,11 @@ decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		SearchCategory = definition
 	;	% multifile definitions
 		entity_property(Primary, _, includes(Functor/Arity, Entity, Properties)),
-		SearchCategory = multifile
+		SearchCategory = (multifile)
+	;	% local definition
+		Entity = This,
+		entity_property(This, Kind, defines(Functor/Arity, Properties)),
+		SearchCategory = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
@@ -737,8 +773,12 @@ decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prop
 			SearchCategory = definition
 		;	% multifile definitions
 			entity_property(Primary, Kind, includes(Functor/Arity, Entity, Properties)),
-			SearchCategory = multifile
+			SearchCategory = (multifile)
 		)
+	;	% local definition
+		Entity = This,
+		entity_property(This, Kind, defines(Functor/Arity, Properties)),
+		SearchCategory = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
@@ -764,7 +804,7 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		),
 		entity_property(Entity, _, declares(Functor/Arity, Properties)),
 		SearchCategory = declaration
-	;	% definition
+	;	% inherited
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
 				\+ specializes_class(This, _) ->
@@ -789,7 +829,11 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 			Properties = [protected| Properties0]
 		;	Properties = [private| Properties0]
 		),
-		SearchCategory = 'overridden definition'
+		SearchCategory = inherited
+	;	% local definition
+		Entity = This,
+		entity_property(This, Kind, defines(Functor/Arity, Properties)),
+		SearchCategory = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
@@ -838,7 +882,7 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 		SearchCategory = definition
 	;	% multifile definitions
 		entity_property(This, _, includes(Functor/Arity, Entity, Properties)),
-		SearchCategory = multifile
+		SearchCategory = (multifile)
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
