@@ -78,8 +78,9 @@
     <module>pdt.console</module>
     <module>pdt.core</module>
     <module>pdt.feature</module>
+    <module>pdt.prolog.library</module>
     <module>pdt.runtime</module>
-	<module>pdt.runtime.builder</module>
+    <module>pdt.runtime.builder</module>
     <module>pdt.runtime.ui</module>
     <module>pdt.runtime.socket</module>
     <module>pdt.runtime.socket.ui</module>
