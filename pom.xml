@@ -85,7 +85,6 @@
     <module>pdt.runtime.socket</module>
     <module>pdt.runtime.socket.ui</module>
     <module>pdt.updatesite</module>
-    <module>org.cs3.lp.utils</module>
     <module>org.cs3.lp.extension</module>
   </modules>
 </project>
