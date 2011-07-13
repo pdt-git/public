@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin
+   id="pdt.prolog.library"
+>
+   <extension
+         point="org.cs3.pdt.runtime.bootstrapContribution">
+      <fileSearchPathContribution
+            alias="org_cs3_lp_utils"
+            id="org.cs3.lp.utils"
+            path="pl/">
+      </fileSearchPathContribution>
+   </extension>
+</plugin>
