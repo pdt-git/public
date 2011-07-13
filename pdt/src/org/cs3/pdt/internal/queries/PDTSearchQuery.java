@@ -42,6 +42,7 @@
 package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private PrologSearchResult result;
 	private PrologInterface pif;
 	private CategoryHandler categoryHandler;
+	private Map<String, SearchPredicateElement> predForSignature = new HashMap<String, SearchPredicateElement>();
 
 	public PDTSearchQuery(PrologInterface pif, Goal goal) {
 		this.goal = goal;
@@ -145,12 +147,15 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 */
 	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
 			throws PrologException, PrologInterfaceException {
-
+		
 		String module = "Module";               // Modul ist freie Variable
 		if(goal.getModule()!=null)
 			module ="'"+ goal.getModule()+ "'"; // Modul ist explizit gesetzt
 
 		String query = buildSearchQuery(goal, module);
+		
+		predForSignature.clear();
+		
 		List<Map<String, Object>> clauses = getResultForQuery(session, query);
 		
 		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
@@ -182,7 +187,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
 			match = constructPrologMatchForAResult(m);
-			if (result != null) {
+			if ((result != null) && (match != null)) {
 				result.addMatch(match);
 			}
 		}
@@ -191,9 +196,42 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	
 	protected abstract PDTMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
-	protected PDTMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties, String searchCategory) {
+	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity,
+	IFile file, int line, List<String> properties, String resultsCategory, String searchCategory) {
+		
+		String signature = resultsCategory+definingModule+functor+arity;
+		SearchPredicateElement pred; 
+		PDTMatch match;
+		if(predForSignature.containsKey(signature)){
+			pred = predForSignature.get(signature);
+			Object[] matches = pred.getChildren();
+			for (Object object : matches) {
+				PDTMatch aMatch = (PDTMatch)object;
+				if (aMatch.getLine() == line) {
+					return null;
+				}
+			}
+			match = createMatchforPredicate(line, searchCategory, pred);
+		}
+		else {
+			match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory);
+			pred = (SearchPredicateElement)match.getElement();
+			predForSignature.put(signature, pred);
+		}
+		return match;
+	}
+
+	protected PDTMatch createMatch(String module, String name, int arity, IFile file, int line, 
+			List<String> properties, String searchCategory) {
+		
 		SearchPredicateElement pe = new SearchPredicateElement(file, module, name, arity, properties);
 		
+		PDTMatch match = createMatchforPredicate(line, searchCategory, pe);
+		return match;
+	}
+
+	protected PDTMatch createMatchforPredicate(int line, String searchCategory,
+			SearchPredicateElement pe) {
 		PDTMatch match = new PDTMatch(pe, line, 0, searchCategory); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
@@ -201,6 +239,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		pe.addOccurence(match);
 		return match;
 	}
+	
 
 	/**
 	 * @throws PrologInterfaceException
