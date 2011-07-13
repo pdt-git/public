@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Utils
+Bundle-SymbolicName: org.cs3.pdt.prolog.library;singleton:=true
+Bundle-Version: 0.2.3.qualifier
+Require-Bundle: org.cs3.pdt.runtime
