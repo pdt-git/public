@@ -89,17 +89,15 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	}
 
 	/**
-	 * //TODO: add pos, len(?), dyn, multi.. Retrieves Predicates with prefix
-	 * <i>prefix </i>. There to ways to restrict the returned elements: module
-	 * and filename
+	 * Retrieves Predicates with prefix <i>prefix </i>. 
+	 * The result can be restricted by module or filename.
 	 * 
 	 * @param prefix
 	 * @param module
-	 *            can be null -> no restriction on the module
+	 *            null -> no restriction on the module
 	 * @param filename
-	 *            can be null -> no restriction on the declaring file
-	 * @module Module name or null, if module is not defined.
-	 * @return
+	 *            null -> no restriction on the declaring file
+	 * @return found predicates
 	 * @throws PrologException
 	 * @throws NumberFormatException
 	 * @throws PrologInterfaceException 
@@ -115,7 +113,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			filename = "_";
 		String query = pdtModulePrefix + "find_pred('"
 				+ filename + "','" + prefix + "', " + module
-				+ ",Name,Arity,Public)";
+				+ ",Name,Arity,Public,_,_)";
 		List<Map<String,Object>> results = session.queryAll(query);
 		List<Predicate> list = new ArrayList<Predicate>();
 		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
