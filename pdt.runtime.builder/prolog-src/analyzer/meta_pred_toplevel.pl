@@ -9,7 +9,7 @@ generate_factbase_with_metapred_analysis(File):-
     format('### Userdefined meta pred: ~w~n', [MetaPreds]).
 
 find_undeclared_meta_predicates_position(File, Offset, MetaSpec):-
-    generate_factbase_with_metapred_analysis(File),
+    %generate_factbase_with_metapred_analysis(File),
     get_all_userdefined_meta_predicates(MetaPreds),
     !,
     member(Module:MetaSpec,MetaPreds),
