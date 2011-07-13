@@ -37,9 +37,15 @@ find_meta_pred_args_in_clause(Module, Head, MetaArgs):-
     predicate_property(Module:Head, meta_predicate(Spec)),
     Spec =.. [_|MetaArgs].
 find_meta_pred_args_in_clause(Module, Head, MetaArgs):-
-	 clause(Module:Head, Body),
-	 find_meta_vars_in_body(Body, Module, [],  MetaVars),
-	 find_meta_vars_in_head(Head, MetaVars, MetaArgs).
+	clause(Module:Head, Body), !,
+	find_meta_vars_in_body(Body, Module, [],  MetaVars),
+	find_meta_vars_in_head(Head, MetaVars, MetaArgs).
+find_meta_pred_args_in_clause(AModule, Head, MetaArgs):-
+    declared_in_module(AModule, Head, Module),
+	clause(Module:Head, Body), !,
+	find_meta_vars_in_body(Body, Module, [],  MetaVars),
+	find_meta_vars_in_head(Head, MetaVars, MetaArgs).
+	 
 	 
 
 
@@ -136,7 +142,7 @@ find_meta_vars_in_body(( Term =.. List ), _Context, KnownMetaVars, MetaVars):-
     	)
     ).
 find_meta_vars_in_body(arg(_,Term,Arg), _Context, KnownMetaVars, MetaVars):-
-    !,
+    !,							%TODO: das doch nur in bestimtmen Fällen (mit functor/3 das erste Argument z.B.)
     (  occurs_in(Term,KnownMetaVars)
     -> add_var_to_set(Arg, KnownMetaVars, MetaVars)
     ;  (	occurs_in(Arg,KnownMetaVars)
