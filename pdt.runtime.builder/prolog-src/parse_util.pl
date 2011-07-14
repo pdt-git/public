@@ -78,6 +78,9 @@ cleanup_nodes:-
 	retractall(directiveT(_,_,_)),
 	retractall(operatorT(_,_,_,_,_,_,_,_)),
 	retractall(dynamicT(_,_)),
+	retractall(load_dir(_,_,_)),
+	retractall(import_dir(_,_)),
+	retractall(export_dir(_,_)),
 	retractall(transparentT(_,_)),						
 	retractall(multifileT(_,_)),	
 	retractall(meta_predT(_,_)),
@@ -100,9 +103,6 @@ cleanup_computed_facts:-
     retractall(predicateT(_,_,_,_,_)),
 	retractall(onloadT(_,_,_)),
     retractall(predicateT_ri(_,_,_,_)),
-    retractall(import_dir(_,_)),
-	retractall(export_dir(_,_)),
-	retractall(load_dir(_,_,_)),
 	retractall(property_dir(_,_,_)),
 	retractall(library_dir(_,_,_)).
     
@@ -133,6 +133,9 @@ clean_file_entries(FileId):-
 	directiveT(DirId,FileId,_),
 		clean_directives(DirId),
 		retractall(directiveT(DirId,_,_)),
+		retractall(import_dir(_,DirId)),
+		retractall(export_dir(_,DirId)),
+		retractall(load_dir(DirId,_,_)),
 		clean_general_references_to(DirId),
 	fail.
 clean_file_entries(FileId):-
