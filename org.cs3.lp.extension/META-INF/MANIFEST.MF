@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Extension
+Bundle-SymbolicName: org.cs3.lp.extension;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.cs3.pdt.runtime
