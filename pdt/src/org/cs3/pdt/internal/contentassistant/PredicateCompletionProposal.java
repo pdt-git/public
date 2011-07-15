@@ -28,7 +28,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(
 						arity==-1?
-								ImageRepository.PE_MODULE :
+								ImageRepository.PACKAGE :
 						isBuiltIn(tags)?
 								ImageRepository.PE_BUILT_IN :
 						isPublic(tags)?
