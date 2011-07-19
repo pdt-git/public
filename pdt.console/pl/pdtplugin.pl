@@ -327,11 +327,11 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
 	;	Module = user
 	),
     functor(Head, Functor, Arity),
-    properties_for_predicate(Module,Functor, Arity, PropertyList0),
+    properties_for_predicate(ModuleCandidate,Functor, Arity, PropertyList0),
     % In the case of a multifile predicate, we want to find all clauses for this 
     % predicate, even when they occur in other files
     (	member(multifile, PropertyList0)
-    -> (	defined_in_file(Module, Functor, Arity, _, DeclFile, Line),
+    -> (	defined_in_file(ModuleCandidate, Functor, Arity, _, DeclFile, Line),
     		(	DeclFile \= File
     		-> 	(	module_property(MultiModule, file(DeclFile)),
     				append([for(MultiModule), defining_file(DeclFile)], PropertyList0, PropertyList),
@@ -346,7 +346,7 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     		SearchCategory = definition,
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    		defined_in_file(Module, Functor, Arity, _, File, Line)
+    		defined_in_file(ModuleCandidate, Functor, Arity, _, File, Line)
     	)
     ).
     
