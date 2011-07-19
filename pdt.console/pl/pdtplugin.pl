@@ -346,7 +346,10 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     		SearchCategory = definition,
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    		defined_in_file(ModuleCandidate, Functor, Arity, _, File, Line)
+    		(	defined_in_file(ModuleCandidate, Functor, Arity, _, File, Line)
+    		->	true
+    		;	defined_in_file(Module, Functor, Arity, _, File, Line)
+    		)
     	)
     ).
     
