@@ -24,7 +24,7 @@ compute_exports:-
     fail.
 compute_exports.
     
-build_export_edge_from_list([],_,_).    
+build_export_edge_from_list([],_).    
 build_export_edge_from_list([A|B],FileId):-
     build_export_edge(A,FileId),
     build_export_edge_from_list(B,FileId).

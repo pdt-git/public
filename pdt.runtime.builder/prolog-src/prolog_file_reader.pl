@@ -1,6 +1,6 @@
 :- module(plparser_quick,[	generate_facts/1]).
 
-:- consult('util/walking_prolog_files.pl').
+:- ensure_loaded('util/walking_prolog_files.pl').
 :- reexport(parse_util).
 :- use_module(preparser).
 :- use_module(predicates).
