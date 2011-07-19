@@ -11,7 +11,7 @@
 walking_file_list([],_,_).
 walking_file_list([File|Files],Functor,Arity):-
     check_file_or_dir(File,Functor,Arity),
-    walking_file_list(Files,Functor,Arity).
+    walking_file_list(Files,Functor,Arity),!.
   
 /**
  *	check_file_or_dir(+File,+Functor,+Arity)

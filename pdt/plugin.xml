@@ -128,9 +128,9 @@
          name="Toggle Comments"/>
    <command
          categoryId="org.cs3.pdt.editing"
-         description="Save And Consult"
-         id="org.eclipse.pdt.ui.edit.save.consult"
-         name="Save and Consult"/>
+         description="Save Without Consult"
+         id="org.eclipse.pdt.ui.edit.save"
+         name="Save Without Consult"/>
    <command
          categoryId="org.cs3.pdt.editing"
          description="Consult"
@@ -154,7 +154,7 @@
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+C"/>
    <key
-         commandId="org.eclipse.pdt.ui.edit.save.consult"
+         commandId="org.eclipse.pdt.ui.edit.save"
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+ALT+S"/>
@@ -351,4 +351,12 @@
     </menuContribution>
  </extension>
 -->	
+
+ <extension
+       point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+          class="org.cs3.pdt.quickfix.PDTMarker"
+          markerType="org.eclipse.core.resources.problemmarker">
+    </markerResolutionGenerator>
+ </extension>
 </plugin>

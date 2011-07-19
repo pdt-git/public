@@ -1,10 +1,22 @@
-:-module(metapred_finder, [	find_all_meta_predicates/0,
+:-module(metapred_finder, [	get_all_userdefined_meta_predicates/1,
+							find_all_meta_predicates/0,
 							infer_meta_arguments_for/3,
 							find_meta_pred_args_in_clause/3]).
 
 :- use_module(metafile_referencer).
 :- use_module(org_cs3_lp_utils(utils4modules)).
 
+
+
+
+get_all_userdefined_meta_predicates(MetaPreds):-
+    find_all_meta_predicates,
+    findall(
+    	Module:NewMetaSpec,
+    	metafile_referencer:user_defined_meta_pred(_Functor, _Arity, Module, NewMetaSpec),
+    	MetaPreds
+    ).
+    	
 
 
 :- dynamic new_meta_pred/2.	%new_meta_pred(MetaSpec, Module)
@@ -16,10 +28,8 @@ find_all_meta_predicates:-
     	forall(
     		(	member(Module:Candidate, Candidates),
     			infer_meta_arguments_for(Module,Candidate,MetaSpec)
-			),
-			(	assert(new_meta_pred(MetaSpec, Module)),
-				format('Candidate: ~w:~w~n', [Module, MetaSpec])
-			)
+ 			),
+			assert(new_meta_pred(MetaSpec, Module))
 		),
 		(	new_meta_pred(_,_)
 		->	(	prepare_next_step,
@@ -35,44 +45,59 @@ initialize_meta_pred_search:-
     retractall(metafile_referencer:user_defined_meta_pred(_,_,_,_)),
     retractall(new_meta_pred(_,_)),
     forall(	
-    	(   current_predicate(Module:Functor/Arity),
-    		functor(Head,Functor,Arity),
-    		predicate_property(Module:Head, built_in),
-    		predicate_property(Module:Head, meta_predicate(Spec)),
-    		is_metaterm(Module, Head, MetaArgs),
-    		(MetaArgs \= [])
+    	(   find_predefined_metas(Spec, Module)
     	),
-    	(	assert(new_meta_pred(Spec, Module)),
-    		format('Candidate: ~w:~w~n', [Module, Spec])
-    	)
+    	assert(new_meta_pred(Spec, Module))
+    		%format('Initial: ~w:~w~n', [Module, Spec])
     ).
     
+  
+find_predefined_metas(Spec, Module):-
+    declared_in_module(Module,Functor, Arity, Module),
+    functor(Head,Functor,Arity),
+    predicate_property(Module:Head, built_in),
+   	predicate_property(Module:Head, meta_predicate(Spec)),
+   	is_metaterm(Module, Head, MetaArgs),
+    (MetaArgs \= []).
+        
 collect_candidates(Candidates):-
 	findall(
 		CandModule:Candidate,
     	(	new_meta_pred(MetaSpec, Module),
     		retract(new_meta_pred(MetaSpec, Module)),
     		functor(MetaSpec, Functor, Arity),
-    		visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
+    		%visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
     														%		für die ..T-Fakten möglich, aber nicht für die vordefinierten...
     														%		andererseits: der genaue Test ist ja eh später, hier nur Kandidaten.
-    		parse_util:literalT(_Id,_ParentId,ClauseId,AModule,Functor,Arity),
+    		(	predicateT(PredId,_FileId,Functor,Arity,Module)
+    		->	parse_util:call_edge(PredId,LiteralId)
+			;	parse_util:call_built_in(Functor, Arity, Module, LiteralId)
+			),
+			parse_util:literalT(LiteralId,_ParentId,ClauseId,_AModule,_Functor,_Arity),
 			parse_util:clauseT(ClauseId,_,CandModule,CandFunctor,CandArity),
-			functor(Candidate, CandFunctor, CandArity)
+			functor(Candidate, CandFunctor, CandArity),
+			\+ (predicate_property(CandModule:Candidate, built-in))%,
+			%format('Candidate: ~w:~w~n', [CandModule, Candidate])
         ),
-        Candidates
-	).	
+        CandidateList
+	), 
+	list_to_set(CandidateList, Candidates).	
+	
+	
     
 prepare_next_step:-
     forall(	
     	new_meta_pred(MetaSpec, Module),
     	(	functor(MetaSpec, Functor, Arity),
     		(	metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, OldMetaSpec)
-    		->	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec)
+    		->	(	(MetaSpec \= OldMetaSpec)
+    			->	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec)
+    			;	retract(new_meta_pred(MetaSpec, Module))	% was already there, no need to handle it again 		
+    			)
     		;	NewMetaSpec = MetaSpec
     		),
-    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec)),
-    		format('New meta found: ~w:~w/~w -> ~w~n', [Module, Functor, Arity, NewMetaSpec])
+    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec))%,
+    		%format('New meta found: ~w:~w/~w -> ~w~n', [Module, Functor, Arity, NewMetaSpec])
     	)
     ).
     
@@ -175,6 +200,11 @@ find_meta_vars_in_body(functor(Term,Functor,_), _Context, KnownMetaVars, MetaVar
     	;  	MetaVars = KnownMetaVars
     	)
     ).
+find_meta_vars_in_body(atom_concat(A,B,C), _Context, KnownMetaVars, AllMeta):-  % Term manipulation predicate
+    !,
+    free_vars_of([A,B,C],Candidates),
+    add_meta_vars(Candidates,KnownMetaVars,AllMeta).
+          
 find_meta_vars_in_body(( Term =.. List ), _Context, KnownMetaVars, MetaVars):-
     !,
     (	occurs_in(Term,KnownMetaVars)
@@ -295,7 +325,35 @@ check_unifier_list([A=B|Rest], OldMetas, Metas):-	%	TODO: p(A):- term(A,B)= term
 	check_unifier_list(Rest, Metas2, Metas). 
 
 
-
+%% free_vars_of(+List,-Free)
+%
+% Free contains the element of List that are free variables.
+% If there are none, Free is an empty list.  
+free_vars_of(List,Free) :-
+    ( setof( X, (member(X,List), var(X)), Free),  
+      !
+    ; Free = []
+    ).
+    
+    
+%% add_meta_vars(+Candidates,+KnownMeta,?AllMeta)
+%
+% Candidates and KnownMeta are lists of free variables.
+% If some variable from Candidates is in AllMeta all the
+% other candidates that do not occur in KnownMeta are 
+% prepended to KnownMeta yielding AllMeta.
+%
+% TODO (Eva): Dies in obigen Prädikaten nutzen um die vielen
+%  Fallunterscheidungen zu eliminieren. Zum Beispiel:
+%check_unifier_list([A=B|Rest], OldMetas, Metas):-	%	TODO: p(A):- term(A,B)= term(C,C), call(B)
+%	add_meta_vars([A,B],OldMeta,Metas2),			% 	funktioniert so nicht! 
+%	check_unifier_list(Rest, Metas2, Metas). 
+%
+add_meta_vars(Candidates,KnownMeta,AllMeta) :- 
+    select(Var,Candidates,OtherCandidates),
+    occurs_in(Var,KnownMeta), 
+    combine_sets_nonbinding(OtherCandidates, KnownMeta, AllMeta),
+    !.
 
 combine_sets_nonbinding([],Set,Set).
 combine_sets_nonbinding([E|Rest],OldSet,NewSet):-
@@ -324,14 +382,19 @@ add_var_to_set(Var, Set, NewSet):-
  * The comparision is done with == instead of =!
  */ 
 occurs_in(Var, Set):-
-	findall(	OldVar, 
-    			(	nth1(_, Set, OldVar),
-    				OldVar == Var
-    			),
-    			AllOldVar
-    		),
-    not(AllOldVar == []).  
-    
+	nth1(_, Set, OldVar),
+    OldVar == Var,
+    !.  
+
+%occurs_in(Var, Set):-
+%	findall(	OldVar, 
+%    			(	nth1(_, Set, OldVar),
+%    				OldVar == Var
+%    			),
+%    			AllOldVar
+%    		),
+%   not(AllOldVar == []).  
+   
 
 
 

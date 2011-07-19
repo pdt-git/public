@@ -1,6 +1,6 @@
 :- module(pl_ast_to_graphML, [write_facts_to_graphML/2,
-								pl_test/0,
-								pl_test/2]).
+								pl_test_graph/0,
+								pl_test_graph/2]).
 
 :- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
@@ -273,10 +273,10 @@ write_data(Stream,Key,Value):-
 	
 
 
-pl_test:-	
-    pl_test(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml').           
- 
-pl_test(Project,Output):-
+
+pl_test_graph:-	
+    pl_test_graph(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
+pl_test_graph(Project,Output):-
 	plparser_quick:generate_facts(Project),
 	writeln('generating graphml-file'),
     time(write_facts_to_graphML(Project,Output)).
