@@ -4,7 +4,8 @@
 
 
 %undeclared_metapredicate(Head):-
-	 
+
+%:- initialization mutex_create(prolog_factbase).	 
 
 
 generate_factbase:-
@@ -16,8 +17,6 @@ generate_factbase(File):-
     find_all_loaded_files(Project),
     filter_already_known_files(Project,MissingFiles),
     flatten(MissingFiles,FlatMissingFiles),
-    %format('****saved file: ~w~n',[File]),
-    %format('****New files: ~w~n',[FlatMissingFiles]),
     plparser_quick:update_facts(File,FlatMissingFiles).       
 
     
