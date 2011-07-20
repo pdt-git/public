@@ -2,22 +2,23 @@
 :- use_module('analyzer/metapred_finder').
 
 
-
-%undeclared_metapredicate(Head):-
-
-%:- initialization mutex_create(prolog_factbase).	 
-
-
 generate_factbase:-
-    find_all_loaded_files(Project),
-    plparser_quick:generate_facts(Project).       
+    with_mutex(prolog_factbase,
+    	(	find_all_loaded_files(Project),
+    		plparser_quick:generate_facts(Project)
+    	)
+    ).       
 
 
 generate_factbase(File):-
-    find_all_loaded_files(Project),
-    filter_already_known_files(Project,MissingFiles),
-    flatten(MissingFiles,FlatMissingFiles),
-    plparser_quick:update_facts(File,FlatMissingFiles).       
+    with_mutex(prolog_factbase,
+    	(	find_all_loaded_files(Project),
+    		filter_already_known_files(Project,MissingFiles),
+    		flatten(MissingFiles,FlatMissingFiles),
+    		plparser_quick:update_facts(File,FlatMissingFiles)
+    	)
+    ).
+    	       
 
     
 find_all_loaded_files(Project):-
