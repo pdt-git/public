@@ -60,8 +60,8 @@ visible_in_module(Predicate,Module):-
     
     
 visible_in_module_as(Predicate,Module,Functor,_):-
-    predicateT(Predicate,_,Functor,_,Module),
-    !.
+    predicateT(Predicate,_,Functor,_,Module).%,
+    %!.
 visible_in_module_as(Predicate,Module,Functor,PreviousModules):-
     fileT(ModuleFile,_,Module),
     load_edge(ModuleFile,DefiningFile,Imports,_),				   %TODO: import_dir verarbeiten irgendwo!!!!
