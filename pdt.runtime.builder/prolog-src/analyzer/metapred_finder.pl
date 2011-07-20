@@ -4,6 +4,7 @@
 :- use_module(metafile_referencer).
 :- use_module(org_cs3_lp_utils(utils4modules)).
 :- use_module(term_based_metapred_finder).
+:- use_module('../modules_and_visibility.pl').
 
 
 :- dynamic new_meta_pred/2.	%new_meta_pred(MetaSpec, Module)
@@ -22,9 +23,15 @@ find_all_meta_predicates:-
     	collect_candidates(Candidates),
     	forall(
     		(	member(Module:Candidate, Candidates),
-    			infer_meta_arguments_for(Module,Candidate,MetaSpec)
+    			(	Module = user
+    			->	(	functor(Candidate, Functor, Arity),
+    					visible_in_module(AModule,Functor,Arity),
+    					infer_meta_arguments_for(AModule, Candidate, MetaSpec)
+    				)	
+    			;	infer_meta_arguments_for(Module,Candidate,MetaSpec)
+    			)
  			),
-			assert(new_meta_pred(MetaSpec, Module))
+ 			assert(new_meta_pred(MetaSpec, Module))
 		),
 		(	new_meta_pred(_,_)
 		->	(	prepare_next_step,
@@ -66,7 +73,7 @@ collect_candidates(Candidates):-
     		%visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
     														%		für die ..T-Fakten möglich, aber nicht für die vordefinierten...
     														%		andererseits: der genaue Test ist ja eh später, hier nur Kandidaten.
-    		(	predicateT(PredId,_FileId,Functor,Arity,Module)
+    		(	predicateT_ri(Functor,Arity,Module,PredId)
     		->	parse_util:call_edge(PredId,LiteralId)
 			;	parse_util:call_built_in(Functor, Arity, Module, LiteralId)
 			),
@@ -88,13 +95,13 @@ prepare_next_step:-
     	(	functor(MetaSpec, Functor, Arity),
     		(	metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, OldMetaSpec)
     		->	(	(MetaSpec \= OldMetaSpec)
-    			->	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec)
+    			->	(	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec),
+    					assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec))
+    				)
     			;	retract(new_meta_pred(MetaSpec, Module))	% was already there, no need to handle it again 		
     			)
-    		;	NewMetaSpec = MetaSpec
-    		),
-    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec))%,
-    		%format('New meta found: ~w:~w/~w -> ~w~n', [Module, Functor, Arity, NewMetaSpec])
+    		;	assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, MetaSpec))
+    		)
     	)
     ).
     
