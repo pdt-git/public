@@ -10,7 +10,7 @@
 						termT/2, slT/3, 
 						call_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
 						call_built_in/4,
-						fileT_ri/2, predicateT_ri/4, clauseT_ri/3,  
+						fileT_ri/2, predicateT_ri/4, literalT_ri/4,  
 						import_dir/2, export_dir/2, load_dir/3, property_dir/3, library_dir/3,
 						pos_and_vars/3, 
 						error/3, warning/3]).
@@ -47,7 +47,7 @@
 
 :- dynamic fileT_ri/2.		%fileT_ri(FileName,Id)
 :- dynamic predicateT_ri/4.	%predicateT_ri(Functor,Arity,Module,Id)		
-:- dynamic clauseT_ri/3.    %clauseT_ri(Functor,Arity,ClauseId)
+:- dynamic literalT_ri/4.   %literalT_ri(Functor, Arity, Module, LiteralId)
 
 :- dynamic pos_and_vars/3.	%pos_and_vars(ClauseId,BodyPos,VarNames)
 
@@ -86,7 +86,7 @@ cleanup_nodes:-
 	retractall(meta_predT(_,_)),
 	retractall(termT(_,_)),
 	retractall(slT(_,_,_)),
-	retractall(clauseT_ri(_,_,_)),     
+	retractall(literalT_ri(_,_,_,_)),     
 	retractall(fileT_ri(_,_)),
 	retractall(pos_and_vars(_,_,_)),	%should not be there, because they get removed when bodies are parsed
 	retractall(error(_,_,_)),
@@ -142,7 +142,6 @@ clean_file_entries(FileId):-
 	clauseT(ClauseId,FileId,_,_,_),
 		clean_clause_references(ClauseId),
 		retractall(clauseT(ClauseId,_,_,_,_)),
-		retractall(clauseT_ri(_,_,ClauseId)),
 		retractall(pos_and_vars(ClauseId,_,_)),
 		clean_general_references_to(ClauseId),
 	fail.	
@@ -156,7 +155,8 @@ clean_clause_references(ClauseId):-
 clean_clause_references(ClauseId):-   
 	literalT(LitId,_,ClauseId,_,_,_),
 		clean_clause_references(LitId),
-    	retractall(literalT(LitId,_,ClauseId,_,_,_)),
+    	retractall(literalT(LitId,_,ClauseId,M,F,A)),
+    	retractall(literalT_ri(F,A,M,LitId)),
     	retractall(metaT(LitId,_,ClauseId,_,_,_)),
     fail.
 
