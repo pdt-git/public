@@ -3,14 +3,19 @@
 
 generate_factbase_with_metapred_analysis(File):-
     %format('###File: ~w~n', [File]), 
-    generate_factbase(File),
-    find_all_meta_predicates,
+    with_mutex(meta_pred_finder,
+    	(	generate_factbase(File),
+    		find_all_meta_predicates
+    	)
+    ),
     get_all_userdefined_meta_predicates(MetaPreds),
     format('### Userdefined meta pred: ~w~n', [MetaPreds]).
 
 find_undeclared_meta_predicates_position(File, Offset, MetaSpec):-
     %generate_factbase_with_metapred_analysis(File),
-    get_all_userdefined_meta_predicates(MetaPreds),
+    with_mutex(meta_pred_finder,
+    	get_all_userdefined_meta_predicates(MetaPreds)
+    ),
     !,
     member(Module:MetaSpec,MetaPreds),
     filter_undeclared_predicate(Module, MetaSpec,File,Offset).
@@ -22,7 +27,7 @@ filter_undeclared_predicate(Module, MetaSpec, FileName, Offset):-
     
 
   
-%% find_missdeclared_meta_predicates_positio(?File, ?Offset, ?DeclaredMetaSpec, ?CorrectMetaSpec)
+%% find_missdeclared_meta_predicates_position(?File, ?Offset, ?DeclaredMetaSpec, ?CorrectMetaSpec)
 find_missdeclared_meta_predicates_position(File, Offset, DeclaredMetaSpec, CorrectMetaSpec):-
 	get_all_userdefined_meta_predicates(MetaPreds),  
     !,
