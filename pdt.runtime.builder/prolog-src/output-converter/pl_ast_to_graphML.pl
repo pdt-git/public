@@ -20,7 +20,7 @@ write_facts_to_graphML(Project, File):-
     write_graphML_keys(OutStream),
     start_graph_element(OutStream),
     flush_output(OutStream),
-    Project=[FirstProject],
+    member(FirstProject,Project),
     write_files(FirstProject,OutStream),
     flush_output(OutStream),
   	write_load_edges(OutStream),
