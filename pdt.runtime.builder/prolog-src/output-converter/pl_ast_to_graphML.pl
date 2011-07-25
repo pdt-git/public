@@ -15,11 +15,7 @@
  *   ###### to be completed #########
  **/
 write_facts_to_graphML(Project, File):-
-    open(File,write,OutStream,[type(text)]),
-    write_graphML_header(OutStream),
-    write_graphML_keys(OutStream),
-    start_graph_element(OutStream),
-    flush_output(OutStream),
+    prepare_for_writing(File,OutStream),
     member(FirstProject,Project),
     write_files(FirstProject,OutStream),
     flush_output(OutStream),
@@ -27,10 +23,29 @@ write_facts_to_graphML(Project, File):-
   	flush_output(OutStream),
   	write_call_edges(OutStream),
   	flush_output(OutStream),
- 	close_graph_element(OutStream),
+ 	finish_writing(OutStream).
+
+%
+%write_focus_facts_to_graphML(FocusFile, File):-
+%    prepare_for_writing(File,OutStream),
+%    
+%    write_files(FocusFile,OutStream),
+%    
+%    finish_writing(OutStream).  
+    
+    
+    
+prepare_for_writing(File,OutStream):-
+    open(File,write,OutStream,[type(text)]),
+    write_graphML_header(OutStream),
+    write_graphML_keys(OutStream),
+    start_graph_element(OutStream),
+    flush_output(OutStream).
+  
+finish_writing(OutStream):-
+    close_graph_element(OutStream),
     write_graphML_footer(OutStream),
     close(OutStream).
-    
 
 write_graphML_header(OutStream):-
 	write(OutStream,'<?xml version="1.0" encoding="UTF-8"?>'), nl(OutStream),
@@ -38,7 +53,6 @@ write_graphML_header(OutStream):-
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'), 
 	nl(OutStream).
-	
 	
 write_graphML_keys(OutStream):-
     write(OutStream, '<key id="id" for="node" attr.name="id" attr.type="string"/>'),
