@@ -37,6 +37,9 @@ h(H):-
 i(H,X):-
     bla(H, b) = bla(B, X),
     call(B).
+    
+%j(J):-
+%    d(J).
 
 z(Z):-	%non_meta
 	Z = 4.

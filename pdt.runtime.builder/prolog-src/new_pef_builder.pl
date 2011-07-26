@@ -1,6 +1,6 @@
 %:- module(new_builder,[consult_entry_point_and_parse/2]).
 
-:- use_module(prolog_file_reader_quick).
+:- use_module(prolog_file_reader).
 
 
 /**

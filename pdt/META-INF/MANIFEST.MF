@@ -33,6 +33,8 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.console,
  org.cs3.pdt.common.ui,
  org.cs3.pdt.runtime.ui;bundle-version="[0.2.0,1.0.0)",
- org.eclipse.core.filesystem
+ org.eclipse.core.filesystem,
+ org.eclipse.ltk.core.refactoring;bundle-version="3.5.200",
+ org.eclipse.ltk.ui.refactoring;bundle-version="3.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
