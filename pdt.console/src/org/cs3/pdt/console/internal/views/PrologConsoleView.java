@@ -116,6 +116,7 @@ import org.eclipse.ui.progress.UIJob;
 @SuppressWarnings("deprecation")
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		PrologConsole {
+	
 	private final class ClearAction extends Action {
 		private ClearAction(String text, String tooltip, ImageDescriptor image) {
 			super(text, image);
@@ -325,7 +326,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 	}
 	
-	private final class CreateProcessAction extends Action{
+	private final class CreateNamedProcessAction extends Action{
 		
 		@Override
 		public void run(){
@@ -334,6 +335,19 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				@Override
 				public IStatus runInUIThread(IProgressMonitor arg0) {
 					PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+					
+					InputDialog dialog = createNewProcessNameDialog(registry);	
+					int result = dialog.open();
+					if (result == InputDialog.CANCEL)
+						return Status.CANCEL_STATUS;
+					String pifKey = dialog.getValue();
+					
+					activateNewPrologProcess(registry, pifKey);
+					return Status.OK_STATUS;
+				}
+
+				public InputDialog createNewProcessNameDialog(
+						PrologInterfaceRegistry registry) {
 					final Set<String> pifKeys = registry.getRegisteredKeys();
 					String defaultPifKey = getNameOfProjectOfActiveEditorInput();
 					if (pifKeys.contains(defaultPifKey))
@@ -350,23 +364,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 								return null;
 						}
 					};
-
-					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process", "Enter a yet unused name for your new Prolog process:", defaultPifKey, validator);
-					int result = dialog.open();
-					if (result == InputDialog.CANCEL)
-						return Status.CANCEL_STATUS;
-
-					String pifKey = dialog.getValue();
-					DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
-					registry.addSubscription(subscription);
-					PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
-
-                    if (automatedSelector.getActiveTrackers().isEmpty()){
-                        PrologConsoleView.this.setPrologInterface(pif);
-                        PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
-                    }
-					return Status.OK_STATUS;
+					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process", "Enter a new name for your new Prolog process:", defaultPifKey, validator);
+					return dialog;
 				}
+
 			};
 			j.schedule();
 		}
@@ -408,6 +409,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			return "create process";
 		}
 	}
+	
+
 
 	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 	private ConsoleViewer viewer;
@@ -422,7 +425,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private GuiTracerAction guiTracerAction;
 	private PasteAction pasteFileNameAction;
 	private RestartAction restartAction;
-	private CreateProcessAction createProcessAction;
+	private CreateNamedProcessAction createProcessAction;
 	private HashMap<PrologInterface, PrologSocketConsoleModel> models = new HashMap<PrologInterface, PrologSocketConsoleModel>();
 	private Label title;
 	private HashMap<PrologInterface, SavedState> viewerStates = new HashMap<PrologInterface, SavedState>();
@@ -434,6 +437,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		try {
 			createPartControl_impl(parent);
+			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			activateNewPrologProcess(registry, "defaultConsole");
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t.getLocalizedMessage(), t);
@@ -583,7 +588,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
 		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
-		createProcessAction = new CreateProcessAction();
+		createProcessAction = new CreateNamedProcessAction();
 	}
 
 	private void initMenus(Control parent) {
@@ -708,6 +713,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 //		setPrologInterface(contextSelector.getCurrentPrologInterface());
 		setPrologInterface(automatedSelector.getCurrentPrologInterface());
 	
+	}
+	
+	public void activateNewPrologProcess(
+			PrologInterfaceRegistry registry, String pifKey) {
+		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
+		registry.addSubscription(subscription);
+		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+
+        if (automatedSelector.getActiveTrackers().isEmpty()){
+            PrologConsoleView.this.setPrologInterface(pif);
+            PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+        }
 	}
 
 	private void addContributions(IContributionManager manager) {
