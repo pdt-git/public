@@ -1,5 +1,13 @@
 :- module(graphML_api,[ prepare_for_writing/2,
-						finish_writing/1]).
+						finish_writing/1,
+						write_predicate/5,
+						write_call_edge/3,
+						write_load_edge/3,
+						open_node/2,
+						open_edge/3,
+						close_node/1,
+						close_edge/1,
+						write_data/3]).
 
 :- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
