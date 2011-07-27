@@ -1,9 +1,15 @@
-:- module(pl_ast_to_graphML, [	write_facts_to_graphML/2,
+:- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
 								write_focus_facts_to_graphML/2,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
+:- use_module('../parse_util.pl').
 :- use_module(graphML_api).
+
+write_project_graph_to_file(Project, OutputFile):-
+	plparser_quick:generate_facts(Project),
+	writeln('generating graphml-file'),
+    time(write_facts_to_graphML(Project,OutputFile)).
 
 /**
  * write_facts_to_graphML(+Project,+File)
@@ -17,7 +23,7 @@
 write_facts_to_graphML(Project, File):-
     prepare_for_writing(File,OutStream),
     member(FirstProject,Project),
-    write_files(FirstProject,OutStream),
+    write_all_files(FirstProject,OutStream),
     flush_output(OutStream),
   	write_load_edges(OutStream),
   	flush_output(OutStream),
@@ -27,16 +33,22 @@ write_facts_to_graphML(Project, File):-
 
 
 write_focus_facts_to_graphML(FocusFile, File):-
-    prepare_for_writing(File,OutStream),
-	fileT(Id,FocusFile,Module),
-	write_file(OutStream,File,Id,File,Module),	
+    setup_call_cleanup(
+    	prepare_for_writing(File,OutStream),
+		(	fileT(Id,FocusFile,Module),
+			write_file(OutStream,File,Id,File,Module),	
 	
-	count_call_edges_between_predicates,
-	collect_ids_for_focus_file(FocusFile,Files,CalledPredicates,Calls),
+			count_call_edges_between_predicates,
+			collect_ids_for_focus_file(FocusFile,Files,_CalledPredicates,Calls),
 	
-    write_files(FocusFile,OutStream),
-    
-    finish_writing(OutStream).  
+   			write_files(FocusFile, Files, OutStream),
+    		forall(
+    			member((SourceId,TargetId),Calls),
+    			write_call_edge(OutStream,SourceId,TargetId)
+    		)
+    	),
+  	  	finish_writing(OutStream)
+  	 ).  
     
     
 collect_ids_for_focus_file(FocusFile,Files,CalledPredicates,Calls):-
@@ -87,17 +99,27 @@ collect_called_predicates_and_files([(_Caller,TargetPred)|OtherCalls],KnownCalle
  * write_files(+Stream)
  *    writes #### dito ####
  */
-write_files(Project,Stream):-
+write_all_files(RelativePath,Stream):-
     forall(	fileT(Id,File,Module),
-    		(	write_file(Stream,Project,Id,File,Module),
+    		(	write_file(Stream,RelativePath,Id,File,Module),
     			flush_output(Stream)
     		)
     	  ).
 		
-write_file(Stream,Project,Id,FileName,Module):-
+
+write_files(RelativePath, Files, Stream):-	
+	forall(	
+		member(FileId,Files),
+		(	fileT(FileId,FileName,Module),
+			write_file(Stream,RelativePath,FileId,FileName,Module),
+    		flush_output(Stream)
+    	)
+    ).	
+
+write_file(Stream,RelativePath,Id,FileName,Module):-
 	open_node(Stream,Id),
 	write_data(Stream,'id',Id),
-	catch(	(	atom_concat(Project,RelativeWithSlash,FileName),
+	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
 				atom_concat('/',RelativeFileName,RelativeWithSlash)
 			),
 			_, 
@@ -143,14 +165,9 @@ write_call_edges(Stream):-
     	)
     ).
     
-	
-
-		
 
 pl_test_graph:-	
     pl_test_graph(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
-pl_test_graph(Project,Output):-
-	plparser_quick:generate_facts(Project),
-	writeln('generating graphml-file'),
-    time(write_facts_to_graphML(Project,Output)).
+pl_test_graph(Project, OutputFile):-
+	write_project_graph_to_file(Project, OutputFile).
     
