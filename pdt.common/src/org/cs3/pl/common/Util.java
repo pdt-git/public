@@ -302,7 +302,7 @@ public class Util {
 				ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
 
 				String currentEntry = entry.getName();
-				System.out.println("Extracting: " + entry);
+				Debug.debug("Extracting: " + entry);
 
 				File destFile = new File(unzipDestinationDirectory,
 						currentEntry);
@@ -784,7 +784,7 @@ public class Util {
 	public static String guessExecutableName() {
 
 		String guessedExecutable = guessExecutableName__();
-		System.out.println("Guessed Prolog executable with GUI: " + guessedExecutable);
+		Debug.info("Guessed Prolog executable with GUI: " + guessedExecutable);
 		return guessedExecutable;
 
 	}
@@ -793,7 +793,7 @@ public class Util {
 	private static String stackCommandLineParameters = null;
 	
 	public static String getStackCommandLineParameters() {
-		System.out.println("DEBUG: getStackCommandLineParameters start");
+		Debug.debug("getStackCommandLineParameters start");
 		if (stackCommandLineParameters == null) {
 		
 			String swiExecutable;
@@ -825,7 +825,7 @@ public class Util {
 			}
 
 		}
-		System.out.println("DEBUG: getStackCommandLineParameters end: '" + stackCommandLineParameters+ "'");
+		Debug.debug("getStackCommandLineParameters end: '" + stackCommandLineParameters+ "'");
 		
 		return stackCommandLineParameters;
 	}
@@ -874,7 +874,7 @@ public class Util {
 	public static String guessCommandLineExecutableName() {
 
 		String guessedExecutable = guessCommandLineExecutableName__();
-		System.out.println("Guessed Prolog executable WITHOUT GUI: " + guessedExecutable);
+		Debug.info("Guessed Prolog executable WITHOUT GUI: " + guessedExecutable);
 		return guessedExecutable;
 
 	}

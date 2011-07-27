@@ -21,7 +21,6 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
 	public SourcePathDecorator() {
-		System.out.println("DEBUG");
 	}
 
 	@Override
