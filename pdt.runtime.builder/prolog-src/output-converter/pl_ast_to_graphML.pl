@@ -1,4 +1,5 @@
-:- module(pl_ast_to_graphML, [write_facts_to_graphML/2,
+:- module(pl_ast_to_graphML, [	write_facts_to_graphML/2,
+								write_focus_facts_to_graphML/2,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
@@ -24,7 +25,7 @@ write_facts_to_graphML(Project, File):-
   	flush_output(OutStream),
  	finish_writing(OutStream).
 
-%
+
 write_focus_facts_to_graphML(FocusFile, File):-
     prepare_for_writing(File,OutStream),
 	fileT(Id,FocusFile,Module),
@@ -49,9 +50,11 @@ collect_ids_for_focus_file(FocusFile,Files,CalledPredicates,Calls):-
     collect_calling_predicates_and_files(IncomingCallsSet,[],CallingPreds,[],CallingFiles),
     collect_calls_from_predicates(OwnPredicates,[],OutgoingCalls),
     list_to_set(OutgoingCalls, OutgoingCallsSet),
-    collect_called_predicates_and_files(OutgoingCallsSet,CallingPreds,AllPreds,CallingFiles,AllFiles)
-    
-    .
+    collect_called_predicates_and_files(OutgoingCallsSet,CallingPreds,AllPreds,CallingFiles,AllFiles),
+    list_to_set(AllPreds, CalledPredicates),
+    list_to_set(AllFiles, Files),
+    append(IncomingCallsSet, OutgoingCallsSet, CallsList),
+    list_to_set(CallsList, Calls).
     
 collect_calls_to_predicates([],KnownCalls,KnownCalls).
 collect_calls_to_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
