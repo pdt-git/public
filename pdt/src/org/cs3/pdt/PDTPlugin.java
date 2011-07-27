@@ -42,8 +42,11 @@
 package org.cs3.pdt;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.cs3.pdt.internal.editors.ColorManager;
+import org.cs3.pdt.internal.editors.PDTChangedFileInformation;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
@@ -52,6 +55,11 @@ import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -62,7 +70,10 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin implements IStartup{
+public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionProvider{
+	
+	private List<ISelectionChangedListener> changeListeners = new ArrayList<ISelectionChangedListener>();
+	private ISelection selection;
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -207,4 +218,33 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 		return colorManager;
 	}
 
+
+	@Override
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		changeListeners.add(listener);
+	}
+
+	@Override
+	public void removeSelectionChangedListener(
+			ISelectionChangedListener listener) {
+		changeListeners.remove(listener);
+	}
+	
+	@Override
+	public void setSelection(ISelection selection) {
+		this.selection = selection;
+		informListenersAboutEditorContent(selection);
+	}
+	
+	public void informListenersAboutEditorContent(ISelection selection) {
+		for (ISelectionChangedListener listener : changeListeners) {
+			listener.selectionChanged(new SelectionChangedEvent(this, selection));
+		}
+	}
+
+	@Override
+	public ISelection getSelection() {
+		return selection;
+	}
+	
 }
