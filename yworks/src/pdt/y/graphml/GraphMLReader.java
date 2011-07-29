@@ -43,6 +43,10 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("functor", dataHolder.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("arity", dataHolder.getArityMap(), KeyScope.NODE, KeyType.INT);
 		core.addInputDataAcceptor("frequency", dataHolder.getCallFrequencyMap(), KeyScope.EDGE, KeyType.INT);
+		core.addInputDataAcceptor("isDynamic", dataHolder.getDynamicMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("isTransparent", dataHolder.getTransparentMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("isMultifile", dataHolder.getMultifileMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
 	}
 	
 	private boolean loadFile(URL resource){

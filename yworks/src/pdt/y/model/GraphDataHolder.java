@@ -23,6 +23,10 @@ public class GraphDataHolder {
 	private DataMap functorMap = Maps.createHashedDataMap();
 	private DataMap arityMap = Maps.createHashedDataMap();
 	private DataMap callFrequencyMap = Maps.createHashedDataMap();
+	private DataMap dynamicMap = Maps.createHashedDataMap();
+	private DataMap transparentMap = Maps.createHashedDataMap();
+	private DataMap metaPredMap = Maps.createHashedDataMap();
+	private DataMap multifileMap = Maps.createHashedDataMap();
 	
 
 	// Getter and Setter
@@ -52,6 +56,22 @@ public class GraphDataHolder {
 
 	public DataMap getCallFrequencyMap() {
 		return callFrequencyMap;
+	}
+	
+	public DataMap getDynamicMap() {
+		return dynamicMap;
+	}
+
+	public DataMap getTransparentMap() {
+		return transparentMap;
+	}
+
+	public DataMap getMetaPredMap() {
+		return metaPredMap;
+	}
+
+	public DataMap getMultifileMap() {
+		return multifileMap;
 	}
 
 	
@@ -85,6 +105,33 @@ public class GraphDataHolder {
 		return kind.equals(LOADING);
 	}
 
+	public boolean isDynamicNode(Node node) {
+		Object returnNode = dynamicMap.get(node);
+		if(returnNode == null) 
+			return false;
+		return true;
+	}
+	
+	public boolean isTransparentNode(Node node) {
+		Object returnNode = transparentMap.get(node);
+		if(returnNode == null) 
+			return false;
+		return true;
+	}
+
+	public boolean isMetaPred(Node node) {
+		Object returnNode = metaPredMap.get(node);
+		if(returnNode == null) 
+			return false;
+		return true;
+	}
+	
+	public boolean isMultifile(Node node) {
+		Object returnNode = multifileMap.get(node);
+		if(returnNode == null) 
+			return false;
+		return true;
+	}
 
 
 	

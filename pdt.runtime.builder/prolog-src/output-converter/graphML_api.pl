@@ -47,7 +47,7 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	;	true
 	),		
 	(	meta_predT(Id,_)
-	->	write_data(Stream,'isDeclaredMetaPredicate','true')
+	->	write_data(Stream,'isMetaPredicate','true')
 	;	true
 	),	
 /*	start_graph_element(Stream),
@@ -114,7 +114,7 @@ write_graphML_ast_keys(OutStream):-
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),
-    write(OutStream, '<key id="isDynamic" for="node" attr.name="isDeclaredMetaPredicate" attr.type="boolean">'),
+    write(OutStream, '<key id="isDynamic" for="node" attr.name="isMetaPredicate" attr.type="boolean">'),
     nl(OutStream),
     write(OutStream, '    <default>false</default>'),
   	nl(OutStream),
