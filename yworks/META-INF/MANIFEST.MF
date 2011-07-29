@@ -22,3 +22,6 @@ Bundle-ClassPath: .,
  lib/hamcrest-library-1.2.jar
 Bundle-Activator: pdt.y.main.PluginActivator
 Bundle-ActivationPolicy: lazy
+Export-Package: pdt.y.graphml,
+ pdt.y.main,
+ pdt.y.model
