@@ -1,0 +1,1004 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+<key id="id" for="node" attr.name="id" attr.type="string"/>
+<key id="kind" for="all" attr.name="kind" attr.type="string"/>
+<key id="fileName" for="node" attr.name="description" attr.type="string"/>
+<key id="module" for="node" attr.name="module" attr.type="string">
+    <default>user</default>
+</key>
+<key id="functor" for="node" attr.name="functor" attr.type="string"/>
+<key id="arity" for="node" attr.name="arity" attr.type="int"/>
+<key id="moduleOfPredicate" for="node" attr.name="moduleOfPredicate" attr.type="string"/>
+<key id="isTransparent" for="node" attr.name="isTransparent" attr.type="boolean">
+    <default>false</default>
+</key>
+<key id="isDynamic" for="node" attr.name="isDynamic" attr.type="boolean">
+    <default>false</default>
+</key>
+<key id="isMultifile" for="node" attr.name="isMultifile" attr.type="boolean">
+    <default>false</default>
+</key>
+
+
+
+<graph edgedefault="directed">
+<node id="10001">
+   <data key="id">10001</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/crossref.pl</data>
+   <data key="module">xref</data>
+<graph edgedefault="directed">
+<node id="10619">
+   <data key="id">10619</data>
+   <data key="functor">deleteXrefDb</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+   <data key="module">initial</data>
+   <Muh key="module">test</Muh>
+</node>
+<node id="10620">
+   <data key="id">10620</data>
+   <data key="functor">buildXrefDb</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+   <data key="module">transition</data>
+</node>
+<node id="10621">
+   <data key="id">10621</data>
+   <data key="functor">find_xref___</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">xref</data>
+   <data key="module">final</data>
+</node>
+<node id="10622">
+   <data key="id">10622</data>
+   <data key="functor">reportXref</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10623">
+   <data key="id">10623</data>
+   <data key="functor">listXref</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10624">
+   <data key="id">10624</data>
+   <data key="functor">before_version</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10625">
+   <data key="id">10625</data>
+   <data key="functor">swi_pl_version</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10626">
+   <data key="id">10626</data>
+   <data key="functor">storeXrefInfoForPreds</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10627">
+   <data key="id">10627</data>
+   <data key="functor">is_metaterm</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10628">
+   <data key="id">10628</data>
+   <data key="functor">collect_meta_args</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10629">
+   <data key="id">10629</data>
+   <data key="functor">extract_meta_argument</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10630">
+   <data key="id">10630</data>
+   <data key="functor">additonal_parameters</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10631">
+   <data key="id">10631</data>
+   <data key="functor">storeXrefInfoForPred_</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10632">
+   <data key="id">10632</data>
+   <data key="functor">predicate_property_switch</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10633">
+   <data key="id">10633</data>
+   <data key="functor">storeXrefInfoForPred___</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10634">
+   <data key="id">10634</data>
+   <data key="functor">extractBasePath_</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10635">
+   <data key="id">10635</data>
+   <data key="functor">storeXrefInfoForFiles</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10636">
+   <data key="id">10636</data>
+   <data key="functor">xrefInfoForFiles</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10637">
+   <data key="id">10637</data>
+   <data key="functor">xrefInfoForFiles_</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10638">
+   <data key="id">10638</data>
+   <data key="functor">storeXrefInfoForFilesOnly</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10639">
+   <data key="id">10639</data>
+   <data key="functor">xrefInfoForFilesOnly</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+<node id="10640">
+   <data key="id">10640</data>
+   <data key="functor">point4</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">xref</data>
+</node>
+</graph>
+</node>
+<node id="10199">
+   <data key="id">10199</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/directive_handler.pl</data>
+   <data key="module">directive_handler</data>
+<graph edgedefault="directed">
+<node id="10641">
+   <data key="id">10641</data>
+   <data key="functor">handle_directive</data>
+   <data key="arity">6</data>
+   <data key="moduleOfPredicate">directive_handler</data>
+</node>
+<node id="10642">
+   <data key="id">10642</data>
+   <data key="functor">categorize_directive</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">directive_handler</data>
+</node>
+</graph>
+</node>
+<node id="10228">
+   <data key="id">10228</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/literal_parser.pl</data>
+   <data key="module">literal_parser</data>
+<graph edgedefault="directed">
+<node id="10643">
+   <data key="id">10643</data>
+   <data key="functor">parse_bodies</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">literal_parser</data>
+</node>
+<node id="10644">
+   <data key="id">10644</data>
+   <data key="functor">parse_body_literals</data>
+   <data key="arity">6</data>
+   <data key="moduleOfPredicate">literal_parser</data>
+</node>
+<node id="10645">
+   <data key="id">10645</data>
+   <data key="functor">process_meta_argument</data>
+   <data key="arity">6</data>
+   <data key="moduleOfPredicate">literal_parser</data>
+</node>
+</graph>
+</node>
+<node id="10248">
+   <data key="id">10248</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/load_graph.pl</data>
+   <data key="module">load_graph</data>
+<graph edgedefault="directed">
+<node id="10646">
+   <data key="id">10646</data>
+   <data key="functor">build_new_load_graph</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10647">
+   <data key="id">10647</data>
+   <data key="functor">build_load_graph</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10648">
+   <data key="id">10648</data>
+   <data key="functor">build_load_edges_for_list</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10649">
+   <data key="id">10649</data>
+   <data key="functor">build_load_edges_for_list</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10650">
+   <data key="id">10650</data>
+   <data key="functor">lookup_complex_file_reference</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10651">
+   <data key="id">10651</data>
+   <data key="functor">lookup_direct_file_reference</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10652">
+   <data key="id">10652</data>
+   <data key="functor">find_file_id_for_file_name</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10653">
+   <data key="id">10653</data>
+   <data key="functor">compute_dir_with_file_search_path</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+<node id="10654">
+   <data key="id">10654</data>
+   <data key="functor">combine_two_path_elements</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">load_graph</data>
+</node>
+</graph>
+</node>
+<node id="10281">
+   <data key="id">10281</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/modules_and_visibility.pl</data>
+   <data key="module">modules_and_visibility</data>
+<graph edgedefault="directed">
+<node id="10655">
+   <data key="id">10655</data>
+   <data key="functor">compute_visibility_graph</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10656">
+   <data key="id">10656</data>
+   <data key="functor">compute_exports</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10657">
+   <data key="id">10657</data>
+   <data key="functor">build_export_edge_from_list</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10658">
+   <data key="id">10658</data>
+   <data key="functor">build_export_edge_from_list</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10659">
+   <data key="id">10659</data>
+   <data key="functor">build_export_edge</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10660">
+   <data key="id">10660</data>
+   <data key="functor">visible_in_module</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10661">
+   <data key="id">10661</data>
+   <data key="functor">visible_in_module_as</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10662">
+   <data key="id">10662</data>
+   <data key="functor">compute_importing_functor</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10663">
+   <data key="id">10663</data>
+   <data key="functor">compute_importing_functor_for_list</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10664">
+   <data key="id">10664</data>
+   <data key="functor">compute_importing_functor_with_exceptions</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+<node id="10665">
+   <data key="id">10665</data>
+   <data key="functor">is_searched_functor</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">modules_and_visibility</data>
+</node>
+</graph>
+</node>
+<node id="10319">
+   <data key="id">10319</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/new_pef_builder.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+<node id="10666">
+   <data key="id">10666</data>
+   <data key="functor">consult_entry_point_and_parse</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+</graph>
+</node>
+<node id="10323">
+   <data key="id">10323</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/parse_util.pl</data>
+   <data key="module">parse_util</data>
+<graph edgedefault="directed">
+<node id="10667">
+   <data key="id">10667</data>
+   <data key="functor">cleanup_nodes</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">parse_util</data>
+</node>
+<node id="10668">
+   <data key="id">10668</data>
+   <data key="functor">assert_new_node</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">parse_util</data>
+</node>
+</graph>
+</node>
+<node id="10359">
+   <data key="id">10359</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/pl_ast_to_abba.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+<node id="10669">
+   <data key="id">10669</data>
+   <data key="functor">write_facts_to_abba</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10670">
+   <data key="id">10670</data>
+   <data key="functor">write_files</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10671">
+   <data key="id">10671</data>
+   <data key="functor">write_predicates</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10672">
+   <data key="id">10672</data>
+   <data key="functor">write_onloades</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10673">
+   <data key="id">10673</data>
+   <data key="functor">write_clauses</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10674">
+   <data key="id">10674</data>
+   <data key="functor">write_directives</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10675">
+   <data key="id">10675</data>
+   <data key="functor">write_hirarchy</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10676">
+   <data key="id">10676</data>
+   <data key="functor">write_edges</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10677">
+   <data key="id">10677</data>
+   <data key="functor">write_node</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10678">
+   <data key="id">10678</data>
+   <data key="functor">write_position</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10679">
+   <data key="id">10679</data>
+   <data key="functor">write_within</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10680">
+   <data key="id">10680</data>
+   <data key="functor">write_edge</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10681">
+   <data key="id">10681</data>
+   <data key="functor">pl_test</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10682">
+   <data key="id">10682</data>
+   <data key="functor">pl_test</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+</graph>
+</node>
+<node id="10391">
+   <data key="id">10391</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/pl_ast_to_graphML.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+<node id="10683">
+   <data key="id">10683</data>
+   <data key="functor">write_facts_to_graphML</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10684">
+   <data key="id">10684</data>
+   <data key="functor">write_graphML_header</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10685">
+   <data key="id">10685</data>
+   <data key="functor">write_graphML_keys</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10686">
+   <data key="id">10686</data>
+   <data key="functor">write_graphML_footer</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10687">
+   <data key="id">10687</data>
+   <data key="functor">write_file</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10688">
+   <data key="id">10688</data>
+   <data key="functor">write_predicates</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10689">
+   <data key="id">10689</data>
+   <data key="functor">write_predicate</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10690">
+   <data key="id">10690</data>
+   <data key="functor">write_load_edges</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10691">
+   <data key="id">10691</data>
+   <data key="functor">write_load_edge</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10692">
+   <data key="id">10692</data>
+   <data key="functor">write_call_edges</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10693">
+   <data key="id">10693</data>
+   <data key="functor">write_hierarchy</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10694">
+   <data key="id">10694</data>
+   <data key="functor">start_graph_element</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10695">
+   <data key="id">10695</data>
+   <data key="functor">close_graph_element</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10696">
+   <data key="id">10696</data>
+   <data key="functor">open_node</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10697">
+   <data key="id">10697</data>
+   <data key="functor">close_node</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10698">
+   <data key="id">10698</data>
+   <data key="functor">open_edge</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10699">
+   <data key="id">10699</data>
+   <data key="functor">close_edge</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10700">
+   <data key="id">10700</data>
+   <data key="functor">write_data</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+</graph>
+</node>
+<node id="10449">
+   <data key="id">10449</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/predicates.pl</data>
+   <data key="module">predicates</data>
+<graph edgedefault="directed">
+<node id="10701">
+   <data key="id">10701</data>
+   <data key="functor">derive_all_predicates</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+<node id="10702">
+   <data key="id">10702</data>
+   <data key="functor">derive_predicate_for_clause</data>
+   <data key="arity">6</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+<node id="10703">
+   <data key="id">10703</data>
+   <data key="functor">derive_onloads</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+<node id="10704">
+   <data key="id">10704</data>
+   <data key="functor">compute_new_length</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+<node id="10705">
+   <data key="id">10705</data>
+   <data key="functor">compute_all_predicate_properties</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+<node id="10706">
+   <data key="id">10706</data>
+   <data key="functor">compute_predicate_property</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+<node id="10707">
+   <data key="id">10707</data>
+   <data key="functor">analyse_directive</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">predicates</data>
+</node>
+</graph>
+</node>
+<node id="10474">
+   <data key="id">10474</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/preparser.pl</data>
+   <data key="module">preparser</data>
+<graph edgedefault="directed">
+<node id="10708">
+   <data key="id">10708</data>
+   <data key="functor">parse</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">preparser</data>
+</node>
+<node id="10709">
+   <data key="id">10709</data>
+   <data key="functor">parse</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">preparser</data>
+</node>
+<node id="10710">
+   <data key="id">10710</data>
+   <data key="functor">parse_clauses</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">preparser</data>
+</node>
+<node id="10711">
+   <data key="id">10711</data>
+   <data key="functor">parse_clause_elements</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">preparser</data>
+</node>
+<node id="10712">
+   <data key="id">10712</data>
+   <data key="functor">parse_head_literal</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">preparser</data>
+</node>
+</graph>
+</node>
+<node id="10494">
+   <data key="id">10494</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/prolog_file_reader.pl</data>
+   <data key="module">plparser_neu</data>
+<graph edgedefault="directed">
+<node id="10713">
+   <data key="id">10713</data>
+   <data key="functor">parse</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10714">
+   <data key="id">10714</data>
+   <data key="functor">parse</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10715">
+   <data key="id">10715</data>
+   <data key="functor">parse_clauses</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10716">
+   <data key="id">10716</data>
+   <data key="functor">parse_clause</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10717">
+   <data key="id">10717</data>
+   <data key="functor">next_module</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10718">
+   <data key="id">10718</data>
+   <data key="functor">handle_error</data>
+   <data key="arity">4</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10719">
+   <data key="id">10719</data>
+   <data key="functor">parse_subterm_positions</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10720">
+   <data key="id">10720</data>
+   <data key="functor">parse_arg_positions</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10721">
+   <data key="id">10721</data>
+   <data key="functor">parse_elm_positions</data>
+   <data key="arity">6</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10722">
+   <data key="id">10722</data>
+   <data key="functor">assert_common_attrs</data>
+   <data key="arity">5</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10723">
+   <data key="id">10723</data>
+   <data key="functor">cleanup_node_attrs</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+<node id="10724">
+   <data key="id">10724</data>
+   <data key="functor">var_name</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">plparser_neu</data>
+</node>
+</graph>
+</node>
+<node id="10536">
+   <data key="id">10536</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/prolog_file_reader_quick.pl</data>
+   <data key="module">plparser_quick</data>
+<graph edgedefault="directed">
+<node id="10725">
+   <data key="id">10725</data>
+   <data key="functor">generate_facts</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">plparser_quick</data>
+</node>
+<node id="10726">
+   <data key="id">10726</data>
+   <data key="functor">derive_edges</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">plparser_quick</data>
+</node>
+</graph>
+</node>
+<node id="10549">
+   <data key="id">10549</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/basicUtilities.pl</data>
+   <data key="module">basicUtilities</data>
+<graph edgedefault="directed">
+<node id="10727">
+   <data key="id">10727</data>
+   <data key="functor">assert_unique_fact</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">basicUtilities</data>
+</node>
+</graph>
+</node>
+<node id="10553">
+   <data key="id">10553</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/ctc_admin.pl</data>
+   <data key="module">ctc_admin</data>
+<graph edgedefault="directed">
+<node id="10728">
+   <data key="id">10728</data>
+   <data key="functor">ctc_id_init</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">ctc_admin</data>
+</node>
+<node id="10729">
+   <data key="id">10729</data>
+   <data key="functor">?-</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">ctc_admin</data>
+</node>
+<node id="10730">
+   <data key="id">10730</data>
+   <data key="functor">new_node_id</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">ctc_admin</data>
+</node>
+</graph>
+</node>
+<node id="10562">
+   <data key="id">10562</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/database.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+<node id="10731">
+   <data key="id">10731</data>
+   <data key="functor">assert_unique_ground_fact</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10732">
+   <data key="id">10732</data>
+   <data key="functor">assert_unique_fact</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+</graph>
+</node>
+<node id="10568">
+   <data key="id">10568</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/directive_finder.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+<node id="10733">
+   <data key="id">10733</data>
+   <data key="functor">collect_directives</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10734">
+   <data key="id">10734</data>
+   <data key="functor">collect_for_files</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10735">
+   <data key="id">10735</data>
+   <data key="functor">collect_for_a_file</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10736">
+   <data key="id">10736</data>
+   <data key="functor">collect_from_term</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10737">
+   <data key="id">10737</data>
+   <data key="functor">print_directives</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+
+
+</graph>
+</node>
+<node id="10582">
+   <data key="id">10582</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/load_xref.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+</graph>
+</node>
+<node id="10585">
+   <data key="id">10585</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/predproptest.pl</data>
+   <data key="module">test_predicate_property</data>
+<graph edgedefault="directed">
+<node id="10738">
+   <data key="id">10738</data>
+   <data key="functor">bla</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">test_predicate_property</data>
+</node>
+</graph>
+</node>
+<node id="10590">
+   <data key="id">10590</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/util/walking_prolog_files.pl</data>
+   <data key="module">user</data>
+<graph edgedefault="directed">
+<node id="10739">
+   <data key="id">10739</data>
+   <data key="functor">walking_file_list</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10740">
+   <data key="id">10740</data>
+   <data key="functor">check_file_or_dir</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10741">
+   <data key="id">10741</data>
+   <data key="functor">walking_prolog_directory</data>
+   <data key="arity">3</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10742">
+   <data key="id">10742</data>
+   <data key="functor">do_nothing_on_file</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10743">
+   <data key="id">10743</data>
+   <data key="functor">prolog_file</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10744">
+   <data key="id">10744</data>
+   <data key="functor">prolog_file_or_dir</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10745">
+   <data key="id">10745</data>
+   <data key="functor">prolog_files</data>
+   <data key="arity">2</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10746">
+   <data key="id">10746</data>
+   <data key="functor">gogo</data>
+   <data key="arity">0</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+<node id="10747">
+   <data key="id">10747</data>
+   <data key="functor">consult_prolog_files</data>
+   <data key="arity">1</data>
+   <data key="moduleOfPredicate">user</data>
+</node>
+</graph>
+</node>
+<edge source="10199" target="10323">
+</edge>
+<edge source="10228" target="10001">
+</edge>
+<edge source="10228" target="10323">
+</edge>
+<edge source="10248" target="10323">
+</edge>
+<edge source="10281" target="10323">
+</edge>
+<edge source="10319" target="10536">
+</edge>
+<edge source="10323" target="10553">
+</edge>
+<edge source="10359" target="10536">
+</edge>
+<edge source="10391" target="10536">
+</edge>
+<edge source="10449" target="10323">
+</edge>
+<edge source="10474" target="10323">
+</edge>
+<edge source="10474" target="10199">
+</edge>
+<edge source="10536" target="10590">
+</edge>
+<edge source="10536" target="10323">
+</edge>
+<edge source="10536" target="10474">
+</edge>
+<edge source="10536" target="10449">
+</edge>
+<edge source="10536" target="10248">
+</edge>
+<edge source="10536" target="10281">
+</edge>
+<edge source="10536" target="10228">
+</edge>
+<edge source="10568" target="10590">
+</edge>
+<edge source="10582" target="10562">
+</edge>
+<edge source="10582" target="10553">
+</edge>
+<edge source="10585" target="10001">
+</edge>
+<edge source="10733" target="10733">
+</edge>
+<edge source="10733" target="10737">
+</edge>
+<edge source="10737" target="10735">
+</edge>
+<edge source="10737" target="10582">
+</edge>
+<edge source="10737" target="10740">
+</edge>
+</graph>
+</graphml>
