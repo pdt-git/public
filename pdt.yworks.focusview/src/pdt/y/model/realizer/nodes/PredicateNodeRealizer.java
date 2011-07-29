@@ -51,7 +51,10 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 //			gfx.setColor(Color.BLUE);
 //			break;
 //		case TRANSITION_STATE:
-			this.setShapeType(ROUND_RECT);
+			if (model.getDataHolder().isDynamicNode(this.getNode()))
+				this.setShapeType(RECT);
+			else
+				this.setShapeType(ROUND_RECT);
 			this.setFillColor(Color.WHITE);
 			this.setLineColor(Color.BLUE);
 			byte myStyle = LineType.LINE_2.getLineStyle();
