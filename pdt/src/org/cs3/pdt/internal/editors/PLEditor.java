@@ -95,10 +95,8 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.widgets.Composite;
@@ -389,8 +387,8 @@ public class PLEditor extends TextEditor{
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				informViewsAboutChangedEditor();
 				addProblemMarkers();
+				informViewsAboutChangedEditor();
 //				executeConsult();
 			}
 
