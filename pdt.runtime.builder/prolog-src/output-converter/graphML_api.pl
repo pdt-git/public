@@ -7,7 +7,9 @@
 						open_edge/3,
 						close_node/1,
 						close_edge/1,
-						write_data/3]).
+						write_data/3,
+						start_graph_element/1,
+						close_graph_element/1]).
 
 :- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
