@@ -2,19 +2,10 @@ package pdt.y.main;
 
 import javax.swing.JComponent;
 
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.internal.editors.PDTChangedFileInformation;
 import org.eclipse.albireo.core.SwingControl;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.internal.Workbench;
 import org.eclipse.ui.part.ViewPart;
-
-import pdt.y.view.swt.commands.GraphLoadAction;
 
 
 public class FocusView extends ViewPart {
@@ -23,6 +14,7 @@ public class FocusView extends ViewPart {
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private SwingControl swingControl;
 	private PDTGraphSwingStandalone view = new PDTGraphSwingStandalone();
+	@SuppressWarnings("unused")
 	private GraphPIFCoordinator pifCoordinator;
 
 	public FocusView() {
