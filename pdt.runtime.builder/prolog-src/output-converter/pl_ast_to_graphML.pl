@@ -1,10 +1,11 @@
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
-								write_focus_facts_to_graphML/2,
+								write_focus_to_graphML/2,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
 :- use_module('../parse_util.pl').
 :- use_module(graphML_api).
+:- use_module('../analyzer/edge_counter').
 
 write_project_graph_to_file(Project, OutputFile):-
 	plparser_quick:generate_facts(Project),
@@ -32,49 +33,55 @@ write_facts_to_graphML(Project, File):-
  	finish_writing(OutStream).
 
 
-write_focus_facts_to_graphML(FocusFile, File):-
+write_focus_to_graphML(FocusFile, File):-
     setup_call_cleanup(
     	prepare_for_writing(File,OutStream),
-		(	fileT(Id,FocusFile,Module),
-			write_file(OutStream,File,Id,File,Module),	
-	
-			count_call_edges_between_predicates,
-			collect_ids_for_focus_file(FocusFile,Files,_CalledPredicates,Calls),
-	
-   			write_files(FocusFile, Files, OutStream),
-    		forall(
-    			member((SourceId,TargetId),Calls),
-    			write_call_edge(OutStream,SourceId,TargetId)
-    		)
-    	),
+		write_focus_facts_to_graphML(FocusFile, OutStream),
   	  	finish_writing(OutStream)
   	 ).  
+  	 
+write_focus_facts_to_graphML(FocusFile, OutStream):-
+    fileT_ri(FocusFile,FocusId), !,
+%	fileT(FocusId,FocusFile,Module),
+%	write_file(OutStream,FocusFile,FocusId,FocusFile,Module),	
+	
+	count_call_edges_between_predicates,
+	collect_ids_for_focus_file(FocusId,Files,_CalledPredicates,Calls),
+	
+   	write_files(FocusFile, Files, OutStream),
+    forall(
+    	member((SourceId,TargetId),Calls),
+    	write_call_edge(OutStream,SourceId,TargetId)
+    ).
     
-    
-collect_ids_for_focus_file(FocusFile,Files,CalledPredicates,Calls):-
+collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls):-
     findall(
     	PredId,
-    	predicateT(PredId,FocusFile,_,_,_),
+    	predicateT(PredId,FocusId,_,_,_),
     	OwnPredicates
     ),
     collect_calls_to_predicates(OwnPredicates,[],IncomingCalls),
-    list_to_set(IncomingCalls,IncomingCallsSet),
-    collect_calling_predicates_and_files(IncomingCallsSet,[],CallingPreds,[],CallingFiles),
+    collect_calling_predicates_and_files(IncomingCalls,OwnPredicates,CallingPreds,[FocusId],CallingFiles),
     collect_calls_from_predicates(OwnPredicates,[],OutgoingCalls),
-    list_to_set(OutgoingCalls, OutgoingCallsSet),
-    collect_called_predicates_and_files(OutgoingCallsSet,CallingPreds,AllPreds,CallingFiles,AllFiles),
+    collect_called_predicates_and_files(OutgoingCalls,CallingPreds,AllPreds,CallingFiles,AllFiles),
     list_to_set(AllPreds, CalledPredicates),
     list_to_set(AllFiles, Files),
-    append(IncomingCallsSet, OutgoingCallsSet, CallsList),
+    append(IncomingCalls, OutgoingCalls, CallsList),
     list_to_set(CallsList, Calls).
     
 collect_calls_to_predicates([],KnownCalls,KnownCalls).
 collect_calls_to_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
     findall( (Source,Predicate),
-    	call_edges_for_predicates(Source,Predicate,_Counter),
+    	(call_edges_for_predicates(Source,Predicate,_Counter), format('Predicate: ~w <- Source: ~w~n',[Predicate,Source])),
     	FoundCalls
     ),
-    collect_calls_to_predicats(OtherPredicates,[FoundCalls|KnownCalls],AllCalls).
+    (	FoundCalls \= []
+   	->	(	append(FoundCalls,KnownCalls,CallList), 
+   			list_to_set(CallList,CallSet)
+   		)
+   	;	CallSet = KnownCalls
+   	),
+    collect_calls_to_predicates(OtherPredicates,CallSet,AllCalls).
     
 collect_calls_from_predicates([],KnownCalls,KnownCalls).
 collect_calls_from_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
@@ -82,7 +89,13 @@ collect_calls_from_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
     	call_edges_for_predicates(Predicate,Target,_Counter),
     	FoundCalls
     ),
-    collect_calls_from_predicats(OtherPredicates,[FoundCalls|KnownCalls],AllCalls).   
+	(	FoundCalls \= []
+   	->	(	append(FoundCalls,KnownCalls,CallList), 
+   			list_to_set(CallList,CallSet)
+   		)
+   	;	CallSet = KnownCalls
+   	),
+    collect_calls_from_predicates(OtherPredicates,CallSet,AllCalls).   
     
 collect_calling_predicates_and_files([],Preds,Preds,Files,Files).    
 collect_calling_predicates_and_files([(SourcePred,_CalledPred)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
@@ -119,12 +132,14 @@ write_files(RelativePath, Files, Stream):-
 write_file(Stream,RelativePath,Id,FileName,Module):-
 	open_node(Stream,Id),
 	write_data(Stream,'id',Id),
-	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
-				atom_concat('/',RelativeFileName,RelativeWithSlash)
-			),
-			_, 
-			RelativeFileName=FileName
-		),
+	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
+					atom_concat('/',RelativeFileName,RelativeWithSlash), !
+				),
+				_, 
+				fail
+			)
+	;	RelativeFileName=FileName
+	),
 	write_data(Stream,'fileName',RelativeFileName),
 	write_data(Stream,'module',Module),	
 	(	Module=user
@@ -137,8 +152,10 @@ write_file(Stream,RelativePath,Id,FileName,Module):-
 	close_node(Stream).	
 		
 write_predicates(Stream,FileId):-
+    format('hier, FileId: ~w~n',[FileId]),
 	forall(	predicateT(Id,FileId,Functor,Arity,Module),
-			(	write_predicate(Stream,Id,Functor,Arity,Module),
+			(	format('Predicate to write: ~w -> ~w:~w/~w~n',[Id,Module,Functor,Arity]),
+				write_predicate(Stream,Id,Functor,Arity,Module),
 				flush_output(Stream)
 			)
 	).
