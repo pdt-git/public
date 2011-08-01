@@ -109,28 +109,28 @@ public class GraphDataHolder {
 		Object returnNode = dynamicMap.get(node);
 		if(returnNode == null) 
 			return false;
-		return true;
+		return (Boolean)returnNode;
 	}
 	
 	public boolean isTransparentNode(Node node) {
 		Object returnNode = transparentMap.get(node);
 		if(returnNode == null) 
 			return false;
-		return true;
+		return (Boolean)returnNode;
 	}
 
 	public boolean isMetaPred(Node node) {
 		Object returnNode = metaPredMap.get(node);
 		if(returnNode == null) 
 			return false;
-		return true;
+		return (Boolean)returnNode;
 	}
 	
 	public boolean isMultifile(Node node) {
 		Object returnNode = multifileMap.get(node);
 		if(returnNode == null) 
 			return false;
-		return true;
+		return (Boolean)returnNode;
 	}
 
 
