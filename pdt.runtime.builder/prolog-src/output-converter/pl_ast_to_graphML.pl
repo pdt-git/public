@@ -46,9 +46,9 @@ write_focus_facts_to_graphML(FocusFile, OutStream):-
 %	write_file(OutStream,FocusFile,FocusId,FocusFile,Module),	
 	
 	count_call_edges_between_predicates,
-	collect_ids_for_focus_file(FocusId,Files,_CalledPredicates,Calls),
+	collect_ids_for_focus_file(FocusId,Files, CorrespondingPredicates,Calls),
 	
-   	write_files(FocusFile, Files, OutStream),
+   	write_files(FocusFile, Files, CorrespondingPredicates, OutStream),
     forall(
     	member((SourceId,TargetId),Calls),
     	write_call_edge(OutStream,SourceId,TargetId)
@@ -114,22 +114,22 @@ collect_called_predicates_and_files([(_Caller,TargetPred)|OtherCalls],KnownCalle
  */
 write_all_files(RelativePath,Stream):-
     forall(	fileT(Id,File,Module),
-    		(	write_file(Stream,RelativePath,Id,File,Module),
+    		(	write_file(Stream,RelativePath,all_preds,Id,File,Module),
     			flush_output(Stream)
     		)
     	  ).
 		
 
-write_files(RelativePath, Files, Stream):-	
+write_files(RelativePath, Files, PredicatesToWrite, Stream):-
 	forall(	
 		member(FileId,Files),
 		(	fileT(FileId,FileName,Module),
-			write_file(Stream,RelativePath,FileId,FileName,Module),
+			write_file(Stream,RelativePath,PredicatesToWrite,FileId,FileName,Module),
     		flush_output(Stream)
     	)
     ).	
-
-write_file(Stream,RelativePath,Id,FileName,Module):-
+    
+write_file(Stream,RelativePath, Predicates, Id,FileName,Module):-
 	open_node(Stream,Id),
 	write_data(Stream,'id',Id),
 	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
@@ -147,19 +147,27 @@ write_file(Stream,RelativePath,Id,FileName,Module):-
 	;	write_data(Stream,'kind','module')
 	),
 	start_graph_element(Stream),
-	write_predicates(Stream,Id),
+	write_predicates(Stream, Id, Predicates),
 	close_graph_element(Stream),
 	close_node(Stream).	
+
 		
-write_predicates(Stream,FileId):-
-    format('hier, FileId: ~w~n',[FileId]),
+write_predicates(Stream, FileId, all_preds):-
+    !,
 	forall(	predicateT(Id,FileId,Functor,Arity,Module),
-			(	format('Predicate to write: ~w -> ~w:~w/~w~n',[Id,Module,Functor,Arity]),
+			(	write_predicate(Stream,Id,Functor,Arity,Module),
+				flush_output(Stream)
+			)
+	).	
+write_predicates(Stream, FileId, PredicatesToWrite):-
+	forall(	(	member(Id,PredicatesToWrite),
+				predicateT(Id,FileId,Functor,Arity,Module)
+			),
+			(
 				write_predicate(Stream,Id,Functor,Arity,Module),
 				flush_output(Stream)
 			)
 	).
-		
 
 write_load_edges(Stream):-
     forall(load_edge(LoadingFileId,FileId,_,_),
