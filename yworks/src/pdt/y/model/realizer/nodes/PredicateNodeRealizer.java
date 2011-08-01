@@ -10,6 +10,7 @@ import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 import y.view.SizeConstraintProvider;
 
+
 public class PredicateNodeRealizer extends ShapeNodeRealizer{
 
 	public static final int INITIAL_STATE = 0;
@@ -45,26 +46,37 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 	@Override
 	protected void paintNode(Graphics2D gfx) {
-		switch (state) {
-		case INITIAL_STATE:
-			gfx.setStroke(LineType.DASHED_1);
-			gfx.setColor(Color.BLUE);
-			break;
-		case TRANSITION_STATE:
-			this.setShapeType(ROUND_RECT);
+//		switch (state) {
+//		case INITIAL_STATE:
+//			gfx.setStroke(LineType.DASHED_1);
+//			gfx.setColor(Color.BLUE);
+//			break;
+//		case TRANSITION_STATE:
+			
+			System.out.println("isDynamic:" + model.getDataHolder().isDynamicNode(this.getNode()));
+			if (model.getDataHolder().isDynamicNode(this.getNode())) {
+				this.setShapeType(ELLIPSE);
+				System.out.println(this.getNode().toString());
+			} else {
+				this.setShapeType(ROUND_RECT);
+				System.out.println("Not dynamic: "+ this.getNode().toString());
+			}
 			this.setFillColor(Color.WHITE);
-			this.setLineColor(Color.BLUE);
+			if (model.getDataHolder().isMetaPred(this.getNode()))
+				this.setLineColor(Color.PINK);
+			else
+				this.setLineColor(Color.BLUE);
 			byte myStyle = LineType.LINE_2.getLineStyle();
 			LineType myLineType = LineType.getLineType(2,myStyle);
 			this.setLineType(myLineType);
-			break;
-		case FINAL_STATE: 
-			gfx.setStroke(LineType.LINE_2);
-			gfx.setColor(Color.GREEN);
-			break;
-		default:
-			break;
-		}
+//			break;
+//		case FINAL_STATE: 
+//			gfx.setStroke(LineType.LINE_2);
+//			gfx.setColor(Color.GREEN);
+//			break;
+//		default:
+//			break;
+//		}
 		super.paintNode(gfx);
 	}
 
