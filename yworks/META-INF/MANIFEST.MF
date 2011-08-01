@@ -22,6 +22,41 @@ Bundle-ClassPath: .,
  lib/hamcrest-library-1.2.jar
 Bundle-Activator: pdt.y.main.PluginActivator
 Bundle-ActivationPolicy: lazy
-Export-Package: pdt.y.graphml,
- pdt.y.main,
- pdt.y.model
+Export-Package: org.eclipse.albireo.core;
+  uses:="new org.eclipse.albireo.core,
+   javax.swing,
+   org.eclipse.swt.events,
+   org.eclipse.albireo.internal,
+   org.eclipse.swt.graphics,
+   org.eclipse.swt.widgets",
+ org.eclipse.albireo.internal;
+  uses:="new org.eclipse.albireo.internal,
+   org.eclipse.swt.events,
+   org.eclipse.swt.widgets,
+   org.eclipse.albireo.core",
+ org.hamcrest;uses:="org.hamcrest.internal,org.hamcrest.core",
+ org.hamcrest.beans;uses:="org.hamcrest",
+ org.hamcrest.collection;uses:="org.hamcrest",
+ org.hamcrest.core;uses:="org.hamcrest",
+ org.hamcrest.internal;uses:="org.hamcrest",
+ org.hamcrest.number;uses:="org.hamcrest",
+ org.hamcrest.object;uses:="org.hamcrest",
+ org.hamcrest.text;uses:="org.hamcrest",
+ org.hamcrest.xml;uses:="org.w3c.dom,org.hamcrest,javax.xml.namespace",
+ pdt.y.graphml;x-internal:=true,
+ pdt.y.main;
+  uses:="org.eclipse.jface.resource,
+   org.cs3.pl.prolog,
+   org.eclipse.ui.plugin,
+   org.eclipse.ui.part,
+   org.cs3.pdt.runtime,
+   javax.swing,
+   org.osgi.framework,
+   org.eclipse.swt.widgets,
+   pdt.y.model",
+ pdt.y.model;
+  uses:="y.layout.hierarchic.incremental,
+   y.view,
+   y.base,
+   y.layout,
+   y.view.hierarchy"
