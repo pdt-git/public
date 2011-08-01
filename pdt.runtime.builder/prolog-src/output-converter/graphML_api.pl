@@ -13,6 +13,7 @@
 
 :- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
+:- use_module('../modules_and_visibility').
 
 prepare_for_writing(File,OutStream):-
     open(File,write,OutStream,[type(text)]),
@@ -47,6 +48,10 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	;	true
 	),		
 	(	meta_predT(Id,_)
+	->	write_data(Stream,'isMetaPredicate','true')
+	;	true
+	),	
+	(	exporting(_,Id,_)
 	->	write_data(Stream,'isMetaPredicate','true')
 	;	true
 	),	
@@ -113,8 +118,14 @@ write_graphML_ast_keys(OutStream):-
     write(OutStream, '    <default>false</default>'),
   	nl(OutStream),
   	write(OutStream, '</key>'),
+  	nl(OutStream),
+    write(OutStream, '<key id="isMetaPredicate" for="node" attr.name="isMetaPredicate" attr.type="boolean">'),
     nl(OutStream),
-    write(OutStream, '<key id="isDynamic" for="node" attr.name="isMetaPredicate" attr.type="boolean">'),
+    write(OutStream, '    <default>false</default>'),
+  	nl(OutStream),
+  	write(OutStream, '</key>'),
+    nl(OutStream),
+    write(OutStream, '<key id="isExported" for="node" attr.name="isMetaExported" attr.type="boolean">'),
     nl(OutStream),
     write(OutStream, '    <default>false</default>'),
   	nl(OutStream),

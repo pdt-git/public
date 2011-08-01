@@ -27,6 +27,7 @@ public class GraphDataHolder {
 	private DataMap transparentMap = Maps.createHashedDataMap();
 	private DataMap metaPredMap = Maps.createHashedDataMap();
 	private DataMap multifileMap = Maps.createHashedDataMap();
+	private DataMap exportedMap = Maps.createHashedDataMap();
 	
 
 	// Getter and Setter
@@ -75,6 +76,10 @@ public class GraphDataHolder {
 	}
 
 	
+	public DataMap getExportedMap() {
+		return exportedMap;
+	}
+
 	public boolean isPredicate(Node node) {
 		DataMap kindMap = getKindMap();
 		String kind = kindMap.get(node).toString();
@@ -133,7 +138,12 @@ public class GraphDataHolder {
 		return (Boolean)returnNode;
 	}
 
-
+	public boolean isExported(Node node) {
+		Object returnNode = exportedMap.get(node);
+		if(returnNode == null) 
+			return false;
+		return (Boolean)returnNode;
+	}
 	
 	public String getLabelTextForNode(Node node) {
 		String labelText;

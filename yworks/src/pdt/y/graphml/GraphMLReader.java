@@ -47,6 +47,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("isTransparent", dataHolder.getTransparentMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isMultifile", dataHolder.getMultifileMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("isExported", dataHolder.getExportedMap(), KeyScope.NODE, KeyType.BOOLEAN);
 	}
 	
 	private boolean loadFile(URL resource){
