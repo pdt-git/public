@@ -14,7 +14,6 @@ public class FocusView extends ViewPart {
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private SwingControl swingControl;
 	private PDTGraphSwingStandalone view = new PDTGraphSwingStandalone();
-	@SuppressWarnings("unused")
 	private GraphPIFCoordinator pifCoordinator;
 
 	public FocusView() {
@@ -27,6 +26,7 @@ public class FocusView extends ViewPart {
 			@Override
 			protected JComponent createSwingComponent() {
 				pifCoordinator = new GraphPIFCoordinator(view);
+				//view.addViewMode(new OpenInEditorViewMode(null, pifCoordinator));
 				return view;
 			}
 
@@ -56,9 +56,9 @@ public class FocusView extends ViewPart {
 	//     * Create menu.
 	//     */
 	//    private void createMenu() {
-	//            
+	//
 	//    }
-	//    
+	//
 	//    /**
 	//     * Create toolbar.
 	//     */
