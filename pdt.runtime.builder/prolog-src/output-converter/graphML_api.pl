@@ -51,7 +51,7 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	->	write_data(Stream,'isMetaPredicate','true')
 	;	true
 	),	
-	(	exporting(_,Id,_)
+	(	modules_and_visibility:exporting(_,Id,_)
 	->	write_data(Stream,'isMetaPredicate','true')
 	;	true
 	),	
