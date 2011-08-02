@@ -26,32 +26,33 @@ import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
+import y.view.ViewMode;
 
 public class PDTGraphSwingStandalone extends  JPanel {
 	private Graph2DView view;
 	private GraphModel model;
 	private Graph2D graph;
 	private GraphMLReader reader;
-	
+
 	private GraphLayout layoutModel;
-	
+
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public PDTGraphSwingStandalone() 
+	public PDTGraphSwingStandalone()
 	{
-		this.setLayout(new BorderLayout());
-		
+		setLayout(new BorderLayout());
+
 		layoutModel = new  GraphLayout();
-		
+
 		reader = new GraphMLReader();
 		view = new Graph2DView();
 		view.addMouseWheelListener(new WheelScroller(view));
 
 		EditMode editMode = initEditMode();
-		
+
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
-		
+
 		add(view);
 
 		addMouseZoomSupport();
@@ -70,8 +71,8 @@ public class PDTGraphSwingStandalone extends  JPanel {
 
 	private void addMouseZoomSupport() {
 		Graph2DViewMouseWheelZoomListener wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
-		//zoom in/out at mouse pointer location 
-		wheelZoomListener.setCenterZooming(false);    
+		//zoom in/out at mouse pointer location
+		wheelZoomListener.setCenterZooming(false);
 		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
 	}
 
@@ -79,35 +80,35 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	public void setModel(GraphModel model){
 		this.model = model;
 	}
-	
+
 	public void loadGraph(URL resource) {
 		model = reader.readFile(resource);
 		model.categorizeData();
 		model.assignPortsToEdges();
 		graph = model.getGraph();
 		view.setGraph2D(graph);
-		
-		this.updateView();
-	}
-	
-	
-	private void updateView() {
-		createFirstLabel();
-		this.calcLayout();
+
+		updateView();
 	}
 
-		private void createFirstLabel() {
+
+	private void updateView() {
+		createFirstLabel();
+		calcLayout();
+	}
+
+	private void createFirstLabel() {
 		String labelText;
 		for (Node node: graph.getNodeArray()) {
 			labelText = model.getLabelTextForNode(node);
 			graph.setLabelText(node,labelText);
 		}
 	}
-	
+
 	public void calcLayout() {
 		view.applyLayout(layoutModel.getLayouter());
-//		layoutModel.getLayouter().doLayout(graph);
-//		graph.updateViews();
+		//		layoutModel.getLayouter().doLayout(graph);
+		//		graph.updateViews();
 		view.fitContent();
 		view.updateView();
 	}
@@ -145,7 +146,7 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	protected JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menu = new JMenu("File");
-	
+
 		menu.add(new LoadAction(this));
 		menu.addSeparator();
 		menu.add(new ResetLayout(this));
@@ -155,14 +156,16 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	}
 
 
-	
-	
-	
+	public void addViewMode(ViewMode viewMode){
+		view.addViewMode(viewMode);
+	}
 
 
 
 
-	
 
-	
+
+
+
+
 }
