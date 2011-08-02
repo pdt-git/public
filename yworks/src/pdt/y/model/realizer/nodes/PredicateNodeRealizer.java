@@ -27,7 +27,7 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		this.state = TRANSITION_STATE;
 		this.model= model;
 		//this.setSize(40,40);
-		this.setFillColor(Color.ORANGE);  
+		this.setFillColor(Color.WHITE);  
 	}
 
 	public PredicateNodeRealizer(NodeRealizer r)
@@ -52,23 +52,30 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 //			gfx.setColor(Color.BLUE);
 //			break;
 //		case TRANSITION_STATE:
-			
-			System.out.println("isDynamic:" + model.getDataHolder().isDynamicNode(this.getNode()));
-			if (model.getDataHolder().isDynamicNode(this.getNode())) {
-				this.setShapeType(ELLIPSE);
-				System.out.println(this.getNode().toString());
-			} else {
-				this.setShapeType(ROUND_RECT);
-				System.out.println("Not dynamic: "+ this.getNode().toString());
-			}
-			this.setFillColor(Color.WHITE);
-			if (model.getDataHolder().isMetaPred(this.getNode()))
-				this.setLineColor(Color.PINK);
-			else
-				this.setLineColor(Color.BLUE);
-			byte myStyle = LineType.LINE_2.getLineStyle();
-			LineType myLineType = LineType.getLineType(2,myStyle);
-			this.setLineType(myLineType);
+
+		byte myStyle;
+		if (model.getDataHolder().isDynamicNode(getNode())) 
+			myStyle = LineType.DASHED_DOTTED_2.getLineStyle();
+		else
+			myStyle = LineType.LINE_2.getLineStyle();
+		LineType myLineType = LineType.getLineType(2,myStyle);
+		setLineType(myLineType);
+		
+		if (model.getDataHolder().isMetaPred(getNode())) 
+			setShapeType(HEXAGON);
+		else if (model.getDataHolder().isTransparentNode(getNode()))
+			setShapeType(ELLIPSE);
+		else
+			setShapeType(ROUND_RECT);
+
+		this.setFillColor(Color.WHITE);
+
+		if (model.getDataHolder().isExported(getNode()))
+			setLineColor(Color.GREEN);
+		else
+			setLineColor(Color.BLUE);
+
+
 //			break;
 //		case FINAL_STATE: 
 //			gfx.setStroke(LineType.LINE_2);
