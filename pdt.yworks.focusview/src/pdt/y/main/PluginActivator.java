@@ -11,27 +11,15 @@ import org.osgi.framework.BundleContext;
  */
 public class PluginActivator extends AbstractUIPlugin {
 	private static String NAME = "GraphML";
-	
-	private PrologInterface prologInterface=null;
-	
-	public PrologInterface getPrologInterface() {
-		if(prologInterface == null) {
-			FocusViewSubscription subscription = FocusViewSubscription.newInstance(NAME);
-			 prologInterface = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
-		} 
-		return prologInterface;
-	}
 
-	public void setPrologInterface(PrologInterface prologInterface) {
-		this.prologInterface = prologInterface;
-	}
+	private PrologInterface prologInterface=null;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "pdt.yworks.demo";
 
 	// The shared instance
 	private static PluginActivator plugin;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -65,6 +53,18 @@ public class PluginActivator extends AbstractUIPlugin {
 	 */
 	public static PluginActivator getDefault() {
 		return plugin;
+	}
+
+	public PrologInterface getPrologInterface() {
+		if(prologInterface == null) {
+			FocusViewSubscription subscription = FocusViewSubscription.newInstance(NAME);
+			prologInterface = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+		}
+		return prologInterface;
+	}
+
+	public void setPrologInterface(PrologInterface prologInterface) {
+		this.prologInterface = prologInterface;
 	}
 
 	/**
