@@ -7,5 +7,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.albireo.core_0.0.3.v20081031.jar"/>
 	<classpathentry kind="lib" path="lib/y.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pdt"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
