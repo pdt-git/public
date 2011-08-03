@@ -61,7 +61,7 @@
     <page
           class="org.cs3.pdt.preferences.PreferencePage"
           id="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          name="PDT Preferences">
+          name="PDT">
     </page>
     <page
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
