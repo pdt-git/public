@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import pdt.y.graphml.GraphMLReader;
+import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
 import pdt.y.view.modes.HierarchicPopupMode;
@@ -160,12 +161,8 @@ public class PDTGraphSwingStandalone extends  JPanel {
 		view.addViewMode(viewMode);
 	}
 
-
-
-
-
-
-
-
+	public GraphDataHolder getDataHolder() {
+		return model.getDataHolder();
+	}
 
 }

@@ -26,7 +26,8 @@ public class FocusView extends ViewPart {
 			@Override
 			protected JComponent createSwingComponent() {
 				pifCoordinator = new GraphPIFCoordinator(view);
-				//view.addViewMode(new OpenInEditorViewMode(null, pifCoordinator));
+				//GraphDataHolder dataHolder = view.getDataHolder();
+				view.addViewMode(new OpenInEditorViewMode(view, pifCoordinator));
 				return view;
 			}
 
