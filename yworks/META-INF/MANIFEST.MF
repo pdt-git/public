@@ -60,4 +60,6 @@ Export-Package: org.eclipse.albireo.core;
    y.view,
    y.base,
    y.layout,
-   y.view.hierarchy"
+   y.view.hierarchy",
+ y.base,
+ y.view;x-friends:="pdt.yworks.focusview"

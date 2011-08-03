@@ -17,18 +17,18 @@ import y.view.Graph2DCopyFactory;
 
 public class GraphMLReader {
 
-	private static final Graph2D DEFAULT_EMPTY_GRAPH=new Graph2D();  
+	private static final Graph2D DEFAULT_EMPTY_GRAPH=new Graph2D();
 
 	private GraphMLIOHandler ioHandler = new GraphMLIOHandler();
 	private Graph2DGraphMLHandler core = ioHandler.getGraphMLHandler();
 	private GraphCopier graphCopier = new GraphCopier(new Graph2DCopyFactory());
-	
+
 	private GraphModel model = null;
-	
+
 	public GraphMLReader(){
 		model = GraphModel.getInstance();
 		model.useHierarchy();
-				
+
 		addInputDataAccessorsToCore();
 
 		ioHandler.addNodeRealizerSerializer(new PredicateNodeRealizerSerializer());
@@ -49,7 +49,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isExported", dataHolder.getExportedMap(), KeyScope.NODE, KeyType.BOOLEAN);
 	}
-	
+
 	private boolean loadFile(URL resource){
 		model.clear();
 		try {
@@ -59,17 +59,17 @@ public class GraphMLReader {
 			return false;
 		}
 	}
-	
-	
-	
+
+
+
 	public GraphModel readFile(URL resource){
-		this.loadFile(resource);
-		return this.model;
+		loadFile(resource);
+		return model;
 	}
-	
+
 	// For testing:
 	Graph2D readFile(InputStream inputFileStream){
-	    model.clear();
+		model.clear();
 		try {
 			ioHandler.read(model.getGraph(), inputFileStream);
 		} catch (IOException e) {
@@ -77,7 +77,7 @@ public class GraphMLReader {
 		}
 		return model.getGraph();
 	}
-	
 
-	
+
+
 }
