@@ -89,7 +89,9 @@ compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
     			new_node_id(PId),		
     			assert(node_id(PId)),
      			assert(predicateT(PId,File,Functor,Arity,Module)),
-    			assert(predicateT_ri(Functor,Arity,Module,PId))
+    			assert(predicateT_ri(Functor,Arity,Module,PId)),
+    			slT(DirectiveId,Pos,Len),
+    			assert(slT(PId,Pos,Len))
 			),
 			assert_prop(Prop, PId, DirectiveId)
 		)
