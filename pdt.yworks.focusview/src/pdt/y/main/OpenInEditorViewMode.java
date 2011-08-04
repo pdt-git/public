@@ -4,7 +4,7 @@ import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.util.Map;
 
-import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
@@ -35,12 +35,7 @@ public class OpenInEditorViewMode extends ViewMode {
 			GraphDataHolder dataHolder = view.getDataHolder();
 			if (!dataHolder.isPredicate(node))
 				return;
-			int id = node.index();
-			String label = dataHolder.getLabelTextForNode(node);
 			String idInt = dataHolder.getNodeText(node);
-			System.out.println(id);
-			System.out.println(label);
-			System.out.println(idInt);
 
 			String query = "predicateT("+idInt+",FileId,_,_,_),fileT(FileId,FileName,_),slT("+idInt+",Pos,Len).";
 			Map<String,Object> result = null;
@@ -57,11 +52,12 @@ public class OpenInEditorViewMode extends ViewMode {
 			final int start = Integer.parseInt((String) result.get("Pos"));
 			final int length = Integer.parseInt((String) result.get("Len"));
 
+
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						UIUtils.selectInEditor(start, length, filename);
+						PDTCoreUtils.selectInEditor(start, length, filename);
 					} catch (PartInitException e) {
 						e.printStackTrace();
 					} catch (FileNotFoundException e) {

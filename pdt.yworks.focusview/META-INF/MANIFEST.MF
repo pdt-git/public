@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.console;bundle-version="0.2.3",
  pdt.yworks.basics;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.ui.forms,
+Import-Package: org.cs3.pdt.core,
+ org.eclipse.ui.forms,
  org.eclipse.ui.forms.events,
  org.eclipse.ui.forms.widgets
 Bundle-ClassPath: .,
