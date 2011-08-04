@@ -94,7 +94,9 @@ parse_body_literals(Literal, Pos, ParentId, ClauseId, Module, _VarNames) :-
    	),
 	assert_new_node(Literal,From,To,Id),   %<===
 	functor(Literal,Functor,Arity),
-    assert(literalT(Id,ParentId,ClauseId,Module,Functor,Arity)).
+    assert(literalT(Id,ParentId,ClauseId,Module,Functor,Arity)),
+    assert(lirteralT_ri(Functor,Arity,Module,Id)).
+    %assert(pos_and_vars(Id,_SubPos,VarNames)).
 
 process_meta_argument( (Nr,MetaTerm), Pos, ParentId, ClauseId, Module, VarNames) :- 
     nth1(Nr,Pos,TermPos),

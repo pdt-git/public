@@ -61,7 +61,7 @@ compute_new_length(PId,Id) :-
 
 compute_all_predicate_properties:-
     forall(	
-    	parse_util:property_dir(Functor, Args, DirectiveId),
+    	/*parse_util:*/property_dir(Functor, Args, DirectiveId),
     	(	directiveT(DirectiveId, _, Module),
     		compute_predicate_property(Functor, Args, DirectiveId, Module)
     	)
@@ -84,10 +84,11 @@ compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
 			;	%(Prop = dynamic)	% because order is not deterministic it is easier to not do this check
 									% this also represents the read code, more. But this should lead to a later
 									% check for missing dynamic declarations - or for a smell about this...
-				new_node_id(PId),		
-    			assert(node_id(PId)),
+
     			directiveT(DirectiveId, File, _),
-    			assert(predicateT(PId,File,Functor,Arity,Module)),
+    			new_node_id(PId),		
+    			assert(node_id(PId)),
+     			assert(predicateT(PId,File,Functor,Arity,Module)),
     			assert(predicateT_ri(Functor,Arity,Module,PId))
 			),
 			assert_prop(Prop, PId, DirectiveId)

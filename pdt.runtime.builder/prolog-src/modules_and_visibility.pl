@@ -4,7 +4,7 @@
 
 :- use_module(parse_util).
 
-:- dynamic exporting/3.	%exporting(Module,PredId,Directive)
+:- dynamic exporting/3.	%exporting(Module,PredId,FileId)
 
 compute_visibility_graph:-
     compute_exports.
@@ -12,23 +12,27 @@ compute_visibility_graph:-
     
 compute_exports:-
     retractall(exporting(_,_,_)),
-    export_dir(Exports,Directive),
-%    plparser_quick:export_dir(Exports,Directive),
+    export_dir(Exports,Directive),		
+    directiveT(Directive,FileId,_),			
     	flatten(Exports,ExportsFlatt),
-%    	format('~w ~n',[ExportsFlatt]),
-    	build_export_edge_from_list(ExportsFlatt,Directive),
-    	fail.
+    	build_export_edge_from_list(ExportsFlatt,FileId),
+    fail.
+compute_exports:-
+    fileT(FileId,_,user),
+    plparser_quick:predicateT(Id,FileId,_,_,_),    
+    	assert(exporting(user,Id,FileId)),
+    fail.
 compute_exports.
     
-build_export_edge_from_list([],_,_).    
-build_export_edge_from_list([A|B],Directive):-
-    build_export_edge(A,Directive),
-    build_export_edge_from_list(B,Directive).
+build_export_edge_from_list([],_).    
+build_export_edge_from_list([A|B],FileId):-
+    build_export_edge(A,FileId),
+    build_export_edge_from_list(B,FileId).
     
-build_export_edge(Functor/Arity,Directive):-
-    directiveT(Directive,_,Module),
-    plparser_quick:predicateT_ri(Functor,Arity,Module,Id),      
-    assert(exporting(Module,Id,Directive)),
+build_export_edge(Functor/Arity,FileId):-
+    fileT(FileId,_,Module),
+    plparser_quick:predicateT_ri(Functor,Arity,Module,Id),    
+    assert(exporting(Module,Id,FileId)),
     !.
     
 %% 
@@ -39,27 +43,34 @@ get_predicate_referenced_as(Module, Functor, Arity, PId):-
     visible_in_module(PId, Module)
     , !.
 get_predicate_referenced_as(Module, Functor, Arity, PId):-
-	visible_in_module_as(PId, Module, Functor,[Module]),    
+    visible_in_module_as(PId, Module, Functor,[Module]),    
 	predicateT(PId,_,_,Arity,_),
 	!.
+get_predicate_referenced_as(Module, Functor, Arity, Predefined):-
+    functor(Term, Functor, Arity),
+    predicate_property(Module:Term, built_in),
+    declared_in_module(Module, Term, DefModule),
+    Predefined = predefined(DefModule, Functor, Arity).
+    
 
 
 visible_in_module(Predicate,Module):-
     visible_in_module_as(Predicate,Module,_,[Module]).
     
+    
+    
 visible_in_module_as(Predicate,Module,Functor,_):-
-    predicateT(Predicate,_,Functor,_,Module). %,
+    predicateT(Predicate,_,Functor,_,Module).%,
     %!.
 visible_in_module_as(Predicate,Module,Functor,PreviousModules):-
-    \+( predicateT(Predicate,_,Functor,_,Module)),
     fileT(ModuleFile,_,Module),
-    load_edge(ModuleFile,DefiningFile,Imports,_),
+    load_edge(ModuleFile,DefiningFile,Imports,_),				   %TODO: import_dir verarbeiten irgendwo!!!!
     fileT(DefiningFile,_,DefiningModule),
     \+ member(DefiningModule, PreviousModules),
     compute_importing_functor(Imports,DefiningFunctor,Functor),	   %Eva: !!!!! TEST this!!!!!   
     visible_in_module_as(Predicate,DefiningModule,DefiningFunctor, [DefiningModule|PreviousModules]),
     exporting(DefiningModule,Predicate,_).   
-   
+   																	
 compute_importing_functor(all,Functor,Functor):-
     !.
 compute_importing_functor([A|B],Functor,NewFunctor):-

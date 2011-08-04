@@ -29,7 +29,7 @@ check_file_or_dir(File,Functor,Arity):-
     !,
     functor(Term,Functor,Arity),
     arg(1,Term,File),
-    (	catch(call(Term),_,(write('.'),writeln(Term),true))
+    (	catch(call(Term),_,true/*(write('.'),writeln(Term),true)*/)
     ;	true
     ).
 check_file_or_dir(Dir,Functor,Arity):-
