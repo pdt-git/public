@@ -1,15 +1,8 @@
 :- module(graphML_api,[ prepare_for_writing/2,
 						finish_writing/1,
-						write_predicate/5,
+						write_file/6,
 						write_call_edge/3,
-						write_load_edge/3,
-						open_node/2,
-						open_edge/3,
-						close_node/1,
-						close_edge/1,
-						write_data/3,
-						start_graph_element/1,
-						close_graph_element/1]).
+						write_load_edge/3]).
 
 :- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
@@ -26,6 +19,59 @@ finish_writing(OutStream):-
     close_graph_element(OutStream),
     write_graphML_footer(OutStream),
     close(OutStream).
+    
+    
+write_file(Stream,RelativePath, Predicates, Id,FileName,Module):-
+	open_node(Stream,Id),
+	write_data(Stream,'id',Id),
+	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
+					atom_concat('/',RelativeFileName,RelativeWithSlash), !
+				),
+				_, 
+				fail
+			)
+	;	RelativeFileName=FileName
+	),
+	write_data(Stream,'fileName',RelativeFileName),
+	write_data(Stream,'module',Module),	
+	(	Module=user
+	->	write_data(Stream,'kind','file')
+	;	write_data(Stream,'kind','module')
+	),
+	start_graph_element(Stream),
+	write_predicates(Stream, Id, Predicates),
+	close_graph_element(Stream),
+	close_node(Stream).	
+
+		
+write_predicates(Stream, FileId, all_preds):-
+    !,
+	forall(	predicateT(Id,FileId,Functor,Arity,Module),
+			(	write_predicate(Stream,Id,Functor,Arity,Module),
+				flush_output(Stream)
+			)
+	).	
+write_predicates(Stream, FileId, PredicatesToWrite):-
+	forall(	(	member(Id,PredicatesToWrite),
+				predicateT(Id,FileId,Functor,Arity,Module)
+			),
+			(
+				write_predicate(Stream,Id,Functor,Arity,Module),
+				flush_output(Stream)
+			)
+	).
+
+write_load_edges(Stream):-
+    forall(load_edge(LoadingFileId,FileId,_,_),
+    	(	(	fileT(LoadingFileId,_,_),
+    			fileT(FileId,_,_)
+    		)
+    	->	write_load_edge(Stream,LoadingFileId,FileId)
+    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
+    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
+	    )
+	).
+    
     
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
@@ -52,7 +98,7 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	;	true
 	),	
 	(	modules_and_visibility:exporting(_,Id,_)
-	->	write_data(Stream,'isMetaPredicate','true')
+	->	write_data(Stream,'isExported','true')
 	;	true
 	),	
 /*	start_graph_element(Stream),
@@ -125,7 +171,7 @@ write_graphML_ast_keys(OutStream):-
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),
-    write(OutStream, '<key id="isExported" for="node" attr.name="isMetaExported" attr.type="boolean">'),
+    write(OutStream, '<key id="isExported" for="node" attr.name="isExported" attr.type="boolean">'),
     nl(OutStream),
     write(OutStream, '    <default>false</default>'),
   	nl(OutStream),

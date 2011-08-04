@@ -34,10 +34,12 @@ write_facts_to_graphML(Project, File):-
 
 
 write_focus_to_graphML(FocusFile, File):-
-    setup_call_cleanup(
-    	prepare_for_writing(File,OutStream),
-		write_focus_facts_to_graphML(FocusFile, OutStream),
-  	  	finish_writing(OutStream)
+    with_mutex(prolog_factbase,
+    	setup_call_cleanup(
+    		prepare_for_writing(File,OutStream),
+			write_focus_facts_to_graphML(FocusFile, OutStream),
+  	  		finish_writing(OutStream)
+  	 	)
   	 ).  
   	 
 write_focus_facts_to_graphML(FocusFile, OutStream):-
@@ -72,7 +74,7 @@ collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls):-
 collect_calls_to_predicates([],KnownCalls,KnownCalls).
 collect_calls_to_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
     findall( (Source,Predicate),
-    	(call_edges_for_predicates(Source,Predicate,_Counter), format('Predicate: ~w <- Source: ~w~n',[Predicate,Source])),
+    	call_edges_for_predicates(Source,Predicate,_Counter),
     	FoundCalls
     ),
     (	FoundCalls \= []
@@ -129,45 +131,6 @@ write_files(RelativePath, Files, PredicatesToWrite, Stream):-
     	)
     ).	
     
-write_file(Stream,RelativePath, Predicates, Id,FileName,Module):-
-	open_node(Stream,Id),
-	write_data(Stream,'id',Id),
-	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
-					atom_concat('/',RelativeFileName,RelativeWithSlash), !
-				),
-				_, 
-				fail
-			)
-	;	RelativeFileName=FileName
-	),
-	write_data(Stream,'fileName',RelativeFileName),
-	write_data(Stream,'module',Module),	
-	(	Module=user
-	->	write_data(Stream,'kind','file')
-	;	write_data(Stream,'kind','module')
-	),
-	start_graph_element(Stream),
-	write_predicates(Stream, Id, Predicates),
-	close_graph_element(Stream),
-	close_node(Stream).	
-
-		
-write_predicates(Stream, FileId, all_preds):-
-    !,
-	forall(	predicateT(Id,FileId,Functor,Arity,Module),
-			(	write_predicate(Stream,Id,Functor,Arity,Module),
-				flush_output(Stream)
-			)
-	).	
-write_predicates(Stream, FileId, PredicatesToWrite):-
-	forall(	(	member(Id,PredicatesToWrite),
-				predicateT(Id,FileId,Functor,Arity,Module)
-			),
-			(
-				write_predicate(Stream,Id,Functor,Arity,Module),
-				flush_output(Stream)
-			)
-	).
 
 write_load_edges(Stream):-
     forall(load_edge(LoadingFileId,FileId,_,_),
