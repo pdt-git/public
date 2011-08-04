@@ -1,13 +1,13 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
- * Author: Lukas Degener (among others) 
+ * Author: Lukas Degener (among others)
  * E-mail: degenerl@cs.uni-bonn.de
- * WWW: http://roots.iai.uni-bonn.de/research/pdt 
+ * WWW: http://roots.iai.uni-bonn.de/research/pdt
  * Copyright (C): 2004-2006, CS Dept. III, University of Bonn
  * 
- * All rights reserved. This program is  made available under the terms 
- * of the Eclipse Public License v1.0 which accompanies this distribution, 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
  * In addition, you may at your option use, modify and redistribute any
@@ -17,21 +17,21 @@
  * 
  * 1) The program part in question does not depend, either directly or
  *   indirectly, on parts of the Eclipse framework and
- *   
+ * 
  * 2) the program part in question does not include files that contain or
  *   are derived from third-party work and are therefor covered by special
  *   license agreements.
- *   
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *   
+ * 
  * ad 1: A program part is said to "depend, either directly or indirectly,
  *   on parts of the Eclipse framework", if it cannot be compiled or cannot
  *   be run without the help or presence of some part of the Eclipse
  *   framework. All java classes in packages containing the "pdt" package
  *   fragment in their name fall into this category.
- *   
+ * 
  * ad 2: "Third-party code" means any code that was originaly written as
  *   part of a project other than the PDT. Files that contain or are based on
  *   such code contain a notice telling you so, and telling you the
@@ -138,12 +138,12 @@ public final class UIUtils {
 		return (Shell) new _SyncReturn() {
 			@Override
 			Object getRVal() {
-				
+
 				return getDisplay().getActiveShell();
 			}
 		}.rval;
 	}
-	
+
 	public static IWorkbenchPage getActivePage() {
 		return (IWorkbenchPage) new _SyncReturn() {
 			@Override
@@ -159,9 +159,8 @@ public final class UIUtils {
 			@Override
 			Object getRVal() {
 				IWorkbenchPage page = getActivePage();
-				if (page == null) {
+				if (page == null)
 					return null;
-				}
 				return page.getActiveEditor();
 			}
 		}.rval;
@@ -188,17 +187,16 @@ public final class UIUtils {
 	 */
 	public static boolean isTestingMode() {
 		String testingEnv = System.getProperty("JT_TESTING");
-		if(testingEnv == null){
+		if (testingEnv == null) {
 			testingEnv = System.getenv("JT_TESTING");
 		}
-		return testingEnv != null && testingEnv.toLowerCase().equals("true");
+		return (testingEnv != null) && testingEnv.toLowerCase().equals("true");
 	}
 
 	public static void displayErrorDialog(final Shell shell,
 			final String title, final String msg) {
-		if(isTestingMode()){
-			throw new RuntimeException("Error Dialog: \n" +title + "\n" + msg);
-		}
+		if (isTestingMode())
+			throw new RuntimeException("Error Dialog: \n" + title + "\n" + msg);
 
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
@@ -248,7 +246,7 @@ public final class UIUtils {
 			final Shell shell, final int code, final int context,
 			final Exception x) {
 		logError(provider, code, context, x);
-		if(shell!=null){
+		if (shell != null) {
 			displayErrorDialog(provider, shell, code, context, x);
 		}
 	}
@@ -258,7 +256,7 @@ public final class UIUtils {
 			@Override
 			public void run() {
 				getActiveEditor().getEditorSite().getActionBars()
-						.getStatusLineManager().setErrorMessage(string);
+				.getStatusLineManager().setErrorMessage(string);
 			}
 		});
 	}
@@ -268,20 +266,19 @@ public final class UIUtils {
 			@Override
 			public void run() {
 				getActiveEditor().getEditorSite().getActionBars()
-						.getStatusLineManager().setMessage(string);
+				.getStatusLineManager().setMessage(string);
 			}
 		});
 	}
-	
-	public  static IViewPart showView(String viewId) throws PartInitException {
-		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (activeWorkbenchWindow == null) {
+
+	public static IViewPart showView(String viewId) throws PartInitException {
+		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI
+				.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null)
 			return null;
-		}
 		final IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
-		if (activePage == null) {
+		if (activePage == null)
 			return null;
-		}
 		return activePage.showView(viewId);
 	}
 
@@ -294,17 +291,19 @@ public final class UIUtils {
 
 	public static String getFileNameForEditorInput(IEditorInput editorInput) {
 		String enclFile;
-		if(editorInput instanceof FileEditorInput){
-			enclFile = ((FileEditorInput)editorInput).getFile().getRawLocation().toPortableString();
+		if (editorInput instanceof FileEditorInput) {
+			enclFile = ((FileEditorInput) editorInput).getFile()
+					.getRawLocation().toPortableString();
 		} else {
-			enclFile = new File(((FileStoreEditorInput)editorInput).getURI()).getAbsolutePath().replace('\\','/');						
+			enclFile = new File(((FileStoreEditorInput) editorInput).getURI())
+			.getAbsolutePath().replace('\\', '/');
 		}
-		if(Util.isWindows()){
+		if (Util.isWindows()) {
 			enclFile = enclFile.toLowerCase();
 		}
 		return enclFile;
 	}
-	
+
 	/**
 	 * Open file in its default editor.
 	 * 
@@ -313,14 +312,16 @@ public final class UIUtils {
 	 * @return
 	 * @throws PartInitException
 	 */
-	static public IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
+	static public IEditorPart openInEditor(IFile file, boolean activate)
+			throws PartInitException {
 		if (file != null) {
-			IWorkbenchPage p= getActivePage();
+			IWorkbenchPage p = getActivePage();
 			if (p != null) {
-				IEditorPart editorPart= IDE.openEditor(p, file, activate);
+				IEditorPart editorPart = IDE.openEditor(p, file, activate);
 				return editorPart;
 			}
 		}
-		return null; 
+		return null;
 	}
+
 }

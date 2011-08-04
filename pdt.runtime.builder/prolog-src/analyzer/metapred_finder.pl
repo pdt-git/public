@@ -31,7 +31,10 @@ find_all_meta_predicates:-
     			;	infer_meta_arguments_for(Module,Candidate,MetaSpec)
     			)
  			),
- 			assert(new_meta_pred(MetaSpec, Module))
+ 			(	predicateT_ri(Functor,Arity,Module,PId),
+ 				assert(parse_util:meta_predT(PId, found)),
+ 				assert(new_meta_pred(MetaSpec, Module))
+ 			)
 		),
 		(	new_meta_pred(_,_)
 		->	(	prepare_next_step,
