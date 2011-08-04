@@ -14,7 +14,7 @@ handle_directive(op,Args,Pos,ParentId,FileId,Module):-
 	assert_new_node(Call,From,To,Id), 
 %	directiveT(ParentId,FileId,Module),			
 	assert(operatorT(Id,ParentId,FileId,Module,Name,Arity,Type,Precedence)),
-	Call.
+	call(Call).
 
 handle_directive(assert,[file_search_path(Name,Path)],_Pos, ParentId,_FileId,_Module):-
     !,				

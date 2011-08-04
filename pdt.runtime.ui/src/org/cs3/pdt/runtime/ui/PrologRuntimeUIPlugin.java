@@ -245,19 +245,19 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 	}
 
-	public void reconfigure() {
-		reconfigurePrologInterfaces();
-	}
+//	public void reconfigure() {
+//		reconfigurePrologInterfaces();
+//	}
 
-	private void reconfigurePrologInterfaces() {
-		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-		Set<String> keys = r.getRegisteredKeys();
-		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = it.next();
-			PrologInterface pif = r.getPrologInterface(key);
-			initPrologInterfaceOptions(pif);
-		}
-	}
+//	private void reconfigurePrologInterfaces() {
+//		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
+//		Set<String> keys = r.getRegisteredKeys();
+//		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+//			String key = it.next();
+//			PrologInterface pif = r.getPrologInterface(key);
+//			initPrologInterfaceOptions(pif);
+//		}
+//	}
 
 	private PrologInterfaceRegistry getPrologInterfaceRegistry() {
 		return PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
@@ -418,7 +418,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	}
 
 	
-
 
 	/**
 	 * Checks if a PrologInterface is registered for the given key.
