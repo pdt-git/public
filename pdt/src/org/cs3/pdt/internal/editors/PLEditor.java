@@ -111,7 +111,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-public class PLEditor extends TextEditor {
+public class PLEditor extends TextEditor{
 
 	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
 
@@ -141,10 +141,20 @@ public class PLEditor extends TextEditor {
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
-		// TRHO: Experimental:
+		// TRHO: Experimental:		
 		addProblemMarkers();
 		setFocus();
 
+	}
+	
+	@Override
+	public void setFocus() {
+		super.setFocus();
+		informAboutChangedEditorInput();
+	}
+
+	public void informAboutChangedEditorInput() {
+		PDTPlugin.getDefault().setSelection(new PDTChangedFileInformation(getEditorInput()));
 	}
 
 	private void addProblemMarkers() {
@@ -206,7 +216,6 @@ public class PLEditor extends TextEditor {
 	public PLEditor() {
 		super();
 		try {
-			PDTPlugin.getDefault();
 			colorManager = PDTPlugin.getDefault().getColorManager();
 			
 			configuration = new PLConfiguration(colorManager, this);
@@ -379,7 +388,12 @@ public class PLEditor extends TextEditor {
 			@Override
 			public void run() {
 				addProblemMarkers();
+				informViewsAboutChangedEditor();
 //				executeConsult();
+			}
+
+			public void informViewsAboutChangedEditor() {
+				PDTPlugin.getDefault().setSelection(new PDTChangedFileInformation(getEditorInput()));
 			}
 		};
 		addAction(menuMgr, reloadAction, "(Re)consult",

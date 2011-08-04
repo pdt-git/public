@@ -1,9 +1,16 @@
-:- module(pl_ast_to_graphML, [write_facts_to_graphML/2,
+:- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
+								write_focus_to_graphML/2,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
-:- use_module('../prolog_file_reader').
+:- use_module('../parse_util.pl').
+:- use_module(graphML_api).
 :- use_module('../analyzer/edge_counter').
+
+write_project_graph_to_file(Project, OutputFile):-
+	plparser_quick:generate_facts(Project),
+	writeln('generating graphml-file'),
+    time(write_facts_to_graphML(Project,OutputFile)).
 
 /**
  * write_facts_to_graphML(+Project,+File)
@@ -15,107 +22,124 @@
  *   ###### to be completed #########
  **/
 write_facts_to_graphML(Project, File):-
-    open(File,write,OutStream,[type(text)]),
-    write_graphML_header(OutStream),
-    write_graphML_keys(OutStream),
-    start_graph_element(OutStream),
-    flush_output(OutStream),
+    prepare_for_writing(File,OutStream),
     member(FirstProject,Project),
-    write_files(FirstProject,OutStream),
+    write_all_files(FirstProject,OutStream),
     flush_output(OutStream),
   	write_load_edges(OutStream),
   	flush_output(OutStream),
   	write_call_edges(OutStream),
   	flush_output(OutStream),
- 	close_graph_element(OutStream),
-    write_graphML_footer(OutStream),
-    close(OutStream).
-    
+ 	finish_writing(OutStream).
 
-write_graphML_header(OutStream):-
-	write(OutStream,'<?xml version="1.0" encoding="UTF-8"?>'), nl(OutStream),
-	write(OutStream,'<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'), 
-	nl(OutStream).
-	
-	
-write_graphML_keys(OutStream):-
-    write(OutStream, '<key id="id" for="node" attr.name="id" attr.type="string"/>'),
-    nl(OutStream),
-    write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
-    nl(OutStream),
-    write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
-    nl(OutStream),
-    write(OutStream, '<key id="module" for="node" attr.name="module" attr.type="string">'),
-    nl(OutStream),
-  	write(OutStream, '    <default>user</default>'),
-  	nl(OutStream),
-  	write(OutStream, '</key>'),
-    nl(OutStream),
-    write(OutStream, '<key id="functor" for="node" attr.name="functor" attr.type="string"/>'),
-    nl(OutStream),
-    write(OutStream, '<key id="arity" for="node" attr.name="arity" attr.type="int"/>'),
-    nl(OutStream),
-    write(OutStream, '<key id="moduleOfPredicate" for="node" attr.name="moduleOfPredicate" attr.type="string"/>'),
-    nl(OutStream),
-    write(OutStream, '<key id="isTransparent" for="node" attr.name="isTransparent" attr.type="boolean">'),
-    nl(OutStream),
-    write(OutStream, '    <default>false</default>'),
-  	nl(OutStream),
-  	write(OutStream, '</key>'),
-    nl(OutStream),
-    write(OutStream, '<key id="isDynamic" for="node" attr.name="isDynamic" attr.type="boolean">'),
-    nl(OutStream),
-    write(OutStream, '    <default>false</default>'),
-  	nl(OutStream),
-  	write(OutStream, '</key>'),
-    nl(OutStream),   
-    write(OutStream, '<key id="isMultifile" for="node" attr.name="isMultifile" attr.type="boolean">'),
-    nl(OutStream),
-    write(OutStream, '    <default>false</default>'),
-  	nl(OutStream),
-  	write(OutStream, '</key>'),
-    nl(OutStream),
-    write(OutStream, '<key id="isDynamic" for="node" attr.name="isDeclaredMetaPredicate" attr.type="boolean">'),
-    nl(OutStream),
-    write(OutStream, '    <default>false</default>'),
-  	nl(OutStream),
-  	write(OutStream, '</key>'),
-    nl(OutStream),   
-    write(OutStream, '<key id="frequency" for="edge" attr.name="frequency" attr.type="int">'),
-    nl(OutStream),
-    write(OutStream, '    <default>1</default>'),
-  	nl(OutStream),
-  	write(OutStream, '</key>'),
-    nl(OutStream),
-    nl(OutStream),
-    nl(OutStream).
-    
 
-write_graphML_footer(OutStream):-
-    write(OutStream,'</graphml>').
+write_focus_to_graphML(FocusFile, File):-
+    setup_call_cleanup(
+    	prepare_for_writing(File,OutStream),
+		write_focus_facts_to_graphML(FocusFile, OutStream),
+  	  	finish_writing(OutStream)
+  	 ).  
+  	 
+write_focus_facts_to_graphML(FocusFile, OutStream):-
+    fileT_ri(FocusFile,FocusId), !,
+%	fileT(FocusId,FocusFile,Module),
+%	write_file(OutStream,FocusFile,FocusId,FocusFile,Module),	
+	
+	count_call_edges_between_predicates,
+	collect_ids_for_focus_file(FocusId,Files, CorrespondingPredicates,Calls),
+	
+   	write_files(FocusFile, Files, CorrespondingPredicates, OutStream),
+    forall(
+    	member((SourceId,TargetId),Calls),
+    	write_call_edge(OutStream,SourceId,TargetId)
+    ).
+    
+collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls):-
+    findall(
+    	PredId,
+    	predicateT(PredId,FocusId,_,_,_),
+    	OwnPredicates
+    ),
+    collect_calls_to_predicates(OwnPredicates,[],IncomingCalls),
+    collect_calling_predicates_and_files(IncomingCalls,OwnPredicates,CallingPreds,[FocusId],CallingFiles),
+    collect_calls_from_predicates(OwnPredicates,[],OutgoingCalls),
+    collect_called_predicates_and_files(OutgoingCalls,CallingPreds,AllPreds,CallingFiles,AllFiles),
+    list_to_set(AllPreds, CalledPredicates),
+    list_to_set(AllFiles, Files),
+    append(IncomingCalls, OutgoingCalls, CallsList),
+    list_to_set(CallsList, Calls).
+    
+collect_calls_to_predicates([],KnownCalls,KnownCalls).
+collect_calls_to_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
+    findall( (Source,Predicate),
+    	(call_edges_for_predicates(Source,Predicate,_Counter), format('Predicate: ~w <- Source: ~w~n',[Predicate,Source])),
+    	FoundCalls
+    ),
+    (	FoundCalls \= []
+   	->	(	append(FoundCalls,KnownCalls,CallList), 
+   			list_to_set(CallList,CallSet)
+   		)
+   	;	CallSet = KnownCalls
+   	),
+    collect_calls_to_predicates(OtherPredicates,CallSet,AllCalls).
+    
+collect_calls_from_predicates([],KnownCalls,KnownCalls).
+collect_calls_from_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
+    findall( (Predicate,Target),
+    	call_edges_for_predicates(Predicate,Target,_Counter),
+    	FoundCalls
+    ),
+	(	FoundCalls \= []
+   	->	(	append(FoundCalls,KnownCalls,CallList), 
+   			list_to_set(CallList,CallSet)
+   		)
+   	;	CallSet = KnownCalls
+   	),
+    collect_calls_from_predicates(OtherPredicates,CallSet,AllCalls).   
+    
+collect_calling_predicates_and_files([],Preds,Preds,Files,Files).    
+collect_calling_predicates_and_files([(SourcePred,_CalledPred)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
+    predicateT(SourcePred,SourceFile,_,_,_),
+    collect_calling_predicates_and_files(OtherCalls,[SourcePred|KnownCalledPreds],CalledPreds,[SourceFile|KnownCalledFiles],CalledFiles). 
+ 
+    
+collect_called_predicates_and_files([],Preds,Preds,Files,Files).    
+collect_called_predicates_and_files([(_Caller,TargetPred)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
+    predicateT(TargetPred,TargetFile,_,_,_),
+    collect_called_predicates_and_files(OtherCalls,[TargetPred|KnownCalledPreds],CalledPreds,[TargetFile|KnownCalledFiles],CalledFiles).
     
 /**
  * write_files(+Stream)
  *    writes #### dito ####
  */
-write_files(Project,Stream):-
+write_all_files(RelativePath,Stream):-
     forall(	fileT(Id,File,Module),
-    		(	write_file(Stream,Project,Id,File,Module),
+    		(	write_file(Stream,RelativePath,all_preds,Id,File,Module),
     			flush_output(Stream)
     		)
     	  ).
 		
-write_file(Stream,Project,Id,FileName,Module):-
+
+write_files(RelativePath, Files, PredicatesToWrite, Stream):-
+	forall(	
+		member(FileId,Files),
+		(	fileT(FileId,FileName,Module),
+			write_file(Stream,RelativePath,PredicatesToWrite,FileId,FileName,Module),
+    		flush_output(Stream)
+    	)
+    ).	
+    
+write_file(Stream,RelativePath, Predicates, Id,FileName,Module):-
 	open_node(Stream,Id),
 	write_data(Stream,'id',Id),
-	catch(	(	atom_concat(Project,RelativeWithSlash,FileName),
-				atom_concat('/',RelativeFileName,RelativeWithSlash)
-			),
-			_, 
-			RelativeFileName=FileName
-		),
+	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
+					atom_concat('/',RelativeFileName,RelativeWithSlash), !
+				),
+				_, 
+				fail
+			)
+	;	RelativeFileName=FileName
+	),
 	write_data(Stream,'fileName',RelativeFileName),
 	write_data(Stream,'module',Module),	
 	(	Module=user
@@ -123,44 +147,27 @@ write_file(Stream,Project,Id,FileName,Module):-
 	;	write_data(Stream,'kind','module')
 	),
 	start_graph_element(Stream),
-	write_predicates(Stream,Id),
+	write_predicates(Stream, Id, Predicates),
 	close_graph_element(Stream),
 	close_node(Stream).	
+
 		
-write_predicates(Stream,FileId):-
+write_predicates(Stream, FileId, all_preds):-
+    !,
 	forall(	predicateT(Id,FileId,Functor,Arity,Module),
 			(	write_predicate(Stream,Id,Functor,Arity,Module),
 				flush_output(Stream)
 			)
+	).	
+write_predicates(Stream, FileId, PredicatesToWrite):-
+	forall(	(	member(Id,PredicatesToWrite),
+				predicateT(Id,FileId,Functor,Arity,Module)
+			),
+			(
+				write_predicate(Stream,Id,Functor,Arity,Module),
+				flush_output(Stream)
+			)
 	).
-		
-write_predicate(Stream,Id,Functor,Arity,Module):-
-    open_node(Stream,Id),
-    write_data(Stream,'kind','predicate'),
-    write_data(Stream,'id',Id),
-	write_data(Stream,'functor',Functor),
-	write_data(Stream,'arity',Arity),	
-	write_data(Stream,'moduleOfPredicate',Module),	
-	(	dynamicT(Id,_)
-	->	write_data(Stream,'isDynamic','true')
-	;	true
-	),
-	(	transparentT(Id,_)
-	->	write_data(Stream,'isTransparent','true')
-	;	true
-	),	
-	(	multifileT(Id,_)
-	->	write_data(Stream,'isMultifile','true')
-	;	true
-	),		
-	(	meta_predT(Id,_)
-	->	write_data(Stream,'isDeclaredMetaPredicate','true')
-	;	true
-	),	
-/*	start_graph_element(Stream),
-	write_clauses(Stream,FileName),
-	close_graph_element(Stream),
-*/	close_node(Stream).	
 
 write_load_edges(Stream):-
     forall(load_edge(LoadingFileId,FileId,_,_),
@@ -173,10 +180,7 @@ write_load_edges(Stream):-
 	    )
 	).
 
-write_load_edge(Stream,LoadingFileId,FileId):-
-    open_edge(Stream,LoadingFileId,FileId),
-    write_data(Stream,'kind','loading'),
-	close_edge(Stream).
+
 	
 
 write_call_edges(Stream):-
@@ -186,98 +190,9 @@ write_call_edges(Stream):-
     	)
     ).
     
-	
-write_call_edge(Stream,SourceId,TargetId):-
-    open_edge(Stream,SourceId,TargetId),
-    write_data(Stream,'kind','call'),
-    call_edges_for_predicates(SourceId,TargetId,Frequency),
-    write_data(Stream,'frequency',Frequency),
-	close_edge(Stream).
-		
-	
-/*write_onloades(Stream):-
-	forall(	onloadT(Id,_,Module),
-			(	write_node(Stream,Id,prolog_onload,Module),
-				slT(Id,Begin,Length),
-				write_position(Stream,Id,Begin,Length)
-			)
-		).
-    
-   	  
-write_clauses(Stream):-
-	forall(	headT(HeadId,Id,_,_,_,_),     
-			(	termT(HeadId,Term),
-				write_node(Stream,Id,prolog_clause,Term),
-				slT(Id,Begin,Length),
-				write_position(Stream,Id,Begin,Length)
-			)
-    	  ).      	  
-
-write_directives(Stream):-
-	forall(	directiveT(Id,_,_),
-			(	termT(Id,Term),
-				write_node(Stream,Id,prolog_directive,Term),
-				slT(Id,Begin,Length),
-				write_position(Stream,Id,Begin,Length)
-			)
-    	  ).  
- 
-write_hierarchy(Stream):-
-    forall( onloadT(PredId,FileId,_),
-    		write_within(Stream,FileId,PredId,'parent-child')
-    	),
-    forall(	predicateT(PredId,FileId,_,_,_),
- 			write_within(Stream,FileId,PredId,'parent-child')
-    	),
-    forall( onload_edge(DirectId,OnloadId),
-    		write_within(Stream,OnloadId,DirectId,'parent-child')
-    	),
-    forall(	pred_edge(ClauseId,Id),
-    		write_within(Stream,Id,ClauseId,'parent-child')
-    	).*/
- 
-    	
-/*write_edges(Stream):-
-    call_edge(LId,CalleeId),
-    literalT(LId,_,CallerId,_,_,_),
-    termT(LId,Term),
-    	write_edge(Stream,LId,CalleeId,CallerId,Term),
-    fail.
-write_edges(_).*/		
-
-    
-start_graph_element(OutStream):-
-    write(OutStream,'<graph edgedefault="directed">'), 
-    nl(OutStream).
-
-close_graph_element(OutStream):-
-    write(OutStream,'</graph>'), 
-    nl(OutStream).
-    
-open_node(Stream,Id):-
-    format(Stream, '<node id="~w">~n', [Id]).
-
-close_node(Stream):-
-    write(Stream, '</node>'),
-    nl(Stream).
-   
-open_edge(Stream,Source,Target):-
-    format(Stream, '<edge source="~w" target="~w">~n', [Source, Target]). 
-	
-close_edge(Stream):-
-    write(Stream, '</edge>'),
-    nl(Stream).
-
-write_data(Stream,Key,Value):-
-	format(Stream, '   <data key="~w">~w</data>~n', [Key,Value]).	
-	
-
-
 
 pl_test_graph:-	
     pl_test_graph(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
-pl_test_graph(Project,Output):-
-	plparser_quick:generate_facts(Project),
-	writeln('generating graphml-file'),
-    time(write_facts_to_graphML(Project,Output)).
+pl_test_graph(Project, OutputFile):-
+	write_project_graph_to_file(Project, OutputFile).
     

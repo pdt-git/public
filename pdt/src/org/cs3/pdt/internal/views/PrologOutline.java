@@ -192,7 +192,6 @@ public class PrologOutline extends ContentOutlinePage {
 			IDocument doc = editor.getDocumentProvider()
 					.getDocument(getInput());
 			if (doc == null) {
-				// wunder, gr�bel,...
 				Debug.debug("Debug: input=" + getInput());
 			}
 			try {
