@@ -42,20 +42,14 @@
 package org.cs3.pdt.ui.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -68,7 +62,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * most of the methods in this class include code that needs to run on the ui
@@ -329,32 +322,6 @@ public final class UIUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Select a text region in file filename which starts at offset start with
-	 * length length.
-	 * 
-	 * @param start
-	 * @param length
-	 * @param filename
-	 * @throws PartInitException
-	 * @throws FileNotFoundException
-	 */
-	static public void selectInEditor(int start, int length, String filename)
-			throws PartInitException, FileNotFoundException {
-		Path path = new Path(filename);
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-		if (file == null)
-			throw new FileNotFoundException("could not find the file: '"
-					+ filename + "' in the workspace.");
-		UIUtils.openInEditor(file, true);
-		IDocument document = ((AbstractTextEditor) getActiveEditor())
-				.getDocumentProvider().getDocument(
-						getActiveEditor().getEditorInput());
-		ISelection selection = new TextSelection(document, start, length);
-		getActiveEditor().getEditorSite().getSelectionProvider()
-		.setSelection(selection);
 	}
 
 }
