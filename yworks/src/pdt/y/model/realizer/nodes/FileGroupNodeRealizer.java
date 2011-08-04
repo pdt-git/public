@@ -22,8 +22,8 @@ public class FileGroupNodeRealizer extends PrologGroupNodeRealizer {
 	protected void createHeaderLabel() {
 		NodeLabel label = getLabel();
 		label.setAlignment(NodeLabel.LEFT);
-		label.setBackgroundColor(Color.ORANGE);
-		label.setTextColor(Color.BLUE);
+		label.setBackgroundColor(Color.WHITE);
+		label.setTextColor(Color.BLACK);
 		label.setUnderlinedTextEnabled(true);
 		label.setModel(NodeLabel.INTERNAL);
 	}
