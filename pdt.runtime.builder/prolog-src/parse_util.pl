@@ -104,7 +104,8 @@ cleanup_computed_facts:-
 	retractall(onloadT(_,_,_)),
     retractall(predicateT_ri(_,_,_,_)),
 	retractall(property_dir(_,_,_)),
-	retractall(library_dir(_,_,_)).
+	retractall(library_dir(_,_,_)),
+	retractall(meta_predT(_,found)).
     
 
 /**
@@ -142,7 +143,6 @@ clean_file_entries(FileId):-
 	clauseT(ClauseId,FileId,_,_,_),
 		clean_clause_references(ClauseId),
 		retractall(clauseT(ClauseId,_,_,_,_)),
-		retractall(pos_and_vars(ClauseId,_,_)),
 		clean_general_references_to(ClauseId),
 	fail.	
 clean_file_entries(_).
@@ -159,7 +159,7 @@ clean_clause_references(ClauseId):-
     	retractall(literalT_ri(F,A,M,LitId)),
     	retractall(metaT(LitId,_,ClauseId,_,_,_)),
     fail.
-
+clean_clause_references(_).
 
 
 %:- dynamic warning/3.		%warning(TreeElement,Type,AdditionalArgument)
@@ -169,12 +169,14 @@ clean_directives(DirectiveId):-
     retractall(export_dir(_,DirectiveId)),
     retractall(load_dir(DirectiveId,_,_)),
     retractall(property_dir(_,_,DirectiveId)),
-    retractall(library_dir(_,_,DirectiveId)).
+    retractall(library_dir(_,_,DirectiveId)),
+    retractall(meta_pred(_,DirectiveId)).
 
 
 
 clean_general_references_to(Id):-
 	retractall(termT(Id,_)),
 	retractall(slT(Id,_,_)),
-	retractall(warning(Id,_,_)).
+	retractall(warning(Id,_,_)),
+	retractall(pos_and_vars(Id,_,_)).
 	

@@ -34,7 +34,7 @@ generate_facts(Project):-
 update_facts(File, Project):-				
 	cleanup_nodes(File),
 	cleanup_computed_facts,
-   	walking_file_list(Project,parse,1),	
+   	walking_file_list([File|Project],parse,1),	
 	build_load_graph,
     derive_all_predicates,
 	derive_onloads,
