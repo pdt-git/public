@@ -94,7 +94,9 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	;	true
 	),		
 	(	meta_predT(Id,_)
-	->	write_data(Stream,'isMetaPredicate','true')
+	->	(	format('Meta-PredT: ~w:~w/~w',[Module,Functor,Arity]),
+			write_data(Stream,'isMetaPredicate','true')
+		)
 	;	true
 	),	
 	(	modules_and_visibility:exporting(_,Id,_)
