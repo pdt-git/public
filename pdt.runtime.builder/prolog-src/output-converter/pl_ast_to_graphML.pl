@@ -35,10 +35,12 @@ write_facts_to_graphML(Project, File):-
 
 write_focus_to_graphML(FocusFile, File):-
     with_mutex(prolog_factbase,
-    	setup_call_cleanup(
-    		prepare_for_writing(File,OutStream),
-			write_focus_facts_to_graphML(FocusFile, OutStream),
-  	  		finish_writing(OutStream)
+    	with_mutex(meta_pred_finder,
+    		setup_call_cleanup(
+    			prepare_for_writing(File,OutStream),
+				write_focus_facts_to_graphML(FocusFile, OutStream),
+  	  			finish_writing(OutStream)
+  	  		)
   	 	)
   	 ).  
   	 
