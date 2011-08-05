@@ -1,6 +1,6 @@
 :- module(literal_parser, [parse_bodies]).
 
-:- use_module(analyzer/metafile_referencer).
+:- use_module('analyzer/metafile_referencer').
 :- ensure_loaded(parse_util).
 
 %Todo: Kommentar verfassen

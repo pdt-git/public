@@ -1,6 +1,7 @@
 :- module(modules_and_visibility, [	compute_visibility_graph/0,
 									visible_in_module/2,
-									get_predicate_referenced_as/4]).
+									get_predicate_referenced_as/4,
+									exporting/3]).
 
 :- use_module(parse_util).
 
