@@ -24,10 +24,10 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 
 	public PredicateNodeRealizer(GraphModel  model){
 		super(ShapeNodeRealizer.ROUND_RECT);
-		this.state = TRANSITION_STATE;
+		state = TRANSITION_STATE;
 		this.model= model;
 		//this.setSize(40,40);
-		this.setFillColor(Color.WHITE);  
+		setFillColor(Color.WHITE);
 	}
 
 	public PredicateNodeRealizer(NodeRealizer r)
@@ -36,54 +36,56 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		if(r instanceof PredicateNodeRealizer)
 		{
 			PredicateNodeRealizer sr = (PredicateNodeRealizer)r;
-			this.state = sr.state;
-			this.model	= sr.model;
+			state = sr.state;
+			model	= sr.model;
 		}
 		else
 		{
-			this.state = FINAL_STATE;
+			state = FINAL_STATE;
 		}
 	}
 	@Override
 	protected void paintNode(Graphics2D gfx) {
-//		switch (state) {
-//		case INITIAL_STATE:
-//			gfx.setStroke(LineType.DASHED_1);
-//			gfx.setColor(Color.BLUE);
-//			break;
-//		case TRANSITION_STATE:
+		//		switch (state) {
+		//		case INITIAL_STATE:
+		//			gfx.setStroke(LineType.DASHED_1);
+		//			gfx.setColor(Color.BLUE);
+		//			break;
+		//		case TRANSITION_STATE:
 
 		byte myStyle;
-		if (model.getDataHolder().isDynamicNode(getNode())) 
+		if (model.getDataHolder().isDynamicNode(getNode())) {
 			myStyle = LineType.DASHED_DOTTED_2.getLineStyle();
-		else
+		} else {
 			myStyle = LineType.LINE_2.getLineStyle();
+		}
 		LineType myLineType = LineType.getLineType(2,myStyle);
 		setLineType(myLineType);
-		
-		if (model.getDataHolder().isMetaPred(getNode())) 
+
+		if (model.getDataHolder().isMetaPred(getNode())) {
 			setShapeType(HEXAGON);
-		else if (model.getDataHolder().isTransparentNode(getNode()))
+		} else if (model.getDataHolder().isTransparentNode(getNode())) {
 			setShapeType(ELLIPSE);
-		else
+		} else {
 			setShapeType(ROUND_RECT);
+		}
 
-		this.setFillColor(Color.WHITE);
+		if (model.getDataHolder().isExported(getNode())) {
+			setFillColor(Color.GREEN);
+		} else {
+			setFillColor(Color.YELLOW);
+		}
 
-		if (model.getDataHolder().isExported(getNode()))
-			setLineColor(Color.GREEN);
-		else
-			setLineColor(Color.BLUE);
+		setLineColor(Color.BLACK);
 
-
-//			break;
-//		case FINAL_STATE: 
-//			gfx.setStroke(LineType.LINE_2);
-//			gfx.setColor(Color.GREEN);
-//			break;
-//		default:
-//			break;
-//		}
+		//			break;
+		//		case FINAL_STATE:
+		//			gfx.setStroke(LineType.LINE_2);
+		//			gfx.setColor(Color.GREEN);
+		//			break;
+		//		default:
+		//			break;
+		//		}
 		super.paintNode(gfx);
 	}
 
@@ -92,13 +94,13 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 
 	public void setState(int initialState) {
-		this.state  = initialState;
+		state  = initialState;
 
 	}
 
 	@Override
 	public SizeConstraintProvider getSizeConstraintProvider() {
-		return new SizeConstraintProvider.Default(Math.max(1, getLabel().getWidth()), 
+		return new SizeConstraintProvider.Default(Math.max(1, getLabel().getWidth()),
 				Math.max(1, getLabel().getHeight()), MAX_NODE_WIDTH, MAX_NODE_HEIGHT);
 	}
 
