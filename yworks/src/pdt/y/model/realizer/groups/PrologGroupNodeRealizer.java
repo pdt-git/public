@@ -2,6 +2,7 @@ package pdt.y.model.realizer.groups;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+
 import pdt.y.model.GraphModel;
 import y.base.Node;
 import y.base.NodeCursor;
@@ -29,25 +30,25 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 		if(nodeRealizer instanceof PrologGroupNodeRealizer)
 		{
 			PrologGroupNodeRealizer specialRealizer = (PrologGroupNodeRealizer)nodeRealizer;
-			this.model	= specialRealizer.model;
+			model	= specialRealizer.model;
 		}
 		init();
 	}
 
 	protected void init() {
-		setFillColor(Color.YELLOW);
+		setFillColor(Color.LIGHT_GRAY);
 		setShapeType(GroupNodeRealizer.ROUND_RECT);
 		setAutoBoundsEnabled(true);
 		YInsets minInsets = new YInsets(5,5,5,5);
 		setMinimalInsets(minInsets);
 		createHeaderLabel();
 	}
-    
+
 	/**
 	 *  Descendants need to provide an own label for the header
 	 */
-    protected abstract void createHeaderLabel();
-	
+	protected abstract void createHeaderLabel();
+
 	@Override
 	public void paintText(Graphics2D gfx) {
 		NodeLabel label = getLabel();
@@ -71,14 +72,14 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 
 	private void paintContentLabel(Graphics2D gfx) {
 		NodeCursor nodeCursor = getNodeCursorForInnerNodes();
-	
+
 		double momentaryLabelHeight= getLabel().getHeight()+ Y_OFFSET;
 		while (nodeCursor.ok()) {
 			Node childNode = nodeCursor.node();
 			String labelText = model.getLabelTextForNode(childNode);
 			NodeLabel childLabel = paintAnInnerLabel(gfx, labelText, momentaryLabelHeight);
 			momentaryLabelHeight += childLabel.getHeight() + Y_OFFSET;
-		
+
 			nodeCursor.next();
 		}
 	}

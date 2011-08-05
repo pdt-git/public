@@ -11,7 +11,9 @@ count_call_edges_between_predicates:-
     				pred_edge(SourceRule,SourceId)
    				)
 			->	inc_call_edges_for_predicates(SourceId,TargetId)
-			;	format('Problem with call-edge: ~w -> ~w~n',[SourceLiteralId, TargetId])
+			;	(	predicateT(TargetId,_,TFunctor,TArity,TModule),
+					format('Problem with call-edge: ~w -> ~w (~w:~w/~w)~n',[SourceLiteralId, TargetId, TModule, TFunctor, TArity])
+				)
 			)
 		).	
 
