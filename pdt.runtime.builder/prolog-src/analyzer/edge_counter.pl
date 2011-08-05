@@ -3,7 +3,7 @@
 
 :- ensure_loaded('../parse_util').
 
-:- dynamic call_edges_for_predicates/3.
+:- dynamic call_edges_for_predicates/3. %call_edges_for_predicates(SourceID,TargetID,Counter)
 count_call_edges_between_predicates:-
     retractall(call_edges_for_predicates(_,_,_)),
 	forall(	call_edge(TargetId, SourceLiteralId),
