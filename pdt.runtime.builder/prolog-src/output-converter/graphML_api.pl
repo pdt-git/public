@@ -6,6 +6,7 @@
 
 :- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
+:- use_module('../analyzer/dead_predicate_finder').
 :- use_module('../modules_and_visibility').
 
 prepare_for_writing(File,OutStream):-
@@ -101,6 +102,11 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	->	write_data(Stream,'isExported','true')
 	;	true
 	),	
+	(	locally_dead_predicate(Id)
+	->	write_data(Stream,'isUnusedLocal','true')
+	;	true
+	),	
+	
 /*	start_graph_element(Stream),
 	write_clauses(Stream,FileName),
 	close_graph_element(Stream),
@@ -169,6 +175,12 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '    <default>false</default>'),
   	nl(OutStream),
+  	write(OutStream, '</key>'),
+    nl(OutStream),
+    write(OutStream, '<key id="isUnusedLocal" for="node" attr.name="isUnusedLocal" attr.type="boolean">'),
+    nl(OutStream),
+    write(OutStream, '    <default>false</default>'),
+  	nl(OutStream),  	
   	write(OutStream, '</key>'),
     nl(OutStream),
     write(OutStream, '<key id="isExported" for="node" attr.name="isExported" attr.type="boolean">'),
