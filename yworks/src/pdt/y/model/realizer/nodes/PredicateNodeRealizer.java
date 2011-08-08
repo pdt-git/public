@@ -76,7 +76,11 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 			setFillColor(Color.YELLOW);
 		}
 
-		setLineColor(Color.BLACK);
+		if (model.getDataHolder().isUnusedLocal(getNode())) {
+			setLineColor(Color.RED);
+		} else {
+			setLineColor(Color.BLACK);
+		}
 
 		//			break;
 		//		case FINAL_STATE:

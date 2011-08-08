@@ -28,6 +28,7 @@ public class GraphDataHolder {
 	private DataMap metaPredMap = Maps.createHashedDataMap();
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
+	private DataMap unusedLocal = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -78,6 +79,10 @@ public class GraphDataHolder {
 
 	public DataMap getExportedMap() {
 		return exportedMap;
+	}
+
+	public DataMap getUnusedLocalMap() {
+		return unusedLocal;
 	}
 
 	public boolean isPredicate(Node node) {
@@ -140,6 +145,13 @@ public class GraphDataHolder {
 
 	public boolean isExported(Node node) {
 		Object returnNode = exportedMap.get(node);
+		if(returnNode == null)
+			return false;
+		return (Boolean)returnNode;
+	}
+
+	public boolean isUnusedLocal(Node node) {
+		Object returnNode = unusedLocal.get(node);
 		if(returnNode == null)
 			return false;
 		return (Boolean)returnNode;
