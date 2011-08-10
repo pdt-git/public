@@ -4,7 +4,7 @@
 						write_call_edge/3,
 						write_load_edge/3]).
 
-:- use_module('../prolog_file_reader').
+:- ensure_loaded('../pdt_factbase.pl').
 :- use_module('../analyzer/edge_counter').
 :- use_module('../analyzer/dead_predicate_finder').
 :- use_module('../modules_and_visibility').

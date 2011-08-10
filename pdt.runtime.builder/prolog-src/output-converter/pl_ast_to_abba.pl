@@ -2,7 +2,7 @@
 							pl_test/0,
 							pl_test/2]).
 								
-:- use_module('../prolog_file_reader').
+:- ensure_loaded('../parse_util').
 
 /**
  * write_facts_to_abba(+File)
@@ -156,12 +156,12 @@ pl_test:-
 %    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/attic/spike/socket/pifcom_codec.pl'],'Z:/WorkspaceTeaching/bla/test.pl').
 %    pl_test(['Z:/WorkspaceTeaching/bla/seltsam.pl'],'Z:/WorkspaceTeaching/bla/test.pl').   
 %    pl_test(['Z:/WorkspaceTeaching/bla/automat.pl'],'Z:/WorkspaceTeaching/bla/test.pl').   
-%    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/pdt/xref/prolog_file_reader_quick.pl'],'Z:/WorkspaceTeaching/bla/test.pl'). 
+%    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/pdt/xref/parse_util_quick.pl'],'Z:/WorkspaceTeaching/bla/test.pl'). 
 %   pl_test(['Z:/WorkspacePDT/jtransformer'],'Z:/WorkspaceTeaching/bla/test.pl'). 
       
  
 pl_test(Project,Output):-
-	plparser_quick:generate_facts(Project),
+	parse_util:generate_facts(Project),
 	writeln('generate abba sources'),
     time(write_facts_to_abba(Output)).     %Ergebnisdatei (abba-Format)
     

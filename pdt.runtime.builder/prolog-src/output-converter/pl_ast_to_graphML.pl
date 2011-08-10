@@ -8,7 +8,7 @@
 :- use_module('../analyzer/edge_counter').
 
 write_project_graph_to_file(Project, OutputFile):-
-	plparser_quick:generate_facts(Project),
+	parse_util:generate_facts(Project),
 	writeln('generating graphml-file'),
     time(write_facts_to_graphML(Project,OutputFile)).
 

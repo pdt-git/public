@@ -2,6 +2,7 @@ package pdt.y.model.realizer.groups;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+
 import pdt.y.model.GraphModel;
 import y.base.Node;
 import y.base.NodeCursor;

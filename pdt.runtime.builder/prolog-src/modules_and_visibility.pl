@@ -3,7 +3,7 @@
 									get_predicate_referenced_as/4,
 									exporting/3]).
 
-:- use_module(parse_util).
+:- ensure_loaded('pdt_factbase').
 
 :- dynamic exporting/3.	%exporting(Module,PredId,FileId)
 
@@ -16,25 +16,58 @@ compute_exports:-
     export_dir(Exports,Directive),		
     directiveT(Directive,FileId,_),			
     	flatten(Exports,ExportsFlatt),
-    	build_export_edge_from_list(ExportsFlatt,FileId),
+    	build_export_edge_from_list(ExportsFlatt, FileId),
     fail.
 compute_exports:-
     fileT(FileId,_,user),
-    plparser_quick:predicateT(Id,FileId,_,_,_),    
+    parse_util:predicateT(Id,FileId,_,_,_),    
     	assert(exporting(user,Id,FileId)),
     fail.
 compute_exports.
     
-build_export_edge_from_list([],_).    
-build_export_edge_from_list([A|B],FileId):-
-    build_export_edge(A,FileId),
-    build_export_edge_from_list(B,FileId).
+build_export_edge_from_list([], _).    
+build_export_edge_from_list([A|B], FileId):-
+    build_export_edge(A, FileId),
+    build_export_edge_from_list(B, FileId).
     
+    
+    
+build_export_edge(reexport(Directive,all), FileId):-
+	import_dir(RefFileId,Directive),
+	fileT(RefFileId,_,Module),
+	forall(	
+		parse_util:predicateT_ri(_,_,Module,Id),
+		assert(exporting(Module,Id,FileId))
+	),!.
+build_export_edge(reexport(_,[]),_):-
+	!.
+build_export_edge(reexport(Directive,[A|B]),FileId):-
+    build_export_edge(reexport(Directive,A),FileId),
+    build_export_edge(reexport(Directive,B),FileId),
+    !.
+build_export_edge(reexport(Directive,[Functor/Arity]),FileId):-
+    import_dir(RefFileId,Directive),
+    fileT(RefFileId,Directive),
+    fileT(RefFileId,_,Module),
+    parse_util:predicateT_ri(Functor,Arity,Module,Id),
+    assert(exporting(Module,Id,FileId)).
 build_export_edge(Functor/Arity,FileId):-
     fileT(FileId,_,Module),
-    plparser_quick:predicateT_ri(Functor,Arity,Module,Id),    
+    parse_util:predicateT_ri(Functor,Arity,Module,Id),    
     assert(exporting(Module,Id,FileId)),
     !.
+build_export_edge(Functor/Arity,FileId):-
+    format('Warning for ~w/~w -> ~w: ',[Functor,Arity,FileId]),
+    fileT(FileId,_,Module),
+    format('~w fails to create export-edge ~n',[Module]),!,
+    (	parse_util:predicateT_ri(Functor,Arity,AModule,Id)
+    -> format('Module: ~w, Id: ~w~n',[AModule, Id]) 
+    ; true
+    ). 
+%build_export_edge(_,_):-!.
+
+
+
     
 %% 
 % get_predicate_referenced_as(+Module, +Functor, +Arity, ?PId)
