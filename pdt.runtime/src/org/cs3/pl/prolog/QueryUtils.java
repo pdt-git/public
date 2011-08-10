@@ -89,7 +89,7 @@ public class QueryUtils {
 		puffer.append("(");
 		
 		if(args.length == 1) {
-			puffer.append(args.toString());
+			puffer.append(args[0].toString());
 		} else {
 			for(Object arg:args) {
 				if(arg instanceof Iterable<?>) {
