@@ -52,7 +52,22 @@ public class OpenInEditorViewMode extends ViewMode {
 			final int start = Integer.parseInt((String) result.get("Pos"));
 			final int length = Integer.parseInt((String) result.get("Len"));
 
-
+			//			ExecutorService executor = Executors.newCachedThreadPool();
+			//			FutureTask<String> futureParser = new FutureTask<String>(new Runnable() {
+			//				@Override
+			//				public void run() {
+			//					try {
+			//						//Display.getDefault().
+			//						PDTCoreUtils.selectInEditor(start, length, filename);
+			//					} catch (Exception e) {
+			//
+			//					}
+			//				}
+			//			},null);
+			//
+			//
+			//			executor.execute(futureParser);
+			//
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {

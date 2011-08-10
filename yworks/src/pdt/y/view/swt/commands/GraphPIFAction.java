@@ -2,7 +2,6 @@ package pdt.y.view.swt.commands;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,9 +12,6 @@ import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.internal.resources.Project;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
@@ -29,8 +25,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import pdt.y.main.PluginActivator;
 import pdt.y.main.PDTGraphSwingStandalone;
+import pdt.y.main.PluginActivator;
 
 public class GraphPIFAction  extends Action {
 	private static final String FILE_TO_CONSULT = "pl_ast_to_graphML";
@@ -40,9 +36,9 @@ public class GraphPIFAction  extends Action {
 	static {
 		image = ImageDescriptor.createFromImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 	}
-	  
+
 	private File helpFile;
-    private static ImageDescriptor image;
+	private static ImageDescriptor image;
 	private PDTGraphSwingStandalone view;
 
 
@@ -52,16 +48,16 @@ public class GraphPIFAction  extends Action {
 		PrologRuntimeUIPlugin plugin=PrologRuntimeUIPlugin.getDefault();
 		ResourceFileLocator locator = plugin.getResourceLocator();
 		helpFile = locator.resolve(NAME_OF_HELPING_FILE);
-		System.out.println("Location of file .graphml file: "+helpFile.toString());		
+		System.out.println("Location of file .graphml file: "+helpFile.toString());
 	}
 
-//	private void getWorkspaceLocation() {
-//		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
-//		workspaceLocation = wsRoot.getLocation().toString();
-//		System.out.println(workspaceLocation);
-//	}
-//	
-	
+	//	private void getWorkspaceLocation() {
+	//		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
+	//		workspaceLocation = wsRoot.getLocation().toString();
+	//		System.out.println(workspaceLocation);
+	//	}
+	//
+
 	@Override
 	public void run() {
 		PrologInterface pif=PluginActivator.getDefault().getPrologInterface();
@@ -70,15 +66,15 @@ public class GraphPIFAction  extends Action {
 		String folderToParse = selectFolderToParse();
 		try {
 			PrologSession session = pif.getSession(PrologInterface.LEGACY);
-			
+
 			session.queryOnce("consult("+prologNameOfFileToConsult+").");
-			
+
 			List<String> folderList = collectPrologFilesInWorkspace();
 			//folderToParse = convertJavaListToPrologListString(folderList);
-			
+
 			String query = "pl_test_graph(['"+folderToParse+"'],'"+Util.prologFileName(helpFile)+"').";
 			session.queryOnce(query);
-			
+
 			view.loadGraph(helpFile.toURI().toURL());
 		} catch (PrologException e1) {
 			e1.printStackTrace();
@@ -88,8 +84,8 @@ public class GraphPIFAction  extends Action {
 			e.printStackTrace();
 		}
 	}
-	
-	private String selectFolderToParse() {		
+
+	private String selectFolderToParse() {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
 		// File standard dialog
 		DirectoryDialog folderDialog = new DirectoryDialog(shell);
@@ -98,21 +94,21 @@ public class GraphPIFAction  extends Action {
 		String selectedPath = folderDialog.open();
 		File file = new File(selectedPath);
 		String prologNameOfSelectedPath = Util.prologFileName(file);
-		
+
 		return prologNameOfSelectedPath;
 	}
-	
+
 	private List<String> collectPrologFilesInWorkspace() {
 		final List<String> fileList = new ArrayList<String>();
 		try {
 			ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor(){
 
-				@Override 
+				@Override
 				public boolean visit(IResource resource) throws CoreException {
-					if (resource instanceof IProject && resource.isAccessible()) {
+					if ((resource instanceof IProject) && resource.isAccessible()) {
 						IPath path = resource.getLocation();
 						File file = path.toFile();
-						
+
 						fileList.add(Util.prologFileName(file));
 						System.out.println("Folder: "+file.toString());
 						return false;
@@ -125,7 +121,7 @@ public class GraphPIFAction  extends Action {
 		System.out.println("fertig mit sammeln");
 		return fileList;
 	}
-	
+
 	private String convertJavaListToPrologListString(List<String> stringList) {
 		StringBuffer buffer = new StringBuffer();
 		for (String elem : stringList) {

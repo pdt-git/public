@@ -1,6 +1,6 @@
 :- module(directive_handler,[handle_directive/6]).
 
-:- ensure_loaded(parse_util).
+:- ensure_loaded(pdt_factbase).
 
 handle_directive(op,Args,Pos,ParentId,FileId,Module):-
 	!,									% operators
@@ -70,7 +70,7 @@ categorize_directive(reexport,Args,ParentId):-
 	;	Imports = all
 	),
     assert(load_dir(ParentId,Files,Imports)),
-    assert(export_dir(Files,ParentId)).					
+    assert(export_dir(reexport(ParentId,Imports),ParentId)).					
 categorize_directive(import,Args,ParentId):-
     !,															% <-- muss behandlet werden
     assert(import_dir(Args,ParentId)).
@@ -89,7 +89,7 @@ categorize_directive(Functor,Args,ParentId):-
     ;	Functor == (meta_predicate)
     ),
     !,
-    assert(property_dir(Functor,Args,ParentId)).
+    assert(property_dir(ParentId,Functor,Args)).
 /*categorize_directive(Functor,_Args,_ParentId,):-
  %   assert(other_dir(FileId,Args,ParentId,Pos)).        <-- hier evtl noch ausbauen bzw etwas speichern    
    writeln(Functor).*/
