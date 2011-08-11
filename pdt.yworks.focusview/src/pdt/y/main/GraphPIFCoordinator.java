@@ -4,6 +4,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
@@ -12,6 +15,7 @@ import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -32,6 +36,7 @@ public class GraphPIFCoordinator implements ISelectionChangedListener{
 	private File helpFile;
 	private PDTGraphSwingStandalone view;
 	private PrologInterface pif;
+	private ExecutorService executor = Executors.newCachedThreadPool();
 
 
 	public GraphPIFCoordinator(PDTGraphSwingStandalone view) {
@@ -78,12 +83,20 @@ public class GraphPIFCoordinator implements ISelectionChangedListener{
 				query = "write_focus_to_graphML('"+focusFileForParsing+"','"+Util.prologFileName(helpFile)+"').";
 				sendQueryToCurrentPiF(query);
 
-				view.loadGraph(helpFile.toURI().toURL());
+				FutureTask<?> futureTask = new FutureTask<Object>(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							view.loadGraph(helpFile.toURI().toURL());
+						} catch (MalformedURLException e) {
+							Debug.rethrow(e);
+						}
+					};
+				},null);
+				executor.execute(futureTask);
 			}
 		} catch (PrologException e1) {
 			e1.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (PrologInterfaceException e) {
 			e.printStackTrace();
 		}
