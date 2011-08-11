@@ -1,6 +1,6 @@
 %:- module(new_builder,[consult_entry_point_and_parse/2]).
 
-:- use_module(prolog_file_reader).
+:- use_module(parse_util).
 
 
 /**
@@ -10,7 +10,7 @@
  *    - after that parses every file that was loaded in the first step inside 
  *      of the directory represented by Arg2 and builds the PEF-AST together
  *      with the edge informations 
- *      (see generate_facts/1 from prolog_file_reader_quick.pl).
+ *      (see generate_facts/1 from parse_util_quick.pl).
  **/
 consult_entry_point_and_parse(File, Project):-
     load_files(File,silent(true)),         

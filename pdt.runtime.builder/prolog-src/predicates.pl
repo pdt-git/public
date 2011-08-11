@@ -1,14 +1,39 @@
 :-module(predicates,[	derive_all_predicates/0,
-						derive_predicate_for_clause/6,
-						derive_onloads/0,
-						compute_all_predicate_properties/0]).
-:- ensure_loaded(parse_util).
+						derive_predicates_of_files/1,
+						%derive_predicate_for_clause/6,
+						derive_directive_collections/0,
+						derive_directive_collection_of_files/1,
+						compute_all_predicate_properties/0,
+						compute_predicate_properties_for_files/1]).
+:- ensure_loaded(pdt_factbase).
 
 derive_all_predicates:-
-    forall( 
-    	clauseT(CId,File,Module,Functor,Arity),
-    	derive_predicate_for_clause(CId,Functor,Arity,Module,File,_PId)
+    forall(
+    	fileT(FileId,_,_),
+    	derive_predicates_of_file(FileId)
     ).
+    
+    
+    
+derive_predicates_of_files(Files):-
+	forall(
+		member(File,Files),
+	    (	fileT_ri(File,FileId)
+	    	->	derive_predicates_of_file(FileId)
+			;	true   %if a file does not exist as a PEF, the rest should be evaluated, anyway
+	    )
+	).
+
+	
+	
+derive_predicates_of_file(FileId):-
+    forall( 
+    	clauseT(CId,FileId,Module,Functor,Arity),
+    	derive_predicate_for_clause(CId,Functor,Arity,Module,FileId,_PId)
+    ),!.
+derive_predicates_of_file(File):-
+	format('Warning: An error occured while coputing predicates for file-id: ~w.~n',[File]).
+    
     	  
 derive_predicate_for_clause(CId,Functor,Arity,Module,_File,PId):-
 	predicateT_ri(Functor,Arity,Module,PId),
@@ -16,16 +41,29 @@ derive_predicate_for_clause(CId,Functor,Arity,Module,_File,PId):-
 	compute_new_length(PId,CId),
     assert(pred_edge(CId,PId)).
 derive_predicate_for_clause(CId,Functor,Arity,Module,File,PId):-    
-    new_node_id(PId),	
-    assert(node_id(PId)),
-    assert(predicateT(PId,File,Functor,Arity,Module)),
-    assert(predicateT_ri(Functor,Arity,Module,PId)),
-    slT(CId,Begin,Length),
-    assert(slT(PId,Begin,Length)),  
+    assert_predicate(CId,Functor,Arity,Module,File,PId),
     assert(pred_edge(CId,PId)).
     
     
-derive_onloads:-
+derive_directive_collections:-
+    forall(
+    	fileT(File,_,_),
+    	derive_directive_collection_of_file(File)
+    ).
+    
+    
+derive_directive_collection_of_files(Files):-
+    forall(
+    	member(FileName,Files),
+    	(	fileT_ri(FileName,File)
+    	->	derive_directive_collection_of_file(File)
+    	;	true	%if a file does not exist as a PEF, the rest should be evaluated, anyway
+    	)
+    ).
+    
+    
+derive_directive_collection_of_file(File):-
+   % fileT(File,FileName,_),
     forall( 
     	directiveT(Id,File,Module),
 		(	(	(	onloadT(PId,File,Module)	
@@ -46,7 +84,10 @@ derive_onloads:-
     	; 	termT(Id,Term),
     		writeln(Term)
     	)
-	). 
+	),!.
+derive_directive_collection_of_file(File):-
+	format('Warning: An error occured while collecting directives for file-id: ~w.~n',[File]).
+	
 
 compute_new_length(PId,Id) :-
 	slT(PId,PBegin,PLength),
@@ -58,14 +99,37 @@ compute_new_length(PId,Id) :-
     NewLength is NewEnd - NewBegin,
     retract(slT(PId,PBegin,PLength)),
     assert(slT(PId,NewBegin,NewLength)).
+    
+    
 
 compute_all_predicate_properties:-
     forall(	
-    	/*parse_util:*/property_dir(Functor, Args, DirectiveId),
-    	(	directiveT(DirectiveId, _, Module),
-    		compute_predicate_property(Functor, Args, DirectiveId, Module)
+    	property_dir(DirectiveId, Functor, Args),
+    	(	directiveT(DirectiveId, File, Module),
+    		compute_predicate_property(Functor, Args, DirectiveId, File, Module)
     	)
     ).
+
+
+compute_predicate_properties_for_files(Files):-
+	forall(
+		member(File,Files),
+	    (	fileT_ri(File,FileId)
+		->	compute_predicate_properties_for_file(FileId)
+		;	true   	%if a file does not exist as a PEF, the rest should be evaluated, anyway
+	    )
+	).
+
+compute_predicate_properties_for_file(File):-
+    forall(
+    	directiveT(DirectiveId, File, Module),
+    	(	property_dir(DirectiveId,Functor,Args)
+    	->	compute_predicate_property(Functor, Args, DirectiveId, File, Module)
+    	;	true	%it may be another kind of property
+    	)
+    ),!.
+compute_predicate_properties_for_file(File):-
+	format('Warning: An error occured while computing predicate properties for file-id: ~w.~n',[File]).
 
 /**
  * analyse_directive(+Directive,+ParentId,+Module)
@@ -75,7 +139,7 @@ compute_all_predicate_properties:-
  *   process (like modules, operators, dynamics, transparencies,
  *   metafile,...)
  **/
-compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
+compute_predicate_property(Prop, Preds, DirectiveId, File, Module):-     % dynamic
 	conjunction_to_list(Preds,Predicates),
 	forall(	
 		member(Functor/Arity, Predicates),
@@ -85,18 +149,14 @@ compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
 									% this also represents the read code, more. But this should lead to a later
 									% check for missing dynamic declarations - or for a smell about this...
 
-    			directiveT(DirectiveId, File, _),
-    			new_node_id(PId),		
-    			assert(node_id(PId)),
-     			assert(predicateT(PId,File,Functor,Arity,Module)),
-    			assert(predicateT_ri(Functor,Arity,Module,PId)),
-    			slT(DirectiveId,Pos,Len),
-    			assert(slT(PId,Pos,Len))
+    			%directiveT(DirectiveId, File, _),
+    			assert_predicate(DirectiveId,Functor,Arity,Module,File,PId)
 			),
 			assert_prop(Prop, PId, DirectiveId)
 		)
-	).	
-compute_predicate_property(_,_,_,_). 
+	),!.	
+compute_predicate_property(Prop, Preds, _DirectiveId, _File, Module):-
+	format('Warning: Error occured while computing predicate property ~w for ~w of Module ~w~n.',[Prop,Preds,Module]). 
 
  	
 
@@ -117,3 +177,13 @@ assert_prop(multifile, PredId, DirectiveId):-
 assert_prop(meta_predicate, PredId, DirectiveId):-
     assert(meta_predT(PredId, DirectiveId)). 
 assert_prop(_,_,_).
+
+
+
+assert_predicate(CId,Functor,Arity,Module,File,PId):-
+    new_node_id(PId),	
+    assert(node_id(PId)),
+    assert(predicateT(PId,File,Functor,Arity,Module)),
+    assert(predicateT_ri(Functor,Arity,Module,PId)),
+    slT(CId,Begin,Length),
+    assert(slT(PId,Begin,Length)).

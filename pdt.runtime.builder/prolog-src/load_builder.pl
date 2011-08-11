@@ -1,11 +1,11 @@
-:- use_module('prolog_file_reader').
+:- ensure_loaded('parse_util').
 :- use_module('analyzer/metapred_finder').
 
 
 generate_factbase:-
     with_mutex(prolog_factbase,
     	(	find_all_loaded_files(Project),
-    		plparser_quick:generate_facts(Project)
+    		parse_util:generate_facts(Project)
     	)
     ).       
 
@@ -15,7 +15,7 @@ generate_factbase(File):-
     	(	find_all_loaded_files(Project),
     		filter_already_known_files(Project,MissingFiles),
     		flatten(MissingFiles,FlatMissingFiles),
-    		plparser_quick:update_facts(File,FlatMissingFiles)
+    		parse_util:update_facts(File,FlatMissingFiles)
     	)
     ).
     	       
@@ -43,7 +43,7 @@ filter_already_known_files([File|Tail],[File|MissingTail]):-
 	 
  
 pl_test(Project):-
-	plparser_quick:generate_facts(Project).
+	parse_util:generate_facts(Project).
 	
 	
 pl_test_fix:-	

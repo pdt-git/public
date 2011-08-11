@@ -5,8 +5,8 @@
 
 :- use_module(org_cs3_lp_utils(utils4modules)).
 :- use_module(properties).
-:- use_module('../parse_util').
-:- use_module('../modules_and_visibility').
+%:- ensure_loaded('../pdt_factbase.pl').
+%:- use_module('../modules_and_visibility').
     /*********************************************
      * FIND REFERENCES TO A PARTICULAR PREDICATE *
      ********************************************/

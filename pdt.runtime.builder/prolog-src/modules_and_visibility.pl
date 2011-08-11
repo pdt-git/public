@@ -3,9 +3,10 @@
 									get_predicate_referenced_as/4,
 									exporting/3]).
 
-:- use_module(parse_util).
+:- ensure_loaded('pdt_factbase').
 
 :- dynamic exporting/3.	%exporting(Module,PredId,FileId)
+:- dynamic currently_missing_export/3. %currently_missing_export(Functor,Arity,FileId)
 
 compute_visibility_graph:-
     compute_exports.
@@ -16,25 +17,65 @@ compute_exports:-
     export_dir(Exports,Directive),		
     directiveT(Directive,FileId,_),			
     	flatten(Exports,ExportsFlatt),
-    	build_export_edge_from_list(ExportsFlatt,FileId),
+    	build_export_edge_from_list(ExportsFlatt, FileId),
     fail.
 compute_exports:-
     fileT(FileId,_,user),
-    plparser_quick:predicateT(Id,FileId,_,_,_),    
+    parse_util:predicateT(Id,FileId,_,_,_),    
     	assert(exporting(user,Id,FileId)),
     fail.
 compute_exports.
     
-build_export_edge_from_list([],_).    
-build_export_edge_from_list([A|B],FileId):-
-    build_export_edge(A,FileId),
-    build_export_edge_from_list(B,FileId).
+build_export_edge_from_list([], _).    
+build_export_edge_from_list([A|B], FileId):-
+    build_export_edge(A, FileId),
+    build_export_edge_from_list(B, FileId).
     
+    
+    
+build_export_edge(reexport(Directive,all), FileId):-
+	import_dir(RefFileId,Directive),
+	fileT(RefFileId,_,Module),
+	forall(	
+		parse_util:predicateT_ri(_,_,Module,Id),
+		assert(exporting(Module,Id,FileId))
+	),!.
+build_export_edge(reexport(_,[]),_):-
+	!.
+build_export_edge(reexport(Directive,[A|B]),FileId):-
+    build_export_edge(reexport(Directive,A),FileId),
+    build_export_edge(reexport(Directive,B),FileId),
+    !.
+build_export_edge(reexport(Directive,[Functor/Arity]),FileId):-
+    import_dir(RefFileId,Directive),
+    fileT(RefFileId,Directive),
+    fileT(RefFileId,_,Module),
+    parse_util:predicateT_ri(Functor,Arity,Module,Id),
+    assert(exporting(Module,Id,FileId)).
 build_export_edge(Functor/Arity,FileId):-
     fileT(FileId,_,Module),
-    plparser_quick:predicateT_ri(Functor,Arity,Module,Id),    
+    parse_util:predicateT_ri(Functor,Arity,Module,Id),    
     assert(exporting(Module,Id,FileId)),
     !.
+build_export_edge(Functor/Arity,FileId):-	% this has to be a predicate imported from somewhere else
+    fileT(FileId,_,Module),
+    (	visible_in_module_as(Module, Functor, Arity, Id)	% maybe we already know that it is visible in the current context
+    ->	assert(exporting(Module,Id,FileId))					% than it's the one reexported
+    ;	assert(currently_missing_export(Functor,Arity,FileId)) % otherwise we have to look for it, when most information was created
+    ). 
+
+%build_export_edge(Functor/Arity,FileId):-
+%    format('Warning for ~w/~w -> ~w: ',[Functor,Arity,FileId]),
+%    fileT(FileId,_,Module),
+%    format('~w fails to create export-edge ',[Module]),!,
+%    (	parse_util:predicateT_ri(Functor,Arity,AModule,Id)
+%    -> format('to Module: ~w, Id: ~w~n',[AModule, Id]) 
+%    ; format('~n',[])
+%    ). 
+%build_export_edge(_,_):-!.
+
+
+
     
 %% 
 % get_predicate_referenced_as(+Module, +Functor, +Arity, ?PId)

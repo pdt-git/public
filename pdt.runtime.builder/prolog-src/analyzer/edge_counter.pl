@@ -1,7 +1,7 @@
 :- module(edge_counter,[count_call_edges_between_predicates/0,
 						call_edges_for_predicates/3]).
 
-:- ensure_loaded('../parse_util').
+:- ensure_loaded('../pdt_factbase').
 
 :- dynamic call_edges_for_predicates/3. %call_edges_for_predicates(SourceID,TargetID,Counter)
 count_call_edges_between_predicates:-

@@ -671,7 +671,7 @@
 </node>
 <node id="10494">
    <data key="id">10494</data>
-   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/prolog_file_reader.pl</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/parse_util.pl</data>
    <data key="module">plparser_neu</data>
 <graph edgedefault="directed">
 <node id="10713">
@@ -750,20 +750,20 @@
 </node>
 <node id="10536">
    <data key="id">10536</data>
-   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/prolog_file_reader_quick.pl</data>
-   <data key="module">plparser_quick</data>
+   <data key="fileName">Z:/pdt.git/pdt.runtime.ui/library/pdt/xref/parse_util_quick.pl</data>
+   <data key="module">parse_util</data>
 <graph edgedefault="directed">
 <node id="10725">
    <data key="id">10725</data>
    <data key="functor">generate_facts</data>
    <data key="arity">1</data>
-   <data key="moduleOfPredicate">plparser_quick</data>
+   <data key="moduleOfPredicate">parse_util</data>
 </node>
 <node id="10726">
    <data key="id">10726</data>
    <data key="functor">derive_edges</data>
    <data key="arity">0</data>
-   <data key="moduleOfPredicate">plparser_quick</data>
+   <data key="moduleOfPredicate">parse_util</data>
 </node>
 </graph>
 </node>

@@ -2,7 +2,7 @@
 									uncalled_local_predicate/1,
 									locally_dead_predicate/1]).
 
-:- use_module('../parse_util').
+:- ensure_loaded('../pdt_factbase').
 :- use_module('../modules_and_visibility').
 :- use_module('edge_counter').
 
