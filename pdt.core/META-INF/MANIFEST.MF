@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDTCore
 Bundle-SymbolicName: org.cs3.pdt.core; singleton:=true

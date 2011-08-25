@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Extension
 Bundle-SymbolicName: org.cs3.lp.extension;singleton:=true
