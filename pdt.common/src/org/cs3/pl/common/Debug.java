@@ -41,11 +41,15 @@
 
 package org.cs3.pl.common;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -73,6 +77,7 @@ public class Debug {
 	static private String outputDir;
 	static private PrintStream outputLogFilePrintStream; 
 	static private PrintStream out = System.err;
+	static private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM HH:mm:ss");
 
 	static public void setDebugLevel(String s) {
 		System.out.println(PREFIX_OUTPUT + "set debug level: " + s);
@@ -197,6 +202,7 @@ public class Debug {
 			write(LEVEL_WARNING, PREFIX_OUTPUT + "The following Exception was caught:");
 			t.printStackTrace(out);
 		}
+		out.flush();
 	}
 
 	private static void setOutputStream(PrintStream out) {
@@ -230,8 +236,9 @@ public class Debug {
 		}
 		Thread currentThread = Thread.currentThread();
 		String nameOfCurrentThread = currentThread.getName();
-		out.println(PREFIX_OUTPUT + prefix + ":" + nameOfCurrentThread + ": "+ msg);
-		out.flush();	
+		
+		out.println(PREFIX_OUTPUT + prefix + " - " + dateFormat.format(new Date()) + " - " + nameOfCurrentThread + ": "+ msg);
+		out.flush();
 	}
 
 	public static void rethrow(String string, Throwable e) {
@@ -245,6 +252,24 @@ public class Debug {
 		warning("wrapping an exception");
 		report(e);
 		throw new RuntimeException(e);
-
 	}
+	
+	public static String getTailOfLogFile(int entryCount) {
+		File logFile = new File(outputDir, "pdt.log");
+		if (!logFile.exists()) {
+			return "";
+		}
+		String logFileString = Util.readFromFile(logFile);
+		String[] logFileContent = logFileString.split("\npdt:");
+		if (logFileContent.length > entryCount) {
+			StringBuffer buf = new StringBuffer();
+			for (int i=logFileContent.length - entryCount; i<logFileContent.length; i++) {
+				buf.append(logFileContent[i] + "\n");
+			}
+			return buf.toString();
+		} else {
+			return logFileString;
+		}
+	}
+	
 }
