@@ -117,7 +117,7 @@ public class PLEditor extends TextEditor{
 
 	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
-	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save";
+	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
 	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
@@ -400,6 +400,7 @@ public class PLEditor extends TextEditor{
 				SEP_PDT_EDIT, COMMAND_CONSULT);
 	}
 
+	
 	private void createMenuEntryForSaveAndReconsult(MenuManager menuMgr,
 			ResourceBundle bundle) {
 		Action action;
