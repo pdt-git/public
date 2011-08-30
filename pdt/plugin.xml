@@ -129,8 +129,8 @@
    <command
          categoryId="org.cs3.pdt.editing"
          description="Save Without Consult"
-         id="org.eclipse.pdt.ui.edit.save"
-         name="Save Without Consult"/>
+         id="org.eclipse.pdt.ui.edit.save.no.reconsult"
+         name="Save Without (Re-)Consult"/>
    <command
          categoryId="org.cs3.pdt.editing"
          description="Consult"
@@ -154,7 +154,7 @@
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+C"/>
    <key
-         commandId="org.eclipse.pdt.ui.edit.save"
+         commandId="org.eclipse.pdt.ui.edit.save.no.reconsult"
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+ALT+S"/>
