@@ -47,6 +47,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1108,6 +1109,27 @@ public class Util {
 		if (c >= 'A' && c <= 'Z')
 			return true;
 		return false;
+	}
+	
+	public static String readFromFile(File f) {
+		StringBuffer buf = new StringBuffer();
+		BufferedReader bufferedReader = null;
+		try {
+			bufferedReader = new BufferedReader(new FileReader(f));
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				buf.append(line + "\n");
+			}
+		} catch (Exception e) {
+		} finally {
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (IOException ioe) {
+				}
+			}
+		}
+		return buf.toString();
 	}
 
 }
