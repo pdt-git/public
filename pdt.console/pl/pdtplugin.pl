@@ -162,7 +162,7 @@ pdt_reload(File):-
     write(File), nl,
     with_mutex(reloadMutex, (
       make:reload_file(File) % SWI Prolog library
-  %    ,generate_factbase_with_metapred_analysis(File)
+  %    , generate_factbase_with_metapred_analysis(File)
       , retractall(in_reload)
       )
      ).
