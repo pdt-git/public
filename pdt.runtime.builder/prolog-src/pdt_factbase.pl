@@ -3,7 +3,7 @@
 							directiveT/3, clauseT/5, literalT/6, metaT/6, headT/6,
 							operatorT/8,
 							dynamicT/2, transparentT/2, multifileT/2, meta_predT/2,
-							termT/2, slT/3, 
+							termT/2,  
 							call_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
 							call_built_in/4,
 							fileT_ri/2, predicateT_ri/4, literalT_ri/4,  
@@ -30,7 +30,7 @@
 :- dynamic meta_predT/2.	%meta_predT(PredicateId,DynamicId)		
 
 :- dynamic termT/2.			%termT(Id,Term)
-:- dynamic slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
+:- dynamic user:slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
 
 :- dynamic call_edge/2.		%call_edge(PredId,LiteralId)
 :- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)					
