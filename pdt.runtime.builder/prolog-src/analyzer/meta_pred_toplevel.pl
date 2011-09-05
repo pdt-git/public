@@ -62,4 +62,4 @@ lookup_filename_and_offset(Module:Term, FileName, Offset):-
     parse_util:predicateT_ri(Functor, Arity, Module, PId),
     parse_util:predicateT(PId,FileId,_,_,_),
     parse_util:fileT(FileId,FileName,_),
-    parse_util:slT(PId,Offset,_).  
+    parse_util:filePosT(PId,Offset,_).  

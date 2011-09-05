@@ -49,7 +49,7 @@ write_files(Stream):-
 write_predicates(Stream):-
 	forall(	predicateT(Id,_,Functor,Arity,Module),
 			(	write_node(Stream,Id,prolog_predicate,(Module:Functor/Arity)),
-				slT(Id,Begin,Length),
+				filePosT(Id,Begin,Length),
 				write_position(Stream,Id,Begin,Length)
 			)
 		).
@@ -57,7 +57,7 @@ write_predicates(Stream):-
 write_onloades(Stream):-
 	forall(	onloadT(Id,_,Module),
 			(	write_node(Stream,Id,prolog_onload,Module),
-				slT(Id,Begin,Length),
+				filePosT(Id,Begin,Length),
 				write_position(Stream,Id,Begin,Length)
 			)
 		).
@@ -67,7 +67,7 @@ write_clauses(Stream):-
 	forall(	headT(HeadId,Id,_,_,_,_),     
 			(	termT(HeadId,Term),
 				write_node(Stream,Id,prolog_clause,Term),
-				slT(Id,Begin,Length),
+				filePosT(Id,Begin,Length),
 				write_position(Stream,Id,Begin,Length)
 			)
     	  ).      	  
@@ -76,7 +76,7 @@ write_directives(Stream):-
 	forall(	directiveT(Id,_,_),
 			(	termT(Id,Term),
 				write_node(Stream,Id,prolog_directive,Term),
-				slT(Id,Begin,Length),
+				filePosT(Id,Begin,Length),
 				write_position(Stream,Id,Begin,Length)
 			)
     	  ).  

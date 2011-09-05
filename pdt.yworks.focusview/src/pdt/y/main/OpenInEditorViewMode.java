@@ -37,7 +37,7 @@ public class OpenInEditorViewMode extends ViewMode {
 				return;
 			String idInt = dataHolder.getNodeText(node);
 
-			String query = "parse_util:predicateT("+idInt+",FileId,_,_,_),parse_util:fileT(FileId,FileName,_),parse_util:slT("+idInt+",Pos,Len).";
+			String query = "parse_util:predicateT("+idInt+",FileId,_,_,_),parse_util:fileT(FileId,FileName,_),parse_util:filePosT("+idInt+",Pos,Len).";
 			Map<String,Object> result = null;
 			try {
 				result = pifCoordinator.sendQueryToCurrentPiF(query);

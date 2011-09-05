@@ -104,7 +104,7 @@ cleanup_nodes:-
 	retractall(multifileT(_,_)),	
 	retractall(meta_predT(_,_)),
 	retractall(termT(_,_)),
-	retractall(slT(_,_,_)),
+	retractall(filePosT(_,_,_)),
 	retractall(literalT_ri(_,_,_,_)),     
 	retractall(fileT_ri(_,_)),
 	retractall(predicateT_ri(_,_,_,_)),
@@ -195,14 +195,14 @@ clean_directives(DirectiveId):-
 
 clean_general_references_to(Id):-
 	retractall(termT(Id,_)),
-	retractall(slT(Id,_,_)),
+	retractall(filePosT(Id,_,_)),
 	retractall(warning(Id,_,_)),
 	retractall(pos_and_vars(Id,_,_)).
 
 
 /**
  * assert_new_node(+Term,+From,+To,-Id)
- * 	creates new identity Arg4 and asserts termT and slT with the information given
+ * 	creates new identity Arg4 and asserts termT and filePosT with the information given
  *  by Arg1-Arg3 to this identity. 
  *  the Arg6. 
  */   
@@ -210,4 +210,4 @@ assert_new_node(Term,From,To,Id):-
     new_node_id(Id),	
 	assert(termT(Id,Term)),
     Length is To - From,
-    assert(slT(Id,From,Length)).	
+    assert(filePosT(Id,From,Length)).	
