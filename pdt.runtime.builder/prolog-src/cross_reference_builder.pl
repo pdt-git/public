@@ -46,9 +46,9 @@ find_reference_for(LId,Module,Functor,Arity):-
     			->	assert(call_built_in(Functor, Arity, DefModule, LId))
     			;	true			%TODO: here is a possible place to create a warning as soon as it's reduced to "real" problems...
     			),
-    			Error,
-    			(	format('Problem with crossref -> Module: ~w, Functor: ~w, Arity: ~w, LId: ~w, Error: ~n',[Module,Functor,Arity,LId, Error]),
+    			_Error,
+    			%(	format('Problem with crossref -> Module: ~w, Functor: ~w, Arity: ~w, LId: ~w, Error: ~n',[Module,Functor,Arity,LId, Error]),
     				true 
-    			)
+    			%)
    			)
 	).

@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PrologInterface
 Bundle-SymbolicName: org.cs3.pdt.runtime.ui;singleton:=true

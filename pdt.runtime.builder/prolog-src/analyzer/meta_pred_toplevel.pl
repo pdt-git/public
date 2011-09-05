@@ -8,8 +8,8 @@ generate_factbase_with_metapred_analysis(File):-
     		find_all_meta_predicates
     	)
     ),
-    get_all_userdefined_meta_predicates(MetaPreds),
-    format('### Userdefined meta pred: ~w~n', [MetaPreds]).
+    get_all_userdefined_meta_predicates(_MetaPreds).
+   % format('### Userdefined meta pred: ~w~n', [MetaPreds]).
 
 find_undeclared_meta_predicates_position(File, Offset, MetaSpec):-
     %generate_factbase_with_metapred_analysis(File),

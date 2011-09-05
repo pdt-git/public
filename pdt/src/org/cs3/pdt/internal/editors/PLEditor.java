@@ -65,6 +65,7 @@ import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -72,6 +73,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
@@ -117,7 +119,7 @@ public class PLEditor extends TextEditor{
 
 	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
-	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save";
+	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
 	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
@@ -142,6 +144,11 @@ public class PLEditor extends TextEditor{
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
 		// TRHO: Experimental:		
+//		try {
+//			Thread.sleep(200);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		addProblemMarkers();
 		setFocus();
 
@@ -154,7 +161,25 @@ public class PLEditor extends TextEditor{
 	}
 
 	public void informAboutChangedEditorInput() {
-		PDTPlugin.getDefault().setSelection(new PDTChangedFileInformation(getEditorInput()));
+		ISchedulingRule rule;
+		if((getEditorInput() instanceof IFileEditorInput)){
+			rule =((IFileEditorInput)getEditorInput()).getFile();
+		} else {
+			rule = null;
+			// TODO: TRHO: This is probably too much. The current file is an external file:
+			// rule = ResourcesPlugin.getWorkspace().getRoot();
+		}
+		
+
+		Job j = new Job("notify PDT views about changed editor input") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				PDTPlugin.getDefault().setSelection(new PDTChangedFileInformation(getEditorInput()));
+				return Status.OK_STATUS;
+			}
+		};
+		j.setRule(rule);
+		j.schedule();
 	}
 
 	private void addProblemMarkers() {
@@ -400,6 +425,7 @@ public class PLEditor extends TextEditor{
 				SEP_PDT_EDIT, COMMAND_CONSULT);
 	}
 
+	
 	private void createMenuEntryForSaveAndReconsult(MenuManager menuMgr,
 			ResourceBundle bundle) {
 		Action action;
