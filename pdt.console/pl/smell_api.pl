@@ -1,4 +1,4 @@
-:- consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
+:- ensure_loaded(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
 
 smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, File, Start, Length) :-
 	smell_description(Name, Description, QuickfixDescription),

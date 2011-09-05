@@ -1,7 +1,7 @@
 :- module(literal_parser, [parse_bodies]).
 
 :- use_module('analyzer/metafile_referencer').
-:- ensure_loaded(pdt_factbase).
+:- ensure_loaded(parse_util).
 
 %Todo: Kommentar verfassen
 /*parse_bodies:-				%TODO: wieder zum laufen bringen!!!!!!!!!!!!!!!!!!!!!!!!!!!!

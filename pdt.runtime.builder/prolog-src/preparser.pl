@@ -114,7 +114,7 @@ parse_head_literal(Module:Head, Pos, ClauseId, _OrigModule, _VarNames) :-
  %   SubPos = [ModuleFrom-ModuleTo, HeadPos],
    	assert_new_node(Module:Head,From,To,Id),   %<===   
    	functor(Head,Functor,Arity),
-   	assert(headT(Id,ClauseId,ClauseId,Module,Functor,Arity)).    
+   	assert(headT(Id,ClauseId,Module,Functor,Arity)).    
 
 /******** 
  * Eva: Was genau soll in dem Fall da oben gespeichert werden?
@@ -126,5 +126,5 @@ parse_head_literal(Head, Pos, ClauseId, Module, _VarNames) :-
    	),
    	assert_new_node(Head,From,To,Id),   %<===   
    	functor(Head,Functor,Arity),
-   	assert(headT(Id,ClauseId,ClauseId,Module,Functor,Arity)). 
+   	assert(headT(Id,ClauseId,Module,Functor,Arity)). 
  
