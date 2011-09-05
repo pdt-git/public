@@ -1,9 +1,11 @@
 :- ensure_loaded(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
 
+% :- multifile find_undeclared_meta_predicates_position/3.
+
 smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, File, Start, Length) :-
 	smell_description(Name, Description, QuickfixDescription),
 	smell(Name, File, Start, Length, QuickfixAction).
-	
+		
 smell_description('MissingMetaPredicateDeclaration', SmellDescription, QuickfixDescription):-
 	SmellDescription = 'Missing meta-predicate declation', 
 	QuickfixDescription = 'Add missing meta-predicate declaration'.

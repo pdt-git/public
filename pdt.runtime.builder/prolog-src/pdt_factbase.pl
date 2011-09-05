@@ -8,7 +8,8 @@
 							call_built_in/4,
 							fileT_ri/2, predicateT_ri/4, literalT_ri/4,  
 							import_dir/2, export_dir/2, load_dir/3, property_dir/3, library_dir/3,
-							pos_and_vars/3, 
+							pos_and_vars/3,
+							slT/3,
 							error/3, warning/3]).
 							
 :- reexport('util/ctc_admin.pl').
@@ -32,7 +33,7 @@
 :- dynamic meta_predT/2.	%meta_predT(PredicateId,DynamicId)		
 
 :- dynamic termT/2.			%termT(Id,Term)
-:- dynamic user:slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
+:- dynamic slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
 
 :- dynamic call_edge/2.		%call_edge(PredId,LiteralId)
 :- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)					
