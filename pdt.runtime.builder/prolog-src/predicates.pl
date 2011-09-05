@@ -74,8 +74,8 @@ derive_directive_collection_of_file(File):-
     					assert(node_id(PId)),
     					assert(onloadT(PId,File,Module)),  
     						
-    					slT(Id,Begin,Length),
-    					assert(slT(PId,Begin,Length)),  
+    					filePosT(Id,Begin,Length),
+    					assert(filePosT(PId,Begin,Length)),  
    
     					assert(onload_edge(Id,PId))
     				)	
@@ -90,15 +90,15 @@ derive_directive_collection_of_file(File):-
 	
 
 compute_new_length(PId,Id) :-
-	slT(PId,PBegin,PLength),
+	filePosT(PId,PBegin,PLength),
     PEnd is PBegin + PLength,
-    slT(Id,Begin,Length),
+    filePosT(Id,Begin,Length),
    	End is Begin + Length,
     NewBegin is min(PBegin,Begin),
     NewEnd is max(PEnd,End),
     NewLength is NewEnd - NewBegin,
-    retract(slT(PId,PBegin,PLength)),
-    assert(slT(PId,NewBegin,NewLength)).
+    retract(filePosT(PId,PBegin,PLength)),
+    assert(filePosT(PId,NewBegin,NewLength)).
     
     
 
@@ -185,5 +185,5 @@ assert_predicate(CId,Functor,Arity,Module,File,PId):-
     assert(node_id(PId)),
     assert(predicateT(PId,File,Functor,Arity,Module)),
     assert(predicateT_ri(Functor,Arity,Module,PId)),
-    slT(CId,Begin,Length),
-    assert(slT(PId,Begin,Length)).
+    filePosT(CId,Begin,Length),
+    assert(filePosT(PId,Begin,Length)).

@@ -71,7 +71,7 @@ parse_clauses(InStream,FileId):-
  *	  Head elements are parsed with parse_head_literals/5.
  *    Body elements can later be parsed with parse_body_literals/6, 
  *
- *    Additionally the remaining arguments are used to define slTs for the
+ *    Additionally the remaining arguments are used to define filePosTs for the
  *    corresponding position information.
  **/
 parse_clause_elements(:- Body, Pos, FileId, VarNames, UnchangedModule) :- % Directive
