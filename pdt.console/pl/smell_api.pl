@@ -1,6 +1,7 @@
 :- ensure_loaded(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
 
-% :- multifile find_undeclared_meta_predicates_position/3.
+:- multifile smell_description/3.
+:- multifile smell/5.
 
 smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, File, Start, Length) :-
 	smell_description(Name, Description, QuickfixDescription),
@@ -10,7 +11,7 @@ smell_description('MissingMetaPredicateDeclaration', SmellDescription, QuickfixD
 	SmellDescription = 'Missing meta-predicate declation', 
 	QuickfixDescription = 'Add missing meta-predicate declaration'.
 	
-%    
+    
 %QuickfixAction ist der Text, der unmittelbar vor dem Smell eingetragen werden muss (Zeilenumbruch muss mit angegeben werden)
 smell('MissingMetaPredicateDeclaration', File, Offset, 0, QuickfixAction) :-
     find_undeclared_meta_predicates_position(File, Offset, Spec),

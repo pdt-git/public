@@ -74,9 +74,10 @@ public class PLMarkerUtils {
 
 						marker.setAttribute(IMarker.MESSAGE, msgText);
 					}
-						
+					monitor.setTaskName("Update Prolog Smells Detectors");
 					String query = "smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, '" + file.getRawLocation().toPortableString().toLowerCase() + "', Start, Length)";
 					List<Map<String, Object>> msgsSmells = session.queryAll(query);
+					if(msgsSmells!=null) {
 					for (Map<String, Object> msg : msgsSmells) {
 						IMarker marker = file.createMarker(IMarker.PROBLEM);
 						marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
@@ -96,7 +97,7 @@ public class PLMarkerUtils {
 						marker.setAttribute(PDTMarker.QUICKFIX_ACTION, msg.get("QuickfixAction".toString()));
 						marker.setAttribute(IMarker.MESSAGE, msgText);
 					}
-
+					}
 
 					session.queryOnce("deactivate_warning_and_error_tracing");
 				} catch (Exception e) {
