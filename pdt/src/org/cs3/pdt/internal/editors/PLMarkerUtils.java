@@ -61,7 +61,8 @@ public class PLMarkerUtils {
 						marker.setAttribute(IMarker.SEVERITY, severity);
 
 						String msgText = (String)msg.get("Message");
-						int start = doc.getLineOffset(Integer.parseInt((String)msg.get("Line"))-1);
+						int line = Integer.parseInt((String)msg.get("Line"))-1;
+						int start = doc.getLineOffset(line);
 						int end = start +Integer.parseInt((String)msg.get("Length"));
 						if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
 							start = end= 0;

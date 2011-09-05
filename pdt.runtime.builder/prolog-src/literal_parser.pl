@@ -74,7 +74,7 @@ parse_body_literals(Body, Pos, ParentId, ClauseId, Module, VarNames) :-
    	catch(	
    		metafile_referencer:is_metaterm(Module, Body, MetaArguments),
    		_,
-   		format('problem with metaterm-check for Module: ~w and Body: ~w~n', [Module, Body])
+   		true
    	),
    	!, 
    	Pos = term_position(From, To, _FFrom, _FTo, SubPos),

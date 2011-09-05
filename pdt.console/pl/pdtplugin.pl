@@ -51,8 +51,12 @@
     activate_warning_and_error_tracing/0,
     deactivate_warning_and_error_tracing/0,
     errors_and_warnings/4,
-    split_file_path/5                % (FullPath, Directory,FileName,BaseName,Extension)
+    split_file_path/5,                % (FullPath, Directory,FileName,BaseName,Extension)
+    wait_for_reload_finished/0,
+    begin_reload/0
     ]).
+
+
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -71,7 +75,64 @@
 :- use_module(org_cs3_lp_utils(utils4modules)).
 
 
+:- dynamic in_reload/0.
 
+:- dynamic reload_trace/2.
+
+
+trace_reload(Name):-
+    fail,
+    get_time(T),
+    assert(reload_trace(Name,T)),
+    !.
+trace_reload(_Name).
+
+begin_reload :-
+    writeln('INFO: begin reload'),
+   with_mutex(reloadMutex, (
+      assert(in_reload)
+    )),
+    trace_reload(begin).
+
+:- dynamic timeout_counter/1.
+timeout_threshold(150).
+
+reset_counter :-
+   retractall(timeout_counter(_)),
+   assert(timeout_counter(0)).
+
+timeout_reached(New) :-
+   timeout_counter(C),
+   New is C+1,
+  timeout_threshold(Th),
+  ( Th == New ->
+     true
+    ; ( retractall(timeout_counter(_)),
+        assert(timeout_counter(New)),
+        fail
+    )
+   ).
+   
+   
+wait_for_reload_finished :-
+   reset_counter,
+   repeat,
+   ( with_mutex(reloadMutex, (
+      trace_reload(check_in_reload),
+       \+in_reload
+     ))
+    ; ( 
+        %writeln(wait_for_reload_to_end),
+        trace_reload(wait),
+        sleep(0.1),
+        ( timeout_reached(Timeout) ->
+           throw(reload_timeout_reached(Timeout))
+        ; fail 
+        )
+	  )
+	),
+    !.
+    
         
 split_file_path(FullPath, Directory, FileName,BaseName,Extension):-
     file_directory_name(FullPath, Directory0),  % SWI-Prolog
@@ -79,6 +140,7 @@ split_file_path(FullPath, Directory, FileName,BaseName,Extension):-
     file_base_name(FullPath,FileName),         % SWI-Prolog
     file_name_extension(BaseName,Extension,FileName).    % SWI-Prolog
             
+
 
                /*************************************
                 * PDT RELAOAD                       *
@@ -91,13 +153,19 @@ split_file_path(FullPath, Directory, FileName,BaseName,Extension):-
 pdt_reload(File):-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::pdt_reload(File).
+    with_mutex(reloadMutex, (
+      logtalk_adapter::pdt_reload(File)
+    )).
+    
     
 pdt_reload(File):-
     write(File), nl,
-    make:reload_file(File),			% SWI Prolog library
-    generate_factbase_with_metapred_analysis(File).  
-
+    with_mutex(reloadMutex, (
+      make:reload_file(File) % SWI Prolog library
+  %    , generate_factbase_with_metapred_analysis(File)
+      , retractall(in_reload)
+      )
+     ).
 
 
         /***********************************************************************
@@ -549,12 +617,16 @@ manual_entry(Pred,-1,Content) :-
 :- dynamic(warning_and_error_tracing/0).
 
 activate_warning_and_error_tracing :- 
-	assertz(warning_and_error_tracing).
+	with_mutex(reloadMutex, (
+		begin_reload,
+	 	assertz(warning_and_error_tracing)
+	)).
 
 deactivate_warning_and_error_tracing :-
-	retractall(warning_and_error_tracing),
-	retractall(traced_messages(_,_,_)).
- 
+	with_mutex(reloadMutex, (
+	  retractall(warning_and_error_tracing),
+	  retractall(traced_messages(_,_,_))
+	)). 
  
 %% message_hook(+Term, +Level,+ Lines) is det. 
 %
@@ -568,23 +640,29 @@ deactivate_warning_and_error_tracing :-
 :- dynamic(user:message_hook/3).
 
 user:message_hook(_Term, Level,Lines) :-
-	warning_and_error_tracing,
-	prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
-	assertz(traced_messages(Level, Line,Lines)),
-	fail.
+    with_mutex(reloadMutex, (
+		warning_and_error_tracing,
+		prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
+		assertz(traced_messages(Level, Line,Lines)),
+		trace_reload(traced_messages(Level, Line,Lines)),
+	%	assertz(user:am(_Term, Level,Lines)),
+		fail
+	)).
+	
 
 %% errors_and_warnings(Level,Line,Length,Message) is nondet.
 %
 errors_and_warnings(Level,Line,0,Message) :-
-    traced_messages(Level, Line,Lines),
-%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
-    new_memory_file(Handle),
-   	open_memory_file(Handle, write, Stream),
-	print_message_lines(Stream,'',Lines),
-    close(Stream),
-	memory_file_to_atom(Handle,Message),
-    free_memory_file(Handle).
-      
+		wait_for_reload_finished,
+	    traced_messages(Level, Line,Lines),
+	    trace_reload(e_w(Lines)),
+	%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
+	    new_memory_file(Handle),
+	   	open_memory_file(Handle, write, Stream),
+		print_message_lines(Stream,'',Lines),
+	    close(Stream),
+		memory_file_to_atom(Handle,Message),
+	    free_memory_file(Handle).      
 
 
                /*****************************************
