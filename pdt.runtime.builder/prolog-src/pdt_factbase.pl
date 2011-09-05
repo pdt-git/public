@@ -1,6 +1,6 @@
 :- module(pdt_factbase, [	fileT/3,
 							predicateT/5, onloadT/3,
-							directiveT/3, clauseT/5, literalT/6, metaT/6, headT/6,
+							directiveT/3, clauseT/5, literalT/6, metaT/6, headT/5,
 							operatorT/8,
 							dynamicT/2, transparentT/2, multifileT/2, meta_predT/2,
 							termT/2, slT/3, 
@@ -10,6 +10,8 @@
 							import_dir/2, export_dir/2, load_dir/3, property_dir/3, library_dir/3,
 							pos_and_vars/3, 
 							error/3, warning/3]).
+							
+:- reexport('util/ctc_admin.pl').
 
 :- dynamic fileT/3.			%fileT(Id,FileName,Module)
 
@@ -20,7 +22,7 @@
 :- dynamic clauseT/5.		%clauseT(Id,ParentId,Module,Functor,Arity)
 :- dynamic literalT/6.		%literalT(Id,ParentId,EnclosingId,Module,Functor,Arity)
 :- dynamic metaT/6.			%metaT(Id,ParentId,EnclosingId,Module,Functor,Arity)		<-- da soll wahrscheinlich noch mehr rein...
-:- dynamic headT/6.			%headT(Id,ParentId,EnclosingId,Module,Functor,Arity)
+:- dynamic headT/5.			%headT(Id,ClauseId,Module,Functor,Arity)
 
 :- dynamic operatorT/8.		%operatorT(Id,ParentId,FileId,Module,Name,Arity,Type,Precedence)
 

@@ -73,7 +73,7 @@ collect_candidates(Candidates):-
     		%visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
     														%		für die ..T-Fakten möglich, aber nicht für die vordefinierten...
     														%		andererseits: der genaue Test ist ja eh später, hier nur Kandidaten.
-    		(	predicateT_ri(Functor,Arity,Module,PredId)
+    		(	parse_util:predicateT_ri(Functor,Arity,Module,PredId)
     		->	parse_util:call_edge(PredId,LiteralId)
 			;	parse_util:call_built_in(Functor, Arity, Module, LiteralId)
 			),
@@ -108,7 +108,7 @@ prepare_next_step:-
     ).
     
 update_factbase(Functor, Arity, Module):-
-    predicateT_ri(Functor,Arity,Module,PId),
+    parse_util:predicateT_ri(Functor,Arity,Module,PId),
  	assert(parse_util:meta_predT(PId, found)).
     
     

@@ -6,7 +6,6 @@
 						cleanup_computed_facts/0]).
 
 :- reexport('pdt_factbase.pl').
-:- reexport('util/ctc_admin.pl').
 :- ensure_loaded('util/walking_prolog_files.pl').
 :- use_module(preparser).
 :- use_module(predicates).
@@ -20,7 +19,7 @@ generate_facts(Project):-
     walking_file_list(Project,parse,1),
 	build_load_graph,
     derive_all_predicates,
-	derive_onloads,
+	derive_directive_collections,
 	compute_all_predicate_properties,
 	compute_visibility_graph,
 	parse_bodies,
@@ -89,7 +88,7 @@ cleanup_nodes:-
 	retractall(fileT(_,_,_)),
 	retractall(literalT(_,_,_,_,_,_)),
 	retractall(metaT(_,_,_,_,_,_)),
-	retractall(headT(_,_,_,_,_,_)),
+	retractall(headT(_,_,_,_,_)),
 	retractall(clauseT(_,_,_,_,_)),
 	retractall(directiveT(_,_,_)),
 	retractall(operatorT(_,_,_,_,_,_,_,_)),
@@ -167,7 +166,7 @@ clean_file_entries(_).
 	
 	
 clean_clause_references(ClauseId):-
-    headT(HeadId,_,ClauseId,_,_,_),
+    headT(HeadId,ClauseId,_,_,_),
     	clean_clause_references(HeadId),
     	retractall(headT(HeadId,_,_,_,_,_)),
     fail.
