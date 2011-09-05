@@ -57,7 +57,6 @@
     ]).
 
 
-
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
 :- use_module(library(pldoc/doc_library)).
@@ -68,7 +67,7 @@
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
 
-:- consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
+:- user:consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
 :- use_module(pdt_runtime_builder_analyzer(pdt_xref_experimental)).
 :- use_module(pdt_runtime_builder_analyzer(properties)).
 
@@ -165,7 +164,7 @@ pdt_reload(File):-
       , retractall(in_reload)
       )
      )
-     , generate_factbase_with_metapred_analysis(File)
+    % , generate_factbase_with_metapred_analysis(File)
      .
 
 
