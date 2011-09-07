@@ -130,12 +130,6 @@ and/or distributed.
          unpack="false"/>
 
    <plugin
-         id="pdt.runtime.builder"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.cs3.lp.extension"
          download-size="0"
          install-size="0"
@@ -143,6 +137,12 @@ and/or distributed.
 
    <plugin
          id="org.cs3.pdt.prolog.library"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.runtime.builder"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
