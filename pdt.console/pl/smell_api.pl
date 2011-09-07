@@ -1,13 +1,13 @@
 :- ensure_loaded(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
 
-:- multifile smell_description/3.
+:- multifile smell_description_pdt/3.
 :- multifile smell/5.
 
 smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, File, Start, Length) :-
-	smell_description(Name, Description, QuickfixDescription),
+	smell_description_pdt(Name, Description, QuickfixDescription),
 	smell(Name, File, Start, Length, QuickfixAction).
 		
-smell_description('MissingMetaPredicateDeclaration', SmellDescription, QuickfixDescription):-
+smell_description_pdt('MissingMetaPredicateDeclaration', SmellDescription, QuickfixDescription):-
 	SmellDescription = 'Missing meta-predicate declation', 
 	QuickfixDescription = 'Add missing meta-predicate declaration'.
 	
@@ -21,5 +21,5 @@ smell('MissingMetaPredicateDeclaration', File, Offset, 0, QuickfixAction) :-
     
     
 % Dummy: Just for testing
-%smell_description('hallo', 'beschreibung', 'fix beschreibung').
+%smell_description_pdt('hallo', 'beschreibung', 'fix beschreibung').
 %smell('hallo', 'l:/work/noth/workspaces/runtime generics/dummdidumm/pl/heididdeliho.pl', 0, 5, '% fix itself\n').
