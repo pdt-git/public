@@ -164,7 +164,7 @@ pdt_reload(File):-
       , retractall(in_reload)
       )
      )
-    % , generate_factbase_with_metapred_analysis(File)
+     , generate_factbase_with_metapred_analysis(File)
      .
 
 
@@ -313,6 +313,16 @@ find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModu
  
 % Now the second argument is a real term:     
 find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
+    find_file(Term,File,Line).
+    
+find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
+    find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
+    primary_location(Locations,DefiningModule,MainFile,FirstLine).
+
+
+% If Term is a loading directive, find the related file,
+% eventually interpreting a FileSPec that contains an alias
+find_file(Term,File,Line) :-
     extract_file_spec(Term,FileSpec),
     catch( absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File),
            _,
@@ -322,11 +332,6 @@ find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
     !,
     Line=1.
     
-find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
-    find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
-    primary_location(Locations,DefiningModule,MainFile,FirstLine).
-
-
 % Work regardelessly whether the user selected the entire consult/use_module
 % statement or just the file spec. Does NOT work if he only selected a file
 % name within an alias but not the complete alias.
@@ -344,7 +349,7 @@ find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningMo
     (  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
     -> defined_in_files(DefiningModule,Name,Arity,Locations)
     ;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
-         defined_in_files(DeclaringModule,Name,Arity,Locations)
+    defined_in_files(DeclaringModule,Name,Arity,Locations)
        )
     ).
 
