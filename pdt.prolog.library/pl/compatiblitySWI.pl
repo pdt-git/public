@@ -379,6 +379,8 @@ has_property(_pred,_prop,0).
 /**
 */
 
+:- dynamic(output_to_memory/2).
+
 open_print_to_memory :-
 	output_to_memory(_,_),
 	throw('memory file still open').
