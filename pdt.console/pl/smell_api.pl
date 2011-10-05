@@ -2,6 +2,7 @@
 
 :- multifile smell_description_pdt/3.
 :- multifile smell/5.
+:- multifile find_undeclared_meta_predicates_position/3. %Do not commit!
 
 smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, File, Start, Length) :-
 	smell_description_pdt(Name, Description, QuickfixDescription),

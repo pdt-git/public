@@ -59,6 +59,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import jpl.Query;
+
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
@@ -96,14 +98,30 @@ private static JackTheProcessRipper processRipper;
 	private Process startSocketServer(SocketPrologInterface socketPif) {
 		socketPif.setLockFile(Util.getLockFile());
 		int port = getFreePort(socketPif);
-		Process process = getNewProcess(socketPif, port);
-		try {			
-			initializeBuffers(socketPif, process);
-			waitForProcessToGetRunning(socketPif, process);
-			return process;
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(socketPif.isStartWithJPL()) {
+			String[] args = getArguments(socketPif, port);
+			
+			 String t1 = "use_module(library('semweb/rdf_db'))"; 
+		//	 String t1 = "use_module(library('memfile'))";
+		      Query q1 = new Query(t1);
+		      
+		      System.out.println( t1 + " " + (q1.hasSolution() ? "succeeded" : "failed") ); 
+		      
+			Query query = new Query("consult(" + args[args.length-1]+ ")");
+			if(query.oneSolution() == null) {
+				Debug.error("Could not initialize PrologInterface via JPL.");
+			}
 			return null;
+		} else {
+			Process process = getNewProcess(socketPif, port);
+			try {			
+				initializeBuffers(socketPif, process);
+				waitForProcessToGetRunning(socketPif, process);
+				return process;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 	}
 
@@ -247,13 +265,17 @@ private static JackTheProcessRipper processRipper;
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
 		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
-		tmpWriter.println(":- guitracer.");
+		if(socketPif.isStartWithJPL()) {
+			tmpWriter.println(":- assert(file_search_path(library, '"+socketPif.getFileSearchPath()+"')).");
+		} else {
+			tmpWriter.println(":- guitracer.");
+			if (socketPif.isHidePlwin()) {
+				tmpWriter.println(":- (  (current_prolog_flag(windows, true))" + "->win_window_pos([show(false)])" + ";true).");
+				tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
+			}
+		}
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- doc_collect(false).");
-		if (socketPif.isHidePlwin()) {
-			tmpWriter.println(":- (  (current_prolog_flag(windows, true))" + "->win_window_pos([show(false)])" + ";true).");
-		}
-		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
 
 		if (socketPif.isCreateLogs()) {
 			tmpWriter.println(":- debug(consult_server).");

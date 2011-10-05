@@ -163,8 +163,13 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	
 	private File lockFile;
 	private ServerStartAndStopStrategy startAndStopStrategy;
+	private boolean startWithJPL = false;
 
 
+	public boolean isStartWithJPL() {
+		return startWithJPL;
+	}
+	
 	public SocketPrologInterface(String name) {		
 		super(name);		
 		setDefaults();
@@ -461,6 +466,11 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		      session.dispose();
 		}
 		return result;
+	}
+	@Override
+	public void setStartWithJPL(boolean startWithJPL) {
+		this.startWithJPL = startWithJPL;
+		
 	}
 	
 }

@@ -248,4 +248,10 @@ public interface PrologInterface {
 	
 	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
 
+	/**
+	 * Start swi-prolog with the JPL Java bridge as part of the same process.
+	 */
+	void setStartWithJPL(boolean startWithJPL);
+	
+	boolean isStartWithJPL();
 }
