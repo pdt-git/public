@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jpl
+Bundle-SymbolicName: org.cs3.pdt.jpl
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: jpl,
+ org.cs3.pl.jpl
+Require-Bundle: org.junit
