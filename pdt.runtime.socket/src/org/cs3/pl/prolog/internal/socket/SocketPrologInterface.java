@@ -43,11 +43,15 @@ package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jpl.Query;
+
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.PreferenceProvider;
+import org.cs3.pl.jpl.JPLHook;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -470,7 +474,12 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	@Override
 	public void setStartWithJPL(boolean startWithJPL) {
 		this.startWithJPL = startWithJPL;
-		
 	}
+	
+	public Query newJPLQuery(String query){
+		return new Query(query);
+	}
+
+
 	
 }

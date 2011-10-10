@@ -100,13 +100,41 @@ private static JackTheProcessRipper processRipper;
 		int port = getFreePort(socketPif);
 		if(socketPif.isStartWithJPL()) {
 			String[] args = getArguments(socketPif, port);
+
+
+			 String env ;
+			 Query envq;
+//			 env= "setenv('SWI_HOME_DIR','c:/dev/pl')"; 
+//		       envq = new Query(env);
+//		      
+//		      System.out.println( env + " " + (envq.hasSolution() ? "succeeded" : "failed") ); 
+
+			 env = "getenv('PATH',Env)"; 
+		     envq = new Query(env);
+		      
+		      System.out.println( env + " " + (envq.hasMoreSolutions() ? "succeeded" : "failed") ); 
+		      System.out.println( env + " " + (envq.nextSolution()) ); 
+		      
+//			
 			
 			 String t1 = "use_module(library('semweb/rdf_db'))"; 
-		//	 String t1 = "use_module(library('memfile'))";
+//			 String t1 = "use_module(library('memfile'))";
 		      Query q1 = new Query(t1);
 		      
-		      System.out.println( t1 + " " + (q1.hasSolution() ? "succeeded" : "failed") ); 
+		      System.loadLibrary("sgml2pl");
+		      System.loadLibrary("uri");
+		      System.loadLibrary("rdf_db");
+		      System.loadLibrary("memfile");
+
+		      System.loadLibrary("socket");
+		      System.loadLibrary("turtle");
+		      System.loadLibrary("time");
+		      System.loadLibrary("http_stream");
+		      System.loadLibrary("mime");
 		      
+
+		      System.out.println( t1 + " " + (q1.hasSolution() ? "succeeded" : "failed") ); 
+		      System.out.println(System.getProperty("SWI_HOME_DIR"));
 			Query query = new Query("consult(" + args[args.length-1]+ ")");
 			if(query.oneSolution() == null) {
 				Debug.error("Could not initialize PrologInterface via JPL.");
