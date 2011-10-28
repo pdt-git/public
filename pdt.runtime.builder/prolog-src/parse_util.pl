@@ -114,7 +114,7 @@ cleanup_nodes:-
 	retractall(error(_,_,_)),
 	retractall(warning(_,_,_)),
 	cleanup_computed_facts,
-	ctc_id_init.
+	ctc_id_init_pdt.
 	
 cleanup_computed_facts:-
     retractall(call_edge(_,_)),	
@@ -207,7 +207,7 @@ clean_general_references_to(Id):-
  *  the Arg6. 
  */   
 assert_new_node(Term,From,To,Id):- 
-    new_node_id(Id),	
+    new_node_id_pdt(Id),	
 	assert(termT(Id,Term)),
     Length is To - From,
     assert(filePosT(Id,From,Length)).	

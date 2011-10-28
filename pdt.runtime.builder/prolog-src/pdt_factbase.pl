@@ -12,7 +12,7 @@
 							filePosT/3,
 							error/3, warning/3]).
 							
-:- reexport('util/ctc_admin.pl').
+:- reexport('util/ctc_admin_copy.pl').
 
 :- dynamic fileT/3.			%fileT(Id,FileName,Module)
 
