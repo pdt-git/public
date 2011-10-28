@@ -70,7 +70,7 @@ derive_directive_collection_of_file(File):-
     			->	(	assert(onload_edge(Id,PId)),
     					compute_new_length(PId,Id)
     				)	  					
-    			;	(	new_node_id(PId),	
+    			;	(	new_node_id_pdt(PId),	
     					assert(node_id(PId)),
     					assert(onloadT(PId,File,Module)),  
     						
@@ -181,7 +181,7 @@ assert_prop(_,_,_).
 
 
 assert_predicate(CId,Functor,Arity,Module,File,PId):-
-    new_node_id(PId),	
+    new_node_id_pdt(PId),	
     assert(node_id(PId)),
     assert(predicateT(PId,File,Functor,Arity,Module)),
     assert(predicateT_ri(Functor,Arity,Module,PId)),

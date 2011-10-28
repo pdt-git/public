@@ -19,7 +19,7 @@ parse(File):-
  * 	clauses contained in the stream Arg2 (which should be one to the file Arg1).
  */          
 parse(File,InStream):-
-    new_node_id(Id),	
+    new_node_id_pdt(Id),	
     nb_setval(module_to_parse, user),
     parse_clauses(InStream,Id),
     nb_getval(module_to_parse,ActualModule),
