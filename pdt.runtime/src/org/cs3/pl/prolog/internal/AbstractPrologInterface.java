@@ -141,7 +141,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	@Override
 	public void setTimeout(String timeout) {
-		if(timeout.equals("") || timeout!=null) {
+		if(timeout.equals("") || timeout==null) {
 			Debug.warning("Invalid Prolog Interface timeout value: " + timeout + ", using 15 sec instead");
 			timeout="15000";
 		}
