@@ -269,6 +269,8 @@ public class PLEditor extends TextEditor{
 
 	private static final String MATCHING_BRACKETS_COLOR = "matching.brackets.color";
 
+	private static final boolean DEACTIVATE_ADD_PROLOG_PROJECT_DIALOG = true;
+
 	public static long OCCURRENCE_UPDATE_DELAY = 300;
 
 	@Override
@@ -705,7 +707,7 @@ public class PLEditor extends TextEditor{
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
-		if (plProject == null) {
+		if (plProject == null && !DEACTIVATE_ADD_PROLOG_PROJECT_DIALOG) {
 			String dialogTitle = "Add Prolog Nature?";
 			String dialogMessage = "The project "
 					+ project.getName()
