@@ -164,7 +164,7 @@ pdt_reload(File):-
       , retractall(in_reload)
       )
      )
-%    , generate_factbase_with_metapred_analysis(File)
+    , generate_factbase_with_metapred_analysis(File)
      .
 
 
