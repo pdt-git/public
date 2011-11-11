@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -56,22 +57,33 @@ public class PLMarkerUtils {
 						} catch(IllegalArgumentException e){
 							continue;
 						}
+						
 						IMarker marker = file.createMarker(IMarker.PROBLEM);
 
 						marker.setAttribute(IMarker.SEVERITY, severity);
 
 						String msgText = (String)msg.get("Message");
 						int line = Integer.parseInt((String)msg.get("Line"))-1;
-						int start = doc.getLineOffset(line);
+						int start = 0;
+						
+						try {
+							start = doc.getLineOffset(line);
+						} catch (BadLocationException e) {
+							Debug.warning("found no position for marker");
+						}
+						
 						int end = start +Integer.parseInt((String)msg.get("Length"));
 						if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
 							start = end= 0;
+							line = 0;
 						}
-						//						marker.setAttribute(IMarker.CHAR_START, start);
-						//						marker.setAttribute(IMarker.CHAR_END, end);
+						
 						MarkerUtilities.setCharStart(marker, start);
 						MarkerUtilities.setCharEnd(marker, end);
-
+						MarkerUtilities.setLineNumber(marker, line+1);
+						
+					
+						
 						marker.setAttribute(IMarker.MESSAGE, msgText);
 					}
 					monitor.setTaskName("Update Prolog Smells Detectors");
