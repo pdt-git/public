@@ -3,7 +3,7 @@
 
 :- ensure_loaded(modules_and_visibility).
 :- ensure_loaded(parse_util).
-:- ensure_loaded(org_cs3_lp_utils(utils4modules)).
+:- ensure_loaded(pdt_prolog_library(utils4modules)).
 
 derive_edges:-
     forall( 

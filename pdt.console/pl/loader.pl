@@ -5,7 +5,7 @@
 :- use_module(pdt_runtime_builder_analyzer(properties)).
 
 % Search, outline, etc. for SWI-Prolog:
-:- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(lib_pdt_console_pl(pdtplugin)).
 :- consult(smell_api).
 	 
