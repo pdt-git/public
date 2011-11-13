@@ -8,8 +8,8 @@
    <extension
          point="org.cs3.pdt.runtime.bootstrapContribution">
       <fileSearchPathContribution
-            alias="org_cs3_lp_utils"
-            id="org.cs3.lp.utils"
+            alias="pdt_prolog_library"
+            id="pdt.prolog.library"
             path="pl/">
       </fileSearchPathContribution>
    </extension>
