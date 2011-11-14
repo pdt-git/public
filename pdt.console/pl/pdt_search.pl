@@ -3,7 +3,7 @@
          , find_definitions_categorized/12       % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
          , find_definition_contained_in/8
-         , find_pred/8,
+         , find_pred/8
          ]).
 
 
