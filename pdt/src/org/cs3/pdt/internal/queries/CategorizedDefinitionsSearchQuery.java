@@ -37,7 +37,7 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 		//String term = Util.quoteAtom(origTerm);
 		
 		
-		String query = "find_definitions_categorized(" 
+		String query = "pdt_search:find_definitions_categorized(" 
 			            + file + "," + goal.getLine() + "," + term + ", Functor, Arity, "+ module2 + 
 			            ", SearchCategory, DefiningModule, File, Line, PropertyList, ResultsCategory)";
 		return query;

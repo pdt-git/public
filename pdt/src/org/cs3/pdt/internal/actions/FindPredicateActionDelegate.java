@@ -177,7 +177,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					String term = goal.getTermString();
 					String quotedTerm = Util.quoteAtom(term);
 					
-					String query = "find_primary_definition_visible_in('"
+					String query = "pdt_search:find_primary_definition_visible_in('"
 						+enclFile+"'," + quotedTerm+ ",'" + goal.getFunctor()+"'," + goal.getArity()+ ","
 						+module 
 						+",File,Line)";
