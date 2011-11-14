@@ -39,7 +39,7 @@
 
 /* The module pdtplugin provides helper predicates for the PDT Eclipse Plugin */
 
-:- module(pdtplugin,[]).
+:- module(pdtplugin,[]). 
   
 :- reexport(pdt_search).                % find definitions, declarations (and autocompletion)
 :- reexport(pdt_editor_reload).         % pdt_reload/1 & friends
