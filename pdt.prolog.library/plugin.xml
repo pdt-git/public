@@ -12,5 +12,9 @@
             id="org.cs3.lp.utils"
             path="pl/">
       </fileSearchPathContribution>
+      <fileContribution
+            id="pdt.prolog.library.fileContribution"
+            path="pl/_load.pl">
+      </fileContribution>
    </extension>
 </plugin>
