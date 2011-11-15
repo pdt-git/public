@@ -22,9 +22,11 @@ import pdt.y.view.swing.actions.ExitAction;
 import pdt.y.view.swing.actions.LoadAction;
 import pdt.y.view.swing.actions.ResetLayout;
 import y.base.Node;
+import y.layout.Layouter;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
 import y.view.Graph2D;
+import y.view.Graph2DLayoutExecutor;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
 import y.view.ViewMode;
@@ -108,8 +110,10 @@ public class PDTGraphSwingStandalone extends  JPanel {
 
 	public void calcLayout() {
 		view.applyLayout(layoutModel.getLayouter());
+		
 		//		layoutModel.getLayouter().doLayout(graph);
 		//		graph.updateViews();
+		
 		view.fitContent();
 		view.updateView();
 	}
@@ -164,5 +168,4 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	public GraphDataHolder getDataHolder() {
 		return model.getDataHolder();
 	}
-
 }
