@@ -63,9 +63,11 @@ import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -88,13 +90,27 @@ public final class PDTUtils {
 			return;
 		}
 
+		
+		// For predicates implemented by external language code the Prolog side returns
+		// an error message instead of a file name. Intercept and display it:
+		if (loc.file
+				.equals("No Prolog source code (only compiled external language code)")) {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			UIUtils.displayMessageDialog(
+					shell,
+					"External language predicate",
+					"There is no Prolog source code for this predicate (only compiled external language code).");
+			return;
+		}
+		
 		IFile file = null;
 		IPath fpath = new Path(loc.file);
 		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
-
+		
 		// see if it is a workspace path:
 		file = wsRoot.getFile(fpath);
 
+		
 		if (!loc.isWorkspacePath) {
 			try {
 				file = PDTCoreUtils.findFileForLocation(loc.file);
