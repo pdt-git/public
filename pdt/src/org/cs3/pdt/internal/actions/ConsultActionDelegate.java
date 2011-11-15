@@ -143,7 +143,8 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 				
 				checkPif();
-				setQuery("consult('" + Util.prologFileName(file) + "')");
+//				setQuery("consult('" + Util.prologFileName(file) + "')");
+				setQuery("pdt_reload('" + Util.prologFileName(file) + "')");
 			} else {
 				Debug
 				.warning("Consult action triggered, but active editor input is no file.");
