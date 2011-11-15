@@ -1,7 +1,7 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
          , find_definitions_categorized/12       % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
-         , find_primary_definition_visible_in/7  % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
+         , find_primary_definition_visible_in/5  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine)
          , find_definition_contained_in/8
          , find_pred/8
          ]).
@@ -149,21 +149,24 @@ visibility(local, ContextModule,Name,Arity,DeclModule) :-
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
         
-find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
+find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine).
+    logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine).
 
 
 % The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
+find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine) :-
     atom_to_term(TermString,Term,_Bindings),
+    functor(Term,Name,Arity),
     find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine).
  
-% Now the second argument is a real term:     
+% Now the second argument is a real term that is 
+%  a) a file loading directive:     
 find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
     find_file(Term,File,Line).
-    
+
+%  b) a literal (call or clause head):    
 find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
     find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
     primary_location(Locations,DefiningModule,MainFile,FirstLine).

@@ -53,6 +53,7 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
@@ -147,57 +148,24 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	
 	private void run_impl(Goal goal, IFile file) throws CoreException {
 		IPrologProject plprj=null;
-		if(file!=null){ // external file
+		if(file!=null){ 
 			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
 		}
-		if(plprj== null){
-			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
-				PrologSession session =null;
+		if(plprj== null){ // no Prolog nature set
+			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole(); 
+			if (console != null) {
+				PrologSession session = null;
 				try {
-					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-
-					// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
-					String enclFile = UIUtils.getFileFromActiveEditor();
-					// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
-						
-					// Folgendes liefert bei Prolog-Libraries die falschen Ergebnisse,
-					// obwohl das aufgerufene Prädikat das Richtige tut, wenn es direkt
-					// in einem Prolog-Prozess aufgerufen wird:
-//					if(goal.getModule()==null) {
-//						String query = "module_of_file('" + enclFile + "',Module)";
-//						String referencedModule = (String) session.queryOnce(query).get("Module");
-//						goal.setModule(referencedModule);
-//					}
-                    // In der Klasse DefinitionsSearchQuery funktioniert es aber! 
-					
-					String module = "_";
-					if(goal.getModule()!=null)
-						module ="'"+ goal.getModule()+ "'";
-					
-					String term = goal.getTermString();
-					String quotedTerm = Util.quoteAtom(term);
-					
-					String query = "pdt_search:find_primary_definition_visible_in('"
-						+enclFile+"'," + quotedTerm+ ",'" + goal.getFunctor()+"'," + goal.getArity()+ ","
-						+module 
-						+",File,Line)";
-					Debug.info("open declaration: " + query);
-//					List<Map<String, Object>> clauses = session.queryAll(query);
-//					if(clauses.size()>0) {
-//						Map<String, Object> clause = clauses.get(0);
-					    Map<String, Object> clause =  session.queryOnce(query);
-						SourceLocation location = new SourceLocation((String)clause.get("File"), false);
-						location.setLine(Integer.parseInt((String)clause.get("Line")));
-					//	System.out.println(location.offset);
-						
-						PDTUtils.showSourceLocation(location);
-						return;
-//					}
-				}catch(Exception e) {
+					session = console.getPrologInterface().getSession();
+					SourceLocation location = findFirstClauseLocation_withoutPdtNature(goal, session);
+					PDTUtils.showSourceLocation(location);
+					return;
+				} catch (Exception e) {
 					Debug.report(e);
 				} finally {
-					if(session!=null)session.dispose();
-				}				
+					if (session != null)
+						session.dispose();
+				}
 			} else {
 				UIUtils.getDisplay().asyncExec(new Runnable() {
 					
@@ -210,29 +178,60 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						messageBox.open();					}
 				});
 			}
-			return;
 		}
-		PrologInterface pif = plprj.getMetadataPrologInterface();
-		SourceLocation loc;
-		try {
-			loc = findFirstClausePosition((Goal)goal,pif);
-			if(loc!=null){
-				PDTUtils.showSourceLocation(loc);
+		else {
+			PrologInterface pif = plprj.getMetadataPrologInterface();
+			SourceLocation loc;
+			try {
+				loc = findFirstClauseLocation_withPdtNature((Goal) goal, pif);
+				if (loc != null) {
+					PDTUtils.showSourceLocation(loc);
+				}
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+				Shell shell = editor.getSite().getShell();
+
+				UIUtils.displayErrorDialog(shell, "PrologInterface Error",
+						"The connection to the Prolog process was lost. ");
 			}
-		} catch (PrologInterfaceException e) {
-			Debug.report(e);
-			Shell shell = editor.getSite().getShell();
-			
-			
-			
-			UIUtils.displayErrorDialog(shell, "PrologInterface Error", "The connection to the Prolog process was lost. ");
 		}
-		
 		
 	}
 
+	private SourceLocation findFirstClauseLocation_withoutPdtNature(Goal goal,
+			PrologSession session) throws PrologInterfaceException {
+		// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
+		String enclFile = UIUtils.getFileFromActiveEditor();
+		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
+			
+		// Folgendes liefert bei Prolog-Libraries die falschen Ergebnisse,
+		// obwohl das aufgerufene Prädikat das Richtige tut, wenn es direkt
+		// in einem Prolog-Prozess aufgerufen wird:
+//					if(goal.getModule()==null) {
+//						String query = "module_of_file('" + enclFile + "',Module)";
+//						String referencedModule = (String) session.queryOnce(query).get("Module");
+//						goal.setModule(referencedModule);
+//					}
+		// In der Klasse DefinitionsSearchQuery funktioniert es aber! 
+		
+		String module = "_";
+		if(goal.getModule()!=null)
+			module ="'"+ goal.getModule()+ "'";
+		
+		String term = goal.getTermString();
+		String quotedTerm = Util.quoteAtom(term);
+		
+		String query = "pdt_search:find_primary_definition_visible_in('"
+			+enclFile+ "'," +quotedTerm+ "," +module+ ",File,Line)";
+		Debug.info("open declaration: " + query);
+		Map<String, Object> clause =  session.queryOnce(query);
+		SourceLocation location = new SourceLocation((String)clause.get("File"), false);
+		location.setLine(Integer.parseInt((String)clause.get("Line")));
+		return location;
+	}
+
 	
-	private SourceLocation findFirstClausePosition(Goal data, PrologInterface pif) throws PrologInterfaceException{
+	private SourceLocation findFirstClauseLocation_withPdtNature(Goal data, PrologInterface pif) throws PrologInterfaceException{
 		PrologSession session = null;
 		String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
 		
