@@ -12,5 +12,9 @@
             id="pdt.prolog.library"
             path="pl/">
       </fileSearchPathContribution>
+      <fileContribution
+            id="pdt.prolog.library.fileContribution"
+            path="pl/_load.pl">
+      </fileContribution>
    </extension>
 </plugin>

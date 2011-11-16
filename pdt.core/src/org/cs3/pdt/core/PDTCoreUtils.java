@@ -56,6 +56,8 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -70,7 +72,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public final class PDTCoreUtils {
@@ -333,26 +338,48 @@ public final class PDTCoreUtils {
 		try {
 			path = new Path(f.getCanonicalPath());
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
-			if (file == null)
-				throw new FileNotFoundException("could not find the file: '"
-						+ filename + "' in the workspace.");
+			if (file == null){
+				IFileStore fileStore = EFS.getLocalFileSystem().getStore(path);
+				if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
+					try {
+						IWorkbenchPage page = UIUtils.getActivePage();
+				        IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
+						if (part instanceof AbstractTextEditor){
+					        IDocument document = ((AbstractTextEditor)part).getDocumentProvider().getDocument(part.getEditorInput());
+							int end = convertLogicalToPhysicalOffset(
+									document, start+length);
+							start = convertLogicalToPhysicalOffset(
+									document, start);
+							length = end - start;
+							ISelection selection = new TextSelection(document,start,length);
+							part.getEditorSite().getSelectionProvider().setSelection(selection);
+						}
+					} catch (PartInitException e) {
+						Debug.report(e);
+					}
+					return;
+				}
 
-			UIUtils.openInEditor(file, false);
-			IDocument document = ((AbstractTextEditor) UIUtils.getActiveEditor())
-					.getDocumentProvider().getDocument(
-							UIUtils.getActiveEditor().getEditorInput());
+//				throw new FileNotFoundException("could not find the file: '"
+//						+ filename + "' in the workspace.");
+			} else {
 
-			int end = convertLogicalToPhysicalOffset(
-					document, start+length);
-			start = convertLogicalToPhysicalOffset(
-					document, start);
-			length = end - start;
+				UIUtils.openInEditor(file, false);
+				IDocument document = ((AbstractTextEditor) UIUtils.getActiveEditor())
+						.getDocumentProvider().getDocument(
+								UIUtils.getActiveEditor().getEditorInput());
 
-			ISelection selection = new TextSelection(document, start, length);
-			UIUtils.getActiveEditor().getEditorSite().getSelectionProvider()
-			.setSelection(selection);
+				int end = convertLogicalToPhysicalOffset(
+						document, start+length);
+				start = convertLogicalToPhysicalOffset(
+						document, start);
+				length = end - start;
 
+				ISelection selection = new TextSelection(document, start, length);
+				UIUtils.getActiveEditor().getEditorSite().getSelectionProvider()
+				.setSelection(selection);
 
+			}
 		} catch (IOException e) {
 			Debug.report(e);
 		}

@@ -43,7 +43,20 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		{
 			state = FINAL_STATE;
 		}
+		
+		init();
 	}
+
+	protected void init() {
+		NodeLabel label = getLabel();
+		
+		label.setConfiguration("CroppingLabel");
+		label.setAutoSizePolicy(NodeLabel.AUTOSIZE_NODE_SIZE);
+		
+		setWidth(100);
+		setHeight(40);
+	}
+	
 	@Override
 	protected void paintNode(Graphics2D gfx) {
 		//		switch (state) {
@@ -90,6 +103,7 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		//		default:
 		//			break;
 		//		}
+		
 		super.paintNode(gfx);
 	}
 
@@ -102,18 +116,18 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 
 	}
 
-	@Override
-	public SizeConstraintProvider getSizeConstraintProvider() {
-		return new SizeConstraintProvider.Default(Math.max(1, getLabel().getWidth()),
-				Math.max(1, getLabel().getHeight()), MAX_NODE_WIDTH, MAX_NODE_HEIGHT);
-	}
-
-	@Override
-	protected void labelBoundsChanged(NodeLabel label) {
-		if (label == getLabel()) {//only resize on bounds changes of the first label
-			setSize(Math.max(30, label.getWidth()), Math.max(30, label.getHeight()));
-		}
-	}
+//	@Override
+//	public SizeConstraintProvider getSizeConstraintProvider() {
+//		return new SizeConstraintProvider.Default(Math.max(1, getLabel().getWidth()),
+//				Math.max(1, getLabel().getHeight()), MAX_NODE_WIDTH, MAX_NODE_HEIGHT);
+//	}
+//
+//	@Override
+//	protected void labelBoundsChanged(NodeLabel label) {
+//		if (label == getLabel()) {//only resize on bounds changes of the first label
+//			setSize(Math.max(30, label.getWidth()), Math.max(30, label.getHeight()));
+//		}
+//	}
 
 
 	@Override

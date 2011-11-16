@@ -20,6 +20,7 @@ public class GraphLayout {
 	
 	public GraphLayout() {
 		stage  = new CompositeLayoutStage();
+		
 		edgeLayouter = createEdgeLayout();
 		coreLayouter = createCoreLayout();
 		
@@ -31,7 +32,7 @@ public class GraphLayout {
 	protected LayoutStage createEdgeLayout() {
 		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
 	    router.setLocalCrossingMinimizationEnabled(true);
-	    router.setCrossingCost(2.0);
+	    router.setCrossingCost(3.0);
 	    router.setReroutingEnabled(true);
 		return router;
 	}
@@ -50,7 +51,6 @@ public class GraphLayout {
 		OrientationLayouter ol = new OrientationLayouter();
 		ol.setOrientation(LayoutOrientation.TOP_TO_BOTTOM);
 		layouter.setOrientationLayouter(ol);
-		
 		
 		layouter.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TIGHT_TREE);
 		layouter.setGroupAlignmentPolicy(IncrementalHierarchicLayouter.POLICY_ALIGN_GROUPS_CENTER);
@@ -80,6 +80,7 @@ public class GraphLayout {
 	    // group node sizes for non-empty group nodes
 	    SimplexNodePlacer snp = new SimplexNodePlacer();
 	    snp.setGroupCompactionStrategy(SimplexNodePlacer.GROUP_COMPACTION_MAX);
+		snp.setEdgeStraighteningOptimizationEnabled(true);
 		layouter.setGroupCompactionEnabled(true);
 		layouter.setRecursiveGroupLayeringEnabled(true);
 	    layouter.setNodePlacer(snp);

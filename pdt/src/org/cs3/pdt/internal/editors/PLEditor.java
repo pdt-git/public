@@ -50,9 +50,11 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
@@ -64,7 +66,10 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
+import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -185,10 +190,14 @@ public class PLEditor extends TextEditor{
 	private void addProblemMarkers() {
 		try {
 			// current file in editor is either an external file or the pdt nature is not assigned:
-			if(!(getEditorInput() instanceof IFileEditorInput)){
-				return;
+			IEditorInput editorInput = getEditorInput();
+			if (editorInput instanceof IFileEditorInput) {
+				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
+			} else if (editorInput instanceof FileStoreEditorInput) {
+				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
+					new ConsultActionDelegate().run(null);
+				}
 			}
-			PLMarkerUtils.updateFileMarkers(((IFileEditorInput)getEditorInput()).getFile());
 
 			
 		} catch (CoreException e) {
