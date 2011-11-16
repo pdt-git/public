@@ -26,7 +26,4 @@ Bundle-ClassPath: .,
  lib/hamcrest-library-1.2.jar
 Bundle-Activator: pdt.y.main.PluginActivator
 Bundle-ActivationPolicy: lazy
-Export-Package: pdt.y.main,
- pdt.y.model.realizer.edges,
- pdt.y.model.realizer.groups,
- pdt.y.model.realizer.nodes
+Export-Package: pdt.y.main

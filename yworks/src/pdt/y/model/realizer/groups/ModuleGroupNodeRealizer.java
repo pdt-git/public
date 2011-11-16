@@ -21,10 +21,11 @@ public class ModuleGroupNodeRealizer extends PrologGroupNodeRealizer {
 	protected void createHeaderLabel() {
 		NodeLabel label = getLabel();
 		label.setAlignment(NodeLabel.CENTER);
-		label.setBackgroundColor(Color.ORANGE);
+		label.setBackgroundColor(new Color(203, 215, 226));
 		label.setTextColor(Color.BLACK);
 		label.setUnderlinedTextEnabled(true);
 		label.setModel(NodeLabel.INTERNAL);
+		label.setConfiguration("CroppingLabel");
 	}
 
 	@Override

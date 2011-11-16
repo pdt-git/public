@@ -36,7 +36,7 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 	}
 
 	protected void init() {
-		setFillColor(Color.LIGHT_GRAY);
+		setFillColor(new Color(240, 240, 240));
 		setShapeType(GroupNodeRealizer.ROUND_RECT);
 		setAutoBoundsEnabled(true);
 		YInsets minInsets = new YInsets(5,5,5,5);
