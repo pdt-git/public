@@ -246,7 +246,9 @@ private static JackTheProcessRipper processRipper;
 	private static void writeInitialisationToTempFile(SocketPrologInterface socketPif,
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
+//      Don't set the encoding globally because it 
+//		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
+		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
 		tmpWriter.println(":- guitracer.");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- doc_collect(false).");
