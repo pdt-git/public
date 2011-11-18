@@ -27,34 +27,10 @@
 %% predicate_manual_entry(+Module, +Pred,+Arity,-Content) is det.
 %
 %
-predicate_manual_entry(_Module,Pred,Arity,Content) :-
-    help_index:predicate(Pred,Arity,_,FromLine,ToLine),
-    !,
-    online_help:line_start(FromLine, From),
-    online_help:line_start(ToLine, To),
-    online_help:online_manual_stream(Manual),
-% TODO: Isn't what comes after this comment just a complicated way to say
-%   with_output_to(atom(Content), (     
-%      seek(Manual,From,bof,_NewOffset),
-%      Range is To - From,
-%      online_help:copy_chars(Range, Manual, MemStream)
-%    )).
-% TODO: Check, replace, test.
-    new_memory_file(Handle),
-    open_memory_file(Handle, write, MemStream),
-    seek(Manual,From,bof,_NewOffset),
-    Range is To - From,
-    online_help:copy_chars(Range, Manual, MemStream),
-    close(MemStream),
-    memory_file_to_atom(Handle,Content),
-    free_memory_file(Handle), 
-    !.
-
-
 predicate_manual_entry(Module, Pred,Arity,Content) :-
     %pldoc:doc_comment(Module:Pred/Arity,_File:_,,Content),
     %TODO: The html code is now available:
-	pldoc:doc_comment(Module:Pred/Arity,File:_,_Summary,_Content),
+    pldoc_process:doc_comment(Module:Pred/Arity,File:_,_Summary,_Content),
 	gen_html_for_pred_(File,Pred/Arity,Content),
     !.
 	
@@ -68,27 +44,18 @@ predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 gen_html_for_pred_(FileSpec,Functor/Arity,Html) :-    
 	doc_file_objects(FileSpec, _File, Objects, FileOptions, []),
 	member(doc(Signature,FilePos,Doc),Objects),
-	(Functor/Arity=Signature;_Module:Functor/Arity=Signature),
+	( Functor/Arity=Signature 
+	; _Module:Functor/Arity=Signature
+	),
+	!,
 	phrase(html([ 
 	     		\objects([doc(Functor/Arity,FilePos,Doc)], FileOptions)
 	     ]),List),
-	maplist(replace_nl_,List,AtomList),
-	concat_atom(AtomList,Html), 
-	!.
+%	maplist(replace_nl_,List,AtomList),
+%	atomic_list_concat(AtomList,Html), 
+	with_output_to(atom(Html), print_html(List)).
 
 
-replace_nl_(nl(_),''):-!. 
-replace_nl_(A,A).
-
-/*  apparently dead code:
-write_ranges_to_file(Ranges, Outfile) :-
-    online_manual_stream(Manual),
-    help_tmp_file(Outfile),
-    open(Outfile, write, Output),
-    show_ranges(Ranges, Manual, Output),
-    close(Manual),
-    close(Output).
-*/
 
 %% manual_entry(Pred,Arity,Content) is det.
 %
