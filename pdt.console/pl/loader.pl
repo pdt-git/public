@@ -6,6 +6,7 @@
 
 % Search, outline, etc. for SWI-Prolog:
 :- use_module(pdt_prolog_library(utils4modules)).
+:- use_module(pdt_editor_highlighting).
 :- use_module(lib_pdt_console_pl(pdtplugin)).
 :- consult(smell_api).
 	 
