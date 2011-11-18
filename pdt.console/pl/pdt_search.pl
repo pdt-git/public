@@ -158,9 +158,22 @@ find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile
 % The second argument is just an atom contianing the string representation of the term:     
 find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine) :-
     atom_to_term(TermString,Term,_Bindings),
-    functor(Term,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine).
- 
+    extract_name_arity(Term,Head,Name,Arity),
+    find_primary_definition_visible_in__(EnclFile,Head,Name,Arity,ReferencedModule,MainFile,FirstLine).
+
+extract_name_arity(Term,Head,Name,Arity) :-
+    (  var(Term) 
+    -> throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
+     ; true
+    ),
+    % Special treatment of Name/Arity terms:
+    (  Term = Name/Arity
+    -> true
+     ; functor(Term,Name,Arity)
+    ),
+    % Create most general head
+    functor(Head,Name,Arity).
+
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
 find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
