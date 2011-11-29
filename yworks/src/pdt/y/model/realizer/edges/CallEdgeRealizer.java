@@ -33,9 +33,8 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 		setLineType(myLineType);
 	}
 	
-	private int calculateLineWidth() {
+	private int calculateLineWidth(GraphModel model) {
 		Edge edge = getEdge();
-		GraphModel model = GraphModel.getInstance();
 		if(model.isCallEdge(edge)) {
 			int frequency = model.getFrequency(edge);
 //			if (frequency <= 1)
@@ -55,8 +54,8 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 		return 1;
 	}
 	
-	public void adjustLineWidth() {
-		width = calculateLineWidth();
+	public void adjustLineWidth(GraphModel model) {
+		width = calculateLineWidth(model);
 		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
 		setLineType(myLineType);
 	}

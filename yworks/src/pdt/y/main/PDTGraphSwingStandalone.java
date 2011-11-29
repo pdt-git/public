@@ -22,11 +22,9 @@ import pdt.y.view.swing.actions.ExitAction;
 import pdt.y.view.swing.actions.LoadAction;
 import pdt.y.view.swing.actions.ResetLayout;
 import y.base.Node;
-import y.layout.Layouter;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
 import y.view.Graph2D;
-import y.view.Graph2DLayoutExecutor;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
 import y.view.ViewMode;
@@ -61,6 +59,16 @@ public class PDTGraphSwingStandalone extends  JPanel {
 		addMouseZoomSupport();
 	}
 
+	public GraphDataHolder getDataHolder() {
+		return model.getDataHolder();
+	}
+	public Graph2D getGraph2D() {
+		return graph;
+	}
+
+	public void addViewMode(ViewMode viewMode){
+		view.addViewMode(viewMode);
+	}
 
 	private EditMode initEditMode() {
 		EditMode editMode = new EditMode();
@@ -160,12 +168,8 @@ public class PDTGraphSwingStandalone extends  JPanel {
 		return menuBar;
 	}
 
-
-	public void addViewMode(ViewMode viewMode){
-		view.addViewMode(viewMode);
-	}
-
-	public GraphDataHolder getDataHolder() {
-		return model.getDataHolder();
+	public boolean isEmpty() {
+		return graph == null 
+			|| graph.getNodeArray().length == 0;
 	}
 }
