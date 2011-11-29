@@ -83,6 +83,10 @@ public class ImageRepository {
 	public static final String PASTE_FILENAME = "paste_filename.gif";
 
 	public static final String NEW_PROCESS = "new_process.png";
+	
+	public static final String THREAD_MONITOR = "threadmonitor.gif";
+	
+	public static final String DEBUG_MONITOR = "debugmonitor.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
