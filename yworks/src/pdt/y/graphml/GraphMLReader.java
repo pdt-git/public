@@ -26,7 +26,7 @@ public class GraphMLReader {
 	private GraphModel model = null;
 
 	public GraphMLReader(){
-		model = GraphModel.getInstance();
+		model = new GraphModel();
 		model.useHierarchy();
 
 		addInputDataAccessorsToCore();
