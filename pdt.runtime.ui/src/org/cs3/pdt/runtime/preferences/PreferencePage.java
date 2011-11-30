@@ -15,6 +15,9 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -93,9 +96,35 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		// Maximum time in milliseconds to wait for the prolog process to come up.
 		addField(new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent()));
 		
-		
+		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Generate Prolog Factbase", getFieldEditorParent()){
+			@Override
+			public void doLoad(){
+				super.doLoad();
+				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
+			}
+			
+			@Override
+			public void doLoadDefault(){
+				super.doLoadDefault();
+				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
+			}
+		};
+		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				metaPred.setEnabled(genFactbase.getBooleanValue(), getFieldEditorParent());
+			}
+		});
+		addField(genFactbase);
+		addField(metaPred);
 
 
+	}
+	
+	private BooleanFieldEditor metaPred;
+	private BooleanFieldEditor getMetaPredEditor(){
+		return metaPred;
 	}
 	
 	/*
