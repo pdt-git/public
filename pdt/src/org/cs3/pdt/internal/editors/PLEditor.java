@@ -101,11 +101,15 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -331,7 +335,7 @@ public class PLEditor extends TextEditor{
 				
 			}
 		});
-
+		checkBackground(getEditorInput());
 	}
 
 
@@ -681,6 +685,19 @@ public class PLEditor extends TextEditor{
 		super.doSetInput(input);
 	
 		filepath = new Path(UIUtils.getFileNameForEditorInput(input));
+		checkBackground(input);
+	}
+
+	private void checkBackground(IEditorInput input) {
+		ISourceViewer sourceViewer = getSourceViewer();
+		if (sourceViewer == null) return;
+		StyledText textWidget = sourceViewer.getTextWidget();
+		if (textWidget == null) return;
+		if (input instanceof IFileEditorInput) {
+			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
+		} else {
+			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
+		}
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {
