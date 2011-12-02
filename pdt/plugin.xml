@@ -48,7 +48,7 @@
              id="org.cs3.pdt.internal.actions.consult"/>
              
        <action
-             label="Open Console"
+             label="Prolog Console"
              class="org.cs3.pdt.internal.actions.OpenConsoleAction"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"

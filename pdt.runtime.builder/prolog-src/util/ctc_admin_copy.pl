@@ -10,10 +10,10 @@
  * with their heads' functor/arity according to F/N_list.  
  */
  
-:- module(ctc_admin,[
+:- module(ctc_admin_copy,[
      % These two rather belong to the interpreter:
-     ctc_id_init/0,
-     new_node_id/1                    % (-NewId)
+     ctc_id_init_pdt/0,
+     new_node_id_pdt/1                    % (-NewId)
 ]).
 
 
@@ -26,16 +26,16 @@
  */
 :- dynamic prev_ctc_id/1.
 
-ctc_id_init :-
+ctc_id_init_pdt :-
   retractall(prev_ctc_id(_)),
   assert(prev_ctc_id(10000)).
 
-?- ctc_id_init.
+?- ctc_id_init_pdt.
 
 /**
  * new_node_id(-Id): Bind id to a unique term.
  */
-new_node_id(NewId) :-
+new_node_id_pdt(NewId) :-
    clause(user:new_id(_),_) % If new_id is defined (=JT is running)
     -> new_id(NewId)        % ... use new_id to ensure consistency
      ; ( var(NewId)         % ... otherwise use own implementation

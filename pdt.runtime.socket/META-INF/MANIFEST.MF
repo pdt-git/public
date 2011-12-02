@@ -11,3 +11,4 @@ Fragment-Host: org.cs3.pdt.runtime
 Export-Package: org.cs3.pl.prolog.internal.socket
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: jpl
+Require-Bundle: org.cs3.pdt.runtime.ui

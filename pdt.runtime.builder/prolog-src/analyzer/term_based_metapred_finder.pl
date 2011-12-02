@@ -1,6 +1,6 @@
 :-module(term_based_metapred_finder, [	infer_meta_arguments_for/3,
 										find_meta_pred_args_in_clause/3]).
-:- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(pdt_prolog_library(utils4modules)).
 
 /**
  * infer_meta_arguments_for(?Module,?AHead,?MetaSpec) is det

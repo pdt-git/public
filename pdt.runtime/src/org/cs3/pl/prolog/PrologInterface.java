@@ -120,6 +120,8 @@ public interface PrologInterface {
 	public static final String PREF_STANDALONE = "pif.standalone";
 	public static final String PREF_TIMEOUT = "pif.timeout";
 	public static final String PREF_HOST = "pif.host";
+	public static final String PREF_GENERATE_FACTBASE = "pif.genfactbase";
+	public static final String PREF_META_PRED_ANALYSIS = "pif.metapred";
 	
 
 	/**

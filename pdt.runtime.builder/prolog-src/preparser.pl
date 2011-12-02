@@ -19,7 +19,7 @@ parse(File):-
  * 	clauses contained in the stream Arg2 (which should be one to the file Arg1).
  */          
 parse(File,InStream):-
-    new_node_id(Id),	
+    new_node_id_pdt(Id),	
     nb_setval(module_to_parse, user),
     parse_clauses(InStream,Id),
     nb_getval(module_to_parse,ActualModule),
@@ -37,9 +37,9 @@ parse_clauses(InStream,FileId):-
         	read_term(InStream,Clause,
             	[   %term_position(Pos),        % output
               		subterm_positions(SubPos), % output
-%                	module(CurrentModule),     % INput
+%                	module(CurrentModule),      % input
 %                	singletons(Singletons),     % output
-                	variable_names(VarNames)  % output
+                	variable_names(VarNames)   % output
             	]),
         	error(Error,Context),
         	( assert(error(Error,Context,FileId)),  % <<<<

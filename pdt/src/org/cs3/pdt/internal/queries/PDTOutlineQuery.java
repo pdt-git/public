@@ -31,7 +31,7 @@ public class PDTOutlineQuery {
 			}
 			session = console.getPrologInterface().getSession();
 
-			String query = "find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
+			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {

@@ -177,23 +177,27 @@ export_all_results(File, Goal) :-
        )
     ).
  
-/**
- * with_output_to_file(+File, ?Goal)
- *   Open an output stream for File and redirect all output
- *   of the goal to that stream. Close it afterwards.
- *   CAUTION: The previous contents of the file will be overwritten!
- */
-:- module_transparent with_output_to_file/2,
-                      export_goal_output/2.
+%% with_output_to_file(+File, +Mode, +Goal)
+%    Open an output stream for File in mode Mode 
+%    (Mode = write | append), and redirect all output
+%    of the goal to that stream. Close it afterwards
+%    even if the Goal exited with an exception.
+%    CAUTION: If you choose Mode = write, the previous 
+%    contents of the file will be overwritten!
+%
+:- module_transparent with_output_to_file/3.
 
-with_output_to_file(File,Goal) :- 
-   %open(File, append, Stream),
-   open(File, write, Stream),
-   with_output_to(Stream,Goal),
-   close(Stream).
+with_output_to_file(File,Mode,Goal) :- 
+   setup_call_cleanup( open(File, Mode, Stream),     % setup
+                       with_output_to(Stream,Goal),  % call
+                       close(Stream)                 % cleanup
+   ).
 
-% -- OBSOLETE, use with_output_to_file/2 instead:
-export_goal_output(File,Goal) :- with_output_to_file(File,Goal).
+
+% -- OBSOLETE, use with_output_to_file/3 instead:
+:- module_transparent with_output_to_file/2, export_goal_output/2.
+with_output_to_file(File,Goal) :-  with_output_to_file(File,write,Goal).
+export_goal_output(File,Goal)  :-  with_output_to_file(File,write,Goal).
 
    
 % Portable implementation of the above predicate
@@ -207,10 +211,10 @@ export_goal_output(File,Goal) :- with_output_to_file(File,Goal).
 %    tell(CurrentOutput).
         
 /**
- * Return in Arg4 the path to a unique file in the CTC_HOME
- * directory, whose name was created from the prefix passed
- * in Arg1 by appending the time of the invocation of this 
- * predicate.  
+ * Return in Arg4 the path to a unique file in folder Arg1.
+ * The file name is created from the prefix passed
+ * in Arg2 by appending the time of the invocation of this 
+ * predicate and the sufix from Arg3.  
  */
 create_timestamped_file_path(Directory,Prefix,Suffix,FilePath) :-
     create_timestamp(Timestamp),
@@ -232,6 +236,13 @@ create_timestamp(TimeStampAtom) :-
     DateTimeTerm2 = Y-M-D-H-Mn-S,
     term_to_atom(DateTimeTerm2,TimeStampAtom).
 
+create_timestamp_2(TimeStampAtom) :-
+    get_time(TimeStamp),
+    stamp_date_time(TimeStamp, DateTimeTerm1, local),
+    DateTimeTerm1 = date(Y,M,D,H,Mn,S,_,_,_),
+    Seconds is truncate(S), 
+    format(atom(TimeStampAtom), '~a.~a.~a ~a:~a:~d', [D,M,Y,H,Mn,Seconds]).
+    
 /** 
  * Determine the absolute path to the root directory of the current 
  * workspace ASSUNIMG that this file is three levels deeper:

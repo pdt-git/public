@@ -2,7 +2,7 @@
 							find_all_meta_predicates/0]).
 
 :- use_module(metafile_referencer).
-:- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(term_based_metapred_finder).
 :- use_module('../modules_and_visibility.pl').
 

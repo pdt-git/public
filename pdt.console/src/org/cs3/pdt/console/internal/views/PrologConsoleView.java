@@ -410,8 +410,50 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 	}
 	
+	private class ConsoleQueryAction extends Action {
+		
+		private String query;
+		
+		public ConsoleQueryAction(String text, ImageDescriptor icon, String query){
+			super(text, icon);
+			this.query = query.endsWith(".") ? query : query + ".";
+			setToolTipText(text);
+		}
+		
+		protected String getQuery(){
+			return query;
+		}
+		
+		@Override
+		public void run(){
+			Job j = new Job(getToolTipText()) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						PrologConsole c = getConsole();
+						ConsoleModel model = c.getModel();
+						model.setLineBuffer(" ");
+						model.commitLineBuffer();
+						model.setLineBuffer(getQuery());
+						model.commitLineBuffer();
+					} catch (Throwable e) {
+						Debug.report(e);
+						return Status.CANCEL_STATUS;
+					} finally {
+						monitor.done();
+					}
+					return Status.OK_STATUS;
+				}
 
+				private PrologConsole getConsole() {
+					return PrologConsoleView.this;
+				}
 
+			};
+			j.schedule();
+		}
+	}
+	
 	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 	private ConsoleViewer viewer;
 	private Composite partControl;
@@ -431,6 +473,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private HashMap<PrologInterface, SavedState> viewerStates = new HashMap<PrologInterface, SavedState>();
 
 	private SelectContextPIFAutomatedAction automatedSelector;
+	private ConsoleQueryAction activateGuiTracerAction;
+	private ConsoleQueryAction deactivateGuiTracerAction;
+	private ConsoleQueryAction threadMonitorAction;
+	private ConsoleQueryAction debugMonitorAction;
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -561,18 +607,16 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		};
 		clearAction = new ClearAction("Clear", "clear console output",
 				ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
-		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
-				new String[] {"activate guitracer", "deactivate guitracer"},  
-				new String[] {"activate GUI tracer", "deactivate GUI tracer"}, 
-				new ImageDescriptor[] {
-				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
-				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
-//		activateGuiTracerAction = new ConsoleAction("guitracer",
-//				"activate guitracer", "activate GUI tracer", ImageRepository
-//						.getImageDescriptor(ImageRepository.GUITRACER));
-//		deactivateGuiTracerAction = new ConsoleAction("noguitracer",
-//				"deactivate guitracer", "deactivate GUI tracer",
-//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
+//		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
+//				new String[] {"activate guitracer", "deactivate guitracer"},  
+//				new String[] {"activate GUI tracer", "deactivate GUI tracer"}, 
+//				new ImageDescriptor[] {
+//				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
+//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
+		activateGuiTracerAction = new ConsoleQueryAction("activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
+		deactivateGuiTracerAction = new ConsoleQueryAction("deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
+		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
+		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
 		pasteFileNameAction = new PasteAction("paste filename",
 				"paste the name of the current editor file", ImageRepository
 						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
@@ -742,9 +786,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		manager.add(new Separator("#System"));
 				
 		manager.add(new Separator("#ConsoleInternal"));
-		manager.add(guiTracerAction);
-//		manager.add(activateGuiTracerAction);
-//		manager.add(deactivateGuiTracerAction);
+//		manager.add(guiTracerAction);
+		manager.add(activateGuiTracerAction);
+		manager.add(deactivateGuiTracerAction);
+		manager.add(threadMonitorAction);
+		manager.add(debugMonitorAction);
 		manager.add(new Separator("#ConsoleInternal-end"));
 		manager.add(new Separator("#Clipboard"));
 		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
