@@ -3,7 +3,7 @@
          [ pdt_reload/1                           % Called from ConsultActionDelegate.run()
          , activate_warning_and_error_tracing/0   % Called from PLMarkerUtils.addMarkers()
          , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
-         , errors_and_warnings/4                  % Called from PLMarkerUtils.run()
+         , errors_and_warnings/5                  % Called from PLMarkerUtils.run()
          ]).
 
 
@@ -45,9 +45,9 @@ pdt_reload(File):-
                 *************************************/
 
 % Store SWI-Prolog error and warning messages as
-% traced_messages(Level, Line, Lines) facts.
+% traced_messages(Level, Line, Lines, File) facts.
 
-:- dynamic(traced_messages/3).
+:- dynamic(traced_messages/4).
 :- dynamic(warning_and_error_tracing/0).
 
 activate_warning_and_error_tracing :- 
@@ -59,7 +59,7 @@ activate_warning_and_error_tracing :-
 deactivate_warning_and_error_tracing :-
 	with_mutex('reloadMutex', (
 	  retractall(warning_and_error_tracing),
-	  retractall(traced_messages(_,_,_))
+	  retractall(traced_messages(_,_,_,_))
 	)). 
  
  	
@@ -85,8 +85,9 @@ user:message_hook(_Term, Level,Lines) :-
     with_mutex('reloadMutex', (
 		warning_and_error_tracing,
 		prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
-		assertz(traced_messages(Level, Line,Lines)),
-		trace_reload(traced_messages(Level, Line,Lines)),
+		prolog_load_context(source, File),
+		assertz(traced_messages(Level, Line,Lines, File)),
+		trace_reload(traced_messages(Level, Line,Lines, File)),
 	%	assertz(user:am(_Term, Level,Lines)),
 		fail
 	)).
@@ -96,11 +97,11 @@ user:message_hook(_Term, Level,Lines) :-
                 * USE INTERCEPTED PROLOG ERROR MESSAGES   *
                 *************************************/
 
-%% errors_and_warnings(?Level,?Line,?Length,?Message) is nondet.
+%% errors_and_warnings(?Level,?Line,?Length,?Message,?File) is nondet.
 %
-errors_and_warnings(Level,Line,0,Message) :-
+errors_and_warnings(Level,Line,0,Message, File) :-
 		wait_for_reload_finished,
-	    traced_messages(Level, Line,Lines),
+	    traced_messages(Level, Line, Lines, File),
 	    trace_reload(e_w(Lines)),
 	%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
 	    new_memory_file(Handle),
