@@ -351,7 +351,14 @@ find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc') :-
 	current_module(Name),
     atom_concat(Prefix,_,Name).
 
-
+% TODO: Improvement Idea: use "string" Prefix instead 
+%  of atom to avoid Prefix to be added to the set of atoms
+find_pred(_EnclFile,Prefix,'zatom',Atom,-1,fail,true,'nodoc') :-
+	'$atom_completions'(Prefix, Atoms),
+	member(Atom,Atoms), 
+	Atom \= Prefix,
+	garbage_collect_atoms,
+	\+ current_predicate(Atom/_Arity).
 
 find_pred_(Prefix,Module,Name,Arity,true) :-
     ( var(Module)->
@@ -366,6 +373,7 @@ find_pred_(Prefix,Module,Name,Arity,true) :-
     	(Prefix \== ''; \+ predicate_property(Term, built_in)) )
       ; true
     ).
+
 
 get_declaring_module(EnclFile,Module,Name,Arity) :-
      module_of_file(EnclFile,ContainingModule),
