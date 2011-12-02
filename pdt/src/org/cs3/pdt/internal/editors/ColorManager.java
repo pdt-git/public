@@ -80,6 +80,10 @@ public class ColorManager {
 	public RGB getBackgroundColor() {
 		return PreferenceConverter.getColor(store, PDTColors.PREF_BACKGROUND);
 	}
+	
+	public RGB getExternBackgroundColor() {
+		return PreferenceConverter.getColor(store, PDTColors.PREF_BACKGROUND_EXTERNAL_FILES);
+	}
 
 	public RGB getDefaultColor() {
 		return PreferenceConverter.getColor(store, PDTColors.PREF_DEFAULT);  

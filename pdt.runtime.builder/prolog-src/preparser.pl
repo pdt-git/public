@@ -37,9 +37,9 @@ parse_clauses(InStream,FileId):-
         	read_term(InStream,Clause,
             	[   %term_position(Pos),        % output
               		subterm_positions(SubPos), % output
-%                	module(CurrentModule),     % INput
+%                	module(CurrentModule),      % input
 %                	singletons(Singletons),     % output
-                	variable_names(VarNames)  % output
+                	variable_names(VarNames)   % output
             	]),
         	error(Error,Context),
         	( assert(error(Error,Context,FileId)),  % <<<<

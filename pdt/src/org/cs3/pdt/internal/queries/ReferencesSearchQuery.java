@@ -23,7 +23,7 @@ public class ReferencesSearchQuery extends PDTSearchQuery {
 	}
 
 	@Override
-	// find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefHead,RefFile,RefLine,Nth,Kind)
+	// pdt_search:find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefHead,RefFile,RefLine,Nth,Kind)
 	protected String buildSearchQuery(Goal goal, String module) {
 	 // String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ",'" + goal.getModule() + "'," +
 		String query = "get_references('" +goal.getFile()+ "','" +goal.getFunctor()+ "'/" +goal.getArity()+ ", " + module           + " ," +

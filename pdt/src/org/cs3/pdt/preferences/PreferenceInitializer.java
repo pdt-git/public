@@ -57,6 +57,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){			
 		PreferenceConverter.setDefault(store, PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_BACKGROUND_EXTERNAL_FILES, PDTColors.BACKGROUND_EXTERN);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_DEFAULT, PDTColors.DEFAULT);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_STRING, PDTColors.STRING);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_COMMENT, PDTColors.COMMENT);		

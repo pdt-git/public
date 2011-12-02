@@ -12,7 +12,7 @@ locally_dead_predicate(Dead):-
     uncalled_local_predicate(Dead).
 locally_dead_predicate(Dead):-
     forall(	
-    	call_edges_for_predicates(Caller,Dead,_),
+    	(call_edges_for_predicates(Caller,Dead,_), Caller \== Dead),
     	locally_dead_predicate(Caller)
     ),
     \+(exporting(_,Dead,_)).

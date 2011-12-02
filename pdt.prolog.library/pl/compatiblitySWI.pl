@@ -369,12 +369,6 @@ nequals(_term1, _term2) :- _term1 \= _term2.
 
 debugPrint(_str) :- writef(_str).
 
-has_property(_pred,_prop,1) :- 
-	predicate_property(_pred,_prop),
-	!.
-	
-has_property(_pred,_prop,0).
-
 
 /**
 */

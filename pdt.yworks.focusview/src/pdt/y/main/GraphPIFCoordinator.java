@@ -83,6 +83,10 @@ public class GraphPIFCoordinator implements ISelectionChangedListener{
 				query = "write_focus_to_graphML('"+focusFileForParsing+"','"+Util.prologFileName(helpFile)+"').";
 				sendQueryToCurrentPiF(query);
 
+				//query = "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
+				//Map<String, Object> result = sendQueryToCurrentPiF(query);
+				//result.get("FocusId");
+				
 				FutureTask<?> futureTask = new FutureTask<Object>(new Runnable() {
 					@Override
 					public void run() {
