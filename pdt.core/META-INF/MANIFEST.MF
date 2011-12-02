@@ -31,4 +31,5 @@ Require-Bundle: org.cs3.pdt.common,
  org.eclipse.jface.text
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.ui.ide
+Import-Package: org.eclipse.core.filesystem,
+ org.eclipse.ui.ide

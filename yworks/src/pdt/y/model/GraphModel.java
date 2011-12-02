@@ -32,7 +32,6 @@ public class GraphModel {
 	private EdgeRealizer callEdgeRealizer;
 	private EdgeRealizer loadEdgeRealizer;
 
-		
 	private GraphModel(){
 		  
 		initNodeRealizers();

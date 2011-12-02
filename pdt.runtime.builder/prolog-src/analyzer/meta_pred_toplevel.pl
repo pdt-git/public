@@ -2,13 +2,18 @@
 
 
 generate_factbase_with_metapred_analysis(File):-
-    %format('###File: ~w~n', [File]), 
-    with_mutex(meta_pred_finder,
-    	(	generate_factbase(File),
-    		find_all_meta_predicates
-    	)
-    ),
-    get_all_userdefined_meta_predicates(_MetaPreds).
+	%format('###File: ~w~n', [File]), 
+	with_mutex(meta_pred_finder,
+		(	pdt_flag(generate_factbase, true)
+		->	generate_factbase(File),
+			(	pdt_flag(meta_pred_analysis, true)
+			->	find_all_meta_predicates
+			;	true
+			)
+		;	true
+		)
+	).
+%    get_all_userdefined_meta_predicates(_MetaPreds).
    % format('### Userdefined meta pred: ~w~n', [MetaPreds]).
 
 find_undeclared_meta_predicates_position(File, Offset, MetaSpec):-

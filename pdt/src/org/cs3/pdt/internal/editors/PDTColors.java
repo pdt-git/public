@@ -44,18 +44,20 @@ package org.cs3.pdt.internal.editors;
 import org.eclipse.swt.graphics.RGB;
 
 public interface PDTColors {
-	public static final RGB BACKGROUND  = new RGB(255, 255, 255);
-	public static final RGB DEFAULT     = new RGB(  0,   0,   0);   // black        
-	public static final RGB STRING      = new RGB(  0,   0, 255);
-	public static final RGB COMMENT     = new RGB( 63, 127,  95);   // RGB values for Eclipse Java comments.	
-	public static final RGB VARIABLE    = new RGB(139,   0,   0);
-	public static final RGB UNDEFINED   = new RGB(255,   0,   0);   // RED = Call to undefined  predicate
-	public static final RGB BUILTIN     = new RGB(  0,   0, 128);   // 
-	public static final RGB DYNAMIC     = new RGB(110,  40,  40);   // dark brown
-	public static final RGB TRANSPARENT = new RGB(255,  80, 180);   // pink for module_transparent
-	public static final RGB META        = new RGB( 15, 160,  15);   // dark green for meta_predicate
+	public static final RGB BACKGROUND        = new RGB(255, 255, 255);
+	public static final RGB BACKGROUND_EXTERN = new RGB(240, 240, 240);
+	public static final RGB DEFAULT           = new RGB(  0,   0,   0);   // black        
+	public static final RGB STRING            = new RGB(  0,   0, 255);
+	public static final RGB COMMENT           = new RGB( 63, 127,  95);   // RGB values for Eclipse Java comments.	
+	public static final RGB VARIABLE          = new RGB(139,   0,   0);
+	public static final RGB UNDEFINED         = new RGB(255,   0,   0);   // RED = Call to undefined  predicate
+	public static final RGB BUILTIN           = new RGB(  0,   0, 128);   // 
+	public static final RGB DYNAMIC           = new RGB(110,  40,  40);   // dark brown
+	public static final RGB TRANSPARENT       = new RGB(255,  80, 180);   // pink for module_transparent
+	public static final RGB META              = new RGB( 15, 160,  15);   // dark green for meta_predicate
 	
 	public static final String PREF_BACKGROUND = "pdt.editor.colors.background";
+	public static final String PREF_BACKGROUND_EXTERNAL_FILES = "pdt.editor.colors.backgroundextern";
 	public static final String PREF_DEFAULT = "pdt.editor.colors.default";
 	public static final String PREF_STRING = "pdt.editor.colors.string";
 	public static final String PREF_COMMENT = "pdt.editor.colors.comment";
@@ -76,4 +78,5 @@ public interface PDTColors {
 	public static final String STRING_STRING = "String";
 	public static final String DEFAULT_STRING = "Default";
 	public static final String BACKGROUND_STRING = "Background";
+	public static final String BACKGROUND_EXTERN_STRING = "Background for external files";
 }

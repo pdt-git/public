@@ -85,13 +85,9 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 	private class ConsoleReader implements Runnable {
 
-		private static final int ESCAPE_CHAR = '*';
+		private static final int ESCAPE_CHAR = '\u001B';   // ASCII ESC
 
 		private static final char RAW_MODE_CHAR = 's';
-
-		private static final char COOKED_MODE_CHAR = 'c';
-
-		private static final char NO_MODE_CHAR = 'n';
 
 		private BufferedReader reader;
 
@@ -122,12 +118,6 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 								data.setLength(0);
 
 								setSingleCharMode(true);
-								break;
-							case COOKED_MODE_CHAR:
-							case NO_MODE_CHAR:
-								// disable single char mode again. should not be
-								// neccessary...
-								setSingleCharMode(false);
 								break;
 							case ESCAPE_CHAR:
 								data.append(buf[i]);
@@ -348,10 +338,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 							"false");
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
-				writer.write("use_module(lib_pdt_console_pl('cio/single_char_interceptor.pl')).\n"
-//						+ "sci_install.\n"
-						+ "set_stream(current_output,tty(true)),"
-						+ "set_stream(current_input,tty(true)).\n");
+				writer.write("pdt_install_console.\n");
 			} 
 			writer.flush();
 			Debug.debug("Connect complete");
