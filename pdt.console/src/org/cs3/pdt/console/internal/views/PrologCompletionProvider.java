@@ -139,7 +139,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		String head = line.substring(0, pos);
 		String tail = line.substring(pos);
 
-		String[] split = head.split("[^\\w]");
+		String[] split = head.split("[^\\w^$]");
 		String prefix = split[split.length - 1];
 
 		Predicate[] elems = null;
