@@ -276,8 +276,10 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     		;	defined_in_file(Module, Functor, Arity, _, File, Line)
     		)
     	)
-    ).
+    ),
+    \+find_blacklist(Functor,Arity,Module).
     
+        
 % The following clause searches for clauses inside the given file, which contribute to multifile 
 % predicates, defined in foreign modules.
 find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Line, PropertyList):-
@@ -290,9 +292,21 @@ find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Li
     clause_property(Ref,line_count(Line)),
     functor(Head, Functor, Arity),
     properties_for_predicate(Module, Functor, Arity, PropertyList0),
-    append([from(Module)], PropertyList0, PropertyList).
+    append([from(Module)], PropertyList0, PropertyList),
+    \+find_blacklist(Functor,Arity,Module).
    
 
+%% find_blacklist(?Functor, ?Arity, ?Module) is nondet.
+%
+% Used to remove (internal) predicates from the results of find_definition_contained_in/8.
+%
+%
+find_blacklist('$load_context_module',2,_).
+find_blacklist('$mode',2,_).
+find_blacklist('$pldoc',4,_).
+
+    
+    
 
 
                /***********************************************
@@ -305,6 +319,8 @@ find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Li
 %
 % Used by the PLEditor content assist.
 %
+% The meaning of Arity is overloaded: -2: atom, -1 : module, >= 0 : predicate
+% 
 % For performance reasons an empty prefix with an unspecified module
 % will only bind predicates if EnclFile is specified.
 %
@@ -353,7 +369,7 @@ find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc') :-
 
 % TODO: Improvement Idea: use "string" Prefix instead 
 %  of atom to avoid Prefix to be added to the set of atoms
-find_pred(_EnclFile,Prefix,'zatom',Atom,-1,fail,true,'nodoc') :-
+find_pred(_EnclFile,Prefix,'',Atom,-2,fail,true,'nodoc') :-
 	'$atom_completions'(Prefix, Atoms),
 	member(Atom,Atoms), 
 	Atom \= Prefix,
