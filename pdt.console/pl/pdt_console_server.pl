@@ -96,6 +96,7 @@
 :- use_module(library(socket)).
  
 
+:- dynamic(console_thread_name/1).
 
 prolog_server(Port,Options) :-
 	tcp_socket(ServerSocket),
@@ -127,9 +128,10 @@ server_loop_impl_X(ServerSocket,Options,Slave,Peer):-
 	flag(pdt_console_client_id,Id,Id+1),
 	concat_atom(['pdt_console_client_',Id,'@',Host],Alias),
 	thread_create(service_client(InStream, OutStream, Peer, Options),
-		      _,
+		      ID,
 		      [ alias(Alias)
 		      ]),
+	assert(console_thread_name(ID)),
 	server_loop_impl(ServerSocket, Options).
  
 service_client(InStream, OutStream, Peer, Options) :-
