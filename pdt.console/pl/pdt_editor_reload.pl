@@ -36,8 +36,8 @@ pdt_reload(File):-
       ( make:reload_file(File) % SWI Prolog library
       , retractall(in_reload)
       )
-    ),
-    generate_factbase_with_metapred_analysis(File).
+    ).
+   % generate_factbase_with_metapred_analysis(File).
 
 
                /*************************************
