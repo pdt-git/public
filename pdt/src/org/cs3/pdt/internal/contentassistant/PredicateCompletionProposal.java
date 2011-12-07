@@ -22,13 +22,34 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String label;
 //	private String module;
 	private String doc;
+private boolean isModule = false;
+private boolean isAtom = false;
 	
+	public boolean isModule() {
+	return isModule;
+}
+
+public boolean isAtom() {
+	return isAtom;
+}
+
+	/**
+	 * 
+	 * @param offset
+	 * @param length
+	 * @param name
+	 * @param arity -2: atom, -1 : module, >= 0 : predicate
+	 * @param tags
+	 * @param module
+	 */
 	public PredicateCompletionProposal(int offset, int length,
 			String name, int arity, Map<String,?> tags, String module) {
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(
 						arity==-1?
 								ImageRepository.PACKAGE :
+							arity==-2?
+								ImageRepository.PE_ATOM :
 						isBuiltIn(tags)?
 								ImageRepository.PE_BUILT_IN :
 						isPublic(tags)?
@@ -39,7 +60,12 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		this.name=name;
 		this.tags=tags;
 //		this.module=module;
-		if(arity==-1){
+		if(arity < 0){
+			if(arity == -1){
+				isModule = true;
+			} else	if(arity == -2){
+				isAtom = true;
+			}
 			this.label=name;
 		} else {
 			this.label = name+"/"+arity;
@@ -69,7 +95,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 			 }
 			
 		}
-		if(module!=null){
+		if(module!=null && !isAtom){
 			label=module+":" + label;
 		}
 //		this.module = module;
@@ -166,8 +192,10 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 			} if(!isBuiltIn() && other.isBuiltIn()) {
 				return -1;
 			}				
-			return getLabel().compareTo(other.getLabel());
-			
+			if(isAtom && !other.isAtom()) {
+				return -1;
+			}
+			return getLabel().compareTo(other.getLabel());	
 		}
 		return 0;
 	}
