@@ -4,6 +4,7 @@
          , activate_warning_and_error_tracing/0   % Called from PLMarkerUtils.addMarkers()
          , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
          , errors_and_warnings/5                  % Called from PLMarkerUtils.run()
+         , pdt_reloaded_file/1
          ]).
 
 
@@ -111,7 +112,33 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 		memory_file_to_atom(Handle,Message),
 	    free_memory_file(Handle).      
 
+pdt_reloaded_file(LoadedFile) :-
+	findall(FileName,
+		(	traced_messages(_, _, _, FileName)
+		;	errors_and_warnings(silent, _, _, Message, File),
+			file_directory_name(File, Dir),
+			atom_concat(' Loading ', Tmp, Message),
+			atom_concat(Spec, ' ...\n', Tmp),
+			resolve_file_name(Dir, Spec, FileName)
+		),
+		FileNames),
+	sort(FileNames, SetOfFileNames),
+	member(LoadedFile, SetOfFileNames).
 
+% aliases
+resolve_file_name(_Dir, Spec, FileName) :-
+	catch(term_to_atom(SpecTerm, Spec),_,fail), 
+	absolute_file_name(SpecTerm, FileName, [file_type(prolog), access(read), file_errors(fail)]),
+	!.
+
+% absolute paths
+resolve_file_name(_Dir, Spec, FileName) :-
+	absolute_file_name(Spec, FileName, [file_type(prolog), access(read), file_errors(fail)]),
+	!.
+
+% relative paths
+resolve_file_name(Dir, Spec, FileName) :-
+	absolute_file_name(Spec, FileName, [file_type(prolog), access(read), file_errors(fail), relative_to(Dir)]).
    
 wait_for_reload_finished :-
    reset_timout_counter,
