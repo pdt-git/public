@@ -538,9 +538,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 
 		};
-		parent.addListener(SWT.Show, handler);
-		parent.addListener(SWT.Hide, handler);
-		parent.addListener(SWT.FocusOut, handler);
+		parent.getParent().addListener(SWT.Show, handler);
+		parent.getParent().addListener(SWT.Hide, handler);
+		parent.getParent().addListener(SWT.FocusOut, handler);
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
 				.registerPrologConsole(this);
 		GridLayout layout = new GridLayout(1, true);
@@ -1129,7 +1129,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	@Override
 	public boolean isVisible() {
-		return partControl.isVisible();
+		return partControl.getVisible();
 	}
 
 	public ConsoleViewer getViewer() {
