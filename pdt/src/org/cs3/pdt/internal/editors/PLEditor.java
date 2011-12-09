@@ -153,6 +153,26 @@ public class PLEditor extends TextEditor{
 
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
+		if (shouldAbortSaving()) {
+			return;
+		}
+		super.doSave(progressMonitor);
+		// TRHO: Experimental:		
+//		try {
+//			Thread.sleep(200);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+		addProblemMarkers();
+		setFocus();
+
+	}
+
+	/**
+	 * @return 
+	 * 
+	 */
+	private boolean shouldAbortSaving() {
 		if (!(getEditorInput() instanceof IFileEditorInput)) {
 			boolean showWarning = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "true"));
 			if (showWarning) {
@@ -166,20 +186,11 @@ public class PLEditor extends TextEditor{
 				case 2:
 				case SWT.DEFAULT:
 				default:
-					return;
+					return true;
 				}
 			}
 		}
-		super.doSave(progressMonitor);
-		// TRHO: Experimental:		
-//		try {
-//			Thread.sleep(200);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-		addProblemMarkers();
-		setFocus();
-
+		return false;
 	}
 	
 	@Override
@@ -469,7 +480,9 @@ public class PLEditor extends TextEditor{
 			public void run() {
 				// must be super, otherwise doSave will 
 				// consult the file and update the problem markers, too.
-				PLEditor.super.doSave(new NullProgressMonitor());
+				if (!shouldAbortSaving()) {
+					PLEditor.super.doSave(new NullProgressMonitor());
+				}
 //				addProblemMarkers();
 //				setFocus();
 			}
