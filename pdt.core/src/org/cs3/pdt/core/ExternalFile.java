@@ -34,10 +34,12 @@ public class ExternalFile implements IFile {
 		this.path = path;
 	}
 	
+	@Override
 	public int hashCode() {
 		return getFullPath().hashCode();
 	}
 
+	@Override
 	public boolean equals(Object target) {
 		if (this == target)
 			return true;
