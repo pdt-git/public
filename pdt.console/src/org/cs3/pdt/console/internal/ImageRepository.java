@@ -90,7 +90,7 @@ public class ImageRepository {
 
 	public static final String ABORT = "abort.gif";
 
-	public static final String TRACE = "trace.gif";
+	public static final String TRACE = "suspend_co.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
