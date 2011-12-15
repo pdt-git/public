@@ -50,6 +50,7 @@ pdt_reload(File):-
 
 :- dynamic(traced_messages/4).
 :- dynamic(warning_and_error_tracing/0).
+:- dynamic(reloaded_file/1).
 
 activate_warning_and_error_tracing :- 
 	with_mutex('reloadMutex', (
@@ -59,8 +60,9 @@ activate_warning_and_error_tracing :-
 
 deactivate_warning_and_error_tracing :-
 	with_mutex('reloadMutex', (
-	  retractall(warning_and_error_tracing),
-	  retractall(traced_messages(_,_,_,_))
+	  retractall(traced_messages(_,_,_,_)),
+	  retractall(reloaded_file(_)),
+	  retractall(warning_and_error_tracing)
 	)). 
  
  	
@@ -94,6 +96,12 @@ user:message_hook(_Term, Level,Lines) :-
 	)).
 
 
+user:message_hook(load_file(start(_, file(_, FullPath))), _, _) :-
+	with_mutex('reloadMutex', (
+		warning_and_error_tracing,
+		assertz(reloaded_file(FullPath)),
+		fail
+	)).
                /*************************************
                 * USE INTERCEPTED PROLOG ERROR MESSAGES   *
                 *************************************/
@@ -113,32 +121,7 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 	    free_memory_file(Handle).      
 
 pdt_reloaded_file(LoadedFile) :-
-	findall(FileName,
-		(	traced_messages(_, _, _, FileName)
-		;	errors_and_warnings(silent, _, _, Message, File),
-			file_directory_name(File, Dir),
-			atom_concat(' Loading ', Tmp, Message),
-			atom_concat(Spec, ' ...\n', Tmp),
-			resolve_file_name(Dir, Spec, FileName)
-		),
-		FileNames),
-	sort(FileNames, SetOfFileNames),
-	member(LoadedFile, SetOfFileNames).
-
-% aliases
-resolve_file_name(_Dir, Spec, FileName) :-
-	catch(term_to_atom(SpecTerm, Spec),_,fail), 
-	absolute_file_name(SpecTerm, FileName, [file_type(prolog), access(read), file_errors(fail)]),
-	!.
-
-% absolute paths
-resolve_file_name(_Dir, Spec, FileName) :-
-	absolute_file_name(Spec, FileName, [file_type(prolog), access(read), file_errors(fail)]),
-	!.
-
-% relative paths
-resolve_file_name(Dir, Spec, FileName) :-
-	absolute_file_name(Spec, FileName, [file_type(prolog), access(read), file_errors(fail), relative_to(Dir)]).
+	reloaded_file(LoadedFile).
    
 wait_for_reload_finished :-
    reset_timout_counter,
