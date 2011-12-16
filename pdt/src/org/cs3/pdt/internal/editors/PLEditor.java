@@ -85,6 +85,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -105,6 +106,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
@@ -151,6 +153,9 @@ public class PLEditor extends TextEditor{
 
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
+		if (shouldAbortSaving()) {
+			return;
+		}
 		super.doSave(progressMonitor);
 		// TRHO: Experimental:		
 //		try {
@@ -161,6 +166,31 @@ public class PLEditor extends TextEditor{
 		addProblemMarkers();
 		setFocus();
 
+	}
+
+	/**
+	 * @return 
+	 * 
+	 */
+	private boolean shouldAbortSaving() {
+		if (!(getEditorInput() instanceof IFileEditorInput)) {
+			boolean showWarning = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "true"));
+			if (showWarning) {
+				MessageDialog m = new MessageDialog(getEditorSite().getShell(), "External file", null, "The current file in the editor is not contained in the workspace. Are you sure you want to save this file?", MessageDialog.QUESTION, new String[]{"Yes", "Yes, always", "No"}, 0);
+				int answer = m.open();
+				switch (answer) {
+				case 1:
+					PDTPlugin.getDefault().setPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "false");
+				case 0:
+					break;
+				case 2:
+				case SWT.DEFAULT:
+				default:
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	@Override
@@ -450,7 +480,9 @@ public class PLEditor extends TextEditor{
 			public void run() {
 				// must be super, otherwise doSave will 
 				// consult the file and update the problem markers, too.
-				PLEditor.super.doSave(new NullProgressMonitor());
+				if (!shouldAbortSaving()) {
+					PLEditor.super.doSave(new NullProgressMonitor());
+				}
 //				addProblemMarkers();
 //				setFocus();
 			}

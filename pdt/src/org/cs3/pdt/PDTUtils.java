@@ -48,6 +48,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.filesystem.EFS;
@@ -74,8 +75,11 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public final class PDTUtils {
 
 	public static PrologInterface getActiveConsolePif() {
-		return PrologConsolePlugin.getDefault().getPrologConsoleService()
-				.getActivePrologConsole().getPrologInterface();
+		PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+		if (activePrologConsole != null) {
+			return activePrologConsole.getPrologInterface();
+		}
+		return null;
 	}
 
 	public static void showSourceLocation(final SourceLocation loc) {
