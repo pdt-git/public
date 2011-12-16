@@ -23,6 +23,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class PreferencePageColor extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private ColorFieldEditor background;
+	private ColorFieldEditor backgroundExtern;
 	private ColorFieldEditor default_;
 	private ColorFieldEditor string;
 	private ColorFieldEditor comment;
@@ -42,6 +43,7 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 
 	private void initColorFieldEditors(boolean show_colors){
 		background.setEnabled(show_colors, getFieldEditorParent());
+		backgroundExtern.setEnabled(show_colors, getFieldEditorParent());
 		default_.setEnabled(show_colors, getFieldEditorParent());
 		string.setEnabled(show_colors, getFieldEditorParent());
 		comment.setEnabled(show_colors, getFieldEditorParent());
@@ -84,6 +86,7 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 	@Override
 	public void createFieldEditors() {
 		background = new ColorFieldEditor(PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND_STRING, getFieldEditorParent());
+		backgroundExtern = new ColorFieldEditor(PDTColors.PREF_BACKGROUND_EXTERNAL_FILES, PDTColors.BACKGROUND_EXTERN_STRING, getFieldEditorParent());
 		default_ = new ColorFieldEditor(PDTColors.PREF_DEFAULT, PDTColors.DEFAULT_STRING, getFieldEditorParent());
 		string = new ColorFieldEditor(PDTColors.PREF_STRING, PDTColors.STRING_STRING, getFieldEditorParent());
 		comment = new ColorFieldEditor(PDTColors.PREF_COMMENT, PDTColors.COMMENT_STRING, getFieldEditorParent());
@@ -95,6 +98,7 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 		meta = new ColorFieldEditor(PDTColors.PREF_META, PDTColors.META_PREDICATE_STRING, getFieldEditorParent());
 		
 		addField(background);
+		addField(backgroundExtern);
 		addField(default_);
 		addField(string);
 		addField(comment);

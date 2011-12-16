@@ -1,5 +1,7 @@
 package org.cs3.pdt.internal.editors;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +15,11 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.BadLocationException;
@@ -99,7 +103,8 @@ public class PLMarkerUtils {
 	private static void add_markers_for_errors_and_warnings(
 			final IFile file, PrologSession session, final IDocument doc)
 			throws PrologInterfaceException, CoreException {
-		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message)");
+		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message,File)");
+		HashSet<IFile> clearedFiles = new HashSet<IFile>();
 		for (Map<String, Object> msg : msgs) {
 			int severity=0;
 			try {
@@ -108,28 +113,43 @@ public class PLMarkerUtils {
 				continue;
 			}
 			
-			IMarker marker = file.createMarker(IMarker.PROBLEM);
+			String fileName = msg.get("File").toString();
+			IFile file2 = null;
+			try {
+				file2 = PDTCoreUtils.findFileForLocation(fileName);
+			} catch (IOException e1) {
+				continue;
+			}
+			if (file2 == null || !file2.exists()){
+				continue;
+			}
+			if (!clearedFiles.contains(file2)){
+				file2.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+				clearedFiles.add(file2);
+			}
+			
+			IMarker marker = file2.createMarker(IMarker.PROBLEM);
 
 			marker.setAttribute(IMarker.SEVERITY, severity);
 
 			String msgText = (String)msg.get("Message");
 			int line = Integer.parseInt((String)msg.get("Line"))-1;
-			int start = 0;
+//			int start = 0;
+//			
+//			try {
+//				start = doc.getLineOffset(line);
+//			} catch (BadLocationException e) {
+//				Debug.warning("Found no position for marker.");
+//			}
 			
-			try {
-				start = doc.getLineOffset(line);
-			} catch (BadLocationException e) {
-				Debug.warning("Found no position for marker.");
-			}
-			
-			int end = start +Integer.parseInt((String)msg.get("Length"));
+//			int end = start +Integer.parseInt((String)msg.get("Length"));
 			if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
-				start = end= 0;
+//				start = end= 0;
 				line = 0;
 			}
 			
-			MarkerUtilities.setCharStart(marker, start);
-			MarkerUtilities.setCharEnd(marker, end);
+//			MarkerUtilities.setCharStart(marker, start);
+//			MarkerUtilities.setCharEnd(marker, end);
 			MarkerUtilities.setLineNumber(marker, line+1);
 			
 			marker.setAttribute(IMarker.MESSAGE, msgText);
