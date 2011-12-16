@@ -54,6 +54,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
@@ -365,7 +366,7 @@ public class PLEditor extends TextEditor{
 				
 			}
 		});
-		checkBackground(getEditorInput());
+		checkBackgroundAndTitleImage(getEditorInput());
 	}
 
 
@@ -717,18 +718,20 @@ public class PLEditor extends TextEditor{
 		super.doSetInput(input);
 	
 		filepath = new Path(UIUtils.getFileNameForEditorInput(input));
-		checkBackground(input);
+		checkBackgroundAndTitleImage(input);
 	}
 
-	private void checkBackground(IEditorInput input) {
+	private void checkBackgroundAndTitleImage(IEditorInput input) {
 		ISourceViewer sourceViewer = getSourceViewer();
 		if (sourceViewer == null) return;
 		StyledText textWidget = sourceViewer.getTextWidget();
 		if (textWidget == null) return;
 		if (input instanceof IFileEditorInput) {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE));
 		} else {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));
 		}
 	}
 

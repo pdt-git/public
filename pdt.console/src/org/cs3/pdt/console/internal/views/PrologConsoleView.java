@@ -316,7 +316,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		@Override
 		public String getToolTipText() {
-			return "restart";
+			return "Restart process";
+//			return "Restart process and reload currently consulted files";
 		}
 
 		@Override
@@ -633,8 +634,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		deactivateGuiTracerAction = new ConsoleQueryAction("deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
-		abortAction = new PifQueryAction("Abort execution", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), thread_signal(ID, abort)");
-		traceAction = new PifQueryAction("Interrupt execution and trace", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), thread_signal(ID, trace)");
+		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), thread_signal(ID, abort)");
+		traceAction = new PifQueryAction("Interrupt running query and start tracing", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), thread_signal(ID, trace)");
 		pasteFileNameAction = new PasteAction("paste filename",
 				"paste the name of the current editor file", ImageRepository
 						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
@@ -666,18 +667,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private void initMenus(Control parent) {
 
 		MenuManager manager = new MenuManager();
-		manager.setRemoveAllWhenShown(true);
-		manager.addMenuListener(new IMenuListener() {
+		IWorkbenchWindow window = getSite().getWorkbenchWindow();
+		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
+		sall.setImageDescriptor(ImageRepository
+				.getImageDescriptor(ImageRepository.SELECT_ALL));
+		manager.add(sall);
 
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				addContributions(manager);
-
-			}
-
-		});
-		getSite().registerContextMenu(manager, viewer);
-		contextMenu = manager.createContextMenu(parent);
+		manager.add(ActionFactory.CUT.create(window));
+		manager.add(ActionFactory.COPY.create(window));
+		manager.add(ActionFactory.PASTE.create(window));
+		manager.add(pasteFileNameAction);
+		manager.add(clearAction);
+		contextMenu = manager.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(contextMenu);
 	}
 
@@ -694,15 +695,16 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		toolBarManager.add(createProcessAction);
 		
-		createCombo(toolBarManager);
-		addContributions(toolBarManager);
+		createAutomatedSelector(toolBarManager);
+		addToolbarContributions(toolBarManager);
+		addMenuContributions(bars.getMenuManager());
 	
 //		pifSelector.init(getViewSite().getWorkbenchWindow());
 		automatedSelector.init(getViewSite().getWorkbenchWindow());
 
 	}
 
-	private void createCombo(IToolBarManager toolBarManager) {
+	private void createAutomatedSelector(IToolBarManager toolBarManager) {
 		
 		automatedSelector = new SelectContextPIFAutomatedAction(){
 
@@ -799,38 +801,22 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
         }
 	}
 
-	private void addContributions(IContributionManager manager) {
-		IWorkbenchWindow window = getSite().getWorkbenchWindow();
-		manager.add(new Separator("#System"));
-				
-		manager.add(new Separator("#ConsoleInternal"));
-//		manager.add(guiTracerAction);
+	private void addToolbarContributions(IToolBarManager manager) {
+		manager.add(new Separator());
+		manager.add(abortAction);
+		manager.add(traceAction);
+		manager.add(restartAction);
+		manager.add(new Separator());
+		manager.add(clearAction);
+	}
+	
+	private void addMenuContributions(IMenuManager manager) {
 		manager.add(activateGuiTracerAction);
 		manager.add(deactivateGuiTracerAction);
 		manager.add(threadMonitorAction);
 		manager.add(debugMonitorAction);
-		manager.add(abortAction);
-		manager.add(traceAction);
-		manager.add(new Separator("#ConsoleInternal-end"));
-		manager.add(new Separator("#Clipboard"));
-		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
-		sall.setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.SELECT_ALL));
-		manager.add(sall);
-
-		manager.add(ActionFactory.CUT.create(window));
-		manager.add(ActionFactory.COPY.create(window));
-		manager.add(ActionFactory.PASTE.create(window));
-		manager.add(pasteFileNameAction);
-//		manager.add(debugAction);
-		manager.add(clearAction);
-		manager.add(new Separator("#Clipboard-end"));
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS
-				+ "-end"));		
-		manager.add(restartAction);
-
 	}
+	
 
 	private File getHistoryFile() {
 		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
