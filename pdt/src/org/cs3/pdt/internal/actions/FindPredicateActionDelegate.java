@@ -225,6 +225,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			+enclFile+ "'," +quotedTerm+ "," +module+ ",File,Line)";
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause =  session.queryOnce(query);
+		if(clause.get("File")== null){
+			throw new RuntimeException("Cannot resolve file for primary declaration of " + quotedTerm);
+		}
 		SourceLocation location = new SourceLocation((String)clause.get("File"), false);
 		location.setLine(Integer.parseInt((String)clause.get("Line")));
 		return location;

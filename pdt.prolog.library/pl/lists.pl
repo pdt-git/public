@@ -286,9 +286,13 @@ pretty_print_list([A|B]) :-
    format(']~n').
 
 pretty_print_list_body__([A|B]) :-
-    term_to_atom(A,Aterm),
-    format('  ~a,~n',[Aterm]),
-    pretty_print_list_body__(B).
+	term_to_atom(A,Aterm),
+	length(B,LB),
+	(	LB=0
+	->	format('  ~a ~n',[Aterm])
+	;	format('  ~a, ~n',[Aterm])
+	),
+	pretty_print_list_body__(B).
 pretty_print_list_body__([]) .
      
 
