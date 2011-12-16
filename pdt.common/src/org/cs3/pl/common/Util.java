@@ -92,7 +92,7 @@ public class Util {
 	public static int physicalToLogicalOffset(String data, int physical) {
 		int logical = 0;
 		int nextPos = data.indexOf("\r\n");
-		while (nextPos >= 0 && nextPos < logical) {
+		while (nextPos >= 0 && nextPos < physical) {
 			physical -= (nextPos + 2);
 			logical += (nextPos + 1);
 			data = data.substring(nextPos + 2);
