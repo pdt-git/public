@@ -98,6 +98,10 @@ public class PredicateReadingUtilities {
 		return end + 1;
 	}
 
+	// Set by findBeginOfPredicateName() and findEndOfPredicateName().
+	// Used by isPredicateNameChar():
+	private static boolean predicate_name_is_enclosed_in_quotes = false;
+	
 	public static int findBeginOfPredicateName(IDocument document, int begin)
 			throws BadLocationException {
 		int start = begin;
@@ -105,16 +109,34 @@ public class PredicateReadingUtilities {
 			start--; // scan left until first non-predicate-name  char
 		}
 		start++; // start is now the position of the first predicate char
-		// (or module prefix char)
+		if (document.getChar(start) == '\'') {
+			predicate_name_is_enclosed_in_quotes = true;
+			// start++; // quotes are not part of the name
+		}
 		return start;
 	}
 
 	public static int findEndOfPredicateName(IDocument document, int end)
 			throws BadLocationException {
-		while (Util.isPredicateNameChar(document.getChar(end))
-				&& end < document.getLength()) {
-			end++;// scan right for first non-predicate char
+		
+		if (predicate_name_is_enclosed_in_quotes) {
+			// Accept any character up to the next simple quote:
+			while ( document.getChar(end)!='\'' 
+					&& end < document.getLength() ) {
+				end++;
+			}
+			// Include the terminal quote
+			end++;
+			// Reset flag for next predicate name reading
+			predicate_name_is_enclosed_in_quotes = false;
+		} else {
+			// Do not accept special characters that may only occur within quotes:
+			while (Util.isNormalPredicateNameChar(document.getChar(end)) 
+					&& end < document.getLength()) {
+				end++;
+			}
 		}
+
 		return end;
 	}
 

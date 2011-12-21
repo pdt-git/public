@@ -385,7 +385,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 //			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
 		}
 		List<String> contributionKeys = s.getBootstrapConstributionKeys();
-		if(contributionKeys.size() == 0){
+		if(!contributionKeys.contains("")){
 			contributionKeys.add("");
 		}
 		for (String contributionKey : contributionKeys) {

@@ -236,7 +236,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		try {
 			session = console.getPrologInterface().getSession();
 			Map<String, Object> solutions = session
-					.queryOnce("predicates_with_property(" 
+					.queryOnce("pdt_editor_highlighting:predicates_with_property(" 
 							+ property
 							+ ",'" 
 							+ file.getName()

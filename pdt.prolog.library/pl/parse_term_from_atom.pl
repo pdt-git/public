@@ -1,7 +1,7 @@
 :- module( parse_term_from_atom,
-         [ atom_to_term/4       % (TermAtom,Term,VarNames,TermPos)
-         , find_term_in_atom/4  % (Atom,SearchTerm,From,To)
-         , find_term_in_term/5  % (SearchTerm,Term,TermPos,From,To)
+         [ atom_to_term/4       % (+TermAtom,Term,VarNames,TermPos)
+         , find_term_in_atom/4  % (+Atom,+SearchTerm,From,To)
+         , find_term_in_term/5  % (+SearchTerm,+Term,TermPos,From,To)
          ]
          ).
  % TODO: 
@@ -30,10 +30,12 @@ atom_to_term(TermAtom,Term,VarNames,TermPos) :-
     ]).
 
 
+%% find_term_in_atom(+Atom,+SearchTerm,?From,?To)
 find_term_in_atom(Atom,SearchTerm,From,To) :-
     atom_to_term(Atom,TermFromAtom,_,AllTermPos),
     find_term_in_term(SearchTerm,TermFromAtom,AllTermPos,From,To).
 
+%% find_term_in_term(+SearchTerm,+Term,?TermPos,?From,?To)
 find_term_in_term(SearchTerm,Term,AllTermPos,From,To) :-
     nonvar(SearchTerm),
     nonvar(Term),
@@ -79,8 +81,8 @@ find_term_in_term__(SearchTerm,Term,TermPos,From,To) :-
 %    FromStartNew is FromStart+FromTerm,
 %    find_term_in_term(SearchTerm,Argument,ArgumentPos,FromStartNew,From,To). 
     
-% See manual for read_term/3 for the meaning of the terms
-% in the first argument:    
+% For the meaning of the terms in the first argument  
+% see the SWI-Prolog manual entry for read_term/3:    
 extract_position( term_position(From, To, _, _, _),     From,To) :- !.
 extract_position( From-To,                              From,To) :- !.
 extract_position( string_position(From, To),            From,To) :- !.
