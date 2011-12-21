@@ -1,12 +1,12 @@
 package pdt.y.main;
 
-import java.util.HashMap;
+import static org.eclipse.ui.IWorkbenchCommandConstants.FILE_SAVE;
+import static org.eclipse.ui.IWorkbenchCommandConstants.FILE_SAVE_ALL;
 
-import javax.swing.JComponent;
+import java.util.HashMap;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PDTChangedFileInformation;
-import org.eclipse.albireo.core.SwingControl;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IExecutionListener;
@@ -17,43 +17,55 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.progress.UIJob;
-
-import pdt.y.model.GraphDataHolder;
-import y.base.Node;
-import y.view.HitInfo;
-import y.view.NodeLabel;
-import y.view.ViewMode;
 
 public class FocusViewCoordinator implements ISelectionChangedListener, IExecutionListener {
 	
-	FocusViewPlugin focusViewPlugin;
-	Composite viewContainer;
-	HashMap<String, FocusView> views = new HashMap<String, FocusView>();
+	final FocusViewPlugin focusViewPlugin;
+	final Composite viewContainer;
+	final HashMap<String, FocusView> views = new HashMap<String, FocusView>();
 	
 	FocusView currentFocusView;
 
-	public FocusViewCoordinator(FocusViewPlugin view, Composite viewContainer) {
-		focusViewPlugin = view;
-		this.viewContainer = viewContainer; 
+	public FocusViewCoordinator(final FocusViewPlugin plugin, final Composite viewContainer) {
+		this.focusViewPlugin = plugin; 
+		this.viewContainer = viewContainer;
+		
 		PDTPlugin.getDefault().addSelectionChangedListener(this);
+		
+		ICommandService service = (ICommandService) PlatformUI
+			.getWorkbench().getService(ICommandService.class);
+	    service.addExecutionListener(this);
 	}
 	
 	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		ISelection selection = event.getSelection();
+		
 		if (selection instanceof PDTChangedFileInformation) {
+		
 			final PDTChangedFileInformation fileInfo = (PDTChangedFileInformation)selection;
+			
 			if (currentFocusView == null 
 					|| !currentFocusView.getFilePath().equals(fileInfo.getPrologFileName())) {
-				new UIJob("Add Focus View") {
+				
+				new UIJob("Update Focus View") {
 				    public IStatus runInUIThread(IProgressMonitor monitor) {
-				    	swichFocusView(fileInfo.getPrologFileName());
-				        return Status.OK_STATUS;
+				    	
+				    	FocusView f = swichFocusView(fileInfo.getPrologFileName());
+				    	
+				    	if (f.isEmpty()){
+				    		focusViewPlugin.setInfo("Please activate prolog console, set focus on file and press F9 to load graph...");
+				    	}
+				        
+				    	return Status.OK_STATUS;
 				    }
 				}.schedule();
 			}
@@ -64,10 +76,11 @@ public class FocusViewCoordinator implements ISelectionChangedListener, IExecuti
 		}
 	}
 	
-	private Composite swichFocusView(String path) {
+	private FocusView swichFocusView(String path) {
 		currentFocusView = views.get(path);
 		if (currentFocusView == null) {
 			currentFocusView = new FocusView(focusViewPlugin, viewContainer, path);
+
 			views.put(path, currentFocusView);
 		}
 		
@@ -76,10 +89,24 @@ public class FocusViewCoordinator implements ISelectionChangedListener, IExecuti
 		return currentFocusView;
 	}
 
-	private void setDirtyFocusView(String path) {
-		// TODO implement logic
+	private void setDirtyFocusView(String location) {
+		if (location == null)
+			return;
+		
+		String path = location.toLowerCase().replace('\\', '/');
+		if (!path.endsWith(".pl"))
+			return;
+		
+		for (FocusView f : views.values()) {
+			for (String d : f.getDependencies()) {
+				if (path.equals(d)) {
+					f.setDirty();
+					break;
+				}
+			}
+		}
 	}
-
+	
 	@Override
 	public void notHandled(String commandId, NotHandledException exception) { }
 
@@ -88,15 +115,30 @@ public class FocusViewCoordinator implements ISelectionChangedListener, IExecuti
 			ExecutionException exception) { }
 
 	@Override
-	public void postExecuteSuccess(String commandId, Object returnValue) {
-		if (commandId.equals(IWorkbenchCommandConstants.FILE_SAVE)
-				|| commandId.equals(IWorkbenchCommandConstants.FILE_SAVE_ALL)) {
-			// TODO: setDirtyFocusView(path);
+	public void preExecute(String commandId, ExecutionEvent event) { }
+	
+	@Override
+	public void postExecuteSuccess(String commandId, Object returnValue) { 
+		IWorkbenchPage wb = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		if (commandId.equals(FILE_SAVE)) {
+			setDirtyFocusView(getFileLocation(wb.getActiveEditor()));
+			return;
+		}
+		if (commandId.equals(FILE_SAVE_ALL)) {
+			IEditorPart[] editors = wb.getEditors();
+			for (IEditorPart e : editors) {
+				setDirtyFocusView(getFileLocation(e));
+			}
 		}
 	}
 
-	@Override
-	public void preExecute(String commandId, ExecutionEvent event) { 
-		// TODO: get path
+	private String getFileLocation(IEditorPart editor) {
+        if (editor != null) {
+            IEditorInput input = editor.getEditorInput();
+            if (input instanceof IFileEditorInput) {
+                return ((IFileEditorInput)input).getFile().getLocation().toOSString();
+            }
+        }
+        return null;
 	}
 }

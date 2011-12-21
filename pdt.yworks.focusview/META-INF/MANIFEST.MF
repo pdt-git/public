@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.5.2",
  org.cs3.pdt;bundle-version="0.2.3",
  org.cs3.pdt.console;bundle-version="0.2.3",
- pdt.yworks.basics;bundle-version="1.0.0"
+ pdt.yworks.basics;bundle-version="1.0.0",
+ org.eclipse.ui.ide;bundle-version="3.6.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.cs3.pdt.core,
  org.eclipse.ui.forms,

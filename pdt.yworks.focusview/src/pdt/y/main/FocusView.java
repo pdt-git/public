@@ -1,5 +1,7 @@
 package pdt.y.main;
 
+import java.util.List;
+
 import javax.swing.JComponent;
 
 import org.eclipse.albireo.core.SwingControl;
@@ -14,42 +16,56 @@ import y.view.ViewMode;
 
 public class FocusView extends SwingControl {
 
-	Composite viewContainer;
-	FocusViewPlugin focusViewPlugin;
-	PDTGraphSwingStandalone pdtGraphView;
-	GraphPIFCoordinator pifCoordinator;
-	String filePath;
+	final FocusViewPlugin focusViewPlugin;
+	final Composite viewContainer;
+	final PDTGraphView pdtGraphView;
+	final GraphPIFCoordinator pifCoordinator;
+	final String filePath;
 	
-	public FocusView(FocusViewPlugin plugin, Composite viewContainer, String filePath) {
+	public FocusView(final FocusViewPlugin plugin, final Composite viewContainer, final String filePath) {
 		super(viewContainer, SWT.NONE);
-		this.viewContainer = viewContainer;
+		
 		this.focusViewPlugin = plugin;
+		this.viewContainer = viewContainer;
 		this.filePath = filePath;
-	}
-	
-	public String getFilePath() {
-		return filePath;
-	}
-
-	@Override
-	protected JComponent createSwingComponent() {
-		pdtGraphView = new PDTGraphSwingStandalone();
+		
+		pdtGraphView = new PDTGraphView();
+		
 		pifCoordinator = new GraphPIFCoordinator(pdtGraphView);
-
+		
 		pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifCoordinator));
 
 		HoverTrigger hoverTrigger = new HoverTrigger();
 		pdtGraphView.addViewMode(hoverTrigger);
-
-		return pdtGraphView;
+	}	
+	
+	public String getFilePath() {
+		return filePath;
 	}
 	
 	public boolean isEmpty() {
 		return pdtGraphView.isEmpty();
 	}
+	
+	public void setDirty() {
+		focusViewPlugin.setInfoStatus("[FocusView is outdated]");
+		if (focusViewPlugin.isAutomaticUpdate()) {
+			reload();
+		}
+	}
+	
+	public List<String> getDependencies() {
+		return pifCoordinator.getDependencies();
+	}
 
 	public void reload() {
 		pifCoordinator.queryPrologForGraphFacts(filePath);
+		focusViewPlugin.setInfoStatus("");
+	}
+
+	@Override
+	protected JComponent createSwingComponent() {
+		return pdtGraphView;
 	}
 
 	@Override
