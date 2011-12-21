@@ -3,7 +3,7 @@
          ]
          ).
 
-:- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(properties).
 %:- ensure_loaded('../pdt_factbase.pl').
 %:- use_module('../modules_and_visibility').

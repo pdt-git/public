@@ -14,7 +14,7 @@ write_project_graph_to_file(Project, OutputFile):-
 
 /**
  * write_facts_to_graphML(+Project,+File)
- *   Arg1 has to be a full qualified file name. The file may not exist.
+ *   Arg1 has to be a fully qualified file name. The file must not exist.
  *   The predicated collects the relevant informations about the following 
  *   facts and converts them into abba-sources for Bashaars Tool. This 
  *   sources are written into the file specified by arg1-
@@ -24,12 +24,9 @@ write_project_graph_to_file(Project, OutputFile):-
 write_facts_to_graphML(Project, File):-
     prepare_for_writing(File,OutStream),
     member(FirstProject,Project),
-    write_all_files(FirstProject,OutStream),
-    flush_output(OutStream),
-  	write_load_edges(OutStream),
-  	flush_output(OutStream),
-  	write_call_edges(OutStream),
-  	flush_output(OutStream),
+    write_all_files(FirstProject,OutStream), flush_output(OutStream),
+  	write_load_edges(OutStream), flush_output(OutStream),
+  	write_call_edges(OutStream), flush_output(OutStream),
  	finish_writing(OutStream).
 
 

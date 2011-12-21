@@ -9,7 +9,7 @@
             key="yworks.contribution.key"
             path="prolog-src/output-converter/">
          <dependency
-               contribution="org.cs3.lp.utils">
+               contribution="pdt.prolog.library">
          </dependency>
       </fileSearchPathContribution>
    </extension>

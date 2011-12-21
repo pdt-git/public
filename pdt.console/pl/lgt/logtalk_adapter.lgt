@@ -12,7 +12,7 @@
 
 % Predicates called by the Java part of the PDT outline and search facilities
 
-:- ensure_loaded(org_cs3_lp_utils(general)).
+:- ensure_loaded(pdt_prolog_library(general)).
 
 
 :- object(logtalk_adapter).
@@ -47,8 +47,8 @@
 
 :- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
-:- use_module(org_cs3_lp_utils(utils4modules)).
-%:- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
+:- use_module(pdt_prolog_library(utils4modules)).
+%:- use_module(pdt_prolog_library(pdt_xref_experimental)).
 
 
 

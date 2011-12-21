@@ -119,7 +119,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					String enclFile = UIUtils.getFileFromActiveEditor();
 					String moduleArg = module!=null?Util.quoteAtom(module):"Module";
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					String query = "find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Builtin,Doc)";
+					String query = "pdt_search:find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Builtin,Doc)";
 					List<Map<String, Object>> predicates = session.queryAll(query);
 					Debug.info("find predicates with prefix: "+ query);
 					for (Map<String, Object> predicate : predicates) {

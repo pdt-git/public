@@ -3,7 +3,7 @@
 								is_metaterm/3					%Arg1=ContextModule %Arg2=Literal %Arg3=MetaArgument
 								]).
 								
-:- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(pdt_xref_experimental).
 
 

@@ -41,6 +41,7 @@
            ]
  ).
  
+:- doc_collect(true).
 
 :- module_transparent(call_and_report_contex_module/1).
 call_and_report_contex_module(Goal) :- 
@@ -155,7 +156,7 @@ L = 203.
 % abolish/1, abolish/1, retractall/1, retract/1
 %  
 declared_in_module(Module, Head) :-
-   ( true ; Module = '$syspreds'),
+   ( true ; Module = '$syspreds'),                     % Try also hidden module
    current_predicate(_, Module:Head),                  % Head is declared
    \+ predicate_property(Module:Head, imported_from(_)). % but not imported
 
@@ -173,9 +174,9 @@ declared_in_module(Module, Head) :-
 declared_in_module(Module,Name,Arity,DeclaringModule) :-
     visible_in_module(Module,Name,Arity),                % Name/arity is visible in Module    
 	functor(Head,Name,Arity), 
-    (  predicate_property(Module:Head, imported_from(M)) % and imported
+    (  predicate_property(Module:Head, imported_from(M)) % by being imported
     -> DeclaringModule = M
-    ;  DeclaringModule = Module      % or declared locally
+    ;  DeclaringModule = Module                          % by being declared locally
     ).
  
  
@@ -184,9 +185,9 @@ declared_in_module(Module,Name,Arity,DeclaringModule) :-
 % does not generate!
 %
 declared_in_module(Module,Head,DeclaringModule) :-   
-    (  predicate_property(Module:Head, imported_from(M)) % and imported
+    (  predicate_property(Module:Head, imported_from(M)) % imported
     -> DeclaringModule = M
-    ;  DeclaringModule = Module      % or declared locally
+    ;  DeclaringModule = Module                          % declared locally
     ),
     functor(Head,Name,Arity), 
     visible_in_module(Module,Name,Arity). % Name/arity is visible in Module   
@@ -194,6 +195,7 @@ declared_in_module(Module,Head,DeclaringModule) :-
 % Defined = There is at least one clause in the declaring module.
 % Then the declaring module is also a defining module.
 % Note that the clause(es) in the module can come from different files.
+
 defined_in_module(Module,Head) :- 
     functor(Head,Name,Arity),
     defined_in_module(Module,Name,Arity).
@@ -204,18 +206,25 @@ defined_in_module(Module,Name,Arity) :- % <<< deleted 1 argument
 defined_in_module(ReferencedModule,Name,Arity,DefiningModule) :- 
     declared_in_module(ReferencedModule,Name,Arity,DefiningModule),
     functor(Head,Name,Arity),
-    predicate_property(DefiningModule:Head, number_of_clauses(_)).
+    predicate_property(DefiningModule:Head, number_of_clauses(X)), 
+    X>0.
 
  
-%% declared_but_undefined(-Module,-Name,-Arity,?DeclaringModule) is semidet
+%% declared_but_undefined(-Module,-Name,-Arity,?DeclaringModule) is nondet
 % 
 % Succeed if the predicate Name/Arity visible in Module is declared in 
 % DeclaringModule but not defined by any clause. 
 declared_but_undefined(Module,Name,Arity) :- % <<< deleted 1 argument
     declared_in_module(Module,Name,Arity,Module),
     functor(Head,Name,Arity),
-    \+ predicate_property(Module:Head, number_of_clauses(_)). 
+    \+ (predicate_property(Module:Head, number_of_clauses(X)), X>0).
 
+
+
+%% referenced_but_undeclared(?Module,?Name,?Arity) is nondet
+% 
+% Succeed if the predicate Name/Arity is called in Module is but not 
+% visible there. 
 referenced_but_undeclared(Module,Name,Arity) :-
     predicate_property(Module:Head,undefined),
     functor(Head,Name,Arity).   
@@ -313,7 +322,9 @@ call_in_module(Module,Goal) :-
    ).
 
    
-/*
+/** 
+ * assert_in_module(?Mod,?Head      ) is det
+ *
  * Assert clauses in an explicitly specified module. 
  * 
  * CAUTION: Due to the semantics of modules in SWI-Prolog, the  

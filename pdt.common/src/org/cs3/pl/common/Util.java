@@ -1067,21 +1067,45 @@ public class Util {
 
 	/**
 	 * Returns true if c is a valid character as part of a Prolog
+	 * predicate name that is NOT enclosed in simple quotes.
+	 * @param c character in question
+	 * @return 
+	 */
+	static public boolean isNormalPredicateNameChar(char c) {
+		if (c >= 'a' && c <= 'z') return true;
+		if (c >= '0' && c <= '9') return true;
+		if (c >= 'A' && c <= 'Z') return true;
+		if (c == '_' || c == ':')  return true;
+		return false;
+	}
+
+	/**
+	 * Returns true if c is a character that may be contained in a Prolog
+	 * predicate name that IS enclosed in simple quotes.
+	 * @param c character in question
+	 * @return 
+	 */
+	static public boolean isSpecialPredicateNameChar(char c) {
+		return (c == '\''  
+			 || c == '\\'
+			 || c == '.' 
+			 || c == '+' 
+			 || c == '-' 
+			 || c == '*' 
+             || c == '$'
+        // TODO: add all the other special characters!
+		);
+	}
+
+	
+	/**
+	 * Returns true if c is a valid character as part of a Prolog
 	 * predicate name (including module definition).
 	 * @param c character in question
 	 * @return 
 	 */
 	static public boolean isPredicateNameChar(char c) {
-		if (c >= 'a' && c <= 'z')
-			return true;
-		if (c >= '0' && c <= '9')
-			return true;
-		if (c >= 'A' && c <= 'Z')
-			return true;
-		if (c == ':' || c == '_' || c == '+' || c == '-' || c == '\\'
-				|| c == '*')
-			return true;
-		return false;
+		return (isNormalPredicateNameChar(c) || isSpecialPredicateNameChar(c));
 	}
 
 	static public boolean isNonQualifiedPredicateNameChar(char c) {

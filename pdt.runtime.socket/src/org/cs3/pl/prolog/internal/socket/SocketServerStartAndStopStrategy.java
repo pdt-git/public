@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
@@ -246,7 +247,9 @@ private static JackTheProcessRipper processRipper;
 	private static void writeInitialisationToTempFile(SocketPrologInterface socketPif,
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
+//      Don't set the encoding globally because it 
+//		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
+		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
 		tmpWriter.println(":- guitracer.");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- doc_collect(false).");
@@ -258,6 +261,14 @@ private static JackTheProcessRipper processRipper;
 		if (socketPif.isCreateLogs()) {
 			tmpWriter.println(":- debug(consult_server).");
 
+		}
+		tmpWriter.println(":- multifile(pdt_flag/2).");
+		tmpWriter.println(":- dynamic(pdt_flag/2).");
+		if (Boolean.parseBoolean(PrologRuntimeUIPlugin.getDefault().getPreferenceValue(PrologInterface.PREF_GENERATE_FACTBASE, "false"))){
+			tmpWriter.println(":- assert(pdt_flag(generate_factbase, true)).");
+		}
+		if (Boolean.parseBoolean(PrologRuntimeUIPlugin.getDefault().getPreferenceValue(PrologInterface.PREF_META_PRED_ANALYSIS, "false"))){
+			tmpWriter.println(":- assert(pdt_flag(meta_pred_analysis, true)).");
 		}
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
