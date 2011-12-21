@@ -634,8 +634,28 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		deactivateGuiTracerAction = new ConsoleQueryAction("deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
-		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), thread_signal(ID, abort)");
-		traceAction = new PifQueryAction("Interrupt running query and start tracing", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), thread_signal(ID, trace)");
+        abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, abort),_,fail)") {
+            @Override
+            public void run(){
+            	super.run();
+            	if (!getModel().isConnected()) {
+            		new Thread(new Runnable(){
+            			@Override
+            			public void run() {
+            				try {
+            					Thread.sleep(500);
+            				} catch (InterruptedException e) {
+            				}
+            				try {
+            					connect(currentPif);
+            				} catch (PrologInterfaceException e) {
+            				}
+            			}
+            		}).start();
+            	}
+            }
+        }; 		
+		traceAction = new PifQueryAction("Interrupt running query and start tracing", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
 		pasteFileNameAction = new PasteAction("paste filename",
 				"paste the name of the current editor file", ImageRepository
 						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
