@@ -9,7 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import pdt.y.main.PDTGraphSwingStandalone;
+import pdt.y.main.PDTGraphView;
 
 /**
 	 * Action that loads the current graph from a file in GraphML format.
@@ -20,9 +20,9 @@ import pdt.y.main.PDTGraphSwingStandalone;
 		 */
 		private static final long serialVersionUID = 65359810633139537L;
 		JFileChooser chooser;
-		private PDTGraphSwingStandalone frame;
+		private PDTGraphView frame;
 
-		public LoadAction(PDTGraphSwingStandalone pdtGraphSwing) {
+		public LoadAction(PDTGraphView pdtGraphSwing) {
 			super("Load...");
 			chooser = null;
 			this.frame = pdtGraphSwing;
@@ -45,7 +45,7 @@ import pdt.y.main.PDTGraphSwingStandalone;
 					}
 				});
 			}
-			chooser.showOpenDialog(frame);
+			chooser.showOpenDialog(null);
 			URL resource = null;
 			if (chooser.getSelectedFile() == null )
 				return;

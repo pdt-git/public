@@ -8,7 +8,6 @@ import y.view.LineType;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
-import y.view.SizeConstraintProvider;
 
 
 public class PredicateNodeRealizer extends ShapeNodeRealizer{

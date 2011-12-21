@@ -12,6 +12,30 @@
             id="pdt.view.focus">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="pdt.y.focusview.preferences.PreferenceInitializer">
+      </initializer>
+      <initializer
+            class="pdt.yworks.focusview.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+            class="pdt.y.focusview.preferences.PreferencePage"
+            id="pdt.y.focusview.preferences.PreferencePage"
+            name="Focus View">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.yworks.focusview.preferences.LayoutPreferences"
+            id="pdt.yworks.focusview.preferences.LayoutPreferences"
+            name="Layout">
+      </page>
+   </extension>
    <!--
    <extension
          point="org.eclipse.ui.commands">

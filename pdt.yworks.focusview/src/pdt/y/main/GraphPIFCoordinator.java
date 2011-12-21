@@ -2,8 +2,11 @@ package pdt.y.main;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -28,26 +31,30 @@ public class GraphPIFCoordinator {
 	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
 
 	private File helpFile;
-	private PDTGraphSwingStandalone view;
+	private PDTGraphView view;
 	private PrologInterface pif;
 	private ExecutorService executor = Executors.newCachedThreadPool();
+	private List<String> dependencies = new ArrayList<String>();
 
-	public GraphPIFCoordinator(PDTGraphSwingStandalone view) {
+	public GraphPIFCoordinator(PDTGraphView view) {
 		this.view = view;
 		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
 		ResourceFileLocator locator = plugin.getResourceLocator();
 		helpFile = locator.resolve(NAME_OF_HELPING_FILE);
 	}
 
+	public List<String> getDependencies() {
+		return dependencies;
+	}
+
 	public void queryPrologForGraphFacts(String focusFileForParsing) {
 
-		String prologNameOfFileToConsult = PATH_ALIAS + "(" + FILE_TO_CONSULT
-				+ ")";
+		String prologNameOfFileToConsult = PATH_ALIAS + "(" + FILE_TO_CONSULT + ")";
 
 		try {
 			PrologConsole activeConsole = PrologConsolePlugin.getDefault()
 					.getPrologConsoleService().getActivePrologConsole();
-			
+
 			if (activeConsole != null) {
 				pif = getPifForActiveConsole(activeConsole);
 
@@ -55,8 +62,15 @@ public class GraphPIFCoordinator {
 				sendQueryToCurrentPiF(query);
 
 				query = "write_focus_to_graphML('" + focusFileForParsing
-						+ "','" + Util.prologFileName(helpFile) + "').";
-				sendQueryToCurrentPiF(query);
+						+ "','" + Util.prologFileName(helpFile)
+						+ "', Dependencies).";
+				Map<String, Object> output = sendQueryToCurrentPiF(query);
+
+				dependencies.clear();
+				if (output != null) {
+					Vector deps = (Vector) output.get("Dependencies");
+					dependencies.addAll(deps);
+				}
 
 				// query =
 				// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
@@ -82,10 +96,10 @@ public class GraphPIFCoordinator {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
-			throws PrologInterfaceException {
-
+		throws PrologInterfaceException {
+	
 		PrologSession session = pif.getSession(PrologInterface.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);
 		return result;

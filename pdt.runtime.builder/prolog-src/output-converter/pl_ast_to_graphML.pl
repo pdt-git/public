@@ -1,5 +1,5 @@
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
-								write_focus_to_graphML/2,
+								write_focus_to_graphML/3,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
@@ -33,18 +33,18 @@ write_facts_to_graphML(Project, File):-
  	finish_writing(OutStream).
 
 
-write_focus_to_graphML(FocusFile, File):-
+write_focus_to_graphML(FocusFile, File, Dependencies):-
     with_mutex(prolog_factbase,
     	with_mutex(meta_pred_finder,
     		setup_call_cleanup(
     			prepare_for_writing(File,OutStream),
-				write_focus_facts_to_graphML(FocusFile, OutStream),
+				write_focus_facts_to_graphML(FocusFile, Dependencies, OutStream),
   	  			finish_writing(OutStream)
   	  		)
   	 	)
   	 ).  
   	 
-write_focus_facts_to_graphML(FocusFile, OutStream):-
+write_focus_facts_to_graphML(FocusFile, Dependencies, OutStream):-
     fileT_ri(FocusFile,FocusId), !,
 %	fileT(FocusId,FocusFile,Module),
 %	write_file(OutStream,FocusFile,FocusId,FocusFile,Module),	
@@ -56,7 +56,13 @@ write_focus_facts_to_graphML(FocusFile, OutStream):-
     forall(
     	member((SourceId,TargetId),Calls),
     	write_call_edge(OutStream,SourceId,TargetId)
-    ).
+    ),
+    file_paths(Files, Dependencies).
+    
+file_paths([], []).
+file_paths([Id|IdTail], [Path|PathTail]) :-
+    fileT(Id, Path, _),
+    file_paths(IdTail, PathTail).
     
 collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls):-
     findall(
