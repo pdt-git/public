@@ -1,14 +1,14 @@
 package pdt.y.main;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.Cursor;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.net.URL;
 
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
@@ -17,7 +17,6 @@ import pdt.y.model.GraphModel;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
-import pdt.y.view.modes.WheelScroller;
 import pdt.y.view.swing.actions.ExitAction;
 import pdt.y.view.swing.actions.LoadAction;
 import pdt.y.view.swing.actions.ResetLayout;
@@ -27,36 +26,107 @@ import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
+import y.view.NavigationMode;
 import y.view.ViewMode;
 
-public class PDTGraphSwingStandalone extends  JPanel {
-	private Graph2DView view;
-	private GraphModel model;
-	private Graph2D graph;
-	private GraphMLReader reader;
+public class PDTGraphView extends  JPanel {
+	final Graph2DView view;
+	GraphModel model;
+	Graph2D graph;
+	GraphMLReader reader;
 
-	private GraphLayout layoutModel;
+	GraphLayout layoutModel;
+	
+	EditMode editMode;
+	NavigationMode navigationMode;
 
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public PDTGraphSwingStandalone()
+	public PDTGraphView()
 	{
 		setLayout(new BorderLayout());
-
+		
 		layoutModel = new  GraphLayout();
 
 		reader = new GraphMLReader();
 		view = new Graph2DView();
-		view.addMouseWheelListener(new WheelScroller(view));
 
-		EditMode editMode = initEditMode();
+		initEditMode();
+		
+		initNavigationMode();
+		
+		initMouseZoomSupport();
 
+		initKeyListener();
+		
+		add(view);
+	}
+
+	private void  initEditMode() {
+		editMode = new EditMode();
+		editMode.allowNodeCreation(false);
+		editMode.allowEdgeCreation(false);
+		editMode.setPopupMode(new HierarchicPopupMode());
+		editMode.setMoveSelectionMode(new MoveSelectedSelectionMode(new OrthogonalEdgeRouter()));
+		
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
+	}
 
-		add(view);
+	protected void initNavigationMode() {
+		navigationMode = new NavigationMode();
+		navigationMode.setDefaultCursor(new Cursor(Cursor.MOVE_CURSOR));
+		navigationMode.setNavigationCursor(new Cursor(Cursor.MOVE_CURSOR));
+	}
 
-		addMouseZoomSupport();
+	private void initMouseZoomSupport() {
+		// why do we need two mouse wheel listeners???
+		//view.addMouseWheelListener(new WheelScroller(view));
+		
+		Graph2DViewMouseWheelZoomListener wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
+		wheelZoomListener.setCenterZooming(false);
+		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
+	}
+	
+	private void initKeyListener() {
+		view.getCanvasComponent().addKeyListener(new KeyListener() {
+			
+			Boolean navigation = false;
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (navigation)
+					return;
+				
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+					navigationMode();
+					navigation = true;
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (!navigation)
+					return;
+				
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+					editMode();
+					navigation = false;
+				}
+			}
+
+			@Override
+			public void keyTyped(KeyEvent arg0) { }
+		});
+	}
+	
+	public void navigationMode() {
+		view.addViewMode(navigationMode);
+		view.removeViewMode(editMode);
+	}
+	public void editMode() {
+		view.addViewMode(editMode);
+		view.removeViewMode(navigationMode);
 	}
 
 	public GraphDataHolder getDataHolder() {
@@ -69,24 +139,6 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	public void addViewMode(ViewMode viewMode){
 		view.addViewMode(viewMode);
 	}
-
-	private EditMode initEditMode() {
-		EditMode editMode = new EditMode();
-		editMode.allowNodeCreation(false);
-		editMode.allowEdgeCreation(false);
-		editMode.setPopupMode(new HierarchicPopupMode());
-		editMode.setMoveSelectionMode(new MoveSelectedSelectionMode(new OrthogonalEdgeRouter()));
-		return editMode;
-	}
-
-
-	private void addMouseZoomSupport() {
-		Graph2DViewMouseWheelZoomListener wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
-		//zoom in/out at mouse pointer location
-		wheelZoomListener.setCenterZooming(false);
-		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
-	}
-
 
 	public void setModel(GraphModel model){
 		this.model = model;
@@ -102,10 +154,14 @@ public class PDTGraphSwingStandalone extends  JPanel {
 		updateView();
 	}
 
-
 	private void updateView() {
 		createFirstLabel();
 		calcLayout();
+	}
+
+	public boolean isEmpty() {
+		return graph == null 
+			|| graph.getNodeArray().length == 0;
 	}
 
 	private void createFirstLabel() {
@@ -127,32 +183,6 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	}
 
 
-	public void start()
-	{
-		JFrame frame = new JFrame(getClass().getName());
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		addContentTo(frame.getRootPane());
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-	}
-
-	private final void addContentTo( final JRootPane rootPane )
-	{
-		rootPane.setContentPane(this);
-		rootPane.setJMenuBar(createMenuBar());
-	}
-
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				(new PDTGraphSwingStandalone()).start();
-			}
-		});
-	}
-
-
 	/**
 	 * Create a menu bar for this demo.
 	 */
@@ -166,10 +196,5 @@ public class PDTGraphSwingStandalone extends  JPanel {
 		menu.add(new ExitAction());
 		menuBar.add(menu);
 		return menuBar;
-	}
-
-	public boolean isEmpty() {
-		return graph == null 
-			|| graph.getNodeArray().length == 0;
 	}
 }
