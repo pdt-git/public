@@ -378,10 +378,11 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
 		String pifKey = s.getPifKey();
 		PrologInterface pif = r.getPrologInterface(pifKey);
+		boolean addPifToRegistry = false;
 		if (pif == null) {
 			pif = createPrologInterface(pifKey);
 			initPrologInterfaceOptions(pif);
-			r.addPrologInterface(pifKey, pif);
+			addPifToRegistry = true;
 //			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
 		}
 		List<String> contributionKeys = s.getBootstrapConstributionKeys();
@@ -409,6 +410,9 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 					}
 				}
 			}
+		}
+		if (addPifToRegistry) {
+			r.addPrologInterface(pifKey, pif);
 		}
 		if (s.getId() != null) {
 			r.addSubscription(s);

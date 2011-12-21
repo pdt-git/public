@@ -46,9 +46,11 @@ package org.cs3.pl.prolog.internal;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
@@ -516,6 +518,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			} catch (InterruptedException e) {
 				throw new PrologInterfaceException(e);
 			}
+			
+			reconsultFiles();
 		}
 
 	}
@@ -625,4 +629,45 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
+	
+	
+	private List<String> consultedFiles;
+
+	@Override
+	public List<String> getConsultedFiles() {
+		return consultedFiles;
+	}
+	
+	@Override
+	public void addConsultedFile(String fileName) {
+		if (consultedFiles == null) {
+			consultedFiles = new ArrayList<String>();
+		}
+		// FIXME: this check changes the order of the consults
+		if (!consultedFiles.contains(fileName)) {
+			System.out.println("save " + fileName + " to consultedFiles");
+			consultedFiles.add(fileName);
+		}
+	}
+
+	private void reconsultFiles() {
+		System.out.println("try to reconsult");
+		if (consultedFiles != null) {
+			synchronized (lifecycle) {
+				for (String fileName : consultedFiles) {
+					try {
+						System.out.println("pdt_reload(" + fileName + "), because it was consulted before");
+						// FIXME: timing problem
+						Map<String, Object> result = queryOnce("consult(" + fileName + ")");
+						System.out.println("result is null: " + (result == null));
+					} catch (PrologInterfaceException e) {
+						e.printStackTrace();
+					}
+				}				
+			}
+		}
+	}
+
+	
+	
 }
