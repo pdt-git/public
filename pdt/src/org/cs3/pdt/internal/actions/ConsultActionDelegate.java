@@ -54,6 +54,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -150,6 +151,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				.warning("Consult action triggered, but active editor input is no file.");
 				return;
 			}
+			PDTBreakpointHandler.getInstance().backupMarkers(null, null);
 			run();
 		} catch (IOException e) {
 			Debug.report(e);

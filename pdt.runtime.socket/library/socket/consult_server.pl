@@ -53,6 +53,7 @@
 %:-debug(consult_server(shutdown)).
 %:-debug(consult_server(accept_loop)).
 %:-debug(consult_server(handler)).
+%:-debug(handle_command).
 
 
 :- use_module(library(socket)).
@@ -270,9 +271,14 @@ handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 		handle_batch_command(Term,InStream,OutStream),
 		Term=end_of_batch,!.
 handle_command(InStream,OutStream,'QUERY',continue):-
+	debug('handle_command', 'before my_format', []),
 	my_format(OutStream,"GIVE_TERM~n",[]),	
+	debug('handle_command', 'after my_format', []),
 	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
-	( iterate_solutions(InStream,OutStream,Term,Vars)
+	( 
+	(debug('handle_command', 'before iterate_solutions ~w', [Term]),
+	iterate_solutions(InStream,OutStream,Term,Vars),
+	debug('handle_command', 'after iterate_solutions ~w', [Term]))
 	; true
 	).
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
@@ -457,8 +463,8 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	( user:forall(
 			catch(Term,E,throw(wrapped(E))),
 			(
-				consult_server:print_solution(OutStream,Vars),
-				consult_server:request_line(InStream,OutStream,'MORE?','YES')											
+				consult_server:print_solution(OutStream,Vars),	
+				consult_server:request_line(InStream,OutStream,'MORE?','YES')										
 			)
 		)
 	->my_format(OutStream,"NO~n",[])

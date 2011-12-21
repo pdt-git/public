@@ -359,4 +359,28 @@
           markerType="org.eclipse.core.resources.problemmarker">
     </markerResolutionGenerator>
  </extension>
+ <extension
+       id="PDTBreakpointMarker"
+       point="org.eclipse.core.resources.markers">
+       <super type="org.eclipse.core.resources.textmarker"/>         
+     <persistent value="false"/>
+ </extension>
+ 
+ 
+  <extension point="org.eclipse.ui.editors.annotationTypes">
+     <type
+        super="org.eclipse.ui.workbench.texteditor.warning"
+        markerType="org.cs3.pdt.PDTBreakpointMarker"
+        name="org.cs3.pdt.PDTBreakpointAnnotation"
+        markerSeverity="0"/>
+  </extension>
+
+  <extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+     <specification
+        annotationType="org.cs3.pdt.PDTBreakpointAnnotation"
+        icon="icons/brkpoint.gif"
+        verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
+        verticalRulerPreferenceValue="true"/>
+  </extension>
+ 
 </plugin>
