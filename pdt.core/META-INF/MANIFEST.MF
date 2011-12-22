@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDTCore
 Bundle-SymbolicName: org.cs3.pdt.core; singleton:=true
-Bundle-Version: 0.2.3.qualifier
+Bundle-Version: 0.2.5.qualifier
 Bundle-Activator: org.cs3.pdt.core.PDTCorePlugin
 Export-Package: org.cs3.pdt.core,
  org.cs3.pdt.core.internal,
