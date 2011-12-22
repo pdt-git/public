@@ -46,6 +46,7 @@ package org.cs3.pl.prolog.internal;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -86,6 +87,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	private String environment;
 	private int timeout;
 	private String fileSearchPath;
+	
+	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 
 	public AbstractPrologInterface() {
 		this(null);
@@ -172,6 +175,16 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public String getEnvironment() {
 		return environment;
 	}
+	
+	@Override
+	public Object getAttribute(String attribute) {
+		return attributes.get(attribute);
+	}
+	
+	@Override
+	public void setAttribute(String attribute, Object value) {
+		attributes.put(attribute, value);
+	}
 
 	@Override
 	public void initOptions(PreferenceProvider provider) {
@@ -181,6 +194,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		setEnvironment(provider.getPreference(PrologInterface.PREF_ENVIRONMENT));
 		setTimeout(provider.getPreference(PrologInterface.PREF_TIMEOUT));
 		setFileSearchPath(provider.getPreference(PrologInterface.PREF_FILE_SEARCH_PATH));
+		setAttribute(PrologInterface.PREF_GENERATE_FACTBASE, provider.getPreference(PrologInterface.PREF_GENERATE_FACTBASE));
+		setAttribute(PrologInterface.PREF_META_PRED_ANALYSIS, provider.getPreference(PrologInterface.PREF_META_PRED_ANALYSIS));
 	}
 
 	/************************************************/
