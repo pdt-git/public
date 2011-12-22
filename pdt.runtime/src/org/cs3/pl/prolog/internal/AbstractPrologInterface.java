@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
@@ -656,15 +657,32 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			synchronized (lifecycle) {
 				for (String fileName : consultedFiles) {
 					try {
-						System.out.println("pdt_reload(" + fileName + "), because it was consulted before");
+						System.out.println("consult(" + fileName + "), because it was consulted before");
 						// FIXME: timing problem
 						Map<String, Object> result = queryOnce("consult(" + fileName + ")");
 						System.out.println("result is null: " + (result == null));
 					} catch (PrologInterfaceException e) {
 						e.printStackTrace();
 					}
-				}				
+				}	
+				notifyLastFileReconsulted();
 			}
+		}
+	}
+	
+	private static Set<ReconsultHook> currentHooks = new HashSet<ReconsultHook>();
+	
+	public static void registerReconsultHook(ReconsultHook hook) {
+		currentHooks.add(hook);
+	}
+	
+	public static void unregisterReconsultHook(ReconsultHook hook) {
+		currentHooks.remove(hook);
+	}
+	
+	private void notifyLastFileReconsulted() {
+		for (ReconsultHook r : currentHooks) {
+			r.lastFileReconsulted(this);
 		}
 	}
 

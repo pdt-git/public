@@ -29,6 +29,7 @@ import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.ReconsultHook;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -41,7 +42,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterfaceListener, LifeCycleHook {
+public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterfaceListener, LifeCycleHook, ReconsultHook {
 
 	private static final String BREAKPOINT_LIFECYCLE_HOOK = "BreakpointLifecycleHook";
 	private static final String SOURCE_FILE = "source_file";
@@ -105,7 +106,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	}
 
 	public void updateMarkers() {
-		if (markerBackup == null) {
+		if (markerBackup == null || deletedIds == null) {
 			return;
 		}
 		
@@ -331,6 +332,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			try {
 				currentDispatcher.removePrologInterfaceListener("add_breakpoint", this);
 				currentDispatcher.removePrologInterfaceListener("remove_breakpoint", this);
+				currentDispatcher.removePrologInterfaceListener("file_loaded", this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -398,19 +400,30 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	}
 
 	@Override
-	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {}
+	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
+		System.out.println("onInit");
+	}
 
 	@Override
-	public void afterInit(PrologInterface pif) throws PrologInterfaceException {}
+	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
+		System.out.println("afterInit");
+	}
 
 	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {
 		System.out.println("beforeShutdown: marker bitte abspeichern");
+		if (currentPif.equals(pif)) {
+			backupMarkers(null, null);
+			removeAllBreakpointMarkers();
+		}
 	}
 
 	@Override
 	public void onError(PrologInterface pif) {
 		System.out.println("onError: marker bitte abspeichern");
+		if (currentPif.equals(pif)) {
+			backupMarkers(null, null);
+		}
 	}
 
 	@Override
@@ -419,5 +432,22 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	@Override
 	public void lateInit(PrologInterface pif) {}
 
-	
+	// TODO: Debug here
+	@Override
+	public void lastFileReconsulted(PrologInterface pif) {
+		if (markerBackup == null) {
+			return;
+		}
+		for (MarkerBackup m : markerBackup) {
+			try {
+				currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+			}
+		}
+		// disable logging of deleted ids
+		markerBackup = null;
+	}
+
+
 }
