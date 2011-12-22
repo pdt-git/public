@@ -404,11 +404,13 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {}
 
 	@Override
-	public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {}
+	public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {
+		System.out.println("beforeShutdown: marker bitte abspeichern");
+	}
 
 	@Override
 	public void onError(PrologInterface pif) {
-		System.out.println("marker bitte abspeichern");
+		System.out.println("onError: marker bitte abspeichern");
 	}
 
 	@Override
