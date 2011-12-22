@@ -45,8 +45,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.editors.ColorManager;
-import org.cs3.pdt.internal.editors.PDTChangedFileInformation;
+import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
@@ -59,7 +60,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -166,6 +166,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 
 			};	
 			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
+			PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
+			
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
