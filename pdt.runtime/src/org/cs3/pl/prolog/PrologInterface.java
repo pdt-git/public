@@ -204,6 +204,8 @@ public interface PrologInterface {
 	public String getFileSearchPath();
 	public int getTimeout();
 	public void setTimeout(String timeout);
+	public Object getAttribute(String attribute);
+	public void setAttribute(String attribute, Object value);
 	public void setFileSearchPath(String fileSearchPath);
 	
 
