@@ -662,12 +662,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 			@Override
 			protected String getTextToInsert() {
-				IFile file = UIUtils.getFileInActiveEditor();
-				if (file == null) {
+				String fileName = UIUtils.getFileFromActiveEditor();
+				if (fileName == null) {
 					return null;
 				}
-				return Util.quoteAtom(Util.prologFileName(file.getLocation()
-						.toFile()));
+				return Util.quoteAtom(Util.prologFileName(new File(fileName)));
 			}
 
 		};

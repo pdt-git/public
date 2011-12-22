@@ -130,6 +130,11 @@
          description="Consult"
          id="org.eclipse.pdt.ui.edit.consult"
          name="Consult"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         id="org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc"
+         name="name">
+   </command>
    <category
          description="Commands for the Prolog Editor"
          id="org.cs3.pdt.editing"
