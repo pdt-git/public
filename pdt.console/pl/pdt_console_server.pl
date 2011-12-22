@@ -133,6 +133,7 @@ server_loop_impl_X(ServerSocket,Options,Slave,Peer):-
 		      ID,
 		      [ alias(Alias)
 		      ]),
+	retractall(console_thread_name(_)),
 	assert(console_thread_name(ID)),
 	server_loop_impl(ServerSocket, Options).
  

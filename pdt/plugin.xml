@@ -35,12 +35,6 @@
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.restart"/>
        <action
-             label="Dump Debug Info"
-             class="org.cs3.pdt.internal.actions.DumpDebugInfoAction"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.dump"/>
-       <action
              label="(Re)consult"
              class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
              style="push"
