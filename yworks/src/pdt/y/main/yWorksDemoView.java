@@ -17,7 +17,7 @@ public class yWorksDemoView extends ViewPart {
 
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private SwingControl swingControl;
-    private PDTGraphSwingStandalone view = new PDTGraphSwingStandalone();
+    private PDTGraphView view = new PDTGraphView();
 
 	public yWorksDemoView() {
 	}

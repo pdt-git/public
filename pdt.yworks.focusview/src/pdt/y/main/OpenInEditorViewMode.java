@@ -15,10 +15,10 @@ import y.view.ViewMode;
 
 public class OpenInEditorViewMode extends ViewMode {
 
-	private PDTGraphSwingStandalone view;
+	private PDTGraphView view;
 	private GraphPIFCoordinator pifCoordinator;
 
-	public OpenInEditorViewMode(PDTGraphSwingStandalone view, GraphPIFCoordinator pifCoordinator) {
+	public OpenInEditorViewMode(PDTGraphView view, GraphPIFCoordinator pifCoordinator) {
 		this.view = view;
 		this.pifCoordinator = pifCoordinator;
 	}

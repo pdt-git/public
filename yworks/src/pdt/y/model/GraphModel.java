@@ -18,7 +18,6 @@ import y.view.hierarchy.GroupNodeRealizer;
 import y.view.hierarchy.HierarchyManager;
 
 public class GraphModel {
-	private static GraphModel instance = null;
 	private Graph2D graph=new Graph2D();
     
 	private GraphDataHolder dataHolder=new GraphDataHolder();
@@ -32,26 +31,12 @@ public class GraphModel {
 	private EdgeRealizer callEdgeRealizer;
 	private EdgeRealizer loadEdgeRealizer;
 
-	private GraphModel(){
+	public GraphModel(){
 		  
 		initNodeRealizers();
 		initEdgeRealizers();
 	}
 	
-	
-	/**
-	 * Singleton Pattern
-	 * This method should be used to get access to the model
-	 */
-	public static GraphModel getInstance() {
-		if (instance == null) {
-			instance = new GraphModel();
-		}
-		return instance;
-	}
-
-	
-
 	private void initNodeRealizers() {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
@@ -89,7 +74,7 @@ public class GraphModel {
 			} else if (dataHolder.isCallEdge(edge)) {
 				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
 				graph.setRealizer(edge, newCallEdgeRealizer);
-				newCallEdgeRealizer.adjustLineWidth();
+				newCallEdgeRealizer.adjustLineWidth(this);
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}
