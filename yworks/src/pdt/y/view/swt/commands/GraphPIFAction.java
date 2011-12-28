@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import pdt.y.main.PDTGraphSwingStandalone;
+import pdt.y.main.PDTGraphView;
 import pdt.y.main.PluginActivator;
 
 public class GraphPIFAction  extends Action {
@@ -39,10 +39,10 @@ public class GraphPIFAction  extends Action {
 
 	private File helpFile;
 	private static ImageDescriptor image;
-	private PDTGraphSwingStandalone view;
+	private PDTGraphView view;
 
 
-	public GraphPIFAction(PDTGraphSwingStandalone view) {
+	public GraphPIFAction(PDTGraphView view) {
 		super("Directory Selection",image);
 		this.view = view;
 		PrologRuntimeUIPlugin plugin=PrologRuntimeUIPlugin.getDefault();

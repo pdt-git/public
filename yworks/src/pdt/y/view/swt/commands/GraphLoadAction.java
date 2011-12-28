@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import pdt.y.main.PDTGraphSwingStandalone;
+import pdt.y.main.PDTGraphView;
 
 public class GraphLoadAction  extends Action {
 	static {
@@ -18,9 +18,9 @@ public class GraphLoadAction  extends Action {
 	}
 	  
     private static ImageDescriptor image;
-	private PDTGraphSwingStandalone view;
+	private PDTGraphView view;
 
-	public GraphLoadAction(PDTGraphSwingStandalone view) {
+	public GraphLoadAction(PDTGraphView view) {
 		super("Load",image);
 		this.view = view;
 	}
