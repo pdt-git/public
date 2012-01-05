@@ -382,5 +382,12 @@
         verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
         verticalRulerPreferenceValue="true"/>
   </extension>
+  <extension
+        point="org.cs3.pdt.runtime.bootstrapContribution">
+     <fileContribution
+           id="org.cs3.pdt.fileContribution"
+           path="pl/load.pl">
+     </fileContribution>
+  </extension>
  
 </plugin>
