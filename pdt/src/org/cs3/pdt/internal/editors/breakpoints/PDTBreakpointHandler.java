@@ -29,6 +29,7 @@ import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.ReconsultHook;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -68,6 +69,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	
 	private PDTBreakpointHandler() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(this);
+		AbstractPrologInterface.registerReconsultHook(this);
 		checkForPif();
 	}
 	
