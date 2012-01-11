@@ -255,4 +255,6 @@ public interface PrologInterface {
 	public List<String> getConsultedFiles();
 	public void addConsultedFile(String file);
 
+	public void clearConsultedFiles();
+
 }

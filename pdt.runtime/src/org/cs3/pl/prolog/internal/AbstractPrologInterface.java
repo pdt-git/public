@@ -654,16 +654,25 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return consultedFiles;
 	}
 	
+
+	@Override
+	public void clearConsultedFiles() {
+		consultedFiles = null;
+	}
+	
 	@Override
 	public void addConsultedFile(String fileName) {
 		if (consultedFiles == null) {
 			consultedFiles = new ArrayList<String>();
 		}
-		// FIXME: this check changes the order of the consults
-		if (!consultedFiles.contains(fileName)) {
-			System.out.println("save " + fileName + " to consultedFiles");
-			consultedFiles.add(fileName);
+		// only take the last consult of a file
+		if (consultedFiles.remove(fileName)) {
+			Debug.debug("move " + fileName + " to end of consulted files");			
+		} else {
+			Debug.debug("add " + fileName + " to consulted files");
 		}
+		consultedFiles.add(fileName);
+		
 	}
 
 	private void reconsultFiles() {
