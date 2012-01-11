@@ -2,6 +2,7 @@
 :- module(pdt_editor_edit_hook,[
 ]).
 
+:- use_module(library(edit)).
 
 :- multifile(prolog_edit:edit_source/1).
 
