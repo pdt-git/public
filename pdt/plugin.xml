@@ -17,40 +17,6 @@
  </extension>
  
  <extension
-       point="org.eclipse.ui.actionSets">
-    <actionSet
-          label="Prolog Actions"
-          visible="true"
-          id="org.cs3.pdt.internal.actions">
-       <menu
-             label="Prolo&amp;g"
-             id="org.cs3.pdt.menus.Prolog">
-          <separator name="separator1"/>
-          <separator name="separator2"/>
-       </menu>
-       <action
-             label="Restart"
-             class="org.cs3.pdt.internal.actions.RestartAction"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.restart"/>
-       <action
-             label="(Re)consult"
-             class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.consult"/>
-             
-       <action
-             label="Prolog Console"
-             class="org.cs3.pdt.internal.actions.OpenConsoleAction"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.open.console"/>
-             
-    </actionSet>
- </extension>
- <extension
        point="org.eclipse.ui.preferencePages">
     <page
           class="org.cs3.pdt.preferences.PreferencePage"
@@ -87,6 +53,42 @@
                label="Goto Error Line"
                menubarPath="additions"/>
       </viewerContribution>
+      <objectContribution
+            adaptable="false"
+            id="pdt.consult.contribution"
+            nameFilter="*.pl"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.cs3.pdt.internal.actions.ReloadAction"
+               id="org.cs3.pdt.internal.actions.reload"
+               label="(Re)consult"
+               style="push">
+         </action>
+      </objectContribution>
+       <objectContribution
+            adaptable="false"
+            id="pdt.consult.contribution"
+            nameFilter="*.qlf"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.cs3.pdt.internal.actions.ReloadAction"
+               id="org.cs3.pdt.internal.actions.reload"
+               label="(Re)consult"
+               style="push">
+         </action>
+      </objectContribution>
+       <objectContribution
+            adaptable="false"
+            id="pdt.consult.contribution"
+            nameFilter="*.lgt"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.cs3.pdt.internal.actions.ReloadAction"
+               id="org.cs3.pdt.internal.actions.reload"
+               label="(Re)consult"
+               style="push">
+         </action>
+      </objectContribution>
  </extension>
  
 <extension
