@@ -14,7 +14,6 @@ import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
-import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -228,16 +227,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 					try {
 						boolean isSourceFile = (currentPif.queryOnce(bT(SOURCE_FILE, prologFileName)) != null);
 						if (isSourceFile) {
-							// FIXME very slow in the first execution
-//							currentPif.queryOnce("current_prolog_flag(version,V)");
-							System.out.println(bT(SET_BREAKPOINT, prologFileName, line, offset, "Id"));
-//							System.out.println("pif is up? " + currentPif.isUp());
-//							AsyncPrologSession async = currentPif.getAsyncSession();
-//							async.queryOnce("", bT(SET_BREAKPOINT, prologFileName, line, offset, "_"));
-//							currentPif.queryOnce(bT(SET_BREAKPOINT, prologFileName, line, offset, "_"));
-							ConsultActionDelegate consultActionDelegate = new ConsultActionDelegate();
-							consultActionDelegate.setQuery(bT(SET_BREAKPOINT, prologFileName, line, offset, "_"));
-							consultActionDelegate.run();
+							executeSetBreakpointQuery(prologFileName, line, offset);
 						} else {
 							UIUtils.displayErrorDialog(Display.getCurrent().getActiveShell(), "File is not loaded", "You are trying to set a breakpoint to a file which is not loaded. You have to consult the file before you can set a breakpoint.");
 						}
@@ -263,6 +253,14 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				}
 			}
 		}		
+	}
+
+	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) {
+		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
+		System.out.println(bT(SET_BREAKPOINT, prologFileName, line, offset, "Id"));
+		ConsultActionDelegate consultActionDelegate = new ConsultActionDelegate();
+		consultActionDelegate.setQuery(bT(SET_BREAKPOINT, prologFileName, line, offset, "_"));
+		consultActionDelegate.run();
 	}
 
 	private void loadBreakpointsFromPif() {
@@ -413,7 +411,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {
-		System.out.println("beforeShutdown: marker bitte abspeichern");
+		System.out.println("beforeShutdown");
 		if (currentPif.equals(pif)) {
 			backupMarkers(null, null);
 			removeAllBreakpointMarkers();
@@ -422,7 +420,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	@Override
 	public void onError(PrologInterface pif) {
-		System.out.println("onError: marker bitte abspeichern");
+		System.out.println("onError");
 		if (currentPif.equals(pif)) {
 			backupMarkers(null, null);
 		}
@@ -434,18 +432,15 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	@Override
 	public void lateInit(PrologInterface pif) {}
 
-	// TODO: Debug here
 	@Override
 	public void lastFileReconsulted(PrologInterface pif) {
 		if (markerBackup == null) {
 			return;
 		}
+		System.out.println("last file reconsulted");
 		for (MarkerBackup m : markerBackup) {
-			try {
-				currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
-			} catch (PrologInterfaceException e) {
-				Debug.report(e);
-			}
+			// TODO: Debug here, timing issues
+			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 		}
 		// disable logging of deleted ids
 		markerBackup = null;
