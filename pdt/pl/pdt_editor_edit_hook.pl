@@ -3,7 +3,7 @@
 ]).
 
 
-:- multifile(prolog_edit:edit_source/3).
+:- multifile(prolog_edit:edit_source/1).
 
 prolog_edit:edit_source(Location) :-
     member(file(File), Location),
