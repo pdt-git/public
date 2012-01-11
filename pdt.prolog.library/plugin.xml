@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.pdt.prolog.library"
    name="PrologLibrary"
-   version="0.2.3.qualifier"
+   version="0.2.5.qualifier"
 >
    <extension
          point="org.cs3.pdt.runtime.bootstrapContribution">

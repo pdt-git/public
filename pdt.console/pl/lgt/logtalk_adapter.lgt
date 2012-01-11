@@ -342,7 +342,7 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
 		% we add a scope/0 property just to simplify coding in the Java side
 		functor(Predicate, Functor, Arity),
-		(	decode(Predicate, Entity, _, _, _, _, DeclarationProperties, declaration) ->
+		(	catch(decode(Predicate, Entity, _, _, _, _, DeclarationProperties, declaration),_,fail) ->
 			% found the scope declaration
 			(	list::member((public), DeclarationProperties) ->
 				Properties = [(public)| Properties0]
