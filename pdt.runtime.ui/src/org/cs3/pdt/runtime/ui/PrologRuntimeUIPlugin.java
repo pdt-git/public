@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -385,7 +386,8 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 			addPifToRegistry = true;
 //			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
 		}
-		List<String> contributionKeys = s.getBootstrapConstributionKeys();
+		List<String> contributionKeys = new ArrayList<String>();
+		contributionKeys.addAll(s.getBootstrapConstributionKeys());
 		if(!contributionKeys.contains("")){
 			contributionKeys.add("");
 		}
