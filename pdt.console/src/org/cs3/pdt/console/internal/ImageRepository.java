@@ -74,6 +74,8 @@ public class ImageRepository {
 
 	public static final String RESTART = "restart.png";
 	
+	public static final String STOP = "stop.gif";
+	
 	public static final String SELECT_ALL = "selectall.png";
 	
 	public static final String SELECT_PIF = "console.png";
@@ -91,6 +93,8 @@ public class ImageRepository {
 	public static final String ABORT = "abort.gif";
 
 	public static final String TRACE = "suspend_co.gif";
+	
+	public static final String GEN_LOAD_FILE = "gen_load_file.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
