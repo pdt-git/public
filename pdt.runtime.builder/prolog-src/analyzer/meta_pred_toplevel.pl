@@ -4,9 +4,9 @@
 generate_factbase_with_metapred_analysis(File):-
 	%format('###File: ~w~n', [File]), 
 	with_mutex(meta_pred_finder,
-		(	pdt_flag(generate_factbase, true)
+		(	flag(generate_factbase, true, true)
 		->	generate_factbase(File),
-			(	pdt_flag(meta_pred_analysis, true)
+			(	flag(meta_pred_analysis, true, true)
 			->	find_all_meta_predicates
 			;	true
 			)
