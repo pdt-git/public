@@ -152,16 +152,16 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 		lastLine=null;
 		String value = e.getCommitText();
 	    //ignore commits like ";", " ", "" + pdt_reload(
-		
-		if(!(value.equals(" ") || 
-				 value.equals("") ||
-				 value.equals(";") ||
-			 value.startsWith("pdt_reload("))
-			 ) {
+
+		if(! ( value.equals(" ")
+				|| value.equals("")
+				|| value.equals(";")
+				|| value.startsWith("pdt_reload(")
+				|| value.startsWith("pdt_set_breakpoint("))
+				) {
 			history.add(e.getCommitText());
 		}
-		pointer=history.size();
-	
+		pointer = history.size();
 	}
 
 	@Override
