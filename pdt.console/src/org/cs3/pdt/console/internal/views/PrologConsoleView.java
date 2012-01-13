@@ -89,6 +89,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -335,59 +336,58 @@ PrologConsole {
 	private final class KillAction extends Action {
 		@Override
 		public void run() {
-			try {
+			
+			boolean answer = MessageDialog.openQuestion(PrologConsoleView.this.getViewSite().getShell(), "Kill process", "Are you sure you want to kill the process? This will remove all breakpoints and will delete the list of consulted files");
+			
+			if (answer) {
+				try {
 
-				Job j = new UIJob("Stopping the PrologInterface") {
+					Job j = new UIJob("Stopping the PrologInterface") {
 
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						try {
-							monitor.beginTask("initializing...",
-									IProgressMonitor.UNKNOWN);
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							try {
+								monitor.beginTask("initializing...",
+										IProgressMonitor.UNKNOWN);
 
-							PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+								PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 
 
-							PrologInterface oldPif = getPrologInterface();
-							if (oldPif != null) {
-								String currentKey = registry.getKey(oldPif);
-								
-								if (!currentKey.equals("defaultConsole")) {
-									setPrologInterface(registry.getPrologInterface("defaultConsole"));
-								}
-								
-								oldPif.clearConsultedFiles();
-								oldPif.stop();
+								PrologInterface oldPif = getPrologInterface();
+								if (oldPif != null) {
+									String currentKey = registry.getKey(oldPif);
 
-								if (!currentKey.equals("defaultConsole")) {
-									Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
-									for (Subscription s : subscriptionsForPif) {
-										System.out.println(s.getId() + ": " + s.getName());
-										registry.removeSubscription(s);
+									if (!currentKey.equals("defaultConsole")) {
+										setPrologInterface(registry.getPrologInterface("defaultConsole"));
 									}
-									registry.removePrologInterface(currentKey);
+
+									oldPif.clearConsultedFiles();
+									oldPif.stop();
+
+									if (!currentKey.equals("defaultConsole")) {
+										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
+										for (Subscription s : subscriptionsForPif) {
+											System.out.println(s.getId() + ": " + s.getName());
+											registry.removeSubscription(s);
+										}
+										registry.removePrologInterface(currentKey);
+									}
+
 								}
-
-								// FIXME: after killing a process, switch to the defaultConsole process,
-								//        so that there is no possibility to reuse the killed process
-								//        by accident
-
-
-								
+							} catch (Throwable e) {
+								Debug.report(e);
+								return Status.CANCEL_STATUS;
+							} finally {
+								monitor.done();
 							}
-						} catch (Throwable e) {
-							Debug.report(e);
-							return Status.CANCEL_STATUS;
-						} finally {
-							monitor.done();
+							return Status.OK_STATUS;
 						}
-						return Status.OK_STATUS;
-					}
 
-				};
-				j.schedule();
-			} catch (Throwable t) {
-				Debug.report(t);
+					};
+					j.schedule();
+				} catch (Throwable t) {
+					Debug.report(t);
+				}
 			}
 		}
 
@@ -400,7 +400,7 @@ PrologConsole {
 
 		@Override
 		public String getToolTipText() {
-			return "Kill prolog process";
+			return "Kill process";
 		}
 
 		@Override
@@ -498,9 +498,9 @@ PrologConsole {
 						@Override
 						public String isValid(String arg0) {
 							if ("".equals(arg0))
-								return "PIF Key must not be empty";
+								return "Process name must not be empty";
 							else if (pifKeys.contains(arg0))
-								return "PIF Key already used";
+								return "Process name already used";
 							else
 								return null;
 						}
@@ -765,7 +765,7 @@ PrologConsole {
 				((AbstractPrologInterface)pif).debug_wakeupPoledSessions();
 			}
 		};
-		clearAction = new ClearAction("Clear", "clear console output",
+		clearAction = new ClearAction("Clear", "Clear console output",
 				ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
 		//		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
 		//				new String[] {"activate guitracer", "deactivate guitracer"},  
