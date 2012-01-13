@@ -253,6 +253,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	public void done(IJobChangeEvent event) {
 		PDTPlugin plugin = PDTPlugin.getDefault();
 		plugin.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				IEditorPart editor = UIUtils.getActiveEditor();
 
