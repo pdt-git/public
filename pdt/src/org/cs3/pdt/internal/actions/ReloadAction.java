@@ -3,6 +3,7 @@ package org.cs3.pdt.internal.actions;
 import java.util.Iterator;
 
 import org.cs3.pdt.internal.editors.PLMarkerUtils;
+import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
@@ -27,7 +28,7 @@ public class ReloadAction implements IObjectActionDelegate  {
 				try {
 					PLMarkerUtils.updateFileMarkers( (IFile) obj);
 				} catch (CoreException e) {
-					e.printStackTrace();
+					Debug.report(e);
 				}
 			}
 

@@ -3,6 +3,7 @@ package org.cs3.pdt.console.internal.loadfile;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -65,13 +66,12 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 			
 			file.setContents(new ByteArrayInputStream(content.getBytes()), IResource.FORCE, null);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Debug.report(e);
 		}
 	}
     
     @Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-//    	this.workbench = workbench;
     	this.selection = selection;
     }
 
