@@ -36,10 +36,20 @@ pdt_reload(File):-
     with_mutex('reloadMutex', 
       ( make:reload_file(File) % SWI Prolog library
       , retractall(in_reload)
+      , notify_reload_listeners(File)
       )
     ).
    % generate_factbase_with_metapred_analysis(File).
 
+:- multifile(pdt_reload_listener/1).
+
+notify_reload_listeners(File) :-
+	pdt_reload_listener(File),
+	fail.
+notify_reload_listeners(_).
+
+pdt_reload_listener(File) :-
+    catch(pif_observe:pif_notify(file_loaded,File),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *
