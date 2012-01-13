@@ -390,5 +390,13 @@
            path="pl/load.pl">
      </fileContribution>
   </extension>
+  <extension
+        point="org.eclipse.ui.perspectives">
+     <perspective
+           class="org.cs3.pdt.PrologPerspective"
+           id="org.cs3.pdt.perspective"
+           name="Prolog">
+     </perspective>
+  </extension>
  
 </plugin>
