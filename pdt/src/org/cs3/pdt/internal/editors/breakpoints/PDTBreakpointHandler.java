@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
@@ -436,10 +435,9 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	@Override
 	public void lastFileReconsulted(PrologInterface pif) {
-		if (markerBackup == null) {
+		if (markerBackup == null || markerBackup.isEmpty()) {
 			return;
 		}
-		System.out.println("last file reconsulted");
 		Thread t = new Thread(new Runnable() { @Override public void run() {
 			PrologConsoleService prologConsoleService = PrologConsolePlugin.getDefault().getPrologConsoleService();
 			if (prologConsoleService == null) {
@@ -459,7 +457,6 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 			}
 			System.out.println(buf.toString());
-
 
 			//		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
 			//		System.out.println(bT(SET_BREAKPOINT, prologFileName, line, offset, "Id"));
