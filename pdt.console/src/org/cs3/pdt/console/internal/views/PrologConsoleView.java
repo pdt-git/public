@@ -118,6 +118,8 @@ import org.eclipse.ui.progress.UIJob;
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 PrologConsole {
 
+	private static final String KILLABLE = "killable";
+
 	private final class ClearAction extends Action {
 		private ClearAction(String text, String tooltip, ImageDescriptor image) {
 			super(text, image);
@@ -364,7 +366,7 @@ PrologConsole {
 									oldPif.clearConsultedFiles();
 									oldPif.stop();
 
-									if (!currentKey.equals("defaultConsole")) {
+									if (!currentKey.equals("defaultConsole") && "true".equals(oldPif.getAttribute(KILLABLE))) {
 										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
 										for (Subscription s : subscriptionsForPif) {
 											System.out.println(s.getId() + ": " + s.getName());
@@ -483,7 +485,8 @@ PrologConsole {
 						return Status.CANCEL_STATUS;
 					String pifKey = dialog.getValue();
 
-					activateNewPrologProcess(registry, pifKey);
+					PrologInterface pif = activateNewPrologProcess(registry, pifKey);
+					pif.setAttribute(KILLABLE, "true");
 					return Status.OK_STATUS;
 				}
 
@@ -953,8 +956,7 @@ PrologConsole {
 
 	}
 
-	public void activateNewPrologProcess(
-			PrologInterfaceRegistry registry, String pifKey) {
+	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey) {
 		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
 		registry.addSubscription(subscription);
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
@@ -963,6 +965,7 @@ PrologConsole {
 			PrologConsoleView.this.setPrologInterface(pif);
 			PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 		}
+		return pif;
 	}
 
 	private void addToolbarContributions(IToolBarManager manager) {
