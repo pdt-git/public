@@ -419,14 +419,12 @@ PrologConsole {
 							if (getPrologInterface() != null) {
 								List<String> consultedFiles = getPrologInterface().getConsultedFiles();
 								
-//								GenerateLoadFileWizard wiz = new GenerateLoadFileWizard(buf.toString());
 								WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
 								dialog.open();
 							}
 
 						} catch (Throwable e) {
 							Debug.report(e);
-							e.printStackTrace();
 							return Status.CANCEL_STATUS;
 						} finally {
 							monitor.done();

@@ -225,7 +225,7 @@ public final class PDTUtils {
 					editor.gotoOffset(offset, 0);
 					return;
 				} catch (BadLocationException e) {
-					e.printStackTrace();
+					Debug.report(e);
 					return;
 				}
 			} else {
