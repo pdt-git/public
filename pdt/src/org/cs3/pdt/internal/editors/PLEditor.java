@@ -203,9 +203,8 @@ public class PLEditor extends TextEditor{
 				}
 			}
 
-			
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Debug.report(e);
 		}
 	}
 
@@ -824,7 +823,7 @@ public class PLEditor extends TextEditor{
 					cancelMonitor.wait(OCCURRENCE_UPDATE_DELAY);
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Debug.report(e);
 			}
 			if (isCanceled(progressMonitor)) {
 //				System.out.println(Thread.currentThread().getName()+ " cancelled");
