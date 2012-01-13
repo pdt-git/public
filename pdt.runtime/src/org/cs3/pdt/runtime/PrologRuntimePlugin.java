@@ -227,8 +227,6 @@ public class PrologRuntimePlugin extends Plugin {
 		Set<String> dependencies = new HashSet<String>();
 		for (IConfigurationElement childElm : element.getChildren()) {
 			if ("dependency".equals(childElm.getName())) {
-				if(childElm.getAttribute("contribution")==null) 
-					System.out.println("DEBUG");
 				dependencies.add(childElm.getAttribute("contribution"));
 			}
 		}

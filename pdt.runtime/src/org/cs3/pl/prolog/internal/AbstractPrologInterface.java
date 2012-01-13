@@ -676,15 +676,13 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	}
 
 	private void reconsultFiles() {
-		System.out.println("try to reconsult");
+		Debug.debug("Reconsult files");
 		if (consultedFiles != null) {
 			synchronized (lifecycle) {
 				for (String fileName : consultedFiles) {
 					try {
-						System.out.println("consult(" + fileName + "), because it was consulted before");
-						// FIXME: timing problem
-						Map<String, Object> result = queryOnce("consult(" + fileName + ")");
-						System.out.println("result is null: " + (result == null));
+						Debug.debug("consult(" + fileName + "), because it was consulted before");
+						queryOnce("consult(" + fileName + ")");
 					} catch (PrologInterfaceException e) {
 						e.printStackTrace();
 					}
