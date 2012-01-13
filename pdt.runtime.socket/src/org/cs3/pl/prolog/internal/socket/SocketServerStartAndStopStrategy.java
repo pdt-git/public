@@ -295,7 +295,7 @@ private static JackTheProcessRipper processRipper;
 //      Don't set the encoding globally because it 
 //		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
 		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
-		f(socketPif.isStartWithJPL()) {
+		if(socketPif.isStartWithJPL()) {
 			tmpWriter.println(":- assert(file_search_path(library, '"+socketPif.getFileSearchPath()+"')).");
 		} else {
 			tmpWriter.println(":- guitracer.");
