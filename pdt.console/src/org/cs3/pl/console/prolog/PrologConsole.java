@@ -58,5 +58,6 @@ public interface PrologConsole {
 	public void setCaretOffset(int offset);
 	public int getStartOfInput();
 	public String getTextRange(int offset, int length);
+	public void ensureConnectionForCurrentPrologInterface();
 	
 }
