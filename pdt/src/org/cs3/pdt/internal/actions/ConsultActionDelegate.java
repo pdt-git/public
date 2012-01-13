@@ -169,9 +169,9 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			//					window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
 		} catch (NullPointerException e) {
 			// probably no WorkbenchWindow active
-			e.printStackTrace();
+			Debug.report(e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Debug.report(e);
 		}
 
 	}

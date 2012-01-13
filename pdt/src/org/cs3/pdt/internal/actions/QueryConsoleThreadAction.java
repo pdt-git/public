@@ -138,7 +138,7 @@ public class QueryConsoleThreadAction extends Action implements IJobChangeListen
 				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 				c=plugin.getPrologConsoleService().getActivePrologConsole();
 			} catch (PartInitException e) {
-				e.printStackTrace();
+				Debug.report(e);
 			}
 		}
 		return c;

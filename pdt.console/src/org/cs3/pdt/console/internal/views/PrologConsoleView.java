@@ -280,26 +280,20 @@ PrologConsole {
 							monitor.beginTask("initializing...",
 									IProgressMonitor.UNKNOWN);
 
-							System.out.println("start restart");
 							try {
 								if (getPrologInterface() != null) {
-									System.out.println("stopping prolog interface");
 									getPrologInterface().stop();
 								}
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
 								if (getPrologInterface() != null) {
-									System.out.println("start interface");
 									if (!getPrologInterface().isDown()){
 										getPrologInterface().reset();
 										Thread.sleep(1000);
 									}
-									System.out.println("init options");
 									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
 									getPrologInterface().start();
-									System.out.println("after start()");
 									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
-									System.out.println("after fireCOnsoleVisibilityChanged");
 								}
 							}
 						} catch (Throwable e) {
@@ -369,7 +363,6 @@ PrologConsole {
 									if (!currentKey.equals("defaultConsole") && "true".equals(oldPif.getAttribute(KILLABLE))) {
 										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
 										for (Subscription s : subscriptionsForPif) {
-											System.out.println(s.getId() + ": " + s.getName());
 											registry.removeSubscription(s);
 										}
 										registry.removePrologInterface(currentKey);
@@ -428,15 +421,12 @@ PrologConsole {
 							if (getPrologInterface() != null) {
 								List<String> consultedFiles = getPrologInterface().getConsultedFiles();
 								
-//								GenerateLoadFileWizard wiz = new GenerateLoadFileWizard(buf.toString());
 								WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
 								dialog.open();
-//								System.out.println(buf.toString());
 							}
 
 						} catch (Throwable e) {
 							Debug.report(e);
-							e.printStackTrace();
 							return Status.CANCEL_STATUS;
 						} finally {
 							monitor.done();
@@ -1046,7 +1036,6 @@ PrologConsole {
 							+ "pdt_console_server:pdt_start_console_server(Port)";
 			Debug.info("starting console server using: " + queryString);
 
-			System.out.println("START SERVER");
 			Map<String,?> result = session.queryOnce(queryString);
 			if (result == null) {
 				Debug.info("starting server failed, which may mean that it is actualy running already.");
@@ -1200,7 +1189,6 @@ PrologConsole {
 		Map<String,?> result = null;
 		try {
 			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
-			System.out.println("START SERVER");
 			result = session.queryOnce( "pdt_start_console_server(Port)");
 			if (result == null) {
 				startServer(pif, session);
