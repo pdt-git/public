@@ -1,12 +1,17 @@
 :- consult('../load_builder').
 
 
+:- multifile(pdt_editor_reload:pdt_reload_listener/1).
+
+pdt_editor_reload:pdt_reload_listener(File) :-
+    generate_factbase_with_metapred_analysis(File).
+
 generate_factbase_with_metapred_analysis(File):-
 	%format('###File: ~w~n', [File]), 
 	with_mutex(meta_pred_finder,
-		(	pdt_flag(generate_factbase, true)
+		(	flag(pdt_generate_factbase, true, true)
 		->	generate_factbase(File),
-			(	pdt_flag(meta_pred_analysis, true)
+			(	flag(pdt_meta_pred_analysis, true, true)
 			->	find_all_meta_predicates
 			;	true
 			)

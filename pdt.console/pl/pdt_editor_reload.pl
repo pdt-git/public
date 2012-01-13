@@ -4,6 +4,7 @@
          , activate_warning_and_error_tracing/0   % Called from PLMarkerUtils.addMarkers()
          , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
          , errors_and_warnings/5                  % Called from PLMarkerUtils.run()
+         , pdt_reloaded_file/1
          ]).
 
 
@@ -35,10 +36,20 @@ pdt_reload(File):-
     with_mutex('reloadMutex', 
       ( make:reload_file(File) % SWI Prolog library
       , retractall(in_reload)
+      , notify_reload_listeners(File)
       )
     ).
    % generate_factbase_with_metapred_analysis(File).
 
+:- multifile(pdt_reload_listener/1).
+
+notify_reload_listeners(File) :-
+	pdt_reload_listener(File),
+	fail.
+notify_reload_listeners(_).
+
+pdt_reload_listener(File) :-
+    catch(pif_observe:pif_notify(file_loaded,File),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *
@@ -49,6 +60,7 @@ pdt_reload(File):-
 
 :- dynamic(traced_messages/4).
 :- dynamic(warning_and_error_tracing/0).
+:- dynamic(reloaded_file/1).
 
 activate_warning_and_error_tracing :- 
 	with_mutex('reloadMutex', (
@@ -58,8 +70,9 @@ activate_warning_and_error_tracing :-
 
 deactivate_warning_and_error_tracing :-
 	with_mutex('reloadMutex', (
-	  retractall(warning_and_error_tracing),
-	  retractall(traced_messages(_,_,_,_))
+	  retractall(traced_messages(_,_,_,_)),
+	  retractall(reloaded_file(_)),
+	  retractall(warning_and_error_tracing)
 	)). 
  
  	
@@ -93,6 +106,12 @@ user:message_hook(_Term, Level,Lines) :-
 	)).
 
 
+user:message_hook(load_file(start(_, file(_, FullPath))), _, _) :-
+	with_mutex('reloadMutex', (
+		warning_and_error_tracing,
+		assertz(reloaded_file(FullPath)),
+		fail
+	)).
                /*************************************
                 * USE INTERCEPTED PROLOG ERROR MESSAGES   *
                 *************************************/
@@ -111,7 +130,8 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 		memory_file_to_atom(Handle,Message),
 	    free_memory_file(Handle).      
 
-
+pdt_reloaded_file(LoadedFile) :-
+	reloaded_file(LoadedFile).
    
 wait_for_reload_finished :-
    reset_timout_counter,

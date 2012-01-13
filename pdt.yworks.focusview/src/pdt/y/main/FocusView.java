@@ -1,13 +1,11 @@
 package pdt.y.main;
 
-import java.awt.event.MouseEvent;
-
 import javax.swing.JComponent;
 
 import org.eclipse.albireo.core.SwingControl;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -15,12 +13,9 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.part.ViewPart;
-
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.model.GraphDataHolder;
-import pdt.y.model.GraphModel;
-
 import y.base.Node;
 import y.view.HitInfo;
 import y.view.NodeLabel;
@@ -30,7 +25,7 @@ import y.view.ViewMode;
 public class FocusView extends ViewPart {
 
 
-	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
+	public static final String ID = "pdt.view.focus";
 	private SwingControl swingControl;
 	private PDTGraphSwingStandalone view = new PDTGraphSwingStandalone();
 	private Label info;
@@ -113,7 +108,8 @@ public class FocusView extends ViewPart {
 	
 	public void setInfo(final String text) {
 		UIJob uiJob = new UIJob("Update Status") {
-		    public IStatus runInUIThread(IProgressMonitor monitor) {
+		    @Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
 		        info.setText(text);
 		        return Status.OK_STATUS;
 		    }
@@ -129,6 +125,7 @@ public class FocusView extends ViewPart {
 			this.pdtGraphView = pdtGraphView;
 		}
 
+		@Override
 		public void mouseMoved(double x, double y) {
 			super.mouseMoved(x, y);
 			HitInfo hitInfo = getHitInfo(x, y);

@@ -50,15 +50,18 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
+import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -66,11 +69,8 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
-import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -82,9 +82,11 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -105,11 +107,13 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -122,7 +126,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-public class PLEditor extends TextEditor{
+public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
 
@@ -151,6 +155,9 @@ public class PLEditor extends TextEditor{
 
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
+		if (shouldAbortSaving()) {
+			return;
+		}
 		super.doSave(progressMonitor);
 		// TRHO: Experimental:		
 //		try {
@@ -158,9 +165,38 @@ public class PLEditor extends TextEditor{
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
-		addProblemMarkers();
+		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+		breakpointHandler.backupMarkers(getCurrentIFile(), document);
+//		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
+		addProblemMarkers(); // here happens the save & reconsult
+//		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
 		setFocus();
 
+	}
+
+	/**
+	 * @return 
+	 * 
+	 */
+	private boolean shouldAbortSaving() {
+		if (!(getEditorInput() instanceof IFileEditorInput)) {
+			boolean showWarning = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "true"));
+			if (showWarning) {
+				MessageDialog m = new MessageDialog(getEditorSite().getShell(), "External file", null, "The current file in the editor is not contained in the workspace. Are you sure you want to save this file?", MessageDialog.QUESTION, new String[]{"Yes", "Yes, always", "No"}, 0);
+				int answer = m.open();
+				switch (answer) {
+				case 1:
+					PDTPlugin.getDefault().setPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "false");
+				case 0:
+					break;
+				case 2:
+				case SWT.DEFAULT:
+				default:
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	@Override
@@ -258,6 +294,8 @@ public class PLEditor extends TextEditor{
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);
 			
+			breakpointHandler = PDTBreakpointHandler.getInstance();
+			
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -334,7 +372,27 @@ public class PLEditor extends TextEditor{
 				
 			}
 		});
-		checkBackground(getEditorInput());
+		checkBackgroundAndTitleImage(getEditorInput());
+		
+		getVerticalRuler().getControl().addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseUp(MouseEvent e) {}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if (PDTUtils.checkForActivePif(true)) {
+					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
+				};
+			}
+		});
+
 	}
 
 
@@ -449,7 +507,9 @@ public class PLEditor extends TextEditor{
 			public void run() {
 				// must be super, otherwise doSave will 
 				// consult the file and update the problem markers, too.
-				PLEditor.super.doSave(new NullProgressMonitor());
+				if (!shouldAbortSaving()) {
+					PLEditor.super.doSave(new NullProgressMonitor());
+				}
 //				addProblemMarkers();
 //				setFocus();
 			}
@@ -528,7 +588,19 @@ public class PLEditor extends TextEditor{
 	public ContentOutlinePage getOutlinePage() {
 		return fOutlinePage;
 	}
-
+	
+	protected int getCurrentLineOffset(int line) {
+		Document document = (Document) getDocumentProvider().getDocument(
+				getEditorInput());
+		int offset = 0;
+		try {
+			offset = document.getLineInformation(line - 1).getOffset();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		return offset;
+	}
+	
 	/**
 	 * @param i
 	 */
@@ -606,6 +678,43 @@ public class PLEditor extends TextEditor{
 
 		return GoalProvider.getPrologDataFromOffset(getPrologFileName(), document, offset, length);
 	}
+	
+	@Override
+	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
+		super.rulerContextMenuAboutToShow(menu);
+		menu.add(new Action("Toggle breakpoint") {
+			@Override
+			public void run() {
+				if (PDTUtils.checkForActivePif(true)) {
+					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+					
+					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
+				}
+			}
+		});
+		menu.add(new Action("Remove all breakpoints") {
+			@Override
+			public void run() {
+				if (PDTUtils.checkForActivePif(true)) {
+//					breakpointHandler.removeBreakpointMarkerForFile(getCurrentIFile());
+					breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
+				}
+			}
+
+			
+		});
+	}
+
+	private IFile getCurrentIFile() {
+		if (getEditorInput() instanceof IFileEditorInput) {
+			IFileEditorInput input = (IFileEditorInput) getEditorInput();
+			return input.getFile();
+		}
+		return null;
+	}
+		
 
 	public String getPrologFileName() {
 		return Util.prologFileName(filepath.toFile());
@@ -684,18 +793,20 @@ public class PLEditor extends TextEditor{
 		super.doSetInput(input);
 	
 		filepath = new Path(UIUtils.getFileNameForEditorInput(input));
-		checkBackground(input);
+		checkBackgroundAndTitleImage(input);
 	}
 
-	private void checkBackground(IEditorInput input) {
+	private void checkBackgroundAndTitleImage(IEditorInput input) {
 		ISourceViewer sourceViewer = getSourceViewer();
 		if (sourceViewer == null) return;
 		StyledText textWidget = sourceViewer.getTextWidget();
 		if (textWidget == null) return;
 		if (input instanceof IFileEditorInput) {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE));
 		} else {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));
 		}
 	}
 
@@ -816,6 +927,7 @@ public class PLEditor extends TextEditor{
 		/*
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public IStatus run(IProgressMonitor progressMonitor) {
 //			System.out.println(Thread.currentThread().getName()+ " wait");
 			try {
@@ -1116,6 +1228,8 @@ public class PLEditor extends TextEditor{
 	public static final int VAR_KIND_ANONYMOUS = 0;
 	public static final int VAR_KIND_SINGLETON = 1;
 	public static final int VAR_KIND_NORMAL=2;
+
+	private PDTBreakpointHandler breakpointHandler;
 	
 	/**
 	 * @param a valid Prolog variable
@@ -1173,6 +1287,7 @@ public class PLEditor extends TextEditor{
 			return fDescription;
 		}
 
+		@Override
 		public String toString() {
 			return "[" + fOffset + " / " + fLength + "] " + fDescription; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -1213,5 +1328,8 @@ public class PLEditor extends TextEditor{
 		
 		return new TextSelection(document,begin,length);
 	}
+
+
+
 	
 }

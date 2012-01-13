@@ -103,8 +103,25 @@ public class PLMarkerUtils {
 	private static void add_markers_for_errors_and_warnings(
 			final IFile file, PrologSession session, final IDocument doc)
 			throws PrologInterfaceException, CoreException {
-		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message,File)");
+		List<Map<String, Object>> reloadedFiles = session.queryAll("pdtplugin:pdt_reloaded_file(File)");
 		HashSet<IFile> clearedFiles = new HashSet<IFile>();
+		for (Map<String, Object> reloadedFile : reloadedFiles) {
+			String fileName = reloadedFile.get("File").toString();
+			IFile file2 = null;
+			try {
+				file2 = PDTCoreUtils.findFileForLocation(fileName);
+			} catch (IOException e1) {
+				continue;
+			} catch (IllegalArgumentException e2){
+				continue;
+			}
+			if (file2 == null || !file2.exists()){
+				continue;
+			}
+			file2.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+			clearedFiles.add(file2);
+		}
+		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message,File)");
 		for (Map<String, Object> msg : msgs) {
 			int severity=0;
 			try {
@@ -118,6 +135,8 @@ public class PLMarkerUtils {
 			try {
 				file2 = PDTCoreUtils.findFileForLocation(fileName);
 			} catch (IOException e1) {
+				continue;
+			} catch (IllegalArgumentException e2){
 				continue;
 			}
 			if (file2 == null || !file2.exists()){

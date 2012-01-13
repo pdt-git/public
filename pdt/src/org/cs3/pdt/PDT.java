@@ -59,6 +59,7 @@ public final class PDT {
 	public final static String PREF_DEBUG_LEVEL = "debug.level";
 	public final static String PREF_DEBUG_OUTPUT_TO = "debug.output.to";
 	public static final String PREF_ADD_NATURE_ON_OPEN = "pdt.ask.add_nature";
+	public static final String PREF_EXTERNAL_FILE_SAVE_WARNING = "pdt.external.file.save.warning";
 
 	/**
 	 * The basename of the resource bundle to be used by the pdt ui
