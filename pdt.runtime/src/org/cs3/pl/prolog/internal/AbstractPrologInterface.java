@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.WeakHashMap;
@@ -684,7 +683,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 						Debug.debug("consult(" + fileName + "), because it was consulted before");
 						queryOnce("consult(" + fileName + ")");
 					} catch (PrologInterfaceException e) {
-						e.printStackTrace();
+						Debug.report(e);
 					}
 				}	
 				notifyLastFileReconsulted();

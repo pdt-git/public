@@ -2,6 +2,7 @@ package org.cs3.pdt.quickfix;
 
 import org.cs3.pdt.internal.editors.PLMarkerUtils;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -109,9 +110,9 @@ public class PDTQuickFix implements IMarkerResolution {
 				PLMarkerUtils.updateFileMarkers(file);
 			}
 		} catch (NumberFormatException e1) {
-			e1.printStackTrace();
+			Debug.report(e1);
 		} catch (CoreException e1) {
-			e1.printStackTrace();
+			Debug.report(e1);
 		}
 	}
 
