@@ -46,9 +46,12 @@ package org.cs3.pl.prolog.internal;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
@@ -86,6 +89,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	private String environment;
 	private int timeout;
 	private String fileSearchPath;
+	
+	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 
 	public AbstractPrologInterface() {
 		this(null);
@@ -172,6 +177,16 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public String getEnvironment() {
 		return environment;
 	}
+	
+	@Override
+	public Object getAttribute(String attribute) {
+		return attributes.get(attribute);
+	}
+	
+	@Override
+	public void setAttribute(String attribute, Object value) {
+		attributes.put(attribute, value);
+	}
 
 	@Override
 	public void initOptions(PreferenceProvider provider) {
@@ -181,6 +196,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		setEnvironment(provider.getPreference(PrologInterface.PREF_ENVIRONMENT));
 		setTimeout(provider.getPreference(PrologInterface.PREF_TIMEOUT));
 		setFileSearchPath(provider.getPreference(PrologInterface.PREF_FILE_SEARCH_PATH));
+		setAttribute(PrologInterface.PREF_GENERATE_FACTBASE, provider.getPreference(PrologInterface.PREF_GENERATE_FACTBASE));
+		setAttribute(PrologInterface.PREF_META_PRED_ANALYSIS, provider.getPreference(PrologInterface.PREF_META_PRED_ANALYSIS));
 	}
 
 	/************************************************/
@@ -516,6 +533,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			} catch (InterruptedException e) {
 				throw new PrologInterfaceException(e);
 			}
+			
+			reconsultFiles();
 		}
 
 	}
@@ -625,4 +644,69 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
+	
+	
+	private List<String> consultedFiles;
+
+	@Override
+	public List<String> getConsultedFiles() {
+		return consultedFiles;
+	}
+	
+
+	@Override
+	public void clearConsultedFiles() {
+		consultedFiles = null;
+	}
+	
+	@Override
+	public void addConsultedFile(String fileName) {
+		if (consultedFiles == null) {
+			consultedFiles = new ArrayList<String>();
+		}
+		// only take the last consult of a file
+		if (consultedFiles.remove(fileName)) {
+			Debug.debug("move " + fileName + " to end of consulted files");			
+		} else {
+			Debug.debug("add " + fileName + " to consulted files");
+		}
+		consultedFiles.add(fileName);
+		
+	}
+
+	private void reconsultFiles() {
+		Debug.debug("Reconsult files");
+		if (consultedFiles != null) {
+			synchronized (lifecycle) {
+				for (String fileName : consultedFiles) {
+					try {
+						Debug.debug("consult(" + fileName + "), because it was consulted before");
+						queryOnce("consult(" + fileName + ")");
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+					}
+				}	
+				notifyLastFileReconsulted();
+			}
+		}
+	}
+	
+	private static Set<ReconsultHook> currentHooks = new HashSet<ReconsultHook>();
+	
+	public static void registerReconsultHook(ReconsultHook hook) {
+		currentHooks.add(hook);
+	}
+	
+	public static void unregisterReconsultHook(ReconsultHook hook) {
+		currentHooks.remove(hook);
+	}
+	
+	private void notifyLastFileReconsulted() {
+		for (ReconsultHook r : currentHooks) {
+			r.lastFileReconsulted(this);
+		}
+	}
+
+	
+	
 }

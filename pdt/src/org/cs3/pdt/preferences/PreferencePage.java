@@ -73,6 +73,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(new RadioGroupFieldEditor(PDT.PREF_SWITCH_TO_DEFAULT_PIF, "Switch to default runtime before consulting", 4,
 				new String[][] { { "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
 						{ "ask", MessageDialogWithToggle.PROMPT } }, getFieldEditorParent(), true));
+		
+		addField(new BooleanFieldEditor(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "Ask before saving external files", getFieldEditorParent()));
 
 		// A comma separated list of filter ids that should be activated at
 		// startup

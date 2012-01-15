@@ -429,7 +429,6 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		PrologSession session = null;
 		try {
 			session = getSession(PrologInterface.LEGACY);
-		    
 			result = session.queryOnce(buf.toString());
 		} finally {
 		    if (session != null)

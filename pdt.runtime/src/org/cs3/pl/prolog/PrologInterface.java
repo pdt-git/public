@@ -207,6 +207,8 @@ public interface PrologInterface {
 	public String getFileSearchPath();
 	public int getTimeout();
 	public void setTimeout(String timeout);
+	public Object getAttribute(String attribute);
+	public void setAttribute(String attribute, Object value);
 	public void setFileSearchPath(String fileSearchPath);
 	
 
@@ -252,6 +254,11 @@ public interface PrologInterface {
 	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException;
 	
 	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
+	
+	public List<String> getConsultedFiles();
+	public void addConsultedFile(String file);
+
+	public void clearConsultedFiles();
 
 	/**
 	 * Start swi-prolog with the JPL Java bridge as part of the same process.
