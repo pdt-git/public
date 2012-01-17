@@ -37,7 +37,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Display;
@@ -182,27 +187,57 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 		}
 	}
 
-	private void addMarker(IFile file, int line, int offset, String id) throws CoreException {
-		HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
-		attributes.put(IMarker.LINE_NUMBER, line);
-		attributes.put(IMarker.MESSAGE, "Prolog Breakpoint: line[" + line + "]");
-		attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-		attributes.put(BREAKPOINT_ID, id);
-		attributes.put(BREAKPOINT_OFFSET, offset);
-		MarkerUtilities.createMarker(file, attributes, PDT_BREAKPOINT_MARKER);
+	private void addMarker(final IFile file, final int line, final int offset, final String id) throws CoreException {
+		runAsJob("Remove all breakpoints", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
+
+			@Override
+			public void run() {
+				HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
+				attributes.put(IMarker.LINE_NUMBER, line);
+				attributes.put(IMarker.MESSAGE, "Prolog Breakpoint: line[" + line + "]");
+				attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+				attributes.put(BREAKPOINT_ID, id);
+				attributes.put(BREAKPOINT_OFFSET, offset);
+				try {
+					MarkerUtilities.createMarker(file, attributes, PDT_BREAKPOINT_MARKER);
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+			}
+		});
 	}
 
 	private void removeAllBreakpointMarkers() {
-		// called when active prolog interface was changed
-		try {
-			ResourcesPlugin.getWorkspace().getRoot().deleteMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
-			//			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
-			//			for (IMarker marker : markers) {
-			//				marker.delete();
-			//			}
-		} catch (CoreException e) {
-			Debug.report(e);
-		}
+		runAsJob("Remove all breakpoints", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
+			
+			@Override
+			public void run() {
+				// called when active prolog interface was changed
+				try {
+					ResourcesPlugin.getWorkspace().getRoot().deleteMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					//			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					//			for (IMarker marker : markers) {
+					//				marker.delete();
+					//			}
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+				
+			}
+		});
+	}
+	
+	private void runAsJob(String name, ISchedulingRule rule, final Runnable runnable) {
+		Job job = new Job(name) {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				runnable.run();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(rule);
+		job.schedule();
 	}
 
 	public void removeBreakpointFactsForFile(String prologFileName) {
@@ -381,16 +416,27 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 		}
 	}
 
-	private void removeMarkerWithId(String id) {
+	private void removeMarkerWithId(final String id) {
 		try {
 			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 			for (IMarker marker : markers) {
 				if (marker.getAttribute(BREAKPOINT_ID, "").equals(id)) {
-					marker.delete();
-					Debug.debug("remove marker " + id);
-					if (deletedIds != null) {
-						deletedIds.add(id);
-					}
+					final IMarker m = marker;
+					runAsJob("Delete marker", marker.getResource(), new Runnable() {
+
+						@Override
+						public void run() {
+							try {
+								m.delete();
+							} catch (CoreException e) {
+								Debug.report(e);
+							}
+							Debug.debug("remove marker " + id);
+							if (deletedIds != null) {
+								deletedIds.add(id);
+							}
+						}
+					});
 					return;
 				}
 			}
