@@ -1,6 +1,6 @@
 package org.cs3.pdt.quickfix;
 
-import org.cs3.pdt.internal.editors.PLMarkerUtils;
+import org.cs3.pdt.internal.actions.ConsultAction;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
@@ -99,7 +99,8 @@ public class PDTQuickFix implements IMarkerResolution {
 					if (op.run(shell, "") != IDialogConstants.CANCEL_ID){
 						// changes are already performed by the dialog
 						file.refreshLocal(IResource.DEPTH_INFINITE, null);
-						PLMarkerUtils.updateFileMarkers(file);
+						new ConsultAction().consultWorkspaceFile(file);
+//						PLMarkerUtils.updateFileMarkers(file);
 					}
 				} catch (InterruptedException e) {
 				}
@@ -107,7 +108,8 @@ public class PDTQuickFix implements IMarkerResolution {
 				textFileChange.perform(new NullProgressMonitor());
 
 				file.refreshLocal(IResource.DEPTH_INFINITE, null);
-				PLMarkerUtils.updateFileMarkers(file);
+				new ConsultAction().consultWorkspaceFile(file);
+//				PLMarkerUtils.updateFileMarkers(file);
 			}
 		} catch (NumberFormatException e1) {
 			Debug.report(e1);

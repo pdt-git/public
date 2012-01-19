@@ -51,12 +51,11 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ConsultActionDelegate;
+import org.cs3.pdt.internal.actions.ConsultAction;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
@@ -167,8 +166,9 @@ public class PLEditor extends TextEditor {
 //		}
 		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
 		breakpointHandler.backupMarkers(getCurrentIFile(), document);
+		new ConsultAction().consultFromActiveEditor();
 //		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
-		addProblemMarkers(); // here happens the save & reconsult
+//		addProblemMarkers(); // here happens the save & reconsult
 //		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
 		setFocus();
 
@@ -227,22 +227,22 @@ public class PLEditor extends TextEditor {
 		j.schedule();
 	}
 
-	private void addProblemMarkers() {
-		try {
-			// current file in editor is either an external file or the pdt nature is not assigned:
-			IEditorInput editorInput = getEditorInput();
-			if (editorInput instanceof IFileEditorInput) {
-				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
-			} else if (editorInput instanceof FileStoreEditorInput) {
-				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
-					new ConsultActionDelegate().run(null);
-				}
-			}
-
-		} catch (CoreException e) {
-			Debug.report(e);
-		}
-	}
+//	private void addProblemMarkers() {
+//		try {
+//			// current file in editor is either an external file or the pdt nature is not assigned:
+//			IEditorInput editorInput = getEditorInput();
+//			if (editorInput instanceof IFileEditorInput) {
+//				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
+//			} else if (editorInput instanceof FileStoreEditorInput) {
+//				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
+//					new ConsultActionDelegate().run(null);
+//				}
+//			}
+//
+//		} catch (CoreException e) {
+//			Debug.report(e);
+//		}
+//	}
 
 	protected abstract class AbstractSelectionChangedListener implements
 			ISelectionChangedListener {
@@ -387,6 +387,7 @@ public class PLEditor extends TextEditor {
 				if (PDTUtils.checkForActivePif(true)) {
 					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+					// FIXME: we need the start of the text, not of the line
 					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
 					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 				};
@@ -484,7 +485,8 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				addProblemMarkers();
+				new ConsultAction().consultFromActiveEditor();
+//				addProblemMarkers();
 				informViewsAboutChangedEditor();
 //				executeConsult();
 			}
