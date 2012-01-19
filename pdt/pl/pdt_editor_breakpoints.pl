@@ -16,7 +16,7 @@ existing_breakpoint(File, Offset) :-
     breakpoint_property(ExistingId, file(File)),
     breakpoint_property(ExistingId, character_range(StartPos, Length)),
     EndPos is StartPos + Length,
-    Offset > StartPos,
+    Offset >= StartPos,
     Offset < EndPos.
     
 pdt_breakpoint_properties(Id, File, Line, Offset) :-
