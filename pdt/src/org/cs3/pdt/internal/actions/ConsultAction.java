@@ -131,7 +131,9 @@ public class ConsultAction extends QueryConsoleThreadAction {
 
 	private void updateDecorator() {
 		PDTConsultDecoratorContributor consultDecorator = PDTPlugin.getDefault().getConsultDecorator();
-		consultDecorator.valuesChanged(null);
+		if (consultDecorator != null) {
+			consultDecorator.valuesChanged(null);
+		}
 	}
 
 
