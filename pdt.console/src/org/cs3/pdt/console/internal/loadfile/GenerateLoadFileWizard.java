@@ -4,10 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -51,16 +53,15 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 
 	public void writeFileContent(IFile file) {
 		try {
-			IPath location = file.getLocation();
-			String locationString = location.toString().toLowerCase();
-			locationString = locationString.substring(0, locationString.lastIndexOf("/") + 1);
+			IPath loadFileLocation = file.getLocation();
+			IPath loadFileFolder = new Path(loadFileLocation.toString().toLowerCase()).removeLastSegments(1);
 			
 			StringBuffer buf = new StringBuffer();
 			for (String fileName : consultedFiles) {
-				if (fileName.startsWith("'" + locationString)) {
-					fileName = "'" + fileName.substring(locationString.length() + 1);
-				}
-				buf.append(":- consult(" + fileName + ").\n");
+				String fileNameWithoutQuotes = Util.unquoteAtom(fileName);
+				IPath path = new Path(fileNameWithoutQuotes);
+				IPath relPath = path.makeRelativeTo(loadFileFolder);
+				buf.append(":- consult('" + relPath.toString().toLowerCase() + "').\n");
 			}
 			String content = buf.toString();
 			
