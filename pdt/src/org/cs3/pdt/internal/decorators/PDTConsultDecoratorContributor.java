@@ -78,11 +78,6 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		try {
 			Map<String, Object> result = currentPif.queryOnce("source_file(" + getPrologFileName(file) + ")");
 			if (result != null) {
-				IDecorationContext context = decoration.getDecorationContext();
-				if (context instanceof DecorationContext) {
-					((DecorationContext) context).putProperty(IDecoration.ENABLE_REPLACE, Boolean.TRUE);
-				}
-
 				decoration.addSuffix(" [consulted]");
 				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED));
 			}
