@@ -960,8 +960,8 @@ PrologConsole {
 
 	private void addToolbarContributions(IToolBarManager manager) {
 		manager.add(new Separator());
-		manager.add(abortAction);
 		manager.add(traceAction);
+		manager.add(abortAction);
 		manager.add(restartAction);
 		manager.add(killAction);
 		manager.add(new Separator());
