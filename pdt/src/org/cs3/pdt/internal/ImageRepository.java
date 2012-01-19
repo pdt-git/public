@@ -99,6 +99,8 @@ public class ImageRepository {
     
     public final static String PROLOG_FILE = "prolog_file.gif";
     
+    public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
+    
     public final static String PROLOG_FILE_EXTERNAL = "prolog_file_external.gif";
 
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
@@ -112,6 +114,7 @@ public class ImageRepository {
 	public static final String RESTART = "restart.gif";
 
 	public static final String PE_PRIVATE = "private_co.gif";
+
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PDTPlugin.getDefault().getBundle().getEntry("/icons/" + icon);
