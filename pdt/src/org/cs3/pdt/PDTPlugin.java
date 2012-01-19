@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor;
 import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
@@ -247,6 +248,15 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 	@Override
 	public ISelection getSelection() {
 		return selection;
+	}
+
+	PDTConsultDecoratorContributor decorator;
+	public void setConsultDecorator(PDTConsultDecoratorContributor decorator) {
+		this.decorator = decorator;
+	}
+	
+	public PDTConsultDecoratorContributor getConsultDecorator() {
+		return decorator;
 	}
 	
 }
