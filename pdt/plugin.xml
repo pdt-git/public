@@ -345,7 +345,7 @@
             id="org.cs3.pdt.consult.decorator"
             label="PDT Consult Decorator"
             lightweight="true"
-            location="REPLACE"
+            location="TOP_LEFT"
             state="true">
          <enablement>
             <objectClass
