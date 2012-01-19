@@ -338,7 +338,26 @@
             </objectClass>
          </enablement>
       </decorator>
+      <decorator
+            adaptable="true"
+            class="org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor"
+            icon="icons/prolog_file_consulted.gif"
+            id="org.cs3.pdt.consult.decorator"
+            label="PDT Consult Decorator"
+            lightweight="true"
+            location="REPLACE"
+            state="true">
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IFile">
+            </objectClass>
+         </enablement>
+      </decorator>
    </extension>
+   
+    
+   
+   
 <!--	
  <extension
        point="org.eclipse.ui.menus">
