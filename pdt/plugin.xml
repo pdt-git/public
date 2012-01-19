@@ -341,16 +341,21 @@
       <decorator
             adaptable="true"
             class="org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor"
-            icon="icons/prolog_file_consulted.gif"
+            icon="icons/prolog_file_consulted.png"
             id="org.cs3.pdt.consult.decorator"
             label="PDT Consult Decorator"
             lightweight="true"
             location="TOP_LEFT"
             state="true">
          <enablement>
+            <or>
             <objectClass
                   name="org.eclipse.core.resources.IFile">
             </objectClass>
+            <objectClass
+                  name="org.eclipse.core.resources.IFolder">
+            </objectClass>
+            </or>
          </enablement>
       </decorator>
    </extension>
