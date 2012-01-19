@@ -387,8 +387,7 @@ public class PLEditor extends TextEditor {
 				if (PDTUtils.checkForActivePif(true)) {
 					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-					// FIXME: we need the start of the text, not of the line
-					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
 					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 				};
 			}
@@ -599,6 +598,28 @@ public class PLEditor extends TextEditor {
 			offset = document.getLineInformation(line - 1).getOffset();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
+		}
+		return offset;
+	}
+	
+	protected int getCurrentLineOffsetSkippingWhiteSpaces(int line) {
+		int offset = 0;
+		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+		try {
+			IRegion lineInformation = document.getLineInformation(line - 1);
+			String lineContent = document.get(lineInformation.getOffset(), lineInformation.getLength());
+			int additionalOffset = 0;
+			while (additionalOffset < lineContent.length()) {
+				char character = lineContent.charAt(additionalOffset);
+				if (character == '\t' || character == ' ') {
+					additionalOffset++;
+				} else {
+					break;
+				}
+			}
+			return lineInformation.getOffset() + additionalOffset;
+		} catch (BadLocationException e) {
+			Debug.report(e);
 		}
 		return offset;
 	}
