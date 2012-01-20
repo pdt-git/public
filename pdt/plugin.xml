@@ -348,14 +348,9 @@
             location="TOP_LEFT"
             state="true">
          <enablement>
-            <or>
             <objectClass
-                  name="org.eclipse.core.resources.IFile">
+                  name="org.eclipse.core.resources.IResource">
             </objectClass>
-            <objectClass
-                  name="org.eclipse.core.resources.IFolder">
-            </objectClass>
-            </or>
          </enablement>
       </decorator>
    </extension>
