@@ -6,8 +6,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import pdt.y.graphml.GraphMLReader;
@@ -17,9 +15,6 @@ import pdt.y.model.GraphModel;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
-import pdt.y.view.swing.actions.ExitAction;
-import pdt.y.view.swing.actions.LoadAction;
-import pdt.y.view.swing.actions.ResetLayout;
 import y.base.Node;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
@@ -180,21 +175,5 @@ public class PDTGraphView extends  JPanel {
 		
 		view.fitContent();
 		view.updateView();
-	}
-
-
-	/**
-	 * Create a menu bar for this demo.
-	 */
-	protected JMenuBar createMenuBar() {
-		JMenuBar menuBar = new JMenuBar();
-		JMenu menu = new JMenu("File");
-
-		menu.add(new LoadAction(this));
-		menu.addSeparator();
-		menu.add(new ResetLayout(this));
-		menu.add(new ExitAction());
-		menuBar.add(menu);
-		return menuBar;
 	}
 }

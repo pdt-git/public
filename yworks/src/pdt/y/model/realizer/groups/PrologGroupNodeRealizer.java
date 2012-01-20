@@ -52,6 +52,7 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 	@Override
 	public void paintText(Graphics2D gfx) {
 		NodeLabel label = getLabel();
+		
 		label.paint(gfx);
 		if (showContentAsLabel) {
 			paintContentLabel(gfx);

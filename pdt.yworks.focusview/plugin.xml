@@ -8,7 +8,7 @@
       <view
             name="PDT Focus View"
             category="org.cs3.pdt"
-            class="pdt.y.main.FocusViewPlugin"
+            class="pdt.y.focusview.FocusViewPlugin"
             id="pdt.view.focus">
       </view>
    </extension>
@@ -16,9 +16,6 @@
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="pdt.y.focusview.preferences.PreferenceInitializer">
-      </initializer>
-      <initializer
-            class="pdt.yworks.focusview.preferences.PreferenceInitializer">
       </initializer>
    </extension>
    <extension
@@ -31,8 +28,8 @@
       </page>
       <page
             category="pdt.y.focusview.preferences.PreferencePage"
-            class="pdt.yworks.focusview.preferences.LayoutPreferences"
-            id="pdt.yworks.focusview.preferences.LayoutPreferences"
+            class="pdt.y.focusview.preferences.LayoutPreferences"
+            id="pdt.y.focusview.preferences.LayoutPreferences"
             name="Layout">
       </page>
    </extension>

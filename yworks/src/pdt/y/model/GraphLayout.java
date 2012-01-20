@@ -32,7 +32,6 @@ public class GraphLayout {
 	protected LayoutStage createEdgeLayout() {
 		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
 	    router.setLocalCrossingMinimizationEnabled(true);
-	    router.setCrossingCost(3.0);
 	    router.setReroutingEnabled(true);
 		return router;
 	}
@@ -56,8 +55,8 @@ public class GraphLayout {
 		layouter.setGroupAlignmentPolicy(IncrementalHierarchicLayouter.POLICY_ALIGN_GROUPS_CENTER);
 
 		
-	    final AdaptNodeToLabelWidths stage = new AdaptNodeToLabelWidths();
-	    stage.setAdaptGroupNodesOnly(false);
+//	    final AdaptNodeToLabelWidths stage = new AdaptNodeToLabelWidths();
+//	    stage.setAdaptGroupNodesOnly(false);
 
 
 	    layouter.prependStage(stage);
