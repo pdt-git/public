@@ -10,9 +10,15 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.common;bundle-version="0.2.3",
  org.cs3.pdt.runtime.ui;bundle-version="0.2.3",
  org.cs3.pdt.common.ui;bundle-version="0.2.3",
- org.eclipse.core.resources;bundle-version="3.5.2"
+ org.eclipse.core.resources;bundle-version="3.5.2",
+ org.cs3.pdt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.jface.text,
+Import-Package: org.cs3.pdt,
+ org.cs3.pdt.console,
+ org.cs3.pdt.core,
+ org.cs3.pl.console.prolog,
+ org.eclipse.jface.text,
+ org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.ui.forms.events,
  org.eclipse.ui.forms.widgets
@@ -44,6 +50,7 @@ Export-Package: org.eclipse.albireo.core;
  org.hamcrest.object;uses:="org.hamcrest",
  org.hamcrest.text;uses:="org.hamcrest",
  org.hamcrest.xml;uses:="org.w3c.dom,org.hamcrest,javax.xml.namespace",
+ pdt.y.focusview,
  pdt.y.graphml;x-internal:=true,
  pdt.y.main;
   uses:="org.eclipse.jface.resource,

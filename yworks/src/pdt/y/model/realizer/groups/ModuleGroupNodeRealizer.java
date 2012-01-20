@@ -25,7 +25,6 @@ public class ModuleGroupNodeRealizer extends PrologGroupNodeRealizer {
 		label.setTextColor(Color.BLACK);
 		label.setUnderlinedTextEnabled(true);
 		label.setModel(NodeLabel.INTERNAL);
-		label.setConfiguration("CroppingLabel");
 	}
 
 	@Override

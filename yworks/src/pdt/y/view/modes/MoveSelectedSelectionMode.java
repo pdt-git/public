@@ -14,9 +14,12 @@ public class MoveSelectedSelectionMode extends MoveSelectionMode {
 	private static final boolean ROUTE_EDGES_ON_MOVE = false;
 	private Layouter router = new OrthogonalEdgeRouter();
 	
+	public MoveSelectedSelectionMode() {
+		super();
+	}
 	
 	public MoveSelectedSelectionMode(Layouter router) {
-		super();
+		this();
 		this.router = router;
 	}
 

@@ -2,8 +2,8 @@ package pdt.y.model;
 
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
+import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
 import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.nodes.FileGroupNodeRealizer;
 import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
 import y.base.Edge;
 import y.base.EdgeMap;
