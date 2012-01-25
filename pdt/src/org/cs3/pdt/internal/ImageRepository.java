@@ -99,6 +99,8 @@ public class ImageRepository {
     
     public final static String PROLOG_FILE = "prolog_file.gif";
 
+    public static final String PROLOG_CONSULTED = "consulted.png";
+    public static final String PROLOG_ENTRY_POINT = "entry_point.png";
     public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
     public static final String PROLOG_FOLDER_CONSULTED = "prolog_folder_consulted.png";
     

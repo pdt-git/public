@@ -50,7 +50,6 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.editors.PLMarkerUtils;
 import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
@@ -125,17 +124,9 @@ public class ConsultAction extends QueryConsoleThreadAction {
 		setQuery(QueryUtils.buildTerm("pdt_reload", Util.quoteAtom(prologFilename)));
 		run();
 		
-		updateDecorator();
+		PDTPlugin.getDefault().notifyDecorators();
 		
 	}
-
-	private void updateDecorator() {
-		PDTConsultDecoratorContributor consultDecorator = PDTPlugin.getDefault().getConsultDecorator();
-		if (consultDecorator != null) {
-			consultDecorator.valuesChanged(null);
-		}
-	}
-
 
 	public void consultFromActiveEditor() {
 		// get input from active editor

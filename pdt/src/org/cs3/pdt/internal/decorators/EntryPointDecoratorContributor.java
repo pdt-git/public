@@ -1,28 +1,22 @@
 package org.cs3.pdt.internal.decorators;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.actions.ToggleEntryPointAction;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderListener;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class PDTConsultDecoratorContributor implements ILightweightLabelDecorator, OptionProviderListener {
+public class EntryPointDecoratorContributor implements ILightweightLabelDecorator, OptionProviderListener {
 
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
@@ -58,63 +52,27 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
-		if(!(element instanceof IFile) && !(element instanceof IFolder)){
+		if(!(element instanceof IFile)){
 			return;
 		}
-
+		
 		PDTPlugin.getDefault().addDecorator(this);
-
-		// get active pif from console
-		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
-
-		if (currentPif == null) {
-			return;
-		}
-
-		if (element instanceof IFile) {
-			IFile file = (IFile) element;
-
-
-			// check if file is consulted
-			try {
-				Map<String, Object> result = currentPif.queryOnce("source_file(" + getPrologFileName(file) + ")");
-				if (result != null) {
-					decoration.addSuffix(" [consulted]");
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_CONSULTED));
-				}
-
-			} catch (PrologInterfaceException e) {
-				e.printStackTrace();
-			}
-		} else {
-			IFolder folder = (IFolder) element;
-			String prologFilename = Util.prologFileName(folder.getRawLocation().toFile());
+		
+		IFile file = (IFile) element;
+		try {
+			String isEntryPoint = file.getPersistentProperty(ToggleEntryPointAction.KEY);
 			
-			if (prologFilename != null) {
-			try {
-				Map<String, Object> result = currentPif.queryOnce("source_file(F), atom_concat('" + prologFilename + "', _, F)");
-				if (result != null) {
-//					decoration.addSuffix(" [consulted]");
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_CONSULTED));
-				}
-			} catch (PrologInterfaceException e) {
-				e.printStackTrace();
+			if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
+				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
 			}
-			}
+			
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
+		
+		
 	}
 	
-	
-	private String getPrologFileName(IFile file) {
-		String enclFile = file.getRawLocation().toPortableString();
-		if (Util.isWindows()) {
-			enclFile = enclFile.toLowerCase();
-		}
-
-		IPath filepath = new Path(enclFile);
-		return "'" + Util.prologFileName(filepath.toFile()) + "'";
-	}
-
 	@Override
 	public void valuesChanged(OptionProviderEvent e) {
 		fireLabelProviderChanged();

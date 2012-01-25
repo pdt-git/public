@@ -43,15 +43,17 @@ package org.cs3.pdt;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor;
 import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.OptionProviderListener;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -250,13 +252,23 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 		return selection;
 	}
 
-	PDTConsultDecoratorContributor decorator;
-	public void setConsultDecorator(PDTConsultDecoratorContributor decorator) {
-		this.decorator = decorator;
+	
+	
+	Set<OptionProviderListener> decorators = new HashSet<OptionProviderListener>();
+	
+	public void addDecorator(OptionProviderListener decorator) {
+		decorators.add(decorator);
 	}
 	
-	public PDTConsultDecoratorContributor getConsultDecorator() {
-		return decorator;
+	public void removeDecorator(OptionProviderListener decorator) {
+		decorators.remove(decorator);
 	}
+	
+	public void notifyDecorators() {
+		for (OptionProviderListener d : decorators) {
+			d.valuesChanged(null);
+		}
+	}
+	
 	
 }
