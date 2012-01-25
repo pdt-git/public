@@ -2,7 +2,6 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -106,12 +105,9 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
 		Object source = e.getSource();
 		if (source instanceof PrologConsole){
-
-			PDTConsultDecoratorContributor consultDecorator = PDTPlugin.getDefault().getConsultDecorator();
-			if (consultDecorator != null) {
-				consultDecorator.valuesChanged(null);
-			}
 			
+			PDTPlugin.getDefault().notifyDecorators();
+
 			if (PDTUtils.checkForActivePif(false)) {
 				removePifListener();
 				

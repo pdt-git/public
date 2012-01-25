@@ -509,6 +509,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			}
 			Debug.debug("Resetting breakpoints after restart: " + buf.toString());
 			QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(buf.toString());
+			System.out.println(System.currentTimeMillis() + ": reset breakpoints");
 			consoleAction.run();
 
 			// disable logging of deleted ids
