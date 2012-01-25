@@ -1,6 +1,7 @@
 package org.cs3.pdt.internal.decorators;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -71,37 +72,50 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			return;
 		}
 
+		
+		// TODO: find a way to see, which qlf files are consulted
+		//       atm: qlf files -> look in the consultedFiles list of the pif
+		//            pl files -> look at the source_file predicate
+		
+		List<String> consultedFiles = currentPif.getConsultedFiles();
 		if (element instanceof IFile) {
 			IFile file = (IFile) element;
 
-
-			// check if file is consulted
-			try {
-				Map<String, Object> result = currentPif.queryOnce("source_file(" + getPrologFileName(file) + ")");
-				if (result != null) {
-					decoration.addSuffix(" [consulted]");
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_CONSULTED));
+			// check if file is in consulted files list (important for qlf files)
+			if (consultedFiles != null && consultedFiles.contains(getPrologFileName(file))) {
+				decoration.addSuffix(" [consulted]");
+				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED));
+				} else {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED));
 				}
-
-			} catch (PrologInterfaceException e) {
-				e.printStackTrace();
+			} else {
+				// check if file is source_file
+				try {
+					Map<String, Object> result = currentPif.queryOnce("source_file(" + getPrologFileName(file) + ")");
+					if (result != null) {
+						decoration.addSuffix(" [consulted]");
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED));
+					}
+				} catch (PrologInterfaceException e) {
+					e.printStackTrace();
+				}
 			}
 		} else {
 			IFolder folder = (IFolder) element;
 			String prologFilename = Util.prologFileName(folder.getRawLocation().toFile());
 			
-			if (prologFilename != null) {
 			try {
 				Map<String, Object> result = currentPif.queryOnce("source_file(F), atom_concat('" + prologFilename + "', _, F)");
 				if (result != null) {
-//					decoration.addSuffix(" [consulted]");
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_CONSULTED));
+					//					decoration.addSuffix(" [consulted]");
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED));
 				}
 			} catch (PrologInterfaceException e) {
 				e.printStackTrace();
 			}
-			}
 		}
+		
 	}
 	
 	
