@@ -13,6 +13,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
@@ -41,9 +44,11 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     @Override
     public boolean performFinish() {
     	IFile file = newFileWizardPage.createNewFile();
-    	
     	if (file != null) {
     		writeFileContent(file);
+    		if (newFileWizardPage.isEntryPoint()) {
+    			// TODO: set entry point
+    		}
 
     		return true;
     	}
@@ -86,6 +91,23 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     		setFileExtension("pl");
     		setFileName("load.pl");
     	}
+    	
+    	Button entryPointCheckbox;
+    	
+    	 @Override
+		public void createControl(Composite parent) {
+    	      // inherit default container and name specification widgets
+    	      super.createControl(parent);
+    	      Composite composite = (Composite)getControl();
+    	      
+    	      entryPointCheckbox = new Button(composite,SWT.CHECK);
+    	      entryPointCheckbox.setText("Mark file as entry point");
+    	      entryPointCheckbox.setSelection(true);
+    	 }
+    	 
+    	 public boolean isEntryPoint() {
+    		 return entryPointCheckbox.getSelection();
+    	 }
 
     }
 
