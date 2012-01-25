@@ -40,6 +40,14 @@
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
       </editor>
+      <editor
+            name="QLF Editor"
+            icon="icons/qlf_file.png"
+            extensions="qlf"
+            class="org.cs3.pdt.internal.editors.QLFEditor"
+            contributorClass="org.eclipse.ui.part.MultiPageEditorActionBarContributor"
+            id="org.cs3.pdt.internal.editors.QLFEditor">
+      </editor>
    </extension>
 
  <extension
