@@ -421,8 +421,14 @@ PrologConsole {
 							if (getPrologInterface() != null) {
 								List<String> consultedFiles = getPrologInterface().getConsultedFiles();
 								
-								WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
-								dialog.open();
+								// only create load file if there are consulted files
+								if (consultedFiles != null && consultedFiles.size() > 0) {
+									WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
+									dialog.open();
+								} else {
+									MessageDialog.openWarning(PrologConsoleView.this.getViewSite().getShell(), "Generate Load File", "No need for a load file, since no files are consulted.");
+								}
+								
 							}
 
 						} catch (Throwable e) {
