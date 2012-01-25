@@ -9,7 +9,7 @@ pdt_set_breakpoint(File, Line, Offset, Id) :-
     not(existing_breakpoint(File, Offset)),
     debug(pdt_breakpoints, 'after existing breakpoint', []),
     debug(pdt_breakpoints, 'before set_breakpoint', []),
-    set_breakpoint(File, Line, Offset, Id),
+    catch(set_breakpoint(File, Line, Offset, Id),_,fail),
     debug(pdt_breakpoints, 'after set_breakpoint', []).
     
 existing_breakpoint(File, Offset) :-   
