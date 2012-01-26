@@ -42,6 +42,7 @@
 package org.cs3.pl.prolog;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
@@ -67,6 +68,8 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	private PrologInterface pif;
 
 	protected PrologLibraryManager libraryManager;
+	
+	private HashSet<String> subjects = new HashSet<String>();
 
 	public PrologEventDispatcher(PrologInterface pif,PrologLibraryManager libManager){
 		this.pif = pif;
@@ -198,6 +201,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			String query = "pif_observe('" + session.getProcessorThreadAlias() + "',"
 			+ subject + ","+Util.quoteAtom(subject) +")";
 			s.queryOnce(query);
+			synchronized (subjects) {
+				subjects.add(subject);
+			}
 		} finally {
 			s.dispose();
 		}
@@ -215,6 +221,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				+ subject + ")");
 		if (!listenerLists.isEmpty()) {
 			dispatch();
+		}
+		synchronized (subjects) {
+			subjects.remove(subject);
 		}
 	}
 
@@ -296,6 +305,14 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		String key = (String) e.getBindings().get("Key");
 		String event = (String) e.getBindings().get("Event");
 		fireUpdate(subject, key, event);
+	}
+	
+	public Set<String> getSubjects(){
+		Set<String> res = new HashSet<String>();
+		synchronized (subjects) {
+			res.addAll(subjects);
+		}
+		return res;
 	}
 
 }
