@@ -114,10 +114,9 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-@SuppressWarnings("deprecation")
-public class PrologConsoleView extends ViewPart implements LifeCycleHook,
-PrologConsole {
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
 
+	private static final String DEFAULT_CONSOLE = "defaultConsole";
 	private static final String KILLABLE = "killable";
 
 	private final class ClearAction extends Action {
@@ -330,6 +329,7 @@ PrologConsole {
 	}
 
 	private final class KillAction extends Action {
+
 		@Override
 		public void run() {
 			
@@ -353,14 +353,14 @@ PrologConsole {
 								if (oldPif != null) {
 									String currentKey = registry.getKey(oldPif);
 
-									if (!currentKey.equals("defaultConsole")) {
-										setPrologInterface(registry.getPrologInterface("defaultConsole"));
+									if (!currentKey.equals(DEFAULT_CONSOLE)) {
+										setPrologInterface(registry.getPrologInterface(DEFAULT_CONSOLE));
 									}
 
 									oldPif.clearConsultedFiles();
 									oldPif.stop();
 
-									if (!currentKey.equals("defaultConsole") && "true".equals(oldPif.getAttribute(KILLABLE))) {
+									if (!currentKey.equals(DEFAULT_CONSOLE) && "true".equals(oldPif.getAttribute(KILLABLE))) {
 										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
 										for (Subscription s : subscriptionsForPif) {
 											registry.removeSubscription(s);
@@ -724,6 +724,7 @@ PrologConsole {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	private void createActions() {
 		cutAction = new Action() {
 			@Override
@@ -797,7 +798,11 @@ PrologConsole {
 				}
 			}
 		}; 		
-		traceAction = new PifQueryAction("Interrupt running query and start tracing", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
+		traceAction = new PifQueryAction(
+				"Interrupt running query and start tracing",
+				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
+				"pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
+		
 		pasteFileNameAction = new PasteAction("paste filename",
 				"paste the name of the current editor file", ImageRepository
 				.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
@@ -812,14 +817,12 @@ PrologConsole {
 			}
 
 		};
-		pasteFileNameAction
-		.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
 
 		//Object service = IServiceLocator.getService(Class);
 
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
-		keyBindingService
-		.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
+		keyBindingService.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
 		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
 		killAction = new KillAction();
