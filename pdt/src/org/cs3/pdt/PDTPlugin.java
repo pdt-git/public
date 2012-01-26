@@ -48,12 +48,20 @@ import java.util.List;
 import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.internal.actions.ToggleEntryPointAction;
 import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.OptionProviderListener;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -171,6 +179,21 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 			PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
 			
+			ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
+				
+				@Override
+				public boolean visit(IResource resource) throws CoreException {
+					if (resource instanceof IFile) {
+						IFile file = (IFile) resource;
+						if ("true".equalsIgnoreCase(file.getPersistentProperty(ToggleEntryPointAction.KEY))) {
+							addEntryPoint(file);
+						}
+					}
+					return true;
+				}
+				
+			});
+			
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
@@ -268,6 +291,20 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 		for (OptionProviderListener d : decorators) {
 			d.valuesChanged(null);
 		}
+	}
+	
+	Set<IFile> entryPoints = new HashSet<IFile>();
+	
+	public void addEntryPoint(IFile f) {
+		entryPoints.add(f);
+	}
+	
+	public void removeEntryPoint(IFile f) {
+		entryPoints.remove(f);
+	}
+	
+	public Set<IFile> getEntryPoints() {
+		return entryPoints;
 	}
 	
 	
