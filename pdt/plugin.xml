@@ -45,7 +45,7 @@
             icon="icons/qlf_file.png"
             extensions="qlf"
             class="org.cs3.pdt.internal.editors.QLFEditor"
-            contributorClass="org.eclipse.ui.part.MultiPageEditorActionBarContributor"
+            contributorClass="org.cs3.pdt.internal.editors.QLFEditorContributor"
             id="org.cs3.pdt.internal.editors.QLFEditor">
       </editor>
    </extension>
