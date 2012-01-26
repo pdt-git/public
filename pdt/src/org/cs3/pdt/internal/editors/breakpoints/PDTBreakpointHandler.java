@@ -50,6 +50,9 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterfaceListener, LifeCycleHook, ReconsultHook {
 
+	private static final String ADD_BREAKPOINT = "add_breakpoint";
+	private static final String REMOVE_BREAKPOINT = "remove_breakpoint";
+	private static final String FILE_LOADED = "file_loaded";
 	private static final String BREAKPOINT_LIFECYCLE_HOOK = "BreakpointLifecycleHook";
 	private static final String SOURCE_FILE = "source_file";
 	private static final String SET_BREAKPOINT = "pdt_set_breakpoint";
@@ -360,9 +363,9 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			currentDispatcher = new PrologEventDispatcher(currentPif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
 			currentPif.addLifeCycleHook(this, BREAKPOINT_LIFECYCLE_HOOK, new String[0]);
 			try {
-				currentDispatcher.addPrologInterfaceListener("add_breakpoint", this);
-				currentDispatcher.addPrologInterfaceListener("remove_breakpoint", this);
-				currentDispatcher.addPrologInterfaceListener("file_loaded", this);
+				currentDispatcher.addPrologInterfaceListener(ADD_BREAKPOINT, this);
+				currentDispatcher.addPrologInterfaceListener(REMOVE_BREAKPOINT, this);
+				currentDispatcher.addPrologInterfaceListener(FILE_LOADED, this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -375,9 +378,9 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			Debug.debug("remove listener for pif " + currentPif.toString());
 			currentPif.removeLifeCycleHook(BREAKPOINT_LIFECYCLE_HOOK);
 			try {
-				currentDispatcher.removePrologInterfaceListener("add_breakpoint", this);
-				currentDispatcher.removePrologInterfaceListener("remove_breakpoint", this);
-				currentDispatcher.removePrologInterfaceListener("file_loaded", this);
+				currentDispatcher.removePrologInterfaceListener(ADD_BREAKPOINT, this);
+				currentDispatcher.removePrologInterfaceListener(REMOVE_BREAKPOINT, this);
+				currentDispatcher.removePrologInterfaceListener(FILE_LOADED, this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -404,7 +407,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	@Override
 	public void update(PrologInterfaceEvent e) {
-		if (e.getSubject().equals("add_breakpoint")) {
+		if (e.getSubject().equals(ADD_BREAKPOINT)) {
 			String id = e.getEvent();
 			try {
 				Map<String, Object> result = currentPif.queryOnce(bT("pdt_breakpoint_properties", id, "File", "Line", "Offset"));
@@ -417,10 +420,10 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			} catch (CoreException e1) {
 				Debug.report(e1);
 			}
-		} else if (e.getSubject().equals("remove_breakpoint")) {
+		} else if (e.getSubject().equals(REMOVE_BREAKPOINT)) {
 			String id = e.getEvent();
 			removeMarkerWithId(id);
-		} else if (e.getSubject().equals("file_loaded")) {
+		} else if (e.getSubject().equals(FILE_LOADED)) {
 			updateMarkers();
 			Debug.debug("update marker for " + e.getEvent());
 		}
@@ -495,6 +498,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				return;
 			}
 			prologConsoleService.getActivePrologConsole().ensureConnectionForCurrentPrologInterface();
+			waitForDispatcherSubjectActive();
 			StringBuffer buf = new StringBuffer();
 			boolean first = true;
 			for (MarkerBackup m : markerBackup) {
@@ -509,7 +513,6 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			}
 			Debug.debug("Resetting breakpoints after restart: " + buf.toString());
 			QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(buf.toString());
-			System.out.println(System.currentTimeMillis() + ": reset breakpoints");
 			consoleAction.run();
 
 			// disable logging of deleted ids
@@ -517,5 +520,17 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 		t.start();
 	}
 
+	private void waitForDispatcherSubjectActive() {
+		PrologEventDispatcher dispatcher = currentDispatcher;
+		for (int i = 0; i < 10; i++) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
+			if (dispatcher.getSubjects().contains(ADD_BREAKPOINT)) {
+				return;
+			}
+		}
+	}
 
 }
