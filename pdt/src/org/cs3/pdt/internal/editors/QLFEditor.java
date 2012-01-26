@@ -17,6 +17,7 @@ public class QLFEditor extends MultiPageEditorPart {
 	@Override
 	protected void createPages() {
 		Composite composite = new Composite(getContainer(), SWT.NONE);
+		
 		GridLayout layout = new GridLayout();
 		composite.setLayout(layout);
 		layout.numColumns = 2;
@@ -25,7 +26,7 @@ public class QLFEditor extends MultiPageEditorPart {
 		GridData gd = new GridData(GridData.BEGINNING);
 		gd.horizontalSpan = 2;
 		consultButton.setLayoutData(gd);
-		consultButton.setText("Consult");
+		consultButton.setText("Consult QLF file");
 		consultButton.addListener(SWT.Selection, new Listener() {
 
 			@Override
@@ -39,7 +40,7 @@ public class QLFEditor extends MultiPageEditorPart {
 
 		addPage(composite);
 	}
-
+	
 	@Override
 	public void doSave(IProgressMonitor monitor) {}
 
