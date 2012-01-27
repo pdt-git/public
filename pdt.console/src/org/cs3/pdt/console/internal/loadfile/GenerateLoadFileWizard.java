@@ -68,12 +68,13 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 			buf.append(":- multifile user:file_search_path/2.\n");
 			buf.append(":- prolog_load_context(directory, Dir), asserta(user:file_search_path(load_file_dir, Dir)).\n");
 			IPath projectFromLoadFile = projectFolder.makeRelativeTo(loadFileFolder);
-			buf.append("file_search_path(project_dir, load_file_dir('" + projectFromLoadFile.toString() + "')).\n\n");
+			String projectAlias = Util.quoteAtom(file.getProject().getName());
+			buf.append("file_search_path(" + projectAlias + ", load_file_dir('" + projectFromLoadFile.toString() + "')).\n\n");
 			for (String fileName : consultedFiles) {
 				String fileNameWithoutQuotes = Util.unquoteAtom(fileName);
 				IPath path = new Path(fileNameWithoutQuotes);
 				IPath relPath = path.makeRelativeTo(projectFolder);
-				buf.append(":- consult(project_dir('" + relPath.toString().toLowerCase() + "')).\n");
+				buf.append(":- consult(" + projectAlias + "('" + relPath.toString().toLowerCase() + "')).\n");
 			}
 			String content = buf.toString();
 			
