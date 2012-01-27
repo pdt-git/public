@@ -65,18 +65,14 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 
 	public void writeFileContent(IFile file) {
 		try {
-			IPath loadFileLocation = file.getLocation();
-			IPath loadFileFolder = new Path(loadFileLocation.toString().toLowerCase()).removeLastSegments(1);
 			IPath projectLocation = file.getProject().getLocation();
 			IPath projectFolder = new Path(projectLocation.toString().toLowerCase());
 			
 			StringBuffer buf = new StringBuffer();
 			buf.append(":- dynamic user:file_search_path/2.\n");
 			buf.append(":- multifile user:file_search_path/2.\n");
-			buf.append(":- prolog_load_context(directory, Dir), asserta(user:file_search_path(load_file_dir, Dir)).\n");
-			IPath projectFromLoadFile = projectFolder.makeRelativeTo(loadFileFolder);
 			String projectAlias = Util.quoteAtom(file.getProject().getName());
-			buf.append("file_search_path(" + projectAlias + ", load_file_dir('" + projectFromLoadFile.toString() + "')).\n\n");
+			buf.append("user:file_search_path(" + projectAlias + ", '" + projectFolder + "').\n\n");
 			for (String fileName : consultedFiles) {
 				String fileNameWithoutQuotes = Util.unquoteAtom(fileName);
 				IPath path = new Path(fileNameWithoutQuotes);
