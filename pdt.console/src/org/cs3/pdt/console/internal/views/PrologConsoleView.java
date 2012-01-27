@@ -83,6 +83,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -106,6 +107,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -116,7 +118,7 @@ import org.eclipse.ui.progress.UIJob;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
 
-	private static final String DEFAULT_CONSOLE = "defaultConsole";
+	private static final String DEFAULT_CONSOLE = "Default Console";
 	private static final String KILLABLE = "killable";
 
 	private final class ClearAction extends Action {
@@ -653,7 +655,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		try {
 			createPartControl_impl(parent);
 			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-			activateNewPrologProcess(registry, "defaultConsole");
+			activateNewPrologProcess(registry, DEFAULT_CONSOLE);
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t.getLocalizedMessage(), t);
@@ -773,8 +775,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		//				new ImageDescriptor[] {
 		//				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
 		//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
-		activateGuiTracerAction = new ConsoleQueryAction("activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
-		deactivateGuiTracerAction = new ConsoleQueryAction("deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
+		activateGuiTracerAction = new ConsoleQueryAction("Activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
+		deactivateGuiTracerAction = new ConsoleQueryAction("Deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
 		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, abort),_,fail)") {
@@ -803,8 +805,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
 				"pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
 		
-		pasteFileNameAction = new PasteAction("paste filename",
-				"paste the name of the current editor file", ImageRepository
+		pasteFileNameAction = new PasteAction("Paste filename",
+				"Paste the name of the current editor file", ImageRepository
 				.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
 
 			@Override
@@ -833,17 +835,31 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	private void initMenus(Control parent) {
 
 		MenuManager manager = new MenuManager();
-		IWorkbenchWindow window = getSite().getWorkbenchWindow();
-		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
-		sall.setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.SELECT_ALL));
-		manager.add(sall);
+		manager.setRemoveAllWhenShown(true);
+		manager.addMenuListener(new IMenuListener() {
 
-		manager.add(ActionFactory.CUT.create(window));
-		manager.add(ActionFactory.COPY.create(window));
-		manager.add(ActionFactory.PASTE.create(window));
-		manager.add(pasteFileNameAction);
-		manager.add(clearAction);
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				manager.add(new Separator("#Clipboard"));
+
+				IWorkbenchWindow window = getSite().getWorkbenchWindow();
+				IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
+				sall.setImageDescriptor(ImageRepository
+						.getImageDescriptor(ImageRepository.SELECT_ALL));
+				manager.add(sall);
+				
+				manager.add(ActionFactory.CUT.create(window));
+				manager.add(ActionFactory.COPY.create(window));
+				manager.add(ActionFactory.PASTE.create(window));
+				manager.add(pasteFileNameAction);
+				manager.add(clearAction);
+				manager.add(new Separator("#Clipboard-end"));
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end"));
+			}
+
+		});
+		getSite().registerContextMenu(manager, viewer);
 		contextMenu = manager.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(contextMenu);
 	}
@@ -859,9 +875,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
-		toolBarManager.add(createProcessAction);
-
-		createAutomatedSelector(toolBarManager);
 		addToolbarContributions(toolBarManager);
 		addMenuContributions(bars.getMenuManager());
 
@@ -956,7 +969,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey) {
-		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
+		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " (Prolog)");
 		registry.addSubscription(subscription);
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
 
@@ -968,14 +981,20 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	private void addToolbarContributions(IToolBarManager manager) {
-		manager.add(new Separator());
+		manager.add(new Separator("#Query"));
 		manager.add(traceAction);
 		manager.add(abortAction);
+		manager.add(new Separator("#Query-end"));
+		manager.add(new Separator("#Console"));
+		createAutomatedSelector(manager);
+		manager.add(createProcessAction);
 		manager.add(restartAction);
 		manager.add(killAction);
-		manager.add(new Separator());
-		manager.add(genLoadFileAction);
 		manager.add(clearAction);
+		manager.add(new Separator("#Console-end"));
+		manager.add(new Separator("#Toolbar-Other"));
+		manager.add(genLoadFileAction);
+		manager.add(new Separator("#Toolbar-End"));
 	}
 
 	private void addMenuContributions(IMenuManager manager) {
