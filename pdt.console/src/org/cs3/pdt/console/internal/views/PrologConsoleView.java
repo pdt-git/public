@@ -981,10 +981,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	private void addToolbarContributions(IToolBarManager manager) {
-		manager.add(new Separator("#Query"));
-		manager.add(traceAction);
-		manager.add(abortAction);
-		manager.add(new Separator("#Query-end"));
 		manager.add(new Separator("#Console"));
 		createAutomatedSelector(manager);
 		manager.add(createProcessAction);
@@ -992,6 +988,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		manager.add(killAction);
 		manager.add(clearAction);
 		manager.add(new Separator("#Console-end"));
+		manager.add(new Separator("#Query"));
+		manager.add(traceAction);
+		manager.add(abortAction);
+		manager.add(new Separator("#Query-end"));
 		manager.add(new Separator("#Toolbar-Other"));
 		manager.add(genLoadFileAction);
 		manager.add(new Separator("#Toolbar-End"));
