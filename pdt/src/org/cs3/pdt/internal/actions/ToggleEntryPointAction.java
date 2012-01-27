@@ -1,10 +1,18 @@
 package org.cs3.pdt.internal.actions;
 
+import static org.cs3.pl.prolog.QueryUtils.bT;
+
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
+import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
@@ -15,6 +23,7 @@ import org.eclipse.ui.IActionDelegate;
 
 public class ToggleEntryPointAction implements IActionDelegate {
 
+	public static final String PDT_ENTRY_POINT = "pdt_entry_point";
 	public static final QualifiedName KEY = new QualifiedName("pdt", "entry.point");
 	
 	public ToggleEntryPointAction() {
@@ -24,27 +33,18 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	public void run(IAction action) {
 		if (selectedFiles != null) {
 			
-			
+			PrologInterface pif = PDTUtils.getActiveConsolePif();
 			if (isSelectionChecked()) {
 				for (IFile file : selectedFiles) {
-					setEntryPoint(file, false);
+					setEntryPoint(file, false, pif);
 				}
 			} else {
 				for (IFile file : selectedFiles) {
-					setEntryPoint(file, true);
+					setEntryPoint(file, true, pif);
 				}
 			}
 			PDTPlugin.getDefault().notifyDecorators();
 			
-//			for (IFile file : selectedFiles) {
-//				if (isEntryPoint(file)) {
-//					setEntryPoint(file, false);
-//				} else {
-//					setEntryPoint(file, true);
-//				}
-//				
-//				PDTPlugin.getDefault().notifyDecorators();
-//			}
 		}
 		
 	}
@@ -93,11 +93,34 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		return false;
 	}
 	
-	private void setEntryPoint(IFile file, boolean b) {
+	private void setEntryPoint(IFile file, boolean b, PrologInterface pif) {
 		try {
 			file.setPersistentProperty(KEY, Boolean.toString(b));
+			if (b) {
+				PDTPlugin.getDefault().addEntryPoint(file);
+			} else {
+				PDTPlugin.getDefault().removeEntryPoint(file);
+			}
 		} catch (CoreException e) {
 			e.printStackTrace();
+		}
+		
+		if (pif != null) {
+			try {
+				String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+				
+				if (b) {
+					pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
+				} else {
+					pif.queryOnce(bT("remove_entry_points", "'" + prologFileName + "'"));
+				}
+			} catch (IOException e) {
+				Debug.report(e);
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+			}
+			
+			
 		}
 	}
 

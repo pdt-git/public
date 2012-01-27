@@ -10,6 +10,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -21,6 +22,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 
 public class GenerateLoadFileWizard extends Wizard implements INewWizard {
+
+	private static final QualifiedName KEY = new QualifiedName("pdt", "entry.point");
 
 	private List<String> consultedFiles;
 	
@@ -47,7 +50,11 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     	if (file != null) {
     		writeFileContent(file);
     		if (newFileWizardPage.isEntryPoint()) {
-    			// TODO: set entry point
+    			try {
+					file.setPersistentProperty(KEY, "true");
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
     		}
 
     		return true;
