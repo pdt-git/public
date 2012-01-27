@@ -1,9 +1,14 @@
 package org.cs3.pdt.internal.editors;
 
+import static org.cs3.pl.prolog.QueryUtils.bT;
+
+import java.io.IOException;
+
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
@@ -12,6 +17,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 
@@ -108,7 +114,7 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 			
 			PDTPlugin.getDefault().notifyDecorators();
 
-			if (PDTUtils.checkForActivePif(false)) {
+//			if (PDTUtils.checkForActivePif(false)) {
 				removePifListener();
 				
 				PrologConsole console = (PrologConsole) source;
@@ -116,8 +122,27 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 				
 				addPifListener();
 				
-			}
+				updateEntryPoints();
+//			}
 		}
+	}
+
+	private void updateEntryPoints() {
+		try {
+			currentPif.queryOnce(bT("remove_entry_points", "_"));
+			
+			for (IFile file : PDTPlugin.getDefault().getEntryPoints()) {
+				try {
+					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+					currentPif.queryOnce(bT("add_entry_point", Util.quoteAtom(prologFileName)));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (PrologInterfaceException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }
