@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
@@ -80,23 +81,26 @@ public class ConsultAction extends QueryConsoleThreadAction {
 	
 
 	public void consultWorkspaceFile(IFile f) {
-		// for workspace files, create markers & do consult
-		try {
-			if( PDTCoreUtils.getPrologProject(f) == null &&
-					PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole() != null) { 
-				String prologFileName = Util.prologFileName(f.getLocation().toFile().getCanonicalFile());
-				PDTBreakpointHandler.getInstance().backupMarkers(null, null);
-				activateWarningAndErrorTracing();
-				f.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-				doConsult(prologFileName);
-				PLMarkerUtils.addMarkers(f);
+
+		if (PDTUtils.checkForActivePif(true)) {
+			// for workspace files, create markers & do consult
+			try {
+				if( PDTCoreUtils.getPrologProject(f) == null &&
+						PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole() != null) { 
+					String prologFileName = Util.prologFileName(f.getLocation().toFile().getCanonicalFile());
+					PDTBreakpointHandler.getInstance().backupMarkers(null, null);
+					activateWarningAndErrorTracing();
+					f.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+					doConsult(prologFileName);
+					PLMarkerUtils.addMarkers(f);
+				}
+			} catch (IOException e) {
+				Debug.report(e);
+			} catch (CoreException e) {
+				Debug.report(e);
+			} catch (PrologInterfaceException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			Debug.report(e);
-		} catch (CoreException e) {
-			Debug.report(e);
-		} catch (PrologInterfaceException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -129,28 +133,29 @@ public class ConsultAction extends QueryConsoleThreadAction {
 	}
 
 	public void consultFromActiveEditor() {
-		// get input from active editor
-		IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
-		if (input == null) {
-			Debug.warning("Consult action triggered, but active editor input is null.");
-			return;
+		if (PDTUtils.checkForActivePif(true)) {
+			// get input from active editor
+			IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
+			if (input == null) {
+				Debug.warning("Consult action triggered, but active editor input is null.");
+				return;
+			}
+			
+			if (input instanceof IFileEditorInput) {
+				// file from workspace 
+				IFileEditorInput fileInput = (IFileEditorInput) input;
+				IFile workspaceFile = fileInput.getFile();
+				consultWorkspaceFile(workspaceFile);
+			} else if(input instanceof FileStoreEditorInput) {
+				// external file
+				FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
+				File file = new File(fileInput.getURI());
+				consultExternalFile(file);
+			} else {
+				Debug.warning("Consult action triggered, but active editor input is no file.");
+				return;
+			}
 		}
-		
-		if (input instanceof IFileEditorInput) {
-			// file from workspace 
-			IFileEditorInput fileInput = (IFileEditorInput) input;
-			IFile workspaceFile = fileInput.getFile();
-			consultWorkspaceFile(workspaceFile);
-		} else if(input instanceof FileStoreEditorInput) {
-			// external file
-			FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
-			File file = new File(fileInput.getURI());
-			consultExternalFile(file);
-		} else {
-			Debug.warning("Consult action triggered, but active editor input is no file.");
-			return;
-		}
-		
 	}
 	
 	// only important for projects with pdt nature

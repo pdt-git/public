@@ -3,8 +3,11 @@
  */
 package org.cs3.pdt.console.internal.views;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.cs3.pdt.console.PDTConsole;
@@ -160,9 +163,11 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	private void fillMenu() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
-		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = it.next();
-
+		
+		List<String> sortedKeys = new ArrayList<String>(keys);
+		Collections.sort(sortedKeys);
+		
+		for (String key : sortedKeys) {
 			createPIFAction(getCreatedMenu(), reg, key);
 		}
 	}
@@ -263,6 +268,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		StringBuffer buf = new StringBuffer();
 
 		buf.append(key);
+		// TODO: write project names to the tooltip, in the label, only: ProjectName (JTransformer)
 		buf.append(": ");
 		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
 			Subscription sub = it.next();
@@ -274,6 +280,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 				buf.append(", ");
 			}
 		}
+		
 		action.setText(buf.toString());
 		action.setEnabled(!unifiedTrackerEnabled);
 		ActionContributionItem item = new ActionContributionItem(action);

@@ -655,7 +655,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		try {
 			createPartControl_impl(parent);
 			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-			activateNewPrologProcess(registry, DEFAULT_CONSOLE);
+			if (registry.getAllKeys().size() == 0) {
+				activateNewPrologProcess(registry, DEFAULT_CONSOLE);
+			}
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t.getLocalizedMessage(), t);
