@@ -165,7 +165,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		Set<String> keys = reg.getAllKeys();
 		
 		List<String> sortedKeys = new ArrayList<String>(keys);
-		Collections.sort(sortedKeys);
+		Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
 		
 		for (String key : sortedKeys) {
 			createPIFAction(getCreatedMenu(), reg, key);
@@ -270,21 +270,25 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		buf.append(key);
 		// TODO: write project names to the tooltip, in the label, only: ProjectName (JTransformer)
 		buf.append(": ");
+		
+		StringBuffer descBuf = new StringBuffer();
 		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
 			Subscription sub = it.next();
 			if (!sub.isVisible() && !showHidden) {
 				continue;
 			}
 			buf.append(sub.getName());
+			descBuf.append(sub.getDescritpion());
 			if (it.hasNext()) {
 				buf.append(", ");
+				descBuf.append(", ");
 			}
 		}
 		
+		action.setToolTipText(descBuf.toString());
 		action.setText(buf.toString());
 		action.setEnabled(!unifiedTrackerEnabled);
 		ActionContributionItem item = new ActionContributionItem(action);
-
 		item.fill(menu, -1);
 
 	}
