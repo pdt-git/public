@@ -57,8 +57,6 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.OptionProviderListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -177,7 +175,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 
 			};	
 			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
-			PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
+			final PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
+			consolePlugin.getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
+			
 			
 			ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
 				
@@ -186,7 +186,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 					if (resource instanceof IFile) {
 						IFile file = (IFile) resource;
 						if ("true".equalsIgnoreCase(file.getPersistentProperty(ToggleEntryPointAction.KEY))) {
-							addEntryPoint(file);
+							consolePlugin.addEntryPoint(file);
 						}
 					}
 					return true;
@@ -292,20 +292,20 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			d.valuesChanged(null);
 		}
 	}
-	
-	Set<IFile> entryPoints = new HashSet<IFile>();
-	
-	public void addEntryPoint(IFile f) {
-		entryPoints.add(f);
-	}
-	
-	public void removeEntryPoint(IFile f) {
-		entryPoints.remove(f);
-	}
-	
-	public Set<IFile> getEntryPoints() {
-		return entryPoints;
-	}
-	
+//	
+//	Set<IFile> entryPoints = new HashSet<IFile>();
+//	
+//	public void addEntryPoint(IFile f) {
+//		entryPoints.add(f);
+//	}
+//	
+//	public void removeEntryPoint(IFile f) {
+//		entryPoints.remove(f);
+//	}
+//	
+//	public Set<IFile> getEntryPoints() {
+//		return entryPoints;
+//	}
+//	
 	
 }

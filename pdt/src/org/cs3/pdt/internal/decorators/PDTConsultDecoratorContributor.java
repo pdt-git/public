@@ -1,7 +1,6 @@
 package org.cs3.pdt.internal.decorators;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -18,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
@@ -71,35 +71,28 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		if (currentPif == null) {
 			return;
 		}
-
 		
-		// TODO: find a way to see, which qlf files are consulted
-		//       atm: qlf files -> look in the consultedFiles list of the pif
-		//            pl files -> look at the source_file predicate
-		
-		List<String> consultedFiles = currentPif.getConsultedFiles();
 		if (element instanceof IFile) {
 			IFile file = (IFile) element;
+			
+			final DecorationContext decorationContext = (DecorationContext) decoration.getDecorationContext();
+			decorationContext.putProperty(IDecoration.ENABLE_REPLACE, Boolean.TRUE);
 
 			// check if file is in consulted files list (important for qlf files)
-			if (consultedFiles != null && consultedFiles.contains(getPrologFileName(file))) {
-				decoration.addSuffix(" [consulted]");
-				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED));
-				} else {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED));
+			String prologFileName = getPrologFileName(file);
+			
+			// XXX: don't mark qlf file if only the pl file is consulted 
+			prologFileName = prologFileName.replace(".qlf'", ".pl'");
+
+			// check if file is source_file
+			try {
+				Map<String, Object> result = currentPif.queryOnce("source_file(" + prologFileName + ")");
+				if (result != null) {
+					decoration.addSuffix(" [consulted]");
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.REPLACE);
 				}
-			} else {
-				// check if file is source_file
-				try {
-					Map<String, Object> result = currentPif.queryOnce("source_file(" + getPrologFileName(file) + ")");
-					if (result != null) {
-						decoration.addSuffix(" [consulted]");
-						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED));
-					}
-				} catch (PrologInterfaceException e) {
-					e.printStackTrace();
-				}
+			} catch (PrologInterfaceException e) {
+				e.printStackTrace();
 			}
 		} else {
 			IFolder folder = (IFolder) element;
@@ -108,16 +101,13 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			try {
 				Map<String, Object> result = currentPif.queryOnce("source_file(F), atom_concat('" + prologFilename + "', _, F)");
 				if (result != null) {
-					//					decoration.addSuffix(" [consulted]");
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED));
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.REPLACE);
 				}
 			} catch (PrologInterfaceException e) {
 				e.printStackTrace();
 			}
 		}
-		
 	}
-	
 	
 	private String getPrologFileName(IFile file) {
 		String enclFile = file.getRawLocation().toPortableString();

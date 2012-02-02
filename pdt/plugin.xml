@@ -415,7 +415,7 @@
             id="org.cs3.pdt.consult.decorator"
             label="PDT Consult Decorator"
             lightweight="true"
-            location="TOP_LEFT"
+            location="TOP_RIGHT"
             state="true">
          <enablement>
             <objectClass
@@ -430,7 +430,7 @@
             id="org.cs3.pdt.entry.point.decorator"
             label="PDT Entry Point Decorator"
             lightweight="true"
-            location="TOP_RIGHT"
+            location="TOP_LEFT"
             state="true">
          <enablement>
             <objectClass
