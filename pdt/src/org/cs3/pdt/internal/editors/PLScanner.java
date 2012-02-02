@@ -229,7 +229,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	public String[] getPredicatesWithProperty__NonPDT(String property) {
 		PrologConsole console = PrologConsolePlugin.getDefault()
 				.getPrologConsoleService().getActivePrologConsole();
-		if (console == null) {
+		if (console == null || console.getPrologInterface() == null) {
 			return null;
 		}
 		PrologSession session = null;
