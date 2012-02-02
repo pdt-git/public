@@ -153,7 +153,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		}
 		if(plprj== null){ // no Prolog nature set
 			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole(); 
-			if (console != null) {
+			if (console != null && console.getPrologInterface() != null) {
 				PrologSession session = null;
 				try {
 					session = console.getPrologInterface().getSession();
