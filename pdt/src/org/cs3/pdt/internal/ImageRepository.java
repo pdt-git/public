@@ -101,7 +101,8 @@ public class ImageRepository {
 
     public static final String PROLOG_CONSULTED = "consulted.png";
 //    public static final String PROLOG_ENTRY_POINT = "entry_point.png";
-    public static final String PROLOG_ENTRY_POINT = "entry_point_black.png";
+    public static final String PROLOG_ENTRY_POINT = "entry_dark.png";
+//    public static final String PROLOG_ENTRY_POINT = "entry_point_black.png";
     public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
     
     public static final String QLF_FILE = "qlf_file.png";
@@ -112,7 +113,6 @@ public class ImageRepository {
     public final static String PROLOG_FILE_EXTERNAL = "prolog_file_external.gif";
 
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
-
 	
 
     public static final String PE_ATOM = "atom.gif";
@@ -122,6 +122,8 @@ public class ImageRepository {
 	public static final String RESTART = "restart.gif";
 
 	public static final String PE_PRIVATE = "private_co.gif";
+
+	public static final String MESSAGE_INFO = "message_info.gif";
 
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
