@@ -1,10 +1,17 @@
 package org.cs3.pdt.console.internal.loadfile;
 
+import static org.cs3.pl.prolog.QueryUtils.bT;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.console.prolog.PrologConsole;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -50,11 +57,7 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     	if (file != null) {
     		writeFileContent(file);
     		if (newFileWizardPage.isEntryPoint()) {
-    			try {
-					file.setPersistentProperty(KEY, "true");
-				} catch (CoreException e) {
-					Debug.report(e);
-				}
+    			addEntryPoint(file);
     		}
 
     		return true;
@@ -62,6 +65,36 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     	else
     		return false;
     	}
+
+	public void addEntryPoint(IFile file) {
+		try {
+			file.setPersistentProperty(KEY, "true");
+			
+			PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
+
+			consolePlugin.addEntryPoint(file);
+			
+			PrologConsole activePrologConsole = consolePlugin.getPrologConsoleService().getActivePrologConsole();
+			if (activePrologConsole != null) {
+
+				PrologInterface pif = activePrologConsole.getPrologInterface();
+				
+				if (pif != null) {
+					try {
+						String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+
+						pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
+					} catch (IOException e) {
+						Debug.report(e);
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+					}
+				}
+			}
+		} catch (CoreException e) {
+			Debug.report(e);
+		}
+	}
 
 	public void writeFileContent(IFile file) {
 		try {
