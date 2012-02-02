@@ -199,10 +199,11 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 						.booleanValue();
 				Vector<String> properties = new Vector<String>();
 				if(pub) properties.add("exported");
-				Predicate data = new Predicate(module, result.get("Name")
-						.toString(), Integer.parseInt(result.get("Arity")
-						.toString()), properties);
-				list.add(data);
+				int arity = Integer.parseInt(result.get("Arity").toString());
+				if (arity >= 0) {
+					Predicate data = new Predicate(module, result.get("Name").toString(), arity, properties);
+					list.add(data);
+				}
 			}
 			return list.toArray(new Predicate[0]);
 		} finally {
