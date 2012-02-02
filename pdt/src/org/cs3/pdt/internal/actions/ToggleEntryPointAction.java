@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -97,9 +98,11 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		try {
 			file.setPersistentProperty(KEY, Boolean.toString(b));
 			if (b) {
-				PDTPlugin.getDefault().addEntryPoint(file);
+				PrologConsolePlugin.getDefault().addEntryPoint(file);
+//				PDTPlugin.getDefault().addEntryPoint(file);
 			} else {
-				PDTPlugin.getDefault().removeEntryPoint(file);
+				PrologConsolePlugin.getDefault().removeEntryPoint(file);
+//				PDTPlugin.getDefault().removeEntryPoint(file);
 			}
 		} catch (CoreException e) {
 			e.printStackTrace();
