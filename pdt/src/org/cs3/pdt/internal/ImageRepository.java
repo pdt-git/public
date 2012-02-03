@@ -97,7 +97,9 @@ public class ImageRepository {
     
     public final static String PACKAGE = "package_obj.gif";
     
-    public final static String PROLOG_FILE = "prolog_file.gif";
+    public final static String PROLOG_FILE = "prolog_file_transparent.png";
+    
+    public final static String PROLOG_FILE_UNCONSULTED = "prolog_file.gif";
 
     public static final String PROLOG_CONSULTED = "consulted.png";
     

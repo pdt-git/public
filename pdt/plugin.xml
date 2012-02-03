@@ -34,7 +34,7 @@
          point="org.eclipse.ui.editors">
       <editor
             name="PL Editor"
-            icon="icons/prolog_file.gif"
+            icon="icons/prolog_file_transparent.png"
             extensions="pl , plt, lgt"
             class="org.cs3.pdt.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
