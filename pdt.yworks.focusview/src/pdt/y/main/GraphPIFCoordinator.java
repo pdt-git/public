@@ -73,31 +73,34 @@ public class GraphPIFCoordinator implements ISelectionChangedListener{
 			PrologConsole activeConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 			if(activeConsole!= null){
 				pif = getPifForActiveConsole(activeConsole);
-
-				String query = "consult("+prologNameOfFileToConsult+").";
-				sendQueryToCurrentPiF(query);
-
-				//List<String> folderList/* = collectPrologFilesInWorkspace()*/;
-				//folderToParse = convertJavaListToPrologListString(folderList);
-
-				query = "write_focus_to_graphML('"+focusFileForParsing+"','"+Util.prologFileName(helpFile)+"').";
-				sendQueryToCurrentPiF(query);
-
-				//query = "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
-				//Map<String, Object> result = sendQueryToCurrentPiF(query);
-				//result.get("FocusId");
 				
-				FutureTask<?> futureTask = new FutureTask<Object>(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							view.loadGraph(helpFile.toURI().toURL());
-						} catch (MalformedURLException e) {
-							Debug.rethrow(e);
-						}
-					};
-				},null);
-				executor.execute(futureTask);
+				if (pif != null) {
+
+					String query = "consult("+prologNameOfFileToConsult+").";
+					sendQueryToCurrentPiF(query);
+	
+					//List<String> folderList/* = collectPrologFilesInWorkspace()*/;
+					//folderToParse = convertJavaListToPrologListString(folderList);
+	
+					query = "write_focus_to_graphML('"+focusFileForParsing+"','"+Util.prologFileName(helpFile)+"').";
+					sendQueryToCurrentPiF(query);
+	
+					//query = "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
+					//Map<String, Object> result = sendQueryToCurrentPiF(query);
+					//result.get("FocusId");
+					
+					FutureTask<?> futureTask = new FutureTask<Object>(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								view.loadGraph(helpFile.toURI().toURL());
+							} catch (MalformedURLException e) {
+								Debug.rethrow(e);
+							}
+						};
+					},null);
+					executor.execute(futureTask);
+				}
 			}
 		} catch (PrologException e1) {
 			e1.printStackTrace();
