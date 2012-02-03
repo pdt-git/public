@@ -45,4 +45,12 @@ public class PreferenceConstants {
 	public static final String P_NODE_SIZE_MAXIMUM = "maximum";
 	
 	public static final String P_NODE_SIZE_INDIVIDUAL = "individual";
+	
+	/* LAYOUT ALGORITHM */
+	
+	public static final String LAYOUT = "layout";
+	
+	public static final String LAYOUT_HIERARCHY = "hierarchy";
+	
+	public static final String LAYOUT_ORGANIC = "organic";
 }

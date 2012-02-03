@@ -230,4 +230,10 @@ public class PDTGraphView extends  JPanel {
 		view.fitContent();
 		view.updateView();
 	}
+	
+	public void updateLayout() {
+		view.applyLayoutAnimated(layoutModel.getLayouter());
+		view.fitContent();
+		view.updateView();
+	}
 }

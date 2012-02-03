@@ -69,6 +69,10 @@ public class FocusView extends SwingControl {
 		
 		isDirty = false;
 	}
+	
+	public void updateLayout() {
+		pdtGraphView.updateLayout();
+	}
 
 	@Override
 	protected JComponent createSwingComponent() {

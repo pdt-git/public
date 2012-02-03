@@ -1,13 +1,9 @@
 package pdt.y.focusview;
 
-
-import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -20,6 +16,10 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
+import pdt.y.internal.ui.ToolBarAction;
+import pdt.y.preferences.LayoutPreferences;
+import pdt.y.preferences.PreferenceConstants;
+
 
 
 public class FocusViewPlugin extends ViewPart {
@@ -31,7 +31,7 @@ public class FocusViewPlugin extends ViewPart {
 	
 	public FocusViewPlugin() {
 	}
-
+	
 	@Override
 	public void createPartControl(final Composite parent) {
 		
@@ -53,7 +53,7 @@ public class FocusViewPlugin extends ViewPart {
 		
 		initInfoLabel(parent);
 		
-		initUpdateButton(parent);
+		initButtons(parent);
 		
 		new FocusViewCoordinator(this, viewContainer);
 	}
@@ -77,38 +77,42 @@ public class FocusViewPlugin extends ViewPart {
 		info.setLayoutData(infoLD);
 	}
 
-	protected void initUpdateButton(final Composite parent) {
+	protected void initButtons(final Composite parent) {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 		
-		toolBarManager.add(new Action() {
-			@Override
-			public void run(){
-					new UIJob("Updating graph")
-					{
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							updateCurrentFocusView();
-							return Status.OK_STATUS;
-					}
-				}.schedule();
-			}
-			
-			@Override
-			public ImageDescriptor getImageDescriptor() {
-				return ImageRepository.getImageDescriptor(ImageRepository.REFRESH);
-			}
-			
-			@Override
-			public String getText() {
-				return "Update";
-			}
-			
-			@Override
-			public String getToolTipText() {
-				return "WARNING: Current layout will be rearranged!";
-			}
-		});
+		
+		toolBarManager.add(new ToolBarAction("Update", "WARNING: Current layout will be rearranged!", 
+				org.cs3.pdt.internal.ImageRepository.getImageDescriptor(
+						org.cs3.pdt.internal.ImageRepository.REFRESH)) {
+
+				@Override
+				public void performAction() {
+					updateCurrentFocusView();	
+				}
+			});
+		
+		toolBarManager.add(new ToolBarAction("Hierarchical layout", 
+				pdt.y.internal.ImageRepository.getImageDescriptor(
+						pdt.y.internal.ImageRepository.HIERARCHY)) {
+
+				@Override
+				public void performAction() {
+					LayoutPreferences.setLayoutPreference(PreferenceConstants.LAYOUT_HIERARCHY);
+					updateCurrentFocusViewLayout();
+				}
+			});
+		
+		toolBarManager.add(new ToolBarAction("Organic layout", 
+				pdt.y.internal.ImageRepository.getImageDescriptor(
+						pdt.y.internal.ImageRepository.ORGANIC)) {
+
+				@Override
+				public void performAction() {
+					LayoutPreferences.setLayoutPreference(PreferenceConstants.LAYOUT_ORGANIC);
+					updateCurrentFocusViewLayout();
+				}
+			});
 	}
 	
 	@Override
@@ -126,9 +130,22 @@ public class FocusViewPlugin extends ViewPart {
 	}
 	
 	public void updateCurrentFocusView() {
+		FocusView f = getCurrentFocusView();
+		if (f != null)
+			f.reload();
+	}
+	
+	public void updateCurrentFocusViewLayout() {
+		FocusView f = getCurrentFocusView();
+		if (f != null)
+			f.updateLayout();
+	}
+	
+	private FocusView getCurrentFocusView() {
 		Control f = ((StackLayout)viewContainer.getLayout()).topControl;
 		if (f instanceof FocusView)
-			((FocusView)f).reload();
+			return (FocusView) f;
+		return null;
 	}
 	
 	public String getInfoText() {
