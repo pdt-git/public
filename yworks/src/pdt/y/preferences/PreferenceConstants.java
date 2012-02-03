@@ -29,4 +29,20 @@ public class PreferenceConstants {
 	public static final String P_NAME_CROPPING_BRACKET = BracketLabel.class.getSimpleName();
 	
 	public static final String P_NAME_CROPPING_MIDDLE = MiddleLabel.class.getSimpleName();
+	
+	/* NODE SIZE */
+	
+	public static final String P_NODE_SIZE = "nodeSize";
+	
+	public static final String P_NODE_SIZE_FIXED = "fixed";
+	
+	public static final String P_NODE_SIZE_FIXED_WIDTH = "nodeSizeWidth";
+	
+	public static final String P_NODE_SIZE_FIXED_HEIGHT = "nodeSizeHeight";
+	
+	public static final String P_NODE_SIZE_MEDIAN = "median";
+	
+	public static final String P_NODE_SIZE_MAXIMUM = "maximum";
+	
+	public static final String P_NODE_SIZE_INDIVIDUAL = "individual";
 }

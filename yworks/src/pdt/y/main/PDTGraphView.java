@@ -1,17 +1,31 @@
 package pdt.y.main;
 
+import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED;
+import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED_HEIGHT;
+import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED_WIDTH;
+import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_INDIVIDUAL;
+import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_MAXIMUM;
+import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_MEDIAN;
+
 import java.awt.BorderLayout;
 import java.awt.Cursor;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.Arrays;
 
 import javax.swing.JPanel;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
+import pdt.y.preferences.LayoutPreferences;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
@@ -150,7 +164,26 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	private void updateView() {
-		createFirstLabel();
+		
+		Graphics gfx = view.getGraphics();
+		FontMetrics fontmtx = gfx.getFontMetrics();
+		
+		int i = 0;
+		int[] lengths = new int[graph.getNodeArray().length];
+		
+		
+		for (Node node: graph.getNodeArray()) {
+			String text = createFirstLabel(node);
+			
+			int v = (int)fontmtx.getStringBounds(text, gfx).getWidth() + 14;
+			lengths[i++] = v;
+		}
+		
+		Arrays.sort(lengths);
+		
+		for (Node node: graph.getNodeArray()) {
+			initializeBoxSize(node, lengths[i - 1], lengths[i / 2], gfx, fontmtx);
+		}
 		calcLayout();
 	}
 
@@ -159,12 +192,33 @@ public class PDTGraphView extends  JPanel {
 			|| graph.getNodeArray().length == 0;
 	}
 
-	private void createFirstLabel() {
-		String labelText;
-		for (Node node: graph.getNodeArray()) {
-			labelText = model.getLabelTextForNode(node);
-			graph.setLabelText(node,labelText);
+	private String createFirstLabel(Node node) {
+		String labelText = model.getLabelTextForNode(node);
+		graph.setLabelText(node,labelText);
+		return labelText;
+	}
+
+	protected void initializeBoxSize(Node node, int maximumValue, int medianValue, Graphics gfx, FontMetrics fontmtx) {
+		
+		int width = 0, height = 20;
+		
+		IPreferenceStore prefs = LayoutPreferences.getCurrentPreferences();
+		
+		if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_FIXED)) {
+			width = prefs.getInt(P_NODE_SIZE_FIXED_WIDTH);
+			height = prefs.getInt(P_NODE_SIZE_FIXED_HEIGHT);
 		}
+		else if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_MAXIMUM)) {
+			width = maximumValue;
+		}
+		else if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_MEDIAN)) {
+			width = medianValue;
+		}
+		else if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_INDIVIDUAL)) {
+			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(node), gfx).getWidth() + 14;
+		}
+		
+		graph.setSize(node, width, height);
 	}
 
 	public void calcLayout() {

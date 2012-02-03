@@ -1,7 +1,11 @@
 package pdt.y.model.realizer.nodes;
 
+import static pdt.y.preferences.PreferenceConstants.*;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import pdt.y.model.GraphModel;
 import pdt.y.preferences.LayoutPreferences;
@@ -49,7 +53,6 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 
 	protected void init() {
-		setSize(100, 40);
 		
 		NodeLabel label = getLabel();
 		
