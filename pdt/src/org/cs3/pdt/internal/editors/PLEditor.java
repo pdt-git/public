@@ -826,7 +826,7 @@ public class PLEditor extends TextEditor {
 		if (textWidget == null) return;
 		if (input instanceof IFileEditorInput) {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
-			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_UNCONSULTED));
 		} else {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
 			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));

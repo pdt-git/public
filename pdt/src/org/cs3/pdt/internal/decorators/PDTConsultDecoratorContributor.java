@@ -69,14 +69,17 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
 
 		if (currentPif == null) {
+			if (element instanceof IFile) {
+				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+			}
 			return;
 		}
 		
 		if (element instanceof IFile) {
 			IFile file = (IFile) element;
 			
-			final DecorationContext decorationContext = (DecorationContext) decoration.getDecorationContext();
-			decorationContext.putProperty(IDecoration.ENABLE_REPLACE, Boolean.TRUE);
+//			final DecorationContext decorationContext = (DecorationContext) decoration.getDecorationContext();
+//			decorationContext.putProperty(IDecoration.ENABLE_REPLACE, Boolean.TRUE);
 
 			// check if file is in consulted files list (important for qlf files)
 			String prologFileName = getPrologFileName(file);
@@ -89,10 +92,13 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 				Map<String, Object> result = currentPif.queryOnce("source_file(" + prologFileName + ")");
 				if (result != null) {
 					decoration.addSuffix(" [consulted]");
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.REPLACE);
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
+				} else {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
 				}
 			} catch (PrologInterfaceException e) {
 				e.printStackTrace();
+				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
 			}
 		} else {
 			IFolder folder = (IFolder) element;
@@ -101,7 +107,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			try {
 				Map<String, Object> result = currentPif.queryOnce("source_file(F), atom_concat('" + prologFilename + "', _, F)");
 				if (result != null) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.REPLACE);
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
 				}
 			} catch (PrologInterfaceException e) {
 				e.printStackTrace();
