@@ -163,8 +163,14 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	private void fillMenu() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
+		List<String> sortedKeys = new ArrayList<String>();
 		
-		List<String> sortedKeys = new ArrayList<String>(keys);
+		for (String key : keys) {
+			if (key != null) {
+				sortedKeys.add(key);
+			}
+		}
+		
 		Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
 		
 		for (String key : sortedKeys) {
