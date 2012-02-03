@@ -72,7 +72,7 @@ public class ImageRepository {
     
 	public static final String BREAK = "break.gif";
 
-	public static final String RESTART = "console_restart8.png";
+	public static final String RESTART = "console_restart12.png";
 	
 	public static final String STOP = "console_stop4.png";
 	
