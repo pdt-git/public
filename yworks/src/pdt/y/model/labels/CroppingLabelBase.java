@@ -11,7 +11,7 @@ import y.view.YLabel;
 
 public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 
-	int BORDER_PADDING = 6;
+	public static final int BORDER_PADDING = 6;
 
 	public CroppingLabelBase() {
 		super();
@@ -71,7 +71,7 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 
 	protected void fillLinesFromStart(String text, String[] lines, int lineWidth, Graphics2D gfx, FontMetrics fontmtx) {
 		
-		int maxCharWidth = (int) fontmtx.getMaxCharBounds(gfx).getWidth();
+		int maxCharWidth = getMaxCharWidth(gfx, fontmtx);
 		
 		int beginIndex = 0;
 		int estCnt = lineWidth / maxCharWidth;
@@ -99,7 +99,7 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 	
 	protected void fillLinesFromEnd(String text, String[] lines, int lineWidth, Graphics2D gfx, FontMetrics fontmtx) {
 		
-		int maxCharWidth = (int) fontmtx.getMaxCharBounds(gfx).getWidth();
+		int maxCharWidth = getMaxCharWidth(gfx, fontmtx);
 		
 		int endIndex = text.length();
 		int estCnt = lineWidth / maxCharWidth;
@@ -126,13 +126,17 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 		}
 	}
 
-	private void paintString(String text, double x, double y, double width,
+	protected int getMaxCharWidth(Graphics2D gfx, FontMetrics fontmtx) {
+		return (int) fontmtx.getStringBounds("_", gfx).getWidth();
+	}
+
+	protected void paintString(String text, double x, double y, double width,
 			double height, Graphics2D gfx, FontMetrics fontmtx) {
 
 		paintStrings(new String[] { text }, x, y, width, height, gfx, fontmtx);
 	}
 
-	private void paintStrings(String[] lines, double x, double y, double width,
+	protected void paintStrings(String[] lines, double x, double y, double width,
 			double height, Graphics2D gfx, FontMetrics fontmtx) {
 
 		int lineHeight = fontmtx.getHeight();

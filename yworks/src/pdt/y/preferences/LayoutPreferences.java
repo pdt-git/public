@@ -1,10 +1,13 @@
 package pdt.y.preferences;
 
+import static pdt.y.preferences.PreferenceConstants.*;
+
 import org.eclipse.jface.preference.*;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
 
 import pdt.y.main.PluginActivator;
+import pdt.y.preferences.controls.NodeSizeRadioGroupFieldEditor;
 
 /**
  * This class represents a preference page that
@@ -38,26 +41,30 @@ public class LayoutPreferences
 	 */
 	public void createFieldEditors() {
 		addField(new RadioGroupFieldEditor(
-			PreferenceConstants.P_NAME_CROPPING,
-			"Name cropping",
-			2,
+			P_NAME_CROPPING, "Name cropping", 2,
 			new String[][] { 
-				{ "P&refix                ", PreferenceConstants.P_NAME_CROPPING_PREFIX },
-				{ "P&ostfix               ", PreferenceConstants.P_NAME_CROPPING_POSTFIX },
-				{ "&Bracket               ", PreferenceConstants.P_NAME_CROPPING_BRACKET }, 
-				{ "&Middle                ", PreferenceConstants.P_NAME_CROPPING_MIDDLE }
+				{ "P&refix                ", P_NAME_CROPPING_PREFIX },
+				{ "P&ostfix               ", P_NAME_CROPPING_POSTFIX },
+				{ "&Bracket               ", P_NAME_CROPPING_BRACKET }, 
+				{ "&Middle                ", P_NAME_CROPPING_MIDDLE }
 				
-		}, getFieldEditorParent()));
+			}, getFieldEditorParent()));
+		
+		addField(new NodeSizeRadioGroupFieldEditor(getFieldEditorParent()));
 	}
 	
 	public void init(IWorkbench workbench) {
 	}
 	
-	private static IPreferenceStore getCurrentPreferences() {
+	public static IPreferenceStore getCurrentPreferences() {
 		return PluginActivator.getDefault().getPreferenceStore();
 	}
 	
 	public static String getNameCroppingConfiguration() {
 		return getCurrentPreferences().getString(PreferenceConstants.P_NAME_CROPPING);
+	}
+	
+	public static String getNodeSizePreference() {
+		return getCurrentPreferences().getString(PreferenceConstants.P_NODE_SIZE);
 	}
 }
