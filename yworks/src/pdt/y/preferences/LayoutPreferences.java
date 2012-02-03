@@ -67,4 +67,12 @@ public class LayoutPreferences
 	public static String getNodeSizePreference() {
 		return getCurrentPreferences().getString(PreferenceConstants.P_NODE_SIZE);
 	}
+	
+	public static String getLayoutPreference() {
+		return getCurrentPreferences().getString(PreferenceConstants.LAYOUT);
+	}
+	
+	public static void setLayoutPreference(String value) {
+		getCurrentPreferences().setValue(PreferenceConstants.LAYOUT, value);
+	}
 }

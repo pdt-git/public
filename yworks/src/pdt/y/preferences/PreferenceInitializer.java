@@ -20,6 +20,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(P_NODE_SIZE, P_NODE_SIZE_MEDIAN);
 		store.setDefault(P_NODE_SIZE_FIXED_HEIGHT, 40);
 		store.setDefault(P_NODE_SIZE_FIXED_WIDTH, 100);
+		store.setDefault(LAYOUT, LAYOUT_HIERARCHY);
 	}
 
 }
