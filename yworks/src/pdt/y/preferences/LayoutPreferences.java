@@ -1,10 +1,16 @@
 package pdt.y.preferences;
 
-import static pdt.y.preferences.PreferenceConstants.*;
+import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING;
+import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_BRACKET;
+import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_MIDDLE;
+import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_POSTFIX;
+import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_PREFIX;
 
-import org.eclipse.jface.preference.*;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import pdt.y.main.PluginActivator;
 import pdt.y.preferences.controls.NodeSizeRadioGroupFieldEditor;
@@ -30,7 +36,6 @@ public class LayoutPreferences
 	public LayoutPreferences() {
 		super(GRID);
 		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
-		//setDescription("Layout preferences");
 	}
 	
 	/**
@@ -41,13 +46,12 @@ public class LayoutPreferences
 	 */
 	public void createFieldEditors() {
 		addField(new RadioGroupFieldEditor(
-			P_NAME_CROPPING, "Name cropping", 2,
+			NAME_CROPPING, "Name cropping", 2,
 			new String[][] { 
-				{ "P&refix                ", P_NAME_CROPPING_PREFIX },
-				{ "P&ostfix               ", P_NAME_CROPPING_POSTFIX },
-				{ "&Bracket               ", P_NAME_CROPPING_BRACKET }, 
-				{ "&Middle                ", P_NAME_CROPPING_MIDDLE }
-				
+				{ "P&refix                ", NAME_CROPPING_PREFIX },
+				{ "P&ostfix               ", NAME_CROPPING_POSTFIX },
+				{ "&Bracket               ", NAME_CROPPING_BRACKET }, 
+				{ "&Middle                ", NAME_CROPPING_MIDDLE }
 			}, getFieldEditorParent()));
 		
 		addField(new NodeSizeRadioGroupFieldEditor(getFieldEditorParent()));
@@ -61,11 +65,11 @@ public class LayoutPreferences
 	}
 	
 	public static String getNameCroppingConfiguration() {
-		return getCurrentPreferences().getString(PreferenceConstants.P_NAME_CROPPING);
+		return getCurrentPreferences().getString(PreferenceConstants.NAME_CROPPING);
 	}
 	
 	public static String getNodeSizePreference() {
-		return getCurrentPreferences().getString(PreferenceConstants.P_NODE_SIZE);
+		return getCurrentPreferences().getString(PreferenceConstants.NODE_SIZE);
 	}
 	
 	public static String getLayoutPreference() {

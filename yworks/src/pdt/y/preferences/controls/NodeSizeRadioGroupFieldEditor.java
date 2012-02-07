@@ -1,12 +1,12 @@
 package pdt.y.preferences.controls;
 
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED_HEIGHT;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED_WIDTH;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_INDIVIDUAL;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_MAXIMUM;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_MEDIAN;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_HEIGHT;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
 
 import java.util.Hashtable;
 
@@ -36,7 +36,7 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 	
 	public NodeSizeRadioGroupFieldEditor(Composite parent) {
 		
-		init(P_NODE_SIZE, "Predicate Node Size");
+		init(NODE_SIZE, "Predicate Node Size");
 		createControl(parent);
     }
 	
@@ -68,7 +68,7 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		
         radioButtons = new Button[4];
         
-		radioButtons[0] = createRadioButton(radioBox, "&Fixed", P_NODE_SIZE_FIXED);
+		radioButtons[0] = createRadioButton(radioBox, "&Fixed", NODE_SIZE_FIXED);
 		
 		Composite pnlSize = new Composite(radioBox, SWT.NONE);
 		layout = new GridLayout();
@@ -81,12 +81,12 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		
 		
         sizeTextboxes = new Text[2];
-		sizeTextboxes[0] = createTextBox(pnlSize, "Width", P_NODE_SIZE_FIXED_WIDTH, radioButtons[0]);
-		sizeTextboxes[1] = createTextBox(pnlSize, "Height", P_NODE_SIZE_FIXED_HEIGHT, radioButtons[0]);
+		sizeTextboxes[0] = createTextBox(pnlSize, "Width", NODE_SIZE_FIXED_WIDTH, radioButtons[0]);
+		sizeTextboxes[1] = createTextBox(pnlSize, "Height", NODE_SIZE_FIXED_HEIGHT, radioButtons[0]);
 		
-		radioButtons[1] = createRadioButton(radioBox, "Me&dian", P_NODE_SIZE_MEDIAN);
-		radioButtons[2] = createRadioButton(radioBox, "Ma&ximum", P_NODE_SIZE_MAXIMUM);
-		radioButtons[3] = createRadioButton(radioBox, "&Individual", P_NODE_SIZE_INDIVIDUAL);
+		radioButtons[1] = createRadioButton(radioBox, "Me&dian", NODE_SIZE_MEDIAN);
+		radioButtons[2] = createRadioButton(radioBox, "Ma&ximum", NODE_SIZE_MAXIMUM);
+		radioButtons[3] = createRadioButton(radioBox, "&Individual", NODE_SIZE_INDIVIDUAL);
 		
 		return radioBox;
 	}
@@ -101,7 +101,7 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
                 String oldValue = value;
                 value = (String) event.widget.getData();
                 setPresentsDefaultValue(false);
-                fireValueChanged(P_NODE_SIZE, oldValue, value);
+                fireValueChanged(NODE_SIZE, oldValue, value);
             }
         });
         
@@ -167,20 +167,20 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 	protected void doLoad() {
 		IPreferenceStore prefs = getPreferenceStore();
 		
-		updateRadioGroupValue(prefs.getString(P_NODE_SIZE));
+		updateRadioGroupValue(prefs.getString(NODE_SIZE));
 		updateSizeTextBoxes(
-				prefs.getString(P_NODE_SIZE_FIXED_WIDTH), 
-				prefs.getString(P_NODE_SIZE_FIXED_HEIGHT));
+				prefs.getString(NODE_SIZE_FIXED_WIDTH), 
+				prefs.getString(NODE_SIZE_FIXED_HEIGHT));
 	}
 
 	@Override
 	protected void doLoadDefault() {
 		IPreferenceStore prefs = getPreferenceStore();
 		
-		updateRadioGroupValue(getPreferenceStore().getString(P_NODE_SIZE));
+		updateRadioGroupValue(getPreferenceStore().getString(NODE_SIZE));
 		updateSizeTextBoxes(
-				prefs.getDefaultString(P_NODE_SIZE_FIXED_WIDTH), 
-				prefs.getDefaultString(P_NODE_SIZE_FIXED_HEIGHT));
+				prefs.getDefaultString(NODE_SIZE_FIXED_WIDTH), 
+				prefs.getDefaultString(NODE_SIZE_FIXED_HEIGHT));
 	}
 	
 	@Override
@@ -191,10 +191,10 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		IPreferenceStore prefs = getPreferenceStore();
 		
 		if (value == null) {
-            prefs.setToDefault(P_NODE_SIZE);
+            prefs.setToDefault(NODE_SIZE);
         }
 		else {
-			prefs.setValue(P_NODE_SIZE, value);
+			prefs.setValue(NODE_SIZE, value);
 		}
 		
 		for (String k : sizeValue.keySet()) {

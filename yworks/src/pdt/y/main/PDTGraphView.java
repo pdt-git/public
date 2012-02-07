@@ -1,11 +1,11 @@
 package pdt.y.main;
 
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED_HEIGHT;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_FIXED_WIDTH;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_INDIVIDUAL;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_MAXIMUM;
-import static pdt.y.preferences.PreferenceConstants.P_NODE_SIZE_MEDIAN;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_HEIGHT;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -204,17 +204,17 @@ public class PDTGraphView extends  JPanel {
 		
 		IPreferenceStore prefs = LayoutPreferences.getCurrentPreferences();
 		
-		if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_FIXED)) {
-			width = prefs.getInt(P_NODE_SIZE_FIXED_WIDTH);
-			height = prefs.getInt(P_NODE_SIZE_FIXED_HEIGHT);
+		if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
+			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
+			height = prefs.getInt(NODE_SIZE_FIXED_HEIGHT);
 		}
-		else if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_MAXIMUM)) {
+		else if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
 			width = maximumValue;
 		}
-		else if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_MEDIAN)) {
+		else if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
 			width = medianValue;
 		}
-		else if (LayoutPreferences.getNodeSizePreference().equals(P_NODE_SIZE_INDIVIDUAL)) {
+		else if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
 			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(node), gfx).getWidth() + 14;
 		}
 		

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import pdt.y.model.GraphModel;
+import pdt.y.preferences.AppearancePreferences;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 
@@ -35,7 +36,7 @@ public class FileGroupNodeRealizer extends PrologGroupNodeRealizer {
 	protected void createHeaderLabel() {
 		NodeLabel label = getLabel();
 		label.setAlignment(NodeLabel.LEFT);
-		label.setBackgroundColor(Color.WHITE);
+		label.setBackgroundColor(AppearancePreferences.getFileHeaderColor());
 		label.setTextColor(Color.BLACK);
 		label.setUnderlinedTextEnabled(true);
 		label.setModel(NodeLabel.INTERNAL);

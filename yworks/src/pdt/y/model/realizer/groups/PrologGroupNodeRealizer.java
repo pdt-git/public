@@ -1,9 +1,9 @@
 package pdt.y.model.realizer.groups;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 import pdt.y.model.GraphModel;
+import pdt.y.preferences.AppearancePreferences;
 import y.base.Node;
 import y.base.NodeCursor;
 import y.geom.YInsets;
@@ -36,7 +36,7 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 	}
 
 	protected void init() {
-		setFillColor(new Color(240, 240, 240));
+		setFillColor(AppearancePreferences.getModuleFileBackgroundColor());
 		setShapeType(GroupNodeRealizer.ROUND_RECT);
 		setAutoBoundsEnabled(true);
 		YInsets minInsets = new YInsets(5,5,5,5);
