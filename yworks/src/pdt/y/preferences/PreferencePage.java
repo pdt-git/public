@@ -49,11 +49,11 @@ public class PreferencePage
 //		new StringFieldEditor(PreferenceConstants.P_STRING, "A &text preference:", getFieldEditorParent()));
 
 		addField(new RadioGroupFieldEditor(
-				PreferenceConstants.P_UPDATE_MODE,
+				PreferenceConstants.UPDATE_MODE,
 			"Update mode",
 			1,
-			new String[][] { { "&Manual (Refresh button)", PreferenceConstants.P_UPDATE_MODE_MANUAL }, {
-				"&Automatic", PreferenceConstants.P_UPDATE_MODE_AUTOMATIC }
+			new String[][] { { "&Manual (Refresh button)", PreferenceConstants.UPDATE_MODE_MANUAL }, {
+				"&Automatic", PreferenceConstants.UPDATE_MODE_AUTOMATIC }
 		}, getFieldEditorParent()));
 	}
 
@@ -65,7 +65,7 @@ public class PreferencePage
 	}
 
 	public static boolean isAutomaticUpdate() {
-		String mode = getCurrentPreferences().getString(PreferenceConstants.P_UPDATE_MODE);
-		return mode.equals(PreferenceConstants.P_UPDATE_MODE_AUTOMATIC);
+		String mode = getCurrentPreferences().getString(PreferenceConstants.UPDATE_MODE);
+		return mode.equals(PreferenceConstants.UPDATE_MODE_AUTOMATIC);
 	}
 }

@@ -1,13 +1,10 @@
 package pdt.y.model.realizer.nodes;
 
-import static pdt.y.preferences.PreferenceConstants.*;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import pdt.y.model.GraphModel;
+import pdt.y.preferences.AppearancePreferences;
 import pdt.y.preferences.LayoutPreferences;
 import y.geom.YDimension;
 import y.view.LineType;
@@ -67,11 +64,11 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		
 		byte myStyle;
 		if (model.getDataHolder().isDynamicNode(getNode())) {
-			myStyle = LineType.DASHED_DOTTED_2.getLineStyle();
+			myStyle = AppearancePreferences.getDynamicPredicateBorderStyle().getLineStyle();
 		} else {
-			myStyle = LineType.LINE_2.getLineStyle();
+			myStyle = AppearancePreferences.getBorderStyle().getLineStyle();
 		}
-		LineType myLineType = LineType.getLineType(2,myStyle);
+		LineType myLineType = LineType.getLineType((int)AppearancePreferences.getBorderWidth(), myStyle);
 		setLineType(myLineType);
 
 		if (model.getDataHolder().isMetaPred(getNode())) {
@@ -83,15 +80,15 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		}
 
 		if (model.getDataHolder().isExported(getNode())) {
-			setFillColor(Color.GREEN);
+			setFillColor(AppearancePreferences.getExportedPredicateColor());
 		} else {
-			setFillColor(Color.YELLOW);
+			setFillColor(AppearancePreferences.getPredicateColor());
 		}
 
 		if (model.getDataHolder().isUnusedLocal(getNode())) {
-			setLineColor(Color.RED);
+			setLineColor(AppearancePreferences.getUnusedPredicateBorderColor());
 		} else {
-			setLineColor(Color.BLACK);
+			setLineColor(AppearancePreferences.getBorderColor());
 		}
 		
 		super.paintNode(gfx);

@@ -32,5 +32,11 @@
             id="pdt.y.focusview.preferences.LayoutPreferences"
             name="Layout">
       </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.AppearancePreferences"
+            id="pdt.y.preferences.Appearance"
+            name="Appearance">
+      </page>
    </extension>
 </plugin>
