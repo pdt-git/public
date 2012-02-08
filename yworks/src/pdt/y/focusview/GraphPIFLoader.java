@@ -59,38 +59,40 @@ public class GraphPIFLoader {
 
 			if (activeConsole != null) {
 				pif = getPifForActiveConsole(activeConsole);
+				if (pif != null) {
 
-				String query = "consult(" + prologNameOfFileToConsult + ").";
-				sendQueryToCurrentPiF(query);
+					String query = "consult(" + prologNameOfFileToConsult + ").";
+					sendQueryToCurrentPiF(query);
 
-				query = "write_focus_to_graphML('" + focusFileForParsing
-						+ "','" + Util.prologFileName(helpFile)
-						+ "', Dependencies).";
-				Map<String, Object> output = sendQueryToCurrentPiF(query);
+					query = "write_focus_to_graphML('" + focusFileForParsing
+							+ "','" + Util.prologFileName(helpFile)
+							+ "', Dependencies).";
+					Map<String, Object> output = sendQueryToCurrentPiF(query);
 
-				dependencies.clear();
-				if (output != null) {
-					Vector deps = (Vector) output.get("Dependencies");
-					dependencies.addAll(deps);
+					dependencies.clear();
+					if (output != null) {
+						Vector deps = (Vector) output.get("Dependencies");
+						dependencies.addAll(deps);
+					}
+
+					// query =
+					// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
+					// Map<String, Object> result = sendQueryToCurrentPiF(query);
+					// result.get("FocusId");
+
+					FutureTask<?> futureTask = new FutureTask<Object>(
+							new Runnable() {
+								@Override
+								public void run() {
+									try {
+										view.loadGraph(helpFile.toURI().toURL());
+									} catch (MalformedURLException e) {
+										Debug.rethrow(e);
+									}
+								};
+							}, null);
+					executor.execute(futureTask);
 				}
-
-				// query =
-				// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
-				// Map<String, Object> result = sendQueryToCurrentPiF(query);
-				// result.get("FocusId");
-
-				FutureTask<?> futureTask = new FutureTask<Object>(
-						new Runnable() {
-							@Override
-							public void run() {
-								try {
-									view.loadGraph(helpFile.toURI().toURL());
-								} catch (MalformedURLException e) {
-									Debug.rethrow(e);
-								}
-							};
-						}, null);
-				executor.execute(futureTask);
 			}
 		} catch (PrologException e1) {
 			e1.printStackTrace();
