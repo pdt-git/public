@@ -90,4 +90,9 @@ public class FocusViewSubscription extends DefaultSubscription implements
 		public void onInit(PrologInterface pif, PrologSession initSession)
 				throws PrologInterfaceException {
 		}
+		
+		@Override
+		public boolean isVisible() {
+			return false;
+		}
 	}
