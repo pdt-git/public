@@ -124,6 +124,8 @@ public class ImageRepository {
 	public static final String RESTART = "restart.gif";
 
 	public static final String PE_PRIVATE = "private_co.gif";
+	
+	public static final String REFRESH = "refresh.gif";
 
 	public static final String MESSAGE_INFO = "message_info.gif";
 
