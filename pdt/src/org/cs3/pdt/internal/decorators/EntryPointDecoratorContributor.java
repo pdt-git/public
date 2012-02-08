@@ -64,6 +64,7 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 			
 			if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
 				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
+				decoration.addSuffix(" [entry point]");
 			}
 			
 		} catch (CoreException e) {
