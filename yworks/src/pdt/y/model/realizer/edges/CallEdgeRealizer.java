@@ -1,8 +1,7 @@
 package pdt.y.model.realizer.edges;
 
-import java.awt.Color;
-
 import pdt.y.model.GraphModel;
+import pdt.y.preferences.AppearancePreferences;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
@@ -27,15 +26,13 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 	
 	private void init() {
 		setTargetArrow(Arrow.PLAIN);
-		setLineColor(Color.DARK_GRAY);
-		width = (float)1.0;
-		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
+		setLineColor(AppearancePreferences.getLineColor());
+		LineType myLineType = LineType.createLineType(1, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
 		setLineType(myLineType);
 	}
 	
-	private int calculateLineWidth() {
+	private int calculateLineWidth(GraphModel model) {
 		Edge edge = getEdge();
-		GraphModel model = GraphModel.getInstance();
 		if(model.isCallEdge(edge)) {
 			int frequency = model.getFrequency(edge);
 //			if (frequency <= 1)
@@ -55,8 +52,8 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 		return 1;
 	}
 	
-	public void adjustLineWidth() {
-		width = calculateLineWidth();
+	public void adjustLineWidth(GraphModel model) {
+		width = calculateLineWidth(model) + AppearancePreferences.getLineWidth() - 1;
 		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
 		setLineType(myLineType);
 	}

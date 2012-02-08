@@ -38,8 +38,8 @@ pdt_reload(File):-
       , retractall(in_reload)
       , notify_reload_listeners(File)
       )
-    ).
-   % generate_factbase_with_metapred_analysis(File).
+    ),
+   generate_factbase_with_metapred_analysis(File).
 
 :- multifile(pdt_reload_listener/1).
 
