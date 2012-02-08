@@ -705,29 +705,34 @@ public class PLEditor extends TextEditor {
 	@Override
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		menu.add(new Action("Toggle breakpoint") {
+		Action toggleBreakpointAction = new Action("Toggle breakpoint") {
 			@Override
 			public void run() {
 				if (PDTUtils.checkForActivePif(true)) {
 					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
 					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
-					
+
 					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 				}
 			}
-		});
-		menu.add(new Action("Remove all breakpoints") {
+		};
+		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
 			@Override
 			public void run() {
 				if (PDTUtils.checkForActivePif(true)) {
-//					breakpointHandler.removeBreakpointMarkerForFile(getCurrentIFile());
 					breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
 				}
 			}
+		};
 
-			
-		});
+		menu.add(toggleBreakpointAction);
+		menu.add(removeBreakpointsAction);
+
+		if (getCurrentIFile() == null) {
+			toggleBreakpointAction.setEnabled(false);
+			removeBreakpointsAction.setEnabled(false);
+		}
 	}
 
 	private IFile getCurrentIFile() {
