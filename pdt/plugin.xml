@@ -81,6 +81,7 @@
             
          <action
                class="org.cs3.pdt.internal.actions.ReloadAction"
+               icon="icons/prolog_file_consulted.png"
                id="org.cs3.pdt.internal.actions.reload"
                label="(Re)consult"
                menubarPath="org.cs3.pdt.menu/group0"
@@ -88,6 +89,7 @@
          </action>
          <action
                class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+               icon="icons/entry_point.gif"
                id="pdt.actions.toggle_entry_point"
                label="Mark as Entry Point"
                menubarPath="org.cs3.pdt.menu/group0"
@@ -113,6 +115,7 @@
 	     </menu>
          <action
                class="org.cs3.pdt.internal.actions.ReloadAction"
+               icon="icons/qlf_file_consulted.png"
                id="org.cs3.pdt.internal.actions.reload"
                label="(Re)consult"
                menubarPath="org.cs3.pdt.menu/group0"
@@ -120,6 +123,7 @@
          </action>
          <action
                class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+               icon="icons/entry_point.gif"
                id="pdt.actions.toggle_entry_point"
                label="Mark as Entry Point"
                menubarPath="org.cs3.pdt.menu/group0"
@@ -145,6 +149,7 @@
 	     </menu>
          <action
                class="org.cs3.pdt.internal.actions.ReloadAction"
+               icon="icons/prolog_file_consulted.png"
                id="org.cs3.pdt.internal.actions.reload"
                label="(Re)consult"
                menubarPath="org.cs3.pdt.menu/group0"
@@ -152,6 +157,7 @@
          </action>
          <action
                class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+               icon="icons/entry_point.gif"
                id="pdt.actions.toggle_entry_point"
                label="Mark as Entry Point"
                menubarPath="org.cs3.pdt.menu/group0"
