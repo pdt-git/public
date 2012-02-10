@@ -29,11 +29,11 @@ import pdt.y.preferences.controls.NodeSizeRadioGroupFieldEditor;
  * be accessed directly via the preference store.
  */
 
-public class LayoutPreferences
+public class PredicateLayoutPreferences
 	extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
 
-	public LayoutPreferences() {
+	public PredicateLayoutPreferences() {
 		super(GRID);
 		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
 	}

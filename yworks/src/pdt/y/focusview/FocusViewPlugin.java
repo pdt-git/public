@@ -4,6 +4,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.preference.IPreferenceNode;
+import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -17,8 +22,12 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.ui.ToolBarAction;
-import pdt.y.preferences.LayoutPreferences;
+import pdt.y.preferences.EdgeAppearancePreferences;
+import pdt.y.preferences.FileAppearancePreferences;
+import pdt.y.preferences.PredicateAppearancePreferences;
+import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PreferenceConstants;
+import pdt.y.preferences.PreferencePage;
 
 
 
@@ -98,7 +107,7 @@ public class FocusViewPlugin extends ViewPart {
 
 				@Override
 				public void performAction() {
-					LayoutPreferences.setLayoutPreference(PreferenceConstants.LAYOUT_HIERARCHY);
+					PredicateLayoutPreferences.setLayoutPreference(PreferenceConstants.LAYOUT_HIERARCHY);
 					updateCurrentFocusViewLayout();
 				}
 			});
@@ -109,10 +118,48 @@ public class FocusViewPlugin extends ViewPart {
 
 				@Override
 				public void performAction() {
-					LayoutPreferences.setLayoutPreference(PreferenceConstants.LAYOUT_ORGANIC);
+					PredicateLayoutPreferences.setLayoutPreference(PreferenceConstants.LAYOUT_ORGANIC);
 					updateCurrentFocusViewLayout();
 				}
 			});
+		
+		toolBarManager.add(new ToolBarAction("Preferences", 
+				org.cs3.pdt.internal.ImageRepository.getImageDescriptor(
+						org.cs3.pdt.internal.ImageRepository.PREFERENCES)) {
+
+				@Override
+				public void performAction() {
+					PreferenceManager mgr = new PreferenceManager();
+					
+					IPreferencePage page = new PreferencePage();
+					page.setTitle("Focus View");
+					
+					IPreferenceNode node = new PreferenceNode("PreferencePage", page);
+					mgr.addToRoot(node);
+					
+					IPreferencePage edgePrefs = new EdgeAppearancePreferences();
+					edgePrefs.setTitle("Edge Appearance");
+					node.add(new PreferenceNode("EdgeAppearancePreferences", edgePrefs));
+					
+					IPreferencePage filePrefs = new FileAppearancePreferences();
+					filePrefs.setTitle("File Appearance");
+					node.add(new PreferenceNode("FileAppearancePreferences", filePrefs));
+					
+					IPreferencePage predicatePrefs = new PredicateAppearancePreferences();
+					predicatePrefs.setTitle("Predicate Appearance");
+					node.add(new PreferenceNode("PredicateAppearancePreferences", predicatePrefs));
+					
+					IPreferencePage predicateLayoutPrefs = new PredicateLayoutPreferences();
+					predicateLayoutPrefs.setTitle("Predicate Layout");
+					node.add(new PreferenceNode("PredicateLayoutPreferences", predicateLayoutPrefs));
+					
+					PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
+					dialog.create();
+					dialog.setMessage(page.getTitle());
+					dialog.open();
+				}
+			});
+
 	}
 	
 	@Override

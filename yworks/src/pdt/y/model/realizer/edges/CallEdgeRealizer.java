@@ -1,7 +1,7 @@
 package pdt.y.model.realizer.edges;
 
 import pdt.y.model.GraphModel;
-import pdt.y.preferences.AppearancePreferences;
+import pdt.y.preferences.EdgeAppearancePreferences;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
@@ -26,7 +26,7 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 	
 	private void init() {
 		setTargetArrow(Arrow.PLAIN);
-		setLineColor(AppearancePreferences.getLineColor());
+		setLineColor(EdgeAppearancePreferences.getLineColor());
 		LineType myLineType = LineType.createLineType(1, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
 		setLineType(myLineType);
 	}
@@ -53,7 +53,7 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 	}
 	
 	public void adjustLineWidth(GraphModel model) {
-		width = calculateLineWidth(model) + AppearancePreferences.getLineWidth() - 1;
+		width = calculateLineWidth(model);
 		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
 		setLineType(myLineType);
 	}

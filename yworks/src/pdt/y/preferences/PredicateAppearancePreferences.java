@@ -30,7 +30,7 @@ import y.view.LineType;
  * be accessed directly via the preference store.
  */
 
-public class AppearancePreferences
+public class PredicateAppearancePreferences
 	extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
 
@@ -41,7 +41,7 @@ public class AppearancePreferences
 		LineType.DASHED_DOTTED_2
 	};
 	
-	public AppearancePreferences() {
+	public PredicateAppearancePreferences() {
 		super(GRID);
 		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
 	}
@@ -54,12 +54,6 @@ public class AppearancePreferences
 	 */
 	public void createFieldEditors() {
 		
-		String[][] lineWidths = new String[][] { 
-				{ "Thin      ", Float.toString(APPEARANCE_LINE_WIDTH_THIN) },
-				{ "Normal    ", Float.toString(APPEARANCE_LINE_WIDTH_NORMAL) },
-				{ "Thick", Float.toString(APPEARANCE_LINE_WIDTH_THICK) }, 
-			};
-		
 		String[][] lineTypes = new String[][] { 
 				{ "Solid      ", Integer.toString(APPEARANCE_BORDER_STYLE_SOLID) },
 				{ "Dashed     ", Integer.toString(APPEARANCE_BORDER_STYLE_DASHED) },
@@ -67,30 +61,17 @@ public class AppearancePreferences
 				{ "Dashed Dotted", Integer.toString(APPEARANCE_BORDER_STYLE_DASHED_DOTTED) }, 
 			};
 		
-		addField(new ColorFieldEditor(APPEARANCE_FILE_HEADER_COLOR, "File Header Color", getFieldEditorParent()));
-		addField(new ColorFieldEditor(APPEARANCE_MODULE_HEADER_COLOR, "Module Header Color", getFieldEditorParent()));
-		
-		addField(new ColorFieldEditor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, "Module and File Background Color", getFieldEditorParent()));
-		
 		addField(new ColorFieldEditor(APPEARANCE_PREDICATE_COLOR, "Predicate Background Color", getFieldEditorParent()));
 		addField(new ColorFieldEditor(APPEARANCE_EXPORTED_PREDICATE_COLOR, "Exported Predicate Background Color", getFieldEditorParent()));
 		
 		addField(new ColorFieldEditor(APPEARANCE_BORDER_COLOR, "Border Color", getFieldEditorParent()));
 		addField(new ColorFieldEditor(APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR, "Unused Predicate Border Color", getFieldEditorParent()));
 		
-		addField(new RadioGroupFieldEditor(APPEARANCE_BORDER_WIDTH, "Border Width", 3, 
-				lineWidths, getFieldEditorParent()));
-		
 		addField(new RadioGroupFieldEditor(APPEARANCE_BORDER_STYLE, "Border Style", 4, 
-				lineTypes, getFieldEditorParent()));
+				lineTypes, getFieldEditorParent(), true));
 		
 		addField(new RadioGroupFieldEditor(APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE, "Dynamic Predicate Border Style", 4, 
-				lineTypes, getFieldEditorParent()));
-		
-		addField(new ColorFieldEditor(APPEARANCE_LINE_COLOR, "Line Color", getFieldEditorParent()));
-		
-		addField(new RadioGroupFieldEditor(APPEARANCE_LINE_WIDTH, "Line Width", 3, 
-				lineWidths, getFieldEditorParent()));
+				lineTypes, getFieldEditorParent(), true));
 	}
 
 	public void init(IWorkbench workbench) {
@@ -104,18 +85,6 @@ public class AppearancePreferences
 		String value = getCurrentPreferences().getString(preferenceName);
 		RGB color = StringConverter.asRGB(value);
 		return new Color(color.red, color.green, color.blue);
-	}
-	
-	public static Color getFileHeaderColor() {
-		return getColor(APPEARANCE_FILE_HEADER_COLOR);
-	}
-	
-	public static Color getModuleHeaderColor() {
-		return getColor(APPEARANCE_MODULE_HEADER_COLOR);
-	}
-	
-	public static Color getModuleFileBackgroundColor() {
-		return getColor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR);
 	}
 	
 	public static Color getPredicateColor() {
@@ -134,10 +103,6 @@ public class AppearancePreferences
 		return getColor(APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR);
 	}
 	
-	public static float getBorderWidth() {
-		return getCurrentPreferences().getFloat(APPEARANCE_BORDER_WIDTH);
-	}
-	
 	public static LineType getBorderStyle() {
 		int i = getCurrentPreferences().getInt(APPEARANCE_BORDER_STYLE);
 		return s_lineTypes[i];
@@ -146,13 +111,5 @@ public class AppearancePreferences
 	public static LineType getDynamicPredicateBorderStyle() {
 		int i = getCurrentPreferences().getInt(APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE);
 		return s_lineTypes[i];
-	}
-	
-	public static Color getLineColor() {
-		return getColor(APPEARANCE_LINE_COLOR);
-	}
-	
-	public static float getLineWidth() {
-		return getCurrentPreferences().getFloat(APPEARANCE_LINE_WIDTH);
 	}
 }
