@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import pdt.y.model.GraphModel;
-import pdt.y.preferences.AppearancePreferences;
-import pdt.y.preferences.LayoutPreferences;
+import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.preferences.PredicateAppearancePreferences;
 import y.geom.YDimension;
 import y.view.LineType;
 import y.view.NodeLabel;
@@ -53,7 +53,7 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		
 		NodeLabel label = getLabel();
 		
-		label.setConfiguration(LayoutPreferences.getNameCroppingConfiguration());
+		label.setConfiguration(PredicateLayoutPreferences.getNameCroppingConfiguration());
 		label.setAutoSizePolicy(NodeLabel.AUTOSIZE_NODE_SIZE);
 		
 		label.setUserData(new YDimension(getWidth(), getHeight()));
@@ -64,11 +64,11 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		
 		byte myStyle;
 		if (model.getDataHolder().isDynamicNode(getNode())) {
-			myStyle = AppearancePreferences.getDynamicPredicateBorderStyle().getLineStyle();
+			myStyle = PredicateAppearancePreferences.getDynamicPredicateBorderStyle().getLineStyle();
 		} else {
-			myStyle = AppearancePreferences.getBorderStyle().getLineStyle();
+			myStyle = PredicateAppearancePreferences.getBorderStyle().getLineStyle();
 		}
-		LineType myLineType = LineType.getLineType((int)AppearancePreferences.getBorderWidth(), myStyle);
+		LineType myLineType = LineType.getLineType(1, myStyle);
 		setLineType(myLineType);
 
 		if (model.getDataHolder().isMetaPred(getNode())) {
@@ -80,15 +80,15 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		}
 
 		if (model.getDataHolder().isExported(getNode())) {
-			setFillColor(AppearancePreferences.getExportedPredicateColor());
+			setFillColor(PredicateAppearancePreferences.getExportedPredicateColor());
 		} else {
-			setFillColor(AppearancePreferences.getPredicateColor());
+			setFillColor(PredicateAppearancePreferences.getPredicateColor());
 		}
 
 		if (model.getDataHolder().isUnusedLocal(getNode())) {
-			setLineColor(AppearancePreferences.getUnusedPredicateBorderColor());
+			setLineColor(PredicateAppearancePreferences.getUnusedPredicateBorderColor());
 		} else {
-			setLineColor(AppearancePreferences.getBorderColor());
+			setLineColor(PredicateAppearancePreferences.getBorderColor());
 		}
 		
 		super.paintNode(gfx);

@@ -1,17 +1,13 @@
 package pdt.y.model;
 
-import pdt.y.preferences.LayoutPreferences;
+import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PreferenceConstants;
 import y.layout.CompositeLayoutStage;
-import y.layout.LayoutOrientation;
 import y.layout.LayoutStage;
 import y.layout.Layouter;
-import y.layout.OrientationLayouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
-import y.layout.hierarchic.incremental.DrawingDistanceCalculator;
-import y.layout.hierarchic.incremental.HierarchicLayouter;
-import y.layout.hierarchic.incremental.SimplexNodePlacer;
 import y.layout.organic.OrganicLayouter;
+import y.layout.organic.SmartOrganicLayouter;
 import y.layout.router.OrthogonalEdgeRouter;
 
 public class GraphLayout {
@@ -91,18 +87,21 @@ public class GraphLayout {
 	}
 	
 	private Layouter createOrganicLayouter() {
-		return new OrganicLayouter();
+		SmartOrganicLayouter layouter = new SmartOrganicLayouter();
+		layouter.setMinimalNodeDistance(20);
+		layouter.setNodeEdgeOverlapAvoided(true);
+		return layouter;
 	}
 	
 	public Layouter getLayouter(){
 		CompositeLayoutStage stage  = new CompositeLayoutStage();
 		
-		if (LayoutPreferences.getLayoutPreference().equals(PreferenceConstants.LAYOUT_HIERARCHY)) {
+		if (PredicateLayoutPreferences.getLayoutPreference().equals(PreferenceConstants.LAYOUT_HIERARCHY)) {
 			
 			stage.setCoreLayouter(hierarhicLayouter);
 		}
 		else {
-			stage.setCoreLayouter(organicLayouter);
+			stage.setCoreLayouter(createOrganicLayouter());
 		}
 		
 		stage.appendStage(edgeLayouter);
