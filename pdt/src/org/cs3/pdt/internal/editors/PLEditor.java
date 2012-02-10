@@ -515,7 +515,7 @@ public class PLEditor extends TextEditor {
 //				setFocus();
 			}
 		};
-		addAction(menuMgr, action, "Save and (Re)consult",
+		addAction(menuMgr, action, "Save",
 				SEP_PDT_EDIT, COMMAND_SAVE_AND_CONSULT);
 	}
 
