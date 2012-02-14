@@ -1,5 +1,7 @@
 package pdt.y.focusview;
 
+import static org.cs3.pl.prolog.QueryUtils.bT;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -64,6 +66,8 @@ public class GraphPIFLoader {
 					String query = "consult(" + prologNameOfFileToConsult + ").";
 					sendQueryToCurrentPiF(query);
 
+					sendQueryToCurrentPiF(bT("ensure_generated_factbase_for_source_file", Util.quoteAtom(focusFileForParsing)));
+					
 					query = "write_focus_to_graphML('" + focusFileForParsing
 							+ "','" + Util.prologFileName(helpFile)
 							+ "', Dependencies).";
