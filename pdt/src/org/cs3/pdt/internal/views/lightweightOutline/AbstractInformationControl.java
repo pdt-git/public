@@ -423,7 +423,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// First search at same level
 		for (int i= 0; i < items.length; i++) {
 			final TreeItem item= items[i];
-			OutlinePredicate element= (OutlinePredicate)item.getData();
+			Object element= item.getData();
 			if (element != null) {
 				String label= labelProvider.getText(element);
 				if (getfStringMatcher().match(label))
