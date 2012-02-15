@@ -115,6 +115,9 @@ public class GraphPIFLoader {
 
 	public PrologInterface getPifForActiveConsole(PrologConsole activeConsole) {
 		PrologInterface pif = activeConsole.getPrologInterface();
+		if (pif == null) {
+			return null;
+		}
 		PrologInterfaceRegistry pifRegistry = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		String pifKey = pifRegistry.getKey(pif);
