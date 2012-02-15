@@ -3,11 +3,9 @@ package pdt.y.internal;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.cs3.pdt.PDTPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
-import pdt.y.focusview.FocusViewPlugin;
 import pdt.y.main.PluginActivator;
 
 public class ImageRepository {

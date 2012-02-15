@@ -20,8 +20,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		IPreferenceStore store = PluginActivator.getDefault().getPreferenceStore();
 		
 		store.setDefault(UPDATE_MODE, UPDATE_MODE_MANUAL);
-		store.setDefault(NAME_CROPPING, NAME_CROPPING_PREFIX);
-		store.setDefault(NODE_SIZE, NODE_SIZE_MEDIAN);
+		store.setDefault(SHOW_TOOLTIPS, true);
+		store.setDefault(NAME_CROPPING, NAME_CROPPING_BRACKET);
+		store.setDefault(NODE_SIZE, NODE_SIZE_FIXED);
 		store.setDefault(NODE_SIZE_FIXED_HEIGHT, 40);
 		store.setDefault(NODE_SIZE_FIXED_WIDTH, 100);
 		store.setDefault(LAYOUT, LAYOUT_HIERARCHY);
@@ -32,11 +33,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(APPEARANCE_EXPORTED_PREDICATE_COLOR, getColorString(Color.GREEN));
 		store.setDefault(APPEARANCE_BORDER_COLOR, getColorString(Color.BLACK));
 		store.setDefault(APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR, getColorString(Color.RED));
-		store.setDefault(APPEARANCE_BORDER_WIDTH, APPEARANCE_LINE_WIDTH_THIN);
 		store.setDefault(APPEARANCE_BORDER_STYLE, APPEARANCE_BORDER_STYLE_SOLID);
 		store.setDefault(APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE, APPEARANCE_BORDER_STYLE_DASHED_DOTTED);
 		store.setDefault(APPEARANCE_LINE_COLOR, getColorString(Color.DARK_GRAY));
-		store.setDefault(APPEARANCE_LINE_WIDTH, APPEARANCE_LINE_WIDTH_THIN);
 	}
 
 	private String getColorString(Color color) {

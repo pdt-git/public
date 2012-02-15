@@ -18,6 +18,8 @@ public class PreferenceConstants {
 	
 	public static final String UPDATE_MODE_AUTOMATIC = "UPDATE_MODE_AUTOMATIC";
 	
+	public static final String SHOW_TOOLTIPS = "SHOW_TOOLTIPS";
+	
 	/* NAME CROPPING */
 	
 	public static final String NAME_CROPPING = "NAME_CROPPING";
@@ -73,8 +75,6 @@ public class PreferenceConstants {
 	
 	public static final String APPEARANCE_LINE_COLOR = "APPEARANCE_LINE_COLOR";
 	
-	public static final String APPEARANCE_BORDER_WIDTH = "APPEARANCE_BORDER_WIDTH";
-	
 	public static final String APPEARANCE_BORDER_STYLE = "APPEARANCE_BORDER_STYLE";
 
 	public static final int APPEARANCE_BORDER_STYLE_SOLID = 0;
@@ -86,12 +86,4 @@ public class PreferenceConstants {
 	public static final int APPEARANCE_BORDER_STYLE_DASHED_DOTTED = 3;
 	
 	public static final String APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE = "APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE";
-	
-	public static final String APPEARANCE_LINE_WIDTH = "APPEARANCE_LINE_WIDTH";
-	
-	public static final float APPEARANCE_LINE_WIDTH_THIN = 1;
-	
-	public static final float APPEARANCE_LINE_WIDTH_NORMAL = 2;
-	
-	public static final float APPEARANCE_LINE_WIDTH_THICK = 3;
 }

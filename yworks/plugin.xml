@@ -28,15 +28,27 @@
       </page>
       <page
             category="pdt.y.focusview.preferences.PreferencePage"
-            class="pdt.y.preferences.LayoutPreferences"
-            id="pdt.y.focusview.preferences.LayoutPreferences"
-            name="Layout">
+            class="pdt.y.preferences.FileAppearancePreferences"
+            id="pdt.y.preferences.FileAppearance"
+            name="File Appearance">
       </page>
       <page
             category="pdt.y.focusview.preferences.PreferencePage"
-            class="pdt.y.preferences.AppearancePreferences"
-            id="pdt.y.preferences.Appearance"
-            name="Appearance">
+            class="pdt.y.preferences.PredicateAppearancePreferences"
+            id="pdt.y.preferences.PredicateAppearance"
+            name="Predicate Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.PredicateLayoutPreferences"
+            id="pdt.y.focusview.preferences.LayoutPreferences"
+            name="Predicate Layout">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.EdgeAppearancePreferences"
+            id="pdt.y.preferences.EdgeAppearance"
+            name="Edge Appearance">
       </page>
    </extension>
 </plugin>
