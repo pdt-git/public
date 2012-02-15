@@ -1,5 +1,7 @@
 package pdt.y.preferences;
 
+import static pdt.y.preferences.PreferenceConstants.*;
+
 import org.eclipse.jface.preference.*;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
@@ -30,6 +32,8 @@ public class PreferencePage
 		setDescription("Preferences for the PDT Focus View Plugin");
 	}
 	
+	
+	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
 	 * the common GUI blocks needed to manipulate various types
@@ -52,9 +56,11 @@ public class PreferencePage
 				PreferenceConstants.UPDATE_MODE,
 			"Update mode",
 			1,
-			new String[][] { { "&Manual (Refresh button)", PreferenceConstants.UPDATE_MODE_MANUAL }, {
-				"&Automatic", PreferenceConstants.UPDATE_MODE_AUTOMATIC }
+			new String[][] { { "&Manual (Refresh button)", UPDATE_MODE_MANUAL }, {
+				"&Automatic", UPDATE_MODE_AUTOMATIC }
 		}, getFieldEditorParent()));
+		
+		addField(new BooleanFieldEditor(SHOW_TOOLTIPS, "Show tooltips", getFieldEditorParent()));
 	}
 
 	public void init(IWorkbench workbench) {
@@ -65,7 +71,11 @@ public class PreferencePage
 	}
 
 	public static boolean isAutomaticUpdate() {
-		String mode = getCurrentPreferences().getString(PreferenceConstants.UPDATE_MODE);
-		return mode.equals(PreferenceConstants.UPDATE_MODE_AUTOMATIC);
+		String mode = getCurrentPreferences().getString(UPDATE_MODE);
+		return mode.equals(UPDATE_MODE_AUTOMATIC);
+	}
+	
+	public static boolean isShowToolTip() {
+		return getCurrentPreferences().getBoolean(SHOW_TOOLTIPS);
 	}
 }

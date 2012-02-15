@@ -13,7 +13,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -25,7 +24,7 @@ import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
-import pdt.y.preferences.LayoutPreferences;
+import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
@@ -202,19 +201,19 @@ public class PDTGraphView extends  JPanel {
 		
 		int width = 0, height = 20;
 		
-		IPreferenceStore prefs = LayoutPreferences.getCurrentPreferences();
+		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
 		
-		if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
+		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
 			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
 			height = prefs.getInt(NODE_SIZE_FIXED_HEIGHT);
 		}
-		else if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
 			width = maximumValue;
 		}
-		else if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
 			width = medianValue;
 		}
-		else if (LayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
 			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(node), gfx).getWidth() + 14;
 		}
 		
