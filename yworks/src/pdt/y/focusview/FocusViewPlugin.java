@@ -217,9 +217,14 @@ public class FocusViewPlugin extends ViewPart {
 		final String text = statusText + " " + infoText;
 		new UIJob("Update Status") {
 		    public IStatus runInUIThread(IProgressMonitor monitor) {
-		        info.setText(text);
-		        return Status.OK_STATUS;
+		        if (info.isDisposed()) {
+		        	return Status.CANCEL_STATUS;
+		        } else {
+			    	info.setText(text);
+			        return Status.OK_STATUS;
+		        }
 		    }
 		}.schedule();
 	}
+
 }
