@@ -249,13 +249,17 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 
 	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		changeListeners.add(listener);
+		synchronized (changeListeners) {
+			changeListeners.add(listener);
+		}
 	}
 
 	@Override
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {
-		changeListeners.remove(listener);
+		synchronized (changeListeners) {
+			changeListeners.remove(listener);
+		}
 	}
 	
 	@Override
@@ -265,8 +269,10 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 	}
 	
 	public void informListenersAboutEditorContent(ISelection selection) {
-		for (ISelectionChangedListener listener : changeListeners) {
-			listener.selectionChanged(new SelectionChangedEvent(this, selection));
+		synchronized (changeListeners) {
+			for (ISelectionChangedListener listener : changeListeners) {
+				listener.selectionChanged(new SelectionChangedEvent(this, selection));
+			}
 		}
 	}
 
