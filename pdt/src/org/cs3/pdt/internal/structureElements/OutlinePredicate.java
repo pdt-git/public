@@ -50,11 +50,11 @@ public class OutlinePredicate extends Predicate implements PDTTreeElement{
 //				String numberString = property.substring(8, property.length()-1);
 //				return Integer.parseInt(numberString);
 //			}
-			else {
-				return occurences.size();
-			}
+//			else {
+//			}
 		}
-		return 0;
+		return occurences.size();
+//		return 0;
 	}
 	
 	public String getFileName() {

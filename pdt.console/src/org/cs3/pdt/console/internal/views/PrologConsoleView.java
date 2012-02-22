@@ -83,6 +83,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -106,6 +107,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -114,10 +116,9 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-@SuppressWarnings("deprecation")
-public class PrologConsoleView extends ViewPart implements LifeCycleHook,
-PrologConsole {
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
 
+	private static final String DEFAULT_CONSOLE = "Default Console";
 	private static final String KILLABLE = "killable";
 
 	private final class ClearAction extends Action {
@@ -330,6 +331,7 @@ PrologConsole {
 	}
 
 	private final class KillAction extends Action {
+
 		@Override
 		public void run() {
 			
@@ -353,14 +355,14 @@ PrologConsole {
 								if (oldPif != null) {
 									String currentKey = registry.getKey(oldPif);
 
-									if (!currentKey.equals("defaultConsole")) {
-										setPrologInterface(registry.getPrologInterface("defaultConsole"));
+									if (!currentKey.equals(DEFAULT_CONSOLE)) {
+										setPrologInterface(registry.getPrologInterface(DEFAULT_CONSOLE));
 									}
 
 									oldPif.clearConsultedFiles();
 									oldPif.stop();
 
-									if (!currentKey.equals("defaultConsole") && "true".equals(oldPif.getAttribute(KILLABLE))) {
+									if (!currentKey.equals(DEFAULT_CONSOLE) && "true".equals(oldPif.getAttribute(KILLABLE))) {
 										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
 										for (Subscription s : subscriptionsForPif) {
 											registry.removeSubscription(s);
@@ -421,8 +423,14 @@ PrologConsole {
 							if (getPrologInterface() != null) {
 								List<String> consultedFiles = getPrologInterface().getConsultedFiles();
 								
-								WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
-								dialog.open();
+								// only create load file if there are consulted files
+								if (consultedFiles != null && consultedFiles.size() > 0) {
+									WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
+									dialog.open();
+								} else {
+									MessageDialog.openWarning(PrologConsoleView.this.getViewSite().getShell(), "Generate Load File", "No need for a load file, since no files are consulted.");
+								}
+								
 							}
 
 						} catch (Throwable e) {
@@ -647,7 +655,9 @@ PrologConsole {
 		try {
 			createPartControl_impl(parent);
 			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-			activateNewPrologProcess(registry, "defaultConsole");
+			if (registry.getAllKeys().size() == 0) {
+				activateNewPrologProcess(registry, DEFAULT_CONSOLE);
+			}
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t.getLocalizedMessage(), t);
@@ -718,6 +728,7 @@ PrologConsole {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	private void createActions() {
 		cutAction = new Action() {
 			@Override
@@ -766,8 +777,8 @@ PrologConsole {
 		//				new ImageDescriptor[] {
 		//				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
 		//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
-		activateGuiTracerAction = new ConsoleQueryAction("activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
-		deactivateGuiTracerAction = new ConsoleQueryAction("deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
+		activateGuiTracerAction = new ConsoleQueryAction("Activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
+		deactivateGuiTracerAction = new ConsoleQueryAction("Deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
 		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, abort),_,fail)") {
@@ -791,9 +802,13 @@ PrologConsole {
 				}
 			}
 		}; 		
-		traceAction = new PifQueryAction("Interrupt running query and start tracing", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
-		pasteFileNameAction = new PasteAction("paste filename",
-				"paste the name of the current editor file", ImageRepository
+		traceAction = new PifQueryAction(
+				"Interrupt running query and start tracing",
+				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
+				"pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
+		
+		pasteFileNameAction = new PasteAction("Paste filename",
+				"Paste the name of the current editor file", ImageRepository
 				.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
 
 			@Override
@@ -806,14 +821,12 @@ PrologConsole {
 			}
 
 		};
-		pasteFileNameAction
-		.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
 
 		//Object service = IServiceLocator.getService(Class);
 
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
-		keyBindingService
-		.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
+		keyBindingService.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
 		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
 		killAction = new KillAction();
@@ -824,17 +837,31 @@ PrologConsole {
 	private void initMenus(Control parent) {
 
 		MenuManager manager = new MenuManager();
-		IWorkbenchWindow window = getSite().getWorkbenchWindow();
-		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
-		sall.setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.SELECT_ALL));
-		manager.add(sall);
+		manager.setRemoveAllWhenShown(true);
+		manager.addMenuListener(new IMenuListener() {
 
-		manager.add(ActionFactory.CUT.create(window));
-		manager.add(ActionFactory.COPY.create(window));
-		manager.add(ActionFactory.PASTE.create(window));
-		manager.add(pasteFileNameAction);
-		manager.add(clearAction);
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				manager.add(new Separator("#Clipboard"));
+
+				IWorkbenchWindow window = getSite().getWorkbenchWindow();
+				IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
+				sall.setImageDescriptor(ImageRepository
+						.getImageDescriptor(ImageRepository.SELECT_ALL));
+				manager.add(sall);
+				
+				manager.add(ActionFactory.CUT.create(window));
+				manager.add(ActionFactory.COPY.create(window));
+				manager.add(ActionFactory.PASTE.create(window));
+				manager.add(pasteFileNameAction);
+				manager.add(clearAction);
+				manager.add(new Separator("#Clipboard-end"));
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end"));
+			}
+
+		});
+		getSite().registerContextMenu(manager, viewer);
 		contextMenu = manager.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(contextMenu);
 	}
@@ -850,9 +877,6 @@ PrologConsole {
 
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
-		toolBarManager.add(createProcessAction);
-
-		createAutomatedSelector(toolBarManager);
 		addToolbarContributions(toolBarManager);
 		addMenuContributions(bars.getMenuManager());
 
@@ -947,7 +971,7 @@ PrologConsole {
 	}
 
 	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey) {
-		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
+		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " (Prolog)");
 		registry.addSubscription(subscription);
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
 
@@ -959,14 +983,20 @@ PrologConsole {
 	}
 
 	private void addToolbarContributions(IToolBarManager manager) {
-		manager.add(new Separator());
-		manager.add(abortAction);
-		manager.add(traceAction);
+		manager.add(new Separator("#Console"));
+		createAutomatedSelector(manager);
+		manager.add(createProcessAction);
 		manager.add(restartAction);
 		manager.add(killAction);
-		manager.add(new Separator());
-		manager.add(genLoadFileAction);
 		manager.add(clearAction);
+		manager.add(new Separator("#Console-end"));
+		manager.add(new Separator("#Query"));
+		manager.add(traceAction);
+		manager.add(abortAction);
+		manager.add(new Separator("#Query-end"));
+		manager.add(new Separator("#Toolbar-Other"));
+		manager.add(genLoadFileAction);
+		manager.add(new Separator("#Toolbar-End"));
 	}
 
 	private void addMenuContributions(IMenuManager manager) {

@@ -83,8 +83,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
-/**
- */
+@Deprecated
 public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 		IWorkbenchWindowActionDelegate {
 

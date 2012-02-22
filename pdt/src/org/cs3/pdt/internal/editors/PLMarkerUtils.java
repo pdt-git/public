@@ -15,14 +15,11 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -43,6 +40,7 @@ public class PLMarkerUtils {
 				+ severity);
 	}
 
+	@Deprecated
 	public static void updateFileMarkers(IFile file ) throws CoreException {
 		if( PDTCoreUtils.getPrologProject(file)==null &&
 				PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
@@ -64,14 +62,14 @@ public class PLMarkerUtils {
 		}
 	}
 	
-
+	@Deprecated
 	private static void executeConsult(IFile file ) {
 		ConsultActionDelegate consult = new ConsultActionDelegate();
 		consult.setSchedulingRule(file);
 		consult.run(null);
 	}
 	
-	private static void addMarkers(final IFile file) throws PrologInterfaceException {
+	public static void addMarkers(final IFile file) throws PrologInterfaceException {
 		Job j = new Job("update markers") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

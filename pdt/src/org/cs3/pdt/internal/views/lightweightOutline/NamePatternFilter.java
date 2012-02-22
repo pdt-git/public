@@ -1,6 +1,11 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicate;
+import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.eclipse.jdt.core.IParent;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -29,15 +34,30 @@ class NamePatternFilter extends ViewerFilter {
 		StringMatcher matcher= this.abstractInformationControl.getMatcher();
 		if (matcher == null || !(viewer instanceof TreeViewer))
 			return true;
-		TreeViewer treeViewer= (TreeViewer) viewer;
 
-		String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
+		String matchName = null;
+		if (element instanceof PredicateOccuranceElement) {
+			return true;
+		} else if (element instanceof OutlinePredicate) {
+			OutlinePredicate p = (OutlinePredicate) element;
+			matchName = p.getFunctor();
+		} else if (element instanceof OutlineModuleElement) {
+			OutlineModuleElement m = (OutlineModuleElement) element;
+			matchName = m.getLabel();
+		}
 		matchName= TextProcessor.deprocess(matchName);
 		if (matchName != null && matcher.match(matchName))
 			return true;
 
+		if (element instanceof OutlineModuleElement) {
+			OutlineModuleElement e = (OutlineModuleElement) element;
+			for (Object child: e.getChildren()) {
+				if (select(viewer, element, child)) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
-
 
 }

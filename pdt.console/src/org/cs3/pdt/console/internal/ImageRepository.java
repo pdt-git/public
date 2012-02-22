@@ -60,7 +60,7 @@ public class ImageRepository {
 	
 	public final static String GUITRACER = "guitracer.gif";
 
-	public final static String CLEAR = "clear.png";
+	public final static String CLEAR = "clear_co.gif";
 
 	public final static String NOGUITRACER = "noguitracer.gif";
 	
@@ -72,9 +72,9 @@ public class ImageRepository {
     
 	public static final String BREAK = "break.gif";
 
-	public static final String RESTART = "restart.png";
+	public static final String RESTART = "console_restart12.png";
 	
-	public static final String STOP = "stop.gif";
+	public static final String STOP = "console_stop4.png";
 	
 	public static final String SELECT_ALL = "selectall.png";
 	
@@ -94,7 +94,7 @@ public class ImageRepository {
 
 	public static final String TRACE = "suspend_co.gif";
 	
-	public static final String GEN_LOAD_FILE = "gen_load_file.gif";
+	public static final String GEN_LOAD_FILE = "gen_load_file2.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);

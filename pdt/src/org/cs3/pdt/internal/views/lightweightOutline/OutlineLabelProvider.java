@@ -27,7 +27,7 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 
 		if(element instanceof Predicate) {
 			Predicate prologPredicate = (Predicate) element;
-			if (prologPredicate.isPublic()) {
+			if (prologPredicate.isPublic() || prologPredicate.getProperties().contains("imported_from(user)")) {
 				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 			} else if (prologPredicate.isPrivate()) {
 				return ImageRepository.getImage(ImageRepository.PE_PRIVATE);

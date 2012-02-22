@@ -97,12 +97,24 @@ public class ImageRepository {
     
     public final static String PACKAGE = "package_obj.gif";
     
-    public final static String PROLOG_FILE = "prolog_file.gif";
+    public final static String PROLOG_FILE = "prolog_file_transparent.png";
+    
+    public final static String PROLOG_FILE_UNCONSULTED = "prolog_file.gif";
+
+    public static final String PROLOG_CONSULTED = "consulted.png";
+    
+    public static final String PROLOG_ENTRY_POINT = "entry_point.gif";
+    
+    public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
+    
+    public static final String QLF_FILE = "qlf_file.png";
+    public static final String QLF_FILE_CONSULTED = "qlf_file_consulted.png";
+    
+    public static final String PROLOG_FOLDER_CONSULTED = "prolog_folder_consulted.png";
     
     public final static String PROLOG_FILE_EXTERNAL = "prolog_file_external.gif";
 
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
-
 	
 
     public static final String PE_ATOM = "atom.gif";
@@ -112,6 +124,13 @@ public class ImageRepository {
 	public static final String RESTART = "restart.gif";
 
 	public static final String PE_PRIVATE = "private_co.gif";
+	
+	public static final String REFRESH = "refresh.gif";
+	
+	public static final String PREFERENCES = "preferences.png";
+
+	public static final String MESSAGE_INFO = "message_info.gif";
+
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PDTPlugin.getDefault().getBundle().getEntry("/icons/" + icon);

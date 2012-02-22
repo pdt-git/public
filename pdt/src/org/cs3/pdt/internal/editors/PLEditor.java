@@ -51,12 +51,11 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ConsultActionDelegate;
+import org.cs3.pdt.internal.actions.ConsultAction;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
@@ -167,8 +166,9 @@ public class PLEditor extends TextEditor {
 //		}
 		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
 		breakpointHandler.backupMarkers(getCurrentIFile(), document);
+		new ConsultAction().consultFromActiveEditor();
 //		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
-		addProblemMarkers(); // here happens the save & reconsult
+//		addProblemMarkers(); // here happens the save & reconsult
 //		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
 		setFocus();
 
@@ -227,22 +227,22 @@ public class PLEditor extends TextEditor {
 		j.schedule();
 	}
 
-	private void addProblemMarkers() {
-		try {
-			// current file in editor is either an external file or the pdt nature is not assigned:
-			IEditorInput editorInput = getEditorInput();
-			if (editorInput instanceof IFileEditorInput) {
-				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
-			} else if (editorInput instanceof FileStoreEditorInput) {
-				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
-					new ConsultActionDelegate().run(null);
-				}
-			}
-
-		} catch (CoreException e) {
-			Debug.report(e);
-		}
-	}
+//	private void addProblemMarkers() {
+//		try {
+//			// current file in editor is either an external file or the pdt nature is not assigned:
+//			IEditorInput editorInput = getEditorInput();
+//			if (editorInput instanceof IFileEditorInput) {
+//				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
+//			} else if (editorInput instanceof FileStoreEditorInput) {
+//				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
+//					new ConsultActionDelegate().run(null);
+//				}
+//			}
+//
+//		} catch (CoreException e) {
+//			Debug.report(e);
+//		}
+//	}
 
 	protected abstract class AbstractSelectionChangedListener implements
 			ISelectionChangedListener {
@@ -387,7 +387,7 @@ public class PLEditor extends TextEditor {
 				if (PDTUtils.checkForActivePif(true)) {
 					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
 					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 				};
 			}
@@ -484,7 +484,8 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				addProblemMarkers();
+				new ConsultAction().consultFromActiveEditor();
+//				addProblemMarkers();
 				informViewsAboutChangedEditor();
 //				executeConsult();
 			}
@@ -514,7 +515,7 @@ public class PLEditor extends TextEditor {
 //				setFocus();
 			}
 		};
-		addAction(menuMgr, action, "Save and (Re)consult",
+		addAction(menuMgr, action, "Save",
 				SEP_PDT_EDIT, COMMAND_SAVE_AND_CONSULT);
 	}
 
@@ -601,6 +602,28 @@ public class PLEditor extends TextEditor {
 		return offset;
 	}
 	
+	protected int getCurrentLineOffsetSkippingWhiteSpaces(int line) {
+		int offset = 0;
+		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+		try {
+			IRegion lineInformation = document.getLineInformation(line - 1);
+			String lineContent = document.get(lineInformation.getOffset(), lineInformation.getLength());
+			int additionalOffset = 0;
+			while (additionalOffset < lineContent.length()) {
+				char character = lineContent.charAt(additionalOffset);
+				if (character == '\t' || character == ' ') {
+					additionalOffset++;
+				} else {
+					break;
+				}
+			}
+			return lineInformation.getOffset() + additionalOffset;
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		}
+		return offset;
+	}
+	
 	/**
 	 * @param i
 	 */
@@ -682,29 +705,34 @@ public class PLEditor extends TextEditor {
 	@Override
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		menu.add(new Action("Toggle breakpoint") {
+		Action toggleBreakpointAction = new Action("Toggle breakpoint") {
 			@Override
 			public void run() {
 				if (PDTUtils.checkForActivePif(true)) {
 					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
 					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
-					
+
 					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 				}
 			}
-		});
-		menu.add(new Action("Remove all breakpoints") {
+		};
+		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
 			@Override
 			public void run() {
 				if (PDTUtils.checkForActivePif(true)) {
-//					breakpointHandler.removeBreakpointMarkerForFile(getCurrentIFile());
 					breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
 				}
 			}
+		};
 
-			
-		});
+		menu.add(toggleBreakpointAction);
+		menu.add(removeBreakpointsAction);
+
+		if (getCurrentIFile() == null) {
+			toggleBreakpointAction.setEnabled(false);
+			removeBreakpointsAction.setEnabled(false);
+		}
 	}
 
 	private IFile getCurrentIFile() {
@@ -803,7 +831,7 @@ public class PLEditor extends TextEditor {
 		if (textWidget == null) return;
 		if (input instanceof IFileEditorInput) {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
-			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_UNCONSULTED));
 		} else {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
 			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));

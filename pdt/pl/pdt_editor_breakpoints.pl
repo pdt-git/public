@@ -3,20 +3,22 @@
 	pdt_set_breakpoint/4,			% used in PDTBreakpointHandler.java
 	pdt_breakpoint_properties/4
 ]).
-	
+
+:- use_module(library(prolog_breakpoints)).
+
 pdt_set_breakpoint(File, Line, Offset, Id) :-
     debug(pdt_breakpoints, 'before existing breakpoint', []),
     not(existing_breakpoint(File, Offset)),
     debug(pdt_breakpoints, 'after existing breakpoint', []),
     debug(pdt_breakpoints, 'before set_breakpoint', []),
-    set_breakpoint(File, Line, Offset, Id),
+    catch(set_breakpoint(File, Line, Offset, Id),_,fail),
     debug(pdt_breakpoints, 'after set_breakpoint', []).
     
 existing_breakpoint(File, Offset) :-   
     breakpoint_property(ExistingId, file(File)),
     breakpoint_property(ExistingId, character_range(StartPos, Length)),
     EndPos is StartPos + Length,
-    Offset > StartPos,
+    Offset >= StartPos,
     Offset < EndPos.
     
 pdt_breakpoint_properties(Id, File, Line, Offset) :-

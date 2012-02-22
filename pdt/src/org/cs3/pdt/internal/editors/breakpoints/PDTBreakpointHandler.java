@@ -13,7 +13,7 @@ import java.util.Set;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.internal.actions.ConsultActionDelegate;
+import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -37,7 +37,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Display;
@@ -45,6 +50,9 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterfaceListener, LifeCycleHook, ReconsultHook {
 
+	private static final String ADD_BREAKPOINT = "add_breakpoint";
+	private static final String REMOVE_BREAKPOINT = "remove_breakpoint";
+	private static final String FILE_LOADED = "file_loaded";
 	private static final String BREAKPOINT_LIFECYCLE_HOOK = "BreakpointLifecycleHook";
 	private static final String SOURCE_FILE = "source_file";
 	private static final String SET_BREAKPOINT = "pdt_set_breakpoint";
@@ -179,30 +187,66 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			addMarker(file, line, offset, id);
 		} catch (IOException e) {
 			Debug.report(e);
+		} catch (IllegalArgumentException e) {
+			if (e.getMessage().startsWith("Not in Workspace: ")) {
+				Debug.warning("Try to set breakpoint marker in non-workspace file");
+			} else {
+				Debug.report(e);
+			}
 		}
 	}
 
-	private void addMarker(IFile file, int line, int offset, String id) throws CoreException {
-		HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
-		attributes.put(IMarker.LINE_NUMBER, line);
-		attributes.put(IMarker.MESSAGE, "Prolog Breakpoint: line[" + line + "]");
-		attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-		attributes.put(BREAKPOINT_ID, id);
-		attributes.put(BREAKPOINT_OFFSET, offset);
-		MarkerUtilities.createMarker(file, attributes, PDT_BREAKPOINT_MARKER);
+	private void addMarker(final IFile file, final int line, final int offset, final String id) throws CoreException {
+		runAsJob("Remove all breakpoints", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
+
+			@Override
+			public void run() {
+				HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
+				attributes.put(IMarker.LINE_NUMBER, line);
+				attributes.put(IMarker.MESSAGE, "Prolog Breakpoint: line[" + line + "]");
+				attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+				attributes.put(BREAKPOINT_ID, id);
+				attributes.put(BREAKPOINT_OFFSET, offset);
+				try {
+					MarkerUtilities.createMarker(file, attributes, PDT_BREAKPOINT_MARKER);
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+			}
+		});
 	}
 
 	private void removeAllBreakpointMarkers() {
-		// called when active prolog interface was changed
-		try {
-			ResourcesPlugin.getWorkspace().getRoot().deleteMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
-			//			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
-			//			for (IMarker marker : markers) {
-			//				marker.delete();
-			//			}
-		} catch (CoreException e) {
-			Debug.report(e);
-		}
+		runAsJob("Remove all breakpoints", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
+			
+			@Override
+			public void run() {
+				// called when active prolog interface was changed
+				try {
+					ResourcesPlugin.getWorkspace().getRoot().deleteMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					//			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					//			for (IMarker marker : markers) {
+					//				marker.delete();
+					//			}
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+				
+			}
+		});
+	}
+	
+	private void runAsJob(String name, ISchedulingRule rule, final Runnable runnable) {
+		Job job = new Job(name) {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				runnable.run();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(rule);
+		job.schedule();
 	}
 
 	public void removeBreakpointFactsForFile(String prologFileName) {
@@ -218,6 +262,10 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	}
 
 	public void toogleBreakpoint(IFile file, int line, int offset) {
+		if (file == null) {
+			UIUtils.displayErrorDialog(Display.getCurrent().getActiveShell(), "File is not in workspace", "You can only set breakpoint markers to files, which are in your workspace.");
+			return;
+		}
 		checkForPif();
 		String prologFileName = getPrologFileName(file);
 		if (line > 0) {
@@ -258,9 +306,9 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
-		ConsultActionDelegate consultActionDelegate = new ConsultActionDelegate();
-		consultActionDelegate.setQuery(bT(SET_BREAKPOINT, prologFileName, line, offset, "_"));
-		consultActionDelegate.run();
+		String query = bT(SET_BREAKPOINT, prologFileName, line, offset, "_");
+		QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(query);
+		consoleAction.run();
 	}
 
 	private void loadBreakpointsFromPif() {
@@ -315,9 +363,9 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			currentDispatcher = new PrologEventDispatcher(currentPif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
 			currentPif.addLifeCycleHook(this, BREAKPOINT_LIFECYCLE_HOOK, new String[0]);
 			try {
-				currentDispatcher.addPrologInterfaceListener("add_breakpoint", this);
-				currentDispatcher.addPrologInterfaceListener("remove_breakpoint", this);
-				currentDispatcher.addPrologInterfaceListener("file_loaded", this);
+				currentDispatcher.addPrologInterfaceListener(ADD_BREAKPOINT, this);
+				currentDispatcher.addPrologInterfaceListener(REMOVE_BREAKPOINT, this);
+				currentDispatcher.addPrologInterfaceListener(FILE_LOADED, this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -330,9 +378,9 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			Debug.debug("remove listener for pif " + currentPif.toString());
 			currentPif.removeLifeCycleHook(BREAKPOINT_LIFECYCLE_HOOK);
 			try {
-				currentDispatcher.removePrologInterfaceListener("add_breakpoint", this);
-				currentDispatcher.removePrologInterfaceListener("remove_breakpoint", this);
-				currentDispatcher.removePrologInterfaceListener("file_loaded", this);
+				currentDispatcher.removePrologInterfaceListener(ADD_BREAKPOINT, this);
+				currentDispatcher.removePrologInterfaceListener(REMOVE_BREAKPOINT, this);
+				currentDispatcher.removePrologInterfaceListener(FILE_LOADED, this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -359,7 +407,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	@Override
 	public void update(PrologInterfaceEvent e) {
-		if (e.getSubject().equals("add_breakpoint")) {
+		if (e.getSubject().equals(ADD_BREAKPOINT)) {
 			String id = e.getEvent();
 			try {
 				Map<String, Object> result = currentPif.queryOnce(bT("pdt_breakpoint_properties", id, "File", "Line", "Offset"));
@@ -372,25 +420,36 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			} catch (CoreException e1) {
 				Debug.report(e1);
 			}
-		} else if (e.getSubject().equals("remove_breakpoint")) {
+		} else if (e.getSubject().equals(REMOVE_BREAKPOINT)) {
 			String id = e.getEvent();
 			removeMarkerWithId(id);
-		} else if (e.getSubject().equals("file_loaded")) {
+		} else if (e.getSubject().equals(FILE_LOADED)) {
 			updateMarkers();
 			Debug.debug("update marker for " + e.getEvent());
 		}
 	}
 
-	private void removeMarkerWithId(String id) {
+	private void removeMarkerWithId(final String id) {
 		try {
 			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 			for (IMarker marker : markers) {
 				if (marker.getAttribute(BREAKPOINT_ID, "").equals(id)) {
-					marker.delete();
-					Debug.debug("remove marker " + id);
-					if (deletedIds != null) {
-						deletedIds.add(id);
-					}
+					final IMarker m = marker;
+					runAsJob("Delete marker", marker.getResource(), new Runnable() {
+
+						@Override
+						public void run() {
+							try {
+								m.delete();
+							} catch (CoreException e) {
+								Debug.report(e);
+							}
+							Debug.debug("remove marker " + id);
+							if (deletedIds != null) {
+								deletedIds.add(id);
+							}
+						}
+					});
 					return;
 				}
 			}
@@ -439,6 +498,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				return;
 			}
 			prologConsoleService.getActivePrologConsole().ensureConnectionForCurrentPrologInterface();
+			waitForDispatcherSubjectActive();
 			StringBuffer buf = new StringBuffer();
 			boolean first = true;
 			for (MarkerBackup m : markerBackup) {
@@ -452,15 +512,25 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 			}
 			Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-			ConsultActionDelegate consultActionDelegate = new ConsultActionDelegate();
-			consultActionDelegate.setQuery(buf.toString());
-			consultActionDelegate.run();
-
+			QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(buf.toString());
+			consoleAction.run();
 
 			// disable logging of deleted ids
 			markerBackup = null;}});
 		t.start();
 	}
 
+	private void waitForDispatcherSubjectActive() {
+		PrologEventDispatcher dispatcher = currentDispatcher;
+		for (int i = 0; i < 10; i++) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
+			if (dispatcher.getSubjects().contains(ADD_BREAKPOINT)) {
+				return;
+			}
+		}
+	}
 
 }
