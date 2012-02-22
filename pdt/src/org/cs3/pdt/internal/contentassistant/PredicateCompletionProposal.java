@@ -79,15 +79,21 @@ public boolean isAtom() {
 					if(doc instanceof CTerm){
 						value =((CTerm)doc).getFunctorValue();
 					} else {
-						value = (String)doc;
+						value = ((String)doc).trim();
 					}
-				if(value.startsWith("<dl><dt")){
-					label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
-				}else {
-					label=value.indexOf('\n')>0 ?
-						value.substring(0,value.indexOf('\n')):
-						value;
-				}
+					
+					// fn: if the following is activated, the auto completion will show:
+					//     dummyPredicate(A) and not dummyPredicate/1
+					
+//				if(value.startsWith("<dl>\n<dt")){
+//					if (value.indexOf("arglist") > 0) {
+//						label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
+//					}
+//				}else {
+//					label=value.indexOf('\n')>0 ?
+//						value.substring(0,value.indexOf('\n')):
+//						value;
+//				}
 				this.doc = value;
 			 } else if(summary!=null){
 					label = label + " - " + summary.getFunctorValue();
