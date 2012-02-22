@@ -6,11 +6,9 @@ import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_MIDDLE;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_POSTFIX;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_PREFIX;
 
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import pdt.y.main.PluginActivator;
 import pdt.y.preferences.controls.NodeSizeRadioGroupFieldEditor;
@@ -30,13 +28,7 @@ import pdt.y.preferences.controls.NodeSizeRadioGroupFieldEditor;
  */
 
 public class PredicateLayoutPreferences
-	extends FieldEditorPreferencePage
-	implements IWorkbenchPreferencePage {
-
-	public PredicateLayoutPreferences() {
-		super(GRID);
-		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
-	}
+	extends PreferencePageBase {
 	
 	/**
 	 * Creates the field editors. Field editors are abstractions of

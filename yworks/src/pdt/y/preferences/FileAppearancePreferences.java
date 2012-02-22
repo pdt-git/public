@@ -1,18 +1,16 @@
 package pdt.y.preferences;
 
-import static pdt.y.preferences.PreferenceConstants.APPEARANCE_FILE_HEADER_COLOR;
 import static pdt.y.preferences.PreferenceConstants.APPEARANCE_MODULE_FILE_BACKGROUND_COLOR;
 import static pdt.y.preferences.PreferenceConstants.APPEARANCE_MODULE_HEADER_COLOR;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_NONMODULE_HEADER_COLOR;
 
 import java.awt.Color;
 
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import pdt.y.main.PluginActivator;
 
@@ -30,13 +28,7 @@ import pdt.y.main.PluginActivator;
  * be accessed directly via the preference store.
  */
 public class FileAppearancePreferences
-	extends FieldEditorPreferencePage
-	implements IWorkbenchPreferencePage {
-	
-	public FileAppearancePreferences() {
-		super(GRID);
-		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
-	}
+	extends PreferencePageBase {
 	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
@@ -47,7 +39,7 @@ public class FileAppearancePreferences
 	public void createFieldEditors() {
 		addField(new ColorFieldEditor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, "File Background Color", getFieldEditorParent()));
 		addField(new ColorFieldEditor(APPEARANCE_MODULE_HEADER_COLOR, "Module File Header Color", getFieldEditorParent()));
-		addField(new ColorFieldEditor(APPEARANCE_FILE_HEADER_COLOR, "Non Module File Header Color", getFieldEditorParent()));
+		addField(new ColorFieldEditor(APPEARANCE_NONMODULE_HEADER_COLOR, "Non Module File Header Color", getFieldEditorParent()));
 	}
 
 	public void init(IWorkbench workbench) {
@@ -64,7 +56,7 @@ public class FileAppearancePreferences
 	}
 	
 	public static Color getFileHeaderColor() {
-		return getColor(APPEARANCE_FILE_HEADER_COLOR);
+		return getColor(APPEARANCE_NONMODULE_HEADER_COLOR);
 	}
 	
 	public static Color getModuleHeaderColor() {
