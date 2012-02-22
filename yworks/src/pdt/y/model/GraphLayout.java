@@ -6,7 +6,6 @@ import y.layout.CompositeLayoutStage;
 import y.layout.LayoutStage;
 import y.layout.Layouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
-import y.layout.organic.OrganicLayouter;
 import y.layout.organic.SmartOrganicLayouter;
 import y.layout.router.OrthogonalEdgeRouter;
 
@@ -101,7 +100,7 @@ public class GraphLayout {
 			stage.setCoreLayouter(hierarhicLayouter);
 		}
 		else {
-			stage.setCoreLayouter(createOrganicLayouter());
+			stage.setCoreLayouter(organicLayouter);
 		}
 		
 		stage.appendStage(edgeLayouter);

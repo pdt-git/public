@@ -1,12 +1,17 @@
 package pdt.y.preferences;
 
-import static pdt.y.preferences.PreferenceConstants.*;
+import static pdt.y.preferences.PreferenceConstants.SHOW_TOOLTIPS;
+import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE;
+import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE_AUTOMATIC;
+import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE_MANUAL;
 
-import org.eclipse.jface.preference.*;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 
 import pdt.y.main.PluginActivator;
+import pdt.y.preferences.controls.PreferencesManagementFieldEditor;
 
 /**
  * This class represents a preference page that
@@ -22,17 +27,12 @@ import pdt.y.main.PluginActivator;
  * be accessed directly via the preference store.
  */
 
-public class PreferencePage
-	extends FieldEditorPreferencePage
-	implements IWorkbenchPreferencePage {
+public class MainPreferencePage
+	extends PreferencePageBase {
 
-	public PreferencePage() {
-		super(GRID);
-		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
+	public MainPreferencePage() {
 		setDescription("Preferences for the PDT Focus View Plugin");
 	}
-	
-	
 	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
@@ -42,25 +42,16 @@ public class PreferencePage
 	 */
 	public void createFieldEditors() {
 		
-//		addField(new DirectoryFieldEditor(PreferenceConstants.P_PATH, 
-//				"&Directory preference:", getFieldEditorParent()));
-//		addField(
-//			new BooleanFieldEditor(
-//				PreferenceConstants.P_BOOLEAN,
-//				"&An example of a boolean preference",
-//				getFieldEditorParent()));
-//		addField(
-//		new StringFieldEditor(PreferenceConstants.P_STRING, "A &text preference:", getFieldEditorParent()));
-
-		addField(new RadioGroupFieldEditor(
-				PreferenceConstants.UPDATE_MODE,
-			"Update mode",
-			1,
-			new String[][] { { "&Manual (Refresh button)", UPDATE_MODE_MANUAL }, {
-				"&Automatic", UPDATE_MODE_AUTOMATIC }
-		}, getFieldEditorParent()));
+		addField(new RadioGroupFieldEditor(UPDATE_MODE,
+				"Update mode",
+				1,
+				new String[][] { { "&Manual (Refresh button)", UPDATE_MODE_MANUAL }, 
+								 { "&Automatic", UPDATE_MODE_AUTOMATIC }
+				}, getFieldEditorParent()));
 		
 		addField(new BooleanFieldEditor(SHOW_TOOLTIPS, "Show tooltips", getFieldEditorParent()));
+		
+		addField(new PreferencesManagementFieldEditor(getFieldEditorParent()));
 	}
 
 	public void init(IWorkbench workbench) {

@@ -1,5 +1,8 @@
 package pdt.y.main;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -10,9 +13,11 @@ import pdt.y.model.labels.NodeLabelConfigurationsInitializer;
  * The activator class controls the plug-in life cycle
  */
 public class PluginActivator extends AbstractUIPlugin {
-
+	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "pdt.yworks";
+	
+	private List<PreferencesUpdateListener> listeners = new LinkedList<PreferencesUpdateListener>();
 
 	// The shared instance
 	private static PluginActivator plugin;
@@ -36,6 +41,20 @@ public class PluginActivator extends AbstractUIPlugin {
 
 	public static PluginActivator getDefault() {
 		return plugin;
+	}
+	
+	public void addPreferencesUpdateListener(PreferencesUpdateListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removePreferencesUpdateListener(PreferencesUpdateListener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void preferencesUpdated() {
+		for (PreferencesUpdateListener l : listeners) {
+			l.preferencesUpdated();
+		}
 	}
 
 	/**

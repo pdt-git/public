@@ -22,7 +22,7 @@
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-            class="pdt.y.preferences.PreferencePage"
+            class="pdt.y.preferences.MainPreferencePage"
             id="pdt.y.focusview.preferences.PreferencePage"
             name="Focus View">
       </page>
