@@ -203,7 +203,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 			store.setValue(p[0], p[1]);
 		}
 		PluginActivator.getDefault().preferencesUpdated();
-
 	}
 
 }
