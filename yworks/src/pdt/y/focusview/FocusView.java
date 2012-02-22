@@ -18,7 +18,7 @@ import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.GraphDataHolder;
-import pdt.y.preferences.PreferencePage;
+import pdt.y.preferences.MainPreferencePage;
 import y.base.Node;
 import y.view.HitInfo;
 import y.view.NodeLabel;
@@ -153,7 +153,7 @@ public class FocusView extends SwingControl {
 
 				focusViewPlugin.setInfoText(text);
 				
-				if (PreferencePage.isShowToolTip() && text.startsWith("Predicate")) {
+				if (MainPreferencePage.isShowToolTip() && text.startsWith("Predicate")) {
 					Point location = Display.getCurrent().getCursorLocation();
 					location.x += 10;
 					location.y += 10;

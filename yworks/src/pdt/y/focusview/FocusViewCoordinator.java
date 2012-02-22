@@ -26,7 +26,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.progress.UIJob;
 
-import pdt.y.preferences.PreferencePage;
+import pdt.y.preferences.MainPreferencePage;
 
 public class FocusViewCoordinator implements ISelectionChangedListener, IExecutionListener {
 	
@@ -111,7 +111,7 @@ public class FocusViewCoordinator implements ISelectionChangedListener, IExecuti
 	}
 
 	protected void refreshCurrentView() {
-		if (PreferencePage.isAutomaticUpdate()
+		if (MainPreferencePage.isAutomaticUpdate()
 				&& currentFocusView.isDirty()) {
 			currentFocusView.reload();
 		}
