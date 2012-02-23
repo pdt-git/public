@@ -52,17 +52,18 @@ import org.eclipse.ui.progress.UIJob;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.GraphDataHolder;
+import pdt.y.main.PluginActivator;
+import pdt.y.main.PreferencesUpdateListener;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
 import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PreferenceConstants;
-import pdt.y.preferences.PreferencePage;
 import y.base.Node;
 import y.view.HitInfo;
 import y.view.NodeLabel;
 import y.view.ViewMode;
-
+import pdt.y.preferences.MainPreferencePage;
 
 
 public class FocusViewPlugin extends ViewPart {
@@ -74,6 +75,12 @@ public class FocusViewPlugin extends ViewPart {
 	private FocusViewCoordinator focusViewCoordinator;
 	
 	public FocusViewPlugin() {
+		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
+			@Override
+			public void preferencesUpdated() {
+				updateCurrentFocusView();	
+			}
+		});
 	}
 	
 	@Override
@@ -166,7 +173,7 @@ public class FocusViewPlugin extends ViewPart {
 				public void performAction() {
 					PreferenceManager mgr = new PreferenceManager();
 					
-					IPreferencePage page = new PreferencePage();
+					IPreferencePage page = new MainPreferencePage();
 					page.setTitle("Focus View");
 					
 					IPreferenceNode node = new PreferenceNode("PreferencePage", page);

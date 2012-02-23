@@ -80,7 +80,6 @@ public class GraphModel {
 			}
 		}
 	}
-
 	
 	public Graph2D getGraph() {
 		return graph;

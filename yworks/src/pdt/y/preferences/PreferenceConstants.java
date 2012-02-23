@@ -10,6 +10,14 @@ import pdt.y.model.labels.PrefixLabel;
  */
 public class PreferenceConstants {
 
+	/* BASE PREFERENCES */
+	
+	public static final String BASE_TEMPLATE = "BASE_TEMPLATE";
+	
+	public static final String BASE_TEMPLATE_DEFAULT = "Default";
+	
+	public static final String BASE_TEMPLATES_STORAGE = "BASE_TEMPLATES_STORAGE";
+	
 	/* UPDATE MODE */
 	
 	public static final String UPDATE_MODE = "UPDATE_MODE";
@@ -69,7 +77,7 @@ public class PreferenceConstants {
 	
 	public static final String APPEARANCE_MODULE_HEADER_COLOR = "APPEARANCE_MODULE_HEADER_COLOR";
 	
-	public static final String APPEARANCE_FILE_HEADER_COLOR = "APPEARANCE_FILE_HEADER_COLOR";
+	public static final String APPEARANCE_NONMODULE_HEADER_COLOR = "APPEARANCE_NONMODULE_HEADER_COLOR";
 	
 	public static final String APPEARANCE_MODULE_FILE_BACKGROUND_COLOR = "APPEARANCE_MODULE_FILE_BACKGROUND_COLOR";
 	
