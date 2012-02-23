@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
 	private int offset;
 	private int length;
+	private int arity;
 	private String name;	
 	private Map<String,?> tags;
 	private String label;
@@ -59,6 +60,7 @@ public boolean isAtom() {
 		this.length = length;
 		this.name=name;
 		this.tags=tags;
+		this.arity=arity;
 //		this.module=module;
 		if(arity < 0){
 			if(arity == -1){
@@ -79,15 +81,21 @@ public boolean isAtom() {
 					if(doc instanceof CTerm){
 						value =((CTerm)doc).getFunctorValue();
 					} else {
-						value = (String)doc;
+						value = ((String)doc).trim();
 					}
-				if(value.startsWith("<dl><dt")){
-					label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
-				}else {
-					label=value.indexOf('\n')>0 ?
-						value.substring(0,value.indexOf('\n')):
-						value;
-				}
+					
+					// fn: if the following is activated, the auto completion will show:
+					//     dummyPredicate(A) and not dummyPredicate/1
+					
+//				if(value.startsWith("<dl>\n<dt")){
+//					if (value.indexOf("arglist") > 0) {
+//						label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
+//					}
+//				}else {
+//					label=value.indexOf('\n')>0 ?
+//						value.substring(0,value.indexOf('\n')):
+//						value;
+//				}
 				this.doc = value;
 			 } else if(summary!=null){
 					label = label + " - " + summary.getFunctorValue();
@@ -124,7 +132,21 @@ public boolean isAtom() {
 	@Override
 	public void apply(IDocument document) {
 		try {
-			document.replace(offset, length, name);
+			if (arity > 0) {
+				StringBuffer buf = new StringBuffer(name);
+				buf.append("(");
+				for (int i=0; i<arity; i++) {
+					if (i==0) {
+						buf.append("_");
+					} else {
+						buf.append(",_");
+					}
+				}
+				buf.append(")");
+				document.replace(offset,length,buf.toString());
+			} else {
+				document.replace(offset, length, name);
+			}
 		} catch (BadLocationException e) {
 			Debug.report(e);
 		}

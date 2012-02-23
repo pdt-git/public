@@ -5,12 +5,10 @@ import static pdt.y.preferences.PreferenceConstants.APPEARANCE_LINE_COLOR;
 import java.awt.Color;
 
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import pdt.y.main.PluginActivator;
 
@@ -29,13 +27,7 @@ import pdt.y.main.PluginActivator;
  */
 
 public class EdgeAppearancePreferences
-	extends FieldEditorPreferencePage
-	implements IWorkbenchPreferencePage {
-	
-	public EdgeAppearancePreferences() {
-		super(GRID);
-		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
-	}
+	extends PreferencePageBase {
 	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
