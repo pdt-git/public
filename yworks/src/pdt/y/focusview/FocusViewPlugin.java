@@ -51,11 +51,12 @@ import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
-import pdt.y.model.GraphDataHolder;
 import pdt.y.main.PluginActivator;
 import pdt.y.main.PreferencesUpdateListener;
+import pdt.y.model.GraphDataHolder;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
+import pdt.y.preferences.MainPreferencePage;
 import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PreferenceConstants;
@@ -63,7 +64,6 @@ import y.base.Node;
 import y.view.HitInfo;
 import y.view.NodeLabel;
 import y.view.ViewMode;
-import pdt.y.preferences.MainPreferencePage;
 
 
 public class FocusViewPlugin extends ViewPart {
@@ -400,7 +400,7 @@ public class FocusViewPlugin extends ViewPart {
 
 					FocusViewPlugin.this.setInfoText(text);
 					
-					if (PreferencePage.isShowToolTip() && text.startsWith("Predicate")) {
+					if (MainPreferencePage.isShowToolTip() && text.startsWith("Predicate")) {
 						Point location = Display.getCurrent().getCursorLocation();
 						location.x += 10;
 						location.y += 10;
@@ -497,7 +497,7 @@ public class FocusViewPlugin extends ViewPart {
 		}
 
 		protected void refreshCurrentView() {
-			if (PreferencePage.isAutomaticUpdate()
+			if (MainPreferencePage.isAutomaticUpdate()
 					&& currentFocusView.isDirty()) {
 				currentFocusView.reload();
 			}
