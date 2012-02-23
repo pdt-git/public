@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
 	private int offset;
 	private int length;
+	private int arity;
 	private String name;	
 	private Map<String,?> tags;
 	private String label;
@@ -59,6 +60,7 @@ public boolean isAtom() {
 		this.length = length;
 		this.name=name;
 		this.tags=tags;
+		this.arity=arity;
 //		this.module=module;
 		if(arity < 0){
 			if(arity == -1){
@@ -130,7 +132,21 @@ public boolean isAtom() {
 	@Override
 	public void apply(IDocument document) {
 		try {
-			document.replace(offset, length, name);
+			if (arity > 0) {
+				StringBuffer buf = new StringBuffer(name);
+				buf.append("(");
+				for (int i=0; i<arity; i++) {
+					if (i==0) {
+						buf.append("_");
+					} else {
+						buf.append(",_");
+					}
+				}
+				buf.append(")");
+				document.replace(offset,length,buf.toString());
+			} else {
+				document.replace(offset, length, name);
+			}
 		} catch (BadLocationException e) {
 			Debug.report(e);
 		}
