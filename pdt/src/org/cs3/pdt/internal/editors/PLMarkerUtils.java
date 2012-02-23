@@ -10,6 +10,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.quickfix.PDTMarker;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -75,14 +76,26 @@ public class PLMarkerUtils {
 			protected IStatus run(IProgressMonitor monitor) {
 				PrologSession session =null;
 				try {
-
 					final IDocument doc = PDTCoreUtils.getDocument(file);
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					Thread.sleep(500); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
+					// fn: I don't think we need this sleep, markers were added for small and large (5k lines +) files,
+					//     even without the sleep
+//					Thread.sleep(500); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
 					add_markers_for_errors_and_warnings(file, session, doc);
 					add_markers_for_smell_detectors(file, monitor, session, doc);
-
 					session.queryOnce("deactivate_warning_and_error_tracing");
+				} catch (PrologException e) {
+					// this may be a reload_timeout_reached exception
+					// (shouldn't happen anymore, but maybe it does)
+					
+					// so at least we deactivate the tracing, because
+					// otherwise error markers will still be visible after removing the error
+					try {
+						session.queryOnce("deactivate_warning_and_error_tracing");
+					} catch (Exception e1) {
+						Debug.report(e1);
+					}
+					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
@@ -94,8 +107,6 @@ public class PLMarkerUtils {
 		};
 		j.setRule(file);
 		j.schedule();
-
-
 	}
 	
 	private static void add_markers_for_errors_and_warnings(
