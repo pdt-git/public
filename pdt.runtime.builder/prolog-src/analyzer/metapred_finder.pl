@@ -63,7 +63,10 @@ find_predefined_metas(Spec, Module):-
     (MetaArgs \= []).
         
         
-        
+% GK: Hier wird mit Listen und list_to_set gearbeitet, um duplikate zu eliminieren.
+% TODO: Messen, ob assert_unique von fakten nicht schneller wäre und vor allem
+% über die geringere Stackbelastung an der Aufrufstelle Vorteile böte.     
+% Bzw. noch sauberer mit setof, wenn es skaliert.
 collect_candidates(Candidates):-
 	findall(
 		CandModule:Candidate,
@@ -79,6 +82,10 @@ collect_candidates(Candidates):-
 			),
 			parse_util:literalT(LiteralId,_ParentId,ClauseId,_AModule,_Functor,_Arity),
 			parse_util:clauseT(ClauseId,_,CandModule,CandFunctor,CandArity),
+			%% GK: Hier evtl zu grob, es macht keinen Sinn sich alle 
+			% Klauseln des Prädikats später noch mal anzusehen, wenn 
+			% man jetzt schon genau weiss, in welcher Klausel ein Meta-Aufruf steckt.
+			% Also: Nur ClauseRef merken!
 			functor(Candidate, CandFunctor, CandArity),
 			\+ (predicate_property(CandModule:Candidate, built-in))%,
 			%format('Candidate: ~w:~w~n', [CandModule, Candidate])
