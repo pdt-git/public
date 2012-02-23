@@ -1,17 +1,24 @@
 package pdt.y.preferences;
 
-import static pdt.y.preferences.PreferenceConstants.*;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_COLOR;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_STYLE;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_STYLE_DASHED;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_STYLE_DASHED_DOTTED;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_STYLE_DOTTED;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_STYLE_SOLID;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_EXPORTED_PREDICATE_COLOR;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_PREDICATE_COLOR;
+import static pdt.y.preferences.PreferenceConstants.APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR;
 
 import java.awt.Color;
 
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import pdt.y.main.PluginActivator;
 import y.view.LineType;
@@ -31,8 +38,7 @@ import y.view.LineType;
  */
 
 public class PredicateAppearancePreferences
-	extends FieldEditorPreferencePage
-	implements IWorkbenchPreferencePage {
+	extends PreferencePageBase {
 
 	private static final LineType[] s_lineTypes = {
 		LineType.LINE_2,
@@ -41,11 +47,6 @@ public class PredicateAppearancePreferences
 		LineType.DASHED_DOTTED_2
 	};
 	
-	public PredicateAppearancePreferences() {
-		super(GRID);
-		setPreferenceStore(PluginActivator.getDefault().getPreferenceStore());
-	}
-	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
 	 * the common GUI blocks needed to manipulate various types
@@ -53,7 +54,6 @@ public class PredicateAppearancePreferences
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		
 		String[][] lineTypes = new String[][] { 
 				{ "Solid      ", Integer.toString(APPEARANCE_BORDER_STYLE_SOLID) },
 				{ "Dashed     ", Integer.toString(APPEARANCE_BORDER_STYLE_DASHED) },

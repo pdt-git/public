@@ -1,27 +1,15 @@
-:- module(metafile_referencer, [file_references_for_metacall/3,	%Arg1=ContextModule %Arg2=MetaCall %Arg3=References (see description)
-								file_references_for_call/3,		%Arg1=ContextModule %Arg2=Term %Arg3=FileSet
-								is_metaterm/3					%Arg1=ContextModule %Arg2=Literal %Arg3=MetaArgument
+:- module(metafile_referencer, [file_references_for_call/3,		%Arg1=ContextModule %Arg2=Term %Arg3=FileSet
+								is_metaterm/3,					%Arg1=ContextModule %Arg2=Literal %Arg3=MetaArgument
+								user_defined_meta_pred/4
 								]).
 								
 :- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(pdt_xref_experimental).
 
-
 :- dynamic user_defined_meta_pred/4.	%user_defined_meta_pred(Functor, Arity ,Module, MetaSpec)
-
-% FÜR EVA: Dies Prädikat müssen wir noch mal besprechen. -- G.
-
-file_references_for_metacall(Module,MetaTerm,References):-
-    is_metaterm(Module,MetaTerm,MetaArgs),			
-    length(MetaArgs,Length),
-    length(References,Length),
-    nth1(N,MetaArgs,MArg),
-    MArg=(ArgNr,Term),
-	file_references_for_term(Module, Term, FileSet),
-    nth1(N,References,(ArgNr,Term,FileSet)).
+ 
     
-    
-/* *
+/**
  * is_metaterm(?Module, -Literal, ?MetaArguments ) is non_det
  * is_metaterm(?Module, +Literal, ?MetaArguments ) is det
  *  Arg1 is a literal representing a metacall and 
@@ -58,8 +46,14 @@ is_metaterm(Module, Literal, MetaArguments) :-
 is_meta_pred(Module, Literal, MetaTerm):-	%TODO: auf built_in einschränken!
     predicate_property(Module:Literal,meta_predicate(MetaTerm)).
 is_meta_pred(Module, Literal, MetaTerm):-    
+	nonvar(Literal),
     functor(Literal, Functor, Arity),
     user_defined_meta_pred(Functor, Arity, Module, MetaTerm).
+
+is_meta_pred(Module, Literal, MetaTerm):-    
+	var(Literal),
+    user_defined_meta_pred(Functor, Arity, Module, MetaTerm),
+    functor(Literal, Functor, Arity).
     
 /* *
 * collect_meta_args(+Args,+MetaArgs,?MetaArguments) is det

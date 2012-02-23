@@ -5,17 +5,22 @@
 /**
  * infer_meta_arguments_for(?Module,?AHead,?MetaSpec) is det
  *
- * Arg3 is the infered meta_predicate specification of the
+ * Arg3 is the inferred meta_predicate specification of the
  * predicat Arg2 in module Arg1. 
  * 
  * Fails, if Arg2 is not a meta-predicate.
  * 
- * Currently only infers ? and 0.
+ * Currently only infers ? as most general mode for non-meta-arguments
+ * and 0 as the indicator of a meta-argument (without promising that 
+ * the term passed therein is actually the called one, without any 
+ * additional arguments -- the arity is not treated currently).
+ * <-- TODO: Include treatment of arity.
+ *
  * For built-in predicates the original specification is used. 
  **/
 infer_meta_arguments_for(Module,AHead,MetaSpec):-
     (	var(AHead)
-    ->	defined_in_module(Module,Functor,Arity)
+    ->	defined_in_module(Module,Functor,Arity)  % GK: Wann kann das auftreten???
     ;	functor(AHead, Functor, Arity)	
     ),
     functor(Head, Functor, Arity), 	%get most general head to find all clauses of the predicate
@@ -36,10 +41,14 @@ find_meta_pred_args_in_clause(Module, Head, MetaArgs):-
     predicate_property(Module:Head, built_in), !,
     predicate_property(Module:Head, meta_predicate(Spec)),
     Spec =.. [_|MetaArgs].
+    
 find_meta_pred_args_in_clause(Module, Head, MetaArgs):-
 	clause(Module:Head, Body), !,
 	find_meta_vars_in_body(Body, Module, [],  MetaVars),
 	find_meta_vars_in_head(Head, MetaVars, MetaArgs).
+% GK: The next clause is doubly pointless since 
+% (a) one traverses supermodules instead of just the clauses one needs
+% (b) clause/3 gets the clauses from the supermodule anyway (or not???)	
 find_meta_pred_args_in_clause(AModule, Head, MetaArgs):-
     declared_in_module(AModule, Head, Module),
 	clause(Module:Head, Body), !,
@@ -53,13 +62,13 @@ find_meta_pred_args_in_clause(AModule, Head, MetaArgs):-
 /**
  * find_meta_vars_in_body(+Term, +Context, +MetaVars, -MetaVars) is det
  * 
- * Analyses the code of Arg1 for calls to known meta_predicates (in the
- * module context of Arg2).
- * If such a meta-call is found, all terms that appear 
- *  - as arguments of those meta-calls,  
+ * Analyses the code in Arg1 for calls to meta_predicates known
+ * in the module context of Arg2.
+ * If such a meta-call is found, all terms that  
+ *  - appear as arguments of those meta-calls,  
  *  - are unified / aliased to them,
  *  - are part of those terms, 
- *  - or are connected to them via term-manupilation
+ *  - or are connected to them via term-manipulation
  * previously in the code of Arg1, are stored in Arg4. 
  * Arg3 helps as an accumulator of previously found arguments / terms.
  */  	 
@@ -90,7 +99,19 @@ find_meta_vars_in_body((TermA; TermB), Context, KnownMetaVars, MetaVars):-
     !, 
    	find_meta_vars_in_body(TermB, Context, KnownMetaVars, MetaVarsB),
    	find_meta_vars_in_body(TermA, Context, MetaVarsB, MetaVars).
-   	
+
+find_meta_vars_in_body((TermA == TermB), _Context, KnownMetaVars, MetaVars):-  % Added by GK, 22.2.2012
+    !,
+   	(	occurs_in(TermA, KnownMetaVars)
+   	->	add_var_to_set(TermB, KnownMetaVars, OwnMetaVars2)
+   	;	OwnMetaVars2 = KnownMetaVars
+   	),
+   	(	occurs_in(TermB, OwnMetaVars2)
+   	->	add_var_to_set(TermA, OwnMetaVars2, MetaVars3)
+   	;	MetaVars3 = OwnMetaVars2
+   	),
+   	check_inner_vars(TermA, TermB, MetaVars3, MetaVars).
+  	
 find_meta_vars_in_body((TermA = TermB), _Context, KnownMetaVars, MetaVars):-
     !,
    	(	occurs_in(TermA, KnownMetaVars)
@@ -284,7 +305,7 @@ add_var_to_set(Var, Set, NewSet):-
 /* occurs_in(?Var, +Set) is det.
  * 
  * Succseds, if Arg1 is equal to a member of Arg2.
- * The comparision is done with == instead of =!
+ * The comparison is done with == instead of =!
  */ 
 occurs_in(Var, Set):-
 	nth1(_, Set, OldVar),
