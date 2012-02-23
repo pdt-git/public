@@ -12,7 +12,6 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.List;
 
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
