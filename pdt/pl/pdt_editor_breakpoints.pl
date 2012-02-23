@@ -29,6 +29,8 @@ pdt_breakpoint_properties(Id, File, Line, Offset) :-
 :- multifile(user:message_hook/3).
 :- dynamic(user:message_hook/3).
 
+% results in error in meta call inference 
+% failed(process_meta_pred(:(2,?,?),pdt_editor_breakpoints))
 user:message_hook(breakpoint(set, Id), _Kind, _Lines) :-
     catch(pif_observe:pif_notify(add_breakpoint,Id),_,true), fail.
     

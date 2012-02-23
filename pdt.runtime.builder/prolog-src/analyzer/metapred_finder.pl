@@ -15,7 +15,8 @@ get_all_userdefined_meta_predicates(MetaPreds):-
     	metafile_referencer:user_defined_meta_pred(_Functor, _Arity, Module, NewMetaSpec),
     	MetaPreds
     ).
-    
+   
+debugme.
 
 find_all_meta_predicates:-
     initialize_meta_pred_search,
@@ -31,7 +32,7 @@ find_all_meta_predicates:-
     			;	infer_meta_arguments_for(Module,Candidate,MetaSpec)
     			)
  			),
- 			assert(new_meta_pred(MetaSpec, Module))
+ 			assert_new_meta_pred(MetaSpec, Module)
 		),
 		(	new_meta_pred(_,_)
 		->	(	prepare_next_step,
@@ -41,7 +42,8 @@ find_all_meta_predicates:-
 		),
 	!.
 	    
-    
+assert_new_meta_pred(MetaSpec, Module):-
+ 			assert(new_meta_pred(MetaSpec, Module)).
     
 initialize_meta_pred_search:-
     retractall(metafile_referencer:user_defined_meta_pred(_,_,_,_)),
@@ -97,9 +99,14 @@ collect_candidates(Candidates):-
 	
     
 prepare_next_step:-
-    forall(	
-    	new_meta_pred(MetaSpec, Module),
-    	(	functor(MetaSpec, Functor, Arity),
+    new_meta_pred(MetaSpec, Module),
+	process_meta_pred(MetaSpec, Module),
+    fail.	
+    
+prepare_next_step.   
+    
+process_meta_pred(MetaSpec, Module) :-
+    	functor(MetaSpec, Functor, Arity),
     		(	metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, OldMetaSpec)
     		->	(	(MetaSpec \= OldMetaSpec)
     			->	(	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec),
@@ -110,9 +117,11 @@ prepare_next_step:-
     			)
     		;	assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, MetaSpec)),
     			update_factbase(Functor, Arity, Module)
-    		)
-    	)
-    ).
+    		),
+     !.
+
+process_meta_pred(MetaSpec, Module) :-
+     throw(failed(process_meta_pred(MetaSpec, Module))).
     
 update_factbase(Functor, Arity, Module):-
     parse_util:predicateT_ri(Functor,Arity,Module,PId),
