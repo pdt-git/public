@@ -23,8 +23,9 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String label;
 //	private String module;
 	private String doc;
-private boolean isModule = false;
-private boolean isAtom = false;
+	private String insertion;
+	private boolean isModule = false;
+	private boolean isAtom = false;
 	
 	public boolean isModule() {
 	return isModule;
@@ -73,9 +74,10 @@ public boolean isAtom() {
 			this.label = name+"/"+arity;
 
 			CTerm summary = (CTerm) tags.get("summary");
+			// FIXME: this only works for exported predicates 
+			//    for not exported predicates: predicate_manual_entry(Module,PredName,Arity,Help) will set Help to nodoc
 			Object doc = tags.get("documentation");
 
-			 
 			if(doc != null){
 				 	String value;
 					if(doc instanceof CTerm){
@@ -84,13 +86,14 @@ public boolean isAtom() {
 						value = ((String)doc).trim();
 					}
 					
-					// fn: if the following is activated, the auto completion will show:
-					//     dummyPredicate(A) and not dummyPredicate/1
 					
-//				if(value.startsWith("<dl>\n<dt")){
-//					if (value.indexOf("arglist") > 0) {
+					
+				if(value.startsWith("<dl>\n<dt")){
+					if (value.indexOf("arglist") > 0 && value.indexOf("</var>") > value.indexOf("arglist")) {
 //						label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
-//					}
+						insertion = name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
+					}
+				}
 //				}else {
 //					label=value.indexOf('\n')>0 ?
 //						value.substring(0,value.indexOf('\n')):
@@ -106,11 +109,6 @@ public boolean isAtom() {
 		if(module!=null && !isAtom){
 			label=module+":" + label;
 		}
-//		this.module = module;
-		
-		
-
-		
 	}
 
 	private static boolean isPublic(Map<String, ?> tags) {
@@ -132,7 +130,9 @@ public boolean isAtom() {
 	@Override
 	public void apply(IDocument document) {
 		try {
-			if (arity > 0) {
+			if(insertion != null) {
+				document.replace(offset, length, insertion);
+			} else if (arity > 0) {
 				StringBuffer buf = new StringBuffer(name);
 				buf.append("(");
 				for (int i=0; i<arity; i++) {
