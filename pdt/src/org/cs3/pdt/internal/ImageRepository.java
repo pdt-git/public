@@ -117,7 +117,7 @@ public class ImageRepository {
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
 	
 
-    public static final String PE_ATOM = "atom.gif";
+    public static final String PE_ATOM = "atom.png";
 
 	public static final String BREAK = "break.gif";
 

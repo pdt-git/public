@@ -2,6 +2,8 @@ package org.cs3.pdt.internal.contentassistant;
 
 import java.util.Map;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CTerm;
@@ -15,6 +17,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.swt.widgets.Shell;
 
 public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
+	private static final String SPAN_HIDDEN = "<span style={display:none}>";
 	private int offset;
 	private int length;
 	private int arity;
@@ -23,8 +26,9 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String label;
 //	private String module;
 	private String doc;
-private boolean isModule = false;
-private boolean isAtom = false;
+	private String insertion;
+	private boolean isModule = false;
+	private boolean isAtom = false;
 	
 	public boolean isModule() {
 	return isModule;
@@ -73,9 +77,10 @@ public boolean isAtom() {
 			this.label = name+"/"+arity;
 
 			CTerm summary = (CTerm) tags.get("summary");
+			// FIXME: this only works for exported predicates 
+			//    for not exported predicates: predicate_manual_entry(Module,PredName,Arity,Help) will set Help to nodoc
 			Object doc = tags.get("documentation");
 
-			 
 			if(doc != null){
 				 	String value;
 					if(doc instanceof CTerm){
@@ -84,13 +89,16 @@ public boolean isAtom() {
 						value = ((String)doc).trim();
 					}
 					
-					// fn: if the following is activated, the auto completion will show:
-					//     dummyPredicate(A) and not dummyPredicate/1
 					
-//				if(value.startsWith("<dl>\n<dt")){
-//					if (value.indexOf("arglist") > 0) {
+					
+				if(value.startsWith("<dl>\n<dt")){
+					if (value.indexOf("arglist") > 0 && value.indexOf("</var>") > value.indexOf("arglist")) {
 //						label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
-//					}
+						insertion = name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
+					}
+				} else if (value.indexOf(SPAN_HIDDEN) > 0 && value.indexOf("</span>") > 0) {
+					insertion = value.substring(value.indexOf(SPAN_HIDDEN) + SPAN_HIDDEN.length(), value.indexOf("</span>"));
+				}
 //				}else {
 //					label=value.indexOf('\n')>0 ?
 //						value.substring(0,value.indexOf('\n')):
@@ -106,11 +114,6 @@ public boolean isAtom() {
 		if(module!=null && !isAtom){
 			label=module+":" + label;
 		}
-//		this.module = module;
-		
-		
-
-		
 	}
 
 	private static boolean isPublic(Map<String, ?> tags) {
@@ -132,21 +135,30 @@ public boolean isAtom() {
 	@Override
 	public void apply(IDocument document) {
 		try {
-			if (arity > 0) {
-				StringBuffer buf = new StringBuffer(name);
-				buf.append("(");
-				for (int i=0; i<arity; i++) {
-					if (i==0) {
-						buf.append("_");
-					} else {
-						buf.append(",_");
+			boolean createArglist = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_COMPLETE_ARGLIST, "true"));
+			
+			if (createArglist) {
+				if(insertion != null) {
+					document.replace(offset, length, insertion);
+				} else if (arity > 0) {
+					StringBuffer buf = new StringBuffer(name);
+					buf.append("(");
+					for (int i=0; i<arity; i++) {
+						if (i==0) {
+							buf.append("_");
+						} else {
+							buf.append(",_");
+						}
 					}
+					buf.append(")");
+					document.replace(offset,length,buf.toString());
+				} else {
+					document.replace(offset, length, name);
 				}
-				buf.append(")");
-				document.replace(offset,length,buf.toString());
 			} else {
 				document.replace(offset, length, name);
 			}
+			
 		} catch (BadLocationException e) {
 			Debug.report(e);
 		}
