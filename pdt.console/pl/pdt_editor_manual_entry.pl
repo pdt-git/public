@@ -42,7 +42,7 @@ predicate_manual_entry(_Module, Pred,Arity,Content) :-
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
 gen_html_for_pred_(FileSpec,Functor/Arity,Html) :-    
-	doc_file_objects(FileSpec, _File, Objects, FileOptions, []),
+	doc_file_objects(FileSpec, _File, Objects, FileOptions, [public_only(false)]),
 	member(doc(Signature,FilePos,Doc),Objects),
 	( Functor/Arity=Signature 
 	; _Module:Functor/Arity=Signature
