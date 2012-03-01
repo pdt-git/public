@@ -2,6 +2,13 @@
 :- use_module('analyzer/metapred_finder').
 
 
+ensure_generated_factbase_for_source_file(File) :-
+	source_file(File),
+	(	fileT_ri(File, _)
+	->	true
+	;	generate_factbase(File)
+	).
+
 generate_factbase:-
     with_mutex(prolog_factbase,
     	(	find_all_loaded_files(Project),

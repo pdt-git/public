@@ -51,8 +51,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.ConsoleModelEvent;
@@ -333,13 +331,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			readerThread.setName("Console Reader Thread");
 			readerThread.start();
 
-			String valString = PrologConsolePlugin.getDefault()
-					.getPreferenceValue(PDTConsole.PREF_INTERCEPT_GET_SINGLE_CHAR,
-							"false");
-			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
-			if (useVoodoo) {
-				writer.write("pdt_install_console.\n");
-			} 
+			writer.write("pdt_install_console.\n");
 			writer.flush();
 			Debug.debug("Connect complete");
 			fireAfterConnect();

@@ -58,7 +58,6 @@ import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -73,7 +72,6 @@ import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -229,7 +227,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	public String[] getPredicatesWithProperty__NonPDT(String property) {
 		PrologConsole console = PrologConsolePlugin.getDefault()
 				.getPrologConsoleService().getActivePrologConsole();
-		if (console == null) {
+		if (console == null || console.getPrologInterface() == null) {
 			return null;
 		}
 		PrologSession session = null;

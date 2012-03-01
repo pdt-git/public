@@ -264,7 +264,7 @@ private static JackTheProcessRipper processRipper;
 		String value = ("true".equals(socketPif.getAttribute(PrologInterface.PREF_GENERATE_FACTBASE)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
 		value = ("true".equals(socketPif.getAttribute(PrologInterface.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
-		tmpWriter.println(":- flag(meta_pred_analysis, _, " + value + ").");
+		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
 			BootstrapPrologContribution contribution = it.next();

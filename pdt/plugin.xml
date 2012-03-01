@@ -17,40 +17,6 @@
  </extension>
  
  <extension
-       point="org.eclipse.ui.actionSets">
-    <actionSet
-          label="Prolog Actions"
-          visible="true"
-          id="org.cs3.pdt.internal.actions">
-       <menu
-             label="Prolo&amp;g"
-             id="org.cs3.pdt.menus.Prolog">
-          <separator name="separator1"/>
-          <separator name="separator2"/>
-       </menu>
-       <action
-             label="Restart"
-             class="org.cs3.pdt.internal.actions.RestartAction"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.restart"/>
-       <action
-             label="(Re)consult"
-             class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.consult"/>
-             
-       <action
-             label="Prolog Console"
-             class="org.cs3.pdt.internal.actions.OpenConsoleAction"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.open.console"/>
-             
-    </actionSet>
- </extension>
- <extension
        point="org.eclipse.ui.preferencePages">
     <page
           class="org.cs3.pdt.preferences.PreferencePage"
@@ -68,11 +34,19 @@
          point="org.eclipse.ui.editors">
       <editor
             name="PL Editor"
-            icon="icons/prolog_file.gif"
+            icon="icons/prolog_file_transparent.png"
             extensions="pl , plt, lgt"
             class="org.cs3.pdt.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
+      </editor>
+      <editor
+            name="QLF Editor"
+            icon="icons/qlf_file.png"
+            extensions="qlf"
+            class="org.cs3.pdt.internal.editors.QLFEditor"
+            contributorClass="org.cs3.pdt.internal.editors.QLFEditorContributor"
+            id="org.cs3.pdt.internal.editors.QLFEditor">
       </editor>
    </extension>
 
@@ -87,6 +61,110 @@
                label="Goto Error Line"
                menubarPath="additions"/>
       </viewerContribution>
+      
+      
+       <objectContribution
+            adaptable="false"
+            id="pdt.entry.point.contribution"
+            nameFilter="*.pl"
+            objectClass="org.eclipse.core.resources.IFile">
+           <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
+            
+         <action
+               class="org.cs3.pdt.internal.actions.ReloadAction"
+               icon="icons/prolog_file_consulted.png"
+               id="org.cs3.pdt.internal.actions.reload"
+               label="(Re)consult"
+               menubarPath="org.cs3.pdt.menu/group0"
+               style="push">
+         </action>
+         <action
+               class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+               icon="icons/entry_point.gif"
+               id="pdt.actions.toggle_entry_point"
+               label="Mark as Entry Point"
+               menubarPath="org.cs3.pdt.menu/group0"
+               style="toggle"
+               tooltip="If checked, the file is considered as a &quot;main&quot; file.">
+         </action>
+      </objectContribution>
+      
+       <objectContribution
+            adaptable="false"
+            id="pdt.consult.contribution"
+            nameFilter="*.qlf"
+            objectClass="org.eclipse.core.resources.IFile">
+           <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
+         <action
+               class="org.cs3.pdt.internal.actions.ReloadAction"
+               icon="icons/qlf_file_consulted.png"
+               id="org.cs3.pdt.internal.actions.reload"
+               label="(Re)consult"
+               menubarPath="org.cs3.pdt.menu/group0"
+               style="push">
+         </action>
+         <action
+               class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+               icon="icons/entry_point.gif"
+               id="pdt.actions.toggle_entry_point"
+               label="Mark as Entry Point"
+               menubarPath="org.cs3.pdt.menu/group0"
+               style="toggle"
+               tooltip="If checked, the file is considered as a &quot;main&quot; file.">
+         </action>
+      </objectContribution>
+      
+       <objectContribution
+            adaptable="false"
+            id="pdt.consult.contribution"
+            nameFilter="*.lgt"
+            objectClass="org.eclipse.core.resources.IFile">
+           <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
+         <action
+               class="org.cs3.pdt.internal.actions.ReloadAction"
+               icon="icons/prolog_file_consulted.png"
+               id="org.cs3.pdt.internal.actions.reload"
+               label="(Re)consult"
+               menubarPath="org.cs3.pdt.menu/group0"
+               style="push">
+         </action>
+         <action
+               class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+               icon="icons/entry_point.gif"
+               id="pdt.actions.toggle_entry_point"
+               label="Mark as Entry Point"
+               menubarPath="org.cs3.pdt.menu/group0"
+               style="toggle"
+               tooltip="If checked, the file is considered as a &quot;main&quot; file.">
+         </action>
+      </objectContribution>
  </extension>
  
 <extension
@@ -336,7 +414,41 @@
             </objectClass>
          </enablement>
       </decorator>
+      <decorator
+            adaptable="true"
+            class="org.cs3.pdt.internal.decorators.PDTConsultDecoratorContributor"
+            icon="icons/prolog_file_consulted.png"
+            id="org.cs3.pdt.consult.decorator"
+            label="PDT Consult Decorator"
+            lightweight="true"
+            location="TOP_RIGHT"
+            state="true">
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IResource">
+            </objectClass>
+         </enablement>
+      </decorator>
+      <decorator
+            adaptable="true"
+            class="org.cs3.pdt.internal.decorators.EntryPointDecoratorContributor"
+            icon="icons/entry_point.png"
+            id="org.cs3.pdt.entry.point.decorator"
+            label="PDT Entry Point Decorator"
+            lightweight="true"
+            location="TOP_LEFT"
+            state="true">
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IFile">
+            </objectClass>
+         </enablement>
+      </decorator>
    </extension>
+   
+    
+   
+   
 <!--	
  <extension
        point="org.eclipse.ui.menus">
@@ -358,4 +470,43 @@
           markerType="org.eclipse.core.resources.problemmarker">
     </markerResolutionGenerator>
  </extension>
+ <extension
+       id="PDTBreakpointMarker"
+       point="org.eclipse.core.resources.markers">
+       <super type="org.eclipse.core.resources.textmarker"/>         
+     <persistent value="false"/>
+ </extension>
+ 
+ 
+  <extension point="org.eclipse.ui.editors.annotationTypes">
+     <type
+        super="org.eclipse.ui.workbench.texteditor.warning"
+        markerType="org.cs3.pdt.PDTBreakpointMarker"
+        name="org.cs3.pdt.PDTBreakpointAnnotation"
+        markerSeverity="0"/>
+  </extension>
+
+  <extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+     <specification
+        annotationType="org.cs3.pdt.PDTBreakpointAnnotation"
+        icon="icons/brkpoint.gif"
+        verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
+        verticalRulerPreferenceValue="true"/>
+  </extension>
+  <extension
+        point="org.cs3.pdt.runtime.bootstrapContribution">
+     <fileContribution
+           id="org.cs3.pdt.fileContribution"
+           path="pl/load.pl">
+     </fileContribution>
+  </extension>
+  <extension
+        point="org.eclipse.ui.perspectives">
+     <perspective
+           class="org.cs3.pdt.PrologPerspective"
+           id="org.cs3.pdt.perspective"
+           name="Prolog">
+     </perspective>
+  </extension>
+ 
 </plugin>

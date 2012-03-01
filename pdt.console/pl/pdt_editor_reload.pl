@@ -32,14 +32,30 @@ pdt_reload(File):-
 
 % SWI-Prolog    
 pdt_reload(File):-
-    % write(File), nl,
     with_mutex('reloadMutex', 
-      ( make:reload_file(File) % SWI Prolog library
-      , retractall(in_reload)
+      (
+        % we have to continiue, even if reload_file fails
+        % normally failing means: the file has errors
+        (make:reload_file(File) -> true ; true),
+        % only return false if the file is not loaded at all
+        ( source_file(File) ->
+          ( retractall(in_reload),
+            notify_reload_listeners(File)
+          )
+          ; fail
+        )        
       )
     ).
-   % generate_factbase_with_metapred_analysis(File).
 
+:- multifile(pdt_reload_listener/1).
+
+notify_reload_listeners(File) :-
+	pdt_reload_listener(File),
+	fail.
+notify_reload_listeners(_).
+
+pdt_reload_listener(File) :-
+    catch(pif_observe:pif_notify(file_loaded,File),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *
@@ -118,7 +134,7 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 		print_message_lines(Stream,'',Lines),
 	    close(Stream),
 		memory_file_to_atom(Handle,Message),
-	    free_memory_file(Handle).      
+	    free_memory_file(Handle).
 
 pdt_reloaded_file(LoadedFile) :-
 	reloaded_file(LoadedFile).
@@ -135,7 +151,7 @@ wait_for_reload_finished :-
         trace_reload(wait),
         sleep(0.1),
         ( timeout_reached(Timeout) ->
-           throw(reload_timeout_reached(Timeout))
+          throw(reload_timeout_reached(Timeout))
         ; fail 
         )
 	  )

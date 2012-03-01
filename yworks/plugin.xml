@@ -6,34 +6,49 @@
          point="org.eclipse.ui.views">
 
       <view
-            name="yWorks Demo View"
+            name="PDT Focus View"
             category="org.cs3.pdt"
-            class="pdt.y.main.yWorksDemoView"
-            id="pdt.yworks.swt.views.yWorksDemoView">
+            class="pdt.y.focusview.FocusViewPlugin"
+            id="pdt.view.focus">
       </view>
    </extension>
-   <!--
    <extension
-         point="org.eclipse.ui.commands">
-      <command
-            defaultHandler="pdt.y.swt.commands.LoadCommandHandler"
-            description="LoadCommand"
-            id="graphml.commands.load"
-            name="Load">
-      </command>
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="pdt.y.preferences.PreferenceInitializer">
+      </initializer>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:pdt.yworks.swt.views.yWorksDemoView">
-         <command
-               commandId="graphml.commands.load"
-               label="Load"
-               style="push"
-               tooltip="Loads a graph from a GraphML file">
-         </command>
-      </menuContribution>
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+            class="pdt.y.preferences.MainPreferencePage"
+            id="pdt.y.focusview.preferences.PreferencePage"
+            name="Focus View">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.FileAppearancePreferences"
+            id="pdt.y.preferences.FileAppearance"
+            name="File Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.PredicateAppearancePreferences"
+            id="pdt.y.preferences.PredicateAppearance"
+            name="Predicate Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.PredicateLayoutPreferences"
+            id="pdt.y.focusview.preferences.LayoutPreferences"
+            name="Predicate Layout">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.EdgeAppearancePreferences"
+            id="pdt.y.preferences.EdgeAppearance"
+            name="Edge Appearance">
+      </page>
    </extension>
-   -->
 </plugin>

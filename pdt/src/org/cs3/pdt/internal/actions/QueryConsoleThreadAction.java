@@ -65,9 +65,14 @@ public class QueryConsoleThreadAction extends Action implements IJobChangeListen
 	private ISchedulingRule schedulingRule;
 	private Job job;
 	
-
-
-
+	public QueryConsoleThreadAction(String query) {
+		super("generic_console_action", null);
+		setToolTipText("generic_console_action");
+		setQuery(query);
+		console = null;
+	}
+	
+	
 	public QueryConsoleThreadAction(PrologConsole console, String query,
 			String text, String tooltip, ImageDescriptor icon) {
 		super(text,icon);
@@ -138,7 +143,7 @@ public class QueryConsoleThreadAction extends Action implements IJobChangeListen
 				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 				c=plugin.getPrologConsoleService().getActivePrologConsole();
 			} catch (PartInitException e) {
-				e.printStackTrace();
+				Debug.report(e);
 			}
 		}
 		return c;

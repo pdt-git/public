@@ -108,8 +108,7 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 					params.put(name, value);
 				}
 
-				@SuppressWarnings("rawtypes")
-				Class clazz;
+				Class<?> clazz;
 				try {
 					clazz = Platform.getBundle(bundle).loadClass(className);
 					PersistableSubscription subscription = (PersistableSubscription) clazz

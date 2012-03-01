@@ -47,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,10 +55,12 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
+import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.ui.PrologContextTracker;
 import org.cs3.pdt.runtime.ui.PrologContextTrackerEvent;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
@@ -80,7 +83,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -88,7 +90,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -112,10 +116,11 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-@SuppressWarnings("deprecation")
-public class PrologConsoleView extends ViewPart implements LifeCycleHook,
-		PrologConsole {
-	
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
+
+	private static final String DEFAULT_CONSOLE = "Default Console";
+	private static final String KILLABLE = "killable";
+
 	private final class ClearAction extends Action {
 		private ClearAction(String text, String tooltip, ImageDescriptor image) {
 			super(text, image);
@@ -127,7 +132,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			getViewer().clearOutput();
 		}
 	}
-	
+
 	private abstract class PasteAction extends Action {
 		public PasteAction(String text, String tooltip, ImageDescriptor icon) {
 			super(text, icon);
@@ -156,8 +161,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 								offsetInLineBuffer=lineBuffer.length();
 								caretOffset=c.getStartOfInput()+lineBuffer.length();
 							}
-							
-							
+
+
 							String textToInsert = getTextToInsert();
 							if (textToInsert == null) {
 								return Status.OK_STATUS;
@@ -194,75 +199,75 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	}
 
-//	// by Hasan Abdel Halim
-//	private final class GuiTracerAction extends Action {
-//		private String[] queries;
-//		private String[] texts;
-//		private String[] tooltips;
-//		private ImageDescriptor[] icons;
-//		private String current_query ;
-//
-//		public GuiTracerAction(String[] query, String[] text, String[] tooltip,
-//				ImageDescriptor[] icon) {
-//
-//			super(null, IAction.AS_CHECK_BOX);
-//			
-//			this.queries = query;
-//			this.texts = text;
-//			this.tooltips = tooltip;
-//			this.icons = icon;
-//			updateInfo();
-//		}
-//
-//		private void updateInfo(){
-//			int index = isChecked()? 1:0;
-//			
-//			setText(texts[index]);
-//			setToolTipText(tooltips[index]);
-//			setImageDescriptor(icons[index]);
-//			current_query = queries[index];
-//			current_query = current_query.trim().endsWith(".") ? current_query : current_query + ".";
-//			
-//		}
-//
-//		@Override
-//		public void run() {
-//			try {		
-//				
-//				Job j = new Job(getToolTipText()) {
-//					
-//					
-//					@Override
-//					protected IStatus run(IProgressMonitor monitor) {
-//						try {
-//							PrologConsole c = getConsole();
-//							ConsoleModel model = c.getModel();
-//							model.setLineBuffer(" ");
-//							model.commitLineBuffer();
-//							model.setLineBuffer(current_query);
-//							model.commitLineBuffer();
-//						} catch (Throwable e) {
-//							Debug.report(e);
-//							return Status.CANCEL_STATUS;
-//						} finally {
-//							updateInfo();
-//							monitor.done();
-//						}
-//						return Status.OK_STATUS;
-//					}
-//
-//					private PrologConsole getConsole() {
-//						return PrologConsoleView.this;
-//					}
-//
-//				};
-//				j.schedule();
-//			} catch (Throwable t) {
-//				Debug.report(t);
-//			}
-//		}
-//	}
-	
+	//	// by Hasan Abdel Halim
+	//	private final class GuiTracerAction extends Action {
+	//		private String[] queries;
+	//		private String[] texts;
+	//		private String[] tooltips;
+	//		private ImageDescriptor[] icons;
+	//		private String current_query ;
+	//
+	//		public GuiTracerAction(String[] query, String[] text, String[] tooltip,
+	//				ImageDescriptor[] icon) {
+	//
+	//			super(null, IAction.AS_CHECK_BOX);
+	//			
+	//			this.queries = query;
+	//			this.texts = text;
+	//			this.tooltips = tooltip;
+	//			this.icons = icon;
+	//			updateInfo();
+	//		}
+	//
+	//		private void updateInfo(){
+	//			int index = isChecked()? 1:0;
+	//			
+	//			setText(texts[index]);
+	//			setToolTipText(tooltips[index]);
+	//			setImageDescriptor(icons[index]);
+	//			current_query = queries[index];
+	//			current_query = current_query.trim().endsWith(".") ? current_query : current_query + ".";
+	//			
+	//		}
+	//
+	//		@Override
+	//		public void run() {
+	//			try {		
+	//				
+	//				Job j = new Job(getToolTipText()) {
+	//					
+	//					
+	//					@Override
+	//					protected IStatus run(IProgressMonitor monitor) {
+	//						try {
+	//							PrologConsole c = getConsole();
+	//							ConsoleModel model = c.getModel();
+	//							model.setLineBuffer(" ");
+	//							model.commitLineBuffer();
+	//							model.setLineBuffer(current_query);
+	//							model.commitLineBuffer();
+	//						} catch (Throwable e) {
+	//							Debug.report(e);
+	//							return Status.CANCEL_STATUS;
+	//						} finally {
+	//							updateInfo();
+	//							monitor.done();
+	//						}
+	//						return Status.OK_STATUS;
+	//					}
+	//
+	//					private PrologConsole getConsole() {
+	//						return PrologConsoleView.this;
+	//					}
+	//
+	//				};
+	//				j.schedule();
+	//			} catch (Throwable t) {
+	//				Debug.report(t);
+	//			}
+	//		}
+	//	}
+
 	private final class RestartAction extends Action {
 		@Override
 		public void run() {
@@ -289,6 +294,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 									}
 									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
 									getPrologInterface().start();
+									
+
+									boolean reconsultFiles = Boolean.parseBoolean(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, "true"));
+									
+									if (reconsultFiles) {
+										getPrologInterface().reconsultFiles();
+									}
+									
 									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 								}
 							}
@@ -316,8 +329,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		@Override
 		public String getToolTipText() {
-			return "Restart process";
-//			return "Restart process and reload currently consulted files";
+			return "Restart process and reconsult loaded files";
 		}
 
 		@Override
@@ -325,9 +337,146 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			return "restart";
 		}
 	}
-	
+
+	private final class KillAction extends Action {
+
+		@Override
+		public void run() {
+			
+			boolean answer = MessageDialog.openQuestion(PrologConsoleView.this.getViewSite().getShell(), "Kill process", "Are you sure you want to kill the process? This will remove all breakpoints and will delete the list of consulted files");
+			
+			if (answer) {
+				try {
+
+					Job j = new UIJob("Stopping the PrologInterface") {
+
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							try {
+								monitor.beginTask("initializing...",
+										IProgressMonitor.UNKNOWN);
+
+								PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+
+
+								PrologInterface oldPif = getPrologInterface();
+								if (oldPif != null) {
+									String currentKey = registry.getKey(oldPif);
+
+									if (!currentKey.equals(DEFAULT_CONSOLE)) {
+										setPrologInterface(registry.getPrologInterface(DEFAULT_CONSOLE));
+									}
+
+									oldPif.clearConsultedFiles();
+									oldPif.stop();
+
+									if (!currentKey.equals(DEFAULT_CONSOLE) && "true".equals(oldPif.getAttribute(KILLABLE))) {
+										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
+										for (Subscription s : subscriptionsForPif) {
+											registry.removeSubscription(s);
+										}
+										registry.removePrologInterface(currentKey);
+									}
+
+								}
+							} catch (Throwable e) {
+								Debug.report(e);
+								return Status.CANCEL_STATUS;
+							} finally {
+								monitor.done();
+							}
+							return Status.OK_STATUS;
+						}
+
+					};
+					j.schedule();
+				} catch (Throwable t) {
+					Debug.report(t);
+				}
+			}
+		}
+
+
+
+		@Override
+		public ImageDescriptor getImageDescriptor() {
+			return ImageRepository.getImageDescriptor(ImageRepository.STOP);
+		}
+
+		@Override
+		public String getToolTipText() {
+			return "Kill process";
+		}
+
+		@Override
+		public String getText() {
+			return "kill";
+		}
+	}
+
+
+	private final class GenLoadFileAction extends Action {
+		@Override
+		public void run() {
+			try {
+
+				Job j = new UIJob("Generating load file") {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						try {
+							monitor.beginTask("initializing...",
+									IProgressMonitor.UNKNOWN);
+
+							if (getPrologInterface() != null) {
+								List<String> consultedFiles = getPrologInterface().getConsultedFiles();
+								
+								// only create load file if there are consulted files
+								if (consultedFiles != null && consultedFiles.size() > 0) {
+									WizardDialog dialog = new WizardDialog(getViewSite().getShell(), new GenerateLoadFileWizard(consultedFiles));
+									dialog.open();
+								} else {
+									MessageDialog.openWarning(PrologConsoleView.this.getViewSite().getShell(), "Generate Load File", "No need for a load file, since no files are consulted.");
+								}
+								
+							}
+
+						} catch (Throwable e) {
+							Debug.report(e);
+							return Status.CANCEL_STATUS;
+						} finally {
+							monitor.done();
+						}
+						return Status.OK_STATUS;
+					}
+
+				};
+				j.schedule();
+			} catch (Throwable t) {
+				Debug.report(t);
+			}
+
+		}
+
+
+		@Override
+		public ImageDescriptor getImageDescriptor() {
+			return ImageRepository.getImageDescriptor(ImageRepository.GEN_LOAD_FILE);
+		}
+
+		@Override
+		public String getToolTipText() {
+			return "Generate load file from consulted files";
+		}
+
+		@Override
+		public String getText() {
+			return "generateLoadFile";
+		}
+	}
+
 	private final class CreateNamedProcessAction extends Action{
-		
+
 		@Override
 		public void run(){
 			Job j = new UIJob("Creating new Prolog Process")
@@ -335,14 +484,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				@Override
 				public IStatus runInUIThread(IProgressMonitor arg0) {
 					PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-					
+
 					InputDialog dialog = createNewProcessNameDialog(registry);	
 					int result = dialog.open();
 					if (result == InputDialog.CANCEL)
 						return Status.CANCEL_STATUS;
 					String pifKey = dialog.getValue();
-					
-					activateNewPrologProcess(registry, pifKey);
+
+					PrologInterface pif = activateNewPrologProcess(registry, pifKey);
+					pif.setAttribute(KILLABLE, "true");
 					return Status.OK_STATUS;
 				}
 
@@ -357,9 +507,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 						@Override
 						public String isValid(String arg0) {
 							if ("".equals(arg0))
-								return "PIF Key must not be empty";
+								return "Process name must not be empty";
 							else if (pifKeys.contains(arg0))
-								return "PIF Key already used";
+								return "Process name already used";
 							else
 								return null;
 						}
@@ -371,29 +521,29 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			};
 			j.schedule();
 		}
-		
+
 		private String getNameOfProjectOfActiveEditorInput(){
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			if (window != null) {
-			    IWorkbenchPage page = window.getActivePage();
-			    if (page != null) {
-			    	IEditorPart editor = page.getActiveEditor();
-			    	if (editor == null)
-			    		return null;
-			    	
-			    	IEditorInput editorInput = editor.getEditorInput();
-			    	if (editorInput == null)
-			    		return null;
-			    	
-		    		IFile file = (IFile) editorInput.getAdapter(IFile.class);
-		    		if (file != null) {
-		    			return file.getProject().getName();
-		    		}
-			    }
+				IWorkbenchPage page = window.getActivePage();
+				if (page != null) {
+					IEditorPart editor = page.getActiveEditor();
+					if (editor == null)
+						return null;
+
+					IEditorInput editorInput = editor.getEditorInput();
+					if (editorInput == null)
+						return null;
+
+					IFile file = (IFile) editorInput.getAdapter(IFile.class);
+					if (file != null) {
+						return file.getProject().getName();
+					}
+				}
 			}
 			return null;
 		}
-		
+
 		@Override
 		public ImageDescriptor getImageDescriptor() {
 			return ImageRepository.getImageDescriptor(ImageRepository.NEW_PROCESS);
@@ -409,21 +559,21 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			return "create process";
 		}
 	}
-	
+
 	private class ConsoleQueryAction extends Action {
-		
+
 		private String query;
-		
+
 		public ConsoleQueryAction(String text, ImageDescriptor icon, String query){
 			super(text, icon);
 			this.query = query.endsWith(".") ? query : query + ".";
 			setToolTipText(text);
 		}
-		
+
 		protected String getQuery(){
 			return query;
 		}
-		
+
 		@Override
 		public void run(){
 			Job j = new Job(getToolTipText()) {
@@ -453,21 +603,21 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			j.schedule();
 		}
 	}
-	
+
 	private class PifQueryAction extends Action {
 
 		private String query;
-		
+
 		public PifQueryAction(String text, ImageDescriptor icon, String query){
 			super(text, icon);
 			this.query = query.endsWith(".") ? query : query + ".";
 			setToolTipText(text);
 		}
-		
+
 		protected String getQuery(){
 			return query;
 		}
-		
+
 		@Override
 		public void run(){
 			try {
@@ -477,7 +627,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			}
 		}
 	}
-	
+
 	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 	private ConsoleViewer viewer;
 	private Composite partControl;
@@ -488,9 +638,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private Action pasteAction;
 	private Action selectAllAction;
 	private ClearAction clearAction;
-//	private GuiTracerAction guiTracerAction;
+	//	private GuiTracerAction guiTracerAction;
 	private PasteAction pasteFileNameAction;
 	private RestartAction restartAction;
+	private KillAction killAction;
+	private GenLoadFileAction genLoadFileAction;
 	private CreateNamedProcessAction createProcessAction;
 	private HashMap<PrologInterface, PrologSocketConsoleModel> models = new HashMap<PrologInterface, PrologSocketConsoleModel>();
 	private Label title;
@@ -501,7 +653,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private ConsoleQueryAction deactivateGuiTracerAction;
 	private ConsoleQueryAction threadMonitorAction;
 	private ConsoleQueryAction debugMonitorAction;
-	
+
 	private PifQueryAction abortAction;
 	private PifQueryAction traceAction;
 
@@ -511,7 +663,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		try {
 			createPartControl_impl(parent);
 			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-			activateNewPrologProcess(registry, "defaultConsole");
+			if (registry.getAllKeys().size() == 0) {
+				activateNewPrologProcess(registry, DEFAULT_CONSOLE);
+			}
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t.getLocalizedMessage(), t);
@@ -543,7 +697,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		parent.getParent().addListener(SWT.Hide, handler);
 		parent.getParent().addListener(SWT.FocusOut, handler);
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
-				.registerPrologConsole(this);
+		.registerPrologConsole(this);
 		GridLayout layout = new GridLayout(1, true);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -569,7 +723,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		return ((DefaultPrologConsoleService) PrologConsolePlugin.getDefault().getPrologConsoleService());
 	}
 
-	
+
 	private void loadHistory(NewConsoleHistory history) {
 
 		try {
@@ -582,6 +736,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	}
 
+	@SuppressWarnings("deprecation")
 	private void createActions() {
 		cutAction = new Action() {
 			@Override
@@ -609,7 +764,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			}
 		};
 		new Action(){
-			
+
 			@Override
 			public void run() {
 				PrologInterface pif = getPrologInterface();
@@ -622,43 +777,47 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				((AbstractPrologInterface)pif).debug_wakeupPoledSessions();
 			}
 		};
-		clearAction = new ClearAction("Clear", "clear console output",
+		clearAction = new ClearAction("Clear", "Clear console output",
 				ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
-//		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
-//				new String[] {"activate guitracer", "deactivate guitracer"},  
-//				new String[] {"activate GUI tracer", "deactivate GUI tracer"}, 
-//				new ImageDescriptor[] {
-//				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
-//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
-		activateGuiTracerAction = new ConsoleQueryAction("activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
-		deactivateGuiTracerAction = new ConsoleQueryAction("deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
+		//		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
+		//				new String[] {"activate guitracer", "deactivate guitracer"},  
+		//				new String[] {"activate GUI tracer", "deactivate GUI tracer"}, 
+		//				new ImageDescriptor[] {
+		//				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
+		//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
+		activateGuiTracerAction = new ConsoleQueryAction("Activate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.GUITRACER), "guitracer");
+		deactivateGuiTracerAction = new ConsoleQueryAction("Deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
-        abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, abort),_,fail)") {
-            @Override
-            public void run(){
-            	super.run();
-            	if (!getModel().isConnected()) {
-            		new Thread(new Runnable(){
-            			@Override
-            			public void run() {
-            				try {
-            					Thread.sleep(500);
-            				} catch (InterruptedException e) {
-            				}
-            				try {
-            					connect(currentPif);
-            				} catch (PrologInterfaceException e) {
-            				}
-            			}
-            		}).start();
-            	}
-            }
-        }; 		
-		traceAction = new PifQueryAction("Interrupt running query and start tracing", ImageRepository.getImageDescriptor(ImageRepository.TRACE), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
-		pasteFileNameAction = new PasteAction("paste filename",
-				"paste the name of the current editor file", ImageRepository
-						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
+		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, abort),_,fail)") {
+			@Override
+			public void run(){
+				super.run();
+				if (!getModel().isConnected()) {
+					new Thread(new Runnable(){
+						@Override
+						public void run() {
+							try {
+								Thread.sleep(500);
+							} catch (InterruptedException e) {
+							}
+							try {
+								connect(currentPif);
+							} catch (PrologInterfaceException e) {
+							}
+						}
+					}).start();
+				}
+			}
+		}; 		
+		traceAction = new PifQueryAction(
+				"Interrupt running query and start tracing",
+				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
+				"pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
+		
+		pasteFileNameAction = new PasteAction("Paste filename",
+				"Paste the name of the current editor file", ImageRepository
+				.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
 
 			@Override
 			protected String getTextToInsert() {
@@ -670,33 +829,47 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			}
 
 		};
-		pasteFileNameAction
-				.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
-		
+		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+
 		//Object service = IServiceLocator.getService(Class);
-		
+
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
-		keyBindingService
-				.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
+		keyBindingService.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
 		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
+		killAction = new KillAction();
+		genLoadFileAction = new GenLoadFileAction();
 		createProcessAction = new CreateNamedProcessAction();
 	}
 
 	private void initMenus(Control parent) {
 
 		MenuManager manager = new MenuManager();
-		IWorkbenchWindow window = getSite().getWorkbenchWindow();
-		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
-		sall.setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.SELECT_ALL));
-		manager.add(sall);
+		manager.setRemoveAllWhenShown(true);
+		manager.addMenuListener(new IMenuListener() {
 
-		manager.add(ActionFactory.CUT.create(window));
-		manager.add(ActionFactory.COPY.create(window));
-		manager.add(ActionFactory.PASTE.create(window));
-		manager.add(pasteFileNameAction);
-		manager.add(clearAction);
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				manager.add(new Separator("#Clipboard"));
+
+				IWorkbenchWindow window = getSite().getWorkbenchWindow();
+				IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
+				sall.setImageDescriptor(ImageRepository
+						.getImageDescriptor(ImageRepository.SELECT_ALL));
+				manager.add(sall);
+				
+				manager.add(ActionFactory.CUT.create(window));
+				manager.add(ActionFactory.COPY.create(window));
+				manager.add(ActionFactory.PASTE.create(window));
+				manager.add(pasteFileNameAction);
+				manager.add(clearAction);
+				manager.add(new Separator("#Clipboard-end"));
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end"));
+			}
+
+		});
+		getSite().registerContextMenu(manager, viewer);
 		contextMenu = manager.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(contextMenu);
 	}
@@ -712,130 +885,135 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
-		toolBarManager.add(createProcessAction);
-		
-		createAutomatedSelector(toolBarManager);
 		addToolbarContributions(toolBarManager);
 		addMenuContributions(bars.getMenuManager());
-	
-//		pifSelector.init(getViewSite().getWorkbenchWindow());
+
+		//		pifSelector.init(getViewSite().getWorkbenchWindow());
 		automatedSelector.init(getViewSite().getWorkbenchWindow());
 
 	}
 
 	private void createAutomatedSelector(IToolBarManager toolBarManager) {
-		
+
 		automatedSelector = new SelectContextPIFAutomatedAction(){
 
-			
+
 			@Override
 			protected PrologInterface getPrologInterface() {
 				return PrologConsoleView.this.getPrologInterface();
 			}
 
-			
+
 			@Override
 			protected void setPrologInterface(PrologInterface prologInterface) {
 				PrologConsoleView.this.setPrologInterface(prologInterface);
-				
+
 			}
 
-			
+
 			@Override
 			protected void trackerActivated(PrologContextTracker tracker) {
 				setPrologInterface(automatedSelector.getCurrentPrologInterface());
-				
+
 			}
 
-			
+
 			@Override
 			protected void trackerDeactivated(PrologContextTracker tracker) {
 				setPrologInterface(automatedSelector.getCurrentPrologInterface());
-				
+
 			}
 
 
 			@Override
 			public void contextChanged(PrologContextTrackerEvent e) {
 				PrologContextTracker tracker = (PrologContextTracker) e
-				.getSource();
+						.getSource();
 				Debug.info("context changed for tracker " + tracker.getLabel());
-			setPrologInterface(e.getPrologInterface());
-				
+				setPrologInterface(e.getPrologInterface());
+
 			}
-			
+
 		};
 		toolBarManager.add(automatedSelector);
-		
-//		pifSelector = new SelectPifAction() {
-//
-//			protected void setPrologInterface(PrologInterface prologInterface) {
-//				PrologConsoleView.this.setPrologInterface(prologInterface);
-//
-//			}
-//
-//			protected PrologInterface getPrologInterface() {
-//				return PrologConsoleView.this.getPrologInterface();
-//			}
-//
-//		};
-//		toolBarManager.add(pifSelector);
 
-//		contextSelector = new SelectContextsAction() {
-//
-//			public void contextChanged(PrologContextTrackerEvent e) {
-//				PrologContextTracker tracker = (PrologContextTracker) e
-//						.getSource();
-//				Debug.info("context changed for tracker " + tracker.getLabel());
-//				setPrologInterface(e.getPrologInterface());
-//
-//			}
-//
-//			protected void trackerActivated(PrologContextTracker tracker) {
-//				setPrologInterface(contextSelector.getCurrentPrologInterface());
-//
-//			}
-//
-//			protected void trackerDeactivated(PrologContextTracker tracker) {
-//				setPrologInterface(contextSelector.getCurrentPrologInterface());
-//
-//			}
-//		};
+		//		pifSelector = new SelectPifAction() {
+		//
+		//			protected void setPrologInterface(PrologInterface prologInterface) {
+		//				PrologConsoleView.this.setPrologInterface(prologInterface);
+		//
+		//			}
+		//
+		//			protected PrologInterface getPrologInterface() {
+		//				return PrologConsoleView.this.getPrologInterface();
+		//			}
+		//
+		//		};
+		//		toolBarManager.add(pifSelector);
 
-//		toolBarManager.add(contextSelector);
-//		setPrologInterface(contextSelector.getCurrentPrologInterface());
+		//		contextSelector = new SelectContextsAction() {
+		//
+		//			public void contextChanged(PrologContextTrackerEvent e) {
+		//				PrologContextTracker tracker = (PrologContextTracker) e
+		//						.getSource();
+		//				Debug.info("context changed for tracker " + tracker.getLabel());
+		//				setPrologInterface(e.getPrologInterface());
+		//
+		//			}
+		//
+		//			protected void trackerActivated(PrologContextTracker tracker) {
+		//				setPrologInterface(contextSelector.getCurrentPrologInterface());
+		//
+		//			}
+		//
+		//			protected void trackerDeactivated(PrologContextTracker tracker) {
+		//				setPrologInterface(contextSelector.getCurrentPrologInterface());
+		//
+		//			}
+		//		};
+
+		//		toolBarManager.add(contextSelector);
+		//		setPrologInterface(contextSelector.getCurrentPrologInterface());
 		setPrologInterface(automatedSelector.getCurrentPrologInterface());
-	
+
 	}
-	
-	public void activateNewPrologProcess(
-			PrologInterfaceRegistry registry, String pifKey) {
-		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
+
+	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey) {
+		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " (Prolog)");
 		registry.addSubscription(subscription);
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
 
-        if (automatedSelector.getActiveTrackers().isEmpty()){
-            PrologConsoleView.this.setPrologInterface(pif);
-            PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
-        }
+		if (automatedSelector.getActiveTrackers().isEmpty()){
+			PrologConsoleView.this.setPrologInterface(pif);
+			PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+		}
+		return pif;
 	}
 
 	private void addToolbarContributions(IToolBarManager manager) {
-		manager.add(new Separator());
-		manager.add(abortAction);
-		manager.add(traceAction);
+		manager.add(new Separator("#Console"));
+		createAutomatedSelector(manager);
+		manager.add(createProcessAction);
 		manager.add(restartAction);
-		manager.add(new Separator());
+		manager.add(killAction);
 		manager.add(clearAction);
+		manager.add(new Separator("#Console-end"));
+		manager.add(new Separator("#Query"));
+		manager.add(traceAction);
+		manager.add(abortAction);
+		manager.add(new Separator("#Query-end"));
+		manager.add(new Separator("#Toolbar-Other"));
+		manager.add(genLoadFileAction);
+		manager.add(new Separator("#Toolbar-End"));
 	}
-	
+
 	private void addMenuContributions(IMenuManager manager) {
 		manager.add(activateGuiTracerAction);
 		manager.add(deactivateGuiTracerAction);
 		manager.add(threadMonitorAction);
 		manager.add(debugMonitorAction);
 	}
-	
+
 
 	private File getHistoryFile() {
 		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
@@ -852,7 +1030,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	public void setFocus() {
 		if (viewer == null) {
 			Debug
-					.warning("PrologConsoleView.setFocus(): View not instantiated yet.");
+			.warning("PrologConsoleView.setFocus(): View not instantiated yet.");
 			return;
 		}
 		viewer.getControl().setFocus();
@@ -863,7 +1041,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	@Override
 	public void dispose() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
-				.unregisterPrologConsole(this);
+		.unregisterPrologConsole(this);
 		for (Iterator<PrologInterface> it = models.keySet().iterator(); it.hasNext();) {
 			PrologInterface pif = it.next();
 			try {
@@ -892,10 +1070,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
 			String queryString = 
-				      "use_module(lib_pdt_console_pl(pdt_console_server)), "
-					+ "pdt_console_server:pdt_start_console_server(Port)";
+					"use_module(lib_pdt_console_pl(pdt_console_server)), "
+							+ "pdt_console_server:pdt_start_console_server(Port)";
 			Debug.info("starting console server using: " + queryString);
-			
+
 			Map<String,?> result = session.queryOnce(queryString);
 			if (result == null) {
 				Debug.info("starting server failed, which may mean that it is actualy running already.");
@@ -904,7 +1082,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 					throw new RuntimeException("No Server running.");
 				}
 			}
-			
+
 			int port = Integer.parseInt((String) result.get("Port"));
 			Debug.debug("A server thread seems to be listinging at port "+port);
 		} catch (Throwable e) {
@@ -945,7 +1123,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
 		saveHistory(history);
 		disconnect(pif);
-		
+
 
 	}
 
@@ -999,6 +1177,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			automatedSelector.update();
 		}
 	}
+	
+	@Override
+	public void ensureConnectionForCurrentPrologInterface() {
+		try {
+			connect(currentPif);
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+		}
+	}
 
 
 	/*
@@ -1024,7 +1211,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 		return model;
 	}
-	
+
 	private void ensureConnection(final PrologInterface pif,
 			PrologSocketConsoleModel model) throws PrologInterfaceException {
 		if (model.isConnected()) {
@@ -1035,8 +1222,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager(), session,
 				new String[] { PDTConsole.PL_LIBRARY });
-		
-		
+
+
 		Map<String,?> result = null;
 		try {
 			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
@@ -1057,7 +1244,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				session.dispose();
 			}
 		}
-		
+
 		int port = Integer.parseInt(result.get("Port").toString());
 		model.setPort(port);
 		model.connect();
@@ -1065,7 +1252,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private void disconnect(PrologInterface pif) {
 		PrologSocketConsoleModel model = models
-		.get(pif);
+				.get(pif);
 		if (model == null) {
 			return;
 		}
@@ -1125,7 +1312,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		boolean useEnter = Boolean.valueOf(
 				PrologConsolePlugin.getDefault().getPreferenceValue(
 						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
-				.booleanValue();
+						.booleanValue();
 
 		viewer.setEnterSendsSemicolon(useEnter);
 
