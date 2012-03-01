@@ -42,6 +42,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, true);
 		store.setDefault(PDT.PREF_OUTLINE_FILTERS,"hide_subterms" );
 		store.setDefault(PDT.PREF_OUTLINE_SORT, false);
+		store.setDefault(PDT.PREF_AUTO_COMPLETE_ARGLIST, true);
 		
 		initializeDefaultPreferences_FontAndColor(store);		
 	}
