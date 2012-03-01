@@ -59,6 +59,8 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 		//reports of problems when using Edinburgh-style io predicates.\n
 		//If you get unexpected io behaviour from 
 		//your application, disabling this flag may help.
+		addField(new BooleanFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART,"reconsult files on restart of process",getFieldEditorParent()));
+		
 		addField(new BooleanFieldEditor(PDTConsole.PREF_INTERCEPT_GET_SINGLE_CHAR,"intercept get_single_char/1 calls",getFieldEditorParent()));
 
 		//The Prolog Console uses this to save its command history.\n

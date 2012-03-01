@@ -294,6 +294,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									}
 									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
 									getPrologInterface().start();
+									
+
+									boolean reconsultFiles = Boolean.parseBoolean(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, "true"));
+									
+									if (reconsultFiles) {
+										getPrologInterface().reconsultFiles();
+									}
+									
 									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 								}
 							}

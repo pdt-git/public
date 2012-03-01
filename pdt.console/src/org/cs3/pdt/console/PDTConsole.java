@@ -81,6 +81,8 @@ final public class PDTConsole {
 	public static final String PREF_CONSOLE_HISTORY_FILE = "pdt.console.history.file";
 
 	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";
+
+	public static final String PREF_RECONSULT_ON_RESTART = "pdt.reconsult.on.restart";
 	
 	
 	
