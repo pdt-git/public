@@ -95,4 +95,6 @@ public final class PDT {
 	public static final int CX_FIND_PREDICATE = -10;
 	public static final int ERR_OUTLINE_BAD_LOCATION = -12;
 
+	public static final String PREF_AUTO_COMPLETE_ARGLIST = "pdt.autocompletion.arglist";
+
 }

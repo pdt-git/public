@@ -2,6 +2,8 @@ package org.cs3.pdt.internal.contentassistant;
 
 import java.util.Map;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CTerm;
@@ -133,23 +135,30 @@ public boolean isAtom() {
 	@Override
 	public void apply(IDocument document) {
 		try {
-			if(insertion != null) {
-				document.replace(offset, length, insertion);
-			} else if (arity > 0) {
-				StringBuffer buf = new StringBuffer(name);
-				buf.append("(");
-				for (int i=0; i<arity; i++) {
-					if (i==0) {
-						buf.append("_");
-					} else {
-						buf.append(",_");
+			boolean createArglist = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_COMPLETE_ARGLIST, "true"));
+			
+			if (createArglist) {
+				if(insertion != null) {
+					document.replace(offset, length, insertion);
+				} else if (arity > 0) {
+					StringBuffer buf = new StringBuffer(name);
+					buf.append("(");
+					for (int i=0; i<arity; i++) {
+						if (i==0) {
+							buf.append("_");
+						} else {
+							buf.append(",_");
+						}
 					}
+					buf.append(")");
+					document.replace(offset,length,buf.toString());
+				} else {
+					document.replace(offset, length, name);
 				}
-				buf.append(")");
-				document.replace(offset,length,buf.toString());
 			} else {
 				document.replace(offset, length, name);
 			}
+			
 		} catch (BadLocationException e) {
 			Debug.report(e);
 		}
