@@ -39,7 +39,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDTConsole.PREF_TIMEOUT, 15000);
 		store.setDefault(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, false);
 		store.setDefault(PDTConsole.PREF_ENTER_FOR_BACKTRACKING, false);
-		store.setDefault(PDTConsole.PREF_INTERCEPT_GET_SINGLE_CHAR, true);
 		store.setDefault(PDTConsole.PREF_RECONSULT_ON_RESTART, true);
 		
 		String historyFile = System.getProperty("user.home") + File.separator + ".prolog_console_history";		
