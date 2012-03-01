@@ -15,6 +15,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.swt.widgets.Shell;
 
 public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
+	private static final String SPAN_HIDDEN = "<span style={display:none}>";
 	private int offset;
 	private int length;
 	private int arity;
@@ -93,6 +94,8 @@ public boolean isAtom() {
 //						label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
 						insertion = name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
 					}
+				} else if (value.indexOf(SPAN_HIDDEN) > 0 && value.indexOf("</span>") > 0) {
+					insertion = value.substring(value.indexOf(SPAN_HIDDEN) + SPAN_HIDDEN.length(), value.indexOf("</span>"));
 				}
 //				}else {
 //					label=value.indexOf('\n')>0 ?
