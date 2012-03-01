@@ -54,6 +54,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -82,8 +83,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
-/**
- */
+@Deprecated
 public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 		IWorkbenchWindowActionDelegate {
 
@@ -150,6 +150,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				.warning("Consult action triggered, but active editor input is no file.");
 				return;
 			}
+			PDTBreakpointHandler.getInstance().backupMarkers(null, null);
 			run();
 		} catch (IOException e) {
 			Debug.report(e);
@@ -167,9 +168,9 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			//					window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
 		} catch (NullPointerException e) {
 			// probably no WorkbenchWindow active
-			e.printStackTrace();
+			Debug.report(e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Debug.report(e);
 		}
 
 	}
@@ -251,6 +252,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	public void done(IJobChangeEvent event) {
 		PDTPlugin plugin = PDTPlugin.getDefault();
 		plugin.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				IEditorPart editor = UIUtils.getActiveEditor();
 

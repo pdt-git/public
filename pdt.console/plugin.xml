@@ -44,7 +44,7 @@
           category="org.cs3.pdt.console.preferences.PreferencePageMain"
           class="org.cs3.pdt.console.preferences.PreferencePageFontColor"
           id="org.cs3.pdt.console.preferences.PreferencePageFontAndColor"
-          name="Console Font and Color">
+          name="Appearance">
     </page>
     <page
     	  category="org.cs3.pdt.internal.preferences.PDTPreferencePage"

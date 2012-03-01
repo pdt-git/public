@@ -110,7 +110,7 @@ public final class PDTUtils {
 		PrologInterface pif = getActiveConsolePif();
 		if (pif == null) {
 			if (showDialog) {
-				UIUtils.displayErrorDialog(Display.getCurrent().getActiveShell(), "No Prolog Process selected", "You have to select an active Prolog process do handle breakpoints. It should be sufficient to set the focus to the prolog console.");
+				UIUtils.displayErrorDialog(Display.getCurrent().getActiveShell(), "No Prolog Process selected", "You have to select an active Prolog process.");
 			}
 			return false;
 		}
@@ -225,7 +225,7 @@ public final class PDTUtils {
 					editor.gotoOffset(offset, 0);
 					return;
 				} catch (BadLocationException e) {
-					e.printStackTrace();
+					Debug.report(e);
 					return;
 				}
 			} else {

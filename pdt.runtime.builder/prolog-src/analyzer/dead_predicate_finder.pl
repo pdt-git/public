@@ -7,13 +7,15 @@
 :- use_module('edge_counter').
 
 
+locally_dead_predicate(Dead) :-
+    locally_dead_predicate(Dead, [Dead]).
 
-locally_dead_predicate(Dead):-
+locally_dead_predicate(Dead, _Visited):-
     uncalled_local_predicate(Dead).
-locally_dead_predicate(Dead):-
+locally_dead_predicate(Dead, Visited):-
     forall(	
-    	(call_edges_for_predicates(Caller,Dead,_), Caller \== Dead),
-    	locally_dead_predicate(Caller)
+    	(call_edges_for_predicates(Caller,Dead,_), Caller \== Dead, not(member(Caller, Visited))),
+    	locally_dead_predicate(Caller, [Caller | Visited])
     ),
     \+(exporting(_,Dead,_)).
     		

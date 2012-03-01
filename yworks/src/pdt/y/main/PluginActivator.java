@@ -1,70 +1,60 @@
 package pdt.y.main;
 
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.prolog.PrologInterface;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import pdt.y.model.labels.NodeLabelConfigurationsInitializer;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class PluginActivator extends AbstractUIPlugin {
-	private static String NAME = "GraphML";
 	
-	private PrologInterface prologInterface=null;
-	
-	public PrologInterface getPrologInterface() {
-		if(prologInterface == null) {
-			YWorksSubscription subscription = YWorksSubscription.newInstance(NAME);
-			 prologInterface = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
-		} 
-		return prologInterface;
-	}
-
-	public void setPrologInterface(PrologInterface prologInterface) {
-		this.prologInterface = prologInterface;
-	}
-
 	// The plug-in ID
-	public static final String PLUGIN_ID = "pdt.yworks.demo";
+	public static final String PLUGIN_ID = "pdt.yworks";
+	
+	private List<PreferencesUpdateListener> listeners = new LinkedList<PreferencesUpdateListener>();
 
 	// The shared instance
 	private static PluginActivator plugin;
 	
-	/**
-	 * The constructor
-	 */
 	public PluginActivator() {
+		NodeLabelConfigurationsInitializer.initialize();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
+	
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
 	}
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
 	public static PluginActivator getDefault() {
 		return plugin;
+	}
+	
+	public void addPreferencesUpdateListener(PreferencesUpdateListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removePreferencesUpdateListener(PreferencesUpdateListener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void preferencesUpdated() {
+		for (PreferencesUpdateListener l : listeners) {
+			l.preferencesUpdated();
+		}
 	}
 
 	/**

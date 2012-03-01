@@ -50,16 +50,17 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ConsultActionDelegate;
+import org.cs3.pdt.internal.actions.ConsultAction;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
+import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -67,11 +68,8 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
-import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -83,6 +81,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -111,8 +110,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -125,7 +125,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-public class PLEditor extends TextEditor{
+public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
 
@@ -164,7 +164,12 @@ public class PLEditor extends TextEditor{
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
-		addProblemMarkers();
+		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+		breakpointHandler.backupMarkers(getCurrentIFile(), document);
+		new ConsultAction().consultFromActiveEditor();
+//		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
+//		addProblemMarkers(); // here happens the save & reconsult
+//		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
 		setFocus();
 
 	}
@@ -222,23 +227,22 @@ public class PLEditor extends TextEditor{
 		j.schedule();
 	}
 
-	private void addProblemMarkers() {
-		try {
-			// current file in editor is either an external file or the pdt nature is not assigned:
-			IEditorInput editorInput = getEditorInput();
-			if (editorInput instanceof IFileEditorInput) {
-				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
-			} else if (editorInput instanceof FileStoreEditorInput) {
-				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
-					new ConsultActionDelegate().run(null);
-				}
-			}
-
-			
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
-	}
+//	private void addProblemMarkers() {
+//		try {
+//			// current file in editor is either an external file or the pdt nature is not assigned:
+//			IEditorInput editorInput = getEditorInput();
+//			if (editorInput instanceof IFileEditorInput) {
+//				PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
+//			} else if (editorInput instanceof FileStoreEditorInput) {
+//				if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
+//					new ConsultActionDelegate().run(null);
+//				}
+//			}
+//
+//		} catch (CoreException e) {
+//			Debug.report(e);
+//		}
+//	}
 
 	protected abstract class AbstractSelectionChangedListener implements
 			ISelectionChangedListener {
@@ -289,6 +293,8 @@ public class PLEditor extends TextEditor{
 			
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);
+			
+			breakpointHandler = PDTBreakpointHandler.getInstance();
 			
 		} catch (Throwable t) {
 			Debug.report(t);
@@ -367,6 +373,26 @@ public class PLEditor extends TextEditor{
 			}
 		});
 		checkBackgroundAndTitleImage(getEditorInput());
+		
+		getVerticalRuler().getControl().addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseUp(MouseEvent e) {}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if (PDTUtils.checkForActivePif(true)) {
+					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
+					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
+				};
+			}
+		});
+
 	}
 
 
@@ -458,7 +484,8 @@ public class PLEditor extends TextEditor{
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				addProblemMarkers();
+				new ConsultAction().consultFromActiveEditor();
+//				addProblemMarkers();
 				informViewsAboutChangedEditor();
 //				executeConsult();
 			}
@@ -488,7 +515,7 @@ public class PLEditor extends TextEditor{
 //				setFocus();
 			}
 		};
-		addAction(menuMgr, action, "Save and (Re)consult",
+		addAction(menuMgr, action, "Save",
 				SEP_PDT_EDIT, COMMAND_SAVE_AND_CONSULT);
 	}
 
@@ -562,7 +589,41 @@ public class PLEditor extends TextEditor{
 	public ContentOutlinePage getOutlinePage() {
 		return fOutlinePage;
 	}
-
+	
+	protected int getCurrentLineOffset(int line) {
+		Document document = (Document) getDocumentProvider().getDocument(
+				getEditorInput());
+		int offset = 0;
+		try {
+			offset = document.getLineInformation(line - 1).getOffset();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		return offset;
+	}
+	
+	protected int getCurrentLineOffsetSkippingWhiteSpaces(int line) {
+		int offset = 0;
+		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+		try {
+			IRegion lineInformation = document.getLineInformation(line - 1);
+			String lineContent = document.get(lineInformation.getOffset(), lineInformation.getLength());
+			int additionalOffset = 0;
+			while (additionalOffset < lineContent.length()) {
+				char character = lineContent.charAt(additionalOffset);
+				if (character == '\t' || character == ' ') {
+					additionalOffset++;
+				} else {
+					break;
+				}
+			}
+			return lineInformation.getOffset() + additionalOffset;
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		}
+		return offset;
+	}
+	
 	/**
 	 * @param i
 	 */
@@ -640,6 +701,48 @@ public class PLEditor extends TextEditor{
 
 		return GoalProvider.getPrologDataFromOffset(getPrologFileName(), document, offset, length);
 	}
+	
+	@Override
+	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
+		super.rulerContextMenuAboutToShow(menu);
+		Action toggleBreakpointAction = new Action("Toggle breakpoint") {
+			@Override
+			public void run() {
+				if (PDTUtils.checkForActivePif(true)) {
+					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+					int currentOffset = PDTCoreUtils.convertPhysicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+
+					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
+				}
+			}
+		};
+		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
+			@Override
+			public void run() {
+				if (PDTUtils.checkForActivePif(true)) {
+					breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
+				}
+			}
+		};
+
+		menu.add(toggleBreakpointAction);
+		menu.add(removeBreakpointsAction);
+
+		if (getCurrentIFile() == null) {
+			toggleBreakpointAction.setEnabled(false);
+			removeBreakpointsAction.setEnabled(false);
+		}
+	}
+
+	private IFile getCurrentIFile() {
+		if (getEditorInput() instanceof IFileEditorInput) {
+			IFileEditorInput input = (IFileEditorInput) getEditorInput();
+			return input.getFile();
+		}
+		return null;
+	}
+		
 
 	public String getPrologFileName() {
 		return Util.prologFileName(filepath.toFile());
@@ -728,7 +831,7 @@ public class PLEditor extends TextEditor{
 		if (textWidget == null) return;
 		if (input instanceof IFileEditorInput) {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
-			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE));
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_UNCONSULTED));
 		} else {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
 			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));
@@ -852,6 +955,7 @@ public class PLEditor extends TextEditor{
 		/*
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public IStatus run(IProgressMonitor progressMonitor) {
 //			System.out.println(Thread.currentThread().getName()+ " wait");
 			try {
@@ -859,7 +963,7 @@ public class PLEditor extends TextEditor{
 					cancelMonitor.wait(OCCURRENCE_UPDATE_DELAY);
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Debug.report(e);
 			}
 			if (isCanceled(progressMonitor)) {
 //				System.out.println(Thread.currentThread().getName()+ " cancelled");
@@ -1152,6 +1256,8 @@ public class PLEditor extends TextEditor{
 	public static final int VAR_KIND_ANONYMOUS = 0;
 	public static final int VAR_KIND_SINGLETON = 1;
 	public static final int VAR_KIND_NORMAL=2;
+
+	private PDTBreakpointHandler breakpointHandler;
 	
 	/**
 	 * @param a valid Prolog variable
@@ -1209,6 +1315,7 @@ public class PLEditor extends TextEditor{
 			return fDescription;
 		}
 
+		@Override
 		public String toString() {
 			return "[" + fOffset + " / " + fLength + "] " + fDescription; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -1249,5 +1356,8 @@ public class PLEditor extends TextEditor{
 		
 		return new TextSelection(document,begin,length);
 	}
+
+
+
 	
 }

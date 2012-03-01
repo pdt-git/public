@@ -7,7 +7,6 @@ import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;

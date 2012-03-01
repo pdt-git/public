@@ -12,7 +12,6 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.List;
 
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -423,7 +422,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// First search at same level
 		for (int i= 0; i < items.length; i++) {
 			final TreeItem item= items[i];
-			OutlinePredicate element= (OutlinePredicate)item.getData();
+			Object element= item.getData();
 			if (element != null) {
 				String label= labelProvider.getText(element);
 				if (getfStringMatcher().match(label))

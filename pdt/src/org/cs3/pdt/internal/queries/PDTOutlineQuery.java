@@ -20,7 +20,7 @@ public class PDTOutlineQuery {
 		PrologSession session=null;
 		try {
 			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-			if(console==null){
+			if(console==null || console.getPrologInterface() == null){
 				//				MessageBox messageBox = new MessageBox(
 				//						shell, SWT.ICON_WARNING| SWT.OK);
 				//

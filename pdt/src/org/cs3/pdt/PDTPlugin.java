@@ -43,14 +43,23 @@ package org.cs3.pdt;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.internal.actions.ToggleEntryPointAction;
 import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.OptionProviderListener;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -166,7 +175,24 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 
 			};	
 			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
-			PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
+			final PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
+			consolePlugin.getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
+			
+			
+			ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
+				
+				@Override
+				public boolean visit(IResource resource) throws CoreException {
+					if (resource instanceof IFile) {
+						IFile file = (IFile) resource;
+						if ("true".equalsIgnoreCase(file.getPersistentProperty(ToggleEntryPointAction.KEY))) {
+							consolePlugin.addEntryPoint(file);
+						}
+					}
+					return true;
+				}
+				
+			});
 			
 		} catch (Throwable t) {
 			Debug.report(t);
@@ -223,13 +249,17 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 
 	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		changeListeners.add(listener);
+		synchronized (changeListeners) {
+			changeListeners.add(listener);
+		}
 	}
 
 	@Override
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {
-		changeListeners.remove(listener);
+		synchronized (changeListeners) {
+			changeListeners.remove(listener);
+		}
 	}
 	
 	@Override
@@ -239,8 +269,10 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 	}
 	
 	public void informListenersAboutEditorContent(ISelection selection) {
-		for (ISelectionChangedListener listener : changeListeners) {
-			listener.selectionChanged(new SelectionChangedEvent(this, selection));
+		synchronized (changeListeners) {
+			for (ISelectionChangedListener listener : changeListeners) {
+				listener.selectionChanged(new SelectionChangedEvent(this, selection));
+			}
 		}
 	}
 
@@ -248,5 +280,38 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 	public ISelection getSelection() {
 		return selection;
 	}
+
+	
+	
+	Set<OptionProviderListener> decorators = new HashSet<OptionProviderListener>();
+	
+	public void addDecorator(OptionProviderListener decorator) {
+		decorators.add(decorator);
+	}
+	
+	public void removeDecorator(OptionProviderListener decorator) {
+		decorators.remove(decorator);
+	}
+	
+	public void notifyDecorators() {
+		for (OptionProviderListener d : decorators) {
+			d.valuesChanged(null);
+		}
+	}
+//	
+//	Set<IFile> entryPoints = new HashSet<IFile>();
+//	
+//	public void addEntryPoint(IFile f) {
+//		entryPoints.add(f);
+//	}
+//	
+//	public void removeEntryPoint(IFile f) {
+//		entryPoints.remove(f);
+//	}
+//	
+//	public Set<IFile> getEntryPoints() {
+//		return entryPoints;
+//	}
+//	
 	
 }
