@@ -14,8 +14,9 @@
     list_to_disjunction/2,    % (+List,?Disjunction) is det.
     list_to_conjunction/2,    % (+List,?Conjunction) is det.
     pretty_print_list/1,      % (+List)!io 
-    pretty_print_list/2,      % (+List,+Indent)!io 
-    pretty_print_list_body/2  % (+List,+Indent)
+    pretty_print_list/2,          % (+List,+Indent)!io 
+    pretty_print_list_body/2,     % (+List,+Indent)
+    list_2_comma_separated_list/2 % (+List,-Atom) is det.
 ] ).
 
 
@@ -328,6 +329,14 @@ pp_list_body([A|B], Indent) :-
     pp_list_body(B, Indent).
 pp_list_body([], _Indent) .
 
+	
+list_2_comma_separated_list([],'') :- !.
+list_2_comma_separated_list([Element],Element) :- !.
+list_2_comma_separated_list([Element|[H|T]],ElementComma) :-
+	list_2_comma_separated_list([H|T],RestAtom),
+	aformat(ElementComma,'~w,~w',[Element,RestAtom]).
+	
 
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)]) .  
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)], 8) . 
+
