@@ -59,6 +59,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -67,6 +68,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
@@ -392,5 +394,15 @@ public final class PDTCoreUtils {
 			}
 		});
 
+	}
+	
+	public static void linkFile(IProject project, String filename) {
+		IFolder folder = project.getFolder(new Path(project.getName() + "/Links"));
+		if (!folder.exists()) {
+			try {
+				folder.create(IResource.VIRTUAL, true, new NullProgressMonitor());
+			} catch (CoreException e) {
+			}
+		}
 	}
 }
