@@ -304,7 +304,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									if (reconsultFiles) {
 										getPrologInterface().reconsultFiles();
 									}
-									
+
 									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 								}
 							}
@@ -379,6 +379,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 											registry.removeSubscription(s);
 										}
 										registry.removePrologInterface(currentKey);
+										getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 									}
 
 								}

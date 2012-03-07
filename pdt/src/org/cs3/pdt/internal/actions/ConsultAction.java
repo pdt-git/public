@@ -128,8 +128,6 @@ public class ConsultAction extends QueryConsoleThreadAction {
 		setQuery(QueryUtils.buildTerm("pdt_reload", Util.quoteAtom(prologFilename)));
 		run();
 		
-		PDTPlugin.getDefault().notifyDecorators();
-		
 	}
 
 	public void consultFromActiveEditor() {
