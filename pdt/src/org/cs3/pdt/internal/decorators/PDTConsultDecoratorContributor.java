@@ -1,13 +1,16 @@
 package org.cs3.pdt.internal.decorators;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.Util;
@@ -84,12 +87,11 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			String prologFileName = getPrologFileName(file);
 			
 			// XXX: don't mark qlf file if only the pl file is consulted 
-			prologFileName = prologFileName.replace(".qlf'", ".pl'");
-
+			if(prologFileName.endsWith(".qlf")){
+				prologFileName = prologFileName.substring(0, prologFileName.length()-3)+"pl";
+			}
 			// check if file is source_file
-			try {
-				Map<String, Object> result = currentPif.queryOnce("source_file(" + prologFileName + ")");
-				if (result != null) {
+				if (sourceFiles.contains(prologFileName)) {
 					decoration.addSuffix(" [consulted]");
 					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
 						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
@@ -99,21 +101,12 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 				} else {
 					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
 				}
-			} catch (PrologInterfaceException e) {
-				e.printStackTrace();
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
-			}
 		} else {
 			IFolder folder = (IFolder) element;
-			String prologFilename = Util.prologFileName(folder.getRawLocation().toFile());
+			String dirName = Util.prologFileName(folder.getRawLocation().toFile());
 			
-			try {
-				Map<String, Object> result = currentPif.queryOnce("source_file(F), atom_concat('" + prologFilename + "', _, F)");
-				if (result != null) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
-				}
-			} catch (PrologInterfaceException e) {
-				e.printStackTrace();
+			if (dirs.contains(dirName)) {
+				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
 			}
 		}
 	}
@@ -125,7 +118,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		}
 
 		IPath filepath = new Path(enclFile);
-		return "'" + Util.prologFileName(filepath.toFile()) + "'";
+		return Util.prologFileName(filepath.toFile());
 	}
 
 	@Override
@@ -133,7 +126,30 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		fireLabelProviderChanged();
 	}
 
+	Set<String> sourceFiles = new HashSet<String>();
+	Set<String> dirs= new HashSet<String>();
+
 	private void fireLabelProviderChanged() {
+		
+
+		sourceFiles.clear();
+		dirs.clear();
+		
+		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
+		Map<String, Object> result;
+		try {
+			result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
+			if(result.get("Files")!=null){
+				String[] files = ((String)result.get("Files")).split(",");
+				for (int i = 0; i < files.length; i++) {
+					sourceFiles.add(files[i]);
+					dirs.add(files[i].substring(0, files[i].lastIndexOf('/')));
+				}
+			}
+		} catch (PrologInterfaceException e1) {
+			Debug.report(e1);
+		}
+		
 		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
 		Vector<ILabelProviderListener> clone=new Vector<ILabelProviderListener>();
 		synchronized(listeners){

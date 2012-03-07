@@ -1,3 +1,4 @@
+:- ensure_loaded(source_files).
 :- ensure_loaded('parse_util').
 :- use_module('analyzer/metapred_finder').
 
