@@ -332,7 +332,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		@Override
 		public String getToolTipText() {
-			return "Restart process and reconsult loaded files";
+			return "Restart process";
 		}
 
 		@Override
