@@ -623,6 +623,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	private PifQueryAction abortAction;
 	private PifQueryAction traceAction;
 	private Action helpAction;
+	private Action configAction;
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -819,6 +820,28 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				}
 			}
 		};
+		
+		configAction = new Action("Console preferences", ImageRepository.getImageDescriptor(ImageRepository.PREFERENCES)) {
+			@Override
+			public void run() {
+				PreferenceManager mgr = new PreferenceManager();
+				
+				IPreferencePage page = new PreferencePageMain();
+				page.setTitle("PDT console preferences");
+				
+				IPreferenceNode node = new PreferenceNode("PreferencePage", page);
+				mgr.addToRoot(node);
+
+				IPreferencePage appearance = new PreferencePageFontColor();
+				appearance.setTitle("Appearance");
+				node.add(new PreferenceNode("AppearancePreferences", appearance));
+				
+				PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
+				dialog.create();
+				dialog.setMessage(page.getTitle());
+				dialog.open();
+			}
+		};
 	}
 
 	private void initMenus(Control parent) {
@@ -983,6 +1006,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		manager.add(new Separator("#Query-end"));
 		manager.add(new Separator("#Toolbar-Other"));
 		manager.add(genLoadFileAction);
+		manager.add(configAction);
 		manager.add(helpAction);
 		manager.add(new Separator("#Toolbar-End"));
 	}
