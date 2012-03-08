@@ -681,8 +681,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			synchronized (lifecycle) {
 				for (String fileName : consultedFiles) {
 					try {
-						Debug.debug("consult(" + fileName + "), because it was consulted before");
-						queryOnce("consult(" + fileName + ")");
+						Debug.debug("pdt_reload(" + fileName + "), because it was consulted before");
+						queryOnce("pdt_reload(" + fileName + ")");
 					} catch (PrologInterfaceException e) {
 						Debug.report(e);
 					}
