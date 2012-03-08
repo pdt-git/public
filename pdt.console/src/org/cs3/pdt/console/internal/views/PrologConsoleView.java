@@ -45,6 +45,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -110,6 +112,7 @@ import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
@@ -301,7 +304,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									if (reconsultFiles) {
 										getPrologInterface().reconsultFiles();
 									}
-									
+
 									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 								}
 							}
@@ -329,7 +332,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		@Override
 		public String getToolTipText() {
-			return "Restart process and reconsult loaded files";
+			return "Restart process";
 		}
 
 		@Override
@@ -376,6 +379,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 											registry.removeSubscription(s);
 										}
 										registry.removePrologInterface(currentKey);
+										getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 									}
 
 								}
@@ -656,6 +660,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	private PifQueryAction abortAction;
 	private PifQueryAction traceAction;
+	private Action helpAction;
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -840,6 +845,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		killAction = new KillAction();
 		genLoadFileAction = new GenLoadFileAction();
 		createProcessAction = new CreateNamedProcessAction();
+		helpAction = new Action("SWI-Prolog Documentation", ImageRepository.getImageDescriptor(ImageRepository.HELP)) {
+			@Override
+			public void run() {
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("http://www.swi-prolog.org/pldoc/index.html"));
+				} catch (PartInitException e) {
+					Debug.report(e);
+				} catch (MalformedURLException e) {
+					Debug.report(e);
+				}
+			}
+		};
 	}
 
 	private void initMenus(Control parent) {
@@ -1004,6 +1021,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		manager.add(new Separator("#Query-end"));
 		manager.add(new Separator("#Toolbar-Other"));
 		manager.add(genLoadFileAction);
+		manager.add(helpAction);
 		manager.add(new Separator("#Toolbar-End"));
 	}
 
