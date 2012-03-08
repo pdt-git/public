@@ -376,20 +376,6 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
 	),
 	predicate_manual_entry(Module,Name,Arity,Help).
 
-find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc') :-
-    var(EnclModule),
-	current_module(Name),
-    atom_concat(Prefix,_,Name).
-
-% TODO: Improvement Idea: use "string" Prefix instead 
-%  of atom to avoid Prefix to be added to the set of atoms
-find_pred(_EnclFile,Prefix,'',Atom,-2,fail,true,'nodoc') :-
-	'$atom_completions'(Prefix, Atoms),
-	member(Atom,Atoms), 
-	Atom \= Prefix,
-	garbage_collect_atoms,
-	\+ current_predicate(Atom/_Arity).
-
 find_pred_(Prefix,Module,Name,Arity,true) :-
     ( var(Module)->
     	Prefix \== ''
@@ -413,3 +399,29 @@ get_declaring_module(EnclFile,Module,Name,Arity) :-
      ; Module = ContainingModule
      ),
      !.
+
+%% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help, -Kind) is nondet.
+%
+
+find_pred_for_editor_completion(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help,Kind) :-
+    \+ atom(EnclFile),
+    throw( first_argument_free_in_call_to(find_pred_for_editor_completion(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help,Kind))).
+
+find_pred_for_editor_completion(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help,predicate) :-
+	find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help).
+
+find_pred_for_editor_completion(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc', module) :-
+    var(EnclModule),
+	current_module(Name),
+    atom_concat(Prefix,_,Name).
+
+% TODO: Improvement Idea: use "string" Prefix instead 
+%  of atom to avoid Prefix to be added to the set of atoms
+find_pred_for_editor_completion(_EnclFile,Prefix,'',Atom,-1,fail,true,'nodoc', atom) :-
+	'$atom_completions'(Prefix, Atoms),
+	member(Atom,Atoms), 
+	Atom \= Prefix,
+	garbage_collect_atoms,
+	\+ current_predicate(Atom/_Arity).
+
+	
