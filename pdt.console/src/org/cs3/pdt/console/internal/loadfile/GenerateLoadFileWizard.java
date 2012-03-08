@@ -110,7 +110,11 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 				String fileNameWithoutQuotes = Util.unquoteAtom(fileName);
 				IPath path = new Path(fileNameWithoutQuotes);
 				IPath relPath = path.makeRelativeTo(projectFolder);
-				buf.append(":- consult(" + projectAlias + "('" + relPath.toString().toLowerCase() + "')).\n");
+				if (path.equals(relPath)) {
+					buf.append(":- consult('" + relPath.toString().toLowerCase() + "').\n");
+				} else {
+					buf.append(":- consult(" + projectAlias + "('" + relPath.toString().toLowerCase() + "')).\n");
+				}
 			}
 			String content = buf.toString();
 			

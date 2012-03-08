@@ -38,6 +38,7 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 
 	private void fileLoaded(String file) {
 		currentPif.addConsultedFile(file);
+		PDTPlugin.getDefault().notifyDecorators();
 	}
 
 	public void openFileInEditor(String event) {
@@ -106,7 +107,9 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 	public void consoleLostFocus(PrologConsoleEvent e) {}
 
 	@Override
-	public void consoleVisibilityChanged(PrologConsoleEvent e) {}
+	public void consoleVisibilityChanged(PrologConsoleEvent e) {
+		PDTPlugin.getDefault().notifyDecorators();
+	}
 
 	@Override
 	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
