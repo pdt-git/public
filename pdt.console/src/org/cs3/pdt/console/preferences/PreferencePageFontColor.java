@@ -37,7 +37,7 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
 	public PreferencePageFontColor() {
 		super(GRID);
 		setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
-		setDescription("Console font and color preferences");
+		setDescription("Appearance preferences");
 	}
 
 
