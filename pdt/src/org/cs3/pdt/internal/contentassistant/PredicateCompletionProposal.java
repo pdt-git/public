@@ -38,6 +38,11 @@ public boolean isAtom() {
 	return isAtom;
 }
 
+public PredicateCompletionProposal(int offset, int length,
+		String name, int arity, Map<String,?> tags, String module) {
+	this(offset, length, name, arity, tags, module, null);
+}
+
 	/**
 	 * 
 	 * @param offset
@@ -48,12 +53,12 @@ public boolean isAtom() {
 	 * @param module
 	 */
 	public PredicateCompletionProposal(int offset, int length,
-			String name, int arity, Map<String,?> tags, String module) {
+			String name, int arity, Map<String,?> tags, String module, String kind) {
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(
-						arity==-1?
+						"module".equals(kind)?
 								ImageRepository.PACKAGE :
-							arity==-2?
+						"atom".equals(kind)?
 								ImageRepository.PE_ATOM :
 						isBuiltIn(tags)?
 								ImageRepository.PE_BUILT_IN :
@@ -66,10 +71,10 @@ public boolean isAtom() {
 		this.tags=tags;
 		this.arity=arity;
 //		this.module=module;
-		if(arity < 0){
-			if(arity == -1){
+		if(kind != null && !"predicate".equals(kind)){
+			if("module".equals(kind)){
 				isModule = true;
-			} else	if(arity == -2){
+			} else	if("atom".equals(kind)){
 				isAtom = true;
 			}
 			this.label=name;

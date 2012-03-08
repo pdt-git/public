@@ -119,12 +119,13 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					String enclFile = UIUtils.getFileFromActiveEditor();
 					String moduleArg = module!=null?Util.quoteAtom(module):"Module";
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					String query = "pdt_search:find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Builtin,Doc)";
+					String query = "pdt_search:find_pred_for_editor_completion('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Builtin,Doc,Kind)";
 					List<Map<String, Object>> predicates = session.queryAll(query);
 					Debug.info("find predicates with prefix: "+ query);
 					for (Map<String, Object> predicate : predicates) {
 						String name = (String) predicate.get("Name");
 						String strArity = (String) predicate.get("Arity");
+						String kind = predicate.get("Kind").toString();
 						if(predicate.get("Module")!=null){
 							module=(String) predicate.get("Module");
 							if(module.equals("_")){
@@ -152,7 +153,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						}
 						
 						ComparableCompletionProposal p = new PredicateCompletionProposal(
-														begin, len, name, arity, tags,module);
+														begin, len, name, arity, tags,module, kind);
 						proposals.add(p);
 					}
 					return;
