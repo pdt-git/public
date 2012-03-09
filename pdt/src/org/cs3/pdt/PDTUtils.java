@@ -41,7 +41,6 @@
 
 package org.cs3.pdt;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
@@ -75,36 +74,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 public final class PDTUtils {
 
-
-	public static IEditorPart openInEditor(String fileName) {
-		try {
-			Path path = new Path(new File(fileName).getCanonicalPath());
-
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
-			if (file == null){
-				IFileStore fileStore = EFS.getLocalFileSystem().getStore(path);
-				if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
-					IWorkbenchPage page = UIUtils.getActivePage();
-					IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
-					return part;
-				}
-			} else {
-				final IEditorPart part = UIUtils.openInEditor(file, false);
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						part.setFocus();
-					}
-				});
-				return part;
-			}
-		} catch (IOException e) {
-			Debug.report(e);
-		} catch (PartInitException e) {
-			Debug.report(e);
-		}
-		return null;
-	}
 
 	public static boolean checkForActivePif(boolean showDialog) {
 		PrologInterface pif = getActiveConsolePif();

@@ -5,9 +5,9 @@ import static org.cs3.pl.prolog.QueryUtils.bT;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -55,7 +55,7 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
-				IEditorPart editorPart = PDTUtils.openInEditor(fileName);
+				IEditorPart editorPart = UIUtils.openInEditor(fileName);
 				if (editorPart != null && editorPart instanceof PLEditor){
 					((PLEditor) editorPart).gotoLine(lineNumber);
 				}
