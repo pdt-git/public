@@ -356,7 +356,7 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
 	setof(
 	   (Name,Arity),
 	   Prefix^Module^
-	   ( module_of_file(EnclFile,Module),
+	   ( my_module_of_file(EnclFile,Module),
 	     find_pred_(Prefix,Module,Name,Arity,true)
 	   ),
 	   All
@@ -392,13 +392,18 @@ find_pred_(Prefix,Module,Name,Arity,true) :-
 
 
 get_declaring_module(EnclFile,Module,Name,Arity) :-
-     module_of_file(EnclFile,ContainingModule),
+	var(Module),
+     my_module_of_file(EnclFile,ContainingModule),
      current_predicate(ContainingModule:Name/Arity),
      functor(Head,Name,Arity),
      ( predicate_property(ContainingModule:Head,imported_from(Module))
      ; Module = ContainingModule
      ),
      !.
+
+get_declaring_module(_EnclFile,Module,_Name,_Arity) :-
+	nonvar(Module),
+	!.
 
 %% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help, -Kind) is nondet.
 %
@@ -424,4 +429,20 @@ find_pred_for_editor_completion(_EnclFile,Prefix,'',Atom,-1,fail,true,'nodoc', a
 	garbage_collect_atoms,
 	\+ current_predicate(Atom/_Arity).
 
-	
+my_module_of_file(_File, Module) :-
+	atom(Module),
+	current_module(Module),
+	!.
+
+my_module_of_file(File,Module):-
+    module_property(Module2,file(File)),
+	(	Module = Module2
+	;	Module = user
+	).
+                                       
+my_module_of_file(File,Module):-
+    atom(File),                           
+    \+ module_property(Module,file(File)),
+    ( Module=user                         
+    ; Module=system                       
+    ).
