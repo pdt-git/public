@@ -9,6 +9,6 @@ The JTransformer Eclipse plugin takes care of synchronizing the logical AST repr
     * The result of applying Conditonal Transformations is reflected either in the original source code or in a copy of it, depending on the option chosen.
     * Every change in the Java sources that compiles without errors in the Eclipse IDE is incrementally synchronized with the fact representation.
    </description>
-   <feature url="features/PDTFeature_0.2.4.qualifier.jar" id="PDTFeature" version="0.2.4.qualifier"/>
+   <feature url="features/PDTFeature_0.2.5.qualifier.jar" id="PDTFeature" version="0.2.5.qualifier"/>
    <category-def name="Prolog Development Tool (PDT)" label="Prolog Development Tool (PDT)"/>
 </site>
