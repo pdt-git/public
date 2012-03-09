@@ -136,6 +136,9 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		dirs.clear();
 		
 		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
+		if (currentPif == null) {
+			return;
+		}
 		Map<String, Object> result;
 		try {
 			result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
