@@ -152,7 +152,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 							tags.put("documentation",doc);
 						}
 						
-						ComparableCompletionProposal p = new PredicateCompletionProposal(
+						ComparableCompletionProposal p = new PredicateCompletionProposal(document,
 														begin, len, name, arity, tags,module, kind);
 						proposals.add(p);
 					}
@@ -186,7 +186,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				String resolvedModule = ((CTerm) anAnswer.get("Module")).getFunctorValue(); //TRHO TODO: not tested, yet
 				int arity = Integer.parseInt(strArity);
 				Map<String, CTerm> tags = CTermUtil.listAsMap((CTerm) anAnswer.get("Tags"));
-				ComparableCompletionProposal p = new PredicateCompletionProposal(
+				ComparableCompletionProposal p = new PredicateCompletionProposal(document,
 												begin, len, name, arity, tags,resolvedModule );
 				proposals.add(p);
 			}
