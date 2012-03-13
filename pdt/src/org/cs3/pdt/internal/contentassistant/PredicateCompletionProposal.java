@@ -9,14 +9,25 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CTerm;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateProposal;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
-public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
+public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, ICompletionProposalExtension2, IInformationControlCreator{
 	private static final String SPAN_HIDDEN = "<span style={display:none}>";
 	private int offset;
 	private int length;
@@ -29,6 +40,8 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String insertion;
 	private boolean isModule = false;
 	private boolean isAtom = false;
+	private TemplateProposal target2;
+	private boolean createArglist;
 	
 	public boolean isModule() {
 	return isModule;
@@ -38,9 +51,9 @@ public boolean isAtom() {
 	return isAtom;
 }
 
-public PredicateCompletionProposal(int offset, int length,
+public PredicateCompletionProposal(IDocument document, int offset, int length,
 		String name, int arity, Map<String,?> tags, String module) {
-	this(offset, length, name, arity, tags, module, null);
+	this(document, offset, length, name, arity, tags, module, null);
 }
 
 	/**
@@ -52,7 +65,7 @@ public PredicateCompletionProposal(int offset, int length,
 	 * @param tags
 	 * @param module
 	 */
-	public PredicateCompletionProposal(int offset, int length,
+	public PredicateCompletionProposal(IDocument document, int offset, int length,
 			String name, int arity, Map<String,?> tags, String module, String kind) {
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(
@@ -87,38 +100,29 @@ public PredicateCompletionProposal(int offset, int length,
 			Object doc = tags.get("documentation");
 
 			if(doc != null){
-				 	String value;
-					if(doc instanceof CTerm){
-						value =((CTerm)doc).getFunctorValue();
-					} else {
-						value = ((String)doc).trim();
-					}
-					
-					
-					
-				if(value.startsWith("<dl>\n<dt")){
-					if (value.indexOf("arglist") > 0 && value.indexOf("</var>") > value.indexOf("arglist")) {
-//						label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
-						insertion = name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
-					}
-				} else if (value.indexOf(SPAN_HIDDEN) > 0 && value.indexOf("</span>") > 0) {
-					insertion = value.substring(value.indexOf(SPAN_HIDDEN) + SPAN_HIDDEN.length(), value.indexOf("</span>"));
+				String value;
+				if(doc instanceof CTerm){
+					value =((CTerm)doc).getFunctorValue();
+				} else {
+					value = ((String)doc).trim();
 				}
-//				}else {
-//					label=value.indexOf('\n')>0 ?
-//						value.substring(0,value.indexOf('\n')):
-//						value;
-//				}
 				this.doc = value;
-			 } else if(summary!=null){
-					label = label + " - " + summary.getFunctorValue();
-				 
-			 }
-			
+			} else if(summary!=null){
+				label = label + " - " + summary.getFunctorValue();
+			}
 		}
+		insertion = createInsertion();
 		if(module!=null && !isAtom){
 			label=module+":" + label;
 		}
+		
+		createArglist = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_COMPLETE_ARGLIST, "true"));
+		
+		final String contextTypeId = "MyContextType";
+		Template template = new Template(insertion, "InsertMe", contextTypeId , insertion, true);
+		TemplateContextType type = new TemplateContextType(contextTypeId);
+		DocumentTemplateContext cxt = new DocumentTemplateContext(type, document , offset, length);
+		target2 = new TemplateProposal(template, cxt, new Region(offset, length), image);
 	}
 
 	private static boolean isPublic(Map<String, ?> tags) {
@@ -140,8 +144,6 @@ public PredicateCompletionProposal(int offset, int length,
 	@Override
 	public void apply(IDocument document) {
 		try {
-			boolean createArglist = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_COMPLETE_ARGLIST, "true"));
-			
 			if (createArglist) {
 				if(insertion != null) {
 					document.replace(offset, length, insertion);
@@ -167,6 +169,52 @@ public PredicateCompletionProposal(int offset, int length,
 		} catch (BadLocationException e) {
 			Debug.report(e);
 		}
+	}
+	
+	private String createInsertion() {
+		if (arity <= 0) {
+			return name;
+		}
+		String[] args = null; 
+		if (doc != null) {
+			if(doc.startsWith("<dl>\n<dt")){
+				if (doc.indexOf("arglist") > 0 && doc.indexOf("</var>") > doc.indexOf("arglist")) {
+					String commaSeparatedArgs = doc.substring(doc.indexOf("arglist") + 10, doc.indexOf("</var>") -1);
+					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\?", "");
+					args = commaSeparatedArgs.split(",");
+				}
+			} else if (doc.indexOf(SPAN_HIDDEN) > 0 && doc.indexOf("</span>") > 0) {
+				String head = doc.substring(doc.indexOf(SPAN_HIDDEN) + SPAN_HIDDEN.length(), doc.indexOf("</span>"));
+				args = head.substring(head.indexOf("(") + 1, head.lastIndexOf(")")).split(",");
+			}
+		}
+		StringBuffer buf = new StringBuffer(name);
+		buf.append("(");
+		if (args == null) {
+			for (int i=0; i<arity; i++) {
+				if (i==0) {
+					buf.append("${_");
+				} else {
+					buf.append(", ${_");
+				}
+				buf.append(i);
+				buf.append("}");
+			}
+		} else {
+			for (int i=0; i<arity; i++) {
+				if (i==0) {
+					buf.append("${");
+					buf.append(args[i].trim());
+					buf.append("}");
+				} else {
+					buf.append(", ${");
+					buf.append(args[i].trim());
+					buf.append("}");
+				}
+			}
+		}
+		buf.append(")");
+		return buf.toString();
 	}
 
 	/**
@@ -239,4 +287,53 @@ public PredicateCompletionProposal(int offset, int length,
 		return 0;
 	}
 
+	@Override
+	public void apply(ITextViewer viewer, char trigger, int stateMask,
+			int offset) {
+		if (createArglist) {
+			target2.apply(viewer, trigger, stateMask, offset);
+		} else {
+			try {
+				viewer.getDocument().replace(this.offset, length, name);
+			} catch (BadLocationException e) {
+				Debug.report(e);
+			}
+		}
+	}
+
+	@Override
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+		target2.selected(viewer, smartToggle);
+	}
+
+	@Override
+	public void unselected(ITextViewer viewer) {
+		target2.unselected(viewer);
+	}
+
+	@Override
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+		return target2.validate(document, offset, event);
+	}
+
+	@Override
+	public String getAdditionalProposalInfo() {
+		return target2.getAdditionalProposalInfo();
+	}
+
+	@Override
+	public IContextInformation getContextInformation() {
+		return target2.getContextInformation();
+	}
+
+	@Override
+	public Image getImage() {
+		return target2.getImage();
+	}
+
+	@Override
+	public Point getSelection(IDocument document) {
+		return target2.getSelection(document);
+	}
+	
 }
