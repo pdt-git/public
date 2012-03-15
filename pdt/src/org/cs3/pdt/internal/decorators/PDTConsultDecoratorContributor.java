@@ -136,18 +136,20 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		dirs.clear();
 		
 		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
-		Map<String, Object> result;
-		try {
-			result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
-			if(result.get("Files")!=null){
-				String[] files = ((String)result.get("Files")).split(",");
-				for (int i = 0; i < files.length; i++) {
-					sourceFiles.add(files[i]);
-					dirs.add(files[i].substring(0, files[i].lastIndexOf('/')));
+		if (currentPif != null) {
+			Map<String, Object> result;
+			try {
+				result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
+				if(result.get("Files")!=null){
+					String[] files = ((String)result.get("Files")).split(",");
+					for (int i = 0; i < files.length; i++) {
+						sourceFiles.add(files[i]);
+						dirs.add(files[i].substring(0, files[i].lastIndexOf('/')));
+					}
 				}
+			} catch (PrologInterfaceException e1) {
+				Debug.report(e1);
 			}
-		} catch (PrologInterfaceException e1) {
-			Debug.report(e1);
 		}
 		
 		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
