@@ -181,7 +181,15 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 				if (doc.indexOf("arglist") > 0 && doc.indexOf("</var>") > doc.indexOf("arglist")) {
 					String commaSeparatedArgs = doc.substring(doc.indexOf("arglist") + 10, doc.indexOf("</var>") -1);
 					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\?", "");
+					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\-", "");
+					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\+", "");
 					args = commaSeparatedArgs.split(",");
+					for (int i = 0; i < args.length; i++) {
+						int typeSeparator = args[i].indexOf(':');
+						if (typeSeparator >= 0) {
+							args[i] = args[i].substring(0, typeSeparator);
+						}
+					}
 				}
 			} else if (doc.indexOf(SPAN_HIDDEN) > 0 && doc.indexOf("</span>") > 0) {
 				String head = doc.substring(doc.indexOf(SPAN_HIDDEN) + SPAN_HIDDEN.length(), doc.indexOf("</span>"));
