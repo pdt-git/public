@@ -12,11 +12,11 @@ import java.util.Set;
 
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
@@ -185,7 +185,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	private void addMarker(String fileName, int line, int offset, String id) throws CoreException {
 		// called when a breakpoint was added in prolog
 		try {
-			IFile file = PDTCoreUtils.findFileForLocation(fileName);
+			IFile file = FileUtils.findFileForLocation(fileName);
 			addMarker(file, line, offset, id);
 		} catch (IOException e) {
 			Debug.report(e);

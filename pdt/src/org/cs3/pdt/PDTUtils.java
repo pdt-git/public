@@ -48,6 +48,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
@@ -129,7 +130,7 @@ public final class PDTUtils {
 		
 		if (!loc.isWorkspacePath) {
 			try {
-				file = PDTCoreUtils.findFileForLocation(loc.file);
+				file = FileUtils.findFileForLocation(loc.file);
 			} catch(IllegalArgumentException iae){
 				if(iae.getLocalizedMessage().startsWith("Not in Workspace")){
 					openExternalFileInEditor(loc);
