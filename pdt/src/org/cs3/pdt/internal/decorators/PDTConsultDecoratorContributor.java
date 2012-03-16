@@ -151,19 +151,6 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		if (currentPif == null) {
 			return;
 		}
-//		Map<String, Object> result;
-//		try {
-//			result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
-//			if(result.get("Files")!=null){
-//				String[] files = ((String)result.get("Files")).split(",");
-//				for (int i = 0; i < files.length; i++) {
-//					sourceFiles.add(files[i]);
-//					dirs.add(files[i].substring(0, files[i].lastIndexOf('/')));
-//				}
-//			}
-//		} catch (PrologInterfaceException e1) {
-//			Debug.report(e1);
-//		}
 		try {
 			List<Map<String, Object>> results = currentPif.queryAll(bT("pdt_source_file", "File", "State"));
 			for (Map<String, Object> result: results) {
@@ -182,13 +169,11 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 					}
 					parentDir = parentDir.substring(0, parentDirEndPos);
 				}
-			} catch (PrologInterfaceException e1) {
-				Debug.report(e1);
 			}
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
 		}
-		
+
 		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
 		Vector<ILabelProviderListener> clone=new Vector<ILabelProviderListener>();
 		synchronized(listeners){
