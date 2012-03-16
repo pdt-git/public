@@ -44,11 +44,13 @@
 package org.cs3.pl.prolog.internal.socket;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
@@ -59,6 +61,7 @@ import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 /**
  */
 public class SocketSession implements PrologSession {
+	private static final String RESULT_LIST = "ResultList";
 	private SocketClient client;
 	private boolean queryActive;
 	private AbstractPrologInterface pif;
@@ -89,28 +92,87 @@ public class SocketSession implements PrologSession {
 		}
 	}
 
+//	public List<Map<String, Object>> queryAll_obsolete(String query) throws PrologException,
+//		PrologInterfaceException {
+//		CTermUtil.checkFlags(flags);
+//		if (isDisposed()) {
+//			throw new IllegalStateException("Session is disposed!");
+//		}
+//		if (query.length() == 0) {
+//			return generateEmptyResults();
+//		}
+//		Vector<Map<String, Object>> results;
+//		try {
+//			configureProtocol(flags);
+//			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+//			client.writeln(SocketCommunicationConstants.QUERY_ALL);
+//			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+//			normalizeQuery(query);
+//			results = readResults();
+//		} catch (IOException e) {
+//			throw pif.error(e);
+//		} 
+//		return results;
+//	}
+	
+	
 	@Override
-	public List<Map<String, Object>> queryAll(String query) throws PrologException,
-		PrologInterfaceException {
-		CTermUtil.checkFlags(flags);
-		if (isDisposed()) {
-			throw new IllegalStateException("Session is disposed!");
+	public List<Map<String, Object>> queryAll(String query) throws PrologInterfaceException {
+		if (query.endsWith(".")) {
+			query = query.substring(0, query.length()-1);
 		}
-		if (query.length() == 0) {
-			return generateEmptyResults();
+		// variablen aus query extrahieren
+		List<String> vars = getVariableNames(query);
+		// in ein findall packen
+		String newQuery = createFindallQuery(query, vars);
+		Map<String, Object> result = queryOnce(newQuery);
+		return transformResults(result, vars);
+		
+	}
+
+	private List<Map<String, Object>> transformResults(Map<String, Object> result,  List<String> vars) {
+		List<Map<String, Object>> newResult = new ArrayList<Map<String,Object>>();
+		
+		List<List<Object>> listOfLists = (List<List<Object>>) result.get(RESULT_LIST);
+		for (List<Object> list : listOfLists) {
+			HashMap<String, Object> newMap = new HashMap<String, Object>();
+			for (int i=0; i<vars.size(); i++) {
+				newMap.put(vars.get(i), list.get(i));
+			}
+			newResult.add(newMap);
 		}
-		Vector<Map<String, Object>> results;
+		
+		return newResult;
+	}
+
+	private String createFindallQuery(String query, List<String> vars) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("findall([");
+		boolean addComma = false;
+		for (String v : vars) {
+			if (addComma) {
+				buf.append(", ");
+			} else {
+				addComma = true;
+			}
+			buf.append(v);
+		}
+		buf.append("], (");
+		buf.append(query);
+		buf.append("), " + RESULT_LIST + ")");
+		return buf.toString();
+	}
+
+	private List<String> getVariableNames(String query) {
 		try {
-			configureProtocol(flags);
-			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
-			client.writeln(SocketCommunicationConstants.QUERY_ALL);
-			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
-			normalizeQuery(query);
-			results = readResults();
-		} catch (IOException e) {
-			throw pif.error(e);
-		} 
-		return results;
+			String getVarQuery = "get_var_names(" + Util.quoteAtom(query) + ",Vars)";
+			Map<String, Object> result = queryOnce(getVarQuery);
+			String varString = result.get("Vars").toString();
+			return Arrays.asList(varString.split(","));
+		} catch (PrologInterfaceException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 
@@ -158,25 +220,25 @@ public class SocketSession implements PrologSession {
 		}
 	}
 
-	private List<Map<String, Object>> generateEmptyResults() {
-		List<Map<String, Object>> l = new Vector<Map<String, Object>>();
-		l.add(generateAnEmtpyResult());
-		return l;
-	}
+//	private List<Map<String, Object>> generateEmptyResults() {
+//		List<Map<String, Object>> l = new Vector<Map<String, Object>>();
+//		l.add(generateAnEmtpyResult());
+//		return l;
+//	}
 	
 	private Map<String, Object> generateAnEmtpyResult() {
 		return new HashMap<String, Object>();
 	}
 	
-	private Vector<Map<String, Object>> readResults() throws IOException {
-		Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
-		Map<String, Object> result = read_solution(flags);
-		while (result != null) {
-			results.add(result);
-			result = read_solution(flags);
-		}
-		return results;
-	}
+//	private Vector<Map<String, Object>> readResults() throws IOException {
+//		Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
+//		Map<String, Object> result = read_solution(flags);
+//		while (result != null) {
+//			results.add(result);
+//			result = read_solution(flags);
+//		}
+//		return results;
+//	}
 	
 	private Map<String, Object> read_solution(int flags) throws IOException {
 		HashMap<String, Object> result = new HashMap<String, Object>();
