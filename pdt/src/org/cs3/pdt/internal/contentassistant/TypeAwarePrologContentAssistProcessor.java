@@ -53,7 +53,7 @@ IContentAssistProcessor  {
 							.getFunctorValue());
 				Map<String, CTerm> tags = CTermUtil
 								.listAsMap((CTerm) map.get("Tags"));
-				ComparableCompletionProposal p = new PredicateCompletionProposal(
+				ComparableCompletionProposal p = new PredicateCompletionProposal(document,
 						begin, len, name, arity, tags,null);
 				proposals.add(p);
 			}

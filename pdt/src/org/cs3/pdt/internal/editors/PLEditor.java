@@ -510,6 +510,7 @@ public class PLEditor extends TextEditor {
 				// consult the file and update the problem markers, too.
 				if (!shouldAbortSaving()) {
 					PLEditor.super.doSave(new NullProgressMonitor());
+					PDTPlugin.getDefault().notifyDecorators();
 				}
 //				addProblemMarkers();
 //				setFocus();

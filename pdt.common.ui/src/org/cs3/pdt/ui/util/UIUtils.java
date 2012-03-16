@@ -42,10 +42,16 @@
 package org.cs3.pdt.ui.util;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -320,6 +326,36 @@ public final class UIUtils {
 				IEditorPart editorPart = IDE.openEditor(p, file, activate);
 				return editorPart;
 			}
+		}
+		return null;
+	}
+
+	public static IEditorPart openInEditor(String fileName) {
+		try {
+			Path path = new Path(new File(fileName).getCanonicalPath());
+	
+			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+			if (file == null){
+				IFileStore fileStore = EFS.getLocalFileSystem().getStore(path);
+				if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
+					IWorkbenchPage page = getActivePage();
+					IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
+					return part;
+				}
+			} else {
+				final IEditorPart part = openInEditor(file, false);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						part.setFocus();
+					}
+				});
+				return part;
+			}
+		} catch (IOException e) {
+			Debug.report(e);
+		} catch (PartInitException e) {
+			Debug.report(e);
 		}
 		return null;
 	}
