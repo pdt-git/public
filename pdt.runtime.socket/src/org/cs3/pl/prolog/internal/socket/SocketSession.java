@@ -121,9 +121,7 @@ public class SocketSession implements PrologSession {
 		if (query.endsWith(".")) {
 			query = query.substring(0, query.length()-1);
 		}
-		// variablen aus query extrahieren
 		List<String> vars = getVariableNames(query);
-		// in ein findall packen
 		String newQuery = createFindallQuery(query, vars);
 		Map<String, Object> result = queryOnce(newQuery);
 		return transformResults(result, vars);
