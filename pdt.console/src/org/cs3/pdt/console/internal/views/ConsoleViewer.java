@@ -46,6 +46,7 @@ import java.io.File;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
@@ -92,6 +93,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -335,19 +337,16 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 								try {
 									int line = Integer.parseInt(fileAndLine[1]) - 1;
 									try {
-										IFile file = PDTCoreUtils.findFileForLocation(fileAndLine[0] + "pl");
-										
-										final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-										if (activeWorkbenchWindow == null) {
+										IEditorPart editor = UIUtils.openInEditor(fileAndLine[0] + "pl");
+										if (!(editor instanceof AbstractTextEditor)) {
 											return;
 										}
-										IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
-										IDE.openEditor(page, file, true);
 										
-										IDocument document = ((AbstractTextEditor)page.getActiveEditor()).getDocumentProvider().getDocument(page.getActiveEditor().getEditorInput());
+										AbstractTextEditor textEditor = (AbstractTextEditor) editor;
+										IDocument document = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
 										IRegion region = document.getLineInformation(line);
 										ISelection selection = new TextSelection(document,region.getOffset(),region.getLength());
-										page.getActiveEditor().getEditorSite().getSelectionProvider().setSelection(selection);
+										textEditor.getEditorSite().getSelectionProvider().setSelection(selection);
 									} catch(Exception ex){
 									}
 								} catch (NumberFormatException ex) {

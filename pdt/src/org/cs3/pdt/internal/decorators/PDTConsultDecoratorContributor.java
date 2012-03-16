@@ -1,7 +1,10 @@
 package org.cs3.pdt.internal.decorators;
 
+import static org.cs3.pl.prolog.QueryUtils.bT;
+
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -91,16 +94,23 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 				prologFileName = prologFileName.substring(0, prologFileName.length()-3)+"pl";
 			}
 			// check if file is source_file
-				if (sourceFiles.contains(prologFileName)) {
-					decoration.addSuffix(" [consulted]");
-					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
-						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
-					} else {
-						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
-					}
+			if (sourceFiles.contains(prologFileName)) {
+				decoration.addSuffix(" [consulted]");
+				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
 				} else {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
 				}
+			} else if (modifiedSourceFiles.contains(prologFileName)) {
+				decoration.addSuffix(" [consulted]");
+				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED_OLD), IDecoration.BOTTOM_LEFT);
+				} else {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED_OLD), IDecoration.UNDERLAY);
+				}
+			} else {
+				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+			}
 		} else {
 			IFolder folder = (IFolder) element;
 			String dirName = Util.prologFileName(folder.getRawLocation().toFile());
@@ -127,29 +137,56 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 	}
 
 	Set<String> sourceFiles = new HashSet<String>();
+	Set<String> modifiedSourceFiles = new HashSet<String>();
 	Set<String> dirs= new HashSet<String>();
 
 	private void fireLabelProviderChanged() {
 		
 
 		sourceFiles.clear();
+		modifiedSourceFiles.clear();
 		dirs.clear();
 		
 		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
-		if (currentPif != null) {
-			Map<String, Object> result;
-			try {
-				result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
-				if(result.get("Files")!=null){
-					String[] files = ((String)result.get("Files")).split(",");
-					for (int i = 0; i < files.length; i++) {
-						sourceFiles.add(files[i]);
-						dirs.add(files[i].substring(0, files[i].lastIndexOf('/')));
+		if (currentPif == null) {
+			return;
+		}
+//		Map<String, Object> result;
+//		try {
+//			result = currentPif.queryOnce("source_files:pdt_source_files(Files)");
+//			if(result.get("Files")!=null){
+//				String[] files = ((String)result.get("Files")).split(",");
+//				for (int i = 0; i < files.length; i++) {
+//					sourceFiles.add(files[i]);
+//					dirs.add(files[i].substring(0, files[i].lastIndexOf('/')));
+//				}
+//			}
+//		} catch (PrologInterfaceException e1) {
+//			Debug.report(e1);
+//		}
+		try {
+			List<Map<String, Object>> results = currentPif.queryAll(bT("pdt_source_file", "File", "State"));
+			for (Map<String, Object> result: results) {
+				String fileName = result.get("File").toString();
+				String fileState = result.get("State").toString();
+				if ("current".equals(fileState)) {
+					sourceFiles.add(fileName);
+				} else {
+					modifiedSourceFiles.add(fileName);
+				}
+				String parentDir = fileName.substring(0, fileName.lastIndexOf('/'));
+				while (dirs.add(parentDir)) {
+					int parentDirEndPos = parentDir.lastIndexOf('/');
+					if (parentDirEndPos < 0) {
+						break;
 					}
+					parentDir = parentDir.substring(0, parentDirEndPos);
 				}
 			} catch (PrologInterfaceException e1) {
 				Debug.report(e1);
 			}
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
 		}
 		
 		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
