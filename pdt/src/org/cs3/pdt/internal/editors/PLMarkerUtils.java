@@ -10,6 +10,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.quickfix.PDTMarker;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -118,7 +119,7 @@ public class PLMarkerUtils {
 			String fileName = reloadedFile.get("File").toString();
 			IFile file2 = null;
 			try {
-				file2 = PDTCoreUtils.findFileForLocation(fileName);
+				file2 = FileUtils.findFileForLocation(fileName);
 			} catch (IOException e1) {
 				continue;
 			} catch (IllegalArgumentException e2){
@@ -142,7 +143,7 @@ public class PLMarkerUtils {
 			String fileName = msg.get("File").toString();
 			IFile file2 = null;
 			try {
-				file2 = PDTCoreUtils.findFileForLocation(fileName);
+				file2 = FileUtils.findFileForLocation(fileName);
 			} catch (IOException e1) {
 				continue;
 			} catch (IllegalArgumentException e2){

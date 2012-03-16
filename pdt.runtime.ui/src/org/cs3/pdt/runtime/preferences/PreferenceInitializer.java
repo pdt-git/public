@@ -41,7 +41,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		store.setDefault(PrologInterface.PREF_TIMEOUT,15000 );
 		
-		store.setDefault(PrologInterface.PREF_GENERATE_FACTBASE, false); // TRHO: should be kept while to slow on large projects (e.g. JT)
+		store.setDefault(PrologInterface.PREF_GENERATE_FACTBASE, false);
 		store.setDefault(PrologInterface.PREF_META_PRED_ANALYSIS, false);
 
 	}

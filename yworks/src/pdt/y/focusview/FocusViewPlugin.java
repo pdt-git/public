@@ -18,6 +18,7 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
@@ -320,10 +321,18 @@ public class FocusViewPlugin extends ViewPart {
 		}
 
 		public void reload() {
-			pifLoader.queryPrologForGraphFacts(filePath);
-			FocusViewPlugin.this.setStatusText("");
-			
-			isDirty = false;
+			Job j = new Job("PDT Focus View: Reloading Graph") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					pifLoader.queryPrologForGraphFacts(filePath);
+					FocusViewPlugin.this.setStatusText("");
+					
+					isDirty = false;
+
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
 		}
 		
 		public void updateLayout() {

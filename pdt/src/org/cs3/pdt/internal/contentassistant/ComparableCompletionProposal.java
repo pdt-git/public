@@ -16,12 +16,14 @@ import org.eclipse.swt.graphics.Point;
 public abstract class ComparableCompletionProposal implements Comparable<ComparableCompletionProposal>,ICompletionProposal{
 	CompletionProposal target = null;
 	private String doc;
+	protected Image image;
 
 	public ComparableCompletionProposal(String proposal, int begin, int len,
 			int cursorPos, Image image, String displayString,
 			IContextInformation contextInfo, String additionalInfo) {
 		target = new CompletionProposal(proposal, begin, len, cursorPos, image,
 				displayString, contextInfo, additionalInfo);
+		this.image = image;
 	}
 	
 	@Override

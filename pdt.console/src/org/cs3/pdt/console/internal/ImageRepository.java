@@ -96,6 +96,10 @@ public class ImageRepository {
 	
 	public static final String GEN_LOAD_FILE = "gen_load_file2.gif";
 
+	public static final String HELP = "linkto_help.gif";
+
+	public static final String PREFERENCES = "preferences.png";
+
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
         return ImageDescriptor.createFromURL(url);

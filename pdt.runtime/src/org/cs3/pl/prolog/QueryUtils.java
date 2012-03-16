@@ -80,7 +80,7 @@ public class QueryUtils {
 	 */
 	public static String buildTerm(String functor, Object...args) {
 		
-		if(args == null || (args.length == 1 && args.toString().equals(""))) {
+		if(args == null || args.length == 0 || (args.length == 1 && args.toString().equals(""))) {
 			return functor;
 		}
 		

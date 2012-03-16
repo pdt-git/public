@@ -101,7 +101,7 @@ public class PLAutoIndentStrategy extends DefaultAutoIndentStrategy implements I
 	 */
 	private void predicateIndent(IDocument d,DocumentCommand c) {
 		String nl = TextUtilities.getDefaultLineDelimiter(d);
-		c.text=nl+"    ";
+		c.text=nl+"\t";
 		
 	}
 

@@ -41,8 +41,12 @@
 
 package org.cs3.pdt.console.internal.views;
 
+import java.io.File;
+
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
@@ -50,9 +54,14 @@ import org.cs3.pl.console.ConsoleHistory;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.ConsoleModelEvent;
 import org.cs3.pl.console.ConsoleModelListener;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -84,6 +93,12 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private static class _TextSelection implements ITextSelection {
@@ -297,6 +312,68 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 
 		});
+		control.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseUp(MouseEvent e) {
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {
+				// It is up to the application to determine when and how a link should be activated.
+				// In this snippet links are activated on mouse down when the control key is held down 
+				try {
+					int offset = control.getOffsetAtLocation(new Point (e.x, e.y));
+					StyleRange style = control.getStyleRangeAtOffset(offset);
+					if (style != null && style.underline && style.underlineStyle == SWT.UNDERLINE_LINK) {
+						StyleRange selectedStyle = findStyleRangeForOffset(control.getStyleRanges(), offset);
+						if (selectedStyle == null) {
+							return;
+						}
+						String link = control.getTextRange(selectedStyle.start, selectedStyle.length);
+						String[] fileAndLine = link.split("pl:");
+						if (fileAndLine.length >= 2) {
+							if (new File(fileAndLine[0] + "pl").exists()) {
+								try {
+									int line = Integer.parseInt(fileAndLine[1]) - 1;
+									try {
+										IEditorPart editor = UIUtils.openInEditor(fileAndLine[0] + "pl");
+										if (!(editor instanceof AbstractTextEditor)) {
+											return;
+										}
+										
+										AbstractTextEditor textEditor = (AbstractTextEditor) editor;
+										IDocument document = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
+										IRegion region = document.getLineInformation(line);
+										ISelection selection = new TextSelection(document,region.getOffset(),region.getLength());
+										textEditor.getEditorSite().getSelectionProvider().setSelection(selection);
+									} catch(Exception ex){
+									}
+								} catch (NumberFormatException ex) {
+								}
+							}
+						}
+					}
+				} catch (IllegalArgumentException ex) {
+				}
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+			}
+			
+			private StyleRange findStyleRangeForOffset(StyleRange[] styles, int offset) {
+				if (styles == null) {
+					return null;
+				}
+				for (StyleRange style: styles) {
+					if (style.start <= offset && offset <= style.start + style.length) {
+						return style;
+					}
+				}
+				return null;
+			}
+		});
 		control.addDisposeListener(new DisposeListener() {
 
 			@Override
@@ -305,6 +382,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 
 		});
+		
 
 		control.setEnabled(model != null && model.isConnected());
 	}
@@ -408,6 +486,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		private ConsoleModel model;
 		public ConsoleCompletionProvider completionProvider;
 		public int caretPosition;
+		private StyleRange[] styleRanges;
 
 	}
 
@@ -418,6 +497,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		SavedState s = new SavedState();
 		s.startOfInput = startOfInput;
 		s.contents = control.getText();
+		s.styleRanges = control.getStyleRanges();
 		s.history = history;
 		s.model = model;
 		s.completionProvider = completionProvider;
@@ -430,6 +510,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 		startOfInput = s.startOfInput;
 		control.setText(s.contents);
+		control.setStyleRanges(s.styleRanges);
 		control.setCaretOffset(s.caretPosition);
 		setHistory(s.history);
 		setModel(s.model);
@@ -717,6 +798,15 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					// SET the Color-Information
 					if (LastOutputColor != null) {
 						setColorRangeInControl(startOfInput + CharCount, row.length(), LastOutputColor);
+						
+						Position location = getLocation(row);
+						if (location != null) {
+							int start = startOfInput + CharCount + location.offset;
+							StyleRange range = new StyleRange(start, location.length, LastOutputColor, control.getBackground());
+							range.underline = true;
+							range.underlineStyle = SWT.UNDERLINE_LINK;
+							control.setStyleRange(range);
+						}
 					}
 
 					CharCount += row.length() + 1;
@@ -1087,4 +1177,60 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 
 	}
+	
+	private Position getLocation(String line) {
+		try {
+			int end = line.indexOf(".pl:");
+			if (end == -1) {
+				return null;
+			} else {
+				end += 4;
+			}
+			int start = getReferencedFilename(line);
+			while(line.charAt(end) >= '0' && line.charAt(end) <= '9')
+				end ++;
+
+//			targetLine =  Integer.parseInt(line.substring(start,end))-1;  
+//			filename = getReferencedFilename(line);
+			return new Position(start, end - start);
+		} catch(Exception e) {
+			return null;
+		}
+	}
+	
+	private int getReferencedFilename(String line) {
+		int start = 0;
+		while(notPartOfFileName(line.charAt(start)))
+			start++;
+		while(notStartOfFileName(line,start))
+			start++;
+//		int end = line.indexOf(".pl:") + 3;
+//		return line.substring(start, end);
+		return start;
+		
+	}
+	
+	private boolean notStartOfFileName(String line, int offset) {
+		if(line.charAt(offset) == '/')
+			return false;
+		if(line.length() > offset+2 && 
+				line.charAt(offset + 1) == ':' &&
+				line.charAt(offset + 2) == '/')
+			return false;
+		return true;
+	}
+	
+	private boolean notPartOfFileName(char c) {
+		switch(c) {
+			case ' ':
+			case '(':
+			case '\t':
+			case '\n':
+			case '\r':
+				return true;
+			default:
+				return false;
+		}
+	}
+	
 }
