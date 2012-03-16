@@ -45,9 +45,11 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -334,7 +336,7 @@ public final class UIUtils {
 		try {
 			Path path = new Path(new File(fileName).getCanonicalPath());
 	
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+			IFile file = FileUtils.findFileForLocation(path);
 			if (file == null){
 				IFileStore fileStore = EFS.getLocalFileSystem().getStore(path);
 				if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
