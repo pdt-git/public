@@ -10,6 +10,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
@@ -57,7 +58,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		IFile file = null;
 		try {
 
-			file = PDTCoreUtils.findFileForLocation(filename);
+			file = FileUtils.findFileForLocation(filename);
 
 		} catch (Throwable e) {
 			Debug.report(e);
