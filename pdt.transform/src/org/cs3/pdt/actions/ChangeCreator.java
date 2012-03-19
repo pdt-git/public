@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
 import org.cs3.pdt.transform.internal.RenameResourceChange;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -135,7 +135,7 @@ public class ChangeCreator {
 	protected IFile resolveFileIfPossible(String path) {
 		IFile file = null;
 		try {
-			file = PDTCoreUtils.findFileForLocation(path);
+			file = FileUtils.findFileForLocation(path);
 		} catch (IOException e) {
 			Debug.report(e);
 			status.addFatalError("Could not resolve file in workspace.");

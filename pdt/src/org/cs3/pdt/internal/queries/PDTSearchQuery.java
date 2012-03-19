@@ -49,13 +49,13 @@ import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.search.PrologSearchResult;
 import org.cs3.pdt.internal.structureElements.CategoryHandler;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologException;
@@ -273,7 +273,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			String path =null; 
 			try{
 				path = Util.unquoteAtom((String) m.get("File"));
-				file = PDTCoreUtils.findFileForLocation(path);
+				file = FileUtils.findFileForLocation(path);
 			}catch(IllegalArgumentException iae){
 				Debug.report(iae);
 				continue;

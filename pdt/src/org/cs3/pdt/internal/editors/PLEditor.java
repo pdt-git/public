@@ -64,6 +64,7 @@ import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.ExternalPrologFilesProjectUtils;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
@@ -179,7 +180,7 @@ public class PLEditor extends TextEditor {
 	 * 
 	 */
 	private boolean shouldAbortSaving() {
-		if (!(getEditorInput() instanceof IFileEditorInput)) {
+		if (isExternalInput()) {
 			boolean showWarning = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "true"));
 			if (showWarning) {
 				MessageDialog m = new MessageDialog(getEditorSite().getShell(), "External file", null, "The current file in the editor is not contained in the workspace. Are you sure you want to save this file?", MessageDialog.QUESTION, new String[]{"Yes", "Yes, always", "No"}, 0);
@@ -207,7 +208,7 @@ public class PLEditor extends TextEditor {
 
 	public void informAboutChangedEditorInput() {
 		ISchedulingRule rule;
-		if((getEditorInput() instanceof IFileEditorInput)){
+		if(!isExternalInput()){
 			rule =((IFileEditorInput)getEditorInput()).getFile();
 		} else {
 			rule = null;
@@ -510,6 +511,7 @@ public class PLEditor extends TextEditor {
 				// consult the file and update the problem markers, too.
 				if (!shouldAbortSaving()) {
 					PLEditor.super.doSave(new NullProgressMonitor());
+					PDTPlugin.getDefault().notifyDecorators();
 				}
 //				addProblemMarkers();
 //				setFocus();
@@ -829,7 +831,7 @@ public class PLEditor extends TextEditor {
 		if (sourceViewer == null) return;
 		StyledText textWidget = sourceViewer.getTextWidget();
 		if (textWidget == null) return;
-		if (input instanceof IFileEditorInput) {
+		if (!isExternalInput(input)) {
 			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
 			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_UNCONSULTED));
 		} else {
@@ -903,6 +905,19 @@ public class PLEditor extends TextEditor {
 			}
 		}
 	}
+	
+	private boolean isExternalInput() {
+		return isExternalInput(getEditorInput());
+	}
+	
+	private boolean isExternalInput(IEditorInput input) {
+		if (!(input instanceof IFileEditorInput)) {
+			return true;
+		}
+		IFileEditorInput fileEditorInput = (IFileEditorInput) input;
+		return ExternalPrologFilesProjectUtils.isExternalFile(fileEditorInput.getFile());
+	}
+	
 	private Object annotationModelMonitor= new Object();
 
 	public Annotation[] fOccurrenceAnnotations;

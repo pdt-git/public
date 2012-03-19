@@ -41,7 +41,6 @@
 
 package org.cs3.pdt;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
@@ -49,6 +48,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
@@ -75,36 +75,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 public final class PDTUtils {
 
-
-	public static IEditorPart openInEditor(String fileName) {
-		try {
-			Path path = new Path(new File(fileName).getCanonicalPath());
-
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
-			if (file == null){
-				IFileStore fileStore = EFS.getLocalFileSystem().getStore(path);
-				if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
-					IWorkbenchPage page = UIUtils.getActivePage();
-					IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
-					return part;
-				}
-			} else {
-				final IEditorPart part = UIUtils.openInEditor(file, false);
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						part.setFocus();
-					}
-				});
-				return part;
-			}
-		} catch (IOException e) {
-			Debug.report(e);
-		} catch (PartInitException e) {
-			Debug.report(e);
-		}
-		return null;
-	}
 
 	public static boolean checkForActivePif(boolean showDialog) {
 		PrologInterface pif = getActiveConsolePif();
@@ -160,7 +130,7 @@ public final class PDTUtils {
 		
 		if (!loc.isWorkspacePath) {
 			try {
-				file = PDTCoreUtils.findFileForLocation(loc.file);
+				file = FileUtils.findFileForLocation(loc.file);
 			} catch(IllegalArgumentException iae){
 				if(iae.getLocalizedMessage().startsWith("Not in Workspace")){
 					openExternalFileInEditor(loc);
