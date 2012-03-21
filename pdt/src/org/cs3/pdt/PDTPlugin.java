@@ -298,20 +298,5 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			d.valuesChanged(null);
 		}
 	}
-//	
-//	Set<IFile> entryPoints = new HashSet<IFile>();
-//	
-//	public void addEntryPoint(IFile f) {
-//		entryPoints.add(f);
-//	}
-//	
-//	public void removeEntryPoint(IFile f) {
-//		entryPoints.remove(f);
-//	}
-//	
-//	public Set<IFile> getEntryPoints() {
-//		return entryPoints;
-//	}
-//	
 	
 }
