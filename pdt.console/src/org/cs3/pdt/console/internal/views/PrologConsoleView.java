@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -119,7 +118,6 @@ import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
@@ -214,17 +212,17 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		public void run() {
 			try {
 
-				Job j = new UIJob("Restarting the PrologInterface") {
+				Job j = new Job("Restarting the PrologInterface") {
 
 					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
+					public IStatus run(IProgressMonitor monitor) {
 						try {
-							monitor.beginTask("initializing...",
-									IProgressMonitor.UNKNOWN);
+							monitor.beginTask("initializing...", 2);
 
 							try {
 								if (getPrologInterface() != null) {
 									getPrologInterface().stop();
+									monitor.worked(1);
 								}
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
@@ -267,7 +265,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									}
 									getPrologInterface().start();
 
-									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
+									Display.getDefault().asyncExec(new Runnable() {
+										@Override
+										public void run() {
+											getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
+										}
+									});
 								}
 							}
 						} catch (Throwable e) {
@@ -813,12 +816,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			public void run() {
 				try {
 					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("http://www.swi-prolog.org/pldoc/index.html"));
-				} catch (PartInitException e) {
-					Debug.report(e);
-				} catch (MalformedURLException e) {
-					Debug.report(e);
-				}
+				} catch (Exception e) {}
 			}
+
 		};
 		
 		configAction = new Action("Console preferences", ImageRepository.getImageDescriptor(ImageRepository.PREFERENCES)) {

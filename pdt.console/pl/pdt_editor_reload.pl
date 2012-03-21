@@ -137,6 +137,7 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 	    free_memory_file(Handle).
 
 pdt_reloaded_file(LoadedFile) :-
+	wait_for_reload_finished,
 	reloaded_file(LoadedFile).
    
 wait_for_reload_finished :-
