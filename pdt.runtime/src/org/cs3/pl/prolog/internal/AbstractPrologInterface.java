@@ -58,6 +58,7 @@ import java.util.WeakHashMap;
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.PreferenceProvider;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.Disposable;
@@ -664,30 +665,45 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		if (consultedFiles == null) {
 			consultedFiles = new ArrayList<String>();
 		}
-		// only take the last consult of a file
-		if (consultedFiles.remove(fileName)) {
-			Debug.debug("move " + fileName + " to end of consulted files");			
-		} else {
-			Debug.debug("add " + fileName + " to consulted files");
+		synchronized (consultedFiles) {
+			// only take the last consult of a file
+			if (consultedFiles.remove(fileName)) {
+				Debug.debug("move " + fileName + " to end of consulted files");			
+			} else {
+				Debug.debug("add " + fileName + " to consulted files");
+			}
+			consultedFiles.add(fileName);
 		}
-		consultedFiles.add(fileName);
-		
 	}
 
+	
+	// TODO: problem with quotes
 	@Override
 	public void reconsultFiles() {
 		Debug.debug("Reconsult files");
 		if (consultedFiles != null) {
 			synchronized (lifecycle) {
-				for (String fileName : consultedFiles) {
+				synchronized (consultedFiles) {
+					StringBuffer buf = new StringBuffer();
+					boolean first = true;
+					for (String fileName : consultedFiles) {
+						if (first) {
+							first = false;
+						} else {
+							buf.append(", ");
+						}
+						buf.append(Util.quoteAtom(fileName));
+						Debug.debug("reload " + fileName + ", because it was consulted before");
+					}
+
 					try {
-						Debug.debug("pdt_reload(" + fileName + "), because it was consulted before");
-						queryOnce("pdt_reload(" + fileName + ")");
+						queryOnce("pdt_reload([" + buf.toString() + "])");
 					} catch (PrologInterfaceException e) {
 						Debug.report(e);
 					}
-				}	
-				notifyLastFileReconsulted();
+
+					notifyLastFileReconsulted();
+				}
 			}
 		}
 	}

@@ -3,21 +3,39 @@
 
 :- multifile(pdt_editor_reload:pdt_reload_listener/1).
 
-pdt_editor_reload:pdt_reload_listener(File) :-
-    generate_factbase_with_metapred_analysis(File).
-
-generate_factbase_with_metapred_analysis(File):-
-	%format('###File: ~w~n', [File]), 
-	with_mutex(meta_pred_finder,
+pdt_editor_reload:pdt_reload_listener(Files) :-
+    with_mutex(meta_pred_finder,
 		(	flag(pdt_generate_factbase, true, true)
-		->	generate_factbase(File),
-			(	flag(pdt_meta_pred_analysis, true, true)
-			->	find_all_meta_predicates
-			;	true
-			)
+		->	generate_factbase_with_metapred_analysis(Files)
 		;	true
 		)
 	).
+
+generate_factbase_with_metapred_analysis([]) :-
+	(	flag(pdt_meta_pred_analysis, true, true)
+			->	find_all_meta_predicates
+			;	true
+	), !.
+    
+generate_factbase_with_metapred_analysis([File|Rest]) :-
+    generate_factbase(File),
+    generate_factbase_with_metapred_analysis(Rest).
+    
+	
+%	generate_factbase_with_metapred_analysis(File):-
+%	%format('###File: ~w~n', [File]), 
+%	with_mutex(meta_pred_finder,
+%		(	flag(pdt_generate_factbase, true, true)
+%		->	generate_factbase(File),
+%			(	flag(pdt_meta_pred_analysis, true, true)
+%			->	find_all_meta_predicates
+%			;	true
+%			)
+%		;	true
+%		)
+%	).
+	
+	
 %    get_all_userdefined_meta_predicates(_MetaPreds).
    % format('### Userdefined meta pred: ~w~n', [MetaPreds]).
 

@@ -45,6 +45,7 @@ package org.cs3.pdt.internal.actions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
@@ -61,6 +62,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.QueryUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -82,7 +84,76 @@ public class ConsultAction extends QueryConsoleThreadAction {
 		super(null, "consult", "consult action", null);
 	}
 	
+	public void consultWorkspaceFiles(final List<IFile> filesToConsult) {
 
+		Job j = new Job("consult files from workspace") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (PDTUtils.checkForActivePif(true)) {
+					// for workspace files, create markers & do consult
+					try {
+						monitor.beginTask("consult " + filesToConsult.size() + " files", 3);
+						PrologInterface pif = PDTUtils.getActiveConsolePif();
+						if( pif != null) {
+							PDTBreakpointHandler.getInstance().backupMarkers(null, null);
+							monitor.subTask("activate warning and error tracing");
+							activateWarningAndErrorTracing(pif, new SubProgressMonitor(monitor, 1));
+							monitor.subTask("load file");
+							doConsult(filesToConsult, new SubProgressMonitor(monitor, 1));
+							monitor.done();
+							monitor.beginTask("update markers", filesToConsult.size());
+//							monitor.subTask("update markers");
+							for (IFile f : filesToConsult) {
+								PLMarkerUtils.addMarkers(f, new SubProgressMonitor(monitor, 1));
+							}
+						}
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+						return Status.CANCEL_STATUS;
+					} finally {
+						monitor.done();
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+//		TODO: find a good rule
+//		j.setRule();
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.schedule();
+	}
+	
+	private void doConsult(List<IFile> filesToConsult, IProgressMonitor monitor) {
+		monitor.beginTask("consult files", 1);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				} catch (PartInitException e) {
+					Debug.report(e);
+				}
+			}
+		});
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (IFile f : filesToConsult) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(", ");
+			}
+			try {
+				buf.append(Util.quoteAtom(Util.prologFileName(f.getLocation().toFile().getCanonicalFile())));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		setQuery(QueryUtils.buildTerm("pdt_reload", "[" + buf.toString()  + "]"));
+		run();
+		monitor.done();
+	}
+		
 	public void consultWorkspaceFile(final IFile f) {
 		Job j = new Job("consult file from workspace") {
 			@Override
@@ -97,7 +168,6 @@ public class ConsultAction extends QueryConsoleThreadAction {
 							PDTBreakpointHandler.getInstance().backupMarkers(null, null);
 							monitor.subTask("activate warning and error tracing");
 							activateWarningAndErrorTracing(pif, new SubProgressMonitor(monitor, 1));
-//							f.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 							monitor.subTask("load file");
 							doConsult(prologFileName, new SubProgressMonitor(monitor, 1));
 							monitor.subTask("update markers");
@@ -284,6 +354,8 @@ public class ConsultAction extends QueryConsoleThreadAction {
 			}
 		} );
 	}
+
+
 	
 
 
