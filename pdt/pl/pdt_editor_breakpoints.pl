@@ -34,11 +34,3 @@ user:message_hook(breakpoint(set, Id), _Kind, _Lines) :-
     
 user:message_hook(breakpoint(delete, Id), _Kind, _Lines) :-
     catch(pif_observe:pif_notify(remove_breakpoint,Id),_,true), fail.
-
-%user:message_hook(load_file(done(0, file(_, File), _, _, _, _)), _Kind, _Lines) :-
-%    catch(pif_observe:pif_notify(file_loaded,File),_,true), fail.
-
-%:- multifile(pdt_editor_reload:pdt_reload_listener/1).
-%
-%pdt_editor_reload:pdt_reload_listener(File) :-
-%    catch(pif_observe:pif_notify(file_loaded,File),_,true).
