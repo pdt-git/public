@@ -1,6 +1,8 @@
 package org.cs3.pdt.internal.actions;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
@@ -18,15 +20,19 @@ public class ReloadAction implements IObjectActionDelegate  {
 
 	@Override
 	public void run(IAction action) {
+		List<IFile> filesToConsult = new ArrayList<IFile>();
 		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
 			Object obj = iter.next();
 			
 			if (obj instanceof IFile) {
-				IFile f = (IFile) obj;
-				new ConsultAction().consultWorkspaceFile(f);
-//				PLMarkerUtils.updateFileMarkers( (IFile) obj);
+				filesToConsult.add((IFile) obj);
 			}
-
+		}
+		
+		if (filesToConsult.size() == 1) {
+			new ConsultAction().consultWorkspaceFile(filesToConsult.get(0));
+		} else {
+			new ConsultAction().consultWorkspaceFiles(filesToConsult);
 		}
 	}
 

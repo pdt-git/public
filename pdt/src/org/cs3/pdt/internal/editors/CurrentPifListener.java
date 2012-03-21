@@ -37,7 +37,11 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 	}
 
 	private void fileLoaded(String file) {
-		currentPif.addConsultedFile(file);
+		file = Util.unquoteStringOrAtom(file);
+		String[] parts = file.split("<>");
+		for (String s : parts) {
+			currentPif.addConsultedFile(s);
+		}
 		PDTPlugin.getDefault().notifyDecorators();
 	}
 
