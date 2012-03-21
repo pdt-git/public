@@ -96,7 +96,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		// Maximum time in milliseconds to wait for the prolog process to come up.
 		addField(new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent()));
 		
-		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Generate Prolog Factbase", getFieldEditorParent()){
+		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Automatically update Focus View after loading a prolog file", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
@@ -109,7 +109,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
 			}
 		};
-		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
+		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
 		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
