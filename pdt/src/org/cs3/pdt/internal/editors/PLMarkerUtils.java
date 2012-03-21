@@ -19,9 +19,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -53,7 +52,7 @@ public class PLMarkerUtils {
 
 				file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 				executeConsult(file);
-				addMarkers(file);
+				addMarkers(file, new NullProgressMonitor());
 
 			}catch(Exception e) {
 				Debug.report(e);
@@ -71,49 +70,44 @@ public class PLMarkerUtils {
 		consult.run(null);
 	}
 	
-	public static void addMarkers(final IFile file) throws PrologInterfaceException {
-		Job j = new Job("update markers") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				PrologSession session =null;
-				try {
-					final IDocument doc = PDTCoreUtils.getDocument(file);
-					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					// fn: I don't think we need this sleep, markers were added for small and large (5k lines +) files,
-					//     even without the sleep
-//					Thread.sleep(500); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
-					add_markers_for_errors_and_warnings(file, session, doc);
-					add_markers_for_smell_detectors(file, monitor, session, doc);
-					session.queryOnce("deactivate_warning_and_error_tracing");
-				} catch (PrologException e) {
-					// this may be a reload_timeout_reached exception
-					// (shouldn't happen anymore, but maybe it does)
-					
-					// so at least we deactivate the tracing, because
-					// otherwise error markers will still be visible after removing the error
-					try {
-						session.queryOnce("deactivate_warning_and_error_tracing");
-					} catch (Exception e1) {
-						Debug.report(e1);
-					}
-					return Status.CANCEL_STATUS;
-				} catch (Exception e) {
-					Debug.report(e);
-					return Status.CANCEL_STATUS;
-				} finally {
-					if(session!=null)session.dispose();
-				}
-				return Status.OK_STATUS;
+	public static void addMarkers(IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("update markers", 2);
+		PrologSession session =null;
+		try {
+			final IDocument doc = PDTCoreUtils.getDocument(file);
+			session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
+			monitor.subTask("add markers for errors and warnings");
+			addMarkersForErrorsAndWarnings(file, session, doc, new SubProgressMonitor(monitor, 1));
+			monitor.subTask("Update Prolog Smells Detectors");
+			addMarkersForSmellDetectors(file, session, doc, new SubProgressMonitor(monitor, 1));
+			session.queryOnce("deactivate_warning_and_error_tracing");
+		} catch (PrologException e) {
+			// this may be a reload_timeout_reached exception
+			// (shouldn't happen anymore, but maybe it does)
+
+			// so at least we deactivate the tracing, because
+			// otherwise error markers will still be visible after removing the error
+			try {
+				session.queryOnce("deactivate_warning_and_error_tracing");
+			} catch (Exception e1) {
+				Debug.report(e1);
 			}
-		};
-		j.setRule(file);
-		j.schedule();
+		} catch (Exception e) {
+			Debug.report(e);
+		} finally {
+			if(session!=null)session.dispose();
+			monitor.done();
+		}
 	}
 	
-	private static void add_markers_for_errors_and_warnings(
-			final IFile file, PrologSession session, final IDocument doc)
+	private static void addMarkersForErrorsAndWarnings(
+			final IFile file, PrologSession session, final IDocument doc, SubProgressMonitor monitor)
 			throws PrologInterfaceException, CoreException {
 		List<Map<String, Object>> reloadedFiles = session.queryAll("pdtplugin:pdt_reloaded_file(File)");
+		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message,File)");
+		monitor.beginTask("add markers for errors and warnings", reloadedFiles.size() + msgs.size());
+		
+		monitor.setTaskName("Collecting files");
 		HashSet<IFile> clearedFiles = new HashSet<IFile>();
 		for (Map<String, Object> reloadedFile : reloadedFiles) {
 			String fileName = reloadedFile.get("File").toString();
@@ -121,22 +115,26 @@ public class PLMarkerUtils {
 			try {
 				file2 = FileUtils.findFileForLocation(fileName);
 			} catch (IOException e1) {
+				monitor.worked(1);
 				continue;
 			} catch (IllegalArgumentException e2){
 				continue;
 			}
 			if (file2 == null || !file2.exists()){
+				monitor.worked(1);
 				continue;
 			}
 			file2.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 			clearedFiles.add(file2);
+			monitor.worked(1);
 		}
-		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message,File)");
+		monitor.setTaskName("Creating markers");
 		for (Map<String, Object> msg : msgs) {
 			int severity=0;
 			try {
 				severity = mapSeverity(((String)msg.get("Kind")));
 			} catch(IllegalArgumentException e){
+				monitor.worked(1);
 				continue;
 			}
 			
@@ -145,11 +143,14 @@ public class PLMarkerUtils {
 			try {
 				file2 = FileUtils.findFileForLocation(fileName);
 			} catch (IOException e1) {
+				monitor.worked(1);
 				continue;
 			} catch (IllegalArgumentException e2){
+				monitor.worked(1);
 				continue;
 			}
 			if (file2 == null || !file2.exists()){
+				monitor.worked(1);
 				continue;
 			}
 			if (!clearedFiles.contains(file2)){
@@ -163,58 +164,47 @@ public class PLMarkerUtils {
 
 			String msgText = (String)msg.get("Message");
 			int line = Integer.parseInt((String)msg.get("Line"))-1;
-//			int start = 0;
-//			
-//			try {
-//				start = doc.getLineOffset(line);
-//			} catch (BadLocationException e) {
-//				Debug.warning("Found no position for marker.");
-//			}
-			
-//			int end = start +Integer.parseInt((String)msg.get("Length"));
 			if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
-//				start = end= 0;
 				line = 0;
 			}
 			
-//			MarkerUtilities.setCharStart(marker, start);
-//			MarkerUtilities.setCharEnd(marker, end);
 			MarkerUtilities.setLineNumber(marker, line+1);
 			
 			marker.setAttribute(IMarker.MESSAGE, msgText);
+			monitor.worked(1);
 		}
+		monitor.done();
 	}
 
 	
-	private static void add_markers_for_smell_detectors(final IFile file,
-			IProgressMonitor monitor, PrologSession session, final IDocument doc)
-			throws PrologInterfaceException, CoreException {
-		monitor.setTaskName("Update Prolog Smells Detectors");
+	private static void addMarkersForSmellDetectors(final IFile file, PrologSession session, final IDocument doc, 
+			IProgressMonitor monitor)
+					throws PrologInterfaceException, CoreException {
+		monitor.beginTask("Update Prolog Smells Detectors", 1);
 
 		String query = "smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, '" + file.getRawLocation().toPortableString().toLowerCase() + "', Start, Length)";
 		List<Map<String, Object>> msgsSmells = session.queryAll(query);
 
 		if(msgsSmells!=null) {
-		for (Map<String, Object> msg : msgsSmells) {
-			IMarker marker = file.createMarker(IMarker.PROBLEM);
-			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-			marker.setAttribute(PDTMarker.SMELL_NAME, msg.get("Name").toString());
-			marker.setAttribute(PDTMarker.QUICKFIX_DESCRIPTION, msg.get("QuickfixDescription").toString());
+			for (Map<String, Object> msg : msgsSmells) {
+				IMarker marker = file.createMarker(IMarker.PROBLEM);
+				marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+				marker.setAttribute(PDTMarker.SMELL_NAME, msg.get("Name").toString());
+				marker.setAttribute(PDTMarker.QUICKFIX_DESCRIPTION, msg.get("QuickfixDescription").toString());
 
-			String msgText = (String)msg.get("Description");
-			int startPl = Integer.parseInt(msg.get("Start").toString());
-			int start =PDTCoreUtils.convertLogicalToPhysicalOffset(doc,startPl);
-			int length = Integer.parseInt(msg.get("Length").toString());
+				String msgText = (String)msg.get("Description");
+				int startPl = Integer.parseInt(msg.get("Start").toString());
+				int start =PDTCoreUtils.convertLogicalToPhysicalOffset(doc,startPl);
+				int length = Integer.parseInt(msg.get("Length").toString());
 
-			//						marker.setAttribute(IMarker.CHAR_START, start);
-			//						marker.setAttribute(IMarker.CHAR_END, (start+length));
-			MarkerUtilities.setCharStart(marker, start);
-			MarkerUtilities.setCharEnd(marker, start+length);
+				MarkerUtilities.setCharStart(marker, start);
+				MarkerUtilities.setCharEnd(marker, start+length);
 
-			marker.setAttribute(PDTMarker.QUICKFIX_ACTION, msg.get("QuickfixAction".toString()));
-			marker.setAttribute(IMarker.MESSAGE, msgText);
+				marker.setAttribute(PDTMarker.QUICKFIX_ACTION, msg.get("QuickfixAction".toString()));
+				marker.setAttribute(IMarker.MESSAGE, msgText);
+			}
 		}
-		}
+		monitor.done();
 	}
 
 
