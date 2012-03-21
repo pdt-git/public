@@ -44,4 +44,9 @@ public class MarkerBackup {
 	public String getId() {
 		return id;
 	}
+	
+	@Override
+	public String toString() {
+		return file.toString() + "[id: " + id + ", line: " + lineNumber + ", offset: " + offset + "]";
+	}
 }
