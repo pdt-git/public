@@ -122,36 +122,50 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				return;
 			}
 			
-			for (MarkerBackup m : markerBackup) {
-				// only recreate the marker if it was deleted
-				if (deletedIds.contains(m.getId())) {
-					if (m.getFile().equals(currentIFile)) {
-						// if the marker is in the current file, recreate information from the document (the marker could be moved)
-						try {
-							int offset = document.getLineInformation(m.getLineNumber() - 1).getOffset();
-							currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(currentIFile), m.getLineNumber(), offset, "Id"));
-						} catch (PrologInterfaceException e) {
-							Debug.report(e);
-						} catch (BadLocationException e) {
-							Debug.report(e);
-						}
-					} else {
-						// else, just reset the marker with the same information as before
-						try {
-							currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
-						} catch (PrologInterfaceException e) {
-							Debug.report(e);
-						}
+			for (final MarkerBackup m : markerBackup) {
+				
+				runAsJob("recreate marker", m.getFile(), new Runnable() {
+					
+					@Override
+					public void run() {
+						// only recreate the marker if it was deleted
+						if (deletedIds.contains(m.getId())) {
+							if (m.getFile().equals(currentIFile)) {
+								// if the marker is in the current file, recreate information from the document (the marker could be moved)
+								try {
+									int offset = document.getLineInformation(m.getLineNumber() - 1).getOffset();
+									currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(currentIFile), m.getLineNumber(), offset, "Id"));
+								} catch (PrologInterfaceException e) {
+									Debug.report(e);
+								} catch (BadLocationException e) {
+									Debug.report(e);
+								}
+							} else {
+								// else, just reset the marker with the same information as before
+								try {
+									currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
+								} catch (PrologInterfaceException e) {
+									Debug.report(e);
+								}
+							}
+						}						
 					}
-				}
+				});
+				
 				
 			}
-			
-			// disable logging of deleted ids
-			deletedIds = null;
-			markerBackup = null;
-			currentIFile = null;
-			document = null;
+
+			runAsJob("recreate marker", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
+				
+				@Override
+				public void run() {
+					// disable logging of deleted ids
+					deletedIds = null;
+					markerBackup = null;
+					currentIFile = null;
+					document = null;
+				}
+			});
 	}
 
 	private String getPrologFileName(IFile file) {
