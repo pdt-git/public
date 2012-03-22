@@ -94,7 +94,10 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	
 	
 		// Maximum time in milliseconds to wait for the prolog process to come up.
-		addField(new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent()));
+		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
+		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
+		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
+		addField(timeoutFieldEditor);
 		
 		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Automatically update Focus View after loading a prolog file", getFieldEditorParent()){
 			@Override
