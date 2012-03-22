@@ -827,7 +827,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				PreferenceManager mgr = new PreferenceManager();
 				
 				IPreferencePage page = new PreferencePageMain();
-				page.setTitle("PDT console preferences");
+				page.setTitle("PDT Console");
 				
 				IPreferenceNode node = new PreferenceNode("PreferencePage", page);
 				mgr.addToRoot(node);
