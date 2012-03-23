@@ -82,6 +82,11 @@ final public class PDTConsole {
 
 	public static final String PREF_RECONSULT_ON_RESTART = "pdt.reconsult.on.restart";
 	
+
+	public static final String RECONSULT_NONE = "pdt.reconsult.none";
+	public static final String RECONSULT_ENTRY = "pdt.reconsult.entry.points";
+	public static final String RECONSULT_ALL = "pdt.reconsult.all";
+	
 	
 	
 }
