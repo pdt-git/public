@@ -10,6 +10,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -28,7 +29,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class PreferencePageMain extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	
 	public PreferencePageMain() {
 		super(GRID);
 		setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
@@ -42,24 +42,17 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 	 */
 	@Override
 	public void createFieldEditors() {
-		
-		
-		
 		//If enabled, the enter key sends a semicolon(';') when\n
 		//while the console is in 'get_single_char/1'-mode, \n
 		//e.g., when backtracking over the solutions to a goal.		
 //		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
 		
-		//When enabled, the console view will be able to detect\n
-		//whether the user input stream is read from via get_single_char/1
-		//(e.g. when backtracking through query results).\n
-		//In those situations, the console view will emulate the
-		//unbuffered behaviour of the SWI-Prolog default terminal/plwin
-		//interface. This works just fine in most cases, but there have been 
-		//reports of problems when using Edinburgh-style io predicates.\n
-		//If you get unexpected io behaviour from 
-		//your application, disabling this flag may help.
-		addField(new BooleanFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART,"reconsult files on restart of process",getFieldEditorParent()));
+//		addField(new BooleanFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "reconsult files on restart of process",getFieldEditorParent()));
+		
+		RadioGroupFieldEditor rgfeReconsult = new RadioGroupFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "Handling consulted files on restart", 3, new String[][] {
+				{ "no reconsulting", PDTConsole.RECONSULT_NONE }, { "reconsult entry points", PDTConsole.RECONSULT_ENTRY }, { "reconsult all files", PDTConsole.RECONSULT_ALL }},
+				getFieldEditorParent(), true);
+		addField(rgfeReconsult);
 		
 		//The Prolog Console uses this to save its command history.\n
 		//Just leave it empty if you do not want the command history to be persistent.

@@ -57,6 +57,7 @@ import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTermUtil;
@@ -68,6 +69,9 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
 
 /**
  * convenience implementation of common infrastructure.
@@ -79,18 +83,18 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
 	private List<BootstrapPrologContribution> bootstrapLibraries = new Vector<BootstrapPrologContribution>();
 	private final MyLifeCycle lifecycle;
-	
+
 	/************************************************/
 	/**** Options [Start] *****/
 	/************************************************/
-	
+
 	private boolean standAloneServer = false;
 	private String host;
 	private String executable;
 	private String environment;
 	private int timeout;
 	private String fileSearchPath;
-	
+
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 
 	public AbstractPrologInterface() {
@@ -101,11 +105,11 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		PifShutdownHook.getInstance().add(this);
 		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
 	}
-	
+
 	/************************************************/
 	/**** Options [Start] *****/
 	/************************************************/
-	
+
 	public void setStandAloneServer(String standAloneServer) {
 		setStandAloneServer(Boolean.parseBoolean(standAloneServer));
 	}
@@ -178,12 +182,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public String getEnvironment() {
 		return environment;
 	}
-	
+
 	@Override
 	public Object getAttribute(String attribute) {
 		return attributes.get(attribute);
 	}
-	
+
 	@Override
 	public void setAttribute(String attribute, Object value) {
 		attributes.put(attribute, value);
@@ -340,7 +344,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public void removeLifeCycleHook(final LifeCycleHook hook, final String hookId) {
 		lifecycle.removeLifeCycleHook(hook, hookId);
 	}
-	
+
 	/**
 	 * 
 	 * override this if your subclass needs special initial Sessions
@@ -401,10 +405,10 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
-					restart();
-					if (getError() != null) {
-						throw new PrologInterfaceException(getError());
-					}
+				restart();
+				if (getError() != null) {
+					throw new PrologInterfaceException(getError());
+				}
 			}
 			if (!isUp()) {
 				try {
@@ -535,7 +539,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 				throw new PrologInterfaceException(e);
 			}
 
-//			reconsultFiles();
+			//			reconsultFiles();
 		}
 
 	}
@@ -616,14 +620,14 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		sessions.add(new WeakReference<AsyncPrologSession>(asyncSession));
 		return asyncSession;
 	}
-	
-	
-	 // =============================================================
-	 // modified from factory
-	 // =============================================================
+
+
+	// =============================================================
+	// modified from factory
+	// =============================================================
 	public final static String PL_INTERFACE_DEFAULT="org.cs3.pl.prolog.internal.socket.SocketPrologInterface";
- 
-    
+
+
 	public static PrologInterface newInstance() {
 		return newInstance(PL_INTERFACE_DEFAULT, null);
 	}
@@ -645,21 +649,21 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
-	
-	
+
+
 	private List<String> consultedFiles;
 
 	@Override
 	public List<String> getConsultedFiles() {
 		return consultedFiles;
 	}
-	
+
 
 	@Override
 	public void clearConsultedFiles() {
 		consultedFiles = null;
 	}
-	
+
 	@Override
 	public void addConsultedFile(String fileName) {
 		if (consultedFiles == null) {
@@ -676,28 +680,24 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
-	
+
 	// TODO: problem with quotes
 	@Override
-	public void reconsultFiles() {
+	public void reconsultFiles(boolean onlyEntryPoints) {
 		Debug.debug("Reconsult files");
 		if (consultedFiles != null) {
 			synchronized (lifecycle) {
 				synchronized (consultedFiles) {
-					StringBuffer buf = new StringBuffer();
-					boolean first = true;
-					for (String fileName : consultedFiles) {
-						if (first) {
-							first = false;
-						} else {
-							buf.append(", ");
-						}
-						buf.append(Util.quoteAtom(fileName));
-						Debug.debug("reload " + fileName + ", because it was consulted before");
+
+					String reconsultQuery = null;
+					if (onlyEntryPoints) {
+						reconsultQuery = createReconsultQueryEntryPoints();
+					} else {
+						reconsultQuery = createReconsultQuery();
 					}
 
 					try {
-						queryOnce("pdt_reload([" + buf.toString() + "])");
+						queryOnce("pdt_reload([" + reconsultQuery + "])");
 					} catch (PrologInterfaceException e) {
 						Debug.report(e);
 					}
@@ -707,23 +707,67 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			}
 		}
 	}
-	
+
+	private String createReconsultQueryEntryPoints() {
+
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String fileName : consultedFiles) {
+			try {
+				IFile file = FileUtils.findFileForLocation(fileName);
+				String isEntryPoint = file.getPersistentProperty(new QualifiedName("pdt", "entry.point"));
+
+				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
+					if (first) {
+						first = false;
+					} else {
+						buf.append(", ");
+					}
+					buf.append(Util.quoteAtom(fileName));
+					Debug.debug("reload " + fileName + ", because it was consulted before");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+		return buf.toString();
+	}
+
+	private String createReconsultQuery() {
+
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String fileName : consultedFiles) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(", ");
+			}
+			buf.append(Util.quoteAtom(fileName));
+			Debug.debug("reload " + fileName + ", because it was consulted before");
+		}
+		return buf.toString();
+	}
+
+
 	private static Set<ReconsultHook> currentHooks = new HashSet<ReconsultHook>();
-	
+
 	public static void registerReconsultHook(ReconsultHook hook) {
 		currentHooks.add(hook);
 	}
-	
+
 	public static void unregisterReconsultHook(ReconsultHook hook) {
 		currentHooks.remove(hook);
 	}
-	
+
 	private void notifyLastFileReconsulted() {
 		for (ReconsultHook r : currentHooks) {
 			r.lastFileReconsulted(this);
 		}
 	}
 
-	
-	
+
+
 }
