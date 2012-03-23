@@ -21,10 +21,14 @@ public class PrologPerspective implements IPerspectiveFactory {
 	public void defineLayout(IPageLayout layout) {
 		String editorArea = layout.getEditorArea();
 
-		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
-		layout.addView("pdt.view.focus", IPageLayout.RIGHT, (float) 0.5, PrologConsoleView.HOOK_ID);
 		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, (float) 0.2, editorArea);
+		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float) 0.8, editorArea);
+		
+//		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
+//		layout.addView("pdt.view.focus", IPageLayout.RIGHT, (float) 0.5, PrologConsoleView.HOOK_ID);
+//		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, (float) 0.2, editorArea);
+//		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float) 0.8, editorArea);
 	}
 	
 }
