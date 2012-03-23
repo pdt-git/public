@@ -99,7 +99,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		addField(timeoutFieldEditor);
 		
-		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Automatically update Focus View after loading a prolog file", getFieldEditorParent()){
+		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
