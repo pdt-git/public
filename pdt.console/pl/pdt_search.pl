@@ -169,7 +169,10 @@ extract_name_arity(Term,Head,Name,Arity) :-
     % Special treatment of Name/Arity terms:
     (  Term = Name/Arity
     -> true
-     ; functor(Term,Name,Arity)
+     ; (  Term = _Module:Term2
+       -> functor(Term2, Name, Arity)
+       ;  functor(Term,Name,Arity)
+       )
     ),
     % Create most general head
     functor(Head,Name,Arity).
