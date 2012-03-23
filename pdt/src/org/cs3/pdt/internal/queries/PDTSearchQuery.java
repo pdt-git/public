@@ -160,7 +160,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		
 		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
 		if(clauses.size()>0 && goal.getModule()==null){
-			goal.setModule((String)clauses.get(0).get("Module"));
+			goal.setModule(clauses.get(0).get("Module").toString());
 		}
 		return clauses;
 	}
@@ -267,12 +267,12 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		for (Iterator<Map<String,Object>> iterator = results.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 
-			int start = Integer.parseInt((String) m.get("Start"));
-			int end = Integer.parseInt((String) m.get("End"));
+			int start = Integer.parseInt(m.get("Start").toString());
+			int end = Integer.parseInt(m.get("End").toString());
 			IFile file=null;
 			String path =null; 
 			try{
-				path = Util.unquoteAtom((String) m.get("File"));
+				path = Util.unquoteAtom(m.get("File").toString());
 				file = FileUtils.findFileForLocation(path);
 			}catch(IllegalArgumentException iae){
 				Debug.report(iae);
@@ -287,9 +287,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 				UIUtils.setStatusErrorMessage(msg);
 				continue;
 			}
-			String type = (String)m.get("Type");
+			String type = m.get("Type").toString();
 			
-			String callerPredicate =(String) m.get("Caller");
+			String callerPredicate = m.get("Caller").toString();
 			String[] callerParts=callerPredicate.split("/");
 			String name = callerParts[0];
 			int arity = Integer.getInteger(callerParts[1]);
