@@ -158,7 +158,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				try {
 					session = console.getPrologInterface().getSession();
 					SourceLocation location = findFirstClauseLocation_withoutPdtNature(goal, session);
-					PDTUtils.showSourceLocation(location);
+					if (location != null) {
+						PDTUtils.showSourceLocation(location);
+					}
 					return;
 				} catch (Exception e) {
 					Debug.report(e);
@@ -225,6 +227,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			+enclFile+ "'," +quotedTerm+ "," +module+ ",File,Line)";
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause =  session.queryOnce(query);
+		if (clause == null) {
+			return null;
+		}
 		if(clause.get("File")== null){
 			throw new RuntimeException("Cannot resolve file for primary declaration of " + quotedTerm);
 		}
