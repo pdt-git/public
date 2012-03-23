@@ -22,6 +22,13 @@
 % Wrapper for consult used to ignore PLEditor-triggered consults in the
 % console history and to start the update of the PDT-internal factbase.
 
+% SWI-Prolog list    
+pdt_reload(Files):-
+    is_list(Files),
+    !,
+    forall(member(F,Files),pdt_reload_no_listener(F)),
+	notify_reload_listeners(Files).
+	
 % Logtalk
 pdt_reload(File):-
     split_file_path(File, _Directory,_FileName,_,lgt),
@@ -30,8 +37,9 @@ pdt_reload(File):-
       logtalk_adapter::pdt_reload(File)
     ).
 
-% SWI-Prolog    
+% SWI-Prolog
 pdt_reload(File):-
+    debug(pdt_reload, 'pdt_reload(~w)', [File]),
     with_mutex('reloadMutex', 
       (
         % we have to continiue, even if reload_file fails
@@ -40,8 +48,23 @@ pdt_reload(File):-
         % only return false if the file is not loaded at all
         ( source_file(File) ->
           ( retractall(in_reload),
-            notify_reload_listeners(File)
+            notify_reload_listeners([File])
           )
+          ; fail
+        )        
+      )
+    ).
+    
+pdt_reload_no_listener(File):-
+    debug(pdt_reload, 'pdt_reload_no_listener(~w)', [File]),
+    with_mutex('reloadMutex', 
+      (
+        % we have to continiue, even if reload_file fails
+        % normally failing means: the file has errors
+        (make:reload_file(File) -> true ; true),
+        % only return false if the file is not loaded at all
+        ( source_file(File) ->
+          retractall(in_reload)
           ; fail
         )        
       )
@@ -49,13 +72,14 @@ pdt_reload(File):-
 
 :- multifile(pdt_reload_listener/1).
 
-notify_reload_listeners(File) :-
-	pdt_reload_listener(File),
+notify_reload_listeners(Files) :-
+	pdt_reload_listener(Files),
 	fail.
 notify_reload_listeners(_).
 
-pdt_reload_listener(File) :-
-    catch(pif_observe:pif_notify(file_loaded,File),_,true).
+pdt_reload_listener(Files) :-
+    list_2_separated_list(Files, '<>', FileList),
+    catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *
@@ -137,6 +161,7 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 	    free_memory_file(Handle).
 
 pdt_reloaded_file(LoadedFile) :-
+	wait_for_reload_finished,
 	reloaded_file(LoadedFile).
    
 wait_for_reload_finished :-

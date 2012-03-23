@@ -2,6 +2,7 @@ package org.cs3.pdt.internal.decorators;
 
 import static org.cs3.pl.prolog.QueryUtils.bT;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -61,12 +62,21 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		}
 		
 	}
+	
+	HashMap<Object, Long> elementDecorated = new HashMap<Object, Long>();
 
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		if(!(element instanceof IFile) && !(element instanceof IFolder)){
 			return;
 		}
+		
+		Long lastElementUpdate = elementDecorated.get(element);
+		
+		if (lastElementUpdate != null && lastElementUpdate > lastUpdate) {
+			fireLabelProviderChanged();
+		}
+		elementDecorated.put(element, System.currentTimeMillis());
 
 		PDTPlugin.getDefault().addDecorator(this);
 
@@ -139,6 +149,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 	Set<String> sourceFiles = new HashSet<String>();
 	Set<String> modifiedSourceFiles = new HashSet<String>();
 	Set<String> dirs= new HashSet<String>();
+	private long lastUpdate = 0;
 
 	private void fireLabelProviderChanged() {
 		
@@ -153,6 +164,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		}
 		try {
 			List<Map<String, Object>> results = currentPif.queryAll(bT("pdt_source_file", "File", "State"));
+			lastUpdate = System.currentTimeMillis();
 			for (Map<String, Object> result: results) {
 				String fileName = result.get("File").toString();
 				String fileState = result.get("State").toString();

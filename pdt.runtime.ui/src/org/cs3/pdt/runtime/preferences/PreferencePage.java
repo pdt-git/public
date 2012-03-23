@@ -94,9 +94,12 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	
 	
 		// Maximum time in milliseconds to wait for the prolog process to come up.
-		addField(new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent()));
+		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
+		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
+		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
+		addField(timeoutFieldEditor);
 		
-		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Generate Prolog Factbase", getFieldEditorParent()){
+		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
@@ -109,7 +112,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
 			}
 		};
-		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
+		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
 		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {

@@ -5,10 +5,12 @@
 
 ensure_generated_factbase_for_source_file(File) :-
 	source_file(File),
-	(	fileT_ri(File, _)
-	->	true
-	;	generate_factbase(File)
-	).
+	exists_file(File),
+	generate_factbase(File).
+%	(	fileT_ri(File, _)
+%	->	true
+%	;	generate_factbase(File)
+%	).
 
 generate_factbase:-
     with_mutex(prolog_factbase,

@@ -45,11 +45,11 @@ package org.cs3.pdt.internal.actions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.editors.PLMarkerUtils;
@@ -62,10 +62,15 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.QueryUtils;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -79,55 +84,154 @@ public class ConsultAction extends QueryConsoleThreadAction {
 		super(null, "consult", "consult action", null);
 	}
 	
+	public void consultWorkspaceFiles(final List<IFile> filesToConsult) {
 
-	public void consultWorkspaceFile(IFile f) {
-
-		if (PDTUtils.checkForActivePif(true)) {
-			// for workspace files, create markers & do consult
-			try {
-				if( PDTCoreUtils.getPrologProject(f) == null &&
-						PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole() != null) { 
-					String prologFileName = Util.prologFileName(f.getLocation().toFile().getCanonicalFile());
-					PDTBreakpointHandler.getInstance().backupMarkers(null, null);
-					activateWarningAndErrorTracing();
-					f.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-					doConsult(prologFileName);
-					PLMarkerUtils.addMarkers(f);
+		Job j = new Job("consult files from workspace") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (PDTUtils.checkForActivePif(true)) {
+					// for workspace files, create markers & do consult
+					try {
+						monitor.beginTask("consult " + filesToConsult.size() + " files", 3);
+						PrologInterface pif = PDTUtils.getActiveConsolePif();
+						if( pif != null) {
+							PDTBreakpointHandler.getInstance().backupMarkers(null, null);
+							monitor.subTask("activate warning and error tracing");
+							activateWarningAndErrorTracing(pif, new SubProgressMonitor(monitor, 1));
+							monitor.subTask("load file");
+							doConsult(filesToConsult, new SubProgressMonitor(monitor, 1));
+							monitor.done();
+							monitor.beginTask("update markers", filesToConsult.size());
+//							monitor.subTask("update markers");
+							for (IFile f : filesToConsult) {
+								PLMarkerUtils.addMarkers(f, new SubProgressMonitor(monitor, 1));
+							}
+						}
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+						return Status.CANCEL_STATUS;
+					} finally {
+						monitor.done();
+					}
 				}
+				return Status.OK_STATUS;
+			}
+		};
+//		TODO: find a good rule
+//		j.setRule();
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.schedule();
+	}
+	
+	private void doConsult(List<IFile> filesToConsult, IProgressMonitor monitor) {
+		monitor.beginTask("consult files", 1);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				} catch (PartInitException e) {
+					Debug.report(e);
+				}
+			}
+		});
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (IFile f : filesToConsult) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(", ");
+			}
+			try {
+				buf.append(Util.quoteAtom(Util.prologFileName(f.getLocation().toFile().getCanonicalFile())));
 			} catch (IOException e) {
-				Debug.report(e);
-			} catch (CoreException e) {
-				Debug.report(e);
-			} catch (PrologInterfaceException e) {
 				e.printStackTrace();
 			}
 		}
+		setQuery(QueryUtils.buildTerm("pdt_reload", "[" + buf.toString()  + "]"));
+		run();
+		monitor.done();
 	}
-
-	private void activateWarningAndErrorTracing() throws PrologInterfaceException {
-		PrologInterface pif = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface();
-		pif.queryOnce("activate_warning_and_error_tracing");
-	}
-	
-	public void consultExternalFile(File f) {
-		// for external files, only do the consult
-		String prologFileName = Util.prologFileName(f);
-		doConsult(prologFileName);
-	}
-	
-	private void doConsult(String prologFilename) {
-
-		try {
-			PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
-		} catch (PartInitException e) {
-			e.printStackTrace();
-		}
 		
-//		checkPif();
+	public void consultWorkspaceFile(final IFile f) {
+		Job j = new Job("consult file from workspace") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (PDTUtils.checkForActivePif(true)) {
+					// for workspace files, create markers & do consult
+					try {
+						monitor.beginTask("consult " + f.getName(), 3);
+						PrologInterface pif = PDTUtils.getActiveConsolePif();
+						if( PDTCoreUtils.getPrologProject(f) == null && pif != null) {
+							String prologFileName = Util.prologFileName(f.getLocation().toFile().getCanonicalFile());
+							PDTBreakpointHandler.getInstance().backupMarkers(null, null);
+							monitor.subTask("activate warning and error tracing");
+							activateWarningAndErrorTracing(pif, new SubProgressMonitor(monitor, 1));
+							monitor.subTask("load file");
+							doConsult(prologFileName, new SubProgressMonitor(monitor, 1));
+							monitor.subTask("update markers");
+							PLMarkerUtils.addMarkers(f, new SubProgressMonitor(monitor, 1));
+						}
+					} catch (IOException e) {
+						Debug.report(e);
+						return Status.CANCEL_STATUS;
+					} catch (CoreException e) {
+						Debug.report(e);
+						return Status.CANCEL_STATUS;
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+						return Status.CANCEL_STATUS;
+					} finally {
+						monitor.done();
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.setRule(f);
+		j.schedule();
+	}
+
+	private void activateWarningAndErrorTracing(PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("activate warning and error tracing", 1);
+		pif.queryOnce("activate_warning_and_error_tracing");
+		monitor.done();
+	}
+	
+	public void consultExternalFile(final File f) {
+
+		Job j = new Job("consult file from workspace") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("consult external file", 1);
+				// for external files, only do the consult
+				String prologFileName = Util.prologFileName(f);
+				doConsult(prologFileName, new SubProgressMonitor(monitor, 1));
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+		};
+		j.setRule(null);
+		j.schedule();
+	}
+	
+	private void doConsult(String prologFilename, IProgressMonitor monitor) {
+		monitor.beginTask("consult file", 1);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				} catch (PartInitException e) {
+					Debug.report(e);
+				}
+			}
+		});
 		
 		setQuery(QueryUtils.buildTerm("pdt_reload", Util.quoteAtom(prologFilename)));
 		run();
-		
+		monitor.done();
 	}
 
 	public void consultFromActiveEditor() {
@@ -250,6 +354,8 @@ public class ConsultAction extends QueryConsoleThreadAction {
 			}
 		} );
 	}
+
+
 	
 
 

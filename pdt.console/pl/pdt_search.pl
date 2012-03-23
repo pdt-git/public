@@ -157,9 +157,17 @@ find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile
 
 % The second argument is just an atom contianing the string representation of the term:     
 find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine) :-
-    atom_to_term(TermString,Term,_Bindings),
+	retrieve_term_from_atom(EnclFile, TermString, Term),
     extract_name_arity(Term,Head,Name,Arity),
     find_primary_definition_visible_in__(EnclFile,Head,Name,Arity,ReferencedModule,MainFile,FirstLine).
+
+retrieve_term_from_atom(EnclFile, TermString, Term) :-
+	(	module_property(Module, file(EnclFile))
+	->	atom_concat(TermString, '.', TermStringWithDot),
+		open_chars_stream(TermStringWithDot, Stream),
+		read_term(Stream, Term, [module(Module)])
+	;	atom_to_term(TermString, Term, _)
+	).
 
 extract_name_arity(Term,Head,Name,Arity) :-
     (  var(Term) 
@@ -169,7 +177,10 @@ extract_name_arity(Term,Head,Name,Arity) :-
     % Special treatment of Name/Arity terms:
     (  Term = Name/Arity
     -> true
-     ; functor(Term,Name,Arity)
+     ; (  Term = _Module:Term2
+       -> functor(Term2, Name, Arity)
+       ;  functor(Term,Name,Arity)
+       )
     ),
     % Create most general head
     functor(Head,Name,Arity).

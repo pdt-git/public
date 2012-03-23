@@ -261,7 +261,7 @@ public interface PrologInterface {
 
 	public void clearConsultedFiles();
 	
-	public void reconsultFiles();
+	public void reconsultFiles(boolean onlyEntryPoints);
 
 	/**
 	 * Start swi-prolog with the JPL Java bridge as part of the same process.

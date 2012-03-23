@@ -16,7 +16,8 @@
     pretty_print_list/1,      % (+List)!io 
     pretty_print_list/2,          % (+List,+Indent)!io 
     pretty_print_list_body/2,     % (+List,+Indent)
-    list_2_comma_separated_list/2 % (+List,-Atom) is det.
+    list_2_comma_separated_list/2, % (+List,-Atom) is det.
+    list_2_separated_list/3 % (+List,-Atom) is det.
 ] ).
 
 
@@ -335,6 +336,12 @@ list_2_comma_separated_list([Element],Element) :- !.
 list_2_comma_separated_list([Element|[H|T]],ElementComma) :-
 	list_2_comma_separated_list([H|T],RestAtom),
 	format(atom(ElementComma),'~w,~w',[Element,RestAtom]).
+	
+list_2_separated_list([],_,'') :- !.
+list_2_separated_list([Element],_,Element) :- !.
+list_2_separated_list([Element|[H|T]],Separator,ElementSeparated) :-
+	list_2_separated_list([H|T],Separator,RestAtom),
+	aformat(ElementSeparated,'~w~w~w',[Element,Separator,RestAtom]).
 	
 
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)]) .  
