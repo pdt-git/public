@@ -232,9 +232,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 										Thread.sleep(1000);
 									}
 									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
-									boolean reconsultFiles = Boolean.parseBoolean(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, "true"));
 									
-									if (reconsultFiles) {
+									final String reconsultFiles = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_NONE);
+									
+									if (reconsultFiles.equals(PDTConsole.RECONSULT_NONE)) {
+										getPrologInterface().clearConsultedFiles();
+									} else {
 
 										getPrologInterface().addLifeCycleHook(new LifeCycleHook() {
 
@@ -257,7 +260,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 											@Override
 											public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-												pif.reconsultFiles();
+												pif.reconsultFiles(reconsultFiles.equals(PDTConsole.RECONSULT_ENTRY));
 												pif.removeLifeCycleHook(HOOK_ID+"_");
 
 											}
