@@ -119,7 +119,7 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
 		cfe_warn = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_WARNING, "WARNING", colourGroup);
 		cfe_info = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_INFO, "INFORMATION", colourGroup);
 		cfe_dbg = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_DEBUG, "DEBUG", colourGroup);
-		bfe_inter_start = new BooleanFieldEditor(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "Interprete *** as 'Information' ", colourGroup);
+		bfe_inter_start = new BooleanFieldEditor(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "Treat '***' as 'INFO'", colourGroup);
 		colourGroup.setLayout(new GridLayout(2, false));
 		colourGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
