@@ -127,7 +127,6 @@ public class SocketSession implements PrologSession {
 		Map<String, Object> result = queryOnce(newQuery);
 		flags=oldflags;
 		return transformResults(result, vars);
-		
 	}
 
 	private List<Map<String, Object>> transformResults(Map<String, Object> result,  List<String> vars) {
@@ -220,25 +219,9 @@ public class SocketSession implements PrologSession {
 		}
 	}
 
-//	private List<Map<String, Object>> generateEmptyResults() {
-//		List<Map<String, Object>> l = new Vector<Map<String, Object>>();
-//		l.add(generateAnEmtpyResult());
-//		return l;
-//	}
-	
 	private Map<String, Object> generateAnEmtpyResult() {
 		return new HashMap<String, Object>();
 	}
-	
-//	private Vector<Map<String, Object>> readResults() throws IOException {
-//		Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
-//		Map<String, Object> result = read_solution(flags);
-//		while (result != null) {
-//			results.add(result);
-//			result = read_solution(flags);
-//		}
-//		return results;
-//	}
 	
 	private Map<String, Object> read_solution(int flags) throws IOException {
 		HashMap<String, Object> result = new HashMap<String, Object>();

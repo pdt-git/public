@@ -42,8 +42,8 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		Iterator<Map<String,Object>> iter = l.iterator();
 		while(iter.hasNext()) {
 			Map<String,Object> map = iter.next();
-			String annotator = (String) map.get("Annotator");
-			String enabled = (String) map.get("Enabled");
+			String annotator = map.get("Annotator").toString();
+			String enabled = map.get("Enabled").toString();
 			options[i++] = new SimpleOption(annotator,annotator,"no description",Option.FLAG,"true");
 			
 			String persisted = prologProject.getPreferenceValue("enabled."+annotator, enabled);
