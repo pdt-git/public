@@ -60,11 +60,13 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 		
 		IFile file = (IFile) element;
 		try {
-			String isEntryPoint = file.getPersistentProperty(ToggleEntryPointAction.KEY);
-			
-			if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
-				decoration.addSuffix(" [entry point]");
+			if (file.exists()) {
+				String isEntryPoint = file.getPersistentProperty(ToggleEntryPointAction.KEY);
+				
+				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
+					decoration.addSuffix(" [entry point]");
+				}
 			}
 			
 		} catch (CoreException e) {
