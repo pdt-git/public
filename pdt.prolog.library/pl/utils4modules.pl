@@ -102,9 +102,25 @@ module_of_file(File,Module):-
 %
 % Suceed if the predicate Name/Arity is visible in Module
 % either via a local declaration or import. 
-%  
+% 
+% The used predicate_property(Head,visible) is documented as:
+%    True when predicate can  be called without raising a  predicate
+%    existence  error.    This  means  that  the  predicate  is  (1)
+%    defined, (2) can be  inherited from one of the  default modules
+%    (see default_module/2) or (3) can be autoloaded.  The behaviour
+%    is logically  consistent iff  the propery  visible is  provided
+%    explicitly.   If  the property  is left  unbound, only  defined
+%    predicates are enumerated.
+          
 visible_in_module(Module,Name,Arity) :-
+%   (ground(functor(Head,Name,Arity),
+%   predicate_property(Module:Head,visible).
+% The above was created by Jan Wielemaker during his visit to our group 
+% in Nov. 2011. It is intended as a better behaved alternative to the
+% strangely inconsistent versions of current_predicate/1 and /2.
+    
     current_predicate(Module:Name/Arity).
+%  
 % <-- Beware of current_predicate/2: It hides system modules! 
 % Only current_predicate/1 returns ALL modules that see Name/Arity,
 % including (hidden) system modules, such as '$syspreds'. 
@@ -200,14 +216,15 @@ defined_in_module(Module,Head) :-
     functor(Head,Name,Arity),
     defined_in_module(Module,Name,Arity).
 
+%% defined_in_module(Module,Name,Arity) is nondet.
+%
 defined_in_module(Module,Name,Arity) :- % <<< deleted 1 argument
     defined_in_module(Module,Name,Arity,Module).
 
 defined_in_module(ReferencedModule,Name,Arity,DefiningModule) :- 
     declared_in_module(ReferencedModule,Name,Arity,DefiningModule),
     functor(Head,Name,Arity),
-    predicate_property(DefiningModule:Head, number_of_clauses(X)), 
-    X>0.
+    \+ predicate_property(DefiningModule:Head, imported(_)).
 
  
 %% declared_but_undefined(-Module,-Name,-Arity,?DeclaringModule) is nondet
