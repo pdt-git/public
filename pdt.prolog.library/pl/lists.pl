@@ -341,7 +341,7 @@ list_2_separated_list([],_,'') :- !.
 list_2_separated_list([Element],_,Element) :- !.
 list_2_separated_list([Element|[H|T]],Separator,ElementSeparated) :-
 	list_2_separated_list([H|T],Separator,RestAtom),
-	aformat(ElementSeparated,'~w~w~w',[Element,Separator,RestAtom]).
+	format(atom(ElementSeparated),'~w~w~w',[Element,Separator,RestAtom]).
 	
 
 aformat(Atom,FormatString,List):-
