@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTermUtil;
@@ -92,42 +93,59 @@ public class SocketSession implements PrologSession {
 		}
 	}
 
-//	public List<Map<String, Object>> queryAll_obsolete(String query) throws PrologException,
-//		PrologInterfaceException {
-//		CTermUtil.checkFlags(flags);
-//		if (isDisposed()) {
-//			throw new IllegalStateException("Session is disposed!");
-//		}
-//		if (query.length() == 0) {
-//			return generateEmptyResults();
-//		}
-//		Vector<Map<String, Object>> results;
-//		try {
-//			configureProtocol(flags);
-//			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
-//			client.writeln(SocketCommunicationConstants.QUERY_ALL);
-//			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
-//			normalizeQuery(query);
-//			results = readResults();
-//		} catch (IOException e) {
-//			throw pif.error(e);
-//		} 
-//		return results;
-//	}
-	
-	
 	@Override
-	public List<Map<String, Object>> queryAll(String query) throws PrologInterfaceException {
-		int oldflags = flags = flags | PrologInterface.PROCESS_LISTS;
-		if (query.endsWith(".")) {
-			query = query.substring(0, query.length()-1);
+	public List<Map<String, Object>> queryAll(String query) throws PrologException,
+		PrologInterfaceException {
+		CTermUtil.checkFlags(flags);
+		if (isDisposed()) {
+			throw new IllegalStateException("Session is disposed!");
 		}
-		List<String> vars = getVariableNames(query);
-		String newQuery = createFindallQuery(query, vars);
-		Map<String, Object> result = queryOnce(newQuery);
-		flags=oldflags;
-		return transformResults(result, vars);
+		if (query.length() == 0) {
+			return generateEmptyResults();
+		}
+		Vector<Map<String, Object>> results;
+		try {
+			configureProtocol(flags);
+			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+			client.writeln(SocketCommunicationConstants.QUERY_ALL);
+			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+			normalizeQuery(query);
+			results = readResults();
+		} catch (IOException e) {
+			throw pif.error(e);
+		} 
+		return results;
 	}
+	
+	private Vector<Map<String, Object>> readResults() throws IOException {
+	Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
+	Map<String, Object> result = read_solution(flags);
+	while (result != null) {
+		results.add(result);
+		result = read_solution(flags);
+	}
+	return results;
+}
+	
+	private List<Map<String, Object>> generateEmptyResults() {
+	List<Map<String, Object>> l = new Vector<Map<String, Object>>();
+	l.add(generateAnEmtpyResult());
+	return l;
+}
+	
+	
+//	@Override
+//	public List<Map<String, Object>> queryAll(String query) throws PrologInterfaceException {
+//		int oldflags = flags = flags | PrologInterface.PROCESS_LISTS;
+//		if (query.endsWith(".")) {
+//			query = query.substring(0, query.length()-1);
+//		}
+//		List<String> vars = getVariableNames(query);
+//		String newQuery = createFindallQuery(query, vars);
+//		Map<String, Object> result = queryOnce(newQuery);
+//		flags=oldflags;
+//		return transformResults(result, vars);
+//	}
 
 	private List<Map<String, Object>> transformResults(Map<String, Object> result,  List<String> vars) {
 		List<Map<String, Object>> newResult = new ArrayList<Map<String,Object>>();
