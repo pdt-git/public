@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTermUtil;
@@ -92,7 +93,8 @@ public class SocketSession implements PrologSession {
 		}
 	}
 
-//	public List<Map<String, Object>> queryAll_obsolete(String query) throws PrologException,
+//	@Override
+//	public List<Map<String, Object>> queryAll(String query) throws PrologException,
 //		PrologInterfaceException {
 //		CTermUtil.checkFlags(flags);
 //		if (isDisposed()) {
@@ -114,6 +116,22 @@ public class SocketSession implements PrologSession {
 //		} 
 //		return results;
 //	}
+//	
+//	private Vector<Map<String, Object>> readResults() throws IOException {
+//	Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
+//	Map<String, Object> result = read_solution(flags);
+//	while (result != null) {
+//		results.add(result);
+//		result = read_solution(flags);
+//	}
+//	return results;
+//}
+//	
+//	private List<Map<String, Object>> generateEmptyResults() {
+//	List<Map<String, Object>> l = new Vector<Map<String, Object>>();
+//	l.add(generateAnEmtpyResult());
+//	return l;
+//}
 	
 	
 	@Override
