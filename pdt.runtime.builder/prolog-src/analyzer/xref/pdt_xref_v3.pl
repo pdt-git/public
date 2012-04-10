@@ -2,7 +2,7 @@
 % Date:   5. April 2012
 % Licence: EPL
 
-%% This module implements a crossreference analysis of the loaded code 
+% This module implements a crossreference analysis of the loaded code 
 %  (using clause/3 and predicate_property/2). It 
 %   - is meta-call-aware (= meta calls are properly handled)  
 %   - has clause level granulrity  (= each called CLAUSE is identified)
@@ -23,18 +23,21 @@
 
 :- module( pdt_xref_v3, 
          [ gen_call_graph/0
+         , xref_statistics/0
+         , non_foreign_clause/2
          , xref/4            % (CallingRef,Literal,ProgramPoint,CalledRef)
          ]
          ).
  
+ 
 % Folgendes Prädikat nutzen wir gar nicht mehr.
 % Eigentlich müssten wir es in der vorletzten Klausel
 % von process_body__/3 aufrufen. Wir tun es aber nicht.
-resolve_call(Call,DeclaringModule,ClauseRef) :- 
-	strip_module(Call,Module,Literal),
-	functor(Literal,Name,Arity),
-	declared_in_module(Module,Name,Arity,DeclaringModule),
-	clause(DeclaringModule:Literal,_Body,ClauseRef).
+%resolve_call(Call,DeclaringModule,ClauseRef) :- 
+%	strip_module(Call,Module,Literal),
+%	functor(Literal,Name,Arity),
+%	declared_in_module(Module,Name,Arity,DeclaringModule),
+%	clause(DeclaringModule:Literal,_Body,ClauseRef).
 % Das heisst: Entweder ist dort ein Fehler, oder es 
 % funktioniert auch ohne den Aufruf von declared_in_module/3 
 % also so:
@@ -61,26 +64,73 @@ resolve_call(Call,DeclaringModule,ClauseRef) :-
 % stammen braucht man declared_in_module. Das (bzw. resolve_call)
 % ist also noch einzbauen in unsere Implementierung. 
  
- 
- 
+%% xref(?CallingClauseRef,?Literal,?ProgramPoint,?CalledClauseRef) is nondet.
+%
+% Stores the arcs of the call graph between program points and clauses.
+% Program points are uniquely identified by the pair (CallingClauseRef,ProgramPoint).
+% The program point numbers start with 0 for each clause body and are incremented for each processed literal by a DFS. 
+%
+:- dynamic xref/4.
   	
 gen_call_graph :- 
-   retractall(xref(_,_,_,_)),  
-   defined_in_module(Module,Name,Arity),
-      functor(Head,Name,Arity),
-      \+ predicate_property(Module:Head, foreign),
+   writeln('Retract all xref facts...'),
+   time(retractall(xref(_,_,_,_))),  
+   non_foreign_clause(Module,Head),
       clause_xref(Module,Head,Xref),
-      assert(Xref),
+      
+      catch(assert(Xref),_E,true),
    fail.
 gen_call_graph.
- 
+
+
+non_foreign_clause(Module,Head):-
+	defined_in_module(Module,Name,Arity),
+    functor(Head,Name,Arity),
+    \+ predicate_property(Module:Head, foreign).
+    
+xref_statistics :-
+    count(current_predicate(_),
+          PredicateCount),
+    count((non_foreign_clause(Module,Head),
+           clause(Module:Head,_Body,_CallingRef)
+          ),
+          ClauseCount),
+    count(xref(_,_,_,_),
+          RefCount),
+	statistics( predicates,PredicateStats ),
+	statistics( clauses,ClausesStats),
+	ClausesWithoutXRef is ClauseCount - RefCount,
+	ClauseStatsWithoutXRef is ClausesStats - RefCount,
+    format('Predicates: ~w (~w)~nClauses:    ~w (~w) ~nXRefs:      ~w~n',[PredicateCount,PredicateStats,ClausesWithoutXRef,ClauseStatsWithoutXRef,RefCount]).
+    
+      
 %% clause_xref(+Module,+Head,?Xref) is nondet.
 %
 clause_xref(Module,Head,Xref):-
    clause(Module:Head,Body,CallingRef),
    process_body(Module,Body,Arc),
    Arc  = arc(            Literal,ProgramPoint,CalledRef),
-   Xref = xref(CallingRef,Literal,ProgramPoint,CalledRef).
+   ( acyclic_term(Literal)
+   -> ACyclicLiteral = Literal
+   ; remove_cyclic_args(Literal,ACyclicLiteral)
+   ),
+   Xref = xref(CallingRef,ACyclicLiteral,ProgramPoint,CalledRef).
+
+remove_cyclic_args(Literal,ACyclicLiteral):-
+	Literal =..[Functor|Args],
+	to_acyclic(Args,ACArgs),
+	ACyclicLiteral =..[Functor|ACArgs].
+
+to_acyclic([],[]).
+to_acyclic([Arg|Args],[Arg|ACArgs]):-
+    acyclic_term(Arg),
+    !,
+	to_acyclic(Args,ACArgs).
+	
+% replaces cyclic term with new var:
+to_acyclic([_Arg|Args],[_Var|ACArgs]):-
+	to_acyclic(Args,ACArgs).
+    
 
 process_body(Module,Body,Arc) :-
 	nb_setval(program_point, 0),
@@ -140,6 +190,17 @@ get_clause(Module:Literal,Ref):-
     predicate_property(Module:Literal, foreign),
     !,
 	Ref=foreign.
+	
+get_clause(Module:Literal,Ref):-
+    predicate_property(Module:Literal, dynamic),
+	( forall(clause(Module:Literal,_Body,Ref),
+	   ground(Literal))
+	-> true
+	; fail % writeln(Module:Literal:-_Body)
+	),
+    !,
+	Ref=dynamic.
+	
 get_clause(Module:Literal,Ref):-
 	\+ clause(Module:Literal,_,_),
 	!,
