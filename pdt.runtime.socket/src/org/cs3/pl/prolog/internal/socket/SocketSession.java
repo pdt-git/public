@@ -136,7 +136,9 @@ public class SocketSession implements PrologSession {
 	
 	@Override
 	public List<Map<String, Object>> queryAll(String query) throws PrologInterfaceException {
-		int oldflags = flags = flags | PrologInterface.PROCESS_LISTS;
+		int oldflags = flags;
+		flags = flags | PrologInterface.PROCESS_LISTS;
+		
 		if (query.endsWith(".")) {
 			query = query.substring(0, query.length()-1);
 		}
