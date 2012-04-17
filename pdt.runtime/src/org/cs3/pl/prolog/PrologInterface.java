@@ -51,7 +51,8 @@ import org.cs3.pl.common.PreferenceProvider;
 public interface PrologInterface {
 
 	/**
-	 * consult event subject constant events of this subject will be fired
+	 * consult event subject constant.
+	 * Events of this subject will be fired
 	 * whenever something was consulted into the prolog system. <br>
 	 * NOT IMPLEMENTED YET
 	 */
