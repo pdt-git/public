@@ -185,7 +185,11 @@ public class SocketSession implements PrologSession {
 			String getVarQuery = "get_var_names(" + Util.quoteAtom(query) + ",Vars)";
 			Map<String, Object> result = queryOnce(getVarQuery);
 			String varString = result.get("Vars").toString();
-			return Arrays.asList(Util.unquoteAtom(varString).split(","));
+			if (varString.isEmpty()) {
+				return new ArrayList<String>();
+			} else {
+				return Arrays.asList(Util.unquoteAtom(varString).split(","));
+			}
 		} catch (PrologInterfaceException e) {
 			e.printStackTrace();
 		}
