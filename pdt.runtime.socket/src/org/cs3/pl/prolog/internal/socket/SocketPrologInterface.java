@@ -340,6 +340,17 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		return lockFile;
 	}
 
+	private File errorLogFile;
+	
+	public void setErrorLogFile(File file) {
+		this.errorLogFile = file;
+
+	}
+
+	public File getErrorLogFile() {
+		return errorLogFile;
+	}
+
 	
 	
 	@Override
