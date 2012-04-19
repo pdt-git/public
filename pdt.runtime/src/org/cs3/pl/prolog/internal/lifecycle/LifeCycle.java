@@ -107,7 +107,7 @@ public abstract class LifeCycle {
 		}
 
 		while (getError() == null && !isUp()) {
-			this.wait();
+			this.wait(1000);
 			if (isDown()) {
 				start();
 			}
@@ -126,7 +126,7 @@ public abstract class LifeCycle {
 					"cannot call this from transition or work queue.");
 		}
 		while ((ignoreErrors||getError() == null) && !isDown()) {
-			this.wait();
+			this.wait(1000);
 			if (isUp()) {
 				stop();
 			}
@@ -147,7 +147,7 @@ public abstract class LifeCycle {
 		}
 		getError();
 		while ((getError()) == null) {
-			this.wait();
+			this.wait(1000);
 		}
 
 	}
