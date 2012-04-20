@@ -175,7 +175,7 @@ public class FocusViewPlugin extends ViewPart {
 					PreferenceManager mgr = new PreferenceManager();
 					
 					IPreferencePage page = new MainPreferencePage();
-					page.setTitle("Focus View");
+					page.setTitle("Context View");
 					
 					IPreferenceNode node = new PreferenceNode("PreferencePage", page);
 					mgr.addToRoot(node);
@@ -321,7 +321,7 @@ public class FocusViewPlugin extends ViewPart {
 		}
 
 		public void reload() {
-			Job j = new Job("PDT Focus View: Reloading Graph") {
+			Job j = new Job("PDT Context View: Reloading Graph") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					pifLoader.queryPrologForGraphFacts(filePath);
@@ -453,7 +453,7 @@ public class FocusViewPlugin extends ViewPart {
 				if (currentFocusView == null 
 						|| !currentFocusView.getFilePath().equals(fileInfo.getPrologFileName())) {
 					
-					new UIJob("Update Focus View") {
+					new UIJob("Update Context View") {
 					    public IStatus runInUIThread(IProgressMonitor monitor) {
 					    	
 					    	FocusView f = swichFocusView(fileInfo.getPrologFileName());

@@ -2,7 +2,7 @@
 <feature
       id="PDTFeature"
       label="Prolog Development Tools"
-      version="0.2.5.qualifier"
+      version="1.0.0.qualifier"
       provider-name="http://roots.iai.uni-bonn.de">
 
    <description url="http://roots.iai.uni-bonn.de/research/pdt/">
@@ -146,5 +146,12 @@ and/or distributed.
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="pdt.yworks.basics"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

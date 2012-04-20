@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PrologInterface
 Bundle-SymbolicName: org.cs3.pdt.runtime.ui;singleton:=true
-Bundle-Version: 0.2.5.qualifier
+Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: prologinterface.ui.jar
 Bundle-Activator: org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin
 Export-Package: org.cs3.pdt.runtime.internal,

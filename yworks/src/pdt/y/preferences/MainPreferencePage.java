@@ -31,7 +31,7 @@ public class MainPreferencePage
 	extends PreferencePageBase {
 
 	public MainPreferencePage() {
-		setDescription("Preferences for the PDT Focus View Plugin");
+		setDescription("Preferences for the PDT Context View Plugin");
 	}
 	
 	/**
