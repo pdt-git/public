@@ -253,8 +253,11 @@ public interface PrologInterface {
 	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
 	
 	public List<String> getConsultedFiles();
+	
 	public void addConsultedFile(String file);
 
 	public void clearConsultedFiles();
+	
+	public void reconsultFiles();
 
 }
