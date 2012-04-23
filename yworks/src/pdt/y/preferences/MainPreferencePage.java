@@ -1,17 +1,13 @@
 package pdt.y.preferences;
 
-import static pdt.y.preferences.PreferenceConstants.SHOW_TOOLTIPS;
-import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE;
-import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE_AUTOMATIC;
-import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE_MANUAL;
+import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE;
+import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE_AUTOMATIC;
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 
 import pdt.y.main.PluginActivator;
-import pdt.y.preferences.controls.PreferencesManagementFieldEditor;
+import pdt.y.preferences.controls.RefreshModeFieldEditor;
 
 /**
  * This class represents a preference page that
@@ -29,9 +25,8 @@ import pdt.y.preferences.controls.PreferencesManagementFieldEditor;
 
 public class MainPreferencePage
 	extends PreferencePageBase {
-
+	
 	public MainPreferencePage() {
-		setDescription("Preferences for the PDT Focus View Plugin");
 	}
 	
 	/**
@@ -42,16 +37,7 @@ public class MainPreferencePage
 	 */
 	public void createFieldEditors() {
 		
-		addField(new RadioGroupFieldEditor(UPDATE_MODE,
-				"Update mode",
-				1,
-				new String[][] { { "&Manual (Refresh button)", UPDATE_MODE_MANUAL }, 
-								 { "&Automatic", UPDATE_MODE_AUTOMATIC }
-				}, getFieldEditorParent()));
-		
-		addField(new BooleanFieldEditor(SHOW_TOOLTIPS, "Show tooltips", getFieldEditorParent()));
-		
-		addField(new PreferencesManagementFieldEditor(getFieldEditorParent()));
+		addField(new RefreshModeFieldEditor(getFieldEditorParent()));
 	}
 
 	public void init(IWorkbench workbench) {
@@ -62,11 +48,7 @@ public class MainPreferencePage
 	}
 
 	public static boolean isAutomaticUpdate() {
-		String mode = getCurrentPreferences().getString(UPDATE_MODE);
-		return mode.equals(UPDATE_MODE_AUTOMATIC);
-	}
-	
-	public static boolean isShowToolTip() {
-		return getCurrentPreferences().getBoolean(SHOW_TOOLTIPS);
+		String mode = getCurrentPreferences().getString(REFRESH_MODE);
+		return mode.equals(REFRESH_MODE_AUTOMATIC);
 	}
 }

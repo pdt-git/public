@@ -36,7 +36,7 @@ public class EdgeAppearancePreferences
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		addField(new ColorFieldEditor(APPEARANCE_LINE_COLOR, "Line Color", getFieldEditorParent()));
+		addField(new ColorFieldEditor(APPEARANCE_LINE_COLOR, "&Line Color    ", wrap(getFieldEditorParent())));
 	}
 
 	public void init(IWorkbench workbench) {

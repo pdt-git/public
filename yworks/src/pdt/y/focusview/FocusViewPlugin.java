@@ -56,6 +56,7 @@ import pdt.y.main.PreferencesUpdateListener;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
+import pdt.y.preferences.FocusViewSkinsPreferences;
 import pdt.y.preferences.MainPreferencePage;
 import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
@@ -194,6 +195,10 @@ public class FocusViewPlugin extends ViewPart {
 					IPreferencePage predicateLayoutPrefs = new PredicateLayoutPreferences();
 					predicateLayoutPrefs.setTitle("Predicate Layout");
 					node.add(new PreferenceNode("PredicateLayoutPreferences", predicateLayoutPrefs));
+					
+					IPreferencePage skinsPrefs = new FocusViewSkinsPreferences();
+					skinsPrefs.setTitle("Skins");
+					node.add(new PreferenceNode("FocusViewSkinsPreferences", skinsPrefs));
 					
 					PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
 					dialog.create();
@@ -400,7 +405,7 @@ public class FocusViewPlugin extends ViewPart {
 
 					FocusViewPlugin.this.setInfoText(text);
 					
-					if (MainPreferencePage.isShowToolTip() && text.startsWith("Predicate")) {
+					if (PredicateLayoutPreferences.isShowToolTip() && text.startsWith("Predicate")) {
 						Point location = Display.getCurrent().getCursorLocation();
 						location.x += 10;
 						location.y += 10;
@@ -520,6 +525,7 @@ public class FocusViewPlugin extends ViewPart {
 				setDirtyFocusView(getFileLocation(wb.getActiveEditor()));
 			}
 			else if (commandId.equals(FILE_SAVE_ALL)) {
+				@SuppressWarnings("deprecation")
 				IEditorPart[] editors = wb.getEditors();
 				for (IEditorPart e : editors) {
 					setDirtyFocusView(getFileLocation(e));
