@@ -2,13 +2,11 @@ package pdt.y.preferences.controls;
 
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_HEIGHT;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
-
-import java.util.Hashtable;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_NUMBER_OF_LINES;
 
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -21,18 +19,22 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 	
-	String value;
-	Hashtable<String, String> sizeValue = new Hashtable<String, String>();
+	String widthMode;
+	String numberOfLines;
+	String width;
 	
-	Button[] radioButtons;
-	Text[] sizeTextboxes;
+	Button[] rbWidthMode;
+	Text txtWidth;
+	Combo cmbNumberOfLines;
 	
 	public NodeSizeRadioGroupFieldEditor(Composite parent) {
 		
@@ -42,53 +44,71 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 	
 	@Override
 	protected void doFillIntoGrid(Composite parent, int numColumns) {
-		Control control = getLabelControl(parent);
-        GridData gd = new GridData();
-        gd.horizontalSpan = numColumns;
-        gd.verticalIndent = HORIZONTAL_GAP;
-        control.setLayoutData(gd);
-		
-		control = getRadioBoxControl(parent);
-        gd = new GridData();
-        gd.horizontalSpan = numColumns;
-        gd.horizontalIndent = HORIZONTAL_GAP;
+		Control control = getRadioBoxControl(parent);
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		gd.verticalIndent = 5;
         control.setLayoutData(gd);
     }
 
 	protected Composite getRadioBoxControl(Composite parent) {
 		
-		Composite radioBox = new Composite(parent, SWT.NONE);
+		Group group = new Group(parent, SWT.NONE);
+		
+		group.setText(getLabelText());
 		
 		GridLayout layout = new GridLayout();
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
         layout.horizontalSpacing = HORIZONTAL_GAP;
-        layout.numColumns = 1;
-        radioBox.setLayout(layout);
-		
-        radioButtons = new Button[4];
+        layout.numColumns = 3;
+        group.setLayout(layout);
         
-		radioButtons[0] = createRadioButton(radioBox, "&Fixed", NODE_SIZE_FIXED);
+        createHeightCombo(group);
+        
+        GridData gd = new GridData();
+        gd.horizontalSpan = 3;
+        
+        Label lblWidth = new Label(group, SWT.NONE);
+        lblWidth.setText("Width");
+        lblWidth.setLayoutData(gd);
 		
-		Composite pnlSize = new Composite(radioBox, SWT.NONE);
-		layout = new GridLayout();
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        layout.marginLeft = 50;
-        layout.horizontalSpacing = HORIZONTAL_GAP;
-        layout.numColumns = 4;
-        pnlSize.setLayout(layout);
+        rbWidthMode = new Button[4];
+        
+		rbWidthMode[0] = createRadioButton(group, "&Fixed", NODE_SIZE_FIXED);
 		
+        txtWidth = createTextBox(group);
+        
+		rbWidthMode[1] = createRadioButton(group, "M&edian", NODE_SIZE_MEDIAN);
+		rbWidthMode[2] = createRadioButton(group, "Ma&ximum", NODE_SIZE_MAXIMUM);
+		rbWidthMode[3] = createRadioButton(group, "&Individual", NODE_SIZE_INDIVIDUAL);
+        
+        rbWidthMode[1].setLayoutData(gd);
+        rbWidthMode[2].setLayoutData(gd);
+        rbWidthMode[3].setLayoutData(gd);
 		
-        sizeTextboxes = new Text[2];
-		sizeTextboxes[0] = createTextBox(pnlSize, "Width", NODE_SIZE_FIXED_WIDTH, radioButtons[0]);
-		sizeTextboxes[1] = createTextBox(pnlSize, "Height", NODE_SIZE_FIXED_HEIGHT, radioButtons[0]);
+		return group;
+	}
+
+	protected void createHeightCombo(Group group) {
 		
-		radioButtons[1] = createRadioButton(radioBox, "Me&dian", NODE_SIZE_MEDIAN);
-		radioButtons[2] = createRadioButton(radioBox, "Ma&ximum", NODE_SIZE_MAXIMUM);
-		radioButtons[3] = createRadioButton(radioBox, "&Individual", NODE_SIZE_INDIVIDUAL);
+		new Label(group, SWT.NONE).setText("Height");
 		
-		return radioBox;
+		cmbNumberOfLines = new Combo(group, SWT.NONE);
+        cmbNumberOfLines.add("1");
+        cmbNumberOfLines.add("2");
+        cmbNumberOfLines.add("3");
+        cmbNumberOfLines.add("4");
+        
+        cmbNumberOfLines.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				String oldValue = numberOfLines;
+				numberOfLines = cmbNumberOfLines.getText();
+                setPresentsDefaultValue(false);
+                fireValueChanged(NODE_SIZE_NUMBER_OF_LINES, oldValue, numberOfLines);
+			}
+        });
+        
+        new Label(group, SWT.NONE).setText("lines");
 	}
 
 	public Button createRadioButton(Composite parent, final String text, final String data) {
@@ -98,21 +118,26 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
         radio.setFont(parent.getFont());
         radio.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
-                String oldValue = value;
-                value = (String) event.widget.getData();
+                String oldValue = widthMode;
+                widthMode = (String) event.widget.getData();
                 setPresentsDefaultValue(false);
-                fireValueChanged(NODE_SIZE, oldValue, value);
+                fireValueChanged(NODE_SIZE, oldValue, widthMode);
             }
         });
         
 		return radio;
 	}
 	
-	private Text createTextBox(final Composite parent, final String text, final String name, final Button bindedButton) {
-		Label l = new Label(parent, SWT.NONE);
-		l.setText(text);
+	private Text createTextBox(final Composite parent) {
+		
+		GridData gd = new GridData();
+		gd.widthHint = 34;
 		
 		final Text txt = new Text(parent, SWT.BORDER);
+		txt.setLayoutData(gd);
+		
+		Label l = new Label(parent, SWT.NONE);
+		l.setText("pixels");
 		
 		Point s = txt.getSize();
 		s.y = 50;
@@ -121,21 +146,19 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		txt.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				String oldValue = sizeValue.get(name);
-				String newValue = txt.getText();
+				String oldValue = width;
+				width = (String)e.data;
 				
-				sizeValue.put(name, newValue);
-				
-				checkValues();
-				
-                setPresentsDefaultValue(false);
-                fireValueChanged(name, oldValue, newValue);
+				if (checkValues()) {
+					setPresentsDefaultValue(false);
+	                fireValueChanged(NODE_SIZE_FIXED_WIDTH, oldValue, width);
+				}
 			}
 		});
 		
-		bindedButton.addSelectionListener(new SelectionAdapter() {
+		rbWidthMode[0].addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
-                txt.setEnabled(bindedButton.getSelection());
+                txt.setEnabled(rbWidthMode[0].getSelection());
             }
         });
 		
@@ -148,15 +171,15 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 	}
 	
 	private boolean checkValues() {
-		for (String k : sizeValue.keySet()) {
-			String v = sizeValue.get(k);
-			try {
-				Integer.parseInt(v);
-			}
-			catch (NumberFormatException ex) {
-				showErrorMessage("Wrong number format");
-				return false;
-			}
+		if (width == null) {
+			return true;
+		}
+		try {
+			Integer.parseInt(width);
+		}
+		catch (NumberFormatException ex) {
+			showErrorMessage("Wrong number format");
+			return false;
 		}
 		
 		clearErrorMessage();
@@ -170,17 +193,21 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		updateRadioGroupValue(prefs.getString(NODE_SIZE));
 		updateSizeTextBoxes(
 				prefs.getString(NODE_SIZE_FIXED_WIDTH), 
-				prefs.getString(NODE_SIZE_FIXED_HEIGHT));
+				prefs.getString(NODE_SIZE_NUMBER_OF_LINES));
 	}
 
 	@Override
 	protected void doLoadDefault() {
 		IPreferenceStore prefs = getPreferenceStore();
 		
+		widthMode = null;
+		numberOfLines = null;
+		width = null;
+		
 		updateRadioGroupValue(getPreferenceStore().getString(NODE_SIZE));
 		updateSizeTextBoxes(
 				prefs.getDefaultString(NODE_SIZE_FIXED_WIDTH), 
-				prefs.getDefaultString(NODE_SIZE_FIXED_HEIGHT));
+				prefs.getDefaultString(NODE_SIZE_NUMBER_OF_LINES));
 	}
 	
 	@Override
@@ -189,52 +216,43 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 			return;
 		
 		IPreferenceStore prefs = getPreferenceStore();
-		
+		store(prefs, NODE_SIZE, widthMode);
+		store(prefs, NODE_SIZE_FIXED_WIDTH, width);
+		store(prefs, NODE_SIZE_NUMBER_OF_LINES, numberOfLines);
+	}
+	
+	private static void store(IPreferenceStore prefs, String name, String value) {
 		if (value == null) {
-            prefs.setToDefault(NODE_SIZE);
+            prefs.setToDefault(name);
         }
 		else {
-			prefs.setValue(NODE_SIZE, value);
-		}
-		
-		for (String k : sizeValue.keySet()) {
-			String v = sizeValue.get(k);
-			if (v == null) {
-				prefs.setToDefault(k);
-			}
-			else {
-				
-				prefs.setValue(k, v);
-			}
+			prefs.setValue(name, value);
 		}
 	}
 	
 	private void updateRadioGroupValue(String selectedValue) {
-        value = selectedValue;
-        if (radioButtons == null) {
+        widthMode = selectedValue;
+        if (rbWidthMode == null) {
 			return;
 		}
 
-        if (this.value != null) {
-            for (int i = 0; i < radioButtons.length; i++) {
-                Button radio = radioButtons[i];
-                radio.setSelection(value.equals(radio.getData()));
+        if (widthMode != null) {
+            for (int i = 0; i < rbWidthMode.length; i++) {
+                Button radio = rbWidthMode[i];
+                radio.setSelection(widthMode.equals(radio.getData()));
             }
         }
     }
 
-	private void updateSizeTextBoxes(final String width, final String height) {
-		if (sizeTextboxes == null) {
+	private void updateSizeTextBoxes(final String width, final String numberOfLines) {
+		if (txtWidth == null || cmbNumberOfLines == null) {
 			return;
 		}
 		
-		sizeTextboxes[0].setText(width);
-		sizeTextboxes[1].setText(height);
+		txtWidth.setText(width);
+		txtWidth.setEnabled(rbWidthMode[0].getSelection());
 		
-		boolean enabled = radioButtons[0].getSelection();
-		
-		sizeTextboxes[0].setEnabled(enabled);
-		sizeTextboxes[1].setEnabled(enabled);
+		cmbNumberOfLines.setText(numberOfLines);
 	}
 
 	@Override

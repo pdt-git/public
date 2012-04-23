@@ -14,10 +14,13 @@ import static pdt.y.preferences.PreferenceConstants.APPEARANCE_UNUSED_PREDICATE_
 import java.awt.Color;
 
 import org.eclipse.jface.preference.ColorFieldEditor;
+import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 
 import pdt.y.main.PluginActivator;
@@ -47,6 +50,20 @@ public class PredicateAppearancePreferences
 		LineType.DASHED_DOTTED_2
 	};
 	
+	private GridLayout groupLayout;
+	private GridData cellData;
+	
+	public PredicateAppearancePreferences() {
+		groupLayout = new GridLayout();
+		groupLayout.marginWidth = 10;
+        groupLayout.marginHeight = 10;
+        groupLayout.numColumns = 2;
+        
+        cellData = new GridData();
+        cellData.widthHint = 267;
+        cellData.heightHint = 32;
+	}
+	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
 	 * the common GUI blocks needed to manipulate various types
@@ -54,29 +71,33 @@ public class PredicateAppearancePreferences
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
+		
 		String[][] lineTypes = new String[][] { 
 				{ "Solid      ", Integer.toString(APPEARANCE_BORDER_STYLE_SOLID) },
 				{ "Dashed     ", Integer.toString(APPEARANCE_BORDER_STYLE_DASHED) },
 				{ "Dotted     ", Integer.toString(APPEARANCE_BORDER_STYLE_DOTTED) },
-				{ "Dashed Dotted", Integer.toString(APPEARANCE_BORDER_STYLE_DASHED_DOTTED) }, 
+				{ "Dashed Dotted", Integer.toString(APPEARANCE_BORDER_STYLE_DASHED_DOTTED) }
 			};
 		
-		addField(new ColorFieldEditor(APPEARANCE_PREDICATE_COLOR, "Predicate Background Color", getFieldEditorParent()));
-		addField(new ColorFieldEditor(APPEARANCE_EXPORTED_PREDICATE_COLOR, "Exported Predicate Background Color", getFieldEditorParent()));
+		Group predicateBgColor = createGroup("Predicate Node Background Color", groupLayout);
 		
-		addField(new ColorFieldEditor(APPEARANCE_BORDER_COLOR, "Border Color", getFieldEditorParent()));
-		addField(new ColorFieldEditor(APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR, "Unused Predicate Border Color", getFieldEditorParent()));
+		addField(new ColorFieldEditor(APPEARANCE_EXPORTED_PREDICATE_COLOR, "&Exported          ", wrap(predicateBgColor, cellData)));
+		addField(new ColorFieldEditor(APPEARANCE_PREDICATE_COLOR, "&Not Exported        ", wrap(predicateBgColor, cellData)));
 		
-		addField(new RadioGroupFieldEditor(APPEARANCE_BORDER_STYLE, "Border Style", 4, 
-				lineTypes, getFieldEditorParent(), true));
+		Group predicateBorderColor = createGroup("Predicate Node Border Color", groupLayout);
 		
-		addField(new RadioGroupFieldEditor(APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE, "Dynamic Predicate Border Style", 4, 
-				lineTypes, getFieldEditorParent(), true));
+		addField(new ColorFieldEditor(APPEARANCE_BORDER_COLOR, "&Used Predicate ", wrap(predicateBorderColor, cellData)));
+		addField(new ColorFieldEditor(APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR, "Unuse&d Predicate  ", wrap(predicateBorderColor, cellData)));
+		
+		Group predicateBorderStyle = createGroup("Predicate Node Border Style", groupLayout);
+		
+		addField(new ComboFieldEditor(APPEARANCE_BORDER_STYLE, "&Static Predicate", lineTypes, wrap(predicateBorderStyle, cellData)));
+		addField(new ComboFieldEditor(APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE, "D&ynamic Predicate", lineTypes, wrap(predicateBorderStyle, cellData)));
 	}
 
 	public void init(IWorkbench workbench) {
 	}
-	
+
 	public static IPreferenceStore getCurrentPreferences() {
 		return PluginActivator.getDefault().getPreferenceStore();
 	}

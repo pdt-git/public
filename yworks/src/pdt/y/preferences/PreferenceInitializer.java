@@ -21,11 +21,11 @@ import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_BRACKET;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_HEIGHT;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_NUMBER_OF_LINES;
+import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE;
+import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE_MANUAL;
 import static pdt.y.preferences.PreferenceConstants.SHOW_TOOLTIPS;
-import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE;
-import static pdt.y.preferences.PreferenceConstants.UPDATE_MODE_MANUAL;
 
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
@@ -53,11 +53,11 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	public static final String[][] defaultPreferences = new String[][] {
 			{ BASE_TEMPLATE, BASE_TEMPLATE_DEFAULT },
-			{ UPDATE_MODE, UPDATE_MODE_MANUAL },
+			{ REFRESH_MODE, REFRESH_MODE_MANUAL },
 			{ SHOW_TOOLTIPS, Boolean.toString(true) },
 			{ NAME_CROPPING, NAME_CROPPING_BRACKET },
 			{ NODE_SIZE, NODE_SIZE_FIXED },
-			{ NODE_SIZE_FIXED_HEIGHT, "40" },
+			{ NODE_SIZE_NUMBER_OF_LINES, "2" },
 			{ NODE_SIZE_FIXED_WIDTH, "100" },
 			{ LAYOUT, LAYOUT_HIERARCHY },
 			{ APPEARANCE_NONMODULE_HEADER_COLOR, getColorString(Color.WHITE) },

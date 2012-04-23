@@ -50,5 +50,11 @@
             id="pdt.y.preferences.EdgeAppearance"
             name="Edge Appearance">
       </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.FocusViewSkinsPreferences"
+            id="pdt.y.preferences.FocusViewSkinsPreferences"
+            name="Skins">
+      </page>
    </extension>
 </plugin>

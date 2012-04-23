@@ -75,7 +75,8 @@ public class GraphPIFLoader {
 
 					dependencies.clear();
 					if (output != null) {
-						Vector deps = (Vector) output.get("Dependencies");
+						@SuppressWarnings("unchecked")
+						Vector<String> deps = (Vector<String>) output.get("Dependencies");
 						dependencies.addAll(deps);
 					}
 
