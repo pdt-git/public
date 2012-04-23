@@ -533,8 +533,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			} catch (InterruptedException e) {
 				throw new PrologInterfaceException(e);
 			}
-			
-			reconsultFiles();
+
+//			reconsultFiles();
 		}
 
 	}
@@ -674,7 +674,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		
 	}
 
-	private void reconsultFiles() {
+	@Override
+	public void reconsultFiles() {
 		Debug.debug("Reconsult files");
 		if (consultedFiles != null) {
 			synchronized (lifecycle) {
