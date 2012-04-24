@@ -1,11 +1,11 @@
 package pdt.y.main;
 
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_HEIGHT;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_NUMBER_OF_LINES;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -199,13 +199,14 @@ public class PDTGraphView extends  JPanel {
 
 	protected void initializeBoxSize(Node node, int maximumValue, int medianValue, Graphics gfx, FontMetrics fontmtx) {
 		
-		int width = 0, height = 20;
+		int width = 0;
+		int height = PredicateLayoutPreferences.getNumberOfLines() * 15 + 10;
 		
 		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
 		
+		
 		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
 			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
-			height = prefs.getInt(NODE_SIZE_FIXED_HEIGHT);
 		}
 		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
 			width = maximumValue;

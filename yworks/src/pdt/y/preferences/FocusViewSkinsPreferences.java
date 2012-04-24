@@ -1,16 +1,8 @@
 package pdt.y.preferences;
 
-import static pdt.y.preferences.PreferenceConstants.APPEARANCE_LINE_COLOR;
-
-import java.awt.Color;
-
-import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.StringConverter;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IWorkbench;
 
-import pdt.y.main.PluginActivator;
+import pdt.y.preferences.controls.FocusViewSkinsEditor;
 
 /**
  * This class represents a preference page that
@@ -26,8 +18,14 @@ import pdt.y.main.PluginActivator;
  * be accessed directly via the preference store.
  */
 
-public class EdgeAppearancePreferences
+public class FocusViewSkinsPreferences
 	extends PreferencePageBase {
+
+	public FocusViewSkinsPreferences() {
+		setDescription("Preferences for the PDT Focus View Plugin");
+		
+		noDefaultAndApplyButton();
+	}
 	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
@@ -36,22 +34,10 @@ public class EdgeAppearancePreferences
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		addField(new ColorFieldEditor(APPEARANCE_LINE_COLOR, "&Line Color    ", wrap(getFieldEditorParent())));
+		
+		addField(new FocusViewSkinsEditor(getFieldEditorParent()));
 	}
 
 	public void init(IWorkbench workbench) {
-	}
-	
-	public static IPreferenceStore getCurrentPreferences() {
-		return PluginActivator.getDefault().getPreferenceStore();
-	}
-	
-	public static Color getColor(String preferenceName) {
-		String value = getCurrentPreferences().getString(preferenceName);
-		RGB color = StringConverter.asRGB(value);
-		return new Color(color.red, color.green, color.blue);
-	}
-	public static Color getLineColor() {
-		return getColor(APPEARANCE_LINE_COLOR);
 	}
 }

@@ -27,14 +27,15 @@ import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.preferences.PreferenceInitializer;
 
-public class PreferencesManagementFieldEditor extends FieldEditor {
+public class FocusViewSkinsEditor extends FieldEditor {
 
 	private Combo templatesCombo;
 	private Text newTemplateName;
 	
-	public PreferencesManagementFieldEditor(Composite parent) {
+	public FocusViewSkinsEditor(Composite parent) {
 		
 		init(BASE_TEMPLATE, "Preferences Management");
+		
 		createControl(parent);
     }
 	
@@ -184,7 +185,9 @@ public class PreferencesManagementFieldEditor extends FieldEditor {
 		button.setText("Save");
 		
 		button.addSelectionListener(new SelectionAdapter() {
+			
 			@Override
+			@SuppressWarnings("deprecation")
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					getPreferencePage().performOk();
