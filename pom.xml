@@ -86,5 +86,6 @@
     <module>pdt.runtime.socket.ui</module>
     <module>pdt.updatesite</module>
     <module>org.cs3.lp.extension</module>
+    <module>pdt.yworks.basics</module>
   </modules>
 </project>
