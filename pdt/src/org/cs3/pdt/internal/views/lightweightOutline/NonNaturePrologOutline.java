@@ -169,7 +169,11 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	}
 
 	
-	
+	@Override
+	public TreeViewer getTreeViewer() {
+		return super.getTreeViewer();
+	}
+
 	public void setInput(Object information) {
 		String fileName = editor.getPrologFileName();
 		
