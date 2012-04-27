@@ -69,8 +69,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		FontData fd = new FontData("Courier New", 10, SWT.NORMAL);
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_FONT, fd);
 
-		store.setDefault(PDTConsole.PREF_CONSOLE_SHOW_COLORS, true);
-
 		Color color_err = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 		Color color_warn = new Color(Display.getDefault(),255,128,50);
 		Color color_info = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
