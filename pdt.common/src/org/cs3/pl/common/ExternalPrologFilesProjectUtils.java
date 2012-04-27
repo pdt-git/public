@@ -20,12 +20,12 @@ public class ExternalPrologFilesProjectUtils {
 	public static IProject getExternalPrologFilesProject() throws CoreException {
 		if (externalPrologFilesProject == null) {
 			externalPrologFilesProject = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-			if (!externalPrologFilesProject.exists()) {
-				externalPrologFilesProject.create(null);
-			}
-			if (!externalPrologFilesProject.isOpen()) {
-				externalPrologFilesProject.open(null);
-			}
+		}
+		if (!externalPrologFilesProject.exists()) {
+			externalPrologFilesProject.create(null);
+		}
+		if (!externalPrologFilesProject.isOpen()) {
+			externalPrologFilesProject.open(null);
 		}
 		return externalPrologFilesProject;
 	}
