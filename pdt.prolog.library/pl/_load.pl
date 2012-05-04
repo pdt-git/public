@@ -15,5 +15,3 @@
  :- consult(count).         % Counting
  :- consult(time).          % Runtime measurement
  :- consult(utils4modules). % Module handling
- 
-% :- consult(pdt_xref_experimental).     % find_references, ...

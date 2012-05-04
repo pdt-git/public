@@ -4,7 +4,6 @@
 								]).
 								
 :- use_module(pdt_prolog_library(utils4modules)).
-:- use_module(pdt_xref_experimental).
 
 
 :- dynamic user_defined_meta_pred/4.	%user_defined_meta_pred(Functor, Arity ,Module, MetaSpec)
