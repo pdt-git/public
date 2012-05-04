@@ -1,6 +1,6 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
-         , find_definitions_categorized/12       % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
+         , find_definitions_categorized/12       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility)
          , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/8
          , find_pred/8
@@ -29,9 +29,9 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategory),
-    results_category_label(ResultsCategory, ResultsCategoryLabel).
+    results_category_label(ResultsCategory, ResultsCategoryLabel). % TODO: fix logtalk_adapter: ResultsCategory -> Visibility, SearchCategory -> DeclOrDef
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, definition, DefiningModule, File,Line, PropertyList, ResultsCategoryLabel):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
     search_term_to_predicate_indicator(Term, Functor/Arity),
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
@@ -39,7 +39,7 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     ;  ReferencedModule = FileModule   % Implicit module reference
     ),    
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),
-    member(ResultsCategoryLabel-DefiningModule-Location,Sources),
+    member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
     properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
@@ -56,18 +56,20 @@ find_decl_or_def(Module,Name,Arity,Sources) :-
     ),
     throw( input_argument_free(find_decl_or_def(Module,Name,Arity,Sources)) ).
 
-find_decl_or_def(CallingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
-   referenced_but_undeclared(CallingModule,Name,Arity),
-   DeclModule = 'No declaration (in any module)',
-   File = 'No declaration (in any file)',
-   Line = 0.
-   
+%find_decl_or_def(CallingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
+%   referenced_but_undeclared(CallingModule,Name,Arity),
+%   DeclModule = 'No declaration (in any module)',
+%   File = 'No declaration (in any file)',
+%   Line = 0.
+find_decl_or_def(CallingModule,Name,Arity,[declaration-none-none-[none-[none]]]) :-
+   referenced_but_undeclared(CallingModule,Name,Arity).
+      
 find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
-   setof( VisibilityText-DeclModule-Location, ContextModule^Name^Arity^ 
+   setof( declaration-Visibility-DeclModule-Location, ContextModule^Name^Arity^ 
           ( declared_but_undefined(DeclModule,Name,Arity),
             visibility(Visibility, ContextModule,Name,Arity,DeclModule),
-            declared_in_file(DeclModule,Name,Arity,Location),
-            results_context_category_label(declared, Visibility, VisibilityText)
+            declared_in_file(DeclModule,Name,Arity,Location)
+%            results_context_category_label(declared, Visibility, VisibilityText)
           ),
           Declarations).
     
@@ -76,11 +78,11 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
 %          defined_in_module(DefiningModule,Name,Arity),
 %          DefiningModules
 %   ),
-   setof( VisibilityText-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
+   setof( definition-Visibility-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
           ( defined_in_module(DefiningModule,Name,Arity),
             visibility(Visibility, ContextModule,Name,Arity,DefiningModule),
-            defined_in_files(DefiningModule,Name,Arity,Locations),
-            results_context_category_label(defined, Visibility, VisibilityText)
+            defined_in_files(DefiningModule,Name,Arity,Locations)
+%            results_context_category_label(defined, Visibility, VisibilityText)
           ),
           Definitions
     ). 
@@ -89,16 +91,15 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
 
 
 :- multifile(results_context_category_label/3).
-
-results_context_category_label(declared, local,      'Local declaration' ) :- !.
-results_context_category_label(declared, supermodule,'Imported declaration' ) :- !.
-results_context_category_label(declared, submodule,  'Submodule declaration') :- !.
-results_context_category_label(declared, invisible,  'Locally invisible declaration') :- !.
-
-results_context_category_label(defined, local,      'Local definitions' ) :- !.
-results_context_category_label(defined, supermodule,'Imported definitions' ) :- !.
-results_context_category_label(defined, submodule,  'Submodule definitions') :- !.
-results_context_category_label(defined, invisible,  'Locally invisible definitions') :- !.
+%results_context_category_label(declared, local,      'Local declaration' ) :- !.
+%results_context_category_label(declared, supermodule,'Imported declaration' ) :- !.
+%results_context_category_label(declared, submodule,  'Submodule declaration') :- !.
+%results_context_category_label(declared, invisible,  'Locally invisible declaration') :- !.
+%
+%results_context_category_label(defined, local,      'Local definitions' ) :- !.
+%results_context_category_label(defined, supermodule,'Imported definitions' ) :- !.
+%results_context_category_label(defined, submodule,  'Submodule definitions') :- !.
+%results_context_category_label(defined, invisible,  'Locally invisible definitions') :- !.
 
     
 % These clauses must stay in this order since they determine
@@ -107,6 +108,21 @@ results_context_category_label(defined, invisible,  'Locally invisible definitio
 % (which is the INVERSE of the order of elements that we
 % compute here).               
          
+
+visibility(super, ContextModule,Name,Arity,DeclModule) :-
+    declared_in_module(ContextModule,Name,Arity,DeclModule),
+    ContextModule \== DeclModule. 
+    
+   
+visibility(local, ContextModule,Name,Arity,DeclModule) :-
+    declared_in_module(ContextModule,Name,Arity,DeclModule),
+    ContextModule == DeclModule.
+    
+visibility(sub, ContextModule,Name,Arity,DeclModule) :-
+    declared_in_module(DeclModule,Name,Arity,DeclModule),
+    % DeclModule is a submodule of ContextModule
+    declared_in_module(DeclModule,_,_,ContextModule), % submodule
+    ContextModule \== DeclModule. 
 visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
     % Take care to generate all values befor using negation.
     % Otherwise the clause will not be able to generate values.
@@ -116,21 +132,6 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
     declared_in_module(DeclModule,Name,Arity,DeclModule),
     \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
     \+ declared_in_module(DeclModule,_,_,ContextModule).
-    
-visibility(submodule, ContextModule,Name,Arity,DeclModule) :-
-    declared_in_module(DeclModule,Name,Arity,DeclModule),
-    % DeclModule is a submodule of ContextModule
-    declared_in_module(DeclModule,_,_,ContextModule), % submodule
-    ContextModule \== DeclModule. 
-
-visibility(supermodule, ContextModule,Name,Arity,DeclModule) :-
-    declared_in_module(ContextModule,Name,Arity,DeclModule),
-    ContextModule \== DeclModule. 
-    
-visibility(local, ContextModule,Name,Arity,DeclModule) :-
-    declared_in_module(ContextModule,Name,Arity,DeclModule),
-    ContextModule == DeclModule.
-   
 
         /***********************************************************************
          * Find Primary Definition                                             *

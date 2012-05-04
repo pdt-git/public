@@ -50,7 +50,6 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.search.PrologSearchResult;
-import org.cs3.pdt.internal.structureElements.CategoryHandler;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -76,7 +75,6 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private Goal goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
-	private CategoryHandler categoryHandler;
 	private Map<String, SearchPredicateElement> predForSignature = new HashMap<String, SearchPredicateElement>();
 
 	public PDTSearchQuery(PrologInterface pif, Goal goal) {
@@ -197,9 +195,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	protected abstract PDTMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
 	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity,
-	IFile file, int line, List<String> properties, String resultsCategory, String searchCategory) {
+	IFile file, int line, List<String> properties, String visibility, String declOrDef) {
 		
-		String signature = resultsCategory+definingModule+functor+arity;
+		String signature = declOrDef+visibility+definingModule+functor+arity;
 		SearchPredicateElement pred; 
 		PDTMatch match;
 		if(predForSignature.containsKey(signature)){
@@ -210,10 +208,10 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 					return null;
 				}
 			}
-			match = createMatchforPredicate(resultsCategory, searchCategory, pred, file, line);
+			match = createMatchforPredicate(visibility, declOrDef, pred, file, line);
 		}
 		else {
-			match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory, resultsCategory);
+			match = createMatch(definingModule, functor, arity, file, line, properties, declOrDef, visibility);
 			pred = (SearchPredicateElement)match.getElement();
 			predForSignature.put(signature, pred);
 		}
@@ -221,16 +219,16 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	}
 
 	protected PDTMatch createMatch(String module, String name, int arity, IFile file, int line, 
-			List<String> properties, String searchCategory, String resultCategory) {
+			List<String> properties, String declOrDef, String visibility) {
 		
 		SearchPredicateElement pe = new SearchPredicateElement(module, name, arity, properties);
 		
-		PDTMatch match = createMatchforPredicate(resultCategory, searchCategory, pe, file, line);
+		PDTMatch match = createMatchforPredicate(visibility, declOrDef, pe, file, line);
 		return match;
 	}
 
-	protected PDTMatch createMatchforPredicate(String resultCategory, String searchCategory, SearchPredicateElement pe, IFile file, int line) {
-		PDTMatch match = new PDTMatch(resultCategory, pe, file, line, 0, searchCategory); 
+	protected PDTMatch createMatchforPredicate(String visibility, String declOrDef, SearchPredicateElement pe, IFile file, int line) {
+		PDTMatch match = new PDTMatch(visibility, pe, file, line, 0, declOrDef); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
 		
@@ -320,22 +318,6 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	@Override
 	public ISearchResult getSearchResult() {
 		return result;
-	}
-
-	public boolean isCategorized(){
-		return false;
-//		return categoryHandler != null;
-	}
-	
-	public CategoryHandler getCategoryHandler(){
-		return categoryHandler;
-	}
-	
-	public void addCategoryEntry(PDTMatch match, String categoryName){
-		if (categoryHandler == null) {
-			categoryHandler = new CategoryHandler();
-		}
-		categoryHandler.addMatchToCategory(match, categoryName);
 	}
 
 	protected void setGoal(Goal goal) {

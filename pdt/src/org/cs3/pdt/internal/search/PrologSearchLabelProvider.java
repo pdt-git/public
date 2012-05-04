@@ -5,11 +5,11 @@ package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.FileTreeElement;
-import org.cs3.pdt.internal.structureElements.SearchModuleElement;
-import org.cs3.pdt.internal.structureElements.PDTTreeElement;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pdt.internal.structureElements.SearchResultCategory;
+import org.cs3.pl.common.ExternalPrologFilesProjectUtils;
 import org.cs3.pl.metadata.PrologElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -41,13 +41,15 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		} else if(element instanceof SearchModuleElement){
 			//return ImageRepository.getImage(ImageRepository.PE_MODULE);
 			return ImageRepository.getImage(ImageRepository.PACKAGE);
-		} else if (element instanceof SearchResultCategory) {
-			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
-			return sharedImagaes.getImage(ISharedImages.IMG_OBJ_ADD);
 		} else if(element instanceof SearchPredicateElement){
 			return setPredicateImage(element);
 		} else if(element instanceof FileTreeElement){
-			return ImageRepository.getImage(ImageRepository.PROLOG_FILE);
+			FileTreeElement fileTreeElement = (FileTreeElement) element;
+			if (ExternalPrologFilesProjectUtils.isExternalFile(fileTreeElement.getFile())) {
+				return ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL);
+			} else {
+				return ImageRepository.getImage(ImageRepository.PROLOG_FILE_CONSULTED);
+			}
 		} 
 		return null;
 	}
@@ -86,8 +88,6 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return label + " (" + count + " match" + plural + ")";
 		} else if(element instanceof PDTTreeElement){
 			return ((PDTTreeElement)element).getLabel();
-		} else if (element instanceof SearchResultCategory) {
-			return ((SearchResultCategory)element).getLabel();
 //		} else if (element instanceof ModuleSearchElement) {
 //			return ((ModuleSearchElement)element).getLabel();
 //		} else if(element instanceof PrologMatch) {

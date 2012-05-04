@@ -14,7 +14,6 @@ package org.cs3.pdt.internal.search;
 import org.cs3.pdt.internal.structureElements.FileTreeElement;
 import org.cs3.pdt.internal.structureElements.PDTTreeElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pdt.internal.structureElements.SearchResultCategory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.search.ui.text.Match;
@@ -45,9 +44,6 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 			Match match = (Match) child;
 			return match.getElement();
 		} 
-		if (child instanceof SearchResultCategory) {
-			return getSearchResult();
-		}
 		return null;
 	}
 

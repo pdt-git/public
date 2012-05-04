@@ -49,15 +49,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElementCreator;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pdt.internal.structureElements.SearchResultCategory;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -226,18 +224,8 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 //		return children;
 //	}
 	
-	public SearchResultCategory[] getCategories() {
-		if (query.getCategoryHandler() == null) {
-			return new SearchResultCategory[0];
-		}
-		return query.getCategoryHandler().getCategories();
-	}
-
 	public Object[] getChildren() {
-		if (query.isCategorized())
-			return getCategories();
-		else
-			return getModules();
+		return getModules();
 	}
 	
 	

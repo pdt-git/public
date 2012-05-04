@@ -37,7 +37,7 @@ public class FileTreeElement implements PDTTreeElement{
 
 	@Override
 	public String getLabel() {
-		return file.getFullPath().toString();
+		return file.getName();
 	}
 
 }
