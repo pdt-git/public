@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.internal.queries.CategorizedDefinitionsSearchQuery;
+import org.cs3.pdt.internal.queries.DefinitionsSearchQuery;
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
 import org.cs3.pdt.internal.queries.ReferencesSearchQueryDirect;
 import org.cs3.pl.metadata.Goal;
@@ -148,7 +148,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		if (limitTo == REFERENCES)
 			searchQuery = new ReferencesSearchQueryDirect(null, goal);
 		else 
-			searchQuery = new CategorizedDefinitionsSearchQuery(null, goal);
+			searchQuery = new DefinitionsSearchQuery(null, goal);
 
 		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQueryInForeground(null,searchQuery);

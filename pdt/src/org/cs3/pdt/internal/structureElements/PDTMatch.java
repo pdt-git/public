@@ -10,15 +10,15 @@ public class PDTMatch extends Match implements PDTTreeElement{
 
 	private String module;
 	private int line=-1;
-	private String kind;
 	private IFile file;
 
 	private boolean isLineLocation= false;
-	private String visibility; 
+	private String visibility;
+	private String declOrDef; 
 	
-	public PDTMatch(String visibility, Object element, IFile file, int offset, int length, String kind) {
+	public PDTMatch(String visibility, Object element, IFile file, int offset, int length, String declOrDef) {
 		super(element, UNIT_LINE, offset, length);
-		this.kind = kind;
+		this.declOrDef = declOrDef;
 		this.file = file;
 		this.visibility = visibility;
 	}
@@ -44,6 +44,10 @@ public class PDTMatch extends Match implements PDTTreeElement{
 		return module;
 	}
 	
+	public String getDeclOrDef() {
+		return declOrDef;
+	}
+	
 	public String getVisibility() {
 		return visibility;
 	}
@@ -67,7 +71,7 @@ public class PDTMatch extends Match implements PDTTreeElement{
 		StringBuffer label = new StringBuffer("Line ");
 		label.append(Integer.toString(getLine()));
 		label.append(" (");
-		label.append(kind);
+		label.append(declOrDef);
 		label.append(")");
 		return label.toString();
 	}

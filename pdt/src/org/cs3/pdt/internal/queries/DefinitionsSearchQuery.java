@@ -11,15 +11,10 @@ import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
-public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
-	public CategorizedDefinitionsSearchQuery(PrologInterface pif, Goal goal) {
+public class DefinitionsSearchQuery extends PDTSearchQuery {
+	public DefinitionsSearchQuery(PrologInterface pif, Goal goal) {
 		super(pif, goal);
 		setSearchType("Definitions and declarations of");
-	}
-
-	protected String getCategoryDescription(String module, String functor, int arity, String category)  {
-		StringBuffer description = new StringBuffer(category);
-		return description.toString();
 	}
 
 	@Override
@@ -38,7 +33,7 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 		
 		String query = "pdt_search:find_definitions_categorized(" 
 			            + file + "," + goal.getLine() + "," + term + ", Functor, Arity, "+ module2 + 
-			            ", SearchCategory, DefiningModule, File, Line, PropertyList, ResultsCategory)";
+			            ", DeclOrDef, DefiningModule, File, Line, PropertyList, Visibility)";
 		return query;
 	}
 
@@ -48,26 +43,23 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 	@Override
 	protected PDTMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
-		String definingModule = (String)m.get("DefiningModule");
-		String functor = (String)m.get("Functor");
-		int arity = Integer.parseInt(((String)m.get("Arity")));
-		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("File"));
-		int line = Integer.parseInt((String) m.get("Line"));
+		String definingModule = m.get("DefiningModule").toString();
+		String functor = m.get("Functor").toString();
+		int arity = Integer.parseInt(m.get("Arity").toString());
+		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(m.get("File").toString());
+		int line = Integer.parseInt(m.get("Line").toString());
 
 		Object prop = m.get("PropertyList");
 		List<String> properties = null;
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}	
-		String resultsCategory = (String)m.get("ResultsCategory");
+		String declOrDef = m.get("DeclOrDef").toString();
+		String visibility = m.get("Visibility").toString();
 
-		String searchCategory = (String)m.get("SearchCategory");
-		
-		
 		PDTMatch match = createUniqueMatch(definingModule, functor, arity,
-				file, line, properties, resultsCategory, searchCategory);
+				file, line, properties, visibility, declOrDef);
 		
-//		addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
 		return match;
 	}
 	

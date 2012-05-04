@@ -1,6 +1,9 @@
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +32,7 @@ public class SearchModuleElementCreator {
 			moduleList.add(dummies.get(key));
 		}
 		
+		Collections.sort(moduleList);
 		return ((SearchModuleElement[])moduleList.toArray(new SearchModuleElement[0]));
 	}
-
 }
