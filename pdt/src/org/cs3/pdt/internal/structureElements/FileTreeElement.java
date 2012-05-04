@@ -30,6 +30,10 @@ public class FileTreeElement implements PDTTreeElement{
 	public Object[] getChildren() {
 		return elements.toArray();
 	}
+	
+	public int getNumberOfChildren() {
+		return elements.size();
+	}
 
 	@Override
 	public String getLabel() {

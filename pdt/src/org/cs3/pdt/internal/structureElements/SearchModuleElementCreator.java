@@ -17,7 +17,7 @@ public class SearchModuleElementCreator {
 			String moduleName = match.getModule();
 			
 			if (!dummies.containsKey(moduleName)) {
-				SearchModuleElement newModule = new SearchModuleElement(moduleName);
+				SearchModuleElement newModule = new SearchModuleElement(moduleName, match.getVisibility());
 				dummies.put(moduleName, newModule);
 			}
 			dummies.get(moduleName).addElement(match);
