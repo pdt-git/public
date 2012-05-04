@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 
 public class FileTreeElement implements PDTTreeElement{
-	private List<PDTTreeElement> elements= new ArrayList<PDTTreeElement>();
+	private List<PDTMatch> occurrences= new ArrayList<PDTMatch>();
 	private IFile file;
 	
 	public FileTreeElement(IFile file) {
@@ -17,22 +17,38 @@ public class FileTreeElement implements PDTTreeElement{
 		return file;
 	}
 	
-	public void addChild(PDTTreeElement elem) {
-		elements.add(elem);
+	public void addChild(PDTMatch elem) {
+		occurrences.add(elem);
 	}
 
 	@Override
 	public boolean hasChildren() {
-		return !(elements.isEmpty());
+		return !(occurrences.isEmpty());
 	}
 
 	@Override
 	public Object[] getChildren() {
-		return elements.toArray();
+		return occurrences.toArray();
 	}
 	
 	public int getNumberOfChildren() {
-		return elements.size();
+		return occurrences.size();
+	}
+	
+	public PDTMatch getFirstMatch() {
+		if (occurrences.isEmpty()) {
+			return null;
+		}
+		PDTMatch firstOccurrance = occurrences.get(0);
+		int firstLine = firstOccurrance.getLine();
+		for (PDTMatch occurence : occurrences) {
+			int line = occurence.getLine();
+			if (line < firstLine) {
+				firstLine = line;
+				firstOccurrance = occurence;
+			}
+		}
+		return firstOccurrance;
 	}
 
 	@Override
