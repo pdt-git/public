@@ -19,7 +19,7 @@
 
 :- public([
 	pdt_reload/1,
-	find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/8,
@@ -48,7 +48,6 @@
 :- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
 :- use_module(pdt_prolog_library(utils4modules)).
-%:- use_module(pdt_prolog_library(pdt_xref_experimental)).
 
 
 
