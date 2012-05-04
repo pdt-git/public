@@ -1,9 +1,7 @@
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pl.metadata.Predicate;
@@ -16,7 +14,7 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 	private static final long serialVersionUID = 8822257720982382862L;
 	private PDTTreeElement parent;
 	private List<PDTMatch> occurrences = new ArrayList<PDTMatch>();
-	Set<FileTreeElement> files = new HashSet<FileTreeElement>();
+	List<FileTreeElement> files = new ArrayList<FileTreeElement>();
 	
 	public SearchPredicateElement(String module, String predicateName, int arity, List<String> properties) {
 		super(module,predicateName,arity, properties);
@@ -46,13 +44,11 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 	@Override
 	public boolean hasChildren() {
 		return !files.isEmpty();
-//		return !occurences.isEmpty();
 	}
 
 	@Override
 	public Object[] getChildren() {
 		return files.toArray();
-//		return occurences.toArray();
 	}
 	
 	@Override
@@ -65,16 +61,11 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 	}
 	
 	public PDTMatch getFirstOccurrence() {
-		PDTMatch firstOccurrance = occurrences.get(0);
-		int firstLine = firstOccurrance.getLine();
-		for (PDTMatch occurence : occurrences) {
-			int line = occurence.getLine();
-			if (line < firstLine) {
-				firstLine = line;
-				firstOccurrance = occurence;
-			}
+		if (files.isEmpty()) {
+			return null;
+		} else {
+			return files.get(0).getFirstMatch();
 		}
-		return firstOccurrance;
 	}
 	
 	public PDTMatch[] getOccurrences() {

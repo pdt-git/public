@@ -47,6 +47,7 @@ package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.structureElements.FileTreeElement;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pl.metadata.SourceLocation;
@@ -155,6 +156,9 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		}
 		if ((element != null) && (element instanceof SearchPredicateElement))  {
 			return ((SearchPredicateElement)element).getFirstOccurrence();
+		}
+		if (element != null && element instanceof FileTreeElement) {
+			return ((FileTreeElement) element).getFirstMatch();
 		}
 		return super.getCurrentMatch();
 	}
