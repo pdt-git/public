@@ -146,6 +146,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 	
 	
+	private static class SourceLocationAndIsMultifileResult {
+		SourceLocation location;
+		boolean isMultifileResult;
+		SourceLocationAndIsMultifileResult(SourceLocation location, boolean isMultifileResult) {
+			this.location = location;
+			this.isMultifileResult = isMultifileResult;
+		}
+	}
 	private void run_impl(Goal goal, IFile file) throws CoreException {
 		IPrologProject plprj=null;
 		if(file!=null){ 
@@ -157,9 +165,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				PrologSession session = null;
 				try {
 					session = console.getPrologInterface().getSession();
-					SourceLocation location = findFirstClauseLocation_withoutPdtNature(goal, session);
-					if (location != null) {
-						PDTUtils.showSourceLocation(location);
+					SourceLocationAndIsMultifileResult res = findFirstClauseLocation_withoutPdtNature(goal, session); 
+					if (res != null) {
+						if (res.location != null) {
+							PDTUtils.showSourceLocation(res.location);
+						}
+						if (res.isMultifileResult) {
+							new FindDefinitionsActionDelegate(editor).run();
+						}
 					}
 					return;
 				} catch (Exception e) {
@@ -200,7 +213,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		
 	}
 
-	private SourceLocation findFirstClauseLocation_withoutPdtNature(Goal goal,
+	private SourceLocationAndIsMultifileResult findFirstClauseLocation_withoutPdtNature(Goal goal,
 			PrologSession session) throws PrologInterfaceException {
 		// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
 		String enclFile = UIUtils.getFileFromActiveEditor();
@@ -224,7 +237,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		String quotedTerm = Util.quoteAtom(term);
 		
 		String query = "pdt_search:find_primary_definition_visible_in('"
-			+enclFile+ "'," +quotedTerm+ "," +module+ ",File,Line)";
+			+enclFile+ "'," +quotedTerm+ "," +module+ ",File,Line,MultifileResults)";
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause =  session.queryOnce(query);
 		if (clause == null) {
@@ -235,7 +248,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		}
 		SourceLocation location = new SourceLocation((String)clause.get("File"), false);
 		location.setLine(Integer.parseInt((String)clause.get("Line")));
-		return location;
+		boolean otherLocations = "yes".equalsIgnoreCase(clause.get("MultifileResults").toString());
+		return new SourceLocationAndIsMultifileResult(location, otherLocations);
 	}
 
 	
