@@ -32,7 +32,7 @@ public class SearchResultCategory implements PDTTreeElement {
 		String moduleName = match.getModule();
 			
 		if (!elements.containsKey(moduleName)) {
-			SearchModuleElement newModule = new SearchModuleElement(moduleName);
+			SearchModuleElement newModule = new SearchModuleElement(moduleName, "");
 			elements.put(moduleName, newModule);
 		}
 		elements.get(moduleName).addElement(match);

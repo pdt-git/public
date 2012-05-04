@@ -183,11 +183,11 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		if (element instanceof IFile){
 			return (IFile) element;
 		}
-		if (element instanceof SearchPredicateElement){
-			return ((SearchPredicateElement) element).getFile();
-		}
+//		if (element instanceof SearchPredicateElement){
+//			return ((SearchPredicateElement) element).getFile();
+//		}
 		if(element instanceof Match){
-			return ((SearchPredicateElement) ((Match) element).getElement()).getFile();
+			return ((PDTMatch) element).getFile();
 		}
 		return null;
 	}
@@ -207,23 +207,24 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		}
 		return SearchModuleElementCreator.getModuleDummiesForMatches(matches);
 	}
-
-	public SearchPredicateElement[] getElements(IFile file) {
-		SearchPredicateElement[] children = elementCache.get(file);
-		if(children==null){
-			Object[] elms = getElements();
-			Vector<SearchPredicateElement> v = new Vector<SearchPredicateElement>();
-			for (int i = 0; i < elms.length; i++) {
-				SearchPredicateElement elm = (SearchPredicateElement) elms[i];
-				if(elm.getFile().equals(file)){
-					v.add(elm);
-				}
-			}
-			children = v.toArray(new SearchPredicateElement[v.size()]);
-			elementCache.put(file, children);
-		}
-		return children;
-	}
+	
+//	AB: This method is never used!	
+//	public SearchPredicateElement[] getElements(IFile file) {
+//		SearchPredicateElement[] children = elementCache.get(file);
+//		if(children==null){
+//			Object[] elms = getElements();
+//			Vector<SearchPredicateElement> v = new Vector<SearchPredicateElement>();
+//			for (int i = 0; i < elms.length; i++) {
+//				SearchPredicateElement elm = (SearchPredicateElement) elms[i];
+//				if(elm.getFile().equals(file)){
+//					v.add(elm);
+//				}
+//			}
+//			children = v.toArray(new SearchPredicateElement[v.size()]);
+//			elementCache.put(file, children);
+//		}
+//		return children;
+//	}
 	
 	public SearchResultCategory[] getCategories() {
 		if (query.getCategoryHandler() == null) {
@@ -242,8 +243,8 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	
 	@Override
 	public void addMatch(Match match) {
-		SearchPredicateElement elm = (SearchPredicateElement) match.getElement();
-		fileCache.add(elm.getFile());
+		PDTMatch pdtMatch = (PDTMatch) match;
+		fileCache.add(pdtMatch.getFile());
 		super.addMatch(match);
 	}
 	

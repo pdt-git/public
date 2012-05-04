@@ -4,6 +4,7 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.structureElements.FileTreeElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.PDTTreeElement;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
@@ -45,6 +46,8 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return sharedImagaes.getImage(ISharedImages.IMG_OBJ_ADD);
 		} else if(element instanceof SearchPredicateElement){
 			return setPredicateImage(element);
+		} else if(element instanceof FileTreeElement){
+			return ImageRepository.getImage(ImageRepository.PROLOG_FILE);
 		} 
 		return null;
 	}
@@ -75,6 +78,12 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";
+		} else if (element instanceof FileTreeElement){
+			FileTreeElement fileTreeElement = ((FileTreeElement) element);
+			String label = fileTreeElement.getLabel();
+			int count = fileTreeElement.getNumberOfChildren();
+			String plural = ((count==1) ? "" : "es");
+			return label + " (" + count + " match" + plural + ")";
 		} else if(element instanceof PDTTreeElement){
 			return ((PDTTreeElement)element).getLabel();
 		} else if (element instanceof SearchResultCategory) {

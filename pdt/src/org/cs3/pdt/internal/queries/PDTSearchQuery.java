@@ -204,17 +204,16 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		PDTMatch match;
 		if(predForSignature.containsKey(signature)){
 			pred = predForSignature.get(signature);
-			Object[] matches = pred.getChildren();
-			for (Object object : matches) {
-				PDTMatch aMatch = (PDTMatch)object;
+			PDTMatch[] matches = pred.getOccurrences();
+			for (PDTMatch aMatch : matches) {
 				if (aMatch.getLine() == line) {
 					return null;
 				}
 			}
-			match = createMatchforPredicate(line, searchCategory, pred);
+			match = createMatchforPredicate(resultsCategory, searchCategory, pred, file, line);
 		}
 		else {
-			match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory);
+			match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory, resultsCategory);
 			pred = (SearchPredicateElement)match.getElement();
 			predForSignature.put(signature, pred);
 		}
@@ -222,21 +221,20 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	}
 
 	protected PDTMatch createMatch(String module, String name, int arity, IFile file, int line, 
-			List<String> properties, String searchCategory) {
+			List<String> properties, String searchCategory, String resultCategory) {
 		
-		SearchPredicateElement pe = new SearchPredicateElement(file, module, name, arity, properties);
+		SearchPredicateElement pe = new SearchPredicateElement(module, name, arity, properties);
 		
-		PDTMatch match = createMatchforPredicate(line, searchCategory, pe);
+		PDTMatch match = createMatchforPredicate(resultCategory, searchCategory, pe, file, line);
 		return match;
 	}
 
-	protected PDTMatch createMatchforPredicate(int line, String searchCategory,
-			SearchPredicateElement pe) {
-		PDTMatch match = new PDTMatch(pe, line, 0, searchCategory); 
+	protected PDTMatch createMatchforPredicate(String resultCategory, String searchCategory, SearchPredicateElement pe, IFile file, int line) {
+		PDTMatch match = new PDTMatch(resultCategory, pe, file, line, 0, searchCategory); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
 		
-		pe.addOccurence(match);
+		pe.addOccurrence(match);
 		return match;
 	}
 	
@@ -294,8 +292,8 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			String name = callerParts[0];
 			int arity = Integer.getInteger(callerParts[1]);
 			
-			SearchPredicateElement pe = new SearchPredicateElement(file, type, name, arity);
-			PDTMatch match = new PDTMatch(pe, start, (end-start), "definition"); 
+			SearchPredicateElement pe = new SearchPredicateElement(type, name, arity);
+			PDTMatch match = new PDTMatch("", pe, file, start, (end-start), "definition"); 
 			match.setLine(start);
 			match.setModule(pe.getModule());
 
@@ -325,7 +323,8 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	}
 
 	public boolean isCategorized(){
-		return categoryHandler != null;
+		return false;
+//		return categoryHandler != null;
 	}
 	
 	public CategoryHandler getCategoryHandler(){

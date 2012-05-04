@@ -67,7 +67,7 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 		PDTMatch match = createUniqueMatch(definingModule, functor, arity,
 				file, line, properties, resultsCategory, searchCategory);
 		
-		addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
+//		addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
 		return match;
 	}
 	

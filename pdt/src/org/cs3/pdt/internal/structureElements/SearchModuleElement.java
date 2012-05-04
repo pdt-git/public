@@ -3,24 +3,22 @@ package org.cs3.pdt.internal.structureElements;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-
 public class SearchModuleElement implements PDTTreeElement {
-	private String name;
-	private IFile file;
+	
 	private List<PDTMatch> elements = new ArrayList<PDTMatch>();
 	List<SearchPredicateElement> predicates = new ArrayList<SearchPredicateElement>();
+	private String label;
 	
-	public SearchModuleElement(String name) {
-		this.name = name;
+	public SearchModuleElement(String name, String visibility) {
+		if (visibility == null || visibility.isEmpty()) {
+			label = name;
+		} else {
+			label = name + " (" + visibility + ")";
+		}
 	}
 	
 	public String getLabel() {
-		StringBuffer label = new StringBuffer(name);
-		label.append(" (in ");
-		label.append(file.getFullPath().toString());
-		label.append(")");
-		return label.toString();
+		return label;
 	}
 	
 	public void addElement(PDTMatch elem) {
@@ -30,13 +28,11 @@ public class SearchModuleElement implements PDTTreeElement {
 		if (!predicates.contains(predicate)) {
 			predicates.add(predicate);
 		}
-		
-		file = predicate.getFile();
 	}
 
 	@Override
 	public Object[] getChildren() {
-		return  predicates.toArray();
+		return predicates.toArray();
 	}
 
 	@Override

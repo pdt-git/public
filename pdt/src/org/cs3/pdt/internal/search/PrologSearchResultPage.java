@@ -122,8 +122,8 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		SearchPredicateElement element = (SearchPredicateElement)match.getElement();
-		IFile file = element.getFile();
 		PDTMatch prologMatch = (PDTMatch)match;
+		IFile file = prologMatch.getFile();
 		if(prologMatch.isLineLocation()) {
 			SourceLocation loc = createLocation(element, file, prologMatch);
 			PDTUtils.showSourceLocation(loc);
@@ -154,7 +154,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 			return (PDTMatch)element;
 		}
 		if ((element != null) && (element instanceof SearchPredicateElement))  {
-			return ((SearchPredicateElement)element).getFirstOccurence();
+			return ((SearchPredicateElement)element).getFirstOccurrence();
 		}
 		return super.getCurrentMatch();
 	}
