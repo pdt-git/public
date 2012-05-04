@@ -10,23 +10,32 @@
     /*********************************************
      * FIND REFERENCES TO A PARTICULAR PREDICATE *
      ********************************************/
-
+find_unique( Goal ) :-
+    setof( Goal, Goal, Set),
+    member(Goal, Set).
+    
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,?PropertyList)
-find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-
+find_reference_to(Functor,Arity,DefFile, SearchMod,
+                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-
+    find_unique(  find_reference_to__(Functor,Arity,DefFile, SearchMod,
+                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) ).
+    
+find_reference_to__(Functor,Arity,DefFile, SearchMod,
+                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-                  
 	( nonvar(DefFile)
-    -> module_of_file(DefFile,DefModule)
+    -> module_of_file(DefFile,SearchMod)
     ; true % Defining File and defining Module remain free ==> 
            % Search for references to independent definitions
            % <-- Does that make sense???
     ),
     ( var(Arity) % Need to backtrack over all declared Functor/Arity combinations:
-    -> ( setof( Functor/Arity, DefModule^current_predicate(DefModule:Functor/Arity), Set),
+    -> ( setof( Functor/Arity, SearchMod^current_predicate(SearchMod:Functor/Arity), Set),
          member(Functor/Arity, Set)
        )
     ; true % Arity already bound in input
     ),
-    functor(T,Functor,Arity),
-    pdt_xref_data(DefModule:T,RefModule:RefHead,Ref,Kind),
+    functor(SearchTerm,Functor,Arity),
+    pdt_xref_data(SearchMod:SearchTerm,RefModule:RefHead,Ref,Kind),
     functor(RefHead,RefName,RefArity),
     predicate_property(RefModule:RefHead,_),
     nth_clause(RefModule:RefHead,Nth,Ref),
@@ -40,8 +49,7 @@ go :- % To list all results quickly call
     format( '~a reference from ~a:~w clause ~a, line ~a, file ~n~a~n~n',
             [Kind, RefModule,RefHead, Nth, RefLine, RefFile]
     ).
-
-
+	
 
 pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
    current_predicate(RefModule:F/A),     % For all defined predicates
