@@ -12,7 +12,7 @@
                 * PDT RELAOAD                       *
                 *************************************/
 
-:- use_module(split_file_path).
+:- use_module('../split_file_path.pl').
 :- use_module(library(make)).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator

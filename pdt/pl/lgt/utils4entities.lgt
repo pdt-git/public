@@ -97,14 +97,14 @@ entity_property(Protocol, protocol, Property) :-
 source_file_entity(FullPath, Line, Entity) :-
 	nonvar(Line),
 	!,
-	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
+	split_file_path:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Begin, End)),
 	Begin =< Line, End >= Line.
 
 source_file_entity(FullPath, Line, Entity) :-
-	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
+	split_file_path:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Line, _)).

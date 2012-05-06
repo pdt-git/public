@@ -62,7 +62,7 @@
 % Logtalk
 pdt_reload(FullPath) :-
 	write(FullPath), nl,
-	pdtplugin:split_file_path(FullPath, Directory, File, BaseName, lgt),
+	split_file_path:split_file_path(FullPath, Directory, File, BaseName, lgt),
 	setup_call_cleanup(
 		working_directory(Current, Directory),     % SWI-Prolog
 		logtalk_reload(Directory, File, BaseName),
@@ -319,7 +319,7 @@ primary_location(Locations,_,File,FirstLine) :-
 % Called from PrologOutlineInformationControl.java
 
 find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
-	pdtplugin:split_file_path(FullPath, Directory, File, _, lgt),
+	split_file_path:split_file_path(FullPath, Directory, File, _, lgt),
 	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
 	(	% entity declarations
