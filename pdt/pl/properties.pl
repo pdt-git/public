@@ -1,10 +1,12 @@
-:- module(properties, [properties_for_predicate/4,
-						entity_property/3]).
+:- module( properties, 
+         [ properties_for_predicate/4   % (+Module, +Name, +Arity, ?PropertyList)
+         , entity_property/3            % (+Entity, predicate|module, ?PropertyList)
+         ]).
 
 /**
  * properties_for_predicate(+Module, +Name, +Arity, ?PropertyList) is det
  * 
- * Gives a  list of properties interest for the predicate that is referenced by Arg1:Arg2/Arg3
+ * Gives a  list of properties interest for the predicate that is referenced by Arg1:Arg2/Arg3 
  * 
  * Selected properties of the predicate are elements of list arg4.
  */ 
@@ -33,7 +35,5 @@ add_properties_to_list(Head, Kind, [Property|Rest_Properties], Orig_List, New_Li
     ;	New_List = Rest_List
     ).
     
-look_for_kind_and_property(Head,predicate,Property):-
-    predicate_property(Head,Property).
-look_for_kind_and_property(Head,module,Property):-
-    module_property(Head,Property).
+look_for_kind_and_property(Head,predicate,Property):- predicate_property(Head,Property).
+look_for_kind_and_property(Head,module,   Property):-    module_property(Head,Property).
