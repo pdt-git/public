@@ -87,7 +87,7 @@ empty_module__(M) :-                       % generator skips system Modules :-(
 % Module is the module defined in File (or 'user' 
 % if the file defines no explicit module or the  
 % defined module is a hidden system module.
-module_of_file(File,Module):-
+module_of_file(File,Module):- 
     module_property(Module,file(File)).    % Fails if File defines no module
                                            % or if it defines a hidden module
                                            % whose name starts with $
@@ -113,14 +113,27 @@ module_of_file(File,Module):-
 %    predicates are enumerated.
           
 visible_in_module(Module,Name,Arity) :-
+    current_predicate(Module:Name/Arity).
+
 %   (ground(functor(Head,Name,Arity),
 %   predicate_property(Module:Head,visible).
+%
 % The above was created by Jan Wielemaker during his visit to our group 
 % in Nov. 2011. It is intended as a better behaved alternative to the
 % strangely inconsistent versions of current_predicate/1 and /2.
-    
-    current_predicate(Module:Name/Arity).
-%  
+%
+% However, the following does not seem really encouraging:
+% 37 ?- utils4modules:is_inconsistent( A,B ) .
+% A = 1547,    <- failed current_predicate when visible suceeds
+% B = 933234.  <- failed visible when current_predicate succeeds
+%
+% 38 ?- count( predicate_property(Module:Head,visible), N).
+% N = 1206199.
+%
+% 39 ?- count( current_predicate(Module:Name/Arity), N).
+% N = 17356.
+   
+
 % <-- Beware of current_predicate/2: It hides system modules! 
 % Only current_predicate/1 returns ALL modules that see Name/Arity,
 % including (hidden) system modules, such as '$syspreds'. 
@@ -166,29 +179,34 @@ L = 203.
 % Determine whether the predicate indicated by Head has a *local*
 % (non-imported) declaration in the module Module. The predicate 
 % succeeds if there is at least a declaration (but possibly no  
-% single clause) of the predicate in the module. If you want it to  
-% fail you must abolish the predicate declaration, not just  
-% retract all its clauses. See the built-ins Prolog predicates   
-% abolish/1, abolish/1, retractall/1, retract/1
+% single clause) of the predicate in the module. 
 %  
-declared_in_module(Module, Head) :-
-   ( true ; Module = '$syspreds'),                     % Try also hidden module
-   current_predicate(_, Module:Head),                  % Head is declared
-   \+ predicate_property(Module:Head, imported_from(_)). % but not imported
+declared_in_module(M,H) :-
+   defined_in(Module, Head).
+   
+defined_in(Module, Head) :-
+   (  nonvar(Head)
+   -> ( functor(Head,Name,Arity), defined_in(Module,Name,Arity) )
+   ;  ( defined_in(Module,Name,Arity), functor(Head,Name,Arity) )
+   ). 
+ 
 
-
-%% declared_in_module(?Module,?Name,?Arity,?DeclaringModule) is nondet.
+%% declared_in_module(?SubModule,?Name,?Arity,?DeclaringModule) is nondet.
 %
 % Succeed if the predicate Name/Arity visible in Module is declared in 
-% DeclaringModule. Module = DeclaringModule holds if Module contains
-% a local (non-imported) declaration. Otherwise, DeclaringModule is the
-% module from which the declaration is imported. 
-% Note that predicate suceeds even if there is no defining clause for 
-% Name/Arity in DeclaringModule (definition implies declaration but 
-% not vice versa). 
+% DeclaringModule. 
+% Module = DeclaringModule holds if Module contains a non-imported
+% (local) declaration. Otherwise, DeclaringModule is the module from 
+% which the declaration is imported. 
+% Note that predicate suceeds even if there is no clause for Name/Arity 
+% in DeclaringModule (definition implies declaration but not vice versa). 
 
+defined_in(Module,Name,Arity) :-
+	declared_in_module(Module,Name,Arity,Module).
+	
 declared_in_module(Module,Name,Arity,DeclaringModule) :-
-    visible_in_module(Module,Name,Arity),                % Name/arity is visible in Module    
+  ( true ; (var(Module), Module = '$syspreds')),                     % Try also hidden module
+     visible_in_module(Module,Name,Arity),                % Name/arity is visible in Module    
 	functor(Head,Name,Arity), 
     (  predicate_property(Module:Head, imported_from(M)) % by being imported
     -> DeclaringModule = M
@@ -197,16 +215,9 @@ declared_in_module(Module,Name,Arity,DeclaringModule) :-
  
  
 %% declared_in_module(?Module,+Head,?DeclaringModule) is nondet.
-%
-% does not generate!
-%
 declared_in_module(Module,Head,DeclaringModule) :-   
-    (  predicate_property(Module:Head, imported_from(M)) % imported
-    -> DeclaringModule = M
-    ;  DeclaringModule = Module                          % declared locally
-    ),
     functor(Head,Name,Arity), 
-    visible_in_module(Module,Name,Arity). % Name/arity is visible in Module   
+    declared_in_module(Module,Name,Arity,DeclaringModule).   
     
 % Defined = There is at least one clause in the declaring module.
 % Then the declaring module is also a defining module.
@@ -221,13 +232,13 @@ defined_in_module(Module,Head) :-
 defined_in_module(Module,Name,Arity) :- % <<< deleted 1 argument
     defined_in_module(Module,Name,Arity,Module).
 
-defined_in_module(ReferencedModule,Name,Arity,DefiningModule) :- 
-    declared_in_module(ReferencedModule,Name,Arity,DefiningModule),
+defined_in_module(ImportingModule,Name,Arity,DefiningModule) :- 
+    declared_in_module(ImportingModule,Name,Arity,DefiningModule),
     functor(Head,Name,Arity),
     \+ predicate_property(DefiningModule:Head, imported(_)).
 
  
-%% declared_but_undefined(-Module,-Name,-Arity,?DeclaringModule) is nondet
+%% declared_but_undefined(?DeclaringModule,?Name,?Arity,) is nondet
 % 
 % Succeed if the predicate Name/Arity visible in Module is declared in 
 % DeclaringModule but not defined by any clause. 
@@ -243,15 +254,23 @@ declared_but_undefined(Module,Name,Arity) :- % <<< deleted 1 argument
 % Succeed if the predicate Name/Arity is called in Module is but not 
 % visible there. 
 referenced_but_undeclared(Module,Name,Arity) :-
-    predicate_property(Module:Head,undefined),
-    functor(Head,Name,Arity).   
+    (atom(Name), integer(Arity))
+    -> ( functor(Head,Name,Arity),
+         predicate_property(Module:Head,undefined)
+       )
+    ;  ( predicate_property(Module:Head,undefined),
+         functor(Head,Name,Arity)
+       )
+    .
 
 %% defined_in_file(-Module,-Name,-Arity,-N,?File,?Line) is nondet
 %  defined_in_file(+Module,+Name,+Arity,+N,?File,?Line) is det
 %
-%  Get the source locations (File and Line) of all clauses
-%  that define Module:Name/Arity.
- 
+%  The N-th clause of the predicate Module:Name/Arity starts at
+%  line Line in File.
+%   
+%  @param File The full path of the file containing the N-th clause
+
 defined_in_file(Module,Name,Arity, N,File,Line) :-
     declared_in_module(Module,Name,Arity,Module),
     functor(Head,Name,Arity),
