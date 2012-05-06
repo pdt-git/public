@@ -1,21 +1,33 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
-         , find_definitions_categorized/12       % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
-         , find_primary_definition_visible_in/5  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine)
+         , find_definitions_categorized/12       % 
+         , find_primary_definition_visible_in/5  % 
          , find_definition_contained_in/8
          , find_pred/8
          ]).
 
-
-% TODO: The following four lines are duplicated in the loader.pl file: 
-:- use_module( pdt_xref, 
-             [ find_reference_to/12
+:- use_module( split_file_path,
+             [ split_file_path/4                % (File,Folder,FileName,BaseName,Extension)
              ] ).
-:- user:consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
-:- use_module(pdt_runtime_builder_analyzer(properties)).
-:- use_module(pdt_prolog_library(utils4modules)).
+:- use_module( pdt_xref, 
+             [ find_reference_to/12             % ...
+             ] ).
+:- use_module( properties, 
+             [ properties_for_predicate/4
+             ] ).
+:- use_module( pdt_prolog_library(utils4modules),
+             [ module_of_file/2                 % (File,FileModule)
+             , declared_but_undefined/4         % (Module,Name,Arity),
+             , declared_in_module/4             % (SubModule,Name,Arity,DeclModule),
+             , defined_in_module/3              % (Module,Name,Arity),
+             , declared_in_file/4               % (Module,Name,Arity,Location)
+             , defined_in_files/4               % (Module,Name,Arity,Locations)
+             ] ).
 
-:- use_module(split_file_path).                    % general utility
+
+% TODO: Why this import?
+:- user:consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
+
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -25,6 +37,10 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
+
+% find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
+%                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
+%                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
 % Logtalk
 find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategoryLabel):-
     Term \= _:_,
@@ -33,41 +49,41 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategory),
     results_category_label(ResultsCategory, ResultsCategoryLabel).
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, definition, DefiningModule, File,Line, PropertyList, ResultsCategoryLabel):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencingModule, definition, DefiningModule, File,Line, PropertyList, ResultsCategoryLabel):-
     search_term_to_predicate_indicator(Term, Functor/Arity),
     module_of_file(EnclFile,FileModule),
-    (  atom(ReferencedModule)
+    (  atom(ReferencingModule)
     -> true                            % Explicit entity reference ReferencedModule:Term (or ReferencedModule::Term
-    ;  ReferencedModule = FileModule   % Implicit module reference
+    ;  ReferencingModule = FileModule   % Implicit module reference
     ),    
-    find_decl_or_def(ReferencedModule,Functor,Arity,Sources),
+    find_decl_or_def(ReferencingModule,Functor,Arity,Sources),
     member(ResultsCategoryLabel-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
-    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+    properties_for_predicate(ReferencingModule,Functor,Arity,PropertyList).
 
 search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
-search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor, Arity).
+search_term_to_predicate_indicator(  Term, Functor/Arity) :- functor(Term, Functor, Arity).
 
 
-%% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
+%% find_decl_or_def(+ReferencingModule,+Name,?Arity,-Visibility,-Sources)
 
-find_decl_or_def(Module,Name,Arity,Sources) :-
-    ( var(Module)
+find_decl_or_def(ReferencingModule,Name,Arity,Sources) :-
+    ( var(ReferencingModule)
     ; var(Name)
     ),
-    throw( input_argument_free(find_decl_or_def(Module,Name,Arity,Sources)) ).
+    throw( input_argument_free(find_decl_or_def(ReferencingModule,Name,Arity,Sources)) ).
 
-find_decl_or_def(CallingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
-   referenced_but_undeclared(CallingModule,Name,Arity),
-   DeclModule = 'No declaration (in any module)',
-   File = 'No declaration (in any file)',
-   Line = 0.
+%find_decl_or_def(ReferencingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
+%   referenced_but_undeclared(ReferencingModule,Name,Arity),
+%   DeclModule = 'No declaration (in any module)',
+%   File = 'No declaration (in any file)',
+%   Line = 0.
    
 find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
    setof( VisibilityText-DeclModule-Location, ContextModule^Name^Arity^ 
           ( declared_but_undefined(DeclModule,Name,Arity),
-            visibility(Visibility, ContextModule,Name,Arity,DeclModule),
+            visibility(ContextModule,Name,Arity,DeclModule,Visibility),
             declared_in_file(DeclModule,Name,Arity,Location),
             results_context_category_label(declared, Visibility, VisibilityText)
           ),
@@ -80,7 +96,7 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
 %   ),
    setof( VisibilityText-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
           ( defined_in_module(DefiningModule,Name,Arity),
-            visibility(Visibility, ContextModule,Name,Arity,DefiningModule),
+            visibility(ContextModule,Name,Arity,DefiningModule,Visibility),
             defined_in_files(DefiningModule,Name,Arity,Locations),
             results_context_category_label(defined, Visibility, VisibilityText)
           ),
@@ -108,32 +124,52 @@ results_context_category_label(defined, invisible,  'Locally invisible definitio
 % and hence the order of elements in the search result view
 % (which is the INVERSE of the order of elements that we
 % compute here).               
-         
-visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
+
+imports_pred_from(Sub,Head,Super) :-
+    predicate_property(Sub:Head, imported_from(Super)).
+
+% visibility(?, ContextModule,Name,Arity,DeclModule)
+      
+visibility(ContextModule,Name,Arity,DeclModule, invisible) :-
     % Take care to generate all values befor using negation.
     % Otherwise the clause will not be able to generate values.
     % Negation DOES NOT generate values for unbound variables!
     
     % There is some DeclaringModule 
     declared_in_module(DeclModule,Name,Arity,DeclModule),
-    \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
-    \+ declared_in_module(DeclModule,_,_,ContextModule).
+    % ... but the ContextModule neither is imported to it
+    % nor imports from it:
+    functor(Head,Name,Arity),
+    \+ imports_pred_from(DeclModule,Head,ContextModule),
+    \+ imports_pred_from(ContextModule,Head,DeclModule).
     
-visibility(submodule, ContextModule,Name,Arity,DeclModule) :-
+    
+visibility(ContextModule,Name,Arity,DeclModule, submodule) :-
     declared_in_module(DeclModule,Name,Arity,DeclModule),
     % DeclModule is a submodule of ContextModule
     declared_in_module(DeclModule,_,_,ContextModule), % submodule
     ContextModule \== DeclModule. 
 
-visibility(supermodule, ContextModule,Name,Arity,DeclModule) :-
+visibility(ContextModule,Name,Arity,DeclModule, supermodule) :-
     declared_in_module(ContextModule,Name,Arity,DeclModule),
     ContextModule \== DeclModule. 
     
-visibility(local, ContextModule,Name,Arity,DeclModule) :-
+visibility(ContextModule,Name,Arity,DeclModule, local) :-
     declared_in_module(ContextModule,Name,Arity,DeclModule),
     ContextModule == DeclModule.
    
-
+decl_or_def(Module,Name,Arity,Status) :-
+	defined_in(Module,Name,Arity),
+    functor(Head,Name,Arity),
+    (  predicate_property(Module:Head, foreign)
+    -> Status = foreign
+    ;  (  predicate_property(Module:Head, number_of_clauses(0))
+       -> Status = declared
+       ;  Status = implemented
+       )
+    ).
+    
+    
         /***********************************************************************
          * Find Primary Definition                                             *
          * --------------------------------------------------------------------*
@@ -147,7 +183,7 @@ visibility(local, ContextModule,Name,Arity,DeclModule) :-
 % the file whose module is the DefiningModule or otherwise (this case only occurs
 % for "magic" system modules, (e.g. 'system')) the file containing most clauses.
 %
-% Used for the open declaration action in 
+% Used for the open declaration action (F3) in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
         
@@ -271,8 +307,8 @@ find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCat
 
 find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
     % Backtrack over all predicates defined in File:
-    source_file(ModuleHead, File),
-	strip_module(ModuleHead,ModuleCandidate,Head),
+    source_file(ModuleCandidate:Head, File), 
+	% strip_module(ModuleHead,ModuleCandidate,Head),
 	(	module_property(ModuleCandidate, file(File))
 	->	Module = ModuleCandidate
 	;	Module = user
