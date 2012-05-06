@@ -499,6 +499,11 @@
            id="org.cs3.pdt.fileContribution"
            path="pl/load.pl">
      </fileContribution>
+     <fileSearchPathContribution
+           alias="pdt_pl"
+           id="pdt.pl"
+           path="pl/">
+     </fileSearchPathContribution>
   </extension>
   <extension
         point="org.eclipse.ui.perspectives">
