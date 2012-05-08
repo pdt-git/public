@@ -63,7 +63,7 @@ public class PDTMatch extends Match implements PDTTreeElement{
 
 	@Override
 	public Object[] getChildren() {
-		return null;
+		return new Object[0];
 	}
 
 	@Override
