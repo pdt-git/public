@@ -17,7 +17,7 @@ public class PDTMatch extends Match implements PDTTreeElement{
 	private String declOrDef; 
 	
 	public PDTMatch(String visibility, Object element, IFile file, int offset, int length, String declOrDef) {
-		super(element, UNIT_LINE, offset, length);
+		super(element, UNIT_LINE, offset - 1, 1);
 		this.declOrDef = declOrDef;
 		this.file = file;
 		this.visibility = visibility;
