@@ -135,9 +135,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
-		if (ei instanceof IFileEditorInput) {
+		if (ei instanceof IFileEditorInput && match instanceof PDTMatch) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			return match.getElement().equals(fi.getFile());
+			return ((PDTMatch)match).getFile().equals(fi.getFile());
 		}
 		return false;
 	}
