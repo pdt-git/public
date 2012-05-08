@@ -57,7 +57,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement==null||getSearchResult()==null){
-			return null;
+			return new Object[0];
 		}
 		if (parentElement instanceof PrologSearchResult){
 			return getSearchResult().getChildren();
@@ -69,7 +69,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if (parentElement instanceof PDTTreeElement) {
 			return ((PDTTreeElement) parentElement).getChildren();
 		}
-		return null;
+		return new Object[0];
 	}
 
 	@Override
