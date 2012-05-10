@@ -1316,12 +1316,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
 		title.setText(key);
-		boolean useEnter = Boolean.valueOf(
-				PrologConsolePlugin.getDefault().getPreferenceValue(
-						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
-						.booleanValue();
 
-		viewer.setEnterSendsSemicolon(useEnter);
+		viewer.setEnterSendsSemicolon(false);
 
 	}
 
