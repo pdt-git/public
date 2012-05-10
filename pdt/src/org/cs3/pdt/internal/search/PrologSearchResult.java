@@ -39,10 +39,6 @@
  *   distributed.
  ****************************************************************************/
 
-/*
- * Created on 23.08.2004
- *
- */
 package org.cs3.pdt.internal.search;
 
 import java.util.ArrayList;
@@ -50,9 +46,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.PDTTreeElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElementCreator;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
@@ -79,8 +75,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private PDTSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
-	private HashMap<IFile,SearchPredicateElement[]> elementCache = new HashMap<IFile, SearchPredicateElement[]>();
-	private HashSet<IFile> fileCache = new HashSet<IFile>();
+	private HashMap<IFile, HashSet<Match>> filesToMatches = new HashMap<IFile, HashSet<Match>>();
 
 	/**
 	 * @param query
@@ -206,24 +201,6 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		return SearchModuleElementCreator.getModuleDummiesForMatches(matches);
 	}
 	
-//	AB: This method is never used!	
-//	public SearchPredicateElement[] getElements(IFile file) {
-//		SearchPredicateElement[] children = elementCache.get(file);
-//		if(children==null){
-//			Object[] elms = getElements();
-//			Vector<SearchPredicateElement> v = new Vector<SearchPredicateElement>();
-//			for (int i = 0; i < elms.length; i++) {
-//				SearchPredicateElement elm = (SearchPredicateElement) elms[i];
-//				if(elm.getFile().equals(file)){
-//					v.add(elm);
-//				}
-//			}
-//			children = v.toArray(new SearchPredicateElement[v.size()]);
-//			elementCache.put(file, children);
-//		}
-//		return children;
-//	}
-	
 	public Object[] getChildren() {
 		return getModules();
 	}
@@ -232,20 +209,44 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public void addMatch(Match match) {
 		PDTMatch pdtMatch = (PDTMatch) match;
-		fileCache.add(pdtMatch.getFile());
+		IFile file = pdtMatch.getFile();
+		HashSet<Match> matches = filesToMatches.get(file);
+		if (matches == null) {
+			matches = new HashSet<Match>();
+			filesToMatches.put(file, matches);
+		}
+		matches.add(match);
 		super.addMatch(match);
 	}
-	
-	public IFile[] getFiles() {
-		IFile[] unsortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
-		return PDTCoreUtils.sortFileSet(unsortedFiles);
-	}
-
 	
 	@Override
 	public void removeAll() {	
 		super.removeAll();
-		fileCache.clear();
-		elementCache.clear();
+		filesToMatches.clear();
+	}
+
+	public Match[] getMatches(Object element) {
+		if (element instanceof IFile) {
+			HashSet<Match> matches = filesToMatches.get(element);
+			if (matches == null) {
+				return new Match[0];
+			} else {
+				return matches.toArray(new Match[matches.size()]);
+			}
+		} else {
+			HashSet<Match> matches = new HashSet<Match>();
+			collectMatches(element, matches);
+			return matches.toArray(new Match[matches.size()]);
+		}
+	}
+	
+	private void collectMatches(Object parent, HashSet<Match> matches) {
+		if (parent instanceof PDTMatch) {
+			matches.add((PDTMatch)parent);
+		} else if (parent instanceof PDTTreeElement) {
+			for (Object child : ((PDTTreeElement) parent).getChildren()) {
+				collectMatches(child, matches);
+			}
+		}
 	}
 }
