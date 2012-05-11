@@ -50,7 +50,7 @@
     	  category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
           class="org.cs3.pdt.console.preferences.PreferencePageMain"
           id="org.cs3.pdt.console.preferences.PreferencePageMain"
-          name="Prolog Console">
+          name="Console">
     </page>
  </extension>
     <extension

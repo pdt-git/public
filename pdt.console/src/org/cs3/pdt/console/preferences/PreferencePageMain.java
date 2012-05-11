@@ -6,12 +6,9 @@ import java.io.IOException;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -32,7 +29,6 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 	public PreferencePageMain() {
 		super(GRID);
 		setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
-		setDescription("Preferences for the Prolog Console");
 	}
 		
 	/**
@@ -42,12 +38,6 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 	 */
 	@Override
 	public void createFieldEditors() {
-		//If enabled, the enter key sends a semicolon(';') when\n
-		//while the console is in 'get_single_char/1'-mode, \n
-		//e.g., when backtracking over the solutions to a goal.		
-//		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
-		
-//		addField(new BooleanFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "reconsult files on restart of process",getFieldEditorParent()));
 		
 		RadioGroupFieldEditor rgfeReconsult = new RadioGroupFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "Handling consulted files on restart", 3, new String[][] {
 				{ "no reconsulting", PDTConsole.RECONSULT_NONE }, { "reconsult entry points", PDTConsole.RECONSULT_ENTRY }, { "reconsult all files", PDTConsole.RECONSULT_ALL }},
@@ -57,20 +47,6 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 		//The Prolog Console uses this to save its command history.\n
 		//Just leave it empty if you do not want the command history to be persistent.
 		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
-		
-		//Maximum time in milliseconds to wait for the console server to come up.
-		IntegerFieldEditor connectTimeoutEditor = new IntegerFieldEditor(PDTConsole.PREF_TIMEOUT,"Connect Timeout",getFieldEditorParent());
-		connectTimeoutEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
-		addField(connectTimeoutEditor);
-		
-		//If this flag is set, processes will be shown in the console even if all subscriptions are marked as invisible.
-		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Show Hidden Processes",getFieldEditorParent()));
-		
-		//comma-separated list of trackers the console does follow
-		StringFieldEditor sfe = new StringFieldEditor(PDTConsole.PREF_CONTEXT_TRACKERS,"Active context trackers",getFieldEditorParent());
-		addField(sfe);
-		// Disabled, because Lukas set it in his implementation to invisible
-		sfe.setEnabled(false, getFieldEditorParent()); 
 		
 	}
 
