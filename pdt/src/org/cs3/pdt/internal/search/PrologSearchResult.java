@@ -41,16 +41,16 @@
 
 package org.cs3.pdt.internal.search;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
+import org.cs3.pdt.internal.structureElements.FileTreeElement;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
-import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
-import org.cs3.pdt.internal.structureElements.SearchModuleElementCreator;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.resources.IFile;
@@ -75,7 +75,6 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private PDTSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
-	private HashMap<IFile, HashSet<Match>> filesToMatches = new HashMap<IFile, HashSet<Match>>();
 
 	/**
 	 * @param query
@@ -97,6 +96,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 
 	private String searchType = "Prolog Search";
+	private HashMap<String, SearchModuleElement> modules = new HashMap<String, SearchModuleElement>();
 	@Override
 	public final String getLabel() {		
 		return searchType + " "
@@ -149,7 +149,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			return result.getMatches(fi.getFile());
+			return computeContainedMatches(fi.getFile());
 		}
 		else return EMPTY_ARR;
 	}
@@ -163,7 +163,26 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
 			IFile file) {
-		return result.getMatches(file);
+		return computeContainedMatches(file);
+	}
+	
+	private Match[] computeContainedMatches(IFile file) {
+		HashSet<Match> result = new HashSet<Match>();
+		for (SearchModuleElement module : modules.values()) {
+			for (Object obj : module.getChildren()) {
+				if (obj instanceof SearchPredicateElement) {
+					SearchPredicateElement predicate = (SearchPredicateElement) obj;
+					for (FileTreeElement fileTreeElement : predicate.getFileTreeElements()) {
+						if (fileTreeElement.getFile().equals(file)) {
+							for (PDTMatch match : fileTreeElement.getOccurrences()) {
+								result.add(match);
+							}
+						}
+					}
+				}
+			}
+		}
+		return result.toArray(new Match[result.size()]);
 	}
 
 	/*
@@ -175,30 +194,22 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	public IFile getFile(Object element) {
 		if (element instanceof IFile){
 			return (IFile) element;
-		}
-//		if (element instanceof SearchPredicateElement){
-//			return ((SearchPredicateElement) element).getFile();
-//		}
-		if(element instanceof Match){
+		} else if (element instanceof FileTreeElement) {
+			return ((FileTreeElement) element).getFile();
+		} else if (element instanceof SearchMatchElement){
+			return ((SearchMatchElement) element).getMatch().getFile();
+		} else if (element instanceof PDTMatch) {
 			return ((PDTMatch) element).getFile();
+		} else {
+			return null;
 		}
-		return null;
 	}
 	
 	public SearchModuleElement[] getModules(){
-		Object[] elements = getElements();
-		List<PDTMatch> matches = new ArrayList<PDTMatch>();
-		for (int i=0; i< elements.length; i++) {
-			if (elements[i] instanceof SearchPredicateElement){
-				SearchPredicateElement elem = (SearchPredicateElement)elements[i];
-				Match[] matchesForElem = getMatches(elem);
-				for (int j =0; j< matchesForElem.length; j++) {
-					if (matchesForElem[j] instanceof PDTMatch)
-						matches.add((PDTMatch)matchesForElem[j]);
-				}
-			}
-		}
-		return SearchModuleElementCreator.getModuleDummiesForMatches(matches);
+		Collection<SearchModuleElement> values = modules.values();
+		SearchModuleElement[] moduleArray = values.toArray(new SearchModuleElement[values.size()]);
+		Arrays.sort(moduleArray);
+		return moduleArray;
 	}
 	
 	public Object[] getChildren() {
@@ -208,45 +219,59 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	
 	@Override
 	public void addMatch(Match match) {
-		PDTMatch pdtMatch = (PDTMatch) match;
-		IFile file = pdtMatch.getFile();
-		HashSet<Match> matches = filesToMatches.get(file);
-		if (matches == null) {
-			matches = new HashSet<Match>();
-			filesToMatches.put(file, matches);
-		}
-		matches.add(match);
 		super.addMatch(match);
+		addMatchToResult((PDTMatch) match);
+	}
+	
+	@Override
+	public void addMatches(Match[] matches) {
+		super.addMatches(matches);
+		for (Match match : matches) {
+			addMatchToResult((PDTMatch) match);
+		}
+	}
+	
+	private void addMatchToResult(PDTMatch match) {
+		String module = match.getModule();
+		String visibility = match.getVisibility();
+		String signature = module + visibility;
+		SearchModuleElement searchModuleElement = modules.get(signature);
+		if (searchModuleElement == null) {
+			searchModuleElement = new SearchModuleElement(this, module, visibility);
+			modules.put(signature, searchModuleElement);
+		}
+		searchModuleElement.addMatch(match);
 	}
 	
 	@Override
 	public void removeAll() {	
 		super.removeAll();
-		filesToMatches.clear();
+		modules.clear();
 	}
-
-	public Match[] getMatches(Object element) {
-		if (element instanceof IFile) {
-			HashSet<Match> matches = filesToMatches.get(element);
-			if (matches == null) {
-				return new Match[0];
-			} else {
-				return matches.toArray(new Match[matches.size()]);
-			}
-		} else {
-			HashSet<Match> matches = new HashSet<Match>();
-			collectMatches(element, matches);
-			return matches.toArray(new Match[matches.size()]);
+	
+	@Override
+	public void removeMatch(Match match) {
+		super.removeMatch(match);
+		removeMatchFromResult((PDTMatch) match);
+	}
+	
+	@Override
+	public void removeMatches(Match[] matches) {
+		super.removeMatches(matches);
+		for (Match match : matches) {
+			removeMatchFromResult((PDTMatch) match);
 		}
 	}
 	
-	private void collectMatches(Object parent, HashSet<Match> matches) {
-		if (parent instanceof PDTMatch) {
-			matches.add((PDTMatch)parent);
-		} else if (parent instanceof PDTTreeElement) {
-			for (Object child : ((PDTTreeElement) parent).getChildren()) {
-				collectMatches(child, matches);
+	private void removeMatchFromResult(PDTMatch match) {
+		String signature = match.getModule() + match.getVisibility();
+		SearchModuleElement searchModuleElement = modules.get(signature);
+		if (searchModuleElement != null) {
+			searchModuleElement.removeMatch(match);
+			if (!searchModuleElement.hasChildren()) {
+				modules.remove(signature);
 			}
 		}
 	}
+
 }

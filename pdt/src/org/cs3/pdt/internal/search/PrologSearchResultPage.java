@@ -50,12 +50,19 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.FileTreeElement;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
@@ -63,6 +70,7 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.UIJob;
 
 
 public class PrologSearchResultPage extends AbstractTextSearchViewPage {
@@ -97,12 +105,41 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 
 	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
-		//viewer.setSorter(new JavaElementLineSorter());
-		//viewer.setLabelProvider(new PrologSearchLabelProvider(this));
-		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(this), 
+		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(), 
 				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new PrologSearchTreeContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				ISelection selection = event.getSelection();
+				if (selection instanceof TreeSelection) {
+					Object firstElement = ((TreeSelection) selection).getFirstElement();
+					Match m = null;
+					if (firstElement instanceof SearchPredicateElement) {
+						m = ((SearchPredicateElement) firstElement).getFirstOccurrence();
+					} else if (firstElement instanceof FileTreeElement) {
+						m = ((FileTreeElement) firstElement).getFirstMatch();
+					}
+					if (m != null) {
+						final Match match = m;
+						UIJob job = new UIJob("Show Match") {
+							@Override
+							public IStatus runInUIThread(IProgressMonitor monitor) {
+								try {
+									showMatch(match, match.getOffset(), match.getLength(), true);
+								} catch (PartInitException e) {
+									Debug.report(e);
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						job.schedule();
+					}
+				}
+				System.out.println();
+			}
+		});
 	}
 	
 	@Override
@@ -112,9 +149,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 
 	@Override
 	protected void configureTableViewer(TableViewer viewer) {
-		//viewer.setSorter(new JavaElementLineSorter());
-		//viewer.setLabelProvider(new PrologSearchLabelProvider(this));
-		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(this), 
+		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(), 
 				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new PrologSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
@@ -122,20 +157,18 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	
 	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		SearchPredicateElement element = (SearchPredicateElement)match.getElement();
 		PDTMatch prologMatch = (PDTMatch)match;
+		SearchPredicateElement element = prologMatch.getPredicateElement();
 		IFile file = prologMatch.getFile();
 		if(prologMatch.isLineLocation()) {
 			SourceLocation loc = createLocation(element, file, prologMatch);
 			PDTUtils.showSourceLocation(loc);
 			return;
 		}
-		PDTUtils.openEditorOnExternalFile(currentOffset, currentLength, activate,
-				file);
+		PDTUtils.openEditorOnExternalFile(currentOffset, currentLength, activate, file);
 	}
 
-	private SourceLocation createLocation(SearchPredicateElement element,
-			IFile file, PDTMatch prologMatch) {
+	private SourceLocation createLocation(SearchPredicateElement element, IFile file, PDTMatch prologMatch) {
 		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		
@@ -145,22 +178,4 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		return loc;
 	}
 
-	@Override
-	public Match getCurrentMatch() {
-		IStructuredSelection selection = (IStructuredSelection) getViewer().getSelection();
-		Object element = null;
-		if (selection.size() > 0)
-			element = selection.getFirstElement();
-		if ((element != null) && (element instanceof PDTMatch)) {
-			return (PDTMatch)element;
-		}
-		if ((element != null) && (element instanceof SearchPredicateElement))  {
-			return ((SearchPredicateElement)element).getFirstOccurrence();
-		}
-		if (element != null && element instanceof FileTreeElement) {
-			return ((FileTreeElement) element).getFirstMatch();
-		}
-		return super.getCurrentMatch();
-	}
-	
 }

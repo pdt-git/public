@@ -1,59 +1,88 @@
 package org.cs3.pdt.internal.structureElements;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-public class FileTreeElement implements PDTTreeElement{
-	private List<PDTMatch> occurrences= new ArrayList<PDTMatch>();
-	private IFile file;
+public class FileTreeElement implements PDTSearchTreeElement {
 	
-	public FileTreeElement(IFile file) {
+	private LinkedHashMap<PDTMatch, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<PDTMatch, SearchMatchElement>();
+	private IFile file;
+	private Object parent;
+	
+	public FileTreeElement(Object parent, IFile file) {
 		this.file = file;
+		this.parent = parent;
 	}
 	
 	public IFile getFile() {
 		return file;
 	}
 	
-	public void addChild(PDTMatch elem) {
-		occurrences.add(elem);
-	}
-
 	@Override
 	public boolean hasChildren() {
-		return !(occurrences.isEmpty());
+		return !(matchesToSearchElements.isEmpty());
 	}
 
 	@Override
 	public Object[] getChildren() {
-		return occurrences.toArray();
+		return matchesToSearchElements.values().toArray();
+	}
+	
+	public PDTMatch[] getOccurrences() {
+		Set<PDTMatch> keySet = matchesToSearchElements.keySet();
+		return keySet.toArray(new PDTMatch[keySet.size()]);
 	}
 	
 	public int getNumberOfChildren() {
-		return occurrences.size();
+		return matchesToSearchElements.size();
 	}
 	
 	public PDTMatch getFirstMatch() {
-		if (occurrences.isEmpty()) {
+		if (matchesToSearchElements.isEmpty()) {
 			return null;
 		}
-		PDTMatch firstOccurrance = occurrences.get(0);
-		int firstLine = firstOccurrance.getLine();
-		for (PDTMatch occurence : occurrences) {
+		PDTMatch firstMatch = null;
+		int firstLine = Integer.MAX_VALUE;
+		for (PDTMatch occurence : matchesToSearchElements.keySet()) {
 			int line = occurence.getLine();
-			if (line < firstLine) {
+			if (firstMatch == null) {
+				firstMatch = occurence;
 				firstLine = line;
-				firstOccurrance = occurence;
+			} else if (line < firstLine) {
+				firstLine = line;
+				firstMatch = occurence;
 			}
 		}
-		return firstOccurrance;
+		return firstMatch;
 	}
 
 	@Override
 	public String getLabel() {
 		return file.getName();
+	}
+
+	@Override
+	public void removeMatch(PDTMatch match) {
+		SearchMatchElement removedElement = matchesToSearchElements.remove(match);
+		if (removedElement != null) {
+			removedElement.removeMatch(match);
+		}
+	}
+
+	@Override
+	public void addMatch(PDTMatch match) {
+		if (!matchesToSearchElements.containsKey(match)) {
+			SearchMatchElement searchMatchElement = (SearchMatchElement) match.getElement();
+			searchMatchElement.setParent(this);
+			matchesToSearchElements.put(match, searchMatchElement);
+		}
+	}
+
+	@Override
+	public Object getParent() {
+		return parent;
 	}
 
 }

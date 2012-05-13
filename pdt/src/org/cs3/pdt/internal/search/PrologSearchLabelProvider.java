@@ -5,8 +5,8 @@ package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.FileTreeElement;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pl.common.ExternalPrologFilesProjectUtils;
@@ -19,23 +19,15 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 public class PrologSearchLabelProvider implements ILabelProvider {
-	/**
-	 * 
-	 */
-	private final PrologSearchResultPage prologSearchResultPage;
 
-	/**
-	 * @param prologSearchResultPage
-	 */
-	PrologSearchLabelProvider(PrologSearchResultPage prologSearchResultPage) {
-		this.prologSearchResultPage = prologSearchResultPage;
+	PrologSearchLabelProvider() {
 	}
 
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IFile) {
 			return ImageRepository.getImage(ImageRepository.FILE);
-		} else if (element instanceof PDTMatch) {
+		} else if (element instanceof SearchMatchElement) {
 			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
 			return setCategoryImage(sharedImagaes);
 		} else if(element instanceof SearchModuleElement){
@@ -56,7 +48,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 
 	private Image setPredicateImage(Object element) {
 		PrologElement pe = (PrologElement) element;
-		if (pe.isPublic()) {
+		if (pe.isPublic() || "user".equals(pe.getModule())) {
 			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 		} 
 		if (pe.isPrivate()) {
@@ -76,8 +68,8 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		if(element instanceof SearchPredicateElement){
 			SearchPredicateElement pe = ((SearchPredicateElement)element);
 			String label = pe.getLabel();
-//			int count = pe.numberOfOccurences();
-			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
+			int count = pe.numberOfOccurences();
+//			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";
 		} else if (element instanceof FileTreeElement){

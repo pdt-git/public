@@ -44,6 +44,7 @@ package org.cs3.pdt.internal.queries;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -51,11 +52,10 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.search.PrologSearchResult;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.SearchMatchElement;
+import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
@@ -74,12 +74,12 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	private Goal goal;
 	private PrologSearchResult result;
-	private PrologInterface pif;
 	private Map<String, SearchPredicateElement> predForSignature = new HashMap<String, SearchPredicateElement>();
+	private Map<String, SearchModuleElement> moduleElements = new HashMap<String, SearchModuleElement>();
+	private LinkedHashSet<String> signatures = new LinkedHashSet<String>();
 
 	public PDTSearchQuery(PrologInterface pif, Goal goal) {
 		this.goal = goal;
-		this.pif=pif;
 		result = new PrologSearchResult(this, goal);
 	}
     
@@ -107,11 +107,11 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throw new NullPointerException();
 		}
 
-		if(pif!= null){ // The project has the PDT nature
-			return searchIfPDTNatureIsSet();
-		} else {                                 
+//		if(pif!= null){ // The project has the PDT nature
+//			return searchIfPDTNatureIsSet();
+//		} else {                                 
 			return searchIfPDTNatureIsMissing(); 
-		}
+//		}
 	}
 
 	/**
@@ -181,6 +181,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 	throws IOException, NumberFormatException {
 		PDTMatch match;
+		moduleElements.clear();
+		predForSignature.clear();
+		signatures.clear();
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
@@ -189,115 +192,34 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 				result.addMatch(match);
 			}
 		}
-
 	}
 	
 	protected abstract PDTMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
-	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity,
-	IFile file, int line, List<String> properties, String visibility, String declOrDef) {
-		
-		String signature = declOrDef+visibility+definingModule+functor+arity;
-		SearchPredicateElement pred; 
-		PDTMatch match;
-		if(predForSignature.containsKey(signature)){
-			pred = predForSignature.get(signature);
-			PDTMatch[] matches = pred.getOccurrences();
-			for (PDTMatch aMatch : matches) {
-				if (aMatch.getLine() == line) {
-					return null;
-				}
-			}
-			match = createMatchforPredicate(visibility, declOrDef, pred, file, line);
+	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int line, List<String> properties, String visibility, String declOrDef) {
+		String signature = declOrDef + visibility + definingModule + functor + arity + line;
+		if (signatures.contains(signature)) {
+			return null;
+		} else {
+			signatures.add(signature);
+			SearchMatchElement searchMatchElement = new SearchMatchElement();
+			PDTMatch match = new PDTMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, line, declOrDef);
+			searchMatchElement.setMatch(match);
+			return match;
 		}
-		else {
-			match = createMatch(definingModule, functor, arity, file, line, properties, declOrDef, visibility);
-			pred = (SearchPredicateElement)match.getElement();
-			predForSignature.put(signature, pred);
-		}
-		return match;
 	}
 
-	protected PDTMatch createMatch(String module, String name, int arity, IFile file, int line, 
-			List<String> properties, String declOrDef, String visibility) {
-		
-		SearchPredicateElement pe = new SearchPredicateElement(module, name, arity, properties);
-		
-		PDTMatch match = createMatchforPredicate(visibility, declOrDef, pe, file, line);
-		return match;
-	}
-
-	protected PDTMatch createMatchforPredicate(String visibility, String declOrDef, SearchPredicateElement pe, IFile file, int line) {
-		PDTMatch match = new PDTMatch(visibility, pe, file, line, 0, declOrDef); 
-		match.setLine(line);
-		match.setModule(pe.getModule());
-		
-		pe.addOccurrence(match);
-		return match;
-	}
-	
-
-	/**
-	 * @throws PrologInterfaceException
-	 * @throws PrologException
-	 * @throws NumberFormatException
-	 * @throws IOException
-	 */
-	private IStatus searchIfPDTNatureIsSet() throws PrologInterfaceException,
-			PrologException, NumberFormatException, IOException {
-		PrologSession session=null;
-		String module=goal.getModule()==null?"_":"'"+goal.getModule()+"'";
-
-		String query="pdt_resolve_predicate('"+goal.getFile()+"',"+module+", '"+goal.getFunctor()+"',"+goal.getArity()+",Pred),"
-		+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
-		List<Map<String,Object>> results=null;
-		try{
-			session=pif.getSession(PrologInterface.NONE);
-			results = session.queryAll(query);
+	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int offset, int length, List<String> properties, String visibility, String declOrDef) {
+		String signature = declOrDef + visibility + definingModule + functor + arity + offset + "#" + length;
+		if (signatures.contains(signature)) {
+			return null;
+		} else {
+			signatures.add(signature);
+			SearchMatchElement searchMatchElement = new SearchMatchElement();
+			PDTMatch match = new PDTMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, offset, length, declOrDef);
+			searchMatchElement.setMatch(match);
+			return match;
 		}
-		finally{
-			if(session!=null){
-				session.dispose();
-			}
-		}
-		for (Iterator<Map<String,Object>> iterator = results.iterator(); iterator.hasNext();) {
-			Map<String,Object> m = iterator.next();
-
-			int start = Integer.parseInt(m.get("Start").toString());
-			int end = Integer.parseInt(m.get("End").toString());
-			IFile file=null;
-			String path =null; 
-			try{
-				path = Util.unquoteAtom(m.get("File").toString());
-				file = FileUtils.findFileForLocation(path);
-			}catch(IllegalArgumentException iae){
-				Debug.report(iae);
-				continue;
-			}
-
-			//IRegion resultRegion = new Region(start,end-start);
-
-			if(file==null||! file.isAccessible()){
-				String msg = "Not found in workspace: "+path;
-				Debug.warning(msg);
-				UIUtils.setStatusErrorMessage(msg);
-				continue;
-			}
-			String type = m.get("Type").toString();
-			
-			String callerPredicate = m.get("Caller").toString();
-			String[] callerParts=callerPredicate.split("/");
-			String name = callerParts[0];
-			int arity = Integer.getInteger(callerParts[1]);
-			
-			SearchPredicateElement pe = new SearchPredicateElement(type, name, arity);
-			PDTMatch match = new PDTMatch("", pe, file, start, (end-start), "definition"); 
-			match.setLine(start);
-			match.setModule(pe.getModule());
-
-			result.addMatch(match);
-		}
-		return Status.OK_STATUS;
 	}
 
 	@Override

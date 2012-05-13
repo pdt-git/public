@@ -1,0 +1,63 @@
+package org.cs3.pdt.internal.structureElements;
+
+public class SearchMatchElement implements PDTSearchTreeElement {
+
+	private PDTMatch match;
+	private Object parent;
+	
+	public SearchMatchElement() {
+	}
+	
+	public void setMatch(PDTMatch match) {
+		this.match = match;
+	}
+	
+	public void setParent(Object parent) {
+		this.parent = parent;
+	}
+	
+	@Override
+	public boolean hasChildren() {
+		return false;
+	}
+
+	@Override
+	public Object[] getChildren() {
+		return new Object[0];
+	}
+
+	@Override
+	public String getLabel() {
+		return match.getLabel();
+	}
+
+	public PDTMatch getMatch() {
+		return match;
+	}
+	
+	@Override
+	public void removeMatch(PDTMatch match) {
+		if (match == this.match) {
+			this.match = null;
+		}
+	}
+
+	@Override
+	public void addMatch(PDTMatch match) {
+		setMatch(match);
+	}
+
+	@Override
+	public Object getParent() {
+		if (parent == null) {
+			if (match == null) {
+				return null;
+			} else {
+				return match.getFile();
+			}
+		} else {
+			return parent;
+		}
+	}
+
+}
