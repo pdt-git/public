@@ -3,26 +3,50 @@
  */
 package org.cs3.pdt.internal.structureElements;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
-public class PDTMatch extends Match implements PDTTreeElement{
+public class PDTMatch extends Match{
 
 	private String module;
-	private int line=-1;
+	private int line = -1;
 	private IFile file;
 
 	private boolean isLineLocation= false;
 	private String visibility;
-	private String declOrDef; 
+	private String declOrDef;
+	private SearchPredicateElement predicateElement;
+	private String name;
+	private int arity;
+	private List<String> properties; 
 	
-	public PDTMatch(String visibility, Object element, IFile file, int offset, int length, String declOrDef) {
-		super(element, UNIT_LINE, offset - 1, 1);
+	public PDTMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int line, String declOrDef) {
+		super(searchMatchElement, UNIT_LINE, line - 1, 1);
 		this.declOrDef = declOrDef;
 		this.file = file;
 		this.visibility = visibility;
+		this.module = module;
+		this.name = name;
+		this.arity = arity;
+		this.properties = properties;
+		this.line = line;
+		isLineLocation = true;
 	}
-
+	
+	public PDTMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int offset, int length, String declOrDef) {
+		super(searchMatchElement, UNIT_CHARACTER, offset, length);
+		this.declOrDef = declOrDef;
+		this.file = file;
+		this.visibility = visibility;
+		this.module = module;
+		this.name = name;
+		this.arity = arity;
+		this.properties = properties;
+		isLineLocation = false;
+	}
+	
 	public int getLine() {
 		return line;
 	}
@@ -36,12 +60,20 @@ public class PDTMatch extends Match implements PDTTreeElement{
 		return isLineLocation;
 	}
 
-	public void setModule(String module) {
-		this.module = module;
-	}
-
 	public String getModule() {
 		return module;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public int getArity() {
+		return arity;
+	}
+	
+	public List<String> getProperties() {
+		return properties;
 	}
 	
 	public String getDeclOrDef() {
@@ -55,18 +87,19 @@ public class PDTMatch extends Match implements PDTTreeElement{
 	public IFile getFile() {
 		return file;
 	}
-
-	@Override
-	public boolean hasChildren() {
-		return false;
+	
+	public void setPredicateElement(SearchPredicateElement element) {
+		predicateElement = element;
+	}
+	
+	public SearchPredicateElement getPredicateElement() {
+		if (predicateElement == null) {
+			return (SearchPredicateElement) ((FileTreeElement)((SearchMatchElement)getElement()).getParent()).getParent();
+		} else {
+			return predicateElement;
+		}
 	}
 
-	@Override
-	public Object[] getChildren() {
-		return new Object[0];
-	}
-
-	@Override
 	public String getLabel() {
 		StringBuffer label = new StringBuffer("Line ");
 		label.append(Integer.toString(getLine()));
