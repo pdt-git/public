@@ -80,6 +80,6 @@ public class ExternalPrologFilesProjectUtils {
 		} catch (CoreException e) {
 			return false;
 		}
-		return file.getProject().equals(project);
+		return project.equals(file.getProject());
 	}
 }
