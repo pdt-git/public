@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
-public class PDTMatch extends Match{
+public class PrologMatch extends Match{
 
 	private String module;
 	private int line = -1;
@@ -22,7 +22,7 @@ public class PDTMatch extends Match{
 	private int arity;
 	private List<String> properties; 
 	
-	public PDTMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int line, String declOrDef) {
+	public PrologMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int line, String declOrDef) {
 		super(searchMatchElement, UNIT_LINE, line - 1, 1);
 		this.declOrDef = declOrDef;
 		this.file = file;
@@ -35,7 +35,7 @@ public class PDTMatch extends Match{
 		isLineLocation = true;
 	}
 	
-	public PDTMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int offset, int length, String declOrDef) {
+	public PrologMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int offset, int length, String declOrDef) {
 		super(searchMatchElement, UNIT_CHARACTER, offset, length);
 		this.declOrDef = declOrDef;
 		this.file = file;
@@ -94,7 +94,7 @@ public class PDTMatch extends Match{
 	
 	public SearchPredicateElement getPredicateElement() {
 		if (predicateElement == null) {
-			return (SearchPredicateElement) ((FileTreeElement)((SearchMatchElement)getElement()).getParent()).getParent();
+			return (SearchPredicateElement) ((SearchFileTreeElement)((SearchMatchElement)getElement()).getParent()).getParent();
 		} else {
 			return predicateElement;
 		}

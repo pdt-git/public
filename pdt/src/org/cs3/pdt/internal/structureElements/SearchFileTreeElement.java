@@ -5,13 +5,13 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-public class FileTreeElement implements PDTSearchTreeElement {
+public class SearchFileTreeElement implements PrologSearchTreeElement {
 	
-	private LinkedHashMap<PDTMatch, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<PDTMatch, SearchMatchElement>();
+	private LinkedHashMap<PrologMatch, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<PrologMatch, SearchMatchElement>();
 	private IFile file;
 	private Object parent;
 	
-	public FileTreeElement(Object parent, IFile file) {
+	public SearchFileTreeElement(Object parent, IFile file) {
 		this.file = file;
 		this.parent = parent;
 	}
@@ -30,22 +30,22 @@ public class FileTreeElement implements PDTSearchTreeElement {
 		return matchesToSearchElements.values().toArray();
 	}
 	
-	public PDTMatch[] getOccurrences() {
-		Set<PDTMatch> keySet = matchesToSearchElements.keySet();
-		return keySet.toArray(new PDTMatch[keySet.size()]);
+	public PrologMatch[] getOccurrences() {
+		Set<PrologMatch> keySet = matchesToSearchElements.keySet();
+		return keySet.toArray(new PrologMatch[keySet.size()]);
 	}
 	
 	public int getNumberOfChildren() {
 		return matchesToSearchElements.size();
 	}
 	
-	public PDTMatch getFirstMatch() {
+	public PrologMatch getFirstMatch() {
 		if (matchesToSearchElements.isEmpty()) {
 			return null;
 		}
-		PDTMatch firstMatch = null;
+		PrologMatch firstMatch = null;
 		int firstLine = Integer.MAX_VALUE;
-		for (PDTMatch occurence : matchesToSearchElements.keySet()) {
+		for (PrologMatch occurence : matchesToSearchElements.keySet()) {
 			int line = occurence.getLine();
 			if (firstMatch == null) {
 				firstMatch = occurence;
@@ -64,7 +64,7 @@ public class FileTreeElement implements PDTSearchTreeElement {
 	}
 
 	@Override
-	public void removeMatch(PDTMatch match) {
+	public void removeMatch(PrologMatch match) {
 		SearchMatchElement removedElement = matchesToSearchElements.remove(match);
 		if (removedElement != null) {
 			removedElement.removeMatch(match);
@@ -72,7 +72,7 @@ public class FileTreeElement implements PDTSearchTreeElement {
 	}
 
 	@Override
-	public void addMatch(PDTMatch match) {
+	public void addMatch(PrologMatch match) {
 		if (!matchesToSearchElements.containsKey(match)) {
 			SearchMatchElement searchMatchElement = (SearchMatchElement) match.getElement();
 			searchMatchElement.setParent(this);

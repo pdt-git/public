@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
@@ -41,7 +41,7 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected PDTMatch constructPrologMatchForAResult(Map<String, Object> m)
+	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
 		String definingModule = m.get("DefiningModule").toString();
 		String functor = m.get("Functor").toString();
@@ -57,7 +57,7 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 		String declOrDef = m.get("DeclOrDef").toString();
 		String visibility = m.get("Visibility").toString();
 
-		PDTMatch match = createUniqueMatch(definingModule, functor, arity,
+		PrologMatch match = createUniqueMatch(definingModule, functor, arity,
 				file, line, properties, visibility, declOrDef);
 		
 		return match;

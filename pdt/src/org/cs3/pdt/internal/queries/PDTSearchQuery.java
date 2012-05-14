@@ -51,7 +51,7 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.search.PrologSearchResult;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
@@ -180,7 +180,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 */
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 	throws IOException, NumberFormatException {
-		PDTMatch match;
+		PrologMatch match;
 		moduleElements.clear();
 		predForSignature.clear();
 		signatures.clear();
@@ -194,29 +194,29 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		}
 	}
 	
-	protected abstract PDTMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
+	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
-	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int line, List<String> properties, String visibility, String declOrDef) {
+	protected PrologMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int line, List<String> properties, String visibility, String declOrDef) {
 		String signature = declOrDef + visibility + definingModule + functor + arity + line;
 		if (signatures.contains(signature)) {
 			return null;
 		} else {
 			signatures.add(signature);
 			SearchMatchElement searchMatchElement = new SearchMatchElement();
-			PDTMatch match = new PDTMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, line, declOrDef);
+			PrologMatch match = new PrologMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, line, declOrDef);
 			searchMatchElement.setMatch(match);
 			return match;
 		}
 	}
 
-	protected PDTMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int offset, int length, List<String> properties, String visibility, String declOrDef) {
+	protected PrologMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int offset, int length, List<String> properties, String visibility, String declOrDef) {
 		String signature = declOrDef + visibility + definingModule + functor + arity + offset + "#" + length;
 		if (signatures.contains(signature)) {
 			return null;
 		} else {
 			signatures.add(signature);
 			SearchMatchElement searchMatchElement = new SearchMatchElement();
-			PDTMatch match = new PDTMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, offset, length, declOrDef);
+			PrologMatch match = new PrologMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, offset, length, declOrDef);
 			searchMatchElement.setMatch(match);
 			return match;
 		}

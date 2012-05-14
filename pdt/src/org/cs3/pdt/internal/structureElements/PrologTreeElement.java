@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.structureElements;
 
-public interface PDTTreeElement {
+public interface PrologTreeElement {
 	
 	public boolean hasChildren();
 	
