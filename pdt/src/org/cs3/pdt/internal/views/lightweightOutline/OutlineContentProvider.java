@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -25,8 +25,8 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 		if(element instanceof PrologSourceFileModel) {
 			return ((PrologSourceFileModel)element).getElements();
 		}	
-		if(element instanceof PDTTreeElement) {
-			return ((PDTTreeElement)element).getChildren();
+		if(element instanceof PrologTreeElement) {
+			return ((PrologTreeElement)element).getChildren();
 		}
 		return null;
 	}
@@ -58,8 +58,8 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 			if(((PrologSourceFileModel)element).hasChildren())
 				return ((PrologSourceFileModel)element).getElements();
 		}	
-		if(element instanceof PDTTreeElement) {
-			return ((PDTTreeElement)element).getChildren();
+		if(element instanceof PrologTreeElement) {
+			return ((PrologTreeElement)element).getChildren();
 		}
 		return new Object[0];
 	}
@@ -73,8 +73,8 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if(element instanceof PDTTreeElement)
-			return ((PDTTreeElement)element).hasChildren();
+		if(element instanceof PrologTreeElement)
+			return ((PrologTreeElement)element).hasChildren();
 		return false;
 	}
 }

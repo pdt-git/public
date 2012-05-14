@@ -3,7 +3,7 @@ package org.cs3.pdt.internal.structureElements;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OutlineModuleElement implements PDTTreeElement{
+public class OutlineModuleElement implements PrologTreeElement{
 	private String name;
 	private String kind;
 	private Map<String, OutlinePredicate> predicates= new HashMap<String,OutlinePredicate>();

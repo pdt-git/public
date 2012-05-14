@@ -12,11 +12,11 @@ import org.eclipse.core.resources.IFile;
 /**
  * used in prolog searches and outlines to represent a predicate.
  */
-public class SearchPredicateElement extends Predicate implements PDTSearchTreeElement {
+public class SearchPredicateElement extends Predicate implements PrologSearchTreeElement {
 
 	private static final long serialVersionUID = 8822257720982382862L;
 	
-	private LinkedHashMap<IFile, FileTreeElement> fileToFileTreeElement = new LinkedHashMap<IFile, FileTreeElement>();
+	private LinkedHashMap<IFile, SearchFileTreeElement> fileToFileTreeElement = new LinkedHashMap<IFile, SearchFileTreeElement>();
 	private Object parent;
 	
 	public SearchPredicateElement(Object parent, String module, String predicateName, int arity, List<String> properties) {
@@ -46,43 +46,43 @@ public class SearchPredicateElement extends Predicate implements PDTSearchTreeEl
 	
 	public int numberOfOccurences() {
 		int sum = 0;
-		for (FileTreeElement e : fileToFileTreeElement.values()) {
+		for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
 			sum += e.getNumberOfChildren();
 		}
 		return sum;
 	}
 	
-	public PDTMatch getFirstOccurrence() {
+	public PrologMatch getFirstOccurrence() {
 		if (fileToFileTreeElement.values().isEmpty()) {
 			return null;
 		} else {
-			for (FileTreeElement e : fileToFileTreeElement.values()) {
+			for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
 				return e.getFirstMatch();
 			}
 			return null;
 		}
 	}
 	
-	public PDTMatch[] getOccurrences() {
-		HashSet<PDTMatch> matches = new HashSet<PDTMatch>();
-		for (FileTreeElement e : fileToFileTreeElement.values()) {
-			for (PDTMatch m : e.getOccurrences()) {
+	public PrologMatch[] getOccurrences() {
+		HashSet<PrologMatch> matches = new HashSet<PrologMatch>();
+		for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
+			for (PrologMatch m : e.getOccurrences()) {
 				matches.add(m);
 			}
 		}
-		return matches.toArray(new PDTMatch[matches.size()]);
+		return matches.toArray(new PrologMatch[matches.size()]);
 	}
 	
-	public FileTreeElement[] getFileTreeElements() {
-		Collection<FileTreeElement> values = fileToFileTreeElement.values();
-		return values.toArray(new FileTreeElement[values.size()]);
+	public SearchFileTreeElement[] getFileTreeElements() {
+		Collection<SearchFileTreeElement> values = fileToFileTreeElement.values();
+		return values.toArray(new SearchFileTreeElement[values.size()]);
 	}
 
 	@Override
-	public void removeMatch(PDTMatch match) {
+	public void removeMatch(PrologMatch match) {
 		IFile file = match.getFile();
 		if (fileToFileTreeElement.containsKey(file)) {
-			FileTreeElement fileTreeElement = fileToFileTreeElement.get(file);
+			SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(file);
 			fileTreeElement.removeMatch(match);
 			if (!fileTreeElement.hasChildren()) {
 				fileToFileTreeElement.remove(file);
@@ -91,10 +91,10 @@ public class SearchPredicateElement extends Predicate implements PDTSearchTreeEl
 	}
 
 	@Override
-	public void addMatch(PDTMatch match) {
-		FileTreeElement fileTreeElement = fileToFileTreeElement.get(match.getFile());
+	public void addMatch(PrologMatch match) {
+		SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(match.getFile());
 		if (fileTreeElement == null) {
-			fileTreeElement = new FileTreeElement(this, match.getFile());
+			fileTreeElement = new SearchFileTreeElement(this, match.getFile());
 			fileToFileTreeElement.put(fileTreeElement.getFile(), fileTreeElement);
 		}
 		fileTreeElement.addMatch(match);

@@ -47,8 +47,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
-import org.cs3.pdt.internal.structureElements.FileTreeElement;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
+import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
@@ -130,9 +130,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
-		if (ei instanceof IFileEditorInput && match instanceof PDTMatch) {
+		if (ei instanceof IFileEditorInput && match instanceof PrologMatch) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			return ((PDTMatch)match).getFile().equals(fi.getFile());
+			return ((PrologMatch)match).getFile().equals(fi.getFile());
 		}
 		return false;
 	}
@@ -172,9 +172,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			for (Object obj : module.getChildren()) {
 				if (obj instanceof SearchPredicateElement) {
 					SearchPredicateElement predicate = (SearchPredicateElement) obj;
-					for (FileTreeElement fileTreeElement : predicate.getFileTreeElements()) {
+					for (SearchFileTreeElement fileTreeElement : predicate.getFileTreeElements()) {
 						if (fileTreeElement.getFile().equals(file)) {
-							for (PDTMatch match : fileTreeElement.getOccurrences()) {
+							for (PrologMatch match : fileTreeElement.getOccurrences()) {
 								result.add(match);
 							}
 						}
@@ -194,12 +194,12 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	public IFile getFile(Object element) {
 		if (element instanceof IFile){
 			return (IFile) element;
-		} else if (element instanceof FileTreeElement) {
-			return ((FileTreeElement) element).getFile();
+		} else if (element instanceof SearchFileTreeElement) {
+			return ((SearchFileTreeElement) element).getFile();
 		} else if (element instanceof SearchMatchElement){
 			return ((SearchMatchElement) element).getMatch().getFile();
-		} else if (element instanceof PDTMatch) {
-			return ((PDTMatch) element).getFile();
+		} else if (element instanceof PrologMatch) {
+			return ((PrologMatch) element).getFile();
 		} else {
 			return null;
 		}
@@ -220,18 +220,18 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public void addMatch(Match match) {
 		super.addMatch(match);
-		addMatchToResult((PDTMatch) match);
+		addMatchToResult((PrologMatch) match);
 	}
 	
 	@Override
 	public void addMatches(Match[] matches) {
 		super.addMatches(matches);
 		for (Match match : matches) {
-			addMatchToResult((PDTMatch) match);
+			addMatchToResult((PrologMatch) match);
 		}
 	}
 	
-	private void addMatchToResult(PDTMatch match) {
+	private void addMatchToResult(PrologMatch match) {
 		String module = match.getModule();
 		String visibility = match.getVisibility();
 		String signature = module + visibility;
@@ -252,18 +252,18 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public void removeMatch(Match match) {
 		super.removeMatch(match);
-		removeMatchFromResult((PDTMatch) match);
+		removeMatchFromResult((PrologMatch) match);
 	}
 	
 	@Override
 	public void removeMatches(Match[] matches) {
 		super.removeMatches(matches);
 		for (Match match : matches) {
-			removeMatchFromResult((PDTMatch) match);
+			removeMatchFromResult((PrologMatch) match);
 		}
 	}
 	
-	private void removeMatchFromResult(PDTMatch match) {
+	private void removeMatchFromResult(PrologMatch match) {
 		String signature = match.getModule() + match.getVisibility();
 		SearchModuleElement searchModuleElement = modules.get(signature);
 		if (searchModuleElement != null) {

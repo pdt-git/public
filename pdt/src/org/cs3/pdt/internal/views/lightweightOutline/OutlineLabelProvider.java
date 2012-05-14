@@ -2,7 +2,7 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -16,8 +16,8 @@ import org.eclipse.ui.PlatformUI;
 class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IStyledLabelProvider*/ {
 	@Override
 	public String getText(Object element) {
-		if(element instanceof PDTTreeElement) {
-			return ((PDTTreeElement) element).getLabel();
+		if(element instanceof PrologTreeElement) {
+			return ((PrologTreeElement) element).getLabel();
 		}
 		return "";
 	}

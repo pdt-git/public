@@ -1,14 +1,14 @@
 package org.cs3.pdt.internal.structureElements;
 
-public class SearchMatchElement implements PDTSearchTreeElement {
+public class SearchMatchElement implements PrologSearchTreeElement {
 
-	private PDTMatch match;
+	private PrologMatch match;
 	private Object parent;
 	
 	public SearchMatchElement() {
 	}
 	
-	public void setMatch(PDTMatch match) {
+	public void setMatch(PrologMatch match) {
 		this.match = match;
 	}
 	
@@ -31,19 +31,19 @@ public class SearchMatchElement implements PDTSearchTreeElement {
 		return match.getLabel();
 	}
 
-	public PDTMatch getMatch() {
+	public PrologMatch getMatch() {
 		return match;
 	}
 	
 	@Override
-	public void removeMatch(PDTMatch match) {
+	public void removeMatch(PrologMatch match) {
 		if (match == this.match) {
 			this.match = null;
 		}
 	}
 
 	@Override
-	public void addMatch(PDTMatch match) {
+	public void addMatch(PrologMatch match) {
 		setMatch(match);
 	}
 

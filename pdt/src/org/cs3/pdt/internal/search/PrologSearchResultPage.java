@@ -47,8 +47,8 @@ package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.structureElements.FileTreeElement;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
+import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.SourceLocation;
@@ -118,8 +118,8 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 					Match m = null;
 					if (firstElement instanceof SearchPredicateElement) {
 						m = ((SearchPredicateElement) firstElement).getFirstOccurrence();
-					} else if (firstElement instanceof FileTreeElement) {
-						m = ((FileTreeElement) firstElement).getFirstMatch();
+					} else if (firstElement instanceof SearchFileTreeElement) {
+						m = ((SearchFileTreeElement) firstElement).getFirstMatch();
 					}
 					if (m != null) {
 						final Match match = m;
@@ -157,7 +157,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	
 	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		PDTMatch prologMatch = (PDTMatch)match;
+		PrologMatch prologMatch = (PrologMatch)match;
 		SearchPredicateElement element = prologMatch.getPredicateElement();
 		IFile file = prologMatch.getFile();
 		if(prologMatch.isLineLocation()) {
@@ -168,7 +168,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		PDTUtils.openEditorOnExternalFile(currentOffset, currentLength, activate, file);
 	}
 
-	private SourceLocation createLocation(SearchPredicateElement element, IFile file, PDTMatch prologMatch) {
+	private SourceLocation createLocation(SearchPredicateElement element, IFile file, PrologMatch prologMatch) {
 		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		

@@ -2,7 +2,7 @@ package org.cs3.pdt.internal.structureElements;
 
 import java.util.LinkedHashMap;
 
-public class SearchModuleElement implements PDTSearchTreeElement, Comparable<SearchModuleElement> {
+public class SearchModuleElement implements PrologSearchTreeElement, Comparable<SearchModuleElement> {
 	
 	private String label;
 	private int visibilityCode;
@@ -54,7 +54,7 @@ public class SearchModuleElement implements PDTSearchTreeElement, Comparable<Sea
 	}
 
 	@Override
-	public void removeMatch(PDTMatch match) {
+	public void removeMatch(PrologMatch match) {
 		String signature = getSignatureForMatch(match);
 		predForSignature.get(signature);
 		if (predForSignature.containsKey(signature)) {
@@ -67,7 +67,7 @@ public class SearchModuleElement implements PDTSearchTreeElement, Comparable<Sea
 	}
 
 	@Override
-	public void addMatch(PDTMatch match) {
+	public void addMatch(PrologMatch match) {
 		String signature = getSignatureForMatch(match);
 		SearchPredicateElement searchPredicateElement = predForSignature.get(signature); 
 		if (searchPredicateElement == null) {
@@ -77,7 +77,7 @@ public class SearchModuleElement implements PDTSearchTreeElement, Comparable<Sea
 		searchPredicateElement.addMatch(match);
 	}
 	
-	private String getSignatureForMatch(PDTMatch match) {
+	private String getSignatureForMatch(PrologMatch match) {
 		return match.getDeclOrDef() + match.getName() + match.getArity();
 	}
 
