@@ -3,12 +3,12 @@
 %
 % Authors: Lukas Degener, Tobias Rho, Günter Kniesel
 % WWW: http://roots.iai.uni-bonn.de/research/pdt
-%
+% 
 % All rights reserved. This program is  made available under the terms
 % of the Eclipse Public License v1.0 which accompanies this distribution,
 % and is available at http://www.eclipse.org/legal/epl-v10.html
 
-%:- module(pdtplugin,[]).
+%:- module(pdtplugin,[]). 
 
 :- use_module(split_file_path).
 :- use_module(pdt_search).                       % Search, outline and autocompletion

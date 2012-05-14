@@ -33,15 +33,15 @@
 resolve_call(Call,DeclaringModule,ClauseRef) :- 
 	strip_module(Call,Module,Literal),
 	functor(Literal,Name,Arity),
-	declared_in_module(Module,Name,Arity,DeclaringModule),
+	defined_in(Module,Name,Arity,DeclaringModule),
 	clause(DeclaringModule:Literal,_Body,ClauseRef).
 % Das heisst: Entweder ist dort ein Fehler, oder es 
-% funktioniert auch ohne den Aufruf von declared_in_module/3 
+% funktioniert auch ohne den Aufruf von defined_in/3 
 % also so:
 %
 %resolve_call(Call,DeclaringModule,ClauseRef) :- 
 %	strip_module(Call,Module,Literal),
-%	%declared_in_module(Module,Name,Arity,DeclaringModule),
+%	%defined_in(Module,Name,Arity,DeclaringModule),
 %	clause(Module:Literal,_Body,ClauseRef).
 %
 %Das ist tatsächlich der Fall:	
@@ -58,7 +58,7 @@ resolve_call(Call,DeclaringModule,ClauseRef) :-
 %ClauseRef = <clause>(08A640B8).
 % FAZIT: Wenn man nur die referenzierten Klauseln will, reicht clause/3.
 % Wenn man hingegen auch das Modul wissen will, aus dem die Klauseln 
-% stammen braucht man declared_in_module. Das (bzw. resolve_call)
+% stammen braucht man defined_in. Das (bzw. resolve_call)
 % ist also noch einzbauen in unsere Implementierung. 
  
  

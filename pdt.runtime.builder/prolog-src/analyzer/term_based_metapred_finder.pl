@@ -41,7 +41,7 @@ find_meta_pred_args_in_clause(Module, Head, MetaArgs):-
 	find_meta_vars_in_body(Body, Module, [],  MetaVars),
 	find_meta_vars_in_head(Head, MetaVars, MetaArgs).
 find_meta_pred_args_in_clause(AModule, Head, MetaArgs):-
-    declared_in_module(AModule, Head, Module),
+    defined_in(AModule, Head, Module),
 	clause(Module:Head, Body), !,
 	find_meta_vars_in_body(Body, Module, [],  MetaVars),
 	find_meta_vars_in_head(Head, MetaVars, MetaArgs).

@@ -17,8 +17,7 @@
              ] ).
 :- use_module( pdt_prolog_library(utils4modules),
              [ module_of_file/2                 % (File,FileModule)
-             , declared_but_undefined/4         % (Module,Name,Arity),
-             , declared_in_module/4             % (SubModule,Name,Arity,DeclModule),
+             , defined_in/4             % (SubModule,Name,Arity,DeclModule),
              , defined_in_module/3              % (Module,Name,Arity),
              , declared_in_file/4               % (Module,Name,Arity,Location)
              , defined_in_files/4               % (Module,Name,Arity,Locations)
@@ -56,7 +55,7 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     -> true                            % Explicit entity reference ReferencedModule:Term (or ReferencedModule::Term
     ;  ReferencingModule = FileModule   % Implicit module reference
     ),    
-    find_decl_or_def(ReferencingModule,Functor,Arity,Sources),
+    find_definition(ReferencingModule,Functor,Arity,Sources),
     member(ResultsCategoryLabel-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
@@ -66,77 +65,99 @@ search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Fu
 search_term_to_predicate_indicator(  Term, Functor/Arity) :- functor(Term, Functor, Arity).
 
 
-%% find_decl_or_def(+ReferencingModule,+Name,?Arity,-Visibility,-Sources)
+%% find_definition(+ReferencingModule,+Name,?Arity,-Visibility,-Sources)
 
-find_decl_or_def(ReferencingModule,Name,Arity,Sources) :-
-    ( var(ReferencingModule)
-    ; var(Name)
+find_definition(ReferencingModule,Name,Arity,Sources) :-
+    var(Name),
+    throw( input_argument_free(find_definition(ReferencingModule,Name,Arity,Sources)) ).
+
+find_definition(Name,Arity,ReferencingModule,Module,Visibility,File,LineNr,N,Case) :-	
+%	(  pdt_option(search, restrict_arity(true))
+%	->
+%	), 
+%	(  pdt_option( search, restrict_module(true) 
+%	-> 
+%	),
+	defined_in(Module,Name,Arity),
+    visibility(Module,Name,Arity,ReferencingModule,Visibility),
+    location(Module,Name,Arity,File,LineNr,N,Case).
+%    locations_by_file(Module,Name,Arity,File,Lines).
+%
+%locations_by_file(Module,Name,Arity,File,Line) :-    
+%    setof( LineNr-N-Case, 
+%           Module^Name^Arity^ location(Module,Name,Arity,File,LineNr,N,Case),
+%           Lines
+%    ),
+%    member(Line,Lines)
+%    .
+    
+%% location(+Module,+Name,+Arity, ?File, ?Line, ?N, ?Case)
+%
+%  @param File The full path of the file containing the N-th clause
+%  @param Case = clause|declaration|foreign|dynamic
+%
+%  * Case==clause: 
+%      a clause of the predicate Module:Name/Arity starts at 
+%      line Line in File.
+%  * Case==declaration: 
+%      a declaration for the predicate Module:Name/Arity is
+%      somewhere in file. Lacking information about positions
+%      of declarations, we guess the Line to be 1.
+%  * Case==foreign
+%      There is no source location for Module:Name/Arity 
+%      since it is defined by foreign language code. 
+%      In this case File==none and Line==0.
+%  * Case==dynamic
+%      There is no source location for Module:Name/Arity 
+%      since it is defined only by dynamic code. 
+%      In this case File==none and Line==0.
+%	
+location(Module,Name,Arity, File,Line,N,clause) :-      % Clause
+    clause_location(Module,Name,Arity,File,Line,N).
+    
+location(Module,Name,Arity,File,Line,N,declaration) :-  % Declaration
+    \+ clause_location(Module,Name,Arity,_,_,_),
+    module_property(Module, file(File)),  
+    !,
+    Line=1,
+    N=0.
+	
+location(Module,Name,Arity,File,Line,N,Prop) :-         % No source code 
+    \+ clause_location(Module,Name,Arity,_,_,_),
+    functor(Head,Name,Arity),
+    ( (Prop = foreign, predicate_property(Module:Head,Prop))
+    ; (Prop = (dynamic), predicate_property(Module:Head,Prop))
     ),
-    throw( input_argument_free(find_decl_or_def(ReferencingModule,Name,Arity,Sources)) ).
-
-%find_decl_or_def(ReferencingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
-%   referenced_but_undeclared(ReferencingModule,Name,Arity),
-%   DeclModule = 'No declaration (in any module)',
-%   File = 'No declaration (in any file)',
-%   Line = 0.
-   
-find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
-   setof( VisibilityText-DeclModule-Location, ContextModule^Name^Arity^ 
-          ( declared_but_undefined(DeclModule,Name,Arity),
-            visibility(ContextModule,Name,Arity,DeclModule,Visibility),
-            declared_in_file(DeclModule,Name,Arity,Location),
-            results_context_category_label(declared, Visibility, VisibilityText)
-          ),
-          Declarations).
-    
-find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
-%   setof( DefiningModule, Name^Arity^
-%          defined_in_module(DefiningModule,Name,Arity),
-%          DefiningModules
-%   ),
-   setof( VisibilityText-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
-          ( defined_in_module(DefiningModule,Name,Arity),
-            visibility(ContextModule,Name,Arity,DefiningModule,Visibility),
-            defined_in_files(DefiningModule,Name,Arity,Locations),
-            results_context_category_label(defined, Visibility, VisibilityText)
-          ),
-          Definitions
-    ). 
-
-:- multifile(results_category_label/2).
+    !,
+    File=none,
+    Line=0,
+    N=0.
 
 
-:- multifile(results_context_category_label/3).
+%% clause_location(+Module,+Name,+Arity,?N,?File,?Line) is nondet
+%
+%  The N-th clause of the predicate Module:Name/Arity starts at
+%  line Line in File.
+%   
+%  @param File The full path of the file containing the N-th clause
 
-results_context_category_label(declared, local,      'Local declaration' ) :- !.
-results_context_category_label(declared, supermodule,'Imported declaration' ) :- !.
-results_context_category_label(declared, submodule,  'Submodule declaration') :- !.
-results_context_category_label(declared, invisible,  'Locally invisible declaration') :- !.
+clause_location(Module,Name,Arity,N,File,Line) :-
+	functor(Head,Name,Arity),
+	nth_clause(Module:Head,N,Ref), 
+	clause_property(Ref, file(File)),
+	clause_property(Ref, line_count(Line)).
 
-results_context_category_label(defined, local,      'Local definitions' ) :- !.
-results_context_category_label(defined, supermodule,'Imported definitions' ) :- !.
-results_context_category_label(defined, submodule,  'Submodule definitions') :- !.
-results_context_category_label(defined, invisible,  'Locally invisible definitions') :- !.
 
-    
-% These clauses must stay in this order since they determine
-% the order of elements in the result of  find_decl_or_def
-% and hence the order of elements in the search result view
-% (which is the INVERSE of the order of elements that we
-% compute here).               
 
 imports_pred_from(Sub,Head,Super) :-
     predicate_property(Sub:Head, imported_from(Super)).
 
-% visibility(?, ContextModule,Name,Arity,DeclModule)
+% visibility+ContextModule,+Name,+Arity,?DeclModule)
       
-visibility(ContextModule,Name,Arity,DeclModule, invisible) :-
-    % Take care to generate all values befor using negation.
-    % Otherwise the clause will not be able to generate values.
-    % Negation DOES NOT generate values for unbound variables!
-    
+visibility(ContextModule,Name,Arity,DeclModule, invisible) :-    
     % There is some DeclaringModule 
-    declared_in_module(DeclModule,Name,Arity,DeclModule),
+    defined_in(DeclModule,Name,Arity,DeclModule),
+    DeclModule \== ContextModule,
     % ... but the ContextModule neither is imported to it
     % nor imports from it:
     functor(Head,Name,Arity),
@@ -145,31 +166,20 @@ visibility(ContextModule,Name,Arity,DeclModule, invisible) :-
     
     
 visibility(ContextModule,Name,Arity,DeclModule, submodule) :-
-    declared_in_module(DeclModule,Name,Arity,DeclModule),
+    defined_in(DeclModule,Name,Arity,DeclModule),
     % DeclModule is a submodule of ContextModule
-    declared_in_module(DeclModule,_,_,ContextModule), % submodule
+    defined_in(DeclModule,_,_,ContextModule), % submodule
     ContextModule \== DeclModule. 
 
 visibility(ContextModule,Name,Arity,DeclModule, supermodule) :-
-    declared_in_module(ContextModule,Name,Arity,DeclModule),
+    defined_in(ContextModule,Name,Arity,DeclModule),
     ContextModule \== DeclModule. 
     
 visibility(ContextModule,Name,Arity,DeclModule, local) :-
-    declared_in_module(ContextModule,Name,Arity,DeclModule),
+    defined_in(ContextModule,Name,Arity,DeclModule),
     ContextModule == DeclModule.
    
-decl_or_def(Module,Name,Arity,Status) :-
-	defined_in(Module,Name,Arity),
-    functor(Head,Name,Arity),
-    (  predicate_property(Module:Head, foreign)
-    -> Status = foreign
-    ;  (  predicate_property(Module:Head, number_of_clauses(0))
-       -> Status = declared
-       ;  Status = implemented
-       )
-    ).
-    
-    
+   
         /***********************************************************************
          * Find Primary Definition                                             *
          * --------------------------------------------------------------------*
@@ -262,7 +272,7 @@ find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningMo
     ),
     (  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
     -> defined_in_files(DefiningModule,Name,Arity,Locations)
-    ;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+    ;  ( defined_in(ReferencedModule,Name,Arity,DeclaringModule),
     defined_in_files(DeclaringModule,Name,Arity,Locations)
        )
     ).
