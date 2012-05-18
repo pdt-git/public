@@ -36,7 +36,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	
 	private void initializeDefaultPreferences_Main(IPreferenceStore store){
-		store.setDefault(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, false);
 		store.setDefault(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_ENTRY);
 		
 		String historyFile = System.getProperty("user.home") + File.separator + ".prolog_console_history";		
