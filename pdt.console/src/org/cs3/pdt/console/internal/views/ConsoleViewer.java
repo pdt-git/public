@@ -211,8 +211,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	};
 
-	private Boolean coloringEnabled;
-
 	public ConsoleViewer(Composite parent, int styles) {
 		createControl(parent, styles);
 		initPreferences();
@@ -243,8 +241,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			COLOR_INFO = new Color(display, color_info);
 			COLOR_DEBUG = new Color(display, color_dbg);
 			
-			coloringEnabled = store.getBoolean(PDTConsole.PREF_CONSOLE_SHOW_COLORS); 
-
 		}
 	}
 
@@ -759,59 +755,57 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			String[] Rows = output.split("\n");
 
 			
-			if (coloringEnabled) {
-				int CharCount = 0;
-
-				String row;
-
-				// for (String row : Rows) {
-				for (int i = 0; i < Rows.length; i++) {
-					row = Rows[i];
-					// Get the Color-Information
-					String UpperCaseRow = row.toUpperCase();
-					if (lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING) &&
+			int CharCount = 0;
+			
+			String row;
+			
+			// for (String row : Rows) {
+			for (int i = 0; i < Rows.length; i++) {
+				row = Rows[i];
+				// Get the Color-Information
+				String UpperCaseRow = row.toUpperCase();
+				if (lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING) &&
 						row.contains(PLACEHOLDER_LGT_UNDEFINED)) {
-						LastOutputColor = COLOR_DEBUG;
-					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
+					LastOutputColor = COLOR_DEBUG;
+				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
 						lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING)) {
-						LastOutputColor = COLOR_WARNING;
-					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
-						LastOutputColor = COLOR_ERROR;
-					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_DEBUG)) {
-						LastOutputColor = COLOR_DEBUG;
-					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_INFO)) {
-						LastOutputColor = COLOR_INFO;
-					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_THREESTARS)) {
-						LastOutputColor = COLOR_INFO;
-					} else if (!UpperCaseRow.startsWith("\u0009")
-					// tabChar oder zwei leerzeichen
-							&& !UpperCaseRow.startsWith(PLACEHOLDER_SPACETAB, 0) && LineFeedOccured) {
-						// No Color Setting, take default color
-						LastOutputColor = null;
-					}
-					// SET the Color-Information
-					if (LastOutputColor != null) {
-						setColorRangeInControl(startOfInput + CharCount, row.length(), LastOutputColor);
-						
-						Position location = getLocation(row);
-						if (location != null) {
-							int start = startOfInput + CharCount + location.offset;
-							StyleRange range = new StyleRange(start, location.length, LastOutputColor, control.getBackground());
-							range.underline = true;
-							range.underlineStyle = SWT.UNDERLINE_LINK;
-							control.setStyleRange(range);
-						}
-					}
-
-					CharCount += row.length() + 1;
-
+					LastOutputColor = COLOR_WARNING;
+				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
+					LastOutputColor = COLOR_ERROR;
+				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_DEBUG)) {
+					LastOutputColor = COLOR_DEBUG;
+				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_INFO)) {
+					LastOutputColor = COLOR_INFO;
+				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_THREESTARS)) {
+					LastOutputColor = COLOR_INFO;
+				} else if (!UpperCaseRow.startsWith("\u0009")
+						// tabChar oder zwei leerzeichen
+						&& !UpperCaseRow.startsWith(PLACEHOLDER_SPACETAB, 0) && LineFeedOccured) {
+					// No Color Setting, take default color
+					LastOutputColor = null;
 				}
-				// is needed for long lines which are pushed in multiple parts
-				if (output.endsWith("\n")) {
-					LineFeedOccured = true;
-				} else {
-					LineFeedOccured = false;
+				// SET the Color-Information
+				if (LastOutputColor != null) {
+					setColorRangeInControl(startOfInput + CharCount, row.length(), LastOutputColor);
+					
+					Position location = getLocation(row);
+					if (location != null) {
+						int start = startOfInput + CharCount + location.offset;
+						StyleRange range = new StyleRange(start, location.length, LastOutputColor, control.getBackground());
+						range.underline = true;
+						range.underlineStyle = SWT.UNDERLINE_LINK;
+						control.setStyleRange(range);
+					}
 				}
+				
+				CharCount += row.length() + 1;
+				
+			}
+			// is needed for long lines which are pushed in multiple parts
+			if (output.endsWith("\n")) {
+				LineFeedOccured = true;
+			} else {
+				LineFeedOccured = false;
 			}
 
 			startOfInput += output.length();

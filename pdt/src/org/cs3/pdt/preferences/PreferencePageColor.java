@@ -2,11 +2,17 @@ package org.cs3.pdt.preferences;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PDTColors;
-import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.cs3.pdt.ui.preferences.MyColorFieldEditor;
+import org.cs3.pdt.ui.preferences.StructuredFieldEditorPreferencePage;
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Layout;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -21,7 +27,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * preferences can be accessed directly via the preference store.
  */
 
-public class PreferencePageColor extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class PreferencePageColor extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private ColorFieldEditor background;
 	private ColorFieldEditor backgroundExtern;
 	private ColorFieldEditor default_;
@@ -38,46 +44,8 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 	public PreferencePageColor() {
 		super(GRID);
 		setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
-		setDescription("Editor color preferences");
 	}
 
-	private void initColorFieldEditors(boolean show_colors){
-		background.setEnabled(show_colors, getFieldEditorParent());
-		backgroundExtern.setEnabled(show_colors, getFieldEditorParent());
-		default_.setEnabled(show_colors, getFieldEditorParent());
-		string.setEnabled(show_colors, getFieldEditorParent());
-		comment.setEnabled(show_colors, getFieldEditorParent());
-		variable.setEnabled(show_colors, getFieldEditorParent());
-		undefined.setEnabled(show_colors, getFieldEditorParent());
-		keyword.setEnabled(show_colors, getFieldEditorParent());
-		dynamic.setEnabled(show_colors, getFieldEditorParent());
-		transparent.setEnabled(show_colors, getFieldEditorParent());
-		meta.setEnabled(show_colors, getFieldEditorParent());
-	}
-	
-	
-	class BooleanFieldEditorWithAccessToCheckBox extends BooleanFieldEditor{
-			
-		public BooleanFieldEditorWithAccessToCheckBox() {
-			super();
-		}
-
-		public BooleanFieldEditorWithAccessToCheckBox(String name, String label, Composite parent) {
-			super(name, label, parent);
-		}
-
-		public BooleanFieldEditorWithAccessToCheckBox(String name, String labelText, int style, Composite parent) {
-			super(name, labelText, style, parent);
-		}
-
-		public Button getCheckBox(Composite parent){
-			return getChangeControl(parent);
-		}
-	}
-	
-	
-	
-	
 	/**
 	 * Creates the field editors. Field editors are abstractions of the common
 	 * GUI blocks needed to manipulate various types of preferences. Each field
@@ -85,17 +53,25 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 	 */
 	@Override
 	public void createFieldEditors() {
-		background = new ColorFieldEditor(PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND_STRING, getFieldEditorParent());
-		backgroundExtern = new ColorFieldEditor(PDTColors.PREF_BACKGROUND_EXTERNAL_FILES, PDTColors.BACKGROUND_EXTERN_STRING, getFieldEditorParent());
-		default_ = new ColorFieldEditor(PDTColors.PREF_DEFAULT, PDTColors.DEFAULT_STRING, getFieldEditorParent());
-		string = new ColorFieldEditor(PDTColors.PREF_STRING, PDTColors.STRING_STRING, getFieldEditorParent());
-		comment = new ColorFieldEditor(PDTColors.PREF_COMMENT, PDTColors.COMMENT_STRING, getFieldEditorParent());
-		variable = new ColorFieldEditor(PDTColors.PREF_VARIABLE, PDTColors.VARIABLE_STRING, getFieldEditorParent());
-		undefined = new ColorFieldEditor(PDTColors.PREF_UNDEFINED, PDTColors.UNDEFINED_STRING, getFieldEditorParent());
-		keyword = new ColorFieldEditor(PDTColors.PREF_BUILTIN, PDTColors.BUILT_IN_STRING, getFieldEditorParent());
-		dynamic = new ColorFieldEditor(PDTColors.PREF_DYNAMIC, PDTColors.DYNAMIC_STRING, getFieldEditorParent());
-		transparent = new ColorFieldEditor(PDTColors.PREF_TRANSPARENT, PDTColors.MODULE_TRANSPARENT_STRING, getFieldEditorParent());
-		meta = new ColorFieldEditor(PDTColors.PREF_META, PDTColors.META_PREDICATE_STRING, getFieldEditorParent());
+		Group gBackground = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		gBackground.setText("Background color");
+		background = getColorFieldEditor(PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND_STRING, gBackground);
+		backgroundExtern = getColorFieldEditor(PDTColors.PREF_BACKGROUND_EXTERNAL_FILES, PDTColors.BACKGROUND_EXTERN_STRING, gBackground);
+		
+		Group gHighlight = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		gHighlight.setText("Font Color: Syntax Highlighting");
+		string = getColorFieldEditor(PDTColors.PREF_STRING, PDTColors.STRING_STRING, gHighlight);
+		comment = getColorFieldEditor(PDTColors.PREF_COMMENT, PDTColors.COMMENT_STRING, gHighlight);
+		variable = getColorFieldEditor(PDTColors.PREF_VARIABLE, PDTColors.VARIABLE_STRING, gHighlight);
+		default_ = getColorFieldEditor(PDTColors.PREF_DEFAULT, PDTColors.DEFAULT_STRING, gHighlight);
+		
+		Group gProps = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		gProps.setText("Font Color: Predicate Properties");
+		undefined = getColorFieldEditor(PDTColors.PREF_UNDEFINED, PDTColors.UNDEFINED_STRING, gProps);
+		keyword = getColorFieldEditor(PDTColors.PREF_BUILTIN, PDTColors.BUILT_IN_STRING, gProps);
+		dynamic = getColorFieldEditor(PDTColors.PREF_DYNAMIC, PDTColors.DYNAMIC_STRING, gProps);
+		meta = getColorFieldEditor(PDTColors.PREF_META, PDTColors.META_PREDICATE_STRING, gProps);
+		transparent = getColorFieldEditor(PDTColors.PREF_TRANSPARENT, PDTColors.MODULE_TRANSPARENT_STRING, gProps);
 		
 		addField(background);
 		addField(backgroundExtern);
@@ -109,10 +85,39 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 		addField(transparent);
 		addField(meta);
 		
-		initColorFieldEditors(true);
-		
+		setColumsWithEqualWidth(gBackground);
+		setColumsWithEqualWidth(gHighlight);
+		setColumsWithEqualWidth(gProps);
+	}
+	
+	private MyColorFieldEditor getColorFieldEditor(String name, String labelText, Composite parent) {
+		MyColorFieldEditor editor = new MyColorFieldEditor(name, labelText, parent);
+		Label labelControl = editor.getLabelControl();
+		if (labelControl != null) {
+			labelControl.setLayoutData(getGridData());
+		}
+		ColorSelector colorSelector = editor.getColorSelector();
+		if (colorSelector != null) {
+			colorSelector.getButton().setLayoutData(getGridData());
+		}
+		return editor;
 	}
 
+	private GridData getGridData() {
+		GridData gridData = new GridData();
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.minimumWidth = SWT.DEFAULT;
+		return gridData;
+	}
+	
+	private void setColumsWithEqualWidth(Composite composite) {
+		Layout layout = composite.getLayout();
+		if (layout instanceof GridLayout) {
+			GridLayout gridLayout = (GridLayout) layout;
+			gridLayout.makeColumnsEqualWidth = true;
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -122,5 +127,5 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 	@Override
 	public void init(IWorkbench workbench) {
 	}
-
+	
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.cs3.pl.metadata.Predicate;
 
-public class OutlinePredicate extends Predicate implements PDTTreeElement{
+public class OutlinePredicate extends Predicate implements PrologTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
 	
 	private String fileName;

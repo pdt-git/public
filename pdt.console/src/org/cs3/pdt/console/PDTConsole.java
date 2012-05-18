@@ -59,7 +59,6 @@ final public class PDTConsole {
 
 	// Font & Color
 	public static final String PREF_CONSOLE_FONT = "pdt.console.font";
-	public static final String PREF_CONSOLE_SHOW_COLORS = "pdt.console.colors.show";
 	public static final String PREF_CONSOLE_COLOR_ERROR = "pdt.console.colors.error";
 	public static final String PREF_CONSOLE_COLOR_WARNING = "pdt.console.colors.warning";
 

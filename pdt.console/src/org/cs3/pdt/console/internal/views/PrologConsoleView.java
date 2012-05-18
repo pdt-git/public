@@ -1078,7 +1078,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		try {
 			String queryString = 
 					"use_module(lib_pdt_console_pl(pdt_console_server)), "
-							+ "pdt_console_server:pdt_start_console_server(Port)";
+							+ "pdt_console_server:pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")";
 			Debug.info("starting console server using: " + queryString);
 
 			Map<String,?> result = session.queryOnce(queryString);
@@ -1234,7 +1234,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		Map<String,?> result = null;
 		try {
 			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
-			result = session.queryOnce( "pdt_start_console_server(Port)");
+			result = session.queryOnce( "pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")");
 			if (result == null) {
 				startServer(pif, session);
 				result = session.queryOnce("pdt_current_console_server(Port)");
