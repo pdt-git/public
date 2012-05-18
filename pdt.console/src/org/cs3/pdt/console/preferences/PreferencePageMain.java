@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
@@ -48,6 +49,10 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 		//Just leave it empty if you do not want the command history to be persistent.
 		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
 		
+		//If this flag is set, processes will be shown in the console even if all subscriptions are marked as invisible.
+		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Show Hidden Subscriptions",getFieldEditorParent()));
+						
+				
 	}
 
 	/*
