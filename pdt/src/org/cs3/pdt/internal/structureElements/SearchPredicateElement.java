@@ -1,6 +1,8 @@
 package org.cs3.pdt.internal.structureElements;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -10,39 +12,31 @@ import org.eclipse.core.resources.IFile;
 /**
  * used in prolog searches and outlines to represent a predicate.
  */
-public class SearchPredicateElement extends Predicate implements PDTTreeElement{
+public class SearchPredicateElement extends Predicate implements PrologSearchTreeElement {
 
 	private static final long serialVersionUID = 8822257720982382862L;
-	private IFile file;          // file that contains the selected literal (non-null)       
-	private PDTTreeElement parent;
-	private List<PDTMatch> occurences = new ArrayList<PDTMatch>();
 	
-	public SearchPredicateElement(IFile file, String module, String predicateName, int arity, List<String> properties) {
+	private LinkedHashMap<IFile, SearchFileTreeElement> fileToFileTreeElement = new LinkedHashMap<IFile, SearchFileTreeElement>();
+	private Object parent;
+	
+	public SearchPredicateElement(Object parent, String module, String predicateName, int arity, List<String> properties) {
 		super(module,predicateName,arity, properties);
-		this.file = file;
+		this.parent = parent;
 	}
 	
-	public SearchPredicateElement(IFile file, String module, String predicateName, int arity) {
+	public SearchPredicateElement(Object parent, String module, String predicateName, int arity) {
 		super(module, predicateName, arity, new Vector<String>());
-		this.file = file;
+		this.parent = parent;
 	}
 	
-	public IFile getFile() {
-		return file;
-	} 
-	
-	public void addOccurence(PDTMatch occurance) {
-		occurences.add(occurance);
-	}
-
 	@Override
 	public boolean hasChildren() {
-		return !occurences.isEmpty();
+		return !fileToFileTreeElement.values().isEmpty();
 	}
 
 	@Override
 	public Object[] getChildren() {
-		return occurences.toArray();
+		return fileToFileTreeElement.values().toArray();
 	}
 	
 	@Override
@@ -51,28 +45,65 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 	}
 	
 	public int numberOfOccurences() {
-		return occurences.size();
+		int sum = 0;
+		for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
+			sum += e.getNumberOfChildren();
+		}
+		return sum;
 	}
 	
-	public PDTMatch getFirstOccurence() {
-		PDTMatch firstOccurance = occurences.get(0);
-		int firstLine = firstOccurance.getLine();
-		for (PDTMatch occurence : occurences) {
-			int line = occurence.getLine();
-			if (line < firstLine) {
-				firstLine = line;
-				firstOccurance = occurence;
+	public PrologMatch getFirstOccurrence() {
+		if (fileToFileTreeElement.values().isEmpty()) {
+			return null;
+		} else {
+			for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
+				return e.getFirstMatch();
+			}
+			return null;
+		}
+	}
+	
+	public PrologMatch[] getOccurrences() {
+		HashSet<PrologMatch> matches = new HashSet<PrologMatch>();
+		for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
+			for (PrologMatch m : e.getOccurrences()) {
+				matches.add(m);
 			}
 		}
-		return firstOccurance;
-	}
-
-	public void setParent(PDTTreeElement parent) {
-		this.parent = parent;
-	}
-
-	public PDTTreeElement getParent() {
-		return parent;
+		return matches.toArray(new PrologMatch[matches.size()]);
 	}
 	
+	public SearchFileTreeElement[] getFileTreeElements() {
+		Collection<SearchFileTreeElement> values = fileToFileTreeElement.values();
+		return values.toArray(new SearchFileTreeElement[values.size()]);
+	}
+
+	@Override
+	public void removeMatch(PrologMatch match) {
+		IFile file = match.getFile();
+		if (fileToFileTreeElement.containsKey(file)) {
+			SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(file);
+			fileTreeElement.removeMatch(match);
+			if (!fileTreeElement.hasChildren()) {
+				fileToFileTreeElement.remove(file);
+			}
+		}
+	}
+
+	@Override
+	public void addMatch(PrologMatch match) {
+		SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(match.getFile());
+		if (fileTreeElement == null) {
+			fileTreeElement = new SearchFileTreeElement(this, match.getFile());
+			fileToFileTreeElement.put(fileTreeElement.getFile(), fileTreeElement);
+		}
+		fileTreeElement.addMatch(match);
+		match.setPredicateElement(this);
+	}
+
+	@Override
+	public Object getParent() {
+		return parent;
+	}
+
 }

@@ -557,4 +557,8 @@ public class ExternalFile implements IFile {
 			IProgressMonitor monitor) throws CoreException {
 
 	}
+	public void accept(IResourceProxyVisitor visitor, int depth, int memberFlags)
+			throws CoreException {
+		
+	}
 }

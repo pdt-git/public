@@ -1,7 +1,7 @@
 package org.cs3.pdt.internal;
 
 
-import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -13,7 +13,7 @@ public class PrologTreeElementLabelDecorator extends LabelProvider implements IL
 
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
-		if(!(element instanceof PDTTreeElement)){
+		if(!(element instanceof PrologTreeElement)){
 			return;
 		}
 		if (element instanceof Predicate) {
