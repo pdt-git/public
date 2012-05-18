@@ -245,20 +245,6 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			return;
 		}
 		// remove hidden subscriptions from the set
-		boolean showHidden = "true".equals(PrologConsolePlugin.getDefault()
-				.getPreferenceValue(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,
-						"false"));
-		if (!showHidden) {
-			for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
-				Subscription sub = it.next();
-				if (!sub.isVisible()) {
-					it.remove();
-				}
-			}
-			if (subs.isEmpty()) {
-				return;
-			}
-		}
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
 			@Override
 			public void run() {
@@ -280,9 +266,6 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		StringBuffer descBuf = new StringBuffer();
 		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
 			Subscription sub = it.next();
-			if (!sub.isVisible() && !showHidden) {
-				continue;
-			}
 			buf.append(sub.getName());
 			descBuf.append(sub.getDescritpion());
 			if (it.hasNext()) {
