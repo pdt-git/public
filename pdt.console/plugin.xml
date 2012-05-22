@@ -41,12 +41,6 @@
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          category="org.cs3.pdt.console.preferences.PreferencePageMain"
-          class="org.cs3.pdt.console.preferences.PreferencePageFontColor"
-          id="org.cs3.pdt.console.preferences.PreferencePageFontAndColor"
-          name="Appearance">
-    </page>
-    <page
     	  category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
           class="org.cs3.pdt.console.preferences.PreferencePageMain"
           id="org.cs3.pdt.console.preferences.PreferencePageMain"
