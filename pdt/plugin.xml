@@ -24,10 +24,16 @@
           name="PDT">
     </page>
     <page
-          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.preferences.PreferencePageColor"
-          id="org.cs3.preferences.PreferencePageColor"
+          category="org.cs3.pdt.preferences.PreferencePageEditor"
+          class="org.cs3.pdt.preferences.PreferencePageEditorColors"
+          id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
+    </page>
+    <page
+          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.pdt.preferences.PreferencePageEditor"
+          id="org.cs3.pdt.preferences.PreferencePageEditor"
+          name="Editor">
     </page>
  </extension>
   <extension
