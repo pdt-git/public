@@ -39,22 +39,19 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDT.PREF_CLIENT_LOG_FILE_DIR, location);
 		store.setDefault(PDT.PREF_ADD_NATURE_ON_OPEN, MessageDialogWithToggle.PROMPT);
 		store.setDefault(PDT.PREF_SWITCH_TO_DEFAULT_PIF, MessageDialogWithToggle.PROMPT);
+		
+		// Editor preferences
 		store.setDefault(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, true);
+		store.setDefault(PDT.PREF_AUTO_COMPLETE_ARGLIST, true);
 		store.setDefault(PDT.PREF_OUTLINE_FILTERS,"hide_subterms" );
 		store.setDefault(PDT.PREF_OUTLINE_SORT, false);
-		store.setDefault(PDT.PREF_AUTO_COMPLETE_ARGLIST, true);
 		
+		// Editor Color preferences
 		initializeDefaultPreferences_FontAndColor(store);		
 	}
 
 	private String getLocation() throws IOException {
 		return PDTPlugin.getDefault().getStateLocation().toOSString();
-//		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
-//		String location = null;
-//		location = new File(FileLocator.toFileURL(url).getFile()).getAbsolutePath();
-//		if (location.charAt(location.length() - 1) == File.separatorChar)
-//			location = location.substring(0, location.length() - 1);
-//		return location;
 	}
 
 	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){			
