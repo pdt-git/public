@@ -19,8 +19,6 @@ public class StandaloneSocketPrologInterface extends SocketPrologInterface {
 		setTimeout("15000");
 		setServerPort("9944");
 		setHidePlwin(true);
-		setCreateLogs(false);
-		setUseSessionPooling("true");
-		setServerLogDir(System.getProperty("java.io.tmpdir"));		
+		setUseSessionPooling(true);
 	}
 }

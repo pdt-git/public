@@ -69,8 +69,6 @@ final public class PDTConsole {
 	public static final String PREF_CONSOLE_COLORS_THREESTARS = "pdt.console.colors_threestars";
 
 	// Main
-	public static final String PREF_SHOW_HIDDEN_SUBSCRIPTIONS = "pdt.console.show_hidden";
-
 	public static final String PREF_CONSOLE_HISTORY_FILE = "pdt.console.history.file";
 
 	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";

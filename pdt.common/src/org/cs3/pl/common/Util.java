@@ -789,6 +789,14 @@ public class Util {
 		return guessedExecutable;
 
 	}
+	
+	public static String getExecutablePreference() {
+		if (isWindows()) {
+			return findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getStackCommandLineParameters();
+		} else {
+			return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
+		}
+	}
 
 
 	private static String stackCommandLineParameters = null;
@@ -870,6 +878,14 @@ public class Util {
 		// return "xterm -e xpce"; // For Mac and Linux with console
 		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 
+	}
+	
+	public static String getInvocationCommand() {
+		if (isWindows()) {
+			return "cmd.exe /c start \"cmdwindow\" /min ";
+		} else {
+			return "";
+		}
 	}
 
 	public static String guessCommandLineExecutableName() {
@@ -1154,6 +1170,18 @@ public class Util {
 			}
 		}
 		return buf.toString();
+	}
+
+	public static String createExecutable(String invocation, String execution, String startupFiles) {
+		StringBuffer executable = new StringBuffer(invocation);
+		executable.append(" ");
+		executable.append(execution);
+		
+		if (startupFiles != null && !startupFiles.isEmpty()) {
+			executable.append(" -f ");
+			executable.append(startupFiles);
+		}
+		return executable.toString();
 	}
 
 }

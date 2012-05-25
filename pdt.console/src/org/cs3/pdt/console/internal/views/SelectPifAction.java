@@ -44,8 +44,6 @@ package org.cs3.pdt.console.internal.views;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
@@ -197,19 +195,6 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 			return;
 		}
 		// remove hidden subscriptions from the set
-		boolean showHidden = "true".equals(PrologConsolePlugin.getDefault().getPreferenceValue(
-				PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, "false"));
-		if (!showHidden) {
-			for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
-				Subscription sub = it.next();
-				if (!sub.isVisible()) {
-					it.remove();
-				}
-			}
-			if(subs.isEmpty()){
-				return;
-			}
-		}
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
 			@Override
 			public void run() {
@@ -227,9 +212,6 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 		buf.append(": ");
 		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
 			Subscription sub = it.next();
-			if(!sub.isVisible() && !showHidden){
-				continue;
-			}
 			buf.append(sub.getName());
 			if (it.hasNext()) {
 				buf.append(", ");

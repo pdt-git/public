@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
@@ -104,7 +105,7 @@ private static JackTheProcessRipper processRipper;
 	@Override
 	public  Process startServer(PrologInterface pif) {
 		if (pif.isStandAloneServer()) {
-			Debug.warning("Will not start server; the option " + PrologInterface.PREF_STANDALONE + " is set.");
+			Debug.warning("Will not start server; the standalone option is set.");
 			return null;
 		}
 		if (!(pif instanceof SocketPrologInterface)) {
@@ -294,13 +295,9 @@ private static JackTheProcessRipper processRipper;
 		}
 		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
 
-		if (socketPif.isCreateLogs()) {
-			tmpWriter.println(":- debug(consult_server).");
-
-		}
-		String value = ("true".equals(socketPif.getAttribute(PrologInterface.PREF_GENERATE_FACTBASE)) ? "true" : "false");
+		String value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_GENERATE_FACTBASE)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
-		value = ("true".equals(socketPif.getAttribute(PrologInterface.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
+		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
@@ -338,7 +335,7 @@ private static JackTheProcessRipper processRipper;
 	@Override
 	public void stopServer(PrologInterface pif) {
 		if (pif.isStandAloneServer()) {
-			Debug.warning("Will not stop server; the option " + PrologInterface.PREF_STANDALONE + " is set.");
+			Debug.warning("Will not stop server; the standalone option is set.");
 			return;
 		}
 		if (!(pif instanceof SocketPrologInterface)) {

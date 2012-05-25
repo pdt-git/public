@@ -58,7 +58,6 @@ import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.console.preferences.PreferencePageFontColor;
 import org.cs3.pdt.console.preferences.PreferencePageMain;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
@@ -835,10 +834,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				IPreferenceNode node = new PreferenceNode("PreferencePage", page);
 				mgr.addToRoot(node);
 
-				IPreferencePage appearance = new PreferencePageFontColor();
-				appearance.setTitle("Appearance");
-				node.add(new PreferenceNode("AppearancePreferences", appearance));
-				
 				PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
 				dialog.create();
 				dialog.setMessage(page.getTitle());
