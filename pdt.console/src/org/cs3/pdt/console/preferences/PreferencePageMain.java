@@ -7,15 +7,16 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.ui.preferences.MyBooleanFieldEditor;
 import org.cs3.pdt.ui.preferences.MyColorFieldEditor;
+import org.cs3.pdt.ui.preferences.MyFileFieldEditor;
 import org.cs3.pdt.ui.preferences.MyFontFieldEditor;
 import org.cs3.pdt.ui.preferences.MyRadioGroupFieldEditor;
 import org.cs3.pdt.ui.preferences.StructuredFieldEditorPreferencePage;
 import org.cs3.pl.common.Debug;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
@@ -84,6 +85,8 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		//Just leave it empty if you do not want the command history to be persistent.
 		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
 		
+		((GridData)fontGroup.getLayoutData()).horizontalSpan = 3;
+		((GridData)colourGroup.getLayoutData()).horizontalSpan = 3;
 	}
 
 	/*
@@ -98,7 +101,7 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 	
 	
 	
-	class FileFieldEditorWithEnsureFileExists extends FileFieldEditor {
+	class FileFieldEditorWithEnsureFileExists extends MyFileFieldEditor {
 
 		public FileFieldEditorWithEnsureFileExists(String name, String labelText, Composite parent) {
 			super(name, labelText, parent);
