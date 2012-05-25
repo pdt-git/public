@@ -137,7 +137,6 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 						job.schedule();
 					}
 				}
-				System.out.println();
 			}
 		});
 	}
