@@ -99,7 +99,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	private int port = 9999;
 	private boolean hidePlwin;
 
-	private boolean createLogs;
 	private String serverLogDir;
 		
 
@@ -109,21 +108,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public void setServerPort(String port) {
 		this.port = Integer.parseInt(port);
 	}
-	public void setUseSessionPooling(String useSessionPooling) {
-		setUseSessionPooling(Boolean.parseBoolean(useSessionPooling));
-	}
 	public void setUseSessionPooling(boolean useSessionPooling) {
 		this.useSessionPooling = useSessionPooling;
 		pool = useSessionPooling ? new ReusablePool() : null;
-	}
-	public void setCreateLogs(boolean createLogs) {
-		this.createLogs = createLogs;
-	}
-	public void setCreateLogs(String createLogs) {
-		this.createLogs = Boolean.parseBoolean(createLogs);
-	}
-	public boolean isCreateLogs() {
-		return createLogs;
 	}
 	public int getPort() {
 		return port;
@@ -148,8 +135,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		super.initOptions(provider);
 		setServerPort(provider.getPreference(PrologRuntime.PREF_PORT));
 		setHidePlwin(provider.getPreference(PrologRuntime.PREF_HIDE_PLWIN));
-		setCreateLogs(provider.getPreference(PrologRuntime.PREF_CREATE_SERVER_LOGS));
-		setUseSessionPooling(provider.getPreference(PrologRuntime.PREF_USE_POOL));
+		setUseSessionPooling(true);
 		setServerLogDir(provider.getPreference(PrologRuntime.PREF_SERVER_LOGDIR));		
 
 	}
@@ -174,8 +160,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	
 	public void setDefaults() {
 		setHidePlwin(true);
-		setCreateLogs(false);
-		setUseSessionPooling("true");
+		setUseSessionPooling(true);
 		setServerLogDir(System.getProperty("java.io.tmpdir"));		
 	}
 	

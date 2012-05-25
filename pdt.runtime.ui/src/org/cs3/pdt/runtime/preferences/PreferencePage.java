@@ -15,6 +15,9 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -72,6 +75,15 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		// you have write permissions will do.
 		addField(new DirectoryFieldEditor(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, "Prolog Process Bootstrap Directory", getFieldEditorParent()));
 
+		DirectoryFieldEditor ffe = new DirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
+		addField(ffe);
+		
+		// Maximum time in milliseconds to wait for the prolog process to come up.
+		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologRuntime.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
+		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
+		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
+		addField(timeoutFieldEditor);
+
 		// The host the PIF server is listening on
 		StringFieldEditor host = new StringFieldEditor(PrologRuntime.PREF_HOST, "Server host", getFieldEditorParent());
 		host.setEnabled(false, getFieldEditorParent());
@@ -82,64 +94,37 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		port.setEnabled(false, getFieldEditorParent());
 		addField(port);
 		
+		addField(new BooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent()));
 		
-//		// If true, the PIF will not try to start and stop its own server
-//		// process.
-//		BooleanFieldEditor standalone = new BooleanFieldEditor(PrologInterface.PREF_STANDALONE, "stand-alone server", getFieldEditorParent());
-//		standalone.setEnabled(false, getFieldEditorParent());
-//		addField(standalone);
-	
-		// Maximum time in milliseconds to wait for the prolog process to come up.
-		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologRuntime.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
-		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
-		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
-		addField(timeoutFieldEditor);
-		
-
-		//The default value for the Runtime PrologInterface property of prolog projects.
-		addField(new StringFieldEditor(PrologRuntime.PREF_RUNTIME_PIF_KEY_DEFAULT, "Default Prolog Process Name", getFieldEditorParent()));
-		
-		// When enabled, the server process will produce rather verbose log
-		// files below the systems temp directory.
-		addField(new BooleanFieldEditor(PrologRuntime.PREF_CREATE_SERVER_LOGS, "Create server debug logs", getFieldEditorParent()));
-		
-		DirectoryFieldEditor ffe = new DirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
-		//ffe.setPropertyChangeListener(debugPropertyChangeListener);
-		//ffe.getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
-		addField(ffe);	
-		
-		addField(new BooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide plwin (windows only)", getFieldEditorParent()));
-		addField(new BooleanFieldEditor(PrologRuntime.PREF_USE_POOL, "Use session pooling", getFieldEditorParent()));
-
-		
-//		// TODO: Move
-//		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
-//			@Override
-//			public void doLoad(){
-//				super.doLoad();
-//				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
-//			}
-//			
-//			@Override
-//			public void doLoadDefault(){
-//				super.doLoadDefault();
-//				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
-//			}
-//		};
-//		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
-//		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
-//		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
-//			@Override
-//			public void handleEvent(Event event) {
-//				metaPred.setEnabled(genFactbase.getBooleanValue(), getFieldEditorParent());
-//			}
-//		});
-//		addField(genFactbase);
-//		addField(metaPred);
-
-
+		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
+			@Override
+			public void doLoad(){
+				super.doLoad();
+				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
+			}
+			
+			@Override
+			public void doLoadDefault(){
+				super.doLoadDefault();
+				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
+			}
+		};
+		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
+		metaPred = new BooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				metaPred.setEnabled(genFactbase.getBooleanValue(), getFieldEditorParent());
+			}
+		});
+		addField(genFactbase);
+		addField(metaPred);
 	}
 	
+	private BooleanFieldEditor metaPred;
+	private BooleanFieldEditor getMetaPredEditor(){
+		return metaPred;
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
