@@ -45,6 +45,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		store.setDefault(PrologRuntime.PREF_GENERATE_FACTBASE, false);
 		store.setDefault(PrologRuntime.PREF_META_PRED_ANALYSIS, false);
+		
+		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
 
 	}
 
