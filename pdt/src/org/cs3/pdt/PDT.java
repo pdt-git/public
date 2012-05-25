@@ -97,4 +97,6 @@ public final class PDT {
 
 	public static final String PREF_AUTO_COMPLETE_ARGLIST = "pdt.autocompletion.arglist";
 
+	public static final String PREF_SHOW_SYSTEM_PREDS = "pdt.show.system.preds";
+
 }

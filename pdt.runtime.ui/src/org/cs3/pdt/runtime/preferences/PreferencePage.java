@@ -3,8 +3,8 @@ package org.cs3.pdt.runtime.preferences;
 import java.util.Set;
 
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -35,15 +35,17 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	
 	
-	private String newPrefExecutable;
+	private boolean isNewPrefExecutable = false;
+	
 	private StringFieldEditor executable;
+	private StringFieldEditor invocation;
+	private StringFieldEditor startupFiles;
 
 	public PreferencePage() {
 		super(GRID);
 		
 		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
 		setPreferenceStore(plugin.getPreferenceStore());
-		setDescription("Preferences for the Prolog Interface");
 
 	}
 
@@ -54,52 +56,47 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	 */
 	@Override
 	public void createFieldEditors() {
-		// Will be passed to SWI-Prolog using the -p command line option.
-		// Make sure that the library(consult_server) can be resolved.
-	//	addField(new StringFieldEditor(PrologInterface.PREF_FILE_SEARCH_PATH, "File Search Path", getFieldEditorParent()));
-	
 		
-		// The factory to be used for creating PrologInterface instances
-//		addField(new StringFieldEditor(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, "PrologInterface implementation", getFieldEditorParent()));
-//		addField(new ComboFieldEditor(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION,"PrologInterface implementation",
-//				  new String[][] {
-//                	{"Socket (stable)", AbstractPrologInterface.PL_INTERFACE_DEFAULT},
-//                	{"PIFcom (very experimental - don't change, if you don't know what you do)", AbstractPrologInterface.PL_INTERFACE_PIFCOM}
-//				}
-//                ,getFieldEditorParent()));	
+		invocation = new StringFieldEditor(PrologRuntime.PREF_INVOCATION, "Prolog invocation", getFieldEditorParent());
+		addField(invocation);
+		
+		// eg. xpce or /usr/bin/xpce
+		executable = new StringFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", getFieldEditorParent());
+		addField(executable);
+		
+		startupFiles = new StringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", getFieldEditorParent());
+		addField(startupFiles);
+		
+		// A comma-separated list of VARIABLE=VALUE pairs.
+		addField(new StringFieldEditor(PrologRuntime.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
 		
 		// The PrologInterface needs to temporarily store some
 		// prolog files during bootstrapping. Any directory for which 
 		// you have write permissions will do.
-		addField(new DirectoryFieldEditor(PrologRuntimeUI.PREF_PIF_BOOTSTRAP_DIR, "PrologInterface Bootstrap Directory", getFieldEditorParent()));
+		addField(new DirectoryFieldEditor(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, "Prolog Process Bootstrap Directory", getFieldEditorParent()));
 
-		// eg. xpce or /usr/bin/xpce
-		executable = new StringFieldEditor(PrologInterface.PREF_EXECUTABLE, "SWI-Prolog executable", getFieldEditorParent());
-		addField(executable);
-
-		// A comma-separated list of VARIABLE=VALUE pairs.
-		addField(new StringFieldEditor(PrologInterface.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
-	
-		// If true, the PIF will not try to start and stop its own server
-		// process.
-		BooleanFieldEditor standalone = new BooleanFieldEditor(PrologInterface.PREF_STANDALONE, "stand-alone server", getFieldEditorParent());
-		standalone.setEnabled(false, getFieldEditorParent());
-		addField(standalone);
-
-		// The host the PIF server is listening on
-		StringFieldEditor host = new StringFieldEditor(PrologInterface.PREF_HOST, "Server host", getFieldEditorParent());
-		host.setEnabled(false, getFieldEditorParent());
-		addField(host);
-
-	
-	
+		DirectoryFieldEditor ffe = new DirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
+		addField(ffe);
+		
 		// Maximum time in milliseconds to wait for the prolog process to come up.
-		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologInterface.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
+		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologRuntime.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
 		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		addField(timeoutFieldEditor);
+
+		// The host the PIF server is listening on
+		StringFieldEditor host = new StringFieldEditor(PrologRuntime.PREF_HOST, "Server host", getFieldEditorParent());
+		host.setEnabled(false, getFieldEditorParent());
+		addField(host);
+
+		// The port the PIF server is listening on
+		IntegerFieldEditor port = new IntegerFieldEditor(PrologRuntime.PREF_PORT, "Server port", getFieldEditorParent());
+		port.setEnabled(false, getFieldEditorParent());
+		addField(port);
 		
-		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologInterface.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
+		addField(new BooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent()));
+		
+		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
@@ -113,7 +110,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 			}
 		};
 		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
-		metaPred = new BooleanFieldEditor(PrologInterface.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		metaPred = new BooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
 		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -122,15 +119,12 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		});
 		addField(genFactbase);
 		addField(metaPred);
-
-
 	}
 	
 	private BooleanFieldEditor metaPred;
 	private BooleanFieldEditor getMetaPredEditor(){
 		return metaPred;
 	}
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -145,46 +139,43 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
 		
-		if(((FieldEditor)event.getSource()).getPreferenceName().equals(PrologInterface.PREF_EXECUTABLE)){
-			newPrefExecutable = (String)event.getNewValue();
+		String prefName = ((FieldEditor)event.getSource()).getPreferenceName();
+		if(prefName.equals(PrologRuntime.PREF_INVOCATION) 
+				|| prefName.equals(PrologRuntime.PREF_EXECUTABLE)
+				|| prefName.equals(PrologRuntime.PREF_ADDITIONAL_STARTUP)) {
+			
+			isNewPrefExecutable = true;
 		}
     }
 	
 	@Override
 	public boolean performOk() {
-		if(newPrefExecutable!= null) {
+		if(isNewPrefExecutable) {
 			updatePrologInterfaceExecutables();	
 		}
 		return super.performOk();
 	}
 
 	private void updatePrologInterfaceExecutables() {
+
+		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), startupFiles.getStringValue());
+		
 		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
 			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());
 			if(pif != null && !(pif.isDown()) ){   // Sinan & Günter, 24.9.2010
-				pif.setExecutable(newPrefExecutable);
+				pif.setExecutable(newExecutable);
 			}
 		}
 	}
 	
 	@Override
 	protected void performApply() {
-		if(newPrefExecutable!= null) {
+		if(isNewPrefExecutable) {
 			updatePrologInterfaceExecutables();	
 		}
-		newPrefExecutable=null;
+		isNewPrefExecutable=false;
 	}
 	
-	/**
-	 * Resets the executable field.
-	 * TODO: extends this to support fields.
-	 */
-	@Override
-	protected void performDefaults() {
-		executable.setStringValue(Util.guessExecutableName());
-		super.performDefaults();
-	}
-
 }

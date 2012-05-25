@@ -27,7 +27,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * preferences can be accessed directly via the preference store.
  */
 
-public class PreferencePageColor extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class PreferencePageEditorColors extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	private ColorFieldEditor background;
 	private ColorFieldEditor backgroundExtern;
 	private ColorFieldEditor default_;
@@ -41,7 +41,7 @@ public class PreferencePageColor extends StructuredFieldEditorPreferencePage imp
 	private ColorFieldEditor meta;
 
 	
-	public PreferencePageColor() {
+	public PreferencePageEditorColors() {
 		super(GRID);
 		setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
 	}
