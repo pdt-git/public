@@ -53,15 +53,15 @@ public class PDTOutlineQuery {
 		String module = "user";
 		boolean showSystemPreds = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_SHOW_SYSTEM_PREDS);
 		for (Map<String, Object> predicate : result) {
-			module=(String)predicate.get("Entity");
-			String name=(String)predicate.get("Functor");
+			module = predicate.get("Entity").toString();
+			String name = predicate.get("Functor").toString();
 			if (!showSystemPreds && name.startsWith("$")) {
 				continue;
 			}
-			String kindOfEntity = (String)predicate.get("KindOfEntity");
-			int arity=Integer.parseInt((String)predicate.get("Arity"));
-			int line = Integer.parseInt((String)predicate.get("Line"));
-			String type = (String)predicate.get("TypeOfDef");
+			String kindOfEntity = predicate.get("KindOfEntity").toString();
+			int arity=Integer.parseInt(predicate.get("Arity").toString());
+			int line = Integer.parseInt(predicate.get("Line").toString());
+			String type = predicate.get("TypeOfDef").toString();
 			Object prop = predicate.get("PropertyList");
 			List<String> properties = null;
 			if (prop instanceof Vector<?>) {
