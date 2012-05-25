@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
@@ -49,9 +51,13 @@ public class PDTOutlineQuery {
 	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		String module = "user";
+		boolean showSystemPreds = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_SHOW_SYSTEM_PREDS);
 		for (Map<String, Object> predicate : result) {
 			module=(String)predicate.get("Entity");
 			String name=(String)predicate.get("Functor");
+			if (!showSystemPreds && name.startsWith("$")) {
+				continue;
+			}
 			String kindOfEntity = (String)predicate.get("KindOfEntity");
 			int arity=Integer.parseInt((String)predicate.get("Arity"));
 			int line = Integer.parseInt((String)predicate.get("Line"));

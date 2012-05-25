@@ -36,6 +36,8 @@ public class PreferencePageEditor extends FieldEditorPreferencePage implements I
 		
 		addField(new BooleanFieldEditor(PDT.PREF_AUTO_COMPLETE_ARGLIST, "Create arglist in auto completion", getFieldEditorParent()));
 		
+		addField(new BooleanFieldEditor(PDT.PREF_SHOW_SYSTEM_PREDS, "Show system predicates in outline", getFieldEditorParent()));
+		
 //		// A comma separated list of filter ids that should be activated at startup
 //		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline",
 //				getFieldEditorParent());
