@@ -28,8 +28,9 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		if (element instanceof IFile) {
 			return ImageRepository.getImage(ImageRepository.FILE);
 		} else if (element instanceof SearchMatchElement) {
-			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
-			return setCategoryImage(sharedImagaes);
+			return ImageRepository.getImage(ImageRepository.SEARCH_MATCH);
+//			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
+//			return setCategoryImage(sharedImagaes);
 		} else if(element instanceof SearchModuleElement){
 			//return ImageRepository.getImage(ImageRepository.PE_MODULE);
 			return ImageRepository.getImage(ImageRepository.PACKAGE);
