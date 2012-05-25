@@ -4,7 +4,6 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -37,15 +36,15 @@ public class PreferencePageEditor extends FieldEditorPreferencePage implements I
 		
 		addField(new BooleanFieldEditor(PDT.PREF_AUTO_COMPLETE_ARGLIST, "Create arglist in auto completion", getFieldEditorParent()));
 		
-		// A comma separated list of filter ids that should be activated at startup
-		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline",
-				getFieldEditorParent());
-		addField(sfe);
-
-		BooleanFieldEditor bfe = new BooleanFieldEditor(PDT.PREF_OUTLINE_SORT,
-				"Whether the Prolog Outline is to be sorted lexicographical", getFieldEditorParent());
-		bfe.setEnabled(false, getFieldEditorParent());
-		addField(bfe);
+//		// A comma separated list of filter ids that should be activated at startup
+//		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline",
+//				getFieldEditorParent());
+//		addField(sfe);
+//
+//		BooleanFieldEditor bfe = new BooleanFieldEditor(PDT.PREF_OUTLINE_SORT,
+//				"Whether the Prolog Outline is to be sorted lexicographical", getFieldEditorParent());
+//		bfe.setEnabled(false, getFieldEditorParent());
+//		addField(bfe);
 
 	}
 

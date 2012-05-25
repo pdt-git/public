@@ -43,14 +43,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PrologRuntime.PREF_PORT, 9944);
 		store.setDefault(PrologRuntime.PREF_HIDE_PLWIN, true);
 		
-		store.setDefault(PrologRuntime.PREF_RUNTIME_PIF_KEY_DEFAULT, "%project%-PDT");
-		
-		store.setDefault(PrologRuntime.PREF_CREATE_SERVER_LOGS, false);
-		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
-		
-//		store.setDefault(PrologInterface.PREF_GENERATE_FACTBASE, false);
-//		store.setDefault(PrologInterface.PREF_META_PRED_ANALYSIS, false);
-		store.setDefault(PrologRuntime.PREF_USE_POOL, "true");
+		store.setDefault(PrologRuntime.PREF_GENERATE_FACTBASE, false);
+		store.setDefault(PrologRuntime.PREF_META_PRED_ANALYSIS, false);
 
 	}
 

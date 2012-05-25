@@ -295,10 +295,6 @@ private static JackTheProcessRipper processRipper;
 		}
 		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
 
-		if (socketPif.isCreateLogs()) {
-			tmpWriter.println(":- debug(consult_server).");
-
-		}
 		String value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_GENERATE_FACTBASE)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
 		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
