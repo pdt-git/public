@@ -109,17 +109,7 @@ public interface PrologInterface {
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
 	
-	/**
-	 * property constant.
-	 */
-	public static final String PREF_FILE_SEARCH_PATH = "pif.file_search_path";
-	public static final String PREF_EXECUTABLE = "pif.executable";
-	public static final String PREF_ENVIRONMENT = "pif.environment";
-	public static final String PREF_STANDALONE = "pif.standalone";
-	public static final String PREF_TIMEOUT = "pif.timeout";
-	public static final String PREF_HOST = "pif.host";
-	public static final String PREF_GENERATE_FACTBASE = "pif.genfactbase";
-	public static final String PREF_META_PRED_ANALYSIS = "pif.metapred";
+	
 	
 
 	/**
