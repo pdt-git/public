@@ -87,5 +87,15 @@ public class OutlinePredicate extends Predicate implements PrologTreeElement{
 		return label.toString();
 	}
 	
+	@Override
+	public String toString() {
+		return super.getSignature();
+	}
+	
+	@Override
+	public String getSignature() {
+		return "Outline: " + super.getSignature();
+	}
+	
 }
 
