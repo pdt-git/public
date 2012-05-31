@@ -140,6 +140,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 //		toolBarManager.add(action);
 		Action action = new ToggleSortAction(getTreeViewer());
 		toolBarManager.add(action);
+		toolBarManager.add(new ToggleFilterAction("Hide private predicates", viewer, new org.cs3.pdt.internal.views.lightweightOutline.HidePrivatePredicatesFilter()));
 //		action = new FilterActionMenu(this);
 //		toolBarManager.add(action);
 		
