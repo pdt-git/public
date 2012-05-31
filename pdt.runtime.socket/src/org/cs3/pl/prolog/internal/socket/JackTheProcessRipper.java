@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 
 public class JackTheProcessRipper extends Thread {
 

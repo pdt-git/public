@@ -5,15 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
 public class DefinitionsSearchQuery extends PDTSearchQuery {
-	public DefinitionsSearchQuery(PrologInterface pif, Goal goal) {
-		super(pif, goal);
+	public DefinitionsSearchQuery(Goal goal) {
+		super(goal);
 		setSearchType("Definitions and declarations of");
 	}
 
@@ -46,7 +45,7 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 		String definingModule = m.get("DefiningModule").toString();
 		String functor = m.get("Functor").toString();
 		int arity = Integer.parseInt(m.get("Arity").toString());
-		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(m.get("File").toString());
+		IFile file = FileUtils.findFileForLocation(m.get("File").toString());
 		int line = Integer.parseInt(m.get("Line").toString());
 
 		Object prop = m.get("PropertyList");

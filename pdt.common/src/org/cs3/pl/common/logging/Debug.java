@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.common;
+package org.cs3.pl.common.logging;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -48,6 +48,8 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.cs3.pl.common.Util;
 
 /**
  * Provides a application-wide mechanism to send debug, or other informational

@@ -44,34 +44,18 @@ package org.cs3.pdt;
 import java.io.IOException;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.FindReplaceDocumentAdapter;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 public final class PDTUtils {
 
@@ -106,12 +90,10 @@ public final class PDTUtils {
 			});
 			return;
 		}
-
 		
 		// For predicates implemented by external language code the Prolog side returns
 		// an error message instead of a file name. Intercept and display it:
-		if (loc.file
-				.equals("No Prolog source code (only compiled external language code)")) {
+		if (loc.file.equals("No Prolog source code (only compiled external language code)")) {
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			UIUtils.displayMessageDialog(
 					shell,
@@ -120,118 +102,27 @@ public final class PDTUtils {
 			return;
 		}
 		
-		IFile file = null;
-		IPath fpath = new Path(loc.file);
-		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
-		
-		// see if it is a workspace path:
-		file = wsRoot.getFile(fpath);
-
-		
-		if (!loc.isWorkspacePath) {
+		if (loc.isLineLocation()) {
 			try {
-				file = FileUtils.findFileForLocation(loc.file);
-			} catch(IllegalArgumentException iae){
-				if(iae.getLocalizedMessage().startsWith("Not in Workspace")){
-					openExternalFileInEditor(loc);
-					return;
-				} else {
-					Debug.report(iae);
-					throw new RuntimeException(iae);
+				IEditorPart editorPart = UIUtils.openInEditor(FileUtils.findFileForLocation(loc.file), true);
+				if (editorPart != null && editorPart instanceof PLEditor){
+					((PLEditor) editorPart).gotoLine(loc.getLine());
 				}
+			} catch (PartInitException e) {
+				Debug.report(e);
 			} catch (IOException e) {
 				Debug.report(e);
-				throw new RuntimeException(e);
 			}
-		}
-
-		try {
-			IWorkbenchPage page = UIUtils.getActivePage();
-			IEditorPart part= IDE.openEditor(page, file);
-			openInEditor(loc, part);
-		} catch (PartInitException e) {
-			Debug.report(e);
-			return;
-		}
-
-
-	}
-
-	public static void openExternalFileInEditor(final SourceLocation loc) {
-		IFileStore fileStore = EFS.getLocalFileSystem().getStore(new Path(loc.file));
-		if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
+			
+		} else {
 			try {
-				IWorkbenchPage page = UIUtils.getActivePage();
-		        IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
-				openInEditor(loc, part);
+				UIUtils.selectInPrologEditor(loc.getOffset(), loc.getEndOffset() - loc.getOffset(), loc.file);
 			} catch (PartInitException e) {
 				Debug.report(e);
 			}
-			return;
 		}
-	}
-
-	private static void openInEditor(final SourceLocation loc,IEditorPart part) {
-		if (part instanceof PLEditor) {
-			PLEditor editor = (PLEditor) part;
-
-			IDocument doc = editor.getDocumentProvider().getDocument(
-					editor.getEditorInput());
-			int offset;
-			if( loc.isLineLocation()){
-				Document document = (Document) editor.getDocumentProvider().getDocument(editor.getEditorInput());
-				try {
-					offset = document.getLineOffset(loc.getLine()-1);
-					if(loc.getPredicateName()!=null){
-						FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(document);
-						
-						IRegion region= finder.find(offset, loc.getPredicateName(), true, true, true,false);
-						if(region!=null){
-							editor.gotoOffset(region.getOffset(),region.getLength());
-							return;
-						} 
-
-					}
-					editor.gotoOffset(offset, 0);
-					return;
-				} catch (BadLocationException e) {
-					Debug.report(e);
-					return;
-				}
-			} else {
-				offset=PDTCoreUtils.convertLogicalToPhysicalOffset(
-						doc.get(), loc.getOffset());
-				editor.gotoOffset(offset,loc.getEndOffset() - loc.getOffset());
-				
-			}
-//			editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
-//					doc.get(), loc.offset));
-
-		}
-	}
-
-	public static void openEditorOnExternalFile(int currentOffset, int currentLength,
-			boolean activate, IFile file) {
-		PLEditor editor= null;
-		try {
-		    editor = (PLEditor) IDE.openEditor(UIUtils.getActivePage(),file);
-		} catch (PartInitException e1) {
-			return;
-		}
-		IDocument doc = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-		int endOffset=currentOffset+currentLength;
-		currentOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-				currentOffset);
-		endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-				endOffset);
-		currentLength=endOffset-currentOffset;
-		if (editor != null && activate) {
-			editor.getEditorSite().getPage().activate(editor);
-			if (editor instanceof ITextEditor) {
-				ITextEditor textEditor= editor;
-				textEditor.selectAndReveal(currentOffset, currentLength);
-			}
-		}
+		
+		
 	}
 
 }

@@ -47,7 +47,7 @@ package org.cs3.pdt.core.internal.actions;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;

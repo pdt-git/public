@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
 import org.cs3.pdt.transform.internal.RenameResourceChange;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;

@@ -41,50 +41,14 @@
 
 /*
  */
-package org.cs3.pdt.internal.editors;
+package org.cs3.pl.common.logging;
 
-import org.cs3.pl.parser.LineBreakInfoProvider;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
+import java.io.PrintStream;
 
-/**
- */
-public class DocumentLineBreakInfoProvider implements LineBreakInfoProvider {
-    private IDocument document;
-
-    public DocumentLineBreakInfoProvider(IDocument document) {
-        this.document = document;
-    }
-    /* (non-Javadoc)
-     * @see org.cs3.pl.parser.LineBreakInfoProvider#getLineAtOffset(int)
-     */
-	@Override
-    public int getLineAtOffset(int offset) {
-        try {
-            return document.getLineOfOffset(offset);
-        } catch (BadLocationException e) {
-	        throw new IndexOutOfBoundsException("invalid offset: "+offset);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.cs3.pl.parser.LineBreakInfoProvider#getOffsetAtLine(int)
-     */
-	@Override
-    public int getOffsetAtLine(int line) {
-        try {
-            return document.getLineOffset(line);
-        } catch (BadLocationException e) {
-            throw new IndexOutOfBoundsException("invalid line number: "+line);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.cs3.pl.parser.LineBreakInfoProvider#getLineCount()
-     */
-	@Override
-    public int getLineCount() {
-        return document.getNumberOfLines();
-    }
-
+public interface LogBuffer {
+    public void log(String key,char c);
+    public void log(String key,byte[] buf, int offset, int len);
+    public void log(String key,String s);
+    public void log(String key,byte[] b);
+    public void printLog(PrintStream out);    
 }

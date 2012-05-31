@@ -41,7 +41,7 @@
 
 /*
  */
-package org.cs3.pl.common;
+package org.cs3.pl.common.logging;
 
 import java.io.PrintStream;
 

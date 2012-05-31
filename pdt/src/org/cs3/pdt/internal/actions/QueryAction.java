@@ -42,7 +42,7 @@
 package org.cs3.pdt.internal.actions;
 
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IProgressMonitor;

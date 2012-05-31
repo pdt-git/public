@@ -44,7 +44,6 @@ package org.cs3.pdt.internal.actions;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.internal.queries.DefinitionsSearchQuery;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.search.ui.ISearchQuery;
@@ -60,9 +59,9 @@ public class FindDefinitionsActionDelegate extends SearchActionDelegate {
 		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),FindDefinitionsActionDelegate.class.getName(), editor);
 	}
 
-	protected ISearchQuery connectSearchQuery(IPrologProject plProject,
-			Goal data) {
-		ISearchQuery query = new DefinitionsSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
+	@Override
+	protected ISearchQuery connectSearchQuery(Goal data) {
+		ISearchQuery query = new DefinitionsSearchQuery(data);
 		return query;
 	}
 	

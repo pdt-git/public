@@ -41,7 +41,7 @@
 
 package org.cs3.pdt.internal.startup;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.ui.IStartup;
 
 public class StartUp implements IStartup {

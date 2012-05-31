@@ -64,6 +64,17 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.cs3.pl.common.logging.Debug;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.IDocument;
+
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
@@ -101,6 +112,14 @@ public class Util {
 		return physical + logical;
 	}
 
+	public static int logicalToPhysicalOffset(IDocument doc, int offset) {
+		return logicalToPhysicalOffset(doc.get(), offset);
+	}
+
+	public static int physicalToLogicalOffset(IDocument doc, int offset) {
+		return physicalToLogicalOffset(doc.get(), offset);
+	}
+	
 	public static String generateFingerPrint() {
 		long l = System.currentTimeMillis();
 		double m = Math.random();
@@ -1182,6 +1201,29 @@ public class Util {
 			executable.append(startupFiles);
 		}
 		return executable.toString();
+	}
+	
+	public static IDocument getDocument(IFile file) throws CoreException{
+		IPath path = file.getFullPath();
+		return getDocument(path,LocationKind.IFILE);
+	}
+
+	public static IDocument getDocument(File file) throws CoreException{
+		IPath path = new Path(file.getAbsolutePath());
+		return getDocument(path,LocationKind.NORMALIZE);
+	}
+
+	public static IDocument getDocument(IPath location, LocationKind kind) throws CoreException{
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+			manager.connect(location, kind,null);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(location,kind);
+			// note: could be null
+			return buffer.getDocument();
+		}
+		finally {
+			manager.disconnect(location, kind,null);
+		}
 	}
 
 }

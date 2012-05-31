@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.quickfix.PDTMarker;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
+import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -19,7 +18,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -41,40 +39,11 @@ public class PLMarkerUtils {
 				+ severity);
 	}
 
-	@Deprecated
-	public static void updateFileMarkers(IFile file ) throws CoreException {
-		if( PDTCoreUtils.getPrologProject(file)==null &&
-				PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
-			PrologSession session =null;
-			try {
-				session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-				session.queryOnce("activate_warning_and_error_tracing");
-
-				file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-				executeConsult(file);
-				addMarkers(file, new NullProgressMonitor());
-
-			}catch(Exception e) {
-				Debug.report(e);
-			} finally {
-				if(session!=null)session.dispose();
-			}
-
-		}
-	}
-	
-	@Deprecated
-	private static void executeConsult(IFile file ) {
-		ConsultActionDelegate consult = new ConsultActionDelegate();
-		consult.setSchedulingRule(file);
-		consult.run(null);
-	}
-	
 	public static void addMarkers(IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("update markers", 2);
 		PrologSession session =null;
 		try {
-			final IDocument doc = PDTCoreUtils.getDocument(file);
+			final IDocument doc = Util.getDocument(file);
 			session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
 			monitor.subTask("add markers for errors and warnings");
 			addMarkersForErrorsAndWarnings(file, session, doc, new SubProgressMonitor(monitor, 1));
@@ -194,7 +163,7 @@ public class PLMarkerUtils {
 
 				String msgText = (String)msg.get("Description");
 				int startPl = Integer.parseInt(msg.get("Start").toString());
-				int start =PDTCoreUtils.convertLogicalToPhysicalOffset(doc,startPl);
+				int start = Util.logicalToPhysicalOffset(doc,startPl);
 				int length = Integer.parseInt(msg.get("Length").toString());
 
 				MarkerUtilities.setCharStart(marker, start);

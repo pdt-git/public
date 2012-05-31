@@ -5,20 +5,6 @@ Bundle-Name: PDTCore
 Bundle-SymbolicName: org.cs3.pdt.core; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.cs3.pdt.core.PDTCorePlugin
-Export-Package: org.cs3.pdt.core,
- org.cs3.pdt.core.internal,
- org.cs3.pdt.core.internal.actions,
- org.cs3.pdt.core.internal.builder,
- org.cs3.pdt.core.internal.decorators,
- org.cs3.pdt.core.internal.natures,
- org.cs3.pdt.core.internal.properties,
- org.cs3.pdt.core.preferences,
- org.cs3.pl.doc,
- org.cs3.pl.metadata,
- org.cs3.pl.metadata.internal.classic,
- org.cs3.pl.metadata.internal.plstatic,
- org.cs3.pl.parser,
- org.cs3.pl.test
 Require-Bundle: org.cs3.pdt.common,
  org.junit,
  org.cs3.pdt.runtime.ui,

@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PDTColors;
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -37,15 +37,11 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDT.PREF_DEBUG_LEVEL, "WARNING");
 		store.setDefault(PDT.PREF_DEBUG_OUTPUT_TO,"LOGFILE");
 		store.setDefault(PDT.PREF_CLIENT_LOG_FILE_DIR, location);
-		store.setDefault(PDT.PREF_ADD_NATURE_ON_OPEN, MessageDialogWithToggle.PROMPT);
-		store.setDefault(PDT.PREF_SWITCH_TO_DEFAULT_PIF, MessageDialogWithToggle.PROMPT);
 		
 		// Editor preferences
 		store.setDefault(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, true);
 		store.setDefault(PDT.PREF_AUTO_COMPLETE_ARGLIST, true);
 		store.setDefault(PDT.PREF_SHOW_SYSTEM_PREDS, false);
-//		store.setDefault(PDT.PREF_OUTLINE_FILTERS,"hide_subterms");
-//		store.setDefault(PDT.PREF_OUTLINE_SORT, false);
 		
 		// Editor Color preferences
 		initializeDefaultPreferences_FontAndColor(store);		

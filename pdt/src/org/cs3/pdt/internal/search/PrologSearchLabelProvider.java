@@ -4,8 +4,8 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
+import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
@@ -15,8 +15,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 public class PrologSearchLabelProvider implements ILabelProvider {
 
@@ -58,10 +56,6 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return ImageRepository.getImage(ImageRepository.PE_LOCAL);
 		}
 		return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
-	}
-
-	private Image setCategoryImage(ISharedImages sharedImagaes) {
-		return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
 	}
 
 	@Override

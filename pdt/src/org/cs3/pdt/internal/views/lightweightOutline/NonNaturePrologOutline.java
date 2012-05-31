@@ -55,7 +55,6 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
@@ -67,6 +66,7 @@ import org.cs3.pdt.internal.views.HideSubtermsFilter;
 import org.cs3.pdt.internal.views.PrologOutlineComparer;
 import org.cs3.pdt.internal.views.PrologOutlineFilter;
 import org.cs3.pdt.internal.views.ToggleSortAction;
+import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
@@ -223,7 +223,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		} else {
 			IFile file;
 			try {
-				file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(selectedFile);
+				file = FileUtils.findFileForLocation(selectedFile);
 				SourceLocation loc = createLocation(predicate, line, file);
 				PDTUtils.showSourceLocation(loc);
 			} catch (IOException e) {
@@ -246,7 +246,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 
 	private SourceLocation createLocation(OutlinePredicate predicate,
 			int line, IFile file) {
-		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		loc.setLine(line);
 		loc.setPredicateName(predicate.getFunctor());

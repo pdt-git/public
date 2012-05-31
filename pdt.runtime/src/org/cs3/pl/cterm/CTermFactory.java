@@ -45,7 +45,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.cterm.internal.parser.ASTAtom;
 import org.cs3.pl.cterm.internal.parser.ASTCompound;
 import org.cs3.pl.cterm.internal.parser.ASTFloat;

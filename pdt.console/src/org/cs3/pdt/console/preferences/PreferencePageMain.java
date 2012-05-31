@@ -11,7 +11,7 @@ import org.cs3.pdt.ui.preferences.MyFileFieldEditor;
 import org.cs3.pdt.ui.preferences.MyFontFieldEditor;
 import org.cs3.pdt.ui.preferences.MyRadioGroupFieldEditor;
 import org.cs3.pdt.ui.preferences.StructuredFieldEditorPreferencePage;
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;

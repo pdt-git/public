@@ -41,13 +41,8 @@
 
 package org.cs3.pdt.internal.views;
 
-import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.IPrologEventDispatcher;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -113,26 +108,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 	public void inputChanged(final Viewer viewer, Object oldInput, Object input) {
 		
 		try {
-			IFileEditorInput editorInput = null;
-			IFile file = null;
-			IPrologProject plProject = null;
-
-			if (input instanceof IFileEditorInput) {
-				editorInput = (IFileEditorInput) input;
-			}
-			if (editorInput != null) {
-				file = editorInput.getFile();
-				plProject = PDTCoreUtils.getPrologProject(file);
-			}
-
-			if (plProject != null) {
-				
-				PrologInterface pif = plProject.getMetadataPrologInterface();
-				IPrologEventDispatcher d = PrologRuntimeUIPlugin.getDefault().getPrologEventDispatcher(pif);
-				backend.setPif(pif,d);
-			} else {
-				backend.setPif(null,null);
-			}
+			backend.setPif(null,null);
 
 			backend.setInput(input);
 			viewer.refresh();

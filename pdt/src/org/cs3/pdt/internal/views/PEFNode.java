@@ -3,8 +3,7 @@ package org.cs3.pdt.internal.views;
 import java.io.File;
 import java.util.Set;
 
-import org.cs3.pdt.core.PEFHandle;
-
+import org.cs3.pl.metadata.PEFHandle;
 
 public interface PEFNode extends PEFHandle {
 	

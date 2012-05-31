@@ -52,8 +52,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;

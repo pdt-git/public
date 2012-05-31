@@ -45,6 +45,8 @@ package org.cs3.pl.common;
 
 import java.io.File;
 
+import org.cs3.pl.common.logging.Debug;
+
 /**
  * Canonical implementation.
  * This implementation uses a given directory URI as root

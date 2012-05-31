@@ -50,7 +50,8 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pl.common.Debug;
+import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -164,11 +165,11 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 			PDTUtils.showSourceLocation(loc);
 			return;
 		}
-		PDTUtils.openEditorOnExternalFile(currentOffset, currentLength, activate, file);
+		UIUtils.selectInPrologEditor(currentOffset, currentLength, file, activate);
 	}
 
 	private SourceLocation createLocation(SearchPredicateElement element, IFile file, PrologMatch prologMatch) {
-		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		
 		loc.setLine(prologMatch.getLine());

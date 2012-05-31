@@ -49,7 +49,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 
 /**
  * Creation of new client sessions seems to be rather costly due to the involved

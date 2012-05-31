@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+
+import org.cs3.pl.common.logging.Debug;
 /**
  * A thread that exhaustes InputStream objects.
  * <p/>

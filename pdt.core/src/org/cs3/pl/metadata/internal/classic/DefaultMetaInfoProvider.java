@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;

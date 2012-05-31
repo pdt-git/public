@@ -11,8 +11,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTermUtil;
 

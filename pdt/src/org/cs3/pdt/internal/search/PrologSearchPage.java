@@ -127,6 +127,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	
 	//---- Action Handling ------------------------------------------------
 	
+	@Override
 	public boolean performAction() {
 		return performNewSearch();
 	}
@@ -146,9 +147,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			goal = new Goal("", data.pattern, "", -1, data.pattern+":Predicate");
 
 		if (limitTo == REFERENCES)
-			searchQuery = new ReferencesSearchQueryDirect(null, goal);
+			searchQuery = new ReferencesSearchQueryDirect(goal);
 		else 
-			searchQuery = new DefinitionsSearchQuery(null, goal);
+			searchQuery = new DefinitionsSearchQuery(goal);
 
 		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQueryInForeground(null,searchQuery);
@@ -235,6 +236,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	/*
 	 * Implements method from IDialogPage
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible && fPattern != null) {
 			if (fFirstTime) {
@@ -259,6 +261,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		readConfiguration();
@@ -287,6 +290,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		//createParticipants(result);
 		
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				int limitTo = getLimitTo();
 				fillLimitToGroup(limitTo);
@@ -321,12 +325,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		// Pattern combo
 		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
 		fPattern.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handlePatternSelected();
 				updateOKStatus();
 			}
 		});
 		fPattern.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				updateOKStatus();
 
@@ -356,6 +362,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		writeConfiguration();
 		super.dispose();
@@ -417,6 +424,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
 		
 		SelectionAdapter listener= new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performLimitToSelectionChanged((Button) e.widget);
 			}
@@ -495,6 +503,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	/*
 	 * Implements method from ISearchPage
 	 */
+	@Override
 	public void setContainer(ISearchPageContainer container) {
 		fContainer= container;
 	}

@@ -44,12 +44,11 @@ package org.cs3.pdt.ui.util;
 import java.io.File;
 import java.io.IOException;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -58,6 +57,9 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -70,6 +72,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * most of the methods in this class include code that needs to run on the ui
@@ -360,6 +363,32 @@ public final class UIUtils {
 			Debug.report(e);
 		}
 		return null;
+	}
+	
+	public static void selectInPrologEditor(int start, int length, String filename) throws PartInitException {
+		selectInPrologEditor(start, length, filename, true);
+	}
+	
+	public static void selectInPrologEditor(int start, int length, String filename, boolean activate) throws PartInitException {
+		try {
+			IFile file = FileUtils.findFileForLocation(filename);
+			selectInPrologEditor(start, length, file, activate);
+		} catch (IOException e) {
+			Debug.report(e);
+		}
+	}
+	
+	public static void selectInPrologEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
+		if (file == null) {
+			return;
+		}
+		IEditorPart editor = UIUtils.openInEditor(file, activate);
+		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(getActiveEditor().getEditorInput());
+		int end = Util.logicalToPhysicalOffset(document, start+length);
+		start = Util.logicalToPhysicalOffset(document, start);
+		length = end - start;
+		ISelection selection = new TextSelection(document,start,length);
+		editor.getEditorSite().getSelectionProvider().setSelection(selection);
 	}
 
 }

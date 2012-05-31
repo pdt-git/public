@@ -58,7 +58,6 @@ public final class PDT {
 	 */
 	public final static String PREF_DEBUG_LEVEL = "debug.level";
 	public final static String PREF_DEBUG_OUTPUT_TO = "debug.output.to";
-	public static final String PREF_ADD_NATURE_ON_OPEN = "pdt.ask.add_nature";
 	public static final String PREF_EXTERNAL_FILE_SAVE_WARNING = "pdt.external.file.save.warning";
 
 	/**
@@ -75,7 +74,6 @@ public final class PDT {
 	 * ui scope used for keybindings etc in the prolog editor.
 	 */
 	public static final String CONTEXT_EDITING_PROLOG_CODE = "org.cs3.pdt.editingProlog";
-	public static final String PREF_SWITCH_TO_DEFAULT_PIF = "pdt.ask.switch_to_default_pif";
 	public static final String PL_PARTITIONER = "pdt.pl_partitioner";
 	public static final int ERR_UNKNOWN = -1;
 	public static final int CX_UNKNOWN = -1;
