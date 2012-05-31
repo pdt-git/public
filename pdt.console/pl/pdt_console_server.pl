@@ -135,7 +135,7 @@ server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer):-
 		      ]),
 	retractall(console_thread_name(_)),
 	assert(console_thread_name(ID)),
-	server_loop_impl(ServerSocket, Options).
+	server_loop_impl(ServerSocket, Name, Options).
  
 service_client(InStream, OutStream, Peer, Options) :-
 	allow(Peer, Options), !,

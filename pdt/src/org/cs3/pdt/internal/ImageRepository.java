@@ -132,6 +132,8 @@ public class ImageRepository {
 	public static final String PREFERENCES = "preferences.png";
 
 	public static final String MESSAGE_INFO = "message_info.gif";
+	
+	public static final String SEARCH_MATCH = "searchm_obj.gif";
 
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
