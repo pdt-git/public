@@ -12,13 +12,19 @@ import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pl.common.ExternalPrologFilesProjectUtils;
 import org.cs3.pl.metadata.PrologElement;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 
-public class PrologSearchLabelProvider implements ILabelProvider {
+public class PrologSearchLabelProvider extends LabelProvider implements IStyledLabelProvider {
 
 	PrologSearchLabelProvider() {
+	}
+
+	@Override
+	public StyledString getStyledText(Object element) {
+		return new StyledString(getText(element));
 	}
 
 	@Override
@@ -83,20 +89,4 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		return "no label";
 	}
 
-	@Override
-	public void addListener(ILabelProviderListener listener) {
-	}
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-	}
 }
