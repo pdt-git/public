@@ -39,49 +39,60 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.common;
+/*
+ */
+package org.cs3.pl.prolog.internal.socket;
 
-import junit.framework.TestCase;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
-public class UtilTest extends TestCase {
-	
-	public void testSplit(){
-		String[] elms = Util.split("konsole -e xpce", " ");
-		assertEquals(3,elms.length);
-		assertEquals("konsole",elms[0]);
-		assertEquals("-e",elms[1]);
-		assertEquals("xpce",elms[2]);				
-	}
-	
-	public void testSplitEmpty(){
-		String[] elms = Util.split("", " ");
-		assertEquals(0,elms.length);					
-	}
-	
-	public void testSplitNoDelim(){
-		String[] elms = Util.split("word", " ");
-		assertEquals(1,elms.length);		
-		assertEquals("word",elms[0]);
-	}
-	
-	public void testQuoteAtom(){
-		String atom="something('something else')";
-		assertEquals("'something(\\'something else\\')'", Util.quoteAtom(atom));
-	}
-	
-	public void testHideStreamHandles(){
-		String s="something(to($stream(hid976)))$stream(562)";
-		assertEquals("something(to($stream(_)))$stream(_)", Util.hideStreamHandles(s, "$stream(_)"));
-	}
-	
-	public void testLogicalToPhysicalOffset01() throws Throwable{
-		byte[] bytes={0x30,0x0D,0x0a,0x32,0x0a,0x35};
-		String data = new String(bytes);
-		assertEquals(0,Util.logicalToPhysicalOffset(data,0));
-		assertEquals(1,Util.logicalToPhysicalOffset(data,1));
-		assertEquals(3,Util.logicalToPhysicalOffset(data,2));
-		assertEquals(4,Util.logicalToPhysicalOffset(data,3));
-		assertEquals(5,Util.logicalToPhysicalOffset(data,4));
-		assertEquals(6,Util.logicalToPhysicalOffset(data,5));
-	}
+import org.cs3.pl.common.logging.Debug;
+import org.cs3.pl.common.logging.LogBuffer;
+import org.cs3.pl.common.logging.SimpleLogBuffer;
+import org.cs3.pl.prolog.internal.Reusable;
+
+public class ReusableSocket extends Socket implements Reusable {
+
+    private LogBuffer logBuffer = new SimpleLogBuffer();
+
+    public ReusableSocket(String host, int port) throws UnknownHostException,
+            IOException {
+        super(host, port);
+    }
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.internal.Reusable#reuse()
+     */
+    @Override
+	public void reuse() {
+        logBuffer.log("socket","reuse");;
+    }
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.internal.Reusable#destroy()
+     */
+    @Override
+	public void destroy() {
+        logBuffer.log("socket","destroy");
+        try {
+            close();
+        } catch (IOException e) {
+	        Debug.report(e);
+	        throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.internal.Reusable#recylce()
+     */
+    @Override
+	public void recylce() {
+        logBuffer.log("socket","recycle");
+    }
+
+    public LogBuffer getLogBuffer() {
+        return this.logBuffer;
+    }
+
 }

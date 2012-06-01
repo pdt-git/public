@@ -39,49 +39,82 @@
  *   distributed.
  ****************************************************************************/
 
+/*
+ */
 package org.cs3.pl.common;
 
-import junit.framework.TestCase;
+/**
+ */
+public interface Option {
+	public final static int FLAG = 0;
 
-public class UtilTest extends TestCase {
+	public final static int NUMBER = 1;
+
+	public final static int STRING = 2;
+
+	public final static int FILE = 3;
+
+	public final static int DIR = 4;
+
+	public final static int FILES = 5;
+
+	public final static int DIRS = 6;
+
+//	public final static int PATH = 7;
+
+	public static final int ENUM = 8;
+
+//	public static final int FONT = 9;
 	
-	public void testSplit(){
-		String[] elms = Util.split("konsole -e xpce", " ");
-		assertEquals(3,elms.length);
-		assertEquals("konsole",elms[0]);
-		assertEquals("-e",elms[1]);
-		assertEquals("xpce",elms[2]);				
-	}
+//	public static final int COLOR = 10;
+
+	public String getDefault();
+
+	public String getDescription();
+
+	public String getId();
+
+	public String getLabel();
+
+	public String[][] getEnumValues();
+
+	public int getType();
+
+	/**
+	 * 
+	 * @param The
+	 *            value to be validated
+	 * @return An error message, if the given value is invalid. An empty String,
+	 *         if the value is valid. null if the option does not perform
+	 *         validation. Note: if you want to express that validation is not
+	 *         neccessary, you should always return an empty string, since
+	 *         otherwise ui classes (field editors, etc) may perform there own
+	 *         validation.
+	 */
+	public String validate(String value);
 	
-	public void testSplitEmpty(){
-		String[] elms = Util.split("", " ");
-		assertEquals(0,elms.length);					
-	}
+	/**
+	 * options can be hidden from the ui by letting this method return
+	 * false.
+	 * @return
+	 */
+	public boolean isVisible();
 	
-	public void testSplitNoDelim(){
-		String[] elms = Util.split("word", " ");
-		assertEquals(1,elms.length);		
-		assertEquals("word",elms[0]);
-	}
+	/**
+	 * options can be made read-only in the ui by letting this method return
+	 * false.
+	 * @return
+	 */
+	public boolean isEditable();
 	
-	public void testQuoteAtom(){
-		String atom="something('something else')";
-		assertEquals("'something(\\'something else\\')'", Util.quoteAtom(atom));
-	}
-	
-	public void testHideStreamHandles(){
-		String s="something(to($stream(hid976)))$stream(562)";
-		assertEquals("something(to($stream(_)))$stream(_)", Util.hideStreamHandles(s, "$stream(_)"));
-	}
-	
-	public void testLogicalToPhysicalOffset01() throws Throwable{
-		byte[] bytes={0x30,0x0D,0x0a,0x32,0x0a,0x35};
-		String data = new String(bytes);
-		assertEquals(0,Util.logicalToPhysicalOffset(data,0));
-		assertEquals(1,Util.logicalToPhysicalOffset(data,1));
-		assertEquals(3,Util.logicalToPhysicalOffset(data,2));
-		assertEquals(4,Util.logicalToPhysicalOffset(data,3));
-		assertEquals(5,Util.logicalToPhysicalOffset(data,4));
-		assertEquals(6,Util.logicalToPhysicalOffset(data,5));
-	}
+	/**
+	 * get the value of a custom property.
+	 * 
+	 * This method is intended to allow implementations to provide additional
+	 * information on how the option should be presented to the user. Keys and values
+	 * as well as their semantics depend on the respective application.  
+	 * @param key the property key. 
+	 * @return the value or null if the property is not set.
+	 */
+	public String getHint(String key);
 }

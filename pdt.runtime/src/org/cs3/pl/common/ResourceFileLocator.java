@@ -39,49 +39,56 @@
  *   distributed.
  ****************************************************************************/
 
+/*
+ */
 package org.cs3.pl.common;
 
-import junit.framework.TestCase;
+import java.io.File;
 
-public class UtilTest extends TestCase {
-	
-	public void testSplit(){
-		String[] elms = Util.split("konsole -e xpce", " ");
-		assertEquals(3,elms.length);
-		assertEquals("konsole",elms[0]);
-		assertEquals("-e",elms[1]);
-		assertEquals("xpce",elms[2]);				
-	}
-	
-	public void testSplitEmpty(){
-		String[] elms = Util.split("", " ");
-		assertEquals(0,elms.length);					
-	}
-	
-	public void testSplitNoDelim(){
-		String[] elms = Util.split("word", " ");
-		assertEquals(1,elms.length);		
-		assertEquals("word",elms[0]);
-	}
-	
-	public void testQuoteAtom(){
-		String atom="something('something else')";
-		assertEquals("'something(\\'something else\\')'", Util.quoteAtom(atom));
-	}
-	
-	public void testHideStreamHandles(){
-		String s="something(to($stream(hid976)))$stream(562)";
-		assertEquals("something(to($stream(_)))$stream(_)", Util.hideStreamHandles(s, "$stream(_)"));
-	}
-	
-	public void testLogicalToPhysicalOffset01() throws Throwable{
-		byte[] bytes={0x30,0x0D,0x0a,0x32,0x0a,0x35};
-		String data = new String(bytes);
-		assertEquals(0,Util.logicalToPhysicalOffset(data,0));
-		assertEquals(1,Util.logicalToPhysicalOffset(data,1));
-		assertEquals(3,Util.logicalToPhysicalOffset(data,2));
-		assertEquals(4,Util.logicalToPhysicalOffset(data,3));
-		assertEquals(5,Util.logicalToPhysicalOffset(data,4));
-		assertEquals(6,Util.logicalToPhysicalOffset(data,5));
-	}
+/**
+ * resolves virtual  files or directory names.
+ * <p>
+ * Intended to enable flexible management of resources in situations
+ * where it is not feasable to abstract from the filesystem (e.g. by 
+ * using the jdk's resource api.)
+ * <p>
+ * RFLs resolve relative path strings to File instances. (see resolve(String)). 
+ * instead of resolving a path string, RFLs can also create so-called
+ * sub-locators for that path. .   
+ * <p>
+ * Concrete motivation: We want to bootstrap the prolog system.
+ * Filesystem seems to be the most simple and relyable way to supply the
+ * server side (prolog) implementation of the prolog interface. 
+ *  <p>
+ *  Alternative: Should be possible to use tcp streams for this.
+ *  Might be an elegant alternative, but atm, i do not see that elegance would
+ *  justify the additional complexity.
+ *  <p>
+ *  comment: i would apreciate another solution. i cannot help feeling that this is
+ *  somewaht redundant.
+ *  
+ *   --lu
+ *  
+ */
+public interface ResourceFileLocator {
+    /**
+     * Resolve a relative resource name to an abstract File.
+     * <p>
+     * 
+     * @return a File that might not exist yet.
+     * @param rel the resource name to be resolved.
+     */
+    public File resolve(String rel);
+    
+    /**
+     * create a sub locator for a relative path.
+     * <p>
+     * The sublocator should behave exactly as this locator would behave if
+     * each path passed as an argument to the resolve or subLocator method was 
+     * prefixed with the <code>subdir</code> path.
+     * @param subdir
+     * @return the sublocator
+     */
+    public ResourceFileLocator subLocator(String subdir);
+  
 }

@@ -5,12 +5,14 @@ Bundle-Name: PDT Runtime Prolog Interface
 Bundle-SymbolicName: org.cs3.pdt.runtime;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
-Require-Bundle: org.cs3.pdt.common,
- org.junit,
+Require-Bundle: org.junit,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ org.eclipse.core.filebuffers
 Export-Package: org.cs3.pdt.runtime,
+ org.cs3.pl.common,
+ org.cs3.pl.common.logging,
  org.cs3.pl.cterm,
  org.cs3.pl.cterm.internal.parser,
  org.cs3.pl.metadata,
