@@ -16,7 +16,6 @@ Export-Package: org.cs3.pdt,
  org.cs3.pdt.internal.search,
  org.cs3.pdt.internal.startup,
  org.cs3.pdt.internal.structureElements,
- org.cs3.pdt.internal.views,
  org.cs3.pdt.internal.views.lightweightOutline,
  org.cs3.pdt.preferences
 Require-Bundle: org.eclipse.ui,

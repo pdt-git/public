@@ -49,25 +49,18 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
-import org.cs3.pdt.internal.views.HideDirectivesFilter;
-import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
-import org.cs3.pdt.internal.views.HideSubtermsFilter;
-import org.cs3.pdt.internal.views.PrologOutlineComparer;
-import org.cs3.pdt.internal.views.PrologOutlineFilter;
-import org.cs3.pdt.internal.views.ToggleSortAction;
 import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -98,7 +91,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	private PrologSourceFileModel model;
 	private PLEditor editor;
 	private ILabelProvider labelProvider;
-	private PrologOutlineFilter[] filters;
 	private Menu contextMenu;
 //	private StringMatcher matcher;
 	
@@ -121,8 +113,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		viewer.setLabelProvider(labelProvider);
 
-		viewer.setComparer(new PrologOutlineComparer());
-
 		viewer.addSelectionChangedListener(this);
 		
 		
@@ -132,15 +122,30 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		
 		viewer.setAutoExpandLevel(EXPANDING_LEVEL);
 		
-		initFilters();
-
 		IActionBars actionBars = getSite().getActionBars();
 		IToolBarManager toolBarManager = actionBars.getToolBarManager();
 //		Action action = new LexicalSortingAction(viewer);
 //		toolBarManager.add(action);
 		Action action = new ToggleSortAction(getTreeViewer());
 		toolBarManager.add(action);
-		toolBarManager.add(new ToggleFilterAction("Hide private predicates", viewer, new org.cs3.pdt.internal.views.lightweightOutline.HidePrivatePredicatesFilter()));
+		ToggleFilterAction action2 = new ToggleFilterAction(
+				"Hide private predicates", 
+				ImageRepository.getImageDescriptor(ImageRepository.PE_PROTECTED), 
+				ImageRepository.getImageDescriptor(ImageRepository.FILTER_PRIVATE), 
+				viewer, 
+				new HidePrivatePredicatesFilter(), 
+				PDTPlugin.getDefault().getPreferenceStore(), 
+				PDT.PREF_OUTLINE_FILTER_PRIVATE);
+		toolBarManager.add(action2);
+		ToggleFilterAction action3 = new ToggleFilterAction(
+				"Hide system predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.NO_FILTER_SYSTEM),
+				ImageRepository.getImageDescriptor(ImageRepository.FILTER_SYSTEM),
+				viewer,
+				new HideSystemPredicatesFilter(),
+				PDTPlugin.getDefault().getPreferenceStore(),
+				PDT.PREF_OUTLINE_FILTER_SYSTEM);
+		toolBarManager.add(action3);
 //		action = new FilterActionMenu(this);
 //		toolBarManager.add(action);
 		
@@ -254,33 +259,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		loc.setArity(predicate.getArity());
 		return loc;
 	}
-
-	public PrologOutlineFilter[] getAvailableFilters() {
-		if (filters == null) {
-			filters = new PrologOutlineFilter[] {
-					new HideDirectivesFilter("hide_directives",
-							"Hide Directives"),
-					new HidePrivatePredicatesFilter("hide_private_predicates",
-							"Hide Private Predicates"),
-					new HideSubtermsFilter("hide_subterms", "Hide Subterms") };
-		}
-		return filters;
-	}
-
-	protected void initFilters() {
-		String value = PDTPlugin.getDefault().getPreferenceValue(
-				PDT.PREF_OUTLINE_FILTERS, "");
-		HashSet<String> enabledIds = new HashSet<String>();
-		Util.split(value, ",", enabledIds);
-		PrologOutlineFilter[] filters = getAvailableFilters();
-		for (int i = 0; i < filters.length; i++) {
-			PrologOutlineFilter filter = filters[i];
-			if (enabledIds.contains(filter.getId())) {
-				getTreeViewer().addFilter(filter);
-			}
-		}
-	}
-	
 
 	@Override
 	public void dispose() {

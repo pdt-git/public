@@ -47,8 +47,8 @@ package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
+import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.logging.Debug;
@@ -57,6 +57,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -65,6 +66,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
@@ -106,8 +108,10 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 
 	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
-		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(), 
-				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		viewer.setLabelProvider(new DecoratingPrologSearchLabelProvider(new PrologSearchLabelProvider()));
+		ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
+//		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(), 
+//				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new PrologSearchTreeContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 		viewer.addDoubleClickListener(new IDoubleClickListener() {

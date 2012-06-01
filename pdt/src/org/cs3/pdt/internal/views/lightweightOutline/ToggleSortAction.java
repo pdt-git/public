@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;

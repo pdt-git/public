@@ -17,7 +17,6 @@ import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
-import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
@@ -159,7 +158,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 			return;
 		}
 
-		inputChanged(fInput, (PrologFileContentModel)information);
+		inputChanged(fInput, information);
 
 	}
 
