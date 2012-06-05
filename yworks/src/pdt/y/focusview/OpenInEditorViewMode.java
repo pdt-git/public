@@ -48,9 +48,9 @@ public class OpenInEditorViewMode extends ViewMode {
 			if(result==null)
 				return;
 
-			final String filename = (String) result.get("FileName");
-			final int start = Integer.parseInt((String) result.get("Pos"));
-			final int length = Integer.parseInt((String) result.get("Len"));
+			final String filename = result.get("FileName").toString();
+			final int start = Integer.parseInt(result.get("Pos").toString());
+			final int length = Integer.parseInt(result.get("Len").toString());
 
 			//			ExecutorService executor = Executors.newCachedThreadPool();
 			//			FutureTask<String> futureParser = new FutureTask<String>(new Runnable() {
