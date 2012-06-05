@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension-point id="prologContextTracker" name="Prolog Context Tracker" schema="schema/prologContextTracker.exsd"/>
+	<extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer
+          class="org.cs3.prolog.connector.preferences.PreferenceInitializer">
+    </initializer>
+ </extension>
+    <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.prolog.connector.preferences.PreferencePage"
+          id="org.cs3.prolog.connector.preferences.PreferencePage"
+          name="Prolog Processes">
+    </page>
+ </extension>
+  <extension
+        point="org.cs3.prolog.connector.hooks">
+     <registryHook
+           class="org.cs3.prolog.connector.internal.PDTRegistryHook">
+     </registryHook>
+  </extension> 
+    <extension
+          point="org.cs3.prolog.connector.prologLibrary">
+		<library
+        alias="library"
+        id="pdt.runtime.library.common"
+        path="library/common/">
+     <attribute
+           id="hidden"
+           value="true"/>
+  </library>
+ 
+  <library
+        alias="library"
+        id="pdt.runtime.library.attic"
+        path="library/attic/">
+     <attribute
+           id="hidden"
+           value="true"/>
+  </library>
+  <library
+        alias="library"
+        id="pdt.runtime.library.pdt"
+        path="library/pdt/">
+     <attribute
+           id="hidden"
+           value="true"/>
+     <dependency
+           library="pdt.runtime.library.common">
+     </dependency>
+  </library>   
+  <library
+        alias="library"
+        id="pdt.runtime.library.testdata"
+        path="library/testdata/">
+     <attribute
+           id="hidden"
+           value="true"/>
+  </library>   
+                  
+    </extension>
+ 
+</plugin>

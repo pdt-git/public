@@ -266,7 +266,7 @@
          parentId="org.eclipse.ui.textEditorScope"/>
 </extension>
 <extension
-      point="org.cs3.pdt.runtime.ui.prologContextTracker">
+      point="org.cs3.prolog.connector.ui.prologContextTracker">
    <tracker
          class="org.cs3.pdt.internal.editors.PLEditorTracker"
          id="pdt.track.pleditor"
@@ -509,7 +509,7 @@
         verticalRulerPreferenceValue="true"/>
   </extension>
   <extension
-        point="org.cs3.pdt.runtime.bootstrapContribution">
+        point="org.cs3.prolog.connector.bootstrapContribution">
      <fileContribution
            id="org.cs3.pdt.fileContribution"
            path="pl/load.pl">

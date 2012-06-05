@@ -27,7 +27,7 @@
             id="org.cs3.pdt.console.internal.views.PrologConsoleView"/>
 	</extension>
 	 <!--<extension
-       point="org.cs3.pdt.runtime.ui.hooks">
+       point="org.cs3.prolog.connector.ui.hooks">
 	    <hook
           class="org.cs3.pdt.console.internal.hooks.ConsoleServerHook"
           id="org.cs3.pdt.console.internal.hooks.ConsoleServerHook"/>
@@ -48,7 +48,7 @@
     </page>
  </extension>
     <extension
-          point="org.cs3.pdt.runtime.prologLibrary">
+          point="org.cs3.prolog.connector.prologLibrary">
        <library
              alias="lib_pdt_console_pl"
              id="pdt.console.pl"

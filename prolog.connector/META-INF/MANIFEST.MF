@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Eclipse-BundleShape: dir
+Bundle-ManifestVersion: 2
+Bundle-Name: Prolog Connector Interface
+Bundle-SymbolicName: org.cs3.prolog.connector;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: .
+Require-Bundle: org.junit,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.jface.text,
+ org.eclipse.core.filebuffers
+Export-Package: org.cs3.pdt.runtime,
+ org.cs3.pl.common,
+ org.cs3.pl.common.logging,
+ org.cs3.pl.cterm,
+ org.cs3.pl.cterm.internal.parser,
+ org.cs3.pl.metadata,
+ org.cs3.pl.prolog,
+ org.cs3.pl.prolog.internal,
+ org.cs3.pl.prolog.internal.lifecycle,
+ org.cs3.pl.prolog.tests
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.cs3.prolog.connector.PrologRuntimePlugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

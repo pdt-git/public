@@ -14,7 +14,7 @@ Export-Package: org.cs3.pdt.console,
  org.cs3.pl.console.prolog
 Require-Bundle: org.eclipse.swt,
  org.eclipse.core.runtime,
- org.cs3.pdt.runtime.ui,
+ org.cs3.prolog.connector.ui,
  org.eclipse.jface.text,
  org.eclipse.ui.ide,
  org.eclipse.core.resources,

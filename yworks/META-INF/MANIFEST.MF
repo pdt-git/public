@@ -6,8 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit4;bundle-version="4.5.0",
- org.cs3.pdt.runtime;bundle-version="0.2.3",
- org.cs3.pdt.runtime.ui;bundle-version="0.2.3",
+ org.cs3.prolog.connector;bundle-version="0.2.3",
+ org.cs3.prolog.connector.ui;bundle-version="0.2.3",
  org.eclipse.core.resources;bundle-version="3.5.2",
  org.cs3.pdt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -54,7 +54,7 @@ Export-Package: org.eclipse.albireo.core;
    org.cs3.pl.prolog,
    org.eclipse.ui.plugin,
    org.eclipse.ui.part,
-   org.cs3.pdt.runtime,
+   org.cs3.prolog.connector,
    javax.swing,
    org.osgi.framework,
    org.eclipse.swt.widgets,
