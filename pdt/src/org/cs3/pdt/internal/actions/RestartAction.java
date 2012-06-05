@@ -44,8 +44,8 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pl.common.logging.Debug;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

@@ -41,7 +41,7 @@
 
 package org.cs3.pdt.internal.punit;
 
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterface;
 
 public interface IPrologInterfaceAdapter {
 	PrologInterface getPrologInterface();

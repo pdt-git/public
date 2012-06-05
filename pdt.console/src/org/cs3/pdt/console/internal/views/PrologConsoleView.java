@@ -59,26 +59,26 @@ import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.console.preferences.PreferencePageMain;
-import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.runtime.ui.PrologContextTracker;
-import org.cs3.pdt.runtime.ui.PrologContextTrackerEvent;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.FileSearchPathConfigurator;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
+import org.cs3.prolog.FileSearchPathConfigurator;
+import org.cs3.prolog.LifeCycleHook;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.DefaultSubscription;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Subscription;
+import org.cs3.prolog.connector.ui.PrologContextTracker;
+import org.cs3.prolog.connector.ui.PrologContextTrackerEvent;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.internal.AbstractPrologInterface;
+import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -709,7 +709,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	}
 
-	@SuppressWarnings("deprecation")
 	private void createActions() {
 		cutAction = new Action() {
 			@Override
@@ -803,8 +802,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		};
 		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
-
-		//Object service = IServiceLocator.getService(Class);
 
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
 		keyBindingService.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });

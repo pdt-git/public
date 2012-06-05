@@ -49,7 +49,7 @@ import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.cs3.pl.common.logging.Debug;
+import org.cs3.prolog.common.logging.Debug;
 
 
 /**

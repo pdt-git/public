@@ -7,12 +7,12 @@ import java.util.Map;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.quickfix.PDTMarker;
-import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.common.logging.Debug;
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.PrologException;
+import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;

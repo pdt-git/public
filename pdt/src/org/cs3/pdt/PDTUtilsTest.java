@@ -43,7 +43,7 @@ package org.cs3.pdt;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.common.Util;
+import org.cs3.prolog.common.Util;
 
 public class PDTUtilsTest extends TestCase {
 

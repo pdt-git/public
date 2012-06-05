@@ -45,9 +45,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;

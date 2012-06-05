@@ -45,12 +45,12 @@ import java.io.IOException;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.metadata.SourceLocation;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.metadata.SourceLocation;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;

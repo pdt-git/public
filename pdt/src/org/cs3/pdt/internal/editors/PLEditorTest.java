@@ -49,8 +49,8 @@ package org.cs3.pdt.internal.editors;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.metadata.GoalProvider;
+import org.cs3.prolog.metadata.Goal;
+import org.cs3.prolog.metadata.GoalProvider;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 

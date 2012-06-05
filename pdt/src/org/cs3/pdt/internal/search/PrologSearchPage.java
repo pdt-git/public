@@ -8,7 +8,7 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.queries.DefinitionsSearchQuery;
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
 import org.cs3.pdt.internal.queries.ReferencesSearchQueryDirect;
-import org.cs3.pl.metadata.Goal;
+import org.cs3.prolog.metadata.Goal;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;

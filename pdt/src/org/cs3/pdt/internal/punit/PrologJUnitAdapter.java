@@ -54,9 +54,9 @@ import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 
 
 

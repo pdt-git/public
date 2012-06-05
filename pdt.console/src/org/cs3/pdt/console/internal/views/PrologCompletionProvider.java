@@ -48,15 +48,15 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.cs3.pl.common.Util;
-import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.PrologException;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.metadata.Predicate;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 

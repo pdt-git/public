@@ -2,8 +2,8 @@ package org.cs3.pdt.preferences;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PDTColors;
-import org.cs3.pdt.ui.preferences.MyColorFieldEditor;
-import org.cs3.pdt.ui.preferences.StructuredFieldEditorPreferencePage;
+import org.cs3.prolog.ui.util.preferences.MyColorFieldEditor;
+import org.cs3.prolog.ui.util.preferences.StructuredFieldEditorPreferencePage;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.swt.SWT;

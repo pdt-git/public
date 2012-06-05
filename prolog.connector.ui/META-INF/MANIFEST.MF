@@ -4,13 +4,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Prolog Connector UI
 Bundle-SymbolicName: org.cs3.prolog.connector.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: prologinterface.ui.jar
 Bundle-Activator: org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin
-Export-Package: org.cs3.pdt.runtime.internal,
- org.cs3.pdt.runtime.preferences,
- org.cs3.pdt.runtime.ui,
- org.cs3.pdt.ui.preferences,
- org.cs3.pdt.ui.util
+Export-Package: org.cs3.prolog.connector.internal,
+ org.cs3.prolog.connector.preferences,
+ org.cs3.prolog.connector.ui,
+ org.cs3.prolog.ui.util,
+ org.cs3.prolog.ui.util.preferences
 Require-Bundle: org.junit,
  org.eclipse.core.runtime,
  org.eclipse.ui,

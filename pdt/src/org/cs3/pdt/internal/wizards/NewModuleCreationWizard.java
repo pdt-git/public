@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -41,6 +41,7 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 	 * <code> addPage()
 	 * </code>
 	 */
+	@Override
 	public void addPages() {
 		setNeedsProgressMonitor(true);
 
@@ -85,6 +86,7 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 	 * Complete generation of the new file, open it in the associated editor,
 	 * and open the Cross References view, if desired.
 	 */
+	@Override
 	public boolean performFinish() {
 		
 //		try {
@@ -107,7 +109,8 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 	}
 
 
-    public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
+    @Override
+	public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
         this.workbench = workbench;
         this.selection = currentSelection;
 
@@ -196,7 +199,8 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
                 // select and reveal resource
                 final ISetSelectionTarget finalTarget = target;
                 window.getShell().getDisplay().asyncExec(new Runnable() {
-                    public void run() {
+                    @Override
+					public void run() {
                         finalTarget.selectReveal(selection);
                     }
                 });

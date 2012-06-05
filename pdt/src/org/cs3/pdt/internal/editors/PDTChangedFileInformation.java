@@ -2,7 +2,7 @@ package org.cs3.pdt.internal.editors;
 
 import java.io.File;
 
-import org.cs3.pl.common.Util;
+import org.cs3.prolog.common.Util;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;

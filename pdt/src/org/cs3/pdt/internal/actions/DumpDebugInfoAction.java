@@ -48,10 +48,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;

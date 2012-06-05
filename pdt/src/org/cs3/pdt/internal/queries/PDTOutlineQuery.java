@@ -11,9 +11,9 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
-import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.common.logging.Debug;
 
 
 public class PDTOutlineQuery {

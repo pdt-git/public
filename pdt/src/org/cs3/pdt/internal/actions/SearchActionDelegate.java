@@ -3,9 +3,9 @@ package org.cs3.pdt.internal.actions;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.logging.Debug;
-import org.cs3.pl.metadata.Goal;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.metadata.Goal;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;

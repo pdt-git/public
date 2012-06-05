@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.decorators;
 
-import static org.cs3.pl.prolog.QueryUtils.bT;
+import static org.cs3.prolog.QueryUtils.bT;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,13 +13,13 @@ import java.util.Vector;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.OptionProviderEvent;
-import org.cs3.pl.common.OptionProviderListener;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.common.logging.Debug;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.common.OptionProviderEvent;
+import org.cs3.prolog.common.OptionProviderListener;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IPath;

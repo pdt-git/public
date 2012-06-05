@@ -10,17 +10,17 @@ Require-Bundle: org.junit,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.core.filebuffers
-Export-Package: org.cs3.pdt.runtime,
- org.cs3.pl.common,
- org.cs3.pl.common.logging,
- org.cs3.pl.cterm,
- org.cs3.pl.cterm.internal.parser,
- org.cs3.pl.metadata,
- org.cs3.pl.prolog,
- org.cs3.pl.prolog.internal,
- org.cs3.pl.prolog.internal.lifecycle,
- org.cs3.pl.prolog.tests
+Export-Package: org.cs3.prolog,
+ org.cs3.prolog.common,
+ org.cs3.prolog.common.logging,
+ org.cs3.prolog.connector,
+ org.cs3.prolog.cterm,
+ org.cs3.prolog.cterm.internal.parser,
+ org.cs3.prolog.internal,
+ org.cs3.prolog.internal.lifecycle,
+ org.cs3.prolog.metadata,
+ org.cs3.prolog.tests
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: org.cs3.pdt.runtime.PrologRuntimePlugin
+Bundle-Activator: org.cs3.prolog.connector.PrologRuntimePlugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 

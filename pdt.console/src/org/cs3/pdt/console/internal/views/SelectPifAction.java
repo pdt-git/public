@@ -45,12 +45,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologInterfaceRegistryEvent;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Subscription;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;

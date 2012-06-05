@@ -447,7 +447,7 @@
       <decorator
             adaptable="true"
             class="org.cs3.pdt.internal.decorators.EntryPointDecoratorContributor"
-            icon="icons/entry_point.png"
+            icon="icons/entry_point.gif"
             id="org.cs3.pdt.entry.point.decorator"
             label="PDT Entry Point Decorator"
             lightweight="true"

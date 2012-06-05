@@ -3,7 +3,7 @@ package org.cs3.pdt.internal.structureElements;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.pl.metadata.Predicate;
+import org.cs3.prolog.metadata.Predicate;
 
 public class OutlinePredicate extends Predicate implements PrologTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
