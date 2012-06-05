@@ -1,8 +1,8 @@
 
 
-:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
-:- use_module(pdt_runtime_builder_analyzer(pdt_xref_experimental)).
-:- use_module(pdt_runtime_builder_analyzer(properties)).
+:- use_module(pdt_builder_analyzer('metafile_referencer.pl')).
+:- use_module(pdt_builder_analyzer(pdt_xref_experimental)).
+:- use_module(pdt_builder_analyzer(properties)).
 
 % Search, outline, etc. for SWI-Prolog:
 :- use_module(pdt_prolog_library(utils4modules)).

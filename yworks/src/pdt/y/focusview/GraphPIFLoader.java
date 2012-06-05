@@ -31,7 +31,7 @@ import pdt.y.main.PDTGraphView;
 
 public class GraphPIFLoader {
 	private static final String FILE_TO_CONSULT = "pl_ast_to_graphML";
-	private static final String PATH_ALIAS = "pdt_runtime_builder_graphml_creator";
+	private static final String PATH_ALIAS = "pdt_builder_graphml_creator";
 	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
 
 	private File helpFile;
