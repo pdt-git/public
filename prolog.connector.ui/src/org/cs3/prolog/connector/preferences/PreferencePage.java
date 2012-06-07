@@ -8,6 +8,7 @@ import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.ui.util.preferences.MyLabelFieldEditor;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
@@ -41,6 +42,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	private StringFieldEditor invocation;
 	private StringFieldEditor commandLineArguments;
 	private StringFieldEditor startupFiles;
+	private MyLabelFieldEditor executeablePreviewLabel;
 
 	public PreferencePage() {
 		super(GRID);
@@ -70,6 +72,11 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		
 		startupFiles = new StringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", getFieldEditorParent());
 		addField(startupFiles);
+		
+		executeablePreviewLabel = new MyLabelFieldEditor(getFieldEditorParent(), "Executable preview");
+		addField(executeablePreviewLabel);
+//		executeablePreviewLabel = new Label(getFieldEditorParent(), SWT.NONE);
+//		executeablePreviewLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 3, 1));
 		
 		// A comma-separated list of VARIABLE=VALUE pairs.
 		addField(new StringFieldEditor(PrologRuntime.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
@@ -125,7 +132,14 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(metaPred);
 	}
 	
+	@Override
+	protected void initialize() {
+		super.initialize();
+		updateExecuteablePreviewLabelText();
+	}
+	
 	private BooleanFieldEditor metaPred;
+
 	private BooleanFieldEditor getMetaPredEditor(){
 		return metaPred;
 	}
@@ -150,6 +164,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 				|| prefName.equals(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS)) {
 			
 			isNewPrefExecutable = true;
+			updateExecuteablePreviewLabelText();
 		}
     }
 	
@@ -159,6 +174,11 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 			updatePrologInterfaceExecutables();	
 		}
 		return super.performOk();
+	}
+	
+	private void updateExecuteablePreviewLabelText() {
+		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue());
+		executeablePreviewLabel.setText(newExecutable);
 	}
 
 	private void updatePrologInterfaceExecutables() {
