@@ -39,6 +39,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	
 	private StringFieldEditor executable;
 	private StringFieldEditor invocation;
+	private StringFieldEditor commandLineArguments;
 	private StringFieldEditor startupFiles;
 
 	public PreferencePage() {
@@ -63,6 +64,9 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		// eg. xpce or /usr/bin/xpce
 		executable = new StringFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", getFieldEditorParent());
 		addField(executable);
+		
+		commandLineArguments = new StringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", getFieldEditorParent());
+		addField(commandLineArguments);
 		
 		startupFiles = new StringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", getFieldEditorParent());
 		addField(startupFiles);
@@ -142,7 +146,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		String prefName = ((FieldEditor)event.getSource()).getPreferenceName();
 		if(prefName.equals(PrologRuntime.PREF_INVOCATION) 
 				|| prefName.equals(PrologRuntime.PREF_EXECUTABLE)
-				|| prefName.equals(PrologRuntime.PREF_ADDITIONAL_STARTUP)) {
+				|| prefName.equals(PrologRuntime.PREF_ADDITIONAL_STARTUP)
+				|| prefName.equals(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS)) {
 			
 			isNewPrefExecutable = true;
 		}
@@ -158,7 +163,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 
 	private void updatePrologInterfaceExecutables() {
 
-		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), startupFiles.getStringValue());
+		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue());
 		
 		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
