@@ -8,16 +8,20 @@ import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.ui.util.preferences.MyBooleanFieldEditor;
+import org.cs3.prolog.ui.util.preferences.MyDirectoryFieldEditor;
+import org.cs3.prolog.ui.util.preferences.MyIntegerFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyLabelFieldEditor;
+import org.cs3.prolog.ui.util.preferences.MyStringFieldEditor;
+import org.cs3.prolog.ui.util.preferences.StructuredFieldEditorPreferencePage;
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -33,7 +37,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * preferences can be accessed directly via the preference store.
  */
 
-public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class PreferencePage extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	
 	
 	private boolean isNewPrefExecutable = false;
@@ -46,10 +50,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 
 	public PreferencePage() {
 		super(GRID);
-		
-		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
-		setPreferenceStore(plugin.getPreferenceStore());
-
+		setPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore());
 	}
 
 	/**
@@ -59,55 +60,55 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	 */
 	@Override
 	public void createFieldEditors() {
+		Group executableGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		executableGroup.setText("Executable");
 		
-		invocation = new StringFieldEditor(PrologRuntime.PREF_INVOCATION, "Prolog invocation", getFieldEditorParent());
+		invocation = new MyStringFieldEditor(PrologRuntime.PREF_INVOCATION, "Prolog invocation", executableGroup);
 		addField(invocation);
 		
 		// eg. xpce or /usr/bin/xpce
-		executable = new StringFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", getFieldEditorParent());
+		executable = new MyStringFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
 		addField(executable);
 		
-		commandLineArguments = new StringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", getFieldEditorParent());
+		commandLineArguments = new MyStringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);
 		addField(commandLineArguments);
 		
-		startupFiles = new StringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", getFieldEditorParent());
+		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup);
 		addField(startupFiles);
 		
-		executeablePreviewLabel = new MyLabelFieldEditor(getFieldEditorParent(), "Executable preview");
+		executeablePreviewLabel = new MyLabelFieldEditor(executableGroup, "Executable preview");
 		addField(executeablePreviewLabel);
-//		executeablePreviewLabel = new Label(getFieldEditorParent(), SWT.NONE);
-//		executeablePreviewLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 3, 1));
 		
 		// A comma-separated list of VARIABLE=VALUE pairs.
-		addField(new StringFieldEditor(PrologRuntime.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
+		addField(new MyStringFieldEditor(PrologRuntime.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
 		
 		// The PrologInterface needs to temporarily store some
 		// prolog files during bootstrapping. Any directory for which 
 		// you have write permissions will do.
-		addField(new DirectoryFieldEditor(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, "Prolog Process Bootstrap Directory", getFieldEditorParent()));
+		addField(new MyDirectoryFieldEditor(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, "Prolog Process Bootstrap Directory", getFieldEditorParent()));
 
-		DirectoryFieldEditor ffe = new DirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
+		MyDirectoryFieldEditor ffe = new MyDirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
 		addField(ffe);
 		
 		// Maximum time in milliseconds to wait for the prolog process to come up.
-		IntegerFieldEditor timeoutFieldEditor = new IntegerFieldEditor(PrologRuntime.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
+		IntegerFieldEditor timeoutFieldEditor = new MyIntegerFieldEditor(PrologRuntime.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
 		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		addField(timeoutFieldEditor);
 
 		// The host the PIF server is listening on
-		StringFieldEditor host = new StringFieldEditor(PrologRuntime.PREF_HOST, "Server host", getFieldEditorParent());
+		StringFieldEditor host = new MyStringFieldEditor(PrologRuntime.PREF_HOST, "Server host", getFieldEditorParent());
 		host.setEnabled(false, getFieldEditorParent());
 		addField(host);
 
 		// The port the PIF server is listening on
-		IntegerFieldEditor port = new IntegerFieldEditor(PrologRuntime.PREF_PORT, "Server port", getFieldEditorParent());
+		IntegerFieldEditor port = new MyIntegerFieldEditor(PrologRuntime.PREF_PORT, "Server port", getFieldEditorParent());
 		port.setEnabled(false, getFieldEditorParent());
 		addField(port);
 		
-		addField(new BooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent()));
+		addField(new MyBooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent()));
 		
-		final BooleanFieldEditor genFactbase = new BooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
+		final MyBooleanFieldEditor genFactbase = new MyBooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
@@ -121,7 +122,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 			}
 		};
 		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
-		metaPred = new BooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		metaPred = new MyBooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
 		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -130,6 +131,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		});
 		addField(genFactbase);
 		addField(metaPred);
+		
+		adjustLayoutForElement(executableGroup);
 	}
 	
 	@Override
