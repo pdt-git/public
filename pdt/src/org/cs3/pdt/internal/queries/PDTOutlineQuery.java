@@ -51,13 +51,9 @@ public class PDTOutlineQuery {
 	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		String module = "user";
-		boolean showSystemPreds = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_SHOW_SYSTEM_PREDS);
 		for (Map<String, Object> predicate : result) {
 			module = predicate.get("Entity").toString();
 			String name = predicate.get("Functor").toString();
-			if (!showSystemPreds && name.startsWith("$")) {
-				continue;
-			}
 			String kindOfEntity = predicate.get("KindOfEntity").toString();
 			int arity=Integer.parseInt(predicate.get("Arity").toString());
 			int line = Integer.parseInt(predicate.get("Line").toString());
