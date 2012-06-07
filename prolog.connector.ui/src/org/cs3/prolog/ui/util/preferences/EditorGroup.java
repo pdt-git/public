@@ -32,7 +32,7 @@ class EditorGroup {
 	
 	void adjustGroupAndEditors() {
 		if (parent != null) {
-			((GridLayout)parent.getLayout()).numColumns = maxColumns;
+			parent.setLayout(new GridLayout(maxColumns, false));
 		}
 		for (FieldEditor e : editors) {
 			if (e instanceof FieldEditorForStructuredPreferencePage) {
