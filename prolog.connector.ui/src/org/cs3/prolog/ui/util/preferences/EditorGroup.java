@@ -3,6 +3,7 @@ package org.cs3.prolog.ui.util.preferences;
 import java.util.ArrayList;
 
 import org.eclipse.jface.preference.FieldEditor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -17,7 +18,7 @@ class EditorGroup {
 		if (parent != null) {
 			GridLayout layout = new GridLayout();
 			parent.setLayout(layout);
-			parent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			parent.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		}
 		this.parent = parent;
 	}
@@ -38,6 +39,10 @@ class EditorGroup {
 				((FieldEditorForStructuredPreferencePage) e).adjustColumns(maxColumns);
 			}
 		}
+	}
+	
+	int getMaxColumns() {
+		return maxColumns;
 	}
 	
 }
