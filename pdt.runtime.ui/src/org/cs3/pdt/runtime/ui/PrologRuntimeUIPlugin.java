@@ -143,9 +143,8 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 
 	public ResourceFileLocator getResourceLocator() {
-		if (resourceLocator == null){
-			String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
-			resourceLocator = new DefaultResourceFileLocator(new File(bootStrapDir));			
+		if (resourceLocator == null) {
+			resourceLocator = new DefaultResourceFileLocator(new File(System.getProperty("java.io.tmpdir")));			
 		}
 		return resourceLocator;
 	}
