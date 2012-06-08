@@ -8,6 +8,7 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.preferences.MyBooleanFieldEditor;
 import org.cs3.pdt.ui.preferences.MyDirectoryFieldEditor;
+import org.cs3.pdt.ui.preferences.MyFileFieldEditor;
 import org.cs3.pdt.ui.preferences.MyIntegerFieldEditor;
 import org.cs3.pdt.ui.preferences.MyLabelFieldEditor;
 import org.cs3.pdt.ui.preferences.MyStringFieldEditor;
@@ -65,11 +66,11 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		Group executableGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		executableGroup.setText("Executable");
 		
-		invocation = new MyStringFieldEditor(PrologRuntime.PREF_INVOCATION, "Prolog invocation", executableGroup);
+		invocation = new MyStringFieldEditor(PrologRuntime.PREF_INVOCATION, "OS invocation", executableGroup);
 		addField(invocation);
 		
 		// eg. xpce or /usr/bin/xpce
-		executable = new MyStringFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
+		executable = new MyFileFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
 		addField(executable);
 		
 		commandLineArguments = new MyStringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);

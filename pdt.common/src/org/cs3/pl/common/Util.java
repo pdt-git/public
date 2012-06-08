@@ -996,7 +996,7 @@ public class Util {
 					exeFile = new File(currPath);
 
 					if (exeFile.exists()) {
-						plwin = "\"" + currPath + "\"";
+						plwin = currPath;
 						break;
 					}
 				}
@@ -1174,10 +1174,15 @@ public class Util {
 
 	public static String createExecutable(String invocation, String execution, String commandLineArguments, String startupFiles) {
 		StringBuffer executable = new StringBuffer(invocation);
-		executable.append(" ");
-		executable.append(execution);
+		if (isWindows()) {
+			executable.append(" \"");
+			executable.append(execution);
+			executable.append("\"");
+		} else {
+			executable.append(execution);
+		}
 		
-		if (commandLineArguments != null && !commandLineArguments.isEmpty() && !commandLineArguments.trim().isEmpty()) {
+		if (commandLineArguments != null && !commandLineArguments.trim().isEmpty()) {
 			executable.append(" ");
 			executable.append(commandLineArguments);
 		}
