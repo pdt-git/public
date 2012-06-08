@@ -46,8 +46,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Set;
 
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
 
 /**
  * Central registry for managing PrologInterface instances and Subscriptions.

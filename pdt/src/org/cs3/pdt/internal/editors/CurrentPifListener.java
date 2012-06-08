@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.editors;
 
-import static org.cs3.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 
@@ -9,14 +9,14 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.prolog.PrologEventDispatcher;
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceEvent;
-import org.cs3.prolog.PrologInterfaceException;
-import org.cs3.prolog.PrologInterfaceListener;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceEvent;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceListener;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;

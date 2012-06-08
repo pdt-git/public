@@ -2,7 +2,7 @@ package org.cs3.pdt.internal;
 
 
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
-import org.cs3.prolog.metadata.Predicate;
+import org.cs3.pdt.metadata.Predicate;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;

@@ -1,6 +1,6 @@
 package pdt.y.focusview;
 
-import static org.cs3.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -15,10 +15,6 @@ import java.util.concurrent.FutureTask;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.prolog.PrologException;
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
-import org.cs3.prolog.PrologSession;
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -26,6 +22,10 @@ import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 import pdt.y.main.PDTGraphView;
 

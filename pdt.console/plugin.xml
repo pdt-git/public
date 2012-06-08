@@ -35,14 +35,14 @@
 	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="org.cs3.pdt.console.preferences.PreferenceInitializer">
+          class="org.cs3.pdt.console.internal.preferences.PreferenceInitializer">
     </initializer>
  </extension>
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
     	  category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.console.preferences.PreferencePageMain"
+          class="org.cs3.pdt.console.internal.preferences.PreferencePageMain"
           id="org.cs3.pdt.console.preferences.PreferencePageMain"
           name="Console">
     </page>

@@ -9,7 +9,6 @@ Bundle-Activator: org.cs3.pdt.console.PrologConsolePlugin
 Export-Package: org.cs3.pdt.console,
  org.cs3.pdt.console.internal,
  org.cs3.pdt.console.internal.views,
- org.cs3.pdt.console.preferences,
  org.cs3.pl.console,
  org.cs3.pl.console.prolog
 Require-Bundle: org.eclipse.swt,

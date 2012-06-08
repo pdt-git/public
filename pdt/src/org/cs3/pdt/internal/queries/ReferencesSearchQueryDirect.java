@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.internal.structureElements.PrologMatch;
+import org.cs3.pdt.metadata.Goal;
 import org.cs3.prolog.common.FileUtils;
-import org.cs3.prolog.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 
 /**

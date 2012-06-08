@@ -43,7 +43,7 @@ package org.cs3.prolog.connector;
 
 import java.util.List;
 
-import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.pif.PrologInterface;
 
 /**
  * Subscription for a PrologInterface instance.

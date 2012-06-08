@@ -41,22 +41,19 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.prolog.PrologException;
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
-import org.cs3.prolog.PrologSession;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.metadata.Predicate;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
@@ -142,17 +139,11 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		String[] split = head.split("[^\\w^$]");
 		String prefix = split[split.length - 1];
 
-		Predicate[] elems = null;
-
 		try {
-			elems = getPredicatesWithPrefix(null, prefix, null);
 			r.options = new TreeSet<String>();
-
 			completions = new TreeSet<String>();
-			for (int i = 0; i < elems.length; i++) {
-				r.options.add(elems[i].getSignature());
-				completions.add(elems[i].getFunctor());
-			}
+			
+			findPredicatesWithPrefix(null, prefix, null, r.options, completions);
 		} catch (NumberFormatException e) {
 			Debug.report(e);
 		} catch (PrologException e) {
@@ -163,10 +154,10 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
 		String completion = completions == null || completions.isEmpty() ? ""
 				: completions.first();
-		if (elems == null || elems.length == 0) {
+		if (completions == null || completions.size() == 0) {
 			r.newLine = line;
 			r.newPos = pos;
-		} else if (elems.length == 1) {
+		} else if (completions.size() == 1) {
 			r.newLine = head + completion.substring(prefix.length()) + tail;
 			r.newPos = pos - prefix.length() + completion.length();
 		} else {
@@ -179,8 +170,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		return r;
 	}
 
-	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
-			String filename) throws NumberFormatException, PrologException,
+	public void findPredicatesWithPrefix(String module, String prefix, String filename, TreeSet<String> signatures, TreeSet<String> functors) throws NumberFormatException, PrologException,
 			PrologInterfaceException {
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
@@ -192,18 +182,12 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			String query = "pdt_search:find_pred('" + filename + "','" + prefix + "', "
 					+ module + ",Name,Arity,Public,_,_)";
 			List<Map<String,Object>> results = session.queryAll(query);
-			List<Predicate> list = new ArrayList<Predicate>();
-			for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
-				Map<String,Object> result = it.next();
-				boolean pub = Boolean.valueOf(result.get("Public").toString())
-						.booleanValue();
-				Vector<String> properties = new Vector<String>();
-				if(pub) properties.add("exported");
+			for (Map<String,Object> result : results) {
 				int arity = Integer.parseInt(result.get("Arity").toString());
-				Predicate data = new Predicate(module, result.get("Name").toString(), arity, properties);
-				list.add(data);
+				String name = result.get("Name").toString();
+				signatures.add(name + "/" + arity);
+				functors.add(name);
 			}
-			return list.toArray(new Predicate[0]);
 		} finally {
 			if (session != null) {
 				session.dispose();

@@ -55,24 +55,23 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.cs3.prolog.IPrologEventDispatcher;
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
-import org.cs3.prolog.PrologLibraryManager;
-import org.cs3.prolog.PrologSession;
-import org.cs3.prolog.UDPEventDispatcher;
 import org.cs3.prolog.common.DefaultResourceFileLocator;
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.BootstrapPrologContribution;
 import org.cs3.prolog.connector.DefaultSubscription;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.internal.DefaultPrologContextTrackerService;
-import org.cs3.prolog.internal.AbstractPrologInterface;
+import org.cs3.prolog.lifecycle.IPrologEventDispatcher;
+import org.cs3.prolog.lifecycle.UDPEventDispatcher;
+import org.cs3.prolog.load.BootstrapPrologContribution;
+import org.cs3.prolog.load.PrologLibraryManager;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -211,7 +210,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		PrologInterface prologInterface = null;
 		
 
-		prologInterface = AbstractPrologInterface.newInstance(AbstractPrologInterface.PL_INTERFACE_DEFAULT,name);
+		prologInterface = PrologRuntimePlugin.getDefault().newPrologInterface(name);
 		prologInterface.initOptions(new EclipsePreferenceProvider(this));
 		
 		prologInterface.setFileSearchPath(PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));

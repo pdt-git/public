@@ -12,26 +12,26 @@
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="org.cs3.pdt.preferences.PreferenceInitializer">
+          class="org.cs3.pdt.internal.preferences.PreferenceInitializer">
     </initializer>
  </extension>
  
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          class="org.cs3.pdt.preferences.PreferencePage"
+          class="org.cs3.pdt.internal.preferences.PreferencePage"
           id="org.cs3.pdt.internal.preferences.PDTPreferencePage"
           name="PDT">
     </page>
     <page
           category="org.cs3.pdt.preferences.PreferencePageEditor"
-          class="org.cs3.pdt.preferences.PreferencePageEditorColors"
+          class="org.cs3.pdt.internal.preferences.PreferencePageEditorColors"
           id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
     </page>
     <page
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.preferences.PreferencePageEditor"
+          class="org.cs3.pdt.internal.preferences.PreferencePageEditor"
           id="org.cs3.pdt.preferences.PreferencePageEditor"
           name="Editor">
     </page>

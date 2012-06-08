@@ -9,11 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.prolog.DefaultPrologLibrary;
-import org.cs3.prolog.PrologLibrary;
-import org.cs3.prolog.PrologLibraryManager;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.load.BootstrapPrologContribution;
+import org.cs3.prolog.load.BootstrapPrologContributionAlias;
+import org.cs3.prolog.load.BootstrapPrologContributionFile;
+import org.cs3.prolog.load.DefaultPrologLibrary;
+import org.cs3.prolog.load.PrologLibrary;
+import org.cs3.prolog.load.PrologLibraryManager;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.ReconsultHook;
+import org.cs3.prolog.pif.internal.socket.SocketPrologInterface;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -445,6 +451,27 @@ public class PrologRuntimePlugin extends Plugin {
 		}
 
 	}
+	
+	public PrologInterface newPrologInterface() {
+		return newPrologInterface(null);
+	}
+	
+	public PrologInterface newPrologInterface(String name) {
+		return new SocketPrologInterface(name);
+	}
 
+	private Set<ReconsultHook> currentHooks = new HashSet<ReconsultHook>();
+
+	public void registerReconsultHook(ReconsultHook hook) {
+		currentHooks.add(hook);
+	}
+
+	public void unregisterReconsultHook(ReconsultHook hook) {
+		currentHooks.remove(hook);
+	}
+	
+	public Set<ReconsultHook> getReconsultHooks() {
+		return currentHooks;
+	}
 
 }

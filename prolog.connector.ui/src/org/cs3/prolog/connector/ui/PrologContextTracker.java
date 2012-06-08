@@ -41,8 +41,8 @@
 
 package org.cs3.prolog.connector.ui;
 
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.ui.IWorkbench;
 
 /**

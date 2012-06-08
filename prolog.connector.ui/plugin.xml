@@ -5,14 +5,14 @@
 	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="org.cs3.prolog.connector.preferences.PreferenceInitializer">
+          class="org.cs3.prolog.connector.internal.preferences.PreferenceInitializer">
     </initializer>
  </extension>
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.prolog.connector.preferences.PreferencePage"
+          class="org.cs3.prolog.connector.internal.preferences.PreferencePage"
           id="org.cs3.prolog.connector.preferences.PreferencePage"
           name="Prolog Processes">
     </page>

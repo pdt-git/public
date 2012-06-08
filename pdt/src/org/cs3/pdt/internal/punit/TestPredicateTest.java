@@ -45,10 +45,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.PrologException;
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
-import org.cs3.prolog.PrologSession;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 public class TestPredicateTest extends TestCase {
 	 

@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
 
-import org.cs3.prolog.metadata.Predicate;
+import org.cs3.pdt.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 
 /**

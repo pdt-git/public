@@ -43,8 +43,8 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.internal.contentassistant.NaivPrologContentAssistProcessor;
 import org.cs3.pdt.internal.views.lightweightOutline.PrologOutlineInformationControl;
-import org.cs3.prolog.PrologInterfaceException;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;

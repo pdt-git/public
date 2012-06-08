@@ -57,16 +57,11 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
+import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.console.preferences.PreferencePageMain;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.prolog.FileSearchPathConfigurator;
-import org.cs3.prolog.LifeCycleHook;
-import org.cs3.prolog.PrologInterface;
-import org.cs3.prolog.PrologInterfaceException;
-import org.cs3.prolog.PrologSession;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.DefaultSubscription;
@@ -76,7 +71,11 @@ import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.ui.PrologContextTracker;
 import org.cs3.prolog.connector.ui.PrologContextTrackerEvent;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.internal.AbstractPrologInterface;
+import org.cs3.prolog.lifecycle.LifeCycleHook;
+import org.cs3.prolog.load.FileSearchPathConfigurator;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
@@ -733,20 +732,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			@Override
 			public void run() {
 				viewer.selectAll();
-			}
-		};
-		new Action(){
-
-			@Override
-			public void run() {
-				PrologInterface pif = getPrologInterface();
-				if(pif==null){
-					return;
-				}
-				if (!(pif instanceof AbstractPrologInterface)){
-					return;
-				}
-				((AbstractPrologInterface)pif).debug_wakeupPoledSessions();
 			}
 		};
 		clearAction = new ClearAction("Clear", "Clear console output",

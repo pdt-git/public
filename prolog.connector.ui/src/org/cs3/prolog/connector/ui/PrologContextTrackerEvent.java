@@ -43,7 +43,7 @@ package org.cs3.prolog.connector.ui;
 
 import java.util.EventObject;
 
-import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.pif.PrologInterface;
 
 public class PrologContextTrackerEvent extends EventObject {
 

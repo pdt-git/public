@@ -46,8 +46,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.prolog.PrologInterface;
 import org.cs3.prolog.common.Util;
+import org.cs3.prolog.pif.PrologInterface;
 
 
 /**

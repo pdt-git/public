@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.prolog.PrologInterface;
+import org.cs3.prolog.pif.PrologInterface;
 
 abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 

@@ -45,8 +45,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.prolog.PrologInterface;
 import org.cs3.prolog.common.Util;
+import org.cs3.prolog.pif.PrologInterface;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.

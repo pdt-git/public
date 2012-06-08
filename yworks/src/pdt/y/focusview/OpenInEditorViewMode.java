@@ -3,7 +3,7 @@ package pdt.y.focusview;
 import java.awt.event.MouseEvent;
 import java.util.Map;
 
-import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;

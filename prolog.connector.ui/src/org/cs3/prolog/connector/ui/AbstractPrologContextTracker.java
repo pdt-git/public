@@ -44,7 +44,7 @@ package org.cs3.prolog.connector.ui;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.prolog.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceException;
 
 /**
  * Convenience class for implementing PrologContextTracker.

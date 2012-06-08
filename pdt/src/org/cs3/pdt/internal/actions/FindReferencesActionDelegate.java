@@ -45,7 +45,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.internal.queries.ReferencesSearchQueryDirect;
-import org.cs3.prolog.metadata.Goal;
+import org.cs3.pdt.metadata.Goal;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
