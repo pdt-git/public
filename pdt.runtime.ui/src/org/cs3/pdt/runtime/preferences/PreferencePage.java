@@ -84,11 +84,6 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		// A comma-separated list of VARIABLE=VALUE pairs.
 		addField(new MyStringFieldEditor(PrologRuntime.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
 		
-		// The PrologInterface needs to temporarily store some
-		// prolog files during bootstrapping. Any directory for which 
-		// you have write permissions will do.
-		addField(new MyDirectoryFieldEditor(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, "Prolog Process Bootstrap Directory", getFieldEditorParent()));
-
 		MyDirectoryFieldEditor ffe = new MyDirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
 		addField(ffe);
 		
