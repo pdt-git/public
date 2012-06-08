@@ -6,11 +6,11 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 public class MyLabelFieldEditor extends FieldEditor implements FieldEditorForStructuredPreferencePage {
 	
-	private Label label2;
+	private Text field;
 	private Composite parent;
 	
 	public MyLabelFieldEditor(Composite parent, String name) {
@@ -20,7 +20,7 @@ public class MyLabelFieldEditor extends FieldEditor implements FieldEditorForStr
 
 	@Override
 	protected void adjustForNumColumns(int numColumns) {
-        GridData gd = (GridData) label2.getLayoutData();
+        GridData gd = (GridData) field.getLayoutData();
         gd.horizontalSpan = numColumns - 1;
         gd.grabExcessHorizontalSpace = (gd.horizontalSpan == 1);
 	}
@@ -28,22 +28,22 @@ public class MyLabelFieldEditor extends FieldEditor implements FieldEditorForStr
 	@Override
 	protected void doFillIntoGrid(Composite parent, int numColumns) {
         getLabelControl(parent);
-        label2 = new Label(parent, SWT.LEFT | SWT.WRAP);
-        label2.setFont(parent.getFont());
+        field = new Text(parent, SWT.BORDER | SWT.SINGLE | SWT.READ_ONLY);
+        field.setFont(parent.getFont());
         String text = getLabelText();
         if (text != null) {
-			label2.setText(text);
+        	field.setText(text);
 		}
-        label2.addDisposeListener(new DisposeListener() {
+        field.addDisposeListener(new DisposeListener() {
             @Override
 			public void widgetDisposed(DisposeEvent event) {
-                label2 = null;
+            	field = null;
             }
         });
         GridData gd = new GridData();
         gd.horizontalAlignment = GridData.FILL;
         gd.grabExcessHorizontalSpace = true;
-        label2.setLayoutData(gd);
+        field.setLayoutData(gd);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class MyLabelFieldEditor extends FieldEditor implements FieldEditorForStr
 	}
 	
 	public void setText(String text) {
-		label2.setText(text);
+		field.setText(text);
 	}
 
 }
