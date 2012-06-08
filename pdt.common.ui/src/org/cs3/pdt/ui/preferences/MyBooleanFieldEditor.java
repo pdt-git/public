@@ -15,6 +15,7 @@ public class MyBooleanFieldEditor extends BooleanFieldEditor implements FieldEdi
     	this.parent = parent;
 	}
 	
+	@Override
 	public void adjustColumns(int numColumns) {
 		adjustForNumColumns(numColumns);
 	}
