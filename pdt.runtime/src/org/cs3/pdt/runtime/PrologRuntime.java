@@ -20,6 +20,7 @@ public interface PrologRuntime {
 	public static final String PREF_FILE_SEARCH_PATH = "pif.file_search_path";
 	public static final String PREF_INVOCATION = "pif.invocation";
 	public static final String PREF_EXECUTABLE = "pif.executable";
+	public static final String PREF_COMMAND_LINE_ARGUMENTS = "pif.command.line.arguments";
 	public static final String PREF_ENVIRONMENT = "pif.environment";
 	public static final String PREF_ADDITIONAL_STARTUP = "pif.additional.startup";
 	public static final String PREF_TIMEOUT = "pif.timeout";
