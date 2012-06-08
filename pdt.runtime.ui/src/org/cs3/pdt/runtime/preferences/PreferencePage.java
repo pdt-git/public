@@ -71,12 +71,15 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		
 		// eg. xpce or /usr/bin/xpce
 		executable = new MyFileFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
+		executable.getLabelControl(executableGroup).setToolTipText("Don't enter quotes, they will be added automatically.");
 		addField(executable);
 		
 		commandLineArguments = new MyStringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);
+		commandLineArguments.getLabelControl(executableGroup).setToolTipText("See SWI-Prolog manual for a list of possible command line arguments.");
 		addField(commandLineArguments);
 		
 		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup);
+		startupFiles.getLabelControl(executableGroup).setToolTipText("Can be multiple files, seperated by spaces.\nAdd quotes if needed!\n\nExample: \"c:/my files/dummy.pl\" dummy2.pl");
 		addField(startupFiles);
 		
 		executeablePreviewLabel = new MyLabelFieldEditor(executableGroup, "Executable preview");
