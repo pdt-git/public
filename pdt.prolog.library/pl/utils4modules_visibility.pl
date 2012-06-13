@@ -21,7 +21,7 @@
            defined_in/3,                   % Module, Name, Arity
            defined_in/4,                   % Module, Name, Arity, DefiningModule
            visible_in/3,	               % Module, Name, Arity
-           undefined_in/3                     % Module, Name, Arity 
+           undefined_in/3                  % Module, Name, Arity 
          ] ).
  
 :- doc_collect(true).
@@ -177,11 +177,11 @@ defined_in(Module, Head) :-
 
 defined_in(Module,Name,Arity) :-
 	defined_in(SubModule,Name,Arity,Module), 
-	( % Non-hidden module that does not import from any other
+	( % Non-hidden module does not import from any other
 	  SubModule == Module
-	; % Hidden system module from which the module "system" imports
-	  SubModule\==Module,
-	  SubModule==system,
+	; % "system" imports from hidden system modules 
+	  system == SubModule,
+	  system \== Module,
 	  hidden_name(Module) 
 	).
 
