@@ -35,7 +35,8 @@ public class MyLabelFieldEditor extends FieldEditor implements FieldEditorForStr
 			label2.setText(text);
 		}
         label2.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent event) {
+            @Override
+			public void widgetDisposed(DisposeEvent event) {
                 label2 = null;
             }
         });
