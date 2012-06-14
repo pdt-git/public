@@ -35,10 +35,12 @@ public class EdgeAppearancePreferences
 	 * of preferences. Each field editor knows how to save and
 	 * restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		addField(new ColorFieldEditor(APPEARANCE_LINE_COLOR, "&Line Color    ", wrap(getFieldEditorParent())));
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 	

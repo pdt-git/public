@@ -35,11 +35,13 @@ public class MainPreferencePage
 	 * of preferences. Each field editor knows how to save and
 	 * restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		
 		addField(new RefreshModeFieldEditor(getFieldEditorParent()));
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 	

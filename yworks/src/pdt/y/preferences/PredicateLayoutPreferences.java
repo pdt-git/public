@@ -38,6 +38,7 @@ public class PredicateLayoutPreferences
 	 * of preferences. Each field editor knows how to save and
 	 * restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		
 		addField(new NodeSizeRadioGroupFieldEditor(getFieldEditorParent()));
@@ -54,6 +55,7 @@ public class PredicateLayoutPreferences
 		addField(new BooleanFieldEditor(SHOW_TOOLTIPS, "&Show full name in tooltip", wrap(getFieldEditorParent())));
 	}
 	
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 

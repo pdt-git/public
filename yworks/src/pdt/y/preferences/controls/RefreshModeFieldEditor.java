@@ -90,7 +90,8 @@ public class RefreshModeFieldEditor extends FieldEditor {
 	    radio.setData(data);
 	    radio.setFont(parent.getFont());
 	    radio.addSelectionListener(new SelectionAdapter() {
-	        public void widgetSelected(SelectionEvent event) {
+	        @Override
+			public void widgetSelected(SelectionEvent event) {
 	            String oldValue = value;
 	            value = (String) event.widget.getData();
 	            setPresentsDefaultValue(false);

@@ -117,7 +117,8 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
         radio.setData(data);
         radio.setFont(parent.getFont());
         radio.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent event) {
+            @Override
+			public void widgetSelected(SelectionEvent event) {
                 String oldValue = widthMode;
                 widthMode = (String) event.widget.getData();
                 setPresentsDefaultValue(false);
@@ -157,7 +158,8 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		});
 		
 		rbWidthMode[0].addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent event) {
+            @Override
+			public void widgetSelected(SelectionEvent event) {
                 txt.setEnabled(rbWidthMode[0].getSelection());
             }
         });
