@@ -221,48 +221,6 @@ public class PLEditor extends TextEditor {
 		j.schedule();
 	}
 
-	protected abstract class AbstractSelectionChangedListener implements
-			ISelectionChangedListener {
-
-		/**
-		 * Installs this selection changed listener with the given selection
-		 * provider. If the selection provider is a post selection provider,
-		 * post selection changed events are the preferred choice, otherwise
-		 * normal selection changed events are requested.
-		 * 
-		 * @param selectionProvider
-		 */
-		public void install(ISelectionProvider selectionProvider) {
-			if (selectionProvider == null)
-				return;
-
-			if (selectionProvider instanceof IPostSelectionProvider) {
-				IPostSelectionProvider provider = (IPostSelectionProvider) selectionProvider;
-				provider.addPostSelectionChangedListener(this);
-			} else {
-				selectionProvider.addSelectionChangedListener(this);
-			}
-		}
-
-		/**
-		 * Removes this selection changed listener from the given selection
-		 * provider.
-		 * 
-		 * @param selectionProviderstyle
-		 */
-		public void uninstall(ISelectionProvider selectionProvider) {
-			if (selectionProvider == null)
-				return;
-
-			if (selectionProvider instanceof IPostSelectionProvider) {
-				IPostSelectionProvider provider = (IPostSelectionProvider) selectionProvider;
-				provider.removePostSelectionChangedListener(this);
-			} else {
-				selectionProvider.removeSelectionChangedListener(this);
-			}
-		}
-	}
-
 	public PLEditor() {
 		super();
 		try {
