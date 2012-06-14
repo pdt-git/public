@@ -43,8 +43,8 @@ package org.cs3.prolog.cterm;
 
 import java.util.Iterator;
 
-import org.cs3.prolog.cterm.internal.parser.ASTAtom;
-import org.cs3.prolog.cterm.internal.parser.ASTNode;
+import org.cs3.prolog.internal.cterm.parser.ASTAtom;
+import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 public class CCompound extends CTerm implements Iterable<CTerm> {
 	private CTerm[] args;

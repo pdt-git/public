@@ -41,7 +41,7 @@
 
 package org.cs3.prolog.cterm;
 
-import org.cs3.prolog.cterm.internal.parser.ASTNode;
+import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 
 public class CVariable extends CTerm {

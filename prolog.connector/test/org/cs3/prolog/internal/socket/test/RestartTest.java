@@ -5,9 +5,9 @@ import junit.framework.TestCase;
 
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.internal.pif.socket.JackTheProcessRipper;
+import org.cs3.prolog.internal.session.socket.SocketSession;
 import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.internal.socket.JackTheProcessRipper;
-import org.cs3.prolog.session.internal.socket.SocketSession;
 
 public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {

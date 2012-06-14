@@ -59,10 +59,10 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.cterm.CCompound;
 import org.cs3.prolog.cterm.CNil;
+import org.cs3.prolog.internal.pif.AbstractPrologInterface;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.internal.AbstractPrologInterface;
 import org.cs3.prolog.session.PrologSession;
 
 /**

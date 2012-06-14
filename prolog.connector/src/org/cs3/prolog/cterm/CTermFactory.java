@@ -46,15 +46,15 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.cterm.internal.parser.ASTAtom;
-import org.cs3.prolog.cterm.internal.parser.ASTCompound;
-import org.cs3.prolog.cterm.internal.parser.ASTFloat;
-import org.cs3.prolog.cterm.internal.parser.ASTInteger;
-import org.cs3.prolog.cterm.internal.parser.ASTNil;
-import org.cs3.prolog.cterm.internal.parser.ASTString;
-import org.cs3.prolog.cterm.internal.parser.ASTVariable;
-import org.cs3.prolog.cterm.internal.parser.CanonicalTermParser;
-import org.cs3.prolog.cterm.internal.parser.Node;
+import org.cs3.prolog.internal.cterm.parser.ASTAtom;
+import org.cs3.prolog.internal.cterm.parser.ASTCompound;
+import org.cs3.prolog.internal.cterm.parser.ASTFloat;
+import org.cs3.prolog.internal.cterm.parser.ASTInteger;
+import org.cs3.prolog.internal.cterm.parser.ASTNil;
+import org.cs3.prolog.internal.cterm.parser.ASTString;
+import org.cs3.prolog.internal.cterm.parser.ASTVariable;
+import org.cs3.prolog.internal.cterm.parser.CanonicalTermParser;
+import org.cs3.prolog.internal.cterm.parser.Node;
 
 public class CTermFactory {
 

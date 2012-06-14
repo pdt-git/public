@@ -425,7 +425,7 @@
             state="false">
          <enablement>
             <objectClass
-                  name="org.cs3.pl.metadata.Predicate">
+                  name="org.cs3.pdt.metadata.Predicate">
             </objectClass>
          </enablement>
       </decorator>
