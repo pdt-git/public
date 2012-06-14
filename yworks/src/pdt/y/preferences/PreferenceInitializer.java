@@ -98,6 +98,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		return templates;
 	}
 
+	@Override
 	public void initializeDefaultPreferences() {
 		
 		IPreferenceStore store = PluginActivator.getDefault().getPreferenceStore();

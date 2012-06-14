@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.internal.pif.socket.SocketPrologInterface;
 import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.load.BootstrapPrologContributionAlias;
 import org.cs3.prolog.load.BootstrapPrologContributionFile;
@@ -19,7 +20,6 @@ import org.cs3.prolog.load.PrologLibrary;
 import org.cs3.prolog.load.PrologLibraryManager;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.ReconsultHook;
-import org.cs3.prolog.pif.internal.socket.SocketPrologInterface;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;

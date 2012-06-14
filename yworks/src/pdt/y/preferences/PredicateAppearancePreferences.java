@@ -70,6 +70,7 @@ public class PredicateAppearancePreferences
 	 * of preferences. Each field editor knows how to save and
 	 * restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		
 		String[][] lineTypes = new String[][] { 
@@ -95,6 +96,7 @@ public class PredicateAppearancePreferences
 		addField(new ComboFieldEditor(APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE, "D&ynamic Predicate", lineTypes, wrap(predicateBorderStyle, cellData)));
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 
