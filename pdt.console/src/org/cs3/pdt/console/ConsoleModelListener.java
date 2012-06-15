@@ -39,13 +39,15 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console.prolog;
-
+package org.cs3.pdt.console;
 import java.util.EventListener;
 
-public interface PrologConsoleListener extends EventListener{
-	public void consoleRecievedFocus(PrologConsoleEvent e);
-	public void consoleLostFocus(PrologConsoleEvent e);
-	public void consoleVisibilityChanged(PrologConsoleEvent e);
-	public void activePrologInterfaceChanged(PrologConsoleEvent e);
+public interface ConsoleModelListener extends EventListener {
+	
+	abstract public void onOutput(ConsoleModelEvent e);
+	abstract public void onEditBufferChanged(ConsoleModelEvent e);
+	abstract public void onCommit(ConsoleModelEvent e);
+	abstract public void onModeChange(ConsoleModelEvent e);
+	abstract public void afterConnect(ConsoleModelEvent e);
+	abstract public void beforeDisconnect(ConsoleModelEvent e);
 }

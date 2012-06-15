@@ -50,9 +50,9 @@ import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.ConsoleModelEvent;
-import org.cs3.pl.console.ConsoleModelListener;
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.ConsoleModelEvent;
+import org.cs3.pdt.console.ConsoleModelListener;
 
 
 /*

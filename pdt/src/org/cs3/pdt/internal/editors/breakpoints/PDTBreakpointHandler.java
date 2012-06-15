@@ -11,12 +11,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.console.PrologConsole;
+import org.cs3.pdt.console.PrologConsoleEvent;
+import org.cs3.pdt.console.PrologConsoleListener;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.console.PrologConsoleService;
 import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.console.prolog.PrologConsoleEvent;
-import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.console.prolog.PrologConsoleService;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;

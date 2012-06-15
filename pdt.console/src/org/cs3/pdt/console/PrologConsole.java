@@ -39,9 +39,8 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console.prolog;
+package org.cs3.pdt.console;
 
-import org.cs3.pl.console.ConsoleModel;
 import org.cs3.prolog.pif.PrologInterface;
 
 public interface PrologConsole {

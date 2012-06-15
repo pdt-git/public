@@ -39,17 +39,13 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console;
+package org.cs3.pdt.console;
 
+import java.util.EventListener;
 
-/**
- * used by the console completion to pass the results of the
- * completion processor.
- */
-public interface CompletionResult{
-    public String getOriginalLineContent();
-    public int getOriginalCaretPosition();
-    public String getNewLineContent();
-    public int getNewCaretPosition();
-    public String[] getOptions();
+public interface PrologConsoleListener extends EventListener{
+	public void consoleRecievedFocus(PrologConsoleEvent e);
+	public void consoleLostFocus(PrologConsoleEvent e);
+	public void consoleVisibilityChanged(PrologConsoleEvent e);
+	public void activePrologInterfaceChanged(PrologConsoleEvent e);
 }

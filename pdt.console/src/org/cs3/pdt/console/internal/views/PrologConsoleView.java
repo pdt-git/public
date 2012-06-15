@@ -52,15 +52,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.DefaultSubscription;
