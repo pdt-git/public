@@ -597,7 +597,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 	}
 
-	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
+	public static final String HOOK_ID = PDTConsole.CONSOLE_VIEW_ID;
 	private ConsoleViewer viewer;
 	private Composite partControl;
 	private PrologInterface currentPif;
