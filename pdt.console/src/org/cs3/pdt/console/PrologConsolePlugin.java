@@ -47,7 +47,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
-import org.cs3.pl.console.prolog.PrologConsoleService;
 import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
 import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.resources.IFile;

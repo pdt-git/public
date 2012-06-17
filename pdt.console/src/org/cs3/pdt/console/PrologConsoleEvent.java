@@ -39,14 +39,16 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console.prolog;
+package org.cs3.pdt.console;
 
-public interface PrologConsoleService {
-	public void registerPrologConsole(PrologConsole console);
-	public void unregisterPrologConsole(PrologConsole console);
-	public PrologConsole[] getRegisteredPrologConsoles();
-	public PrologConsole getActivePrologConsole();
-	public void addPrologConsoleListener(PrologConsoleListener l);
-	public void removePrologConsoleListener(PrologConsoleListener l);
+import java.util.EventObject;
+
+public class PrologConsoleEvent extends EventObject {
+
+	private static final long serialVersionUID = 1L;
+
+	public PrologConsoleEvent(Object source) {
+		super(source);
+	}
 
 }

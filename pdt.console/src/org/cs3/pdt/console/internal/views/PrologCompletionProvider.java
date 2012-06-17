@@ -46,8 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.cs3.pl.console.CompletionResult;
-import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologException;
@@ -55,7 +53,7 @@ import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 
-public class PrologCompletionProvider implements ConsoleCompletionProvider {
+public class PrologCompletionProvider {
 
 	private class _Result implements CompletionResult {
 
@@ -119,13 +117,18 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
 	private PrologInterface pif;
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * complete the line.
 	 * 
-	 * @see org.cs3.pl.views.ConsoleCompletionProvider#getCompletion(java.lang.String,
-	 *      int)
+	 * @param line
+	 *            the content of the line buffer
+	 * @param pos
+	 *            the carret position
+	 * @return the completed line. If there is no  completeion, the line
+	 *         should be returned unchanged.
+	 * 			If there is more than one option, the provider should
+	 * 			try to do as much as possible.
 	 */
-	@Override
 	public CompletionResult doCompletion(String line, int pos) {
 		if (pif == null) {
 			return null;

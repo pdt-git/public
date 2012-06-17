@@ -39,25 +39,13 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console.prolog;
+package org.cs3.pdt.console;
 
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.prolog.pif.PrologInterface;
+import java.util.EventListener;
 
-public interface PrologConsole {
-	public ConsoleModel getModel();
-	public PrologInterface getPrologInterface();
-	public void setPrologInterface(PrologInterface pif);
-	public boolean isVisible();
-	public String getText();
-	public int getLineAtOffset(int offset);
-	public int getOffsetAtLine(int line);
-	public int getLineCount();
-	public void clearOutput();
-	public int getCaretOffset();
-	public void setCaretOffset(int offset);
-	public int getStartOfInput();
-	public String getTextRange(int offset, int length);
-	public void ensureConnectionForCurrentPrologInterface();
-	
+public interface PrologConsoleListener extends EventListener{
+	public void consoleRecievedFocus(PrologConsoleEvent e);
+	public void consoleLostFocus(PrologConsoleEvent e);
+	public void consoleVisibilityChanged(PrologConsoleEvent e);
+	public void activePrologInterfaceChanged(PrologConsoleEvent e);
 }

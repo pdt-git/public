@@ -8,9 +8,7 @@ Bundle-ClassPath: console.jar
 Bundle-Activator: org.cs3.pdt.console.PrologConsolePlugin
 Export-Package: org.cs3.pdt.console,
  org.cs3.pdt.console.internal,
- org.cs3.pdt.console.internal.views,
- org.cs3.pl.console,
- org.cs3.pl.console.prolog
+ org.cs3.pdt.console.internal.views
 Require-Bundle: org.eclipse.swt,
  org.eclipse.core.runtime,
  org.cs3.prolog.connector.ui,

@@ -39,17 +39,14 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console;
+package org.cs3.pdt.console;
 
+public interface PrologConsoleService {
+	public void registerPrologConsole(PrologConsole console);
+	public void unregisterPrologConsole(PrologConsole console);
+	public PrologConsole[] getRegisteredPrologConsoles();
+	public PrologConsole getActivePrologConsole();
+	public void addPrologConsoleListener(PrologConsoleListener l);
+	public void removePrologConsoleListener(PrologConsoleListener l);
 
-/**
- * used by the console completion to pass the results of the
- * completion processor.
- */
-public interface CompletionResult{
-    public String getOriginalLineContent();
-    public int getOriginalCaretPosition();
-    public String getNewLineContent();
-    public int getNewCaretPosition();
-    public String[] getOptions();
 }

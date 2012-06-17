@@ -49,12 +49,10 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
 
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.ConsoleModelEvent;
-import org.cs3.pl.console.ConsoleModelListener;
-import org.cs3.pl.console.prolog.QueryExpansion;
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.ConsoleModelEvent;
+import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.prolog.common.logging.Debug;
 
 /**
@@ -75,8 +73,6 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	private HashSet<ConsoleModelListener> listeners = new HashSet<ConsoleModelListener>();
 
 	private Socket socket;
-
-	private Vector<QueryExpansion> expansions = new Vector<QueryExpansion>();
 
 	private boolean disconnecting;
 
@@ -206,7 +202,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		fireOutputEvent(cme);
 
 		try {
-			writer.write(expandQuery(lineBuffer));
+			writer.write(lineBuffer);
 			writer.write("\n");
 			writer.flush();
 
@@ -221,30 +217,6 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
-		}
-	}
-
-	private String expandQuery(String query) {
-		for (Iterator<QueryExpansion> it = expansions.iterator(); it.hasNext();) {
-			QueryExpansion exp = it.next();
-			query = exp.apply(query);
-		}
-		return query;
-	}
-
-	public void registerQueryExpansion(QueryExpansion s) {
-		synchronized (expansions) {
-			if (!expansions.contains(s)) {
-				expansions.add(s);
-			}
-		}
-	}
-
-	public void unregisterQueryExpansion(QueryExpansion s) {
-		synchronized (expansions) {
-			if (expansions.contains(s)) {
-				expansions.remove(s);
-			}
 		}
 	}
 

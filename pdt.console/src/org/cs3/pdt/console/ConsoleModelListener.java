@@ -39,20 +39,15 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console;
+package org.cs3.pdt.console;
+import java.util.EventListener;
 
-public interface ConsoleCompletionProvider {
-	/**
-	 * complete the line.
-	 * 
-	 * @param line
-	 *            the content of the line buffer
-	 * @param pos
-	 *            the carret position
-	 * @return the completed line. If there is no  completeion, the line
-	 *         should be returned unchanged.
-	 * 			If there is more than one option, the provider should
-	 * 			try to do as much as possible.
-	 */
-	public CompletionResult doCompletion(String line, int pos);
+public interface ConsoleModelListener extends EventListener {
+	
+	abstract public void onOutput(ConsoleModelEvent e);
+	abstract public void onEditBufferChanged(ConsoleModelEvent e);
+	abstract public void onCommit(ConsoleModelEvent e);
+	abstract public void onModeChange(ConsoleModelEvent e);
+	abstract public void afterConnect(ConsoleModelEvent e);
+	abstract public void beforeDisconnect(ConsoleModelEvent e);
 }
