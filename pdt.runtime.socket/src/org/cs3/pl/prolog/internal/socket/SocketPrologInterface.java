@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import jpl.Query;
-
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.jpl.JPLHook;
@@ -60,7 +60,7 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
-public class SocketPrologInterface extends AbstractPrologInterface implements SocketPrologInterfacePreferences {
+public class SocketPrologInterface extends AbstractPrologInterface {
 
 	private class InitSession extends SocketSession {
 		public InitSession(SocketClient client, AbstractPrologInterface pif,int flags)
@@ -102,7 +102,6 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	private int port = 9999;
 	private boolean hidePlwin;
 
-	private boolean createLogs;
 	private String serverLogDir;
 		
 
@@ -112,21 +111,9 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	public void setServerPort(String port) {
 		this.port = Integer.parseInt(port);
 	}
-	public void setUseSessionPooling(String useSessionPooling) {
-		setUseSessionPooling(Boolean.parseBoolean(useSessionPooling));
-	}
 	public void setUseSessionPooling(boolean useSessionPooling) {
 		this.useSessionPooling = useSessionPooling;
 		pool = useSessionPooling ? new ReusablePool() : null;
-	}
-	public void setCreateLogs(boolean createLogs) {
-		this.createLogs = createLogs;
-	}
-	public void setCreateLogs(String createLogs) {
-		this.createLogs = Boolean.parseBoolean(createLogs);
-	}
-	public boolean isCreateLogs() {
-		return createLogs;
 	}
 	public int getPort() {
 		return port;
@@ -149,11 +136,10 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	@Override
 	public void initOptions(PreferenceProvider provider) {
 		super.initOptions(provider);
-		setServerPort(provider.getPreference(SocketPrologInterfacePreferences.PREF_PORT));
-		setHidePlwin(provider.getPreference(SocketPrologInterfacePreferences.PREF_HIDE_PLWIN));
-		setCreateLogs(provider.getPreference(SocketPrologInterfacePreferences.PREF_CREATE_SERVER_LOGS));
-		setUseSessionPooling(provider.getPreference(SocketPrologInterfacePreferences.PREF_USE_POOL));
-		setServerLogDir(provider.getPreference(SocketPrologInterfacePreferences.PREF_SERVER_LOGDIR));		
+		setServerPort(provider.getPreference(PrologRuntime.PREF_PORT));
+		setHidePlwin(provider.getPreference(PrologRuntime.PREF_HIDE_PLWIN));
+		setUseSessionPooling(true);
+		setServerLogDir(provider.getPreference(PrologRuntime.PREF_SERVER_LOGDIR));		
 
 	}
 	
@@ -182,8 +168,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	
 	public void setDefaults() {
 		setHidePlwin(true);
-		setCreateLogs(false);
-		setUseSessionPooling("true");
+		setUseSessionPooling(true);
 		setServerLogDir(System.getProperty("java.io.tmpdir"));		
 	}
 	
@@ -347,6 +332,17 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 
 	public File getLockFile() {
 		return lockFile;
+	}
+
+	private File errorLogFile;
+	
+	public void setErrorLogFile(File file) {
+		this.errorLogFile = file;
+
+	}
+
+	public File getErrorLogFile() {
+		return errorLogFile;
 	}
 
 	

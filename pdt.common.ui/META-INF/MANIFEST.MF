@@ -2,9 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common UI
 Bundle-SymbolicName: org.cs3.pdt.common.ui;singleton:=true
-Bundle-Version: 0.2.5.qualifier
+Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: commonui.jar
-Export-Package: org.cs3.pdt.ui.util;
+Export-Package: org.cs3.pdt.ui.preferences,
+ org.cs3.pdt.ui.util;
   uses:="org.eclipse.jface.preference,
    org.eclipse.core.runtime,
    org.eclipse.ui,

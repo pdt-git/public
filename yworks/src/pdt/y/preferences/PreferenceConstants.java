@@ -18,13 +18,13 @@ public class PreferenceConstants {
 	
 	public static final String BASE_TEMPLATES_STORAGE = "BASE_TEMPLATES_STORAGE";
 	
-	/* UPDATE MODE */
+	/* REFRESH MODE */
 	
-	public static final String UPDATE_MODE = "UPDATE_MODE";
+	public static final String REFRESH_MODE = "REFRESH_MODE";
 	
-	public static final String UPDATE_MODE_MANUAL = "UPDATE_MODE_MANUAL";
+	public static final String REFRESH_MODE_MANUAL = "REFRESH_MODE_MANUAL";
 	
-	public static final String UPDATE_MODE_AUTOMATIC = "UPDATE_MODE_AUTOMATIC";
+	public static final String REFRESH_MODE_AUTOMATIC = "REFRESH_MODE_AUTOMATIC";
 	
 	public static final String SHOW_TOOLTIPS = "SHOW_TOOLTIPS";
 	
@@ -48,7 +48,7 @@ public class PreferenceConstants {
 	
 	public static final String NODE_SIZE_FIXED_WIDTH = "NODE_SIZE_FIXED_WIDTH";
 	
-	public static final String NODE_SIZE_FIXED_HEIGHT = "NODE_SIZE_FIXED_HEIGHT";
+	public static final String NODE_SIZE_NUMBER_OF_LINES = "NODE_SIZE_NUMBER_OF_LINES";
 	
 	public static final String NODE_SIZE_MEDIAN = "NODE_SIZE_MEDIAN";
 	

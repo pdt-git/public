@@ -90,7 +90,7 @@
 
 :- module(pdt_console_server,[
 	pdt_current_console_server/1,
-	pdt_start_console_server/1,
+	pdt_start_console_server/2,
 	pdt_stop_console_server/0
 ]).
 :- use_module(library(socket)).
@@ -98,23 +98,23 @@
 
 :- dynamic(console_thread_name/1).
 
-prolog_server(Port,Options) :-
+prolog_server(Port, Name, Options) :-
 	tcp_socket(ServerSocket),
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
-	thread_create(server_loop(ServerSocket, Options), _,
+	thread_create(server_loop(ServerSocket, Name, Options), _,
 		      [ alias(pdt_console_server)
 		      ]).
  
-server_loop(ServerSocket, Options):-
-    server_loop_impl(ServerSocket,Options),
+server_loop(ServerSocket, Name, Options):-
+    server_loop_impl(ServerSocket, Name, Options),
     thread_exit(0).
-server_loop_impl(ServerSocket, Options) :-
+server_loop_impl(ServerSocket, Name, Options) :-
 	tcp_accept(ServerSocket, Slave, Peer),
-	server_loop_impl_X(ServerSocket,Options,Slave,Peer).
+	server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer).
 
-server_loop_impl_X(ServerSocket,_,Slave,_) :-
+server_loop_impl_X(ServerSocket,_,_,Slave,_) :-
 	recorded(pdt_console_server_flag,shutdown,Ref),
 	!,
 	erase(Ref),
@@ -122,20 +122,20 @@ server_loop_impl_X(ServerSocket,_,Slave,_) :-
     tcp_close_socket(Slave),
     % that's it, we are closing down business.
     tcp_close_socket(ServerSocket).	
-server_loop_impl_X(ServerSocket,Options,Slave,Peer):-	
+server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer):-	
 	tcp_open_socket(Slave, InStream, OutStream),
 	set_stream(InStream,encoding(utf8)),
     set_stream(OutStream,encoding(utf8)),
-	tcp_host_to_address(Host, Peer),
+%	tcp_host_to_address(Host, Peer),
 	flag(pdt_console_client_id,Id,Id+1),
-	concat_atom(['pdt_console_client_',Id,'@',Host],Alias),
+	concat_atom(['pdt_console_client_',Id,'_',Name],Alias),
 	thread_create(service_client(InStream, OutStream, Peer, Options),
 		      ID,
 		      [ alias(Alias)
 		      ]),
 	retractall(console_thread_name(_)),
 	assert(console_thread_name(ID)),
-	server_loop_impl(ServerSocket, Options).
+	server_loop_impl(ServerSocket, Name, Options).
  
 service_client(InStream, OutStream, Peer, Options) :-
 	allow(Peer, Options), !,
@@ -192,9 +192,9 @@ pdt_current_console_server(Port) :-
 % pdt_start_console_server(?TCPPort)
 % starts a new console server.
 % UDPPort is used for sending back a sync when the server is up.
-pdt_start_console_server(Port) :-
+pdt_start_console_server(Port, Name) :-
     with_mutex(pdt_console_server_mux,
-    	start_server(Port)
+    	start_server(Port, Name)
     ).
 
 % pdt_stop_console_server(+LockFile)
@@ -208,9 +208,9 @@ pdt_stop_console_server:-
 consult_server:pif_shutdown_hook:-
     pdt_stop_console_server.
 
-start_server(Port) :-
+start_server(Port, Name) :-
     \+ thread_property(_, alias(pdt_console_server)),
-    prolog_server(Port, []),
+    prolog_server(Port, Name, []),
     assertz(server(Port)).
 
 stop_server :-

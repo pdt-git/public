@@ -5,7 +5,9 @@ import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_BRACKET;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_MIDDLE;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_POSTFIX;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_PREFIX;
+import static pdt.y.preferences.PreferenceConstants.SHOW_TOOLTIPS;
 
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
@@ -37,21 +39,24 @@ public class PredicateLayoutPreferences
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		addField(new RadioGroupFieldEditor(
-			NAME_CROPPING, "Name cropping", 2,
-			new String[][] { 
-				{ "P&refix                ", NAME_CROPPING_PREFIX },
-				{ "P&ostfix               ", NAME_CROPPING_POSTFIX },
-				{ "&Bracket               ", NAME_CROPPING_BRACKET }, 
-				{ "&Middle                ", NAME_CROPPING_MIDDLE }
-			}, getFieldEditorParent()));
 		
 		addField(new NodeSizeRadioGroupFieldEditor(getFieldEditorParent()));
+		
+		addField(new RadioGroupFieldEditor(
+				NAME_CROPPING, "Name cropping", 1,
+				new String[][] { 
+					{ "&Bracket:   abc ... xyz", NAME_CROPPING_BRACKET },
+					{ "P&refix:      abcdefg ...", NAME_CROPPING_PREFIX }, 
+					{ "&Middle:   ... klmno ...", NAME_CROPPING_MIDDLE },
+					{ "P&ostfix:    ... tuvwxyz", NAME_CROPPING_POSTFIX }
+				}, getFieldEditorParent(), true));
+		
+		addField(new BooleanFieldEditor(SHOW_TOOLTIPS, "&Show full name in tooltip", wrap(getFieldEditorParent())));
 	}
 	
 	public void init(IWorkbench workbench) {
 	}
-	
+
 	public static IPreferenceStore getCurrentPreferences() {
 		return PluginActivator.getDefault().getPreferenceStore();
 	}
@@ -64,11 +69,19 @@ public class PredicateLayoutPreferences
 		return getCurrentPreferences().getString(PreferenceConstants.NODE_SIZE);
 	}
 	
+	public static int getNumberOfLines() {
+		return getCurrentPreferences().getInt(PreferenceConstants.NODE_SIZE_NUMBER_OF_LINES);
+	}
+	
 	public static String getLayoutPreference() {
 		return getCurrentPreferences().getString(PreferenceConstants.LAYOUT);
 	}
 	
 	public static void setLayoutPreference(String value) {
 		getCurrentPreferences().setValue(PreferenceConstants.LAYOUT, value);
+	}
+	
+	public static boolean isShowToolTip() {
+		return getCurrentPreferences().getBoolean(SHOW_TOOLTIPS);
 	}
 }

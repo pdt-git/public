@@ -46,6 +46,7 @@ package org.cs3.pl.prolog.internal.socket;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -62,6 +63,7 @@ import java.util.Map;
 import jpl.Query;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
@@ -71,6 +73,26 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrategy {
 private static JackTheProcessRipper processRipper;
 	
+	private static final String STARTUP_ERROR_LOG_PROLOG_CODE = 
+			":- multifile message_hook/3.\n" +
+			":- dynamic message_hook/3.\n" +
+			":- dynamic pdt_startup_error_message/1.\n" +
+			":- dynamic collect_pdt_startup_error_messages/0.\n" +
+			"collect_pdt_startup_error_messages.\n" +
+			"message_hook(error(Error,File),_,_):-\n" +
+			"    collect_pdt_startup_error_messages,\n" + 
+			"    message_to_string(error(Error,File),Msg),\n" +
+			"    assertz(pdt_startup_error_message(Msg)),\n" +
+			"    fail.\n" +
+			"write_pdt_startup_error_messages_to_file(_File) :-\n" +
+			"    retractall(collect_pdt_startup_error_messages),\n" + 
+			"    \\+ pdt_startup_error_message(_),\n" +
+			"    !.\n" +
+			"write_pdt_startup_error_messages_to_file(File) :-\n" +
+			"    open(File, write, Stream),\n" +
+			"    forall(pdt_startup_error_message(Msg),format(Stream, '~w~n', [Msg])),\n" +
+			"    close(Stream).";
+
 	public SocketServerStartAndStopStrategy() {
 		processRipper=JackTheProcessRipper.getInstance();
 	}
@@ -85,7 +107,7 @@ private static JackTheProcessRipper processRipper;
 	@Override
 	public  Process startServer(PrologInterface pif) {
 		if (pif.isStandAloneServer()) {
-			Debug.warning("Will not start server; the option " + PrologInterface.PREF_STANDALONE + " is set.");
+			Debug.warning("Will not start server; the standalone option is set.");
 			return null;
 		}
 		if (!(pif instanceof SocketPrologInterface)) {
@@ -97,6 +119,7 @@ private static JackTheProcessRipper processRipper;
 
 	private Process startSocketServer(SocketPrologInterface socketPif) {
 		socketPif.setLockFile(Util.getLockFile());
+		socketPif.setErrorLogFile(Util.getLockFile());
 		int port = getFreePort(socketPif);
 		if(socketPif.isStartWithJPL()) {
 			String[] args = getArguments(socketPif, port);
@@ -208,6 +231,10 @@ private static JackTheProcessRipper processRipper;
 			try {
 				long now = System.currentTimeMillis();
 				if (now - startTime > timeout) {
+					String errorLogFileContent = getErrorLogFileContent(socketPif);
+					if (errorLogFileContent != null) {
+						Debug.error("Prolog errors during initialization:\n" + errorLogFileContent);
+					}
 					throw new RuntimeException("Timeout exceeded while waiting for peer to come up.");
 				}
 				Thread.sleep(50);
@@ -222,6 +249,16 @@ private static JackTheProcessRipper processRipper;
 				; // nothing. the process is still coming up.
 			}
 		}
+	}
+
+	private String getErrorLogFileContent(SocketPrologInterface socketPif) {
+		String errorLogFileContent = null;
+		try {
+			errorLogFileContent = Util.toString(new FileInputStream(socketPif.getErrorLogFile()));
+		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
+		}
+		return errorLogFileContent;
 	}
 
 
@@ -294,6 +331,7 @@ private static JackTheProcessRipper processRipper;
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
 //      Don't set the encoding globally because it 
 //		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
+		tmpWriter.println(STARTUP_ERROR_LOG_PROLOG_CODE);
 		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
 		if(socketPif.isStartWithJPL()) {
 			tmpWriter.println(":- assert(file_search_path(library, '"+socketPif.getFileSearchPath()+"')).");
@@ -307,13 +345,9 @@ private static JackTheProcessRipper processRipper;
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- doc_collect(false).");
 
-		if (socketPif.isCreateLogs()) {
-			tmpWriter.println(":- debug(consult_server).");
-
-		}
-		String value = ("true".equals(socketPif.getAttribute(PrologInterface.PREF_GENERATE_FACTBASE)) ? "true" : "false");
+		String value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_GENERATE_FACTBASE)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
-		value = ("true".equals(socketPif.getAttribute(PrologInterface.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
+		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
@@ -324,6 +358,7 @@ private static JackTheProcessRipper processRipper;
 		tmpWriter.println(":- [library(consult_server)].");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
+		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + Util.prologFileName(socketPif.getErrorLogFile()) + "').");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker4.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.close();
 	}
@@ -350,7 +385,7 @@ private static JackTheProcessRipper processRipper;
 	@Override
 	public void stopServer(PrologInterface pif) {
 		if (pif.isStandAloneServer()) {
-			Debug.warning("Will not stop server; the option " + PrologInterface.PREF_STANDALONE + " is set.");
+			Debug.warning("Will not stop server; the standalone option is set.");
 			return;
 		}
 		if (!(pif instanceof SocketPrologInterface)) {
@@ -376,6 +411,10 @@ private static JackTheProcessRipper processRipper;
 			long pid = client.getServerPid();
 			client.close();
 			socketPif.getLockFile().delete();
+			File errorLogFile = socketPif.getErrorLogFile();
+			if (errorLogFile.exists()) {
+				errorLogFile.delete();
+			}
 			Debug.info("server process will be killed in about a second.");
 			processRipper.markForDeletion(pid);
 		} catch (Exception e) {

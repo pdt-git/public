@@ -83,8 +83,6 @@ public class PLMarkerUtils {
 			session.queryOnce("deactivate_warning_and_error_tracing");
 		} catch (PrologException e) {
 			// this may be a reload_timeout_reached exception
-			// (shouldn't happen anymore, but maybe it does)
-
 			// so at least we deactivate the tracing, because
 			// otherwise error markers will still be visible after removing the error
 			try {
@@ -162,8 +160,8 @@ public class PLMarkerUtils {
 
 			marker.setAttribute(IMarker.SEVERITY, severity);
 
-			String msgText = (String)msg.get("Message");
-			int line = Integer.parseInt((String)msg.get("Line"))-1;
+			String msgText = msg.get("Message").toString();
+			int line = Integer.parseInt(msg.get("Line").toString())-1;
 			if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
 				line = 0;
 			}

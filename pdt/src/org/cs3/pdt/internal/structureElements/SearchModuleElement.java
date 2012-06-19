@@ -1,47 +1,89 @@
 package org.cs3.pdt.internal.structureElements;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
-import org.eclipse.core.resources.IFile;
-
-public class SearchModuleElement implements PDTTreeElement {
-	private String name;
-	private IFile file;
-	private List<PDTMatch> elements = new ArrayList<PDTMatch>();
-	List<SearchPredicateElement> predicates = new ArrayList<SearchPredicateElement>();
+public class SearchModuleElement implements PrologSearchTreeElement, Comparable<SearchModuleElement> {
 	
-	public SearchModuleElement(String name) {
+	private String label;
+	private int visibilityCode;
+	private String name;
+	private Object parent;
+	
+	private LinkedHashMap<String, SearchPredicateElement> predForSignature = new LinkedHashMap<String, SearchPredicateElement>();
+	
+	public SearchModuleElement(Object parent, String name, String visibility) {
+		this.parent = parent;
 		this.name = name;
+		if (visibility == null || visibility.isEmpty()) {
+			label = name;
+		} else {
+			label = name + " (" + visibility + ")";
+		}
+		if ("invisible".equalsIgnoreCase(visibility)) {
+			visibilityCode = 1; 
+		} else if ("sub".equalsIgnoreCase(visibility)) {
+			visibilityCode = 2; 
+		} else if ("local".equalsIgnoreCase(visibility)) {
+			visibilityCode = 3; 
+		} else if ("super".equalsIgnoreCase(visibility)) {
+			visibilityCode = 4; 
+		}
 	}
 	
 	public String getLabel() {
-		StringBuffer label = new StringBuffer(name);
-		label.append(" (in ");
-		label.append(file.getFullPath().toString());
-		label.append(")");
-		return label.toString();
+		return label;
 	}
 	
-	public void addElement(PDTMatch elem) {
-		elements.add(elem);
-		
-		SearchPredicateElement predicate = (SearchPredicateElement)elem.getElement();
-		if (!predicates.contains(predicate)) {
-			predicates.add(predicate);
-		}
-		
-		file = predicate.getFile();
+	public String getName() {
+		return name;
 	}
-
+	
 	@Override
 	public Object[] getChildren() {
-		return  predicates.toArray();
+		return predForSignature.values().toArray();
 	}
 
 	@Override
 	public boolean hasChildren() {
-		return !predicates.isEmpty();
+		return !predForSignature.isEmpty();
+	}
+
+	@Override
+	public int compareTo(SearchModuleElement o) {
+		return o.visibilityCode - this.visibilityCode;
+	}
+
+	@Override
+	public void removeMatch(PrologMatch match) {
+		String signature = getSignatureForMatch(match);
+		predForSignature.get(signature);
+		if (predForSignature.containsKey(signature)) {
+			SearchPredicateElement predicateElement = predForSignature.get(signature);
+			predicateElement.removeMatch(match);
+			if (!predicateElement.hasChildren()) {
+				predForSignature.remove(signature);
+			}
+		}
+	}
+
+	@Override
+	public void addMatch(PrologMatch match) {
+		String signature = getSignatureForMatch(match);
+		SearchPredicateElement searchPredicateElement = predForSignature.get(signature); 
+		if (searchPredicateElement == null) {
+			searchPredicateElement = new SearchPredicateElement(this, match.getModule(), match.getName(), match.getArity(), match.getProperties());
+			predForSignature.put(signature, searchPredicateElement);
+		}
+		searchPredicateElement.addMatch(match);
+	}
+	
+	private String getSignatureForMatch(PrologMatch match) {
+		return match.getDeclOrDef() + match.getName() + match.getArity();
+	}
+
+	@Override
+	public Object getParent() {
+		return parent;
 	}
 
 }

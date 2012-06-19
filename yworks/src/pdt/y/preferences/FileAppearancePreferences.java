@@ -10,6 +10,9 @@ import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 
 import pdt.y.main.PluginActivator;
@@ -30,6 +33,20 @@ import pdt.y.main.PluginActivator;
 public class FileAppearancePreferences
 	extends PreferencePageBase {
 	
+	private GridLayout groupLayout;
+	private GridData cellData;
+	
+	public FileAppearancePreferences() {
+		groupLayout = new GridLayout();
+		groupLayout.marginWidth = 10;
+        groupLayout.marginHeight = 10;
+        groupLayout.numColumns = 2;
+        
+        cellData = new GridData();
+        cellData.widthHint = 200;
+        cellData.heightHint = 32;
+	}
+	
 	/**
 	 * Creates the field editors. Field editors are abstractions of
 	 * the common GUI blocks needed to manipulate various types
@@ -37,9 +54,13 @@ public class FileAppearancePreferences
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		addField(new ColorFieldEditor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, "File Background Color", getFieldEditorParent()));
-		addField(new ColorFieldEditor(APPEARANCE_MODULE_HEADER_COLOR, "Module File Header Color", getFieldEditorParent()));
-		addField(new ColorFieldEditor(APPEARANCE_NONMODULE_HEADER_COLOR, "Non Module File Header Color", getFieldEditorParent()));
+		
+		addField(new ColorFieldEditor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, "&File Background Color    ", wrap(getFieldEditorParent())));
+		
+		Group fileHeaderColor = createGroup("File Header Background Color", groupLayout);
+		
+		addField(new ColorFieldEditor(APPEARANCE_MODULE_HEADER_COLOR, "&Module File  ", wrap(fileHeaderColor, cellData)));
+		addField(new ColorFieldEditor(APPEARANCE_NONMODULE_HEADER_COLOR, "&Non Module File  ", wrap(fileHeaderColor, cellData)));
 	}
 
 	public void init(IWorkbench workbench) {

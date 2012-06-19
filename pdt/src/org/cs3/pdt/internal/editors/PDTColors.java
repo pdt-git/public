@@ -75,8 +75,8 @@ public interface PDTColors {
 	public static final String UNDEFINED_STRING = "Undefined";
 	public static final String VARIABLE_STRING = "Variable";
 	public static final String COMMENT_STRING = "Comment";
-	public static final String STRING_STRING = "String";
-	public static final String DEFAULT_STRING = "Default";
-	public static final String BACKGROUND_STRING = "Background";
-	public static final String BACKGROUND_EXTERN_STRING = "Background for external files";
+	public static final String STRING_STRING = "Atom";
+	public static final String DEFAULT_STRING = "Other";
+	public static final String BACKGROUND_STRING = "Project files";
+	public static final String BACKGROUND_EXTERN_STRING = "External files";
 }

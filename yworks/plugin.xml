@@ -6,7 +6,7 @@
          point="org.eclipse.ui.views">
 
       <view
-            name="PDT Focus View"
+            name="PDT Context View"
             category="org.cs3.pdt"
             class="pdt.y.focusview.FocusViewPlugin"
             id="pdt.view.focus">
@@ -24,7 +24,7 @@
             category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
             class="pdt.y.preferences.MainPreferencePage"
             id="pdt.y.focusview.preferences.PreferencePage"
-            name="Focus View">
+            name="Context View">
       </page>
       <page
             category="pdt.y.focusview.preferences.PreferencePage"
@@ -49,6 +49,12 @@
             class="pdt.y.preferences.EdgeAppearancePreferences"
             id="pdt.y.preferences.EdgeAppearance"
             name="Edge Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.FocusViewSkinsPreferences"
+            id="pdt.y.preferences.FocusViewSkinsPreferences"
+            name="Skins">
       </page>
    </extension>
 </plugin>

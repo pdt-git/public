@@ -54,7 +54,8 @@ import org.cs3.pl.common.PreferenceProvider;
 public interface PrologInterface {
 
 	/**
-	 * consult event subject constant events of this subject will be fired
+	 * consult event subject constant.
+	 * Events of this subject will be fired
 	 * whenever something was consulted into the prolog system. <br>
 	 * NOT IMPLEMENTED YET
 	 */
@@ -111,17 +112,7 @@ public interface PrologInterface {
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
 	
-	/**
-	 * property constant.
-	 */
-	public static final String PREF_FILE_SEARCH_PATH = "pif.file_search_path";
-	public static final String PREF_EXECUTABLE = "pif.executable";
-	public static final String PREF_ENVIRONMENT = "pif.environment";
-	public static final String PREF_STANDALONE = "pif.standalone";
-	public static final String PREF_TIMEOUT = "pif.timeout";
-	public static final String PREF_HOST = "pif.host";
-	public static final String PREF_GENERATE_FACTBASE = "pif.genfactbase";
-	public static final String PREF_META_PRED_ANALYSIS = "pif.metapred";
+	
 	
 
 	/**

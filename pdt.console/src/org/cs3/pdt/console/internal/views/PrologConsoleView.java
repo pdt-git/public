@@ -58,7 +58,6 @@ import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.console.preferences.PreferencePageFontColor;
 import org.cs3.pdt.console.preferences.PreferencePageMain;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
@@ -835,10 +834,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				IPreferenceNode node = new PreferenceNode("PreferencePage", page);
 				mgr.addToRoot(node);
 
-				IPreferencePage appearance = new PreferencePageFontColor();
-				appearance.setTitle("Appearance");
-				node.add(new PreferenceNode("AppearancePreferences", appearance));
-				
 				PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
 				dialog.create();
 				dialog.setMessage(page.getTitle());
@@ -1078,7 +1073,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		try {
 			String queryString = 
 					"use_module(lib_pdt_console_pl(pdt_console_server)), "
-							+ "pdt_console_server:pdt_start_console_server(Port)";
+							+ "pdt_console_server:pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")";
 			Debug.info("starting console server using: " + queryString);
 
 			Map<String,?> result = session.queryOnce(queryString);
@@ -1234,7 +1229,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		Map<String,?> result = null;
 		try {
 			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
-			result = session.queryOnce( "pdt_start_console_server(Port)");
+			result = session.queryOnce( "pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")");
 			if (result == null) {
 				startServer(pif, session);
 				result = session.queryOnce("pdt_current_console_server(Port)");
@@ -1316,12 +1311,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
 		title.setText(key);
-		boolean useEnter = Boolean.valueOf(
-				PrologConsolePlugin.getDefault().getPreferenceValue(
-						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
-						.booleanValue();
 
-		viewer.setEnterSendsSemicolon(useEnter);
+		viewer.setEnterSendsSemicolon(false);
 
 	}
 

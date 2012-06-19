@@ -1,14 +1,14 @@
 package org.cs3.pdt.internal.structureElements;
 
 
-public class PredicateOccuranceElement implements PDTTreeElement{
+public class PredicateOccuranceElement implements PrologTreeElement{
 	private String label;
 	private int line;
 	private String type;
-	private PDTTreeElement parent;
+	private PrologTreeElement parent;
 	private String file;
 	
-	public PredicateOccuranceElement(String label, String file, int line, String type, PDTTreeElement parent) {
+	public PredicateOccuranceElement(String label, String file, int line, String type, PrologTreeElement parent) {
 		this.label = label;
 		this.line = line;
 		this.type = type;
@@ -24,7 +24,7 @@ public class PredicateOccuranceElement implements PDTTreeElement{
 		return type;
 	}
 	
-	public PDTTreeElement getParent() {
+	public PrologTreeElement getParent() {
 		return parent;
 	}
 	@Override

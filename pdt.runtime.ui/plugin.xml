@@ -14,7 +14,7 @@
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
           class="org.cs3.pdt.runtime.preferences.PreferencePage"
           id="org.cs3.pdt.runtime.preferences.PreferencePage"
-          name="Prolog Runtime">
+          name="Prolog Processes">
     </page>
  </extension>
   <extension
