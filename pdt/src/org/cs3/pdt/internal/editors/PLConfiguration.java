@@ -53,7 +53,7 @@ import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IAutoIndentStrategy;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -170,9 +170,8 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	}
 
 	@Override
-	public IAutoIndentStrategy getAutoIndentStrategy(
-			ISourceViewer sourceViewer, String contentType) {
-		return new PLAutoIndentStrategy();
+	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
+		return new IAutoEditStrategy[]{new PLAutoIndentStrategy()};
 	}
 
 	@Override

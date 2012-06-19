@@ -1,6 +1,7 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.PDTConsole;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;
@@ -27,7 +28,7 @@ public class OpenConsoleAction implements IWorkbenchWindowActionDelegate {
 			return;
 		}
 		try {
-			activePage.showView("org.cs3.pdt.console.internal.views.PrologConsoleView");
+			activePage.showView(PDTConsole.CONSOLE_VIEW_ID);
 		} catch (PartInitException e) {
 //			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
 //					PDTCore.ERR_UNKNOWN, PDTCore.CX_UNKNOWN, e);

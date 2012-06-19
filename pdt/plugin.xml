@@ -67,17 +67,6 @@
 
  <extension
          point="org.eclipse.ui.popupMenus">      
-      <viewerContribution
-            id="pdt.viewercontribution.console.contextmenu"
-            targetID="org.cs3.pdt.console.internal.views.PrologConsoleView">
-         <action
-               class="org.cs3.pdt.internal.actions.GotoErrorLineViewActionDelegate"
-               id="pdt.action.goto_error_line"
-               label="Goto Error Line"
-               menubarPath="additions"/>
-      </viewerContribution>
-      
-      
        <objectContribution
             adaptable="false"
             id="pdt.entry.point.contribution"

@@ -39,16 +39,17 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console;
+package org.cs3.pdt.console.internal.views;
+
+
 /**
- * the history is just another view/controller. 
- * it operates directly on the model.
+ * used by the console completion to pass the results of the
+ * completion processor.
  */
-public interface ConsoleHistory {
-	public void setConsoleModel(ConsoleModel model);
-	public ConsoleModel getConsoleModel();
-	public void previous();
-	public void next();
-	public void clearHistory();
-	 
+public interface CompletionResult{
+    public String getOriginalLineContent();
+    public int getOriginalCaretPosition();
+    public String getNewLineContent();
+    public int getNewCaretPosition();
+    public String[] getOptions();
 }

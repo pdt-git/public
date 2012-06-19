@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console;
+package org.cs3.pdt.console.internal.views;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,6 +49,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Vector;
+
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.ConsoleModelEvent;
+import org.cs3.pdt.console.ConsoleModelListener;
 
 
 /*
@@ -72,37 +76,30 @@ import java.util.Vector;
  *  
  *  0<=pointer<=history.size()
  */
-public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
+public class ConsoleHistory implements ConsoleModelListener {
 	Vector<String> history = new Vector<String>();
 	int pointer=0;
 	String lastLine;
 	
 	private ConsoleModel model;
-	@Override
+	
 	public void setConsoleModel(ConsoleModel consoleModel) {
 		if (model == consoleModel) {
 			return;
 		}
 		if (model != null) {
 			model.removeConsoleListener(this);
-			
 		}
 		this.model = consoleModel;
 		if (model != null) {
 			model.addConsoleListener(this);
-			
 		}
-
 	}
 
-	@Override
 	public ConsoleModel getConsoleModel() {		
 		return model;
 	}
 
-	
-	
-	@Override
 	public void previous() {		
 		if(model==null||history.isEmpty()||pointer<=0){
 			return;
@@ -115,9 +112,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 		model.setLineBuffer(history.get(pointer));
 	}
 
-	@Override
 	public void next() {
-		
 		if(model==null){
 			return;
 		}
@@ -128,25 +123,20 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 		if(pointer==history.size()){
 			model.setLineBuffer(lastLine);
 			lastLine=null;			
+		} else {			
+			model.setLineBuffer(history.get(pointer));
 		}
-		else {			
-			  model.setLineBuffer(history.get(pointer));
-		}
-		
 	}
 
-	@Override
 	public void clearHistory() {
-		if(lastLine!=null){
+		if (lastLine!=null){
 			model.setLineBuffer(lastLine);
 			lastLine=null;
 			pointer=0;
 		}
 		history.clear();
-		
 	}
 
-	
 	@Override
 	public void onCommit(ConsoleModelEvent e) {		
 		lastLine=null;

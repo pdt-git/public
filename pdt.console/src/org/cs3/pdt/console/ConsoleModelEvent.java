@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console;
+package org.cs3.pdt.console;
 import java.util.EventObject;
 
 public class ConsoleModelEvent extends EventObject {

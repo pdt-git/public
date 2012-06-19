@@ -52,16 +52,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.NewConsoleHistory;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.DefaultSubscription;
@@ -598,7 +597,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 	}
 
-	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
+	public static final String HOOK_ID = PDTConsole.CONSOLE_VIEW_ID;
 	private ConsoleViewer viewer;
 	private Composite partControl;
 	private PrologInterface currentPif;
@@ -696,7 +695,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 
-	private void loadHistory(NewConsoleHistory history) {
+	private void loadHistory(ConsoleHistory history) {
 
 		try {
 			FileInputStream in = new FileInputStream(getHistoryFile());
@@ -1097,21 +1096,21 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	 */
 	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
-		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
+		ConsoleHistory history = viewer.getHistory();
 		saveHistory(history);
 		disconnect(pif);
 	}
 
 	@Override
 	public void onError(PrologInterface pif) {
-		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
+		ConsoleHistory history = viewer.getHistory();
 		saveHistory(history);
 		disconnect(pif);
 
 
 	}
 
-	private void saveHistory(NewConsoleHistory history) {
+	private void saveHistory(ConsoleHistory history) {
 		if (history == null) {
 			return;
 		}
@@ -1284,7 +1283,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			PrologCompletionProvider completionProvider = new PrologCompletionProvider();
 			completionProvider.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
-			NewConsoleHistory history = new NewConsoleHistory();
+			ConsoleHistory history = new ConsoleHistory();
 			viewer.setHistory(history);
 			loadHistory(history);
 		} else {

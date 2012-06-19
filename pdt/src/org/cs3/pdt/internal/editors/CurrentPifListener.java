@@ -5,10 +5,10 @@ import static org.cs3.prolog.common.QueryUtils.bT;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.PrologConsole;
+import org.cs3.pdt.console.PrologConsoleEvent;
+import org.cs3.pdt.console.PrologConsoleListener;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.console.prolog.PrologConsoleEvent;
-import org.cs3.pl.console.prolog.PrologConsoleListener;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;

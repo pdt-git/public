@@ -55,13 +55,11 @@ public class PrologCompletionProposal implements ICompletionProposal {
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IContextInformation getContextInformation() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

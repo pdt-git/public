@@ -42,10 +42,10 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -167,36 +167,25 @@ public class QueryConsoleThreadAction extends Action implements IJobChangeListen
 
 	@Override
 	public void aboutToRun(IJobChangeEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void awake(IJobChangeEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void done(IJobChangeEvent event) {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void running(IJobChangeEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void scheduled(IJobChangeEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void sleeping(IJobChangeEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 }
