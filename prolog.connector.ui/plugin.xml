@@ -23,45 +23,5 @@
            class="org.cs3.prolog.connector.internal.PDTRegistryHook">
      </registryHook>
   </extension> 
-    <extension
-          point="org.cs3.prolog.connector.prologLibrary">
-		<library
-        alias="library"
-        id="pdt.runtime.library.common"
-        path="library/common/">
-     <attribute
-           id="hidden"
-           value="true"/>
-  </library>
- 
-  <library
-        alias="library"
-        id="pdt.runtime.library.attic"
-        path="library/attic/">
-     <attribute
-           id="hidden"
-           value="true"/>
-  </library>
-  <library
-        alias="library"
-        id="pdt.runtime.library.pdt"
-        path="library/pdt/">
-     <attribute
-           id="hidden"
-           value="true"/>
-     <dependency
-           library="pdt.runtime.library.common">
-     </dependency>
-  </library>   
-  <library
-        alias="library"
-        id="pdt.runtime.library.testdata"
-        path="library/testdata/">
-     <attribute
-           id="hidden"
-           value="true"/>
-  </library>   
-                  
-    </extension>
  
 </plugin>
