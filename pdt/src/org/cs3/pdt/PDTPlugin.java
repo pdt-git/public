@@ -51,8 +51,10 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.actions.ToggleEntryPointAction;
 import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.internal.editors.CurrentPifListener;
+import org.cs3.pdt.internal.editors.EditorConsultListener;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
 import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.resources.IFile;
@@ -177,6 +179,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 			final PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
 			consolePlugin.getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
+			
+			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(new EditorConsultListener());
 			
 			
 			ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {

@@ -240,6 +240,10 @@ public class Util {
 		return mac;
 	}
 
+	public static String prologFileName(IFile file) throws IOException {
+		return prologFileName(file.getLocation().toFile().getCanonicalFile());
+	}
+	
 	public static String prologFileName(File f) {
 		try {
 			return normalizeOnWindows(f.getCanonicalPath());

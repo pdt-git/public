@@ -71,6 +71,8 @@ import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.load.PrologLibraryManager;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.IPrologInterfaceService;
+import org.cs3.prolog.pif.service.PrologInterfaceService;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
 import org.eclipse.core.runtime.CoreException;
@@ -444,6 +446,15 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 	public PrologLibraryManager getLibraryManager() {
 		return PrologRuntimePlugin.getLibraryManager();
+	}
+	
+	private IPrologInterfaceService prologInterfaceService;
+	
+	public IPrologInterfaceService getPrologInterfaceService() {
+		if (prologInterfaceService == null) {
+			prologInterfaceService = new PrologInterfaceService();
+		}
+		return prologInterfaceService;
 	}
 	
 }

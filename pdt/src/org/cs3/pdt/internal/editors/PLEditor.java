@@ -65,6 +65,8 @@ import org.cs3.pdt.metadata.PredicateReadingUtilities;
 import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -97,9 +99,6 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
@@ -417,10 +416,11 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				new ConsultAction().consultFromActiveEditor();
-//				addProblemMarkers();
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+//				new ConsultAction().consultFromActiveEditor();
+////				addProblemMarkers();
 				informViewsAboutChangedEditor();
-//				executeConsult();
+////				executeConsult();
 			}
 
 			public void informViewsAboutChangedEditor() {
