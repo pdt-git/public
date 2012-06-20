@@ -792,9 +792,9 @@ public class Util {
 	
 	public static String getExecutablePreference() {
 		if (isWindows()) {
-			return findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getStackCommandLineParameters();
+			return findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES);
 		} else {
-			return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
+			return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
 		}
 	}
 
@@ -996,7 +996,7 @@ public class Util {
 					exeFile = new File(currPath);
 
 					if (exeFile.exists()) {
-						plwin = "\"" + currPath + "\"";
+						plwin = currPath;
 						break;
 					}
 				}
@@ -1172,12 +1172,22 @@ public class Util {
 		return buf.toString();
 	}
 
-	public static String createExecutable(String invocation, String execution, String startupFiles) {
+	public static String createExecutable(String invocation, String execution, String commandLineArguments, String startupFiles) {
 		StringBuffer executable = new StringBuffer(invocation);
-		executable.append(" ");
-		executable.append(execution);
+		if (isWindows()) {
+			executable.append(" \"");
+			executable.append(execution);
+			executable.append("\"");
+		} else {
+			executable.append(execution);
+		}
 		
-		if (startupFiles != null && !startupFiles.isEmpty()) {
+		if (commandLineArguments != null && !commandLineArguments.trim().isEmpty()) {
+			executable.append(" ");
+			executable.append(commandLineArguments);
+		}
+		
+		if (startupFiles != null && !startupFiles.trim().isEmpty()) {
 			executable.append(" -f ");
 			executable.append(startupFiles);
 		}

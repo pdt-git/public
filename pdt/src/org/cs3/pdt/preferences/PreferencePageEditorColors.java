@@ -39,6 +39,9 @@ public class PreferencePageEditorColors extends StructuredFieldEditorPreferenceP
 	private ColorFieldEditor dynamic;
 	private ColorFieldEditor transparent;
 	private ColorFieldEditor meta;
+	private Group gBackground;
+	private Group gHighlight;
+	private Group gProps;
 
 	
 	public PreferencePageEditorColors() {
@@ -53,19 +56,19 @@ public class PreferencePageEditorColors extends StructuredFieldEditorPreferenceP
 	 */
 	@Override
 	public void createFieldEditors() {
-		Group gBackground = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		gBackground = new Group(getFieldEditorParent(), SWT.NONE);
 		gBackground.setText("Background color");
 		background = getColorFieldEditor(PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND_STRING, gBackground);
 		backgroundExtern = getColorFieldEditor(PDTColors.PREF_BACKGROUND_EXTERNAL_FILES, PDTColors.BACKGROUND_EXTERN_STRING, gBackground);
-		
-		Group gHighlight = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+
+		gHighlight = new Group(getFieldEditorParent(), SWT.NONE);
 		gHighlight.setText("Font Color: Syntax Highlighting");
 		string = getColorFieldEditor(PDTColors.PREF_STRING, PDTColors.STRING_STRING, gHighlight);
 		comment = getColorFieldEditor(PDTColors.PREF_COMMENT, PDTColors.COMMENT_STRING, gHighlight);
 		variable = getColorFieldEditor(PDTColors.PREF_VARIABLE, PDTColors.VARIABLE_STRING, gHighlight);
 		default_ = getColorFieldEditor(PDTColors.PREF_DEFAULT, PDTColors.DEFAULT_STRING, gHighlight);
-		
-		Group gProps = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+
+		gProps = new Group(getFieldEditorParent(), SWT.NONE);
 		gProps.setText("Font Color: Predicate Properties");
 		undefined = getColorFieldEditor(PDTColors.PREF_UNDEFINED, PDTColors.UNDEFINED_STRING, gProps);
 		keyword = getColorFieldEditor(PDTColors.PREF_BUILTIN, PDTColors.BUILT_IN_STRING, gProps);
@@ -84,11 +87,17 @@ public class PreferencePageEditorColors extends StructuredFieldEditorPreferenceP
 		addField(dynamic);
 		addField(transparent);
 		addField(meta);
-		
+	}
+
+	@Override
+	protected void adjustGridLayout() {
+		super.adjustGridLayout();
+
 		setColumsWithEqualWidth(gBackground);
 		setColumsWithEqualWidth(gHighlight);
 		setColumsWithEqualWidth(gProps);
 	}
+
 	
 	private MyColorFieldEditor getColorFieldEditor(String name, String labelText, Composite parent) {
 		MyColorFieldEditor editor = new MyColorFieldEditor(name, labelText, parent);

@@ -209,6 +209,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	private String getExecutable(PreferenceProvider provider) {
 		return Util.createExecutable(provider.getPreference(PrologRuntime.PREF_INVOCATION),
 						      provider.getPreference(PrologRuntime.PREF_EXECUTABLE),
+						      provider.getPreference(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS),
 							  provider.getPreference(PrologRuntime.PREF_ADDITIONAL_STARTUP));
 	}
 

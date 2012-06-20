@@ -83,8 +83,6 @@ public class PLMarkerUtils {
 			session.queryOnce("deactivate_warning_and_error_tracing");
 		} catch (PrologException e) {
 			// this may be a reload_timeout_reached exception
-			// (shouldn't happen anymore, but maybe it does)
-
 			// so at least we deactivate the tracing, because
 			// otherwise error markers will still be visible after removing the error
 			try {

@@ -16,7 +16,6 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
@@ -85,8 +84,8 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		//Just leave it empty if you do not want the command history to be persistent.
 		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
 		
-		((GridData)fontGroup.getLayoutData()).horizontalSpan = 3;
-		((GridData)colourGroup.getLayoutData()).horizontalSpan = 3;
+		adjustLayoutForElement(fontGroup);
+		adjustLayoutForElement(colourGroup);
 	}
 
 	/*
