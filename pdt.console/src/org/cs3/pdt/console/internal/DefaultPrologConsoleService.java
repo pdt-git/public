@@ -166,7 +166,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
 			l.activePrologInterfaceChanged(e);
-		}		
+		}
 	}
 
 	public void fireConsoleLostFocus(PrologConsole console) {

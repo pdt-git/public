@@ -74,6 +74,7 @@ import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.load.FileSearchPathConfigurator;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -121,7 +122,7 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole, ActivePrologInterfaceListener {
 
 	private static final String DEFAULT_CONSOLE = "Default Console";
 	private static final String KILLABLE = "killable";
@@ -667,8 +668,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.getParent().addListener(SWT.Show, handler);
 		parent.getParent().addListener(SWT.Hide, handler);
 		parent.getParent().addListener(SWT.FocusOut, handler);
-		PrologConsolePlugin.getDefault().getPrologConsoleService()
-		.registerPrologConsole(this);
+		PrologConsolePlugin.getDefault().getPrologConsoleService().registerPrologConsole(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		GridLayout layout = new GridLayout(1, true);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -1152,6 +1153,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			}
 			reconfigureViewer(currentPif);
 			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
+			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().setActivePrologInterface(currentPif);
 
 		} else {
 			Debug.debug("no pif (yet).");
@@ -1363,6 +1365,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	@Override
 	public void lateInit(PrologInterface pif) {
 		;
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+		setPrologInterface(pif);
 	}
 
 }

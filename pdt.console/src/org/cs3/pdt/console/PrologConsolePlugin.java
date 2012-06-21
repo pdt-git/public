@@ -46,7 +46,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.cs3.pdt.console.internal.ConsolePrologInterfaceProvider;
 import org.cs3.pdt.console.internal.ConsoleReloadExecutor;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -85,7 +84,6 @@ public class PrologConsolePlugin extends AbstractUIPlugin implements IStartup {
 	public void start(BundleContext context) throws Exception{
 		super.start(context);
 		IPrologInterfaceService prologInterfaceService = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService();
-		prologInterfaceService.registerPrologInterfaceProvider(new ConsolePrologInterfaceProvider());
 		prologInterfaceService.registerPDTReloadExecutor(new ConsoleReloadExecutor());
 	}
 

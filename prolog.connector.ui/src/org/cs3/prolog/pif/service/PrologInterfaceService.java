@@ -1,6 +1,7 @@
 package org.cs3.prolog.pif.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +9,11 @@ import java.util.TreeSet;
 
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.DefaultSubscription;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Subscription;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -21,45 +27,71 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 public class PrologInterfaceService implements IPrologInterfaceService{
 	
 	public PrologInterfaceService() {
-		registerPrologInterfaceProvider(new DefaultPrologInterfaceProvider());
 		registerPDTReloadExecutor(new DefaultReloadExecutor());
 	}
 	
-	private TreeSet<PrologInterfaceProvider> pifProviders = new TreeSet<PrologInterfaceProvider>(new Comparator<PrologInterfaceProvider>() {
-		@Override
-		public int compare(PrologInterfaceProvider p1, PrologInterfaceProvider p2) {
-			return p2.getPriority() - p1.getPriority();
-		}
-	});
+	private PrologInterface activePrologInterface;
 	
 	@Override
-	public void registerPrologInterfaceProvider(PrologInterfaceProvider provider) {
-		synchronized (pifProviders) {
-			pifProviders.add(provider);
+	public PrologInterface getActivePrologInterface() {
+		if (activePrologInterface == null) {
+			setActivePrologInterface(null);
 		}
+		return activePrologInterface;
 	}
 	
 	@Override
-	public void unRegisterPrologInterfaceProvider(PrologInterfaceProvider provider) {
-		synchronized (pifProviders) {
-			pifProviders.remove(provider);
-		}
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public PrologInterface getPrologInterface() {
-		TreeSet<PrologInterfaceProvider> providersClone;
-		synchronized (pifProviders) {
-			providersClone = (TreeSet<PrologInterfaceProvider>) pifProviders.clone();
-		}
-		for (PrologInterfaceProvider provider : providersClone) {
-			PrologInterface pif = provider.getPrologInterface();
-			if (pif != null) {
-				return pif;
+	public synchronized void setActivePrologInterface(PrologInterface pif) {
+		if (pif == null) {
+			activePrologInterface = getDefaultPrologInterface();
+		} else {
+			if (activePrologInterface == pif) {
+				return;
+			} else {
+				activePrologInterface = pif;
 			}
 		}
-		return null;
+		fireActivePrologInterfaceChanged(activePrologInterface);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private synchronized void fireActivePrologInterfaceChanged(PrologInterface pif) {
+		ArrayList<ActivePrologInterfaceListener> listenersClone;
+		synchronized (activePrologInterfaceListeners) {
+			listenersClone = (ArrayList<ActivePrologInterfaceListener>) activePrologInterfaceListeners.clone();
+		}
+		for (ActivePrologInterfaceListener listener : listenersClone) {
+			listener.activePrologInterfaceChanged(pif);
+		}
+	}
+	
+	private ArrayList<ActivePrologInterfaceListener> activePrologInterfaceListeners = new ArrayList<ActivePrologInterfaceListener>();
+	
+	@Override
+	public void registerActivePrologInterfaceListener(ActivePrologInterfaceListener listener) {
+		synchronized (activePrologInterfaceListeners) {
+			activePrologInterfaceListeners.add(listener);
+		}
+	}
+	
+	@Override
+	public void unRegisterActivePrologInterfaceListener(ActivePrologInterfaceListener listener) {
+		synchronized (activePrologInterfaceListeners) {
+			activePrologInterfaceListeners.remove(listener);
+		}
+	}
+	
+	private static final String DEFAULT_CONSOLE = "Default Console";
+	
+	private PrologInterface getDefaultPrologInterface() {
+		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		Subscription subscription = registry.getSubscription(DEFAULT_CONSOLE);
+		if (subscription == null) {
+			subscription = new DefaultSubscription(DEFAULT_CONSOLE + "_indepent", DEFAULT_CONSOLE, "Independent prolog process", DEFAULT_CONSOLE + " (Prolog)");
+			registry.addSubscription(subscription);
+		}
+		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+		return pif;
 	}
 	
 	private TreeSet<PDTReloadExecutor> pdtReloadExecutors = new TreeSet<PDTReloadExecutor>(new Comparator<PDTReloadExecutor>() {
@@ -133,7 +165,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
 		}
-		PrologInterface pif = getPrologInterface();
+		PrologInterface pif = getActivePrologInterface();
 		if (pif == null) {
 			return;
 		}
@@ -199,7 +231,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
 		}
-		PrologInterface pif = getPrologInterface();
+		PrologInterface pif = getActivePrologInterface();
 		if (pif == null) {
 			return;
 		}

@@ -7,12 +7,6 @@ import org.eclipse.core.resources.IFile;
 
 public interface IPrologInterfaceService {
 
-	void registerPrologInterfaceProvider(PrologInterfaceProvider provider);
-
-	void unRegisterPrologInterfaceProvider(PrologInterfaceProvider provider);
-
-	PrologInterface getPrologInterface();
-
 	void registerPDTReloadExecutor(PDTReloadExecutor executor);
 
 	void unRegisterPDTReloadExecutor(PDTReloadExecutor executor);
@@ -26,5 +20,13 @@ public interface IPrologInterfaceService {
 	void consultFile(String file);
 
 	void consultFiles(List<IFile> files);
+
+	void registerActivePrologInterfaceListener(ActivePrologInterfaceListener listener);
+
+	void unRegisterActivePrologInterfaceListener(ActivePrologInterfaceListener listener);
+
+	PrologInterface getActivePrologInterface();
+
+	void setActivePrologInterface(PrologInterface pif);
 	
 }
