@@ -180,6 +180,16 @@
                tooltip="If checked, the file is considered as a &quot;main&quot; file.">
          </action>
       </objectContribution>
+       <objectContribution
+             adaptable="false"
+             id="pdt.junit.testcase.contribution"
+             objectClass="org.eclipse.jdt.junit.model.ITestCaseElement">
+          <action
+                class="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
+                id="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
+                label="Open Prolog Test">
+          </action>
+       </objectContribution>
  </extension>
  
 <extension
