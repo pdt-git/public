@@ -44,7 +44,9 @@ package org.cs3.pdt.console.internal.views;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1177,6 +1179,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 		if(automatedSelector != null){
 			automatedSelector.update();
+		}
+		try {
+			int port = (Integer)currentPif.getClass().getMethod("getPort").invoke(currentPif);
+			File portFile = new File(System.getProperty("java.io.tmpdir")+File.separator + "pdtconsoleActivePort.txt");
+			FileWriter writer = new FileWriter(portFile,false);
+			writer.write(""+port+"\n");
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
