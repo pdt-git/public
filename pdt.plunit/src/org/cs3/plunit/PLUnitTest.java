@@ -21,7 +21,6 @@ public class PLUnitTest extends AbstractPrologTestCase{
 
 	private String testname;
 	private String unit;
-	private String assertionLine;
 
 
 	public PLUnitTest(String arg,String unit,String testname,String file, String line) {
@@ -31,7 +30,8 @@ public class PLUnitTest extends AbstractPrologTestCase{
 	}
 
 	@SuppressWarnings("rawtypes")
-	@Parameters(name="{0}:{3}:{4}")
+	//@Parameters
+	@Parameters(name="{2}:{4}")
 	public static Collection data() throws Exception{
 		
 //		prepareTests();
@@ -50,7 +50,7 @@ public class PLUnitTest extends AbstractPrologTestCase{
 			data[i][0]=unitname+":"+testname;
 			data[i][1]=unitname;
 			data[i][2]=testname;
-			data[i][3]=file.replace(':', '|');
+			data[i][3]=file;
 			data[i][4]=line;
 			
 		}
@@ -60,10 +60,10 @@ public class PLUnitTest extends AbstractPrologTestCase{
 
 
 	@Test
-	public void lpane() throws Exception{
+	public void _() throws Exception{
 		
 		boolean print = true;
-		TimeMeasurement fullTm = new TimeMeasurement("test: " + testname, print );
+//		TimeMeasurement fullTm = new TimeMeasurement("test: " + testname, print );
 
 		PrologFacade.queryAll("run_tests("+unit+":"+testname+")");
 
@@ -80,11 +80,10 @@ public class PLUnitTest extends AbstractPrologTestCase{
 
 		Map<String,Object> failedAssertion=PrologFacade.queryOnce("plunit:failed_assertion(Unit, Test, Line, File:ALine, STO, Reason,Module:Goal)");
 		if(failedAssertion != null){
-			assertionLine = (String)failedAssertion.get("ALine");
 			fail("Failed Assertion in Line "+failedAssertion.get("ALine")+" with "+failedAssertion.get("Reason")+" of goal " + failedAssertion.get("Module")+":"+ failedAssertion.get("Goal")+"\n   test case: "+unit+":"+testname);
 		}
 
-		fullTm.getTimeDiff();
+//		fullTm.getTimeDiff();
 		
 	}
 
