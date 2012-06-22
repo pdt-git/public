@@ -1,13 +1,11 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
-import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
