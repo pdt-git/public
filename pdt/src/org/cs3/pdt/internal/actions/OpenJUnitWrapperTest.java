@@ -3,11 +3,10 @@ package org.cs3.pdt.internal.actions;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
-import org.eclipse.jdt.junit.model.ITestElement;
+import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -32,8 +31,10 @@ public class OpenJUnitWrapperTest implements IObjectActionDelegate {
 		
 		ITreeSelection tree = (ITreeSelection)selection;
 		ITestCaseElement tc = (ITestCaseElement)tree.getFirstElement();
+		fileName = ((ITestSuiteElement)tc.getParentContainer().getParentContainer()).getSuiteTypeName();
 		String[] args= tc.getTestMethodName().substring(6,tc.getTestMethodName().length()-1).split(":");
-		fileName = args[2].replace('|', ':');
+//		String[] fileNum= args[1].split(";");
+//		fileName = fileNum[0];
 		if(tc.getFailureTrace()!=null && tc.getFailureTrace().getTrace().startsWith("java.lang.AssertionError: Failed Assertion in Line ")){
 			String trace = tc.getFailureTrace().getTrace();
 			trace = trace.substring("java.lang.AssertionError: Failed Assertion in Line ".length(),trace.length());
@@ -47,7 +48,7 @@ public class OpenJUnitWrapperTest implements IObjectActionDelegate {
 						
 		} else
 
-		lineNumber = Integer.parseInt(args[3]);
+		lineNumber = Integer.parseInt(args[1]);
 		
 	}
 
