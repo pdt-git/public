@@ -80,7 +80,7 @@ public class PLMarkerUtils {
 			addMarkersForErrorsAndWarnings(file, session, doc, new SubProgressMonitor(monitor, 1));
 			monitor.subTask("Update Prolog Smells Detectors");
 			addMarkersForSmellDetectors(file, session, doc, new SubProgressMonitor(monitor, 1));
-			session.queryOnce("deactivate_warning_and_error_tracing");
+//			session.queryOnce("deactivate_warning_and_error_tracing");
 		} catch (PrologException e) {
 			// this may be a reload_timeout_reached exception
 			// so at least we deactivate the tracing, because
