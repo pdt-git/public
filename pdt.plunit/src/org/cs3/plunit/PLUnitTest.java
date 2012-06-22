@@ -62,9 +62,9 @@ public class PLUnitTest extends AbstractPrologTestCase{
 	@Test
 	public void _() throws Exception{
 		
-		boolean print = true;
+//		boolean print = true;
 //		TimeMeasurement fullTm = new TimeMeasurement("test: " + testname, print );
-
+		
 		PrologFacade.queryAll("run_tests("+unit+":"+testname+")");
 
 
