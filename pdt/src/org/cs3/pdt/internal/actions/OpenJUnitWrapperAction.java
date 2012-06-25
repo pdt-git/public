@@ -11,7 +11,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-public class OpenJUnitWrapperTest implements IObjectActionDelegate {
+public class OpenJUnitWrapperAction implements IObjectActionDelegate {
 
 	private String fileName;
 	private int lineNumber;
@@ -35,7 +35,7 @@ public class OpenJUnitWrapperTest implements IObjectActionDelegate {
 		String[] args= tc.getTestMethodName().substring(6,tc.getTestMethodName().length()-1).split(":");
 //		String[] fileNum= args[1].split(";");
 //		fileName = fileNum[0];
-		if(tc.getFailureTrace()!=null && tc.getFailureTrace().getTrace().startsWith("java.lang.AssertionError: Failed Assertion in Line ")){
+		if(tc.getFailureTrace()!=null && tc.getFailureTrace().getTrace().startsWith("java.lang.AssertionError: Failed assertion in line ")){
 			String trace = tc.getFailureTrace().getTrace();
 			trace = trace.substring("java.lang.AssertionError: Failed Assertion in Line ".length(),trace.length());
 			StringBuffer buf = new StringBuffer();
