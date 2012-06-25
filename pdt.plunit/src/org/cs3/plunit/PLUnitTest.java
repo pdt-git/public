@@ -62,28 +62,14 @@ public class PLUnitTest extends AbstractPrologTestCase{
 	@Test
 	public void _() throws Exception{
 		
-//		boolean print = true;
-//		TimeMeasurement fullTm = new TimeMeasurement("test: " + testname, print );
-		
-		PrologFacade.queryAll("run_tests("+unit+":"+testname+")");
-
-
-		Map<String,Object> failed=PrologFacade.queryOnce("plunit:failed(_,_,Line,Error)");
+		Map<String,Object> failed = PrologFacade.queryOnce(
+				"forall(" + // ensure all choice points processed
+				"run_tests("+unit+":"+testname+")," +
+						"true)," +
+				"junitadapter:test_failure(Kind,Msg,Line)");
 		if(failed != null){
-			fail("Failed in Line "+failed.get("Line")+" with Error "+failed.get("Error")+" of "+unit+":"+testname);
+			fail(""+failed.get("Msg"));
 		}
-		
-		Map<String,Object> blocked=PrologFacade.queryOnce("plunit:blocked(_,_,Line,Reason)");
-		if(blocked != null){
-			fail("Blocked in Line "+blocked.get("Line")+" with "+blocked.get("Reason")+" of "+unit+":"+testname);
-		}
-
-		Map<String,Object> failedAssertion=PrologFacade.queryOnce("plunit:failed_assertion(Unit, Test, Line, File:ALine, STO, Reason,Module:Goal)");
-		if(failedAssertion != null){
-			fail("Failed Assertion in Line "+failedAssertion.get("ALine")+" with "+failedAssertion.get("Reason")+" of goal " + failedAssertion.get("Module")+":"+ failedAssertion.get("Goal")+"\n   test case: "+unit+":"+testname);
-		}
-
-//		fullTm.getTimeDiff();
 		
 	}
 

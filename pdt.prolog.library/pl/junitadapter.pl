@@ -56,7 +56,25 @@ file_information(TestName,File,Line):-
 file_information(TestName,__File,__Line):-
     sformat(Msg, ' no test case ''~w'' defined in the factbase.',[TestName]),
     throw(Msg). 
-    
+
+
+test_failure(assertion,A,  Line):-
+  plunit:failed_assertion(_Unit, _Test, _Line, _File:Line, _STO, Reason,Module:Goal),
+  format(atom(A),'Failed assertion in line ~w, ~w of goal ~w in module ~w.',[Line,Reason,Goal,Module]).
+
+
+test_failure(assertion,A,Line):-
+  plunit:failed_assertion(_Unit, _Test, Line, _, _STO, Reason,Module:Goal),
+  format(atom(A),'Failed assertion in line ~w, ~w of goal ~w in module ~w.',[Line,Reason,Goal,Module]).
+  
+test_failure(blocked,A, Line):-
+   plunit:blocked(_,_,Line,Reason),
+  format(atom(A),'Failed Assertion in line ~w, ~w.',[Line,Reason]).
+
+test_failure(failed,A, Line):-
+  plunit:failed(_,_,Line,Reason),
+  format(atom(A),'Blocked test in line ~w, ~w.',[Line,Reason]).
+	 
 
 
 %mypred2(Info):-

@@ -185,7 +185,7 @@
              id="pdt.junit.testcase.contribution"
              objectClass="org.eclipse.jdt.junit.model.ITestCaseElement">
           <action
-                class="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
+                class="org.cs3.pdt.internal.actions.OpenJUnitWrapperAction"
                 id="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
                 label="Open Prolog Test">
           </action>
