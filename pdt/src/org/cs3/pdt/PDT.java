@@ -91,6 +91,8 @@ public final class PDT {
 	public static final int ERR_WORKBENCH_UI_PROBLEM = -10;
 	public static final String PREF_OUTLINE_FILTERS = "pdt.outline.filters";
 	public static final String PREF_OUTLINE_SORT = "pdt.outline.sort";
+	public static final String PREF_OUTLINE_FILTER_PRIVATE = "pdt.outline.filter.private";
+	public static final String PREF_OUTLINE_FILTER_SYSTEM = "pdt.outline.filter.system";
 	public static final int ERR_NO_ACTIVE_FILE = -11;
 	public static final int CX_FIND_PREDICATE = -10;
 	public static final int ERR_OUTLINE_BAD_LOCATION = -12;

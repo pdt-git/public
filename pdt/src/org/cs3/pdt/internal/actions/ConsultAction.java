@@ -195,7 +195,7 @@ public class ConsultAction extends QueryConsoleThreadAction {
 
 	private void activateWarningAndErrorTracing(PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("activate warning and error tracing", 1);
-		pif.queryOnce("activate_warning_and_error_tracing");
+//		pif.queryOnce("activate_warning_and_error_tracing");
 		monitor.done();
 	}
 	
