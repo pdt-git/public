@@ -60,16 +60,22 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.QueryUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -248,6 +254,7 @@ public class ConsultAction extends QueryConsoleThreadAction {
 				IFileEditorInput fileInput = (IFileEditorInput) input;
 				IFile workspaceFile = fileInput.getFile();
 				consultWorkspaceFile(workspaceFile);
+				runUnitTest(workspaceFile);
 			} else if(input instanceof FileStoreEditorInput) {
 				// external file
 				FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
@@ -355,7 +362,76 @@ public class ConsultAction extends QueryConsoleThreadAction {
 		} );
 	}
 
+	private void runUnitTest(IFile workspaceFile) {
+		final IFile f;
+		String fileExtension = workspaceFile.getFileExtension();
+		if(fileExtension == null){
+			return;
+		}
+		if(fileExtension.equals("plt")){
+			f = workspaceFile;
+		} else {
+			String name = workspaceFile.getName();
+			String fullPath = name.substring(0,name.length()-fileExtension.length()-1) + ".plt";
+			IFile testFile = workspaceFile.getParent().getFile(new Path(fullPath));
+			if (testFile != null) {
+				f = testFile;
+			} else {
+				return;
+			}
+		}
+//		Job j = new Job("consult file from workspace") {
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+				if (PDTUtils.checkForActivePif(true)) {
+					PrologSession session = null;
+					try {
+						PrologInterface pif = PDTUtils
+								.getActiveConsolePif();
+						session = pif.getSession();
+						String prologFileName = PDTUtils
+								.getPrologFileName(f);
+						String query = "junitadapter:unit_test(UnitName,Test,'"+ prologFileName + "',Line)";
+						if (session.queryOnce(query) != null) {
+							session.queryOnce("assert(junitadapter:file_to_test('"+ prologFileName + "'))");
+							
+							ILaunchConfiguration[] launchConfigurations = DebugPlugin
+									.getDefault().getLaunchManager().getLaunchConfigurations();
+							ILaunchConfiguration plunit = null;
+							for (ILaunchConfiguration iLaunchConfiguration : launchConfigurations) {
+								if(iLaunchConfiguration.getName().equals("PLUnitTest")){
+									plunit = iLaunchConfiguration;
+									break;
+								}
+							}
+							if(plunit!=null){
+//								UIUtils.getDisplay().asyncExec(new Runnable() {
+//									
+//									@Override
+//									public void run() {
+									  	  DebugUITools.launch(plunit,
+													ILaunchManager.RUN_MODE);
+									  	UIUtils.getActiveEditor().setFocus();
+//									}
+//								});
+							}
+						}
+					} catch (Exception e) {
+						Debug.report(e);
+					} finally {
+						if (session != null) {
+							session.dispose();
+						}
 
+					}
+				}
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		j.setRule(f);
+//		j.schedule();
+		
+	}
 	
 
 

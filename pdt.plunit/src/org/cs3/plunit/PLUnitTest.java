@@ -10,8 +10,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.plunit.framework.AbstractPrologTestCase;
 import org.cs3.plunit.framework.PrologFacade;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
@@ -72,5 +74,9 @@ public class PLUnitTest extends AbstractPrologTestCase{
 		}
 		
 	}
-
+	@AfterClass
+	static public void resetFilesToTest() throws PrologInterfaceException{
+		 PrologFacade.queryOnce("junitadapter:reset_file_to_test");
+	}
+	
 }
