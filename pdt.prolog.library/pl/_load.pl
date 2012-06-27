@@ -17,4 +17,6 @@
  :- consult(utils4modules). % Module handling
  :- consult(utils4modules_visibility). % Visibility handling
  
+ :- use_module(junitadapter).
+ 
 % :- consult(pdt_xref_experimental).     % find_references, ...

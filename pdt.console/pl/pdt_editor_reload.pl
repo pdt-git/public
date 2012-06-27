@@ -5,6 +5,7 @@
          , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
          , errors_and_warnings/5                  % Called from PLMarkerUtils.run()
          , pdt_reloaded_file/1
+         , wait_for_reload_finished/0
          ]).
 
 
@@ -23,57 +24,41 @@
 % console history and to start the update of the PDT-internal factbase.
 
 % SWI-Prolog list    
-pdt_reload(Files):-
+
+pdt_reload(FileOrFiles) :-
+	with_mutex('reloadMutex',(
+		activate_warning_and_error_tracing,
+		pdt_reload__(FileOrFiles),
+		deactivate_warning_and_error_tracing,
+		notify_reload_listeners(FileOrFiles)
+	)).
+
+pdt_reload__(Files):-
     is_list(Files),
     !,
-    forall(member(F,Files),pdt_reload_no_listener(F)),
-	notify_reload_listeners(Files).
+    forall(member(F,Files), pdt_reload__(F)).
 	
 % Logtalk
-pdt_reload(File):-
+pdt_reload__(File):-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
-    with_mutex('reloadMutex', 
-      logtalk_adapter::pdt_reload(File)
-    ).
+    logtalk_adapter::pdt_reload(File).
 
 % SWI-Prolog
-pdt_reload(File):-
-    debug(pdt_reload, 'pdt_reload(~w)', [File]),
-    with_mutex('reloadMutex', 
-      (
-        % we have to continiue, even if reload_file fails
-        % normally failing means: the file has errors
-        (make:reload_file(File) -> true ; true),
-        % only return false if the file is not loaded at all
-        ( source_file(File) ->
-          ( retractall(in_reload),
-            notify_reload_listeners([File])
-          )
-          ; fail
-        )        
-      )
-    ).
-    
-pdt_reload_no_listener(File):-
-    debug(pdt_reload, 'pdt_reload_no_listener(~w)', [File]),
-    with_mutex('reloadMutex', 
-      (
-        % we have to continiue, even if reload_file fails
-        % normally failing means: the file has errors
-        (make:reload_file(File) -> true ; true),
-        % only return false if the file is not loaded at all
-        ( source_file(File) ->
-          retractall(in_reload)
-          ; fail
-        )        
-      )
-    ).
+pdt_reload__(File):-
+	debug(pdt_reload, 'pdt_reload(~w)', [File]),
+	
+	% we have to continiue, even if reload_file fails
+	% normally failing means: the file has errors
+	(make:reload_file(File) -> true ; true).
 
 :- multifile(pdt_reload_listener/1).
 
 notify_reload_listeners(Files) :-
-	pdt_reload_listener(Files),
+	(	is_list(Files)
+	->	pdt_reload_listener(Files)
+	;	pdt_reload_listener([Files])
+	),
 	fail.
 notify_reload_listeners(_).
 
@@ -93,26 +78,18 @@ pdt_reload_listener(Files) :-
 :- dynamic(reloaded_file/1).
 
 activate_warning_and_error_tracing :- 
-	with_mutex('reloadMutex', (
-		begin_reload,
-	 	assertz(warning_and_error_tracing)
-	)).
+    trace_reload(begin),
+    assertz(in_reload),
+	retractall(traced_messages(_,_,_,_)),
+	retractall(reloaded_file(_)),
+	assertz(warning_and_error_tracing).
 
 deactivate_warning_and_error_tracing :-
-	with_mutex('reloadMutex', (
-	  retractall(traced_messages(_,_,_,_)),
-	  retractall(reloaded_file(_)),
-	  retractall(warning_and_error_tracing)
-	)). 
+	retractall(in_reload),
+	retractall(warning_and_error_tracing).
  
- 	
 :- dynamic in_reload/0.
 
-begin_reload :-
-    writeln('INFO: begin reload'),
-    with_mutex('reloadMutex', assert(in_reload) ),
-    trace_reload(begin).
-    
 %% message_hook(+Term, +Level,+ Lines) is det. 
 %
 % intercept prolog messages to collect term positions and 
