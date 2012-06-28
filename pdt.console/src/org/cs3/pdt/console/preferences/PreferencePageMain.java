@@ -5,14 +5,19 @@ import java.io.IOException;
 
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.ui.preferences.MyBooleanFieldEditor;
+import org.cs3.pdt.ui.preferences.MyColorFieldEditor;
+import org.cs3.pdt.ui.preferences.MyFileFieldEditor;
+import org.cs3.pdt.ui.preferences.MyFontFieldEditor;
+import org.cs3.pdt.ui.preferences.MyRadioGroupFieldEditor;
+import org.cs3.pdt.ui.preferences.StructuredFieldEditorPreferencePage;
 import org.cs3.pl.common.Debug;
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -27,12 +32,17 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * preferences can be accessed directly via the preference store.
  */
 
-public class PreferencePageMain extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class PreferencePageMain extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+	private ColorFieldEditor cfe_error;
+	private ColorFieldEditor cfe_warn;
+	private ColorFieldEditor cfe_info;
+	private ColorFieldEditor cfe_dbg;
+	private BooleanFieldEditor bfe_inter_start;
+	
 	public PreferencePageMain() {
 		super(GRID);
 		setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
-		setDescription("Preferences for the Prolog Console");
 	}
 		
 	/**
@@ -42,36 +52,40 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 	 */
 	@Override
 	public void createFieldEditors() {
-		//If enabled, the enter key sends a semicolon(';') when\n
-		//while the console is in 'get_single_char/1'-mode, \n
-		//e.g., when backtracking over the solutions to a goal.		
-//		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
 		
-//		addField(new BooleanFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "reconsult files on restart of process",getFieldEditorParent()));
 		
-		RadioGroupFieldEditor rgfeReconsult = new RadioGroupFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "Handling consulted files on restart", 3, new String[][] {
+		RadioGroupFieldEditor rgfeReconsult = new MyRadioGroupFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "Handling consulted files on restart", 3, new String[][] {
 				{ "no reconsulting", PDTConsole.RECONSULT_NONE }, { "reconsult entry points", PDTConsole.RECONSULT_ENTRY }, { "reconsult all files", PDTConsole.RECONSULT_ALL }},
-				getFieldEditorParent(), true);
+				getFieldEditorParent());
 		addField(rgfeReconsult);
+		
+
+		Group fontGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		fontGroup.setText("Console font");
+		addField(new MyFontFieldEditor(PDTConsole.PREF_CONSOLE_FONT, "Console font:", fontGroup));
+		
+		Group colourGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		colourGroup.setText("Colour output line starting with ...");
+		
+		cfe_error = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_ERROR, "ERROR", colourGroup);
+		cfe_warn = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_WARNING, "WARNING", colourGroup);
+		cfe_info = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_INFO, "INFO", colourGroup);
+		cfe_dbg = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_DEBUG, "DEBUG", colourGroup);
+		bfe_inter_start = new MyBooleanFieldEditor(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "Treat '***' as 'INFO'", colourGroup);
+		
+		addField(cfe_error);
+		addField(cfe_warn);
+		addField(cfe_info);
+		addField(cfe_dbg);
+		addField(bfe_inter_start);
+		
 		
 		//The Prolog Console uses this to save its command history.\n
 		//Just leave it empty if you do not want the command history to be persistent.
 		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
 		
-		//Maximum time in milliseconds to wait for the console server to come up.
-		IntegerFieldEditor connectTimeoutEditor = new IntegerFieldEditor(PDTConsole.PREF_TIMEOUT,"Connect Timeout",getFieldEditorParent());
-		connectTimeoutEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
-		addField(connectTimeoutEditor);
-		
-		//If this flag is set, processes will be shown in the console even if all subscriptions are marked as invisible.
-		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Show Hidden Processes",getFieldEditorParent()));
-		
-		//comma-separated list of trackers the console does follow
-		StringFieldEditor sfe = new StringFieldEditor(PDTConsole.PREF_CONTEXT_TRACKERS,"Active context trackers",getFieldEditorParent());
-		addField(sfe);
-		// Disabled, because Lukas set it in his implementation to invisible
-		sfe.setEnabled(false, getFieldEditorParent()); 
-		
+		adjustLayoutForElement(fontGroup);
+		adjustLayoutForElement(colourGroup);
 	}
 
 	/*
@@ -86,21 +100,7 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 	
 	
 	
-	class FileFieldEditorWithEnsureFileExists extends FileFieldEditor{
-
-		
-
-		public FileFieldEditorWithEnsureFileExists() {
-			super();
-		}
-
-		public FileFieldEditorWithEnsureFileExists(String name, String labelText, boolean enforceAbsolute, Composite parent) {
-			super(name, labelText, enforceAbsolute, parent);
-		}
-
-		public FileFieldEditorWithEnsureFileExists(String name, String labelText, boolean enforceAbsolute, int validationStrategy, Composite parent) {
-			super(name, labelText, enforceAbsolute, validationStrategy, parent);
-		}
+	class FileFieldEditorWithEnsureFileExists extends MyFileFieldEditor {
 
 		public FileFieldEditorWithEnsureFileExists(String name, String labelText, Composite parent) {
 			super(name, labelText, parent);
@@ -154,8 +154,7 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 	        clearErrorMessage();
 	        return true;
 		}
-		
-	
+
 	}
 	
 	

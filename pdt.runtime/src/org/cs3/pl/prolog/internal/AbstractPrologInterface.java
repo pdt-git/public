@@ -56,6 +56,7 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.PreferenceProvider;
@@ -195,14 +196,21 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	@Override
 	public void initOptions(PreferenceProvider provider) {
-		setStandAloneServer(provider.getPreference(PrologInterface.PREF_STANDALONE));
-		setHost(provider.getPreference(PrologInterface.PREF_HOST));
-		setExecutable(provider.getPreference(PrologInterface.PREF_EXECUTABLE));
-		setEnvironment(provider.getPreference(PrologInterface.PREF_ENVIRONMENT));
-		setTimeout(provider.getPreference(PrologInterface.PREF_TIMEOUT));
-		setFileSearchPath(provider.getPreference(PrologInterface.PREF_FILE_SEARCH_PATH));
-		setAttribute(PrologInterface.PREF_GENERATE_FACTBASE, provider.getPreference(PrologInterface.PREF_GENERATE_FACTBASE));
-		setAttribute(PrologInterface.PREF_META_PRED_ANALYSIS, provider.getPreference(PrologInterface.PREF_META_PRED_ANALYSIS));
+		setHost(provider.getPreference(PrologRuntime.PREF_HOST));
+		String executable = getExecutable(provider);
+		setExecutable(executable);
+		setEnvironment(provider.getPreference(PrologRuntime.PREF_ENVIRONMENT));
+		setTimeout(provider.getPreference(PrologRuntime.PREF_TIMEOUT));
+		setFileSearchPath(provider.getPreference(PrologRuntime.PREF_FILE_SEARCH_PATH));
+		setAttribute(PrologRuntime.PREF_GENERATE_FACTBASE, provider.getPreference(PrologRuntime.PREF_GENERATE_FACTBASE));
+		setAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS, provider.getPreference(PrologRuntime.PREF_META_PRED_ANALYSIS));
+	}
+
+	private String getExecutable(PreferenceProvider provider) {
+		return Util.createExecutable(provider.getPreference(PrologRuntime.PREF_INVOCATION),
+						      provider.getPreference(PrologRuntime.PREF_EXECUTABLE),
+						      provider.getPreference(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS),
+							  provider.getPreference(PrologRuntime.PREF_ADDITIONAL_STARTUP));
 	}
 
 	/************************************************/

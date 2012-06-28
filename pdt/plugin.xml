@@ -24,10 +24,16 @@
           name="PDT">
     </page>
     <page
-          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.preferences.PreferencePageColor"
-          id="org.cs3.preferences.PreferencePageColor"
+          category="org.cs3.pdt.preferences.PreferencePageEditor"
+          class="org.cs3.pdt.preferences.PreferencePageEditorColors"
+          id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
+    </page>
+    <page
+          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.pdt.preferences.PreferencePageEditor"
+          id="org.cs3.pdt.preferences.PreferencePageEditor"
+          name="Editor">
     </page>
  </extension>
   <extension
@@ -48,6 +54,15 @@
             contributorClass="org.cs3.pdt.internal.editors.QLFEditorContributor"
             id="org.cs3.pdt.internal.editors.QLFEditor">
       </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSetPartAssociations">
+      <actionSetPartAssociation
+            targetID="org.eclipse.ui.edit.text.actionSet.presentation">
+         <part
+               id="org.cs3.pdt.internal.editors.PLEditor">
+         </part>
+      </actionSetPartAssociation>
    </extension>
 
  <extension
@@ -165,6 +180,16 @@
                tooltip="If checked, the file is considered as a &quot;main&quot; file.">
          </action>
       </objectContribution>
+       <objectContribution
+             adaptable="false"
+             id="pdt.junit.testcase.contribution"
+             objectClass="org.eclipse.jdt.junit.model.ITestCaseElement">
+          <action
+                class="org.cs3.pdt.internal.actions.OpenJUnitWrapperAction"
+                id="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
+                label="Open Prolog Test">
+          </action>
+       </objectContribution>
  </extension>
  
 <extension

@@ -39,25 +39,19 @@
  *   distributed.
  ****************************************************************************/
 
-/*
- * Created on 23.08.2004
- *
- */
 package org.cs3.pdt.internal.search;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Vector;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.queries.PDTSearchQuery;
+import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
+import org.cs3.pdt.internal.structureElements.PrologMatch;
+import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
-import org.cs3.pdt.internal.structureElements.SearchModuleElementCreator;
-import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pdt.internal.structureElements.SearchResultCategory;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -81,8 +75,6 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private PDTSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
-	private HashMap<IFile,SearchPredicateElement[]> elementCache = new HashMap<IFile, SearchPredicateElement[]>();
-	private HashSet<IFile> fileCache = new HashSet<IFile>();
 
 	/**
 	 * @param query
@@ -104,6 +96,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 
 	private String searchType = "Prolog Search";
+	private HashMap<String, SearchModuleElement> modules = new HashMap<String, SearchModuleElement>();
 	@Override
 	public final String getLabel() {		
 		return searchType + " "
@@ -137,9 +130,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
-		if (ei instanceof IFileEditorInput) {
+		if (ei instanceof IFileEditorInput && match instanceof PrologMatch) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			return match.getElement().equals(fi.getFile());
+			return ((PrologMatch)match).getFile().equals(fi.getFile());
 		}
 		return false;
 	}
@@ -156,7 +149,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			return result.getMatches(fi.getFile());
+			return computeContainedMatches(fi.getFile());
 		}
 		else return EMPTY_ARR;
 	}
@@ -170,7 +163,26 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
 			IFile file) {
-		return result.getMatches(file);
+		return computeContainedMatches(file);
+	}
+	
+	private Match[] computeContainedMatches(IFile file) {
+		HashSet<Match> result = new HashSet<Match>();
+		for (SearchModuleElement module : modules.values()) {
+			for (Object obj : module.getChildren()) {
+				if (obj instanceof SearchPredicateElement) {
+					SearchPredicateElement predicate = (SearchPredicateElement) obj;
+					for (SearchFileTreeElement fileTreeElement : predicate.getFileTreeElements()) {
+						if (fileTreeElement.getFile().equals(file)) {
+							for (PrologMatch match : fileTreeElement.getOccurrences()) {
+								result.add(match);
+							}
+						}
+					}
+				}
+			}
+		}
+		return result.toArray(new Match[result.size()]);
 	}
 
 	/*
@@ -182,81 +194,84 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	public IFile getFile(Object element) {
 		if (element instanceof IFile){
 			return (IFile) element;
+		} else if (element instanceof SearchFileTreeElement) {
+			return ((SearchFileTreeElement) element).getFile();
+		} else if (element instanceof SearchMatchElement){
+			return ((SearchMatchElement) element).getMatch().getFile();
+		} else if (element instanceof PrologMatch) {
+			return ((PrologMatch) element).getFile();
+		} else {
+			return null;
 		}
-		if (element instanceof SearchPredicateElement){
-			return ((SearchPredicateElement) element).getFile();
-		}
-		if(element instanceof Match){
-			return ((SearchPredicateElement) ((Match) element).getElement()).getFile();
-		}
-		return null;
 	}
 	
 	public SearchModuleElement[] getModules(){
-		Object[] elements = getElements();
-		List<PDTMatch> matches = new ArrayList<PDTMatch>();
-		for (int i=0; i< elements.length; i++) {
-			if (elements[i] instanceof SearchPredicateElement){
-				SearchPredicateElement elem = (SearchPredicateElement)elements[i];
-				Match[] matchesForElem = getMatches(elem);
-				for (int j =0; j< matchesForElem.length; j++) {
-					if (matchesForElem[j] instanceof PDTMatch)
-						matches.add((PDTMatch)matchesForElem[j]);
-				}
-			}
-		}
-		return SearchModuleElementCreator.getModuleDummiesForMatches(matches);
-	}
-
-	public SearchPredicateElement[] getElements(IFile file) {
-		SearchPredicateElement[] children = elementCache.get(file);
-		if(children==null){
-			Object[] elms = getElements();
-			Vector<SearchPredicateElement> v = new Vector<SearchPredicateElement>();
-			for (int i = 0; i < elms.length; i++) {
-				SearchPredicateElement elm = (SearchPredicateElement) elms[i];
-				if(elm.getFile().equals(file)){
-					v.add(elm);
-				}
-			}
-			children = v.toArray(new SearchPredicateElement[v.size()]);
-			elementCache.put(file, children);
-		}
-		return children;
+		Collection<SearchModuleElement> values = modules.values();
+		SearchModuleElement[] moduleArray = values.toArray(new SearchModuleElement[values.size()]);
+		Arrays.sort(moduleArray);
+		return moduleArray;
 	}
 	
-	public SearchResultCategory[] getCategories() {
-		if (query.getCategoryHandler() == null) {
-			return new SearchResultCategory[0];
-		}
-		return query.getCategoryHandler().getCategories();
-	}
-
 	public Object[] getChildren() {
-		if (query.isCategorized())
-			return getCategories();
-		else
-			return getModules();
+		return getModules();
 	}
 	
 	
 	@Override
 	public void addMatch(Match match) {
-		SearchPredicateElement elm = (SearchPredicateElement) match.getElement();
-		fileCache.add(elm.getFile());
 		super.addMatch(match);
+		addMatchToResult((PrologMatch) match);
 	}
 	
-	public IFile[] getFiles() {
-		IFile[] unsortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
-		return PDTCoreUtils.sortFileSet(unsortedFiles);
+	@Override
+	public void addMatches(Match[] matches) {
+		super.addMatches(matches);
+		for (Match match : matches) {
+			addMatchToResult((PrologMatch) match);
+		}
 	}
-
+	
+	private void addMatchToResult(PrologMatch match) {
+		String module = match.getModule();
+		String visibility = match.getVisibility();
+		String signature = module + visibility;
+		SearchModuleElement searchModuleElement = modules.get(signature);
+		if (searchModuleElement == null) {
+			searchModuleElement = new SearchModuleElement(this, module, visibility);
+			modules.put(signature, searchModuleElement);
+		}
+		searchModuleElement.addMatch(match);
+	}
 	
 	@Override
 	public void removeAll() {	
 		super.removeAll();
-		fileCache.clear();
-		elementCache.clear();
+		modules.clear();
 	}
+	
+	@Override
+	public void removeMatch(Match match) {
+		super.removeMatch(match);
+		removeMatchFromResult((PrologMatch) match);
+	}
+	
+	@Override
+	public void removeMatches(Match[] matches) {
+		super.removeMatches(matches);
+		for (Match match : matches) {
+			removeMatchFromResult((PrologMatch) match);
+		}
+	}
+	
+	private void removeMatchFromResult(PrologMatch match) {
+		String signature = match.getModule() + match.getVisibility();
+		SearchModuleElement searchModuleElement = modules.get(signature);
+		if (searchModuleElement != null) {
+			searchModuleElement.removeMatch(match);
+			if (!searchModuleElement.hasChildren()) {
+				modules.remove(signature);
+			}
+		}
+	}
+
 }

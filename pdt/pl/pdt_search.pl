@@ -1,7 +1,7 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
-         , find_definitions_categorized/12       % 
-         , find_primary_definition_visible_in/5  % 
+         , find_definitions_categorized/12       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility)
+         , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/8
          , find_pred/8
          ]).
@@ -41,14 +41,13 @@
 %                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
 %                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
 % Logtalk
-find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategoryLabel):-
+find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
     Term \= _:_,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategory),
-    results_category_label(ResultsCategory, ResultsCategoryLabel).
+    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencingModule, definition, DefiningModule, File,Line, PropertyList, ResultsCategoryLabel):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencingModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
     search_term_to_predicate_indicator(Term, Functor/Arity),
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencingModule)
@@ -56,7 +55,7 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     ;  ReferencingModule = FileModule   % Implicit module reference
     ),    
     find_definition(ReferencingModule,Functor,Arity,Sources),
-    member(ResultsCategoryLabel-DefiningModule-Location,Sources),
+    member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
     properties_for_predicate(ReferencingModule,Functor,Arity,PropertyList).
@@ -186,7 +185,7 @@ visibility(ContextModule,Name,Arity,DeclModule, local) :-
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/ 
 
-%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
+%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine,?MultifileResult)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity 
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either 
@@ -197,17 +196,17 @@ visibility(ContextModule,Name,Arity,DeclModule, local) :-
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
         
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine) :-
+find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine).
+    logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult).
 
 
 % The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine) :-
+find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
     extract_name_arity(Term,Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Head,Name,Arity,ReferencedModule,MainFile,FirstLine).
+    find_primary_definition_visible_in__(EnclFile,Head,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult).
 
 retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	(	module_property(Module, file(EnclFile))
@@ -235,13 +234,17 @@ extract_name_arity(Term,Head,Name,Arity) :-
 
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
-find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
+find_primary_definition_visible_in__(_,Term,_,_,_,File,Line,no):-
     find_file(Term,File,Line).
 
 %  b) a literal (call or clause head):    
-find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
-    find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
-    primary_location(Locations,DefiningModule,MainFile,FirstLine).
+find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
+	find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
+	(	Locations = [_,_|_]
+	->	MultifileResult = yes
+	;	MultifileResult = no
+	),
+	primary_location(Locations,DefiningModule,MainFile,FirstLine).
 
 
 % If Term is a loading directive, find the related file,

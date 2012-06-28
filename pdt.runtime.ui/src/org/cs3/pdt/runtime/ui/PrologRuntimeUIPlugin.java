@@ -58,6 +58,7 @@ import java.util.WeakHashMap;
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
@@ -142,9 +143,8 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 
 	public ResourceFileLocator getResourceLocator() {
-		if (resourceLocator == null){
-			String bootStrapDir = getPreferenceValue(PrologRuntimeUI.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
-			resourceLocator = new DefaultResourceFileLocator(new File(bootStrapDir));			
+		if (resourceLocator == null) {
+			resourceLocator = new DefaultResourceFileLocator(new File(System.getProperty("java.io.tmpdir")));			
 		}
 		return resourceLocator;
 	}
@@ -279,10 +279,10 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	 */
 	protected void registerStaticTrackers() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, PrologRuntimeUI.EP_TRACKERS);
+		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, PrologRuntime.EP_TRACKERS);
 		if (point == null) {
-			Debug.error("could not find the extension point " + PrologRuntimeUI.EP_TRACKERS);
-			throw new RuntimeException("could not find the extension point " + PrologRuntimeUI.EP_TRACKERS);
+			Debug.error("could not find the extension point " + PrologRuntime.EP_TRACKERS);
+			throw new RuntimeException("could not find the extension point " + PrologRuntime.EP_TRACKERS);
 		}
 		IExtension[] extensions = point.getExtensions();
 		try {

@@ -80,7 +80,7 @@ public class ImageRepository {
 
     public final static String PE_PROTECTED = "protected_co.gif";
     public final static String POTENTIAL_MATCH = "protected_co.gif";
-
+    
     public final static String PE_MULTIFILE = "multifile.gif";
 
     public final static String PE_LOCAL = "variable.gif";
@@ -132,6 +132,12 @@ public class ImageRepository {
 	public static final String PREFERENCES = "preferences.png";
 
 	public static final String MESSAGE_INFO = "message_info.gif";
+	
+	public static final String SEARCH_MATCH = "searchm_obj.gif";
+
+    public static final String FILTER_PRIVATE = "protected_co_crossed.gif";
+    public static final String FILTER_SYSTEM = "system_filter.png";
+    public static final String NO_FILTER_SYSTEM = "system.png";
 
 
     public static final ImageDescriptor getImageDescriptor(String icon) {

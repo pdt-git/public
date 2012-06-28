@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
+<!--
     	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
@@ -28,7 +29,6 @@
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
             id="PrologProjectObjectContribution">
-            <!-- see org.eclipse.ui.IResourceActionFilter.PROJECT_NATURE -->
             <visibility>
 		       <not>
 	             <objectState
@@ -62,7 +62,6 @@
 	              name="group1">
 	        </separator>
 	     </menu>
-	     <!-- see org.eclipse.ui.IProjectActionFilter.NATURE -->
             <visibility>
              <objectState
                    name="projectNature"
@@ -206,18 +205,6 @@
                name="nature"
                value="org.cs3.pdt.core.PDTProjectNature"/>
     </page>
-    <!-- <page
-          adaptable="true"
-          category="org.cs3.pdt.properties.projectPropertyPage"
-          class="org.cs3.pdt.core.internal.properties.AnnotatorsPropertyPage"
-          icon="icons/sample.gif"
-          id="org.cs3.pdt.properties.annotatorsPropertyPage"
-          name="Parser Modules"
-          objectClass="org.eclipse.core.resources.IProject">
-		  <filter
-               name="nature"
-               value="org.cs3.pdt.core.PDTProjectNature"/>
-    </page> -->
  </extension>
   <extension
         point="org.cs3.pdt.runtime.prologLibrary">
@@ -226,7 +213,6 @@
            id="pdt.core.library"
            path="engine">
         <dependency library="pdt.runtime.library.common"/>
-    <!--    <dependency library="pdt.runtime.library.swipl"/> -->
         <dependency library="pdt.runtime.library.attic"/>
         <attribute id="hidden" value="true"/>
         <dependency
@@ -314,6 +300,6 @@
            type="org.cs3.pdt.core.problem">
      </super>
   </extension>
- 
+ -->
  
 </plugin>

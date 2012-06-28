@@ -44,7 +44,9 @@ package org.cs3.pdt.console.internal.views;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,7 +60,6 @@ import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.console.preferences.PreferencePageFontColor;
 import org.cs3.pdt.console.preferences.PreferencePageMain;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
@@ -274,6 +275,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 											getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 										}
 									});
+									writeCurrentProcessPortToFile();
 								}
 							}
 						} catch (Throwable e) {
@@ -835,10 +837,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				IPreferenceNode node = new PreferenceNode("PreferencePage", page);
 				mgr.addToRoot(node);
 
-				IPreferencePage appearance = new PreferencePageFontColor();
-				appearance.setTitle("Appearance");
-				node.add(new PreferenceNode("AppearancePreferences", appearance));
-				
 				PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
 				dialog.create();
 				dialog.setMessage(page.getTitle());
@@ -1183,6 +1181,19 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		if(automatedSelector != null){
 			automatedSelector.update();
 		}
+		writeCurrentProcessPortToFile();
+	}
+
+	public void writeCurrentProcessPortToFile() {
+		try {
+			int port = (Integer)currentPif.getClass().getMethod("getPort").invoke(currentPif);
+			File portFile = new File(System.getProperty("java.io.tmpdir")+File.separator + "pdtconsoleActivePort.txt");
+			FileWriter writer = new FileWriter(portFile,false);
+			writer.write(""+port+"\n");
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -1316,12 +1327,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
 		title.setText(key);
-		boolean useEnter = Boolean.valueOf(
-				PrologConsolePlugin.getDefault().getPreferenceValue(
-						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
-						.booleanValue();
 
-		viewer.setEnterSendsSemicolon(useEnter);
+		viewer.setEnterSendsSemicolon(false);
 
 	}
 

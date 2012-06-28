@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
@@ -30,6 +32,8 @@ public class PDTOutlineQuery {
 				return new HashMap<String, OutlineModuleElement>();
 			}
 			session = console.getPrologInterface().getSession();
+			
+			session.queryOnce("pdt_editor_reload:wait_for_reload_finished");
 
 			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
 			List<Map<String, Object>> result = session.queryAll(query);
@@ -50,12 +54,12 @@ public class PDTOutlineQuery {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		String module = "user";
 		for (Map<String, Object> predicate : result) {
-			module=(String)predicate.get("Entity");
-			String name=(String)predicate.get("Functor");
-			String kindOfEntity = (String)predicate.get("KindOfEntity");
-			int arity=Integer.parseInt((String)predicate.get("Arity"));
-			int line = Integer.parseInt((String)predicate.get("Line"));
-			String type = (String)predicate.get("TypeOfDef");
+			module = predicate.get("Entity").toString();
+			String name = predicate.get("Functor").toString();
+			String kindOfEntity = predicate.get("KindOfEntity").toString();
+			int arity=Integer.parseInt(predicate.get("Arity").toString());
+			int line = Integer.parseInt(predicate.get("Line").toString());
+			String type = predicate.get("TypeOfDef").toString();
 			Object prop = predicate.get("PropertyList");
 			List<String> properties = null;
 			if (prop instanceof Vector<?>) {
