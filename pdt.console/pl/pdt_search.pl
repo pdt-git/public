@@ -260,33 +260,43 @@ primary_location(Locations,_,File,FirstLine) :-
          
 % TODO: This is meanwhile subsumed by other predicates. Integrate!
    
-%% find_definition_contained_in(+File, -Name,-Arity,-Line,-PropertyList) is nondet.
+%% find_definition_contained_in(+File, -Entity, -EntityKind, -Name,-Arity, -SearchCategory, -Line,-PropertyList) is nondet.
 %
-% Looks up the starting line of each clause of each  
-% predicate Name/Arity defined in File. Core properties
-% of the predicate are contained in the PropertyList.
+% Look up the starting line of a clause of a predicate Name/Arity defined in File. 
+% Do this upon backtracking for each clause of each predicate in File.
 %
+% @param File           The file to search for definitions.
+% @param Entity         The module (in Prolog) or Entity (in logtalk) to which a predicate belongs.
+%                       Note that there can be multiple entities in a file. 
+% @param EntityKind     "module" (in Prolog) or "object|category|protocoll" (in Logtalk)
+% @param Name           The name of the defined predicate
+% @param Arity          The arity of the defined predicate
+% @param SearchCategory "multifile|definition"
+% @param Line           The starting line of a clause of Name/Arity contained in File.
+% @param PropertyList   A list of properties of the predicate. 
+%                       TODO: Enumerate values expected by the Java GUI.
+
 % Called from PDTOutlineQuery.java
 
-find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
+find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
+    find_definition_contained_in(File, Module, _, module, Functor, Arity, SearchCategory, Line, PropertyList).
+    
+
+find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
+    logtalk_adapter::find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
 
-find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
+find_definition_contained_in(File, Module, ModuleLine, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
-	strip_module(ModuleHead,ModuleCandidate,Head),
-	(	module_property(ModuleCandidate, file(File))
-	->	Module = ModuleCandidate
-	;	Module = user
-	),
+    pdt_strip_module(ModuleHead,Module,ModuleLine,Head),
     functor(Head, Functor, Arity),
-    properties_for_predicate(ModuleCandidate,Functor, Arity, PropertyList0),
+    properties_for_predicate(Module,Functor, Arity, PropertyList0),
     % In the case of a multifile predicate, we want to find all clauses for this 
     % predicate, even when they occur in other files
     (	member(multifile, PropertyList0)
-    -> (	defined_in_file(ModuleCandidate, Functor, Arity, _, DeclFile, Line),
+    -> (	defined_in_file(Module, Functor, Arity, _, DeclFile, Line),
     		(	DeclFile \= File
     		-> 	(	module_property(MultiModule, file(DeclFile)),
     				append([for(MultiModule), defining_file(DeclFile)], PropertyList0, PropertyList),
@@ -299,17 +309,31 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     	)
     ;	(	PropertyList = PropertyList0,
     		SearchCategory = definition,
-    % The following backtracks over each clause of each predicate.
-    % Do this at the end, after the things that are deterministic: 
-    		(	defined_in_file(ModuleCandidate, Functor, Arity, _, File, _)
-    		->	Module2 = ModuleCandidate
-    		;	Module2 = Module
-    		),
-    		defined_in_file(Module2, Functor, Arity, _, File, Line)
+            % After all deterministic things are done,  
+            % backtrack over each clause of each predicate: 
+    		defined_in_file(Module, Functor, Arity, _, File, Line)
     	)
     ),
     \+find_blacklist(Functor,Arity,Module).
-    
+
+
+% pdt_strip_module(+ModuleHead,?Module,-ModuleLine,?Head) is det
+% pdt_strip_module(-ModuleHead,?Module,-ModuleLine,+Head) is det
+%
+% If a predicate is defined in a proper module, 
+% ModuleLine is the line of the module declaration.
+% Otherwise, it is implicitly defined in "user" at line 1.
+%
+% Unlike the strip_module/3 of SWI-Prolog it does not add the module
+% in which it is called if the ModuleHead has no module prefix.
+pdt_strip_module(Module:Head,Module,Line,Head) :- 
+     atom(Module),                               % If we are in a proper module
+     !,
+     module_property(Module, line_count(Line)).  % ... get its line number
+pdt_strip_module(Head,user,1,Head).              
+	
+% TODO: Reconcile the above with utils4modules_visibility.pl::module_of_file/2
+  
         
 % The following clause searches for clauses inside the given file, which contribute to multifile 
 % predicates, defined in foreign modules.
