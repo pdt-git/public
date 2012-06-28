@@ -33,17 +33,19 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
     
 find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
+    referenced_entity(EnclFile, ReferencedModule),    
     search_term_to_predicate_indicator(Term, Functor/Arity),
-    module_of_file(EnclFile,FileModule),
-    (  atom(ReferencedModule)
-    -> true                            % Explicit entity reference ReferencedModule:Term (or ReferencedModule::Term
-    ;  ReferencedModule = FileModule   % Implicit module reference
-    ),    
-    find_decl_or_def(ReferencedModule,Functor,Arity,Sources),
+    find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
     member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
     properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+
+referenced_entity(EnclFile, ReferencedModule) :- 
+    (  atom(ReferencedModule)
+    -> true                            % Explicit entity reference ReferencedModule:Term (or ReferencedModule::Term
+    ;  module_of_file(EnclFile,ReferencedModule)   % Implicit module reference
+    ).
 
 search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
 search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor, Arity).
@@ -59,8 +61,8 @@ find_decl_or_def(Module,Name,Arity,Sources) :-
 
 %find_decl_or_def(CallingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
 %   referenced_but_undeclared(CallingModule,Name,Arity),
-%   DeclModule = 'No declaration (in any module)',
-%   File = 'No declaration (in any file)',
+%   DeclModule = 'none',
+%   File = 'none',
 %   Line = 0.
 find_decl_or_def(CallingModule,Name,Arity,[declaration-none-none-[none-[none]]]) :-
    referenced_but_undeclared(CallingModule,Name,Arity).
@@ -75,10 +77,6 @@ find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
           Declarations).
     
 find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
-%   setof( DefiningModule, Name^Arity^
-%          defined_in_module(DefiningModule,Name,Arity),
-%          DefiningModules
-%   ),
    setof( definition-Visibility-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
           ( defined_in_module(DefiningModule,Name,Arity),
             visibility(Visibility, ContextModule,Name,Arity,DefiningModule),
