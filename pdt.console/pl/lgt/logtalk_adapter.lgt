@@ -146,7 +146,7 @@ filter_categorized_definitions([], []).
 filter_categorized_definitions([Item0| Items0], Items) :-
 	Item0 = item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, Visibility),
 	Visibility \= invisible,
-	(	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, This, _, _, _, invisible), Items0, Items1),
+	(	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, This, _, _, _, invisible), Items0, Items1)
 	;	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, invisible), Items0, Items1)
 	),
 	!,
@@ -815,7 +815,7 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 	functor(Template, OriginalFunctor, Arity),
 	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, local) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	% local predicate
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -836,14 +836,20 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 			abolish_object(Obj)
 		),
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
-		DeclOrDef = declaration
+		DeclOrDef = declaration,
+		(	\+ Entity \= This -> 
+			Visibility = local
+		;	Visibility = super
+		)
 	;	% definition
 		Entity = This,
 		entity_property(Entity, _, defines(Functor/Arity, Properties)),
-		DeclOrDef = definition
+		DeclOrDef = definition,
+		Visibility = local
 	;	% multifile definitions
 		entity_property(This, _, includes(Functor/Arity, Entity, Properties)),
-		DeclOrDef = definition
+		DeclOrDef = definition,
+		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
