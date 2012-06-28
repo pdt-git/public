@@ -22,7 +22,7 @@
 	find_reference_to/12, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
-	find_definition_contained_in/8,
+	find_definition_contained_in/9,
 	get_pred/7,
 	find_pred/8,
 	predicates_with_property/3,
@@ -264,10 +264,11 @@ primary_location(Locations,_,File,FirstLine) :-
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
+find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
 	split_file_path:split_file_path(FullPath, Directory, File, _, lgt),
 	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
+	entity_property(Entity, Kind, lines(EntityLine, _)),
 	(	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
 		% we add a number_of_clauses/1 declaration property just to simplify coding in the Java side
