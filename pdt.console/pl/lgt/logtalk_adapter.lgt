@@ -19,7 +19,7 @@
 
 :- public([
 	pdt_reload/1,
-	find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+	find_reference_to/12, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/8,
@@ -51,6 +51,23 @@
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
 
 
+:- if(current_logtalk_flag(version, version(3, _, _))).
+	:- multifile(logtalk::message_hook/3).
+	:- dynamic(logtalk::message_hook/3).
+
+	logtalk::message_hook(Term, _Kind, _Tokens) :-
+%		nonvar(Term),
+%		arg(1, Term, Path),
+%		is_absolute_file_path(Path),
+%		arg(2, Term, Lines),
+%		(	integer(Lines)
+%			% if integer(Lines), Lines =< 0 -> no line number available
+%		;	Lines = Begin - End,
+%		 	integer(Begin),
+%			integer(End)
+%		),
+		fail.
+:- endif.
 
                /*************************************
                 * PDT RELOAD                       *
@@ -330,7 +347,7 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 	entity_property(Entity, Kind, file(File, Directory)),
 	(	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
-		% we add a clauses/1 declaration property just to simplify coding in the Java side
+		% we add a number_of_clauses/1 declaration property just to simplify coding in the Java side
 		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)) ->
 			list::memberchk(number_of_clauses(N0), DefinitionProperties)
 		;	N0 = 0
@@ -366,7 +383,7 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		SearchCategory = (multifile)
 	;	% entity multifile definitions
 		entity_property(Entity, Kind, provides(Functor/Arity, For, Properties0)),
-		% we add a from/1 + defining_file/1 properties just to simplify coding in the Java side
+		% we add a for/1 + defining_file/1 properties just to simplify coding in the Java side
 		entity_property(Entity, Kind, file(DefiningFile, DefiningDirectory)),
 		atom_concat(DefiningDirectory, DefiningFile, DefiningFullPath),
 		Properties = [for(For), defining_file(DefiningFullPath)| Properties0],
@@ -560,6 +577,8 @@ deactivate_warning_and_error_tracing:-
 %
 % @author trho
 %
+:- multifile(user:message_hook/3).
+
 user:message_hook(_Term, Level, Lines) :-
 	warning_and_error_tracing,
 	pdt_term_position(StartLine),
