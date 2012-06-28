@@ -276,8 +276,8 @@ primary_location(Locations,_,File,FirstLine) :-
 
 % Called from PDTOutlineQuery.java
 
-find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
-    find_definition_contained_in(File, Module, _, module, Functor, Arity, SearchCategory, Line, PropertyList).
+find_definition_contained_in(File, Module, Kind, Functor, Arity, SearchCategory, Line, PropertyList) :-
+    find_definition_contained_in(File, Module, _, Kind, Functor, Arity, SearchCategory, Line, PropertyList).
     
 
 find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
