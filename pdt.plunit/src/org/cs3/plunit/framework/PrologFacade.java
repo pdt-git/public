@@ -30,7 +30,7 @@ public class PrologFacade {
 	static {
 		
 		try {
-			File portFile = new File(System.getProperty("java.io.tmpdir")+File.separator + "pdtconsoleActivePort.txt");
+			File portFile = new File(System.getProperty("java.io.tmpdir")+File.separator + "pdt_console_active_port.txt");
 			BufferedReader reader = new BufferedReader(new FileReader(portFile));
 			int port = Integer.parseInt(reader.readLine());
 			reader.close();
@@ -71,21 +71,31 @@ public class PrologFacade {
 
 	public static List<Map<String, Object>> queryAll(String query) throws PrologException,
 			PrologInterfaceException {
-		PrologSession session = pif.getSession(PrologInterface.LEGACY);
+		if(session == null)
+			session = pif.getSession(PrologInterface.LEGACY);
 		List<Map<String, Object>> results = session.queryAll(query);
-		session.dispose();
+//		session.dispose();
 		return results;
 	}
 
+	static PrologSession session = null;
 	public static Map<String, Object> queryOnce(String query)
+			throws PrologInterfaceException {
+		if(session == null)
+			session = pif.getSession(PrologInterface.LEGACY);
+		Map<String, Object> result = session.queryOnce(query);
+//		session.dispose();
+		return result;
+	}
+
+
+	public static Map<String, Object> queryOnceNewSession(String query)
 			throws PrologInterfaceException {
 		PrologSession session = pif.getSession(PrologInterface.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);
 		session.dispose();
 		return result;
 	}
-
-
 
 	
 	public static void removeTempServerDirectory() throws Exception{
