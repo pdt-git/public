@@ -180,8 +180,24 @@ public class PLEditor extends TextEditor {
 //		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
 //		addProblemMarkers(); // here happens the save & reconsult
 //		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
-		setFocus();
+		Job j = new Job("consult file from workspace") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				UIUtils.getDisplay().asyncExec(new Runnable() {
 
+					@Override
+					public void run() {
+//						UIUtils.getActiveEditor().setFocus();
+						setFocus();
+
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		j.setPriority(Job.SHORT);
+		j.setRule(getCurrentIFile());
+		j.schedule();
 	}
 
 	

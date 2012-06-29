@@ -70,7 +70,7 @@ file_information(TestName,__File,__Line):-
 
 test_failure(assertion,A,  Line):-
   plunit:failed_assertion(_Unit, _Test, _Line, _File:Line, _STO, Reason,Module:Goal),
-  format(atom(A),'Failed assertion in line ~w, ~w of goal ~w in module ~w.',[Line,Reason,Goal,Module]).
+  format(atom(A),'Failed assertion in line ~w,~n ~w of goal ~w in module ~w.',[Line,Reason,Goal,Module]).
 
 
 test_failure(assertion,A,Line):-

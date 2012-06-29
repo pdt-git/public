@@ -365,72 +365,77 @@ public class ConsultAction extends QueryConsoleThreadAction {
 	private void runUnitTest(IFile workspaceFile) {
 		final IFile f;
 		String fileExtension = workspaceFile.getFileExtension();
-		if(fileExtension == null){
+		if (fileExtension == null) {
 			return;
 		}
-		if(fileExtension.equals("plt")){
+		if (fileExtension.equals("plt")) {
 			f = workspaceFile;
 		} else {
 			String name = workspaceFile.getName();
-			String fullPath = name.substring(0,name.length()-fileExtension.length()-1) + ".plt";
-			IFile testFile = workspaceFile.getParent().getFile(new Path(fullPath));
+			String fullPath = name.substring(0,
+					name.length() - fileExtension.length() - 1)
+					+ ".plt";
+			IFile testFile = workspaceFile.getParent().getFile(
+					new Path(fullPath));
 			if (testFile != null) {
 				f = testFile;
 			} else {
 				return;
 			}
 		}
-//		Job j = new Job("consult file from workspace") {
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-				if (PDTUtils.checkForActivePif(true)) {
-					PrologSession session = null;
-					try {
-						PrologInterface pif = PDTUtils
-								.getActiveConsolePif();
-						session = pif.getSession();
-						String prologFileName = PDTUtils
-								.getPrologFileName(f);
-						String query = "junitadapter:unit_test(UnitName,Test,'"+ prologFileName + "',Line)";
-						if (session.queryOnce(query) != null) {
-							session.queryOnce("assert(junitadapter:file_to_test('"+ prologFileName + "'))");
-							
-							ILaunchConfiguration[] launchConfigurations = DebugPlugin
-									.getDefault().getLaunchManager().getLaunchConfigurations();
-							ILaunchConfiguration plunit = null;
-							for (ILaunchConfiguration iLaunchConfiguration : launchConfigurations) {
-								if(iLaunchConfiguration.getName().equals("PLUnitTest")){
-									plunit = iLaunchConfiguration;
-									break;
-								}
-							}
-							if(plunit!=null){
+		if (PDTUtils.checkForActivePif(true)) {
+			PrologSession session = null;
+			try {
+				PrologInterface pif = PDTUtils.getActiveConsolePif();
+				session = pif.getSession();
+				String prologFileName = PDTUtils.getPrologFileName(f);
+				String query = "junitadapter:unit_test(UnitName,Test,'"
+						+ prologFileName + "',Line)";
+				if (session.queryOnce(query) != null) {
+					session.queryOnce("assert(junitadapter:file_to_test('"
+							+ prologFileName + "'))");
+
+					ILaunchConfiguration[] launchConfigurations = DebugPlugin
+							.getDefault().getLaunchManager()
+							.getLaunchConfigurations();
+					ILaunchConfiguration plunit = null;
+					for (ILaunchConfiguration iLaunchConfiguration : launchConfigurations) {
+						if (iLaunchConfiguration.getName().equals("PLUnitTest")) {
+							plunit = iLaunchConfiguration;
+							break;
+						}
+					}
+					if (plunit != null) {
+						DebugUITools.launch(plunit, ILaunchManager.RUN_MODE);
+//						Job j = new Job("consult file from workspace") {
+//							@Override
+//							protected IStatus run(IProgressMonitor monitor) {
 //								UIUtils.getDisplay().asyncExec(new Runnable() {
-//									
+//
 //									@Override
 //									public void run() {
-									  	  DebugUITools.launch(plunit,
-													ILaunchManager.RUN_MODE);
-									  	UIUtils.getActiveEditor().setFocus();
+//										UIUtils.getActiveEditor().setFocus();
 //									}
 //								});
-							}
-						}
-					} catch (Exception e) {
-						Debug.report(e);
-					} finally {
-						if (session != null) {
-							session.dispose();
-						}
+//								return Status.OK_STATUS;
+//							}
+//						};
+//						j.setRule(f);
+//						j.schedule();
 
 					}
 				}
-//				return Status.OK_STATUS;
-//			}
-//		};
-//		j.setRule(f);
-//		j.schedule();
-		
+			} catch (Exception e) {
+				Debug.report(e);
+			} finally {
+				if (session != null) {
+					session.dispose();
+				}
+
+			}
+		}
+
+
 	}
 	
 
