@@ -318,9 +318,11 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		}		
 	}
 
-	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) {
+	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) throws PrologInterfaceException {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
 		String query = bT(SET_BREAKPOINT, prologFileName, line, offset, "_");
+//		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+//		pif.queryOnce(query);
 		QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(query);
 		consoleAction.run();
 	}
