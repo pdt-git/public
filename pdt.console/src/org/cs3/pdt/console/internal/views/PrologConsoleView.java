@@ -1024,8 +1024,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	@Override
 	public void dispose() {
-		PrologConsolePlugin.getDefault().getPrologConsoleService()
-		.unregisterPrologConsole(this);
+		PrologConsolePlugin.getDefault().getPrologConsoleService().unregisterPrologConsole(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
 		for (Iterator<PrologInterface> it = models.keySet().iterator(); it.hasNext();) {
 			PrologInterface pif = it.next();
 			try {
