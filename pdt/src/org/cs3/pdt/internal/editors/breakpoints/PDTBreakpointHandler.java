@@ -11,9 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsoleEvent;
-import org.cs3.pdt.console.PrologConsoleListener;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.PrologConsoleService;
 import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
@@ -29,6 +26,7 @@ import org.cs3.prolog.pif.PrologInterfaceEvent;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.PrologInterfaceListener;
 import org.cs3.prolog.pif.ReconsultHook;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
@@ -48,7 +46,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterfaceListener, LifeCycleHook, ReconsultHook {
+public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleHook, ReconsultHook, ActivePrologInterfaceListener {
 
 	private static final String ADD_BREAKPOINT = "add_breakpoint";
 	private static final String REMOVE_BREAKPOINT = "remove_breakpoint";
@@ -76,7 +74,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 	}
 
 	private PDTBreakpointHandler() {
-		PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		PrologRuntimePlugin.getDefault().registerReconsultHook(this);
 		checkForPif();
 	}
@@ -352,26 +350,6 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	}
 
-
-
-	@Override
-	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
-		Object source = e.getSource();
-		if (source instanceof PrologConsole){
-			if (PDTUtils.checkForActivePif(false)) {
-				removePifListener();
-
-				PrologConsole console = (PrologConsole) source;
-				currentPif = console.getPrologInterface();
-				removeAllBreakpointMarkers();
-				loadBreakpointsFromPif();
-
-				addPifListener();
-
-			}
-		}
-	}
-
 	private void addPifListener() {
 		if (currentPif != null) {
 			Debug.debug("add listener for pif " + currentPif.toString());
@@ -402,24 +380,6 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 			}
 		}
 	}
-
-	@Override
-	public void consoleRecievedFocus(PrologConsoleEvent e) {
-		if (currentPif == null) {
-			Object source = e.getSource();
-			if (source instanceof PrologConsole){
-				PrologConsole console = (PrologConsole) source;
-				currentPif = console.getPrologInterface();
-				addPifListener();
-			}
-		}
-	}
-
-	@Override
-	public void consoleLostFocus(PrologConsoleEvent e) {}
-
-	@Override
-	public void consoleVisibilityChanged(PrologConsoleEvent e) {}
 
 	@Override
 	public void update(PrologInterfaceEvent e) {
@@ -552,6 +512,17 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 				return;
 			}
 		}
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+		removePifListener();
+
+		currentPif = pif;
+		removeAllBreakpointMarkers();
+		loadBreakpointsFromPif();
+
+		addPifListener();
 	}
 
 }
