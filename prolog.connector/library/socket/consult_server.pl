@@ -58,6 +58,7 @@
 
 :- use_module(library(socket)).
 :- use_module(library(memfile)).
+:- use_module(library(debug)).
 
 option_default(interprete_lists,true).
 option_default(canonical,false).
@@ -140,9 +141,9 @@ consult_server(Port):-
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
-	concat_atom([consult_server,'@',Port],Alias),
+	atomic_list_concat([consult_server,'@',Port],Alias),
 	%accept_loop(ServerSocket).
-	recordz(pif_flag,port(Port)),
+	recordz(pif_flag,port(Port),_),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
 
 consult_server(Port,Lockfile):-
@@ -150,9 +151,8 @@ consult_server(Port,Lockfile):-
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
-	concat_atom([consult_server,'@',Port],Alias),
-	%accept_loop(ServerSocket).
-	recordz(pif_flag,port(Port)),
+	atomic_list_concat([consult_server,'@',Port],Alias),
+	recordz(pif_flag,port(Port),_),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]),
 	create_lock_file(Lockfile).
 
@@ -183,7 +183,7 @@ accept_loop_impl(ServerSocket) :-
 
 accept_loop_impl_X(ServerSocket,Slave):-
     debug(consult_server(shutdown),"Checking for shutdown flag. ~n",[]),
-    recorded(pif_flag,shutdown),    
+    recorded(pif_flag,shutdown,_),    
     !,
     debug(consult_server(shutdown),"Shutdown flag is set. We are closing down. ~n",[]),
     tcp_close_socket(Slave),
@@ -252,8 +252,8 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	% then we have to kick the accept loop out of the tcp_accept/3 call.
 	% we do this by simply opening a connection to the listen port.
 
-	recordz(pif_flag,shutdown),
-	recorded(pif_flag,port(Port)),
+	recordz(pif_flag,shutdown,_),
+	recorded(pif_flag,port(Port),_),
 	tcp_socket(Socket),
 	tcp_connect(Socket,localhost:Port),
 	tcp_close_socket(Socket).
@@ -329,9 +329,9 @@ handle_batch_messages(OutStream):-
 
 record_abort_request(Type,Id):-
     thread_self(Thread),
-    (	recorded(pif_batch_abort,request(Thread,Type,Id))
+    (	recorded(pif_batch_abort,request(Thread,Type,Id),_)
     ->	true
-    ;	recordz(pif_batch_abort,request(Thread,Type,Id))
+    ;	recordz(pif_batch_abort,request(Thread,Type,Id),_)
     ).
     
 
@@ -344,7 +344,7 @@ erase_abort_request(Type,Id):-
     
 abort_requested(Type,Id):-
 	thread_self(Thread),
-	recorded(pif_batch_abort,request(Thread,Type,Id)).    
+	recorded(pif_batch_abort,request(Thread,Type,Id),_).    
 
 aborting:-
     abort_requested(async,_).
@@ -609,7 +609,7 @@ unused_thread_name(Prefix,Suffix,Name):-
 	unused_thread_name(Prefix,Suffix,0,Name).	
 	
 unused_thread_name(Prefix,Suffix,Try,Name):-
-	concat_atom([Prefix,Try,Suffix],A),
+	atomic_list_concat([Prefix,Try,Suffix],A),
 	(	current_thread(A,_)
 	->	plus(Try,1,Next),
 		unused_thread_name(Prefix,Suffix,Next,Name)
