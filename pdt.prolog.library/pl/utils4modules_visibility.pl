@@ -29,13 +29,15 @@
         
 %% module_of_file(?File,?Module)
 %
-% Module is the module defined in File (or 'user' 
-% if the file defines no explicit module or the  
-% defined module is a hidden system module.
+% Module is the module defined in File. 
+% If the file defines no explicit module or the  
+% defined module is a hidden system module (whose 
+% name starts with $) the Module is either 'user'
+% .
 module_of_file(File,Module):- 
-    module_property(Module,file(File)).    % Fails if File defines no module
-                                           % or if it defines a hidden module
-                                           % whose name starts with $
+    module_property(Module,file(File)),    % SWI: Fails if File defines no module
+                                           % or if it defines a hidden module. 
+                                           % Nondeterministic for mode (-,-).
 module_of_file(File,Module):-
     atom(File),                            % If File is provided as input
     \+ module_property(Module,file(File)), % and there is no module in that file
