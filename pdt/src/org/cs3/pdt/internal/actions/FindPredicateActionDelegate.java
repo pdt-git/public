@@ -257,7 +257,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		PrologSession session = null;
 		String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
 		
-		String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getFunctor()+"',"+data.getArity()+",Pred),"
+		String query="pdt_resolve_predicate('"+data.getFilePath()+"',"+module+", '"+data.getFunctor()+"',"+data.getArity()+",Pred),"
 		+ "pdt_predicate_contribution(Pred,File,Start,End)";
 		Map<String,Object> m=null;
 		try{

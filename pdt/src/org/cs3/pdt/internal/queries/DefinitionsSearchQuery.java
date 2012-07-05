@@ -19,8 +19,8 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {		
-		String file = "'"+goal.getFile()+"'";
-		if (goal.getFile().equals(""))
+		String file = "'"+goal.getFilePath()+"'";
+		if (goal.getFilePath().equals(""))
 			file = "OrigFile";
 
 		String module2 = module;

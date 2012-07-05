@@ -33,8 +33,8 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (goal.getArity() < 0) 
 			arity = "Arity";
 		
-		String file = "'"+goal.getFile()+"'";
-		if (goal.getFile().equals(""))
+		String file = "'"+goal.getFilePath()+"'";
+		if (goal.getFilePath().equals(""))
 			file = "File";
 		
 		String name = "'"+goal.getFunctor()+"'";
