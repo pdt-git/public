@@ -42,7 +42,7 @@
 :- consult(library(memfile)).
 :- multifile test/1.
 
-/**
+/*
  * SWI Kompability
  * specific for SWI Prolog
  */
@@ -107,7 +107,7 @@ open_printf_to_memory(Key) :-
     asserta(output_to_memory(Key,Handle,Stream)),
 	select_printf(Key).
 
-/**
+/*
  * openUniqueMemoryStream(+Prefix,-Stream):-
  *
  * 
@@ -297,23 +297,23 @@ retractT(_).
 	Mapped to atom_concat/3. (Needed for ISO-Prolog Compatibility).
 */
 
-stringAppend(S1, S2, Ret) :-
+stringAppend(S1, _S2, _Ret) :-
 	nonvar(S1),
-	S1 = unqualified(A,B),
+	S1 = unqualified(_,_),
 	throw(exception).
 
-stringAppend(S1, S2, Ret) :-
+stringAppend(_S1, S2, _Ret) :-
 	nonvar(S2),
-	S2 = unqualified(A,B),
+	S2 = unqualified(_,_),
 	throw(exception).
 
-stringAppend(S1, S2, Ret) :-
+stringAppend(_S1, _S2, Ret) :-
 	nonvar(Ret),
-	Ret = unqualified(A,B),
+	Ret = unqualified(_,_),
 	throw(exception).
 
-stringAppend(_str1, _str2, _Ret) :-
-    atom_concat(_str1, _str2, _Ret).
+stringAppend(Str1, Str2, Ret) :-
+    atom_concat(Str1, Str2, Ret).
 
 /*
 stringAppend(_str1, _str2, _Ret) :-
@@ -350,17 +350,17 @@ test('stringAppend/3#3') :- stringAppend('','a','a').
 test('stringAppend/3#4') :- stringAppend('a','b','ab').
 test('stringAppend/3#4') :- stringAppend('uwe ','tarek bardey','uwe tarek bardey').
 
-list2java(_l, _S) :-
-    concat_atom(_l, ', ', _S).
+list2java(l, S) :-
+    concat_atom(l, ', ', S).
 
 
 mapPredicate(_, _ ,[] ,[]).
-mapPredicate(_Pred, _Arg1 ,[_Arg2H | _Arg2T] ,[_RetH | _RetT]) :-
-               _Q =.. [_Pred, _Arg1, _Arg2H, _RetH],
-               call(_Q),
-               mapPredicate(_Pred, _Arg1, _Arg2T, _RetT).
+mapPredicate(Pred, Arg1 ,[Arg2H | Arg2T] ,[RetH | RetT]) :-
+               Q =.. [Pred, Arg1, Arg2H, RetH],
+               call(Q),
+               mapPredicate(Pred, Arg1, Arg2T, RetT).
 
-sum(_Int1, _Int2, _Int3) :- plus(_Int1, _Int2, _Int3).
+sum(Int1, Int2, Int3) :- plus(Int1, Int2, Int3).
 
 int2string(_int, _string) :- swritef(_string, "%d", [_int]).
 
@@ -370,8 +370,7 @@ nequals(_term1, _term2) :- _term1 \= _term2.
 debugPrint(_str) :- writef(_str).
 
 
-/**
-*/
+
 
 :- dynamic(output_to_memory/2).
 
@@ -434,15 +433,17 @@ read_term_atom(Atom,Term,Options):-
 	).
 	
 test(read_term_atom):-
-	catch(read_term_atom('asdf("asdf)', Term, [variable_names(Vars)]),
-	      Exception,true),
+	catch(read_term_atom('asdf("asdf)', _Term, [variable_names(_Vars)]),
+	      Exception,
+	      true),
 	assert_true(nonvar(Exception)),
 	assert_true((Exception = error(syntax_error(end_of_file_in_string),_))). 
 	
 test(read_term_atom2):-
-	catch(read_term_atom('asdf(Var,asdf).', Term, [variable_names(Vars)]),
-	      Exception,true),
+	catch(read_term_atom('asdf(Var,asdf).', _Term, [variable_names(_Vars)]),
+	      _Exception,
+	      true),
 	writeln(Vars),
-	assert_true(Vars==[Var=A]).
+	assert_true(Vars==[_=_]).
 	
 
