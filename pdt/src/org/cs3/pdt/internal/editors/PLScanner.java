@@ -46,10 +46,9 @@ import java.net.URI;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -193,14 +192,9 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	 * 
 	 */
 	private String[] getPredicatesWithProperty(String property) throws PrologInterfaceException, CoreException {
-		PrologConsole console = PrologConsolePlugin.getDefault()
-				.getPrologConsoleService().getActivePrologConsole();
-		if (console == null || console.getPrologInterface() == null) {
-			return null;
-		}
 		PrologSession session = null;
 		try {
-			session = console.getPrologInterface().getSession();
+			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 			Map<String, Object> solutions = session
 					.queryOnce("pdt_editor_highlighting:predicates_with_property(" 
 							+ property

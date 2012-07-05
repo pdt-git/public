@@ -315,12 +315,10 @@ public class PLEditor extends TextEditor {
 			
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {
-				if (PDTUtils.checkForActivePif(true)) {
-					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
-					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-					int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
-					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
-				};
+				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
+				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		});
 
@@ -641,21 +639,17 @@ public class PLEditor extends TextEditor {
 		Action toggleBreakpointAction = new Action("Toggle breakpoint") {
 			@Override
 			public void run() {
-				if (PDTUtils.checkForActivePif(true)) {
-					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
-					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-					int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
 
-					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
-				}
+				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		};
 		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
 			@Override
 			public void run() {
-				if (PDTUtils.checkForActivePif(true)) {
-					breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
-				}
+				breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
 			}
 		};
 

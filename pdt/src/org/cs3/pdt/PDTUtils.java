@@ -43,13 +43,10 @@ package org.cs3.pdt;
 
 import java.io.IOException;
 
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -58,26 +55,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 public final class PDTUtils {
-
-
-	public static boolean checkForActivePif(boolean showDialog) {
-		PrologInterface pif = getActiveConsolePif();
-		if (pif == null) {
-			if (showDialog) {
-				UIUtils.displayErrorDialog(Display.getCurrent().getActiveShell(), "No Prolog Process selected", "You have to select an active Prolog process.");
-			}
-			return false;
-		}
-		return true;
-	}
-	
-	public static PrologInterface getActiveConsolePif() {
-		PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-		if (activePrologConsole != null) {
-			return activePrologConsole.getPrologInterface();
-		}
-		return null;
-	}
 
 	public static void showSourceLocation(final SourceLocation loc) {
 		if (Display.getCurrent() != UIUtils.getDisplay()) {

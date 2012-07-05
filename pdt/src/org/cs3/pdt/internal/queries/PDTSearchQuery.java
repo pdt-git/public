@@ -57,6 +57,7 @@ import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pdt.metadata.Goal;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
@@ -123,8 +124,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			return Status.CANCEL_STATUS;
 		}
 		else {
-			PrologSession session = PrologConsolePlugin.getDefault().getPrologConsoleService()
-			                        .getActivePrologConsole().getPrologInterface().getSession();
+			PrologSession session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 
 			processFoundClauses(findReferencedClauses(session));
 			return Status.OK_STATUS;

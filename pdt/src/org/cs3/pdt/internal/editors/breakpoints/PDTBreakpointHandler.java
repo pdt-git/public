@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.PrologConsoleService;
 import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
@@ -81,7 +80,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	private void checkForPif() {
 		if (currentPif == null) {
-			currentPif = PDTUtils.getActiveConsolePif();
+			currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 			addPifListener();
 		}
 	}

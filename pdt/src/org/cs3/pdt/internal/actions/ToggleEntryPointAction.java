@@ -8,10 +8,10 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -34,7 +34,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	public void run(IAction action) {
 		if (selectedFiles != null) {
 			
-			PrologInterface pif = PDTUtils.getActiveConsolePif();
+			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 			if (isSelectionChecked()) {
 				for (IFile file : selectedFiles) {
 					setEntryPoint(file, false, pif);

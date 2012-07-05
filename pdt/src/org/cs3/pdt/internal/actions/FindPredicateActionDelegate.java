@@ -46,13 +46,12 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.metadata.Goal;
 import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -62,8 +61,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -143,40 +140,36 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	}
 
 	private void run_impl(Goal goal, IFile file) throws CoreException {
-		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-		if (console != null && console.getPrologInterface() != null) {
-			PrologSession session = null;
-			try {
-				session = console.getPrologInterface().getSession();
-				SourceLocationAndIsMultifileResult res = findFirstClauseLocation(goal, session);
-				if (res != null) {
-					if (res.location != null) {
-						PDTUtils.showSourceLocation(res.location);
-					}
-					if (res.isMultifileResult) {
-						new FindDefinitionsActionDelegate(editor).run();
-					}
+		PrologSession session = null;
+		try {
+			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+			SourceLocationAndIsMultifileResult res = findFirstClauseLocation(goal, session);
+			if (res != null) {
+				if (res.location != null) {
+					PDTUtils.showSourceLocation(res.location);
 				}
-				return;
-			} catch (Exception e) {
-				Debug.report(e);
-			} finally {
-				if (session != null)
-					session.dispose();
+				if (res.isMultifileResult) {
+					new FindDefinitionsActionDelegate(editor).run();
+				}
 			}
-		} else {
-			UIUtils.getDisplay().asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					MessageBox messageBox = new MessageBox(UIUtils.getActiveShell(), SWT.ICON_WARNING | SWT.OK);
-
-					messageBox.setText("Open Declaration");
-					messageBox.setMessage("Cannot open declaration. No active Prolog Console available for a fallback.");
-					messageBox.open();
-				}
-			});
+			return;
+		} catch (Exception e) {
+			Debug.report(e);
+		} finally {
+			if (session != null)
+				session.dispose();
 		}
+//		UIUtils.getDisplay().asyncExec(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				MessageBox messageBox = new MessageBox(UIUtils.getActiveShell(), SWT.ICON_WARNING | SWT.OK);
+//
+//				messageBox.setText("Open Declaration");
+//				messageBox.setMessage("Cannot open declaration. No active Prolog Console available for a fallback.");
+//				messageBox.open();
+//			}
+//		});
 
 	}
 

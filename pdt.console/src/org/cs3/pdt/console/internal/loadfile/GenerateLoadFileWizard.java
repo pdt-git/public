@@ -6,10 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -74,21 +74,17 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 
 			consolePlugin.addEntryPoint(file);
 			
-			PrologConsole activePrologConsole = consolePlugin.getPrologConsoleService().getActivePrologConsole();
-			if (activePrologConsole != null) {
+			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 
-				PrologInterface pif = activePrologConsole.getPrologInterface();
-				
-				if (pif != null) {
-					try {
-						String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+			if (pif != null) {
+				try {
+					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
 
-						pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
-					} catch (IOException e) {
-						Debug.report(e);
-					} catch (PrologInterfaceException e) {
-						Debug.report(e);
-					}
+					pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
+				} catch (IOException e) {
+					Debug.report(e);
+				} catch (PrologInterfaceException e) {
+					Debug.report(e);
 				}
 			}
 		} catch (CoreException e) {
