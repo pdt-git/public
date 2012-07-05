@@ -189,6 +189,16 @@
                 id="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
                 label="Open Prolog Test">
           </action>
+            <action
+                class="org.cs3.pdt.internal.actions.AbortTestAction"
+                id="org.cs3.pdt.internal.actions.AbortTestAction"
+                label="Abort Prolog Test">
+          </action>
+            <action
+                class="org.cs3.pdt.internal.actions.RunUnitTestOnConsoleAction"
+                id="org.cs3.pdt.internal.actions.RunUnitTestAction"
+                label="Run Test on Prolog Console">
+          </action>
        </objectContribution>
  </extension>
  
@@ -235,6 +245,11 @@
          name="Consult"/>
    <command
          categoryId="org.cs3.pdt.editing"
+         description="Run Unit Test"
+         id="org.eclipse.pdt.ui.edit.run.unit.test"
+         name="Run Unit Test"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
          id="org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc"
          name="name">
    </command>
@@ -265,6 +280,12 @@
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F9"/>
+
+   <key
+         commandId="org.eclipse.pdt.ui.edit.run.unit.test"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+U"/>
          
 </extension>
 <extension

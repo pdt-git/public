@@ -78,8 +78,24 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		commandLineArguments.getLabelControl(executableGroup).setToolTipText("See SWI-Prolog manual for a list of possible command line arguments.");
 		addField(commandLineArguments);
 		
-		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup);
-		startupFiles.getLabelControl(executableGroup).setToolTipText("Can be multiple files, seperated by spaces.\nAdd quotes if needed!\n\nExample: \"c:/my files/dummy.pl\" dummy2.pl");
+		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup){
+			@Override
+			protected boolean doCheckState() {
+				String value = getStringValue();
+				String[] files = value.split(",");
+				for (String file : files) {
+					if (file.contains(" ")) {
+						if (!(file.startsWith("\"") && file.endsWith("\""))
+								&& !(file.startsWith("'") && file.endsWith("'"))) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		};
+		startupFiles.setErrorMessage("File paths containing white spaces must be enclosed in double quotes. To enter multiple files, separate them by a comma.");
+		startupFiles.getLabelControl(executableGroup).setToolTipText("Can be multiple files, seperated by commas.\nAdd quotes if needed!\n\nExample: \"c:/my files/dummy.pl\" dummy2.pl");
 		addField(startupFiles);
 		
 		executeablePreviewLabel = new MyLabelFieldEditor(executableGroup, "Executable preview");

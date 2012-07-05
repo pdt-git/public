@@ -49,6 +49,7 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
@@ -232,6 +233,16 @@ public final class PDTUtils {
 				textEditor.selectAndReveal(currentOffset, currentLength);
 			}
 		}
+	}
+
+	public static String getPrologFileName(IFile file) {
+		String enclFile = file.getRawLocation().toPortableString();
+		if (Util.isWindows()) {
+			enclFile = enclFile.toLowerCase();
+		}
+
+		IPath filepath = new Path(enclFile);
+		return Util.prologFileName(filepath.toFile());
 	}
 
 }

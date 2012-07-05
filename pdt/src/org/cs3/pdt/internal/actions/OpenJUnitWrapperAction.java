@@ -29,7 +29,11 @@ public class OpenJUnitWrapperAction implements IObjectActionDelegate {
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		
+		if(!(selection instanceof ITreeSelection)){
+			return;
+		}
 		ITreeSelection tree = (ITreeSelection)selection;
+		
 		ITestCaseElement tc = (ITestCaseElement)tree.getFirstElement();
 		fileName = ((ITestSuiteElement)tc.getParentContainer().getParentContainer()).getSuiteTypeName();
 		String[] args= tc.getTestMethodName().substring(6,tc.getTestMethodName().length()-1).split(":");

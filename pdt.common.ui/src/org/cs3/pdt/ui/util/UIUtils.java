@@ -163,6 +163,7 @@ public final class UIUtils {
 	}
 
 	public static IEditorPart getActiveEditor() {
+		try {
 		return (IEditorPart) new _SyncReturn() {
 			@Override
 			Object getRVal() {
@@ -172,6 +173,10 @@ public final class UIUtils {
 				return page.getActiveEditor();
 			}
 		}.rval;
+		} catch(Exception ex){
+			Debug.report(ex);
+			return null;
+		}
 	}
 
 	public static void displayMessageDialog(final Shell shell,
