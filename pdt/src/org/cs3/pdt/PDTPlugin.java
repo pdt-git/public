@@ -178,8 +178,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			};	
 			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 			final PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
-			consolePlugin.getPrologConsoleService().addPrologConsoleListener(new CurrentPifListener());
 			
+			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(new CurrentPifListener());
 			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(new EditorConsultListener());
 			
 			
