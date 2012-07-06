@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.console.PrologConsoleService;
-import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -320,10 +317,8 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) throws PrologInterfaceException {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
 		String query = bT(SET_BREAKPOINT, prologFileName, line, offset, "_");
-//		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
-//		pif.queryOnce(query);
-		QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(query);
-		consoleAction.run();
+		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		pif.queryOnce(query);
 	}
 
 	private void loadBreakpointsFromPif() {
@@ -472,33 +467,35 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 			if (markerBackup == null || markerBackup.isEmpty()) {
 				return;
 			}
-			Thread t = new Thread(new Runnable() { @Override public void run() {
-				PrologConsoleService prologConsoleService = PrologConsolePlugin.getDefault().getPrologConsoleService();
-				if (prologConsoleService == null) {
-					return;
-				}
-				prologConsoleService.getActivePrologConsole().ensureConnectionForCurrentPrologInterface();
-//			checkForPif();
-				waitForDispatcherSubjectActive();
-				StringBuffer buf = new StringBuffer();
-				boolean first = true;
-				for (MarkerBackup m : markerBackup) {
-					// TODO: Debug here, timing issues
-					if (first) {
-						first = false;
-					} else {
-						buf.append(", ");
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					waitForDispatcherSubjectActive();
+					StringBuffer buf = new StringBuffer();
+					boolean first = true;
+					for (MarkerBackup m : markerBackup) {
+						// TODO: Debug here, timing issues
+						if (first) {
+							first = false;
+						} else {
+							buf.append(", ");
+						}
+						buf.append(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
+						//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 					}
-					buf.append(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
-					//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
+					Debug.debug("Resetting breakpoints after restart: " + buf.toString());
+					PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+					try {
+						pif.queryOnce(buf.toString());
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+					}
+					
+					// disable logging of deleted ids
+					markerBackup = null;
+					shouldUpdateMarkers = true;
 				}
-				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-				QueryConsoleThreadAction consoleAction = new QueryConsoleThreadAction(buf.toString());
-				consoleAction.run();
-				
-				// disable logging of deleted ids
-				markerBackup = null;
-				shouldUpdateMarkers = true;}});
+			});
 			t.start();
 	}
 
