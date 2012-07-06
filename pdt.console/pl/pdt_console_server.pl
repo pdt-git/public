@@ -94,6 +94,8 @@
 	pdt_stop_console_server/0
 ]).
 :- use_module(library(socket)).
+:- use_module(library(backcomp)).
+:- use_module(library(lists)).
  
 
 :- dynamic(console_thread_name/1).

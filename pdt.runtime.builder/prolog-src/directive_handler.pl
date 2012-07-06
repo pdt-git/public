@@ -1,5 +1,6 @@
 :- module(directive_handler,[handle_directive/6]).
 
+:- use_module(library(lists)).
 :- ensure_loaded(pdt_factbase).
 
 handle_directive(op,Args,Pos,ParentId,FileId,Module):-

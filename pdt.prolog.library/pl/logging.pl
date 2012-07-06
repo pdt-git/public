@@ -3,6 +3,8 @@
 
 % TODO: Move all logging primitives here.
    
+:- use_module(library(lists)).
+
 consult_silent_if_logging_disabled(FileOrFiles) :-
     (  not(loggingEnabled) 
     -> consult_silent(FileOrFiles)          % load without printing a  message.

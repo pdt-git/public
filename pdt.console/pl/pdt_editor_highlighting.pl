@@ -3,7 +3,8 @@
 :- module( pdt_editor_highlighting,
          [ predicates_with_property/3  
          ]).
-
+:- use_module(library(backcomp)).
+:- use_module(library(lists)).
 
                /************************************************
                 * PREDICATE PROPERTIES FOR SYNTAX HIGHLIGHTING *

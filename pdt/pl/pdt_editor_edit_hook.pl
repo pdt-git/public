@@ -3,6 +3,7 @@
 ]).
 
 :- use_module(library(edit)).
+:- use_module(library(lists)).
 
 :- multifile(prolog_edit:edit_source/1).
 

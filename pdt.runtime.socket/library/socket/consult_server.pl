@@ -56,8 +56,13 @@
 %:-debug(handle_command).
 
 
-:- use_module(library(socket)).
+:- use_module(library(backcomp)).
+:- use_module(library(lists)).
 :- use_module(library(memfile)).
+:- use_module(library(socket)).
+:- use_module(library(debug)).
+:- use_module(library(readutil)).
+:- use_module(library(option)).
 
 option_default(interprete_lists,true).
 option_default(canonical,false).

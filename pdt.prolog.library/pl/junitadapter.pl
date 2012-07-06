@@ -1,6 +1,7 @@
 :-module(junitadapter, []).
 
 :- use_module(library(plunit)).
+:- use_module(library(backcomp)).
 
 unit_test(UnitName,Name):-
     plunit:current_test_set(UnitName),

@@ -41,6 +41,9 @@
            ]
  ).
  
+:- use_module(library(lists)).
+:- use_module(library(listing)).
+
 :- doc_collect(true).
 
 :- module_transparent(call_and_report_contex_module/1).

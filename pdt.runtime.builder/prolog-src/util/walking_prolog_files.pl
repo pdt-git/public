@@ -1,3 +1,7 @@
+
+:- use_module(library(lists)).
+:- use_module(library(statistics)).
+
 /**
  * walking_file_list(+FileList,+Functor,+Arity)
  *

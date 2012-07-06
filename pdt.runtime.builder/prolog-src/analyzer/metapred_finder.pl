@@ -1,6 +1,7 @@
 :-module(metapred_finder, [	get_all_userdefined_meta_predicates/1,
 							find_all_meta_predicates/0]).
 
+:- use_module(library(lists)).
 :- use_module(metafile_referencer).
 :- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(term_based_metapred_finder).

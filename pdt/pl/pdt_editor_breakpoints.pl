@@ -5,6 +5,7 @@
 ]).
 
 :- use_module(library(prolog_breakpoints)).
+:- use_module(library(debug)).
 
 pdt_set_breakpoint(File, Line, Offset, Id) :-
     debug(pdt_breakpoints, 'before existing breakpoint', []),

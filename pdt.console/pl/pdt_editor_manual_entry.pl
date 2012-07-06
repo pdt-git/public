@@ -9,6 +9,13 @@
          ]).
          
 
+:- use_module(library(backcomp)).
+:- use_module(library(lists)).
+:- use_module(library(helpidx)).
+:- use_module(library(memfile)).
+:- use_module(library(quintus)).
+
+% TODO 2012-07: are these still in use?
 :- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
 :- use_module(library(help)).

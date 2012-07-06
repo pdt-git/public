@@ -39,7 +39,10 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- consult(library(memfile)).
+:- use_module(library(backcomp)).
+:- use_module(library(error)). 
+:- use_module(library(memfile)).  
+
 :- multifile test/1.
 
 /**

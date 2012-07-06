@@ -15,6 +15,11 @@
 :- use_module(split_file_path).
 :- use_module(library(make)).
 
+:- use_module(library(make)).
+:- use_module(library(lists)).
+:- use_module(library(memfile)).
+:- use_module(library(debug)).
+
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
 %% pdt_reload(+File) is det.

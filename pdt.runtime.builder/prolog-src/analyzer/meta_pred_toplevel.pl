@@ -1,5 +1,6 @@
 :- consult('../load_builder').
 
+:- use_module(library(lists)).
 
 :- multifile(pdt_editor_reload:pdt_reload_listener/1).
 

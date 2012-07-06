@@ -14,6 +14,8 @@
 :- use_module(pdt_prolog_library(utils4modules)).
 
 :- use_module(split_file_path).                    % general utility
+:- use_module(library(charsio)). 
+:- use_module(library(lists)). 
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 

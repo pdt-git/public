@@ -20,6 +20,8 @@
     list_2_separated_list/3 % (+List,-Atom) is det.
 ] ).
 
+:- use_module(library(backcomp)).
+:- use_module(library(lists)).
 
 /**
  * Check list membership without unifying.
