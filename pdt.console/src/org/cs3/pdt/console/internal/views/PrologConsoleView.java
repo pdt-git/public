@@ -346,6 +346,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 										}
 										registry.removePrologInterface(currentKey);
 										getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
+										PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().setActivePrologInterface(null);
 									}
 
 								}
@@ -1054,8 +1055,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
 			String queryString = 
-					"use_module(lib_pdt_console_pl(pdt_console_server)), "
-							+ "pdt_console_server:pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")";
+//					"use_module(lib_pdt_console_pl(pdt_console_server)), "
+				"pdt_console_server:pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")";
 			Debug.info("starting console server using: " + queryString);
 
 			Map<String,?> result = session.queryOnce(queryString);
@@ -1204,14 +1205,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
-		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimeUIPlugin.getDefault()
-				.getLibraryManager(), session,
-				new String[] { PDTConsole.PL_LIBRARY });
+//		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimeUIPlugin.getDefault()
+//				.getLibraryManager(), session,
+//				new String[] { PDTConsole.PL_LIBRARY });
 
 
 		Map<String,?> result = null;
 		try {
-			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
+//			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
 			result = session.queryOnce( "pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")");
 			if (result == null) {
 				startServer(pif, session);
