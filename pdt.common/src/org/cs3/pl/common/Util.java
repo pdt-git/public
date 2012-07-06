@@ -1188,8 +1188,10 @@ public class Util {
 		}
 		
 		if (startupFiles != null && !startupFiles.trim().isEmpty()) {
-			executable.append(" -f ");
-			executable.append(startupFiles);
+			// Using -s instead of -f still loads personal user initialisation files.
+			// See SWI-Prolog manual (tip due to Paulo Moura):
+			executable.append(" -s ");
+			executable.append(splice(startupFiles.split(","), " "));
 		}
 		return executable.toString();
 	}

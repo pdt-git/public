@@ -51,7 +51,9 @@ import java.util.List;
  * a tuple describing a logical prolog element like a predicate or a clause.
 
  */
-public class PrologElement implements Serializable, Comparable<PrologElement>{
+public class PrologElement 
+       extends PrologSourceLocation
+       implements Serializable, Comparable<PrologElement>{
 
 	/**
 	 * Comment for <code>serialVersionUID</code>
@@ -65,7 +67,6 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 	protected boolean isKnown;
 	private List<String> properties = null;
 
-	
 	/**
 	 * Creates a PrologElementData Entity. This class is a container for
 	 * Prolog elements like facts, clauses or modules. 
@@ -73,12 +74,27 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 	 * @param functorName
 	 * @param arity if arity is -1 the element is a module.
 	 */
-	protected PrologElement(String contextModule,String functorName, int arity, List<String>  properties) {
+	protected PrologElement(String filePath, int line,
+			  String contextModule,String functorName, int arity, List<String>  properties) {
+		super(filePath,line);
 		this.functorName = functorName;
 		this.arity = arity;
 		this.contextModule=contextModule;		
 		this.properties = properties;
 		this.isKnown=true;
+	}
+	
+
+	/**
+	 * Creates a PrologElementData Entity. This class is a container for
+	 * Prolog elements like facts, clauses or modules. 
+	 * 
+	 * @param functorName
+	 * @param arity if arity is -1 the element is a module.
+	 */
+	protected PrologElement(String filePath, int line, String contextModule,String functorName, int arity) {
+		this(filePath, line, contextModule, functorName,  arity, new ArrayList<String>());
+		this.isKnown=false;
 	}
 
 	/**
@@ -88,12 +104,8 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 	 * @param functorName
 	 * @param arity if arity is -1 the element is a module.
 	 */
-	protected PrologElement(String contextModule,String functorName, int arity) {
-		this.contextModule=contextModule;
-		this.functorName = functorName;
-		this.arity = arity;
-		this.isKnown=false;
-		this.properties = new ArrayList<String>();
+	protected PrologElement(String contextModule,String functorName, int arity, List<String>  properties) {
+		this(null,0,contextModule, functorName,  arity, properties);
 	}
 
 	/**

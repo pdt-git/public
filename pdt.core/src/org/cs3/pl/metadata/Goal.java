@@ -44,24 +44,17 @@ package org.cs3.pl.metadata;
 public class Goal extends PrologElement {
 
 	private static final long serialVersionUID = 1L;
-	private String file;
-	private String line;
 	private String termString;
 
 	public Goal(String file, String module, String elementName, int arity, String termString) {
-		super(module, elementName, arity);
-		this.file=file;
-		this.termString = termString;
+		this(file, 0,  module,  elementName,  arity,  termString);
 	}
 
 	public Goal(String file, int line, String module, String elementName, int arity, String termString) {
-		this( file, module,  elementName,  arity,  termString);
-		this.line = String.valueOf(line);
+		super(file, line, module, elementName, arity);
+		this.termString = termString;
 	}
 		
-	public String getFile() {
-		return file;
-	}
 
 	public void setModule(String module) {
 		this.contextModule=module;
@@ -69,10 +62,6 @@ public class Goal extends PrologElement {
 	
 	public String getTermString() {
 		return termString;
-	}
-
-	public String getLine() {
-		return line;
 	}
 
 }

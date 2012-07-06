@@ -19,10 +19,10 @@
 
 :- public([
 	pdt_reload/1,
-	find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+	find_reference_to/12, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
-	find_definition_contained_in/8,
+	find_definition_contained_in/9,
 	get_pred/7,
 	find_pred/8,
 	predicates_with_property/3,
@@ -36,21 +36,38 @@
 :- uses(meta, [map/3::maplist/3]).
 :- uses(utils4entities, [source_file_entity/3, entity_property/3]).
 
-:- use_module(library(pldoc/doc_library)).
-:- use_module(library(explain)).
-:- use_module(library(help)).
-:- use_module(library(make)).
-:- use_module(library(memfile)).
+%:- use_module(library(pldoc/doc_library)).
+%:- use_module(library(explain)).
+%:- use_module(library(help)).
+%:- use_module(library(make)).
+%:- use_module(library(memfile)).
 %:- use_module(library('pldoc')).
 %:- use_module(library('pldoc/doc_html'), []).
 %:- use_module(library('http/html_write'), []).
 
-:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
+%:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
-:- use_module(pdt_prolog_library(utils4modules)).
+%:- use_module(pdt_prolog_library(utils4modules)).
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
 
 
+:- if(current_logtalk_flag(version, version(3, _, _))).
+	:- multifile(logtalk::message_hook/3).
+	:- dynamic(logtalk::message_hook/3).
+
+	logtalk::message_hook(Term, _Kind, _Tokens) :-
+%		nonvar(Term),
+%		arg(1, Term, Path),
+%		is_absolute_file_path(Path),
+%		arg(2, Term, Lines),
+%		(	integer(Lines)
+%			% if integer(Lines), Lines =< 0 -> no line number available
+%		;	Lines = Begin - End,
+%		 	integer(Begin),
+%			integer(End)
+%		),
+		fail.
+:- endif.
 
                /*************************************
                 * PDT RELOAD                       *
@@ -63,7 +80,7 @@
 % Logtalk
 pdt_reload(FullPath) :-
 	write(FullPath), nl,
-	pdtplugin:split_file_path(FullPath, Directory, File, BaseName, lgt),
+	split_file_path:split_file_path(FullPath, Directory, File, BaseName, lgt),
 	setup_call_cleanup(
 		working_directory(Current, Directory),     % SWI-Prolog
 		logtalk_reload(Directory, File, BaseName),
@@ -85,51 +102,53 @@ logtalk_reload(Directory, File, BaseName) :-
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/
 
-find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2) :-
+find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+	source_file_entity(EnclFile, ClickedLine, This),
+	search_term_to_predicate_indicator(Term, Functor/Arity),
 	findall(
-		item(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2),
-		find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2),
+		item(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility),
+		find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility),
 		Items0
 	),
 	filter_categorized_definitions(Items0, Items),
-	list::member(item(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory1, Entity, FullPath, Line, Properties, SearchCategory2), Items).
+	list::member(item(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility0), Items),
+	% construct the actual text label that will be used by the Java side when showing the search results
+	visibility_text(DeclOrDef, Visibility0, Visibility).
 
 
-find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory, Entity, FullPath, Line, Properties, SearchCategory) :-
-	search_term_to_predicate_indicator(Term, Functor/Arity),
-	source_file_entity(EnclFile,ClickedLine,This),
-	decode(Term, This, Entity, _Kind, _Template, Location, Properties, SearchCategory),
+find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+	decode(Term, This, Entity, _Kind, _Template, Location, Properties, DeclOrDef, Visibility),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
 
-find_definitions_categorized0(_EnclFile, _ClickedLine, Term, Functor, Arity, _This, SearchCategory, Entity, FullPath, Line, Properties, other) :-
-	search_term_to_predicate_indicator(Term, Functor/Arity),
+find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
 	(	current_object(Entity)
 	;	current_protocol(Entity)
 	;	current_category(Entity)
 	),
+	Entity \= This,
 	(	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)),
-		SearchCategory = declaration
+		DeclOrDef = declaration,
+		Visibility = invisible
 	;	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
-		SearchCategory = definition
+		DeclOrDef = definition,
+		Visibility = invisible
 	;	entity_property(Entity, _Kind, includes(Functor/Arity, Properties)),
-		SearchCategory = (multifile)
+		DeclOrDef = definition,
+		Visibility = invisible
 	),
 	entity_property(Entity, _Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties),
 	atom_concat(Directory, File, FullPath).
 
+
 filter_categorized_definitions([], []).
 filter_categorized_definitions([Item0| Items0], Items) :-
-	Item0 = item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, SearchCategory2),
-	SearchCategory2 \= other,
-	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, This, _, _, _, other), Items0, Items1),
-	!,
-	filter_categorized_definitions([Item0| Items1], Items).
-filter_categorized_definitions([Item0| Items0], Items) :-
-	Item0 = item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, SearchCategory2),
-	SearchCategory2 \= other,
-	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, other), Items0, Items1),
+	Item0 = item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, Visibility),
+	Visibility \= invisible,
+	(	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, This, _, _, _, invisible), Items0, Items1)
+	;	list::selectchk(item(EnclFile, ClickedLine, Term, Functor, Arity, This, _, Entity, FullPath, Line, _, invisible), Items0, Items1)
+	),
 	!,
 	filter_categorized_definitions([Item0| Items1], Items).
 filter_categorized_definitions([Item0| Items0], [Item0| Items]) :-
@@ -144,92 +163,18 @@ search_term_to_predicate_indicator(_<<Term, Functor/Arity) :- !, functor(Term, F
 search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
 search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor, Arity).
 
-:- multifile(pdtplugin:results_category_label/2).
 
-pdtplugin:results_category_label(declaration, 'Visible declaration').
-pdtplugin:results_category_label(definition, 'Called definition').
-pdtplugin:results_category_label(inherited, 'Called definition').
-pdtplugin:results_category_label(local, 'Local definition').
-pdtplugin:results_category_label((multifile), 'Visible multifile definitions').
-pdtplugin:results_category_label(other, 'Other declarations and definitions').
+visibility_text(declaration, local,		'Local declaration' ) :- !.
+visibility_text(declaration, super,   	'Inherited' ) :- !.
+visibility_text(declaration, sub, 		'Descendant declaration') :- !.
+visibility_text(declaration, invisible,	'Locally invisible declaration') :- !.
 
-
-%% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
-
-find_decl_or_def(Module,Name,Arity,Sources) :-
-	( var(Module)
-	; var(Name)
-	),
-	throw( input_argument_free(find_decl_or_def(Module,Name,Arity,Sources)) ).
-
-find_decl_or_def(CallingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
-	referenced_but_undeclared(CallingModule,Name,Arity),
-	DeclModule = 'No declaration (in any entity)',
-	File = 'No declaration (in any file)',
-	Line = 0.
-
-find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
-	setof(
-		VisibilityText-DeclModule-Location, ContextModule^Name^Arity^
-			(declared_but_undefined(DeclModule,Name,Arity),
-			 visibility(Visibility, ContextModule,Name,Arity,DeclModule),
-			 declared_in_file(DeclModule,Name,Arity,Location),
-			 visibility_text(declared, Visibility, VisibilityText)),
-		Declarations
-	).
-
-find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
-%   setof( DefiningModule, Name^Arity^
-%          defined_in_module(DefiningModule,Name,Arity),
-%          DefiningModules
-%   ),
-	setof(
-		VisibilityText-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
-			(defined_in_module(DefiningModule,Name,Arity),
-			 visibility(Visibility, ContextModule,Name,Arity,DefiningModule),
-			 defined_in_files(DefiningModule,Name,Arity,Locations),
-			 visibility_text(defined, Visibility, VisibilityText)),
-		Definitions
-	).
+visibility_text(definition, local,		'Local definition' ) :- !.
+visibility_text(definition, super,   	'Inherited' ) :- !.
+visibility_text(definition, sub, 		'Descendant definition') :- !.
+visibility_text(definition, invisible,	'Locally invisible definition') :- !.
 
 
-visibility_text(declared, local,      'Local declaration' ) :- !.
-visibility_text(declared, ancestor,   'Inherited declaration' ) :- !.
-visibility_text(declared, descendant, 'Descendant declaration') :- !.
-visibility_text(declared, invisible,  'Locally invisible declaration') :- !.
-
-visibility_text(defined, local,      'Local definitions' ) :- !.
-visibility_text(defined, ancestor,   'Inherited definitions' ) :- !.
-visibility_text(defined, descendant, 'Descendant definitions') :- !.
-visibility_text(defined, invisible,  'Locally invisible definitions') :- !.
-
-
-
-% These clauses must stay in this order since they determine
-% the order of elements in the result of  find_decl_or_def
-% and hence the order of elements in the search result view
-% (which is the INVERSE of the order of elements that we
-% compute here).
-
-visibility(invisible, ContextEntity,Name,Arity,DeclEntity) :-
-	% There is some DeclaringEntity
-	declared_in_entity(DeclEntity,Name,Arity,DeclEntity),
-	\+ declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
-	\+ declared_in_entity(DeclEntity,_,_,ContextEntity).
-
-visibility(descendant, ContextEntity,Name,Arity,DeclEntity) :-
-	declared_in_entity(DeclEntity,Name,Arity,DeclEntity),
-	% DeclEntity is a submodule of ContextEntity
-	declared_in_entity(DeclEntity,_,_,ContextEntity), % submodule
-	ContextEntity \== DeclEntity.
-
-visibility(ancestor, ContextEntity,Name,Arity,DeclEntity) :-
-	declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
-	ContextEntity \== DeclEntity.
-
-visibility(local, ContextEntity,Name,Arity,DeclEntity) :-
-	declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
-	ContextEntity == DeclEntity.
 
 
         /***********************************************************************
@@ -319,13 +264,14 @@ primary_location(Locations,_,File,FirstLine) :-
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
-	pdtplugin:split_file_path(FullPath, Directory, File, _, lgt),
+find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
+	split_file_path:split_file_path(FullPath, Directory, File, _, lgt),
 	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
+	entity_property(Entity, Kind, lines(EntityLine, _)),
 	(	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
-		% we add a clauses/1 declaration property just to simplify coding in the Java side
+		% we add a number_of_clauses/1 declaration property just to simplify coding in the Java side
 		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)) ->
 			list::memberchk(number_of_clauses(N0), DefinitionProperties)
 		;	N0 = 0
@@ -342,7 +288,7 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
 		% we add a scope/0 property just to simplify coding in the Java side
 		functor(Predicate, Functor, Arity),
-		(	catch(decode(Predicate, Entity, _, _, _, _, DeclarationProperties, declaration),_,fail) ->
+		(	catch(decode(Predicate, Entity, _, _, _, _, DeclarationProperties, declaration, _),_,fail) ->
 			% found the scope declaration
 			(	list::member((public), DeclarationProperties) ->
 				Properties = [(public)| Properties0]
@@ -356,15 +302,17 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		SearchCategory = definition
 	;	% entity multifile definitions
 		entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0)),
+		entity_property(From, _, file(FromFile, FromDirectory)),
+		atom_concat(FromDirectory, FromFile, FromPath),
 		% we add a from/1 property just to simplify coding in the Java side
-		Properties = [from(From)| Properties0],
+		Properties = [(multifile), from(From), defining_file(FromPath)| Properties0],
 		SearchCategory = (multifile)
 	;	% entity multifile definitions
 		entity_property(Entity, Kind, provides(Functor/Arity, For, Properties0)),
-		% we add a from/1 + defining_file/1 properties just to simplify coding in the Java side
+		% we add a for/1 + defining_file/1 properties just to simplify coding in the Java side
 		entity_property(Entity, Kind, file(DefiningFile, DefiningDirectory)),
 		atom_concat(DefiningDirectory, DefiningFile, DefiningFullPath),
-		Properties = [for(For), defining_file(DefiningFullPath)| Properties0],
+		Properties = [(multifile), for(For), defining_file(DefiningFullPath)| Properties0],
 		SearchCategory = (multifile)
 	),
 	list::memberchk(line_count(Line), Properties).
@@ -555,6 +503,8 @@ deactivate_warning_and_error_tracing:-
 %
 % @author trho
 %
+:- multifile(user:message_hook/3).
+
 user:message_hook(_Term, Level, Lines) :-
 	warning_and_error_tracing,
 	pdt_term_position(StartLine),
@@ -659,7 +609,7 @@ predicate_name_with_unary_property_(Name,Property,Arg) :-
 
 % decode(Term, This, Entity, Kind, Template, Location, Properties).
 
-decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	!,
 	nonvar(Object),
 	nonvar(Predicate),
@@ -669,26 +619,30 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 	(	% declaration
 		Object::predicate_property(Template, declared_in(Entity)),
 		entity_property(Entity, _, declares(Functor/Arity, Properties)),
-		SearchCategory = declaration
+		DeclOrDef = declaration,
+		Visibility = invisible
 	;	% definition
 		Object::predicate_property(Template, defined_in(Primary)),
 		(	% local definitions
 			Entity = Primary,
 			entity_property(Primary, _, defines(Functor/Arity, Properties)),
-			SearchCategory = definition
+			DeclOrDef = definition,
+			Visibility = invisible
 		;	% multifile definitions
 			entity_property(Primary, _, includes(Functor/Arity, Entity, Properties)),
-			SearchCategory = multifile
+			DeclOrDef = definition,
+			Visibility = invisible
 		)
 	;	% local definition
 		Entity = This,
 		entity_property(This, Kind, defines(Functor/Arity, Properties)),
-		SearchCategory = local
+		DeclOrDef = definition,
+		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
 
-decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	!,
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -709,7 +663,8 @@ decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		),
 		entity_property(DeclarationEntity, _, declares(Functor/Arity, Properties)),
 		Entity = DeclarationEntity,
-		SearchCategory = declaration
+		DeclOrDef = declaration,
+		Visibility = super
 	;	% definition
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
@@ -736,19 +691,22 @@ decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		;	Properties = [private| Properties0]
 		),
 		Entity = Primary,
-		SearchCategory = definition
+		DeclOrDef = definition,
+		Visibility = sub
 	;	% multifile definitions
 		entity_property(Primary, _, includes(Functor/Arity, Entity, Properties)),
-		SearchCategory = (multifile)
+		DeclOrDef = definition,
+		Visibility = local
 	;	% local definition
 		Entity = This,
 		entity_property(This, Kind, defines(Functor/Arity, Properties)),
-		SearchCategory = local
+		DeclOrDef = definition,
+		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
 
-decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	functor(Template, Functor, Arity),
@@ -761,7 +719,7 @@ decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prop
 			abolish_object(Obj)
 		),
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
-		SearchCategory = declaration
+		DeclOrDef = declaration
 	;	% definition
 		findall(Category, imports_category(This, Category), Categories),
 		create_object(Obj, [imports(Categories)], [], []),
@@ -770,20 +728,23 @@ decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prop
 		(	% local definitions
 			Entity = Primary,
 			entity_property(Primary, Kind, defines(Functor/Arity, Properties)),
-			SearchCategory = definition
+			DeclOrDef = definition,
+			Visibility = local
 		;	% multifile definitions
 			entity_property(Primary, Kind, includes(Functor/Arity, Entity, Properties)),
-			SearchCategory = (multifile)
+			DeclOrDef = definition,
+			Visibility = local
 		)
 	;	% local definition
 		Entity = This,
 		entity_property(This, Kind, defines(Functor/Arity, Properties)),
-		SearchCategory = local
+		DeclOrDef = definition,
+		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
 
-decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	!,
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -803,7 +764,8 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 			abolish_object(Obj)
 		),
 		entity_property(Entity, _, declares(Functor/Arity, Properties)),
-		SearchCategory = declaration
+		DeclOrDef = declaration,
+		Visibility = super
 	;	% inherited
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
@@ -829,32 +791,34 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 			Properties = [protected| Properties0]
 		;	Properties = [private| Properties0]
 		),
-		SearchCategory = inherited
+		DeclOrDef = definition,
+		Visibility = super
 	;	% local definition
 		Entity = This,
 		entity_property(This, Kind, defines(Functor/Arity, Properties)),
-		SearchCategory = local
+		DeclOrDef = definition,
+		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	entity_property(This, _, uses(Object, OriginalFunctor/Arity, Functor/Arity)),
 	!,
 	functor(Template, OriginalFunctor, Arity),
-	decode(Object::Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory).
+	decode(Object::Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	entity_property(This, _, use_module(Module, OriginalFunctor/Arity, Functor/Arity)),
 	!,
 	functor(Template, OriginalFunctor, Arity),
-	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory).
+	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	% local predicate
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -875,14 +839,20 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 			abolish_object(Obj)
 		),
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
-		SearchCategory = declaration
+		DeclOrDef = declaration,
+		(	\+ Entity \= This -> 
+			Visibility = local
+		;	Visibility = super
+		)
 	;	% definition
 		Entity = This,
 		entity_property(Entity, _, defines(Functor/Arity, Properties)),
-		SearchCategory = definition
+		DeclOrDef = definition,
+		Visibility = local
 	;	% multifile definitions
 		entity_property(This, _, includes(Functor/Arity, Entity, Properties)),
-		SearchCategory = (multifile)
+		DeclOrDef = definition,
+		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).

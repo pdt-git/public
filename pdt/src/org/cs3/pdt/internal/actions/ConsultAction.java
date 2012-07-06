@@ -60,16 +60,22 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.QueryUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -195,7 +201,7 @@ public class ConsultAction extends QueryConsoleThreadAction {
 
 	private void activateWarningAndErrorTracing(PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("activate warning and error tracing", 1);
-		pif.queryOnce("activate_warning_and_error_tracing");
+//		pif.queryOnce("activate_warning_and_error_tracing");
 		monitor.done();
 	}
 	
@@ -355,8 +361,6 @@ public class ConsultAction extends QueryConsoleThreadAction {
 		} );
 	}
 
-
-	
 
 
 }

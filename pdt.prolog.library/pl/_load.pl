@@ -15,6 +15,7 @@
  :- consult(count).         % Counting
  :- consult(time).          % Runtime measurement
  :- consult(utils4modules). % Module handling
+ :- consult(utils4modules_visibility). % Visibility handling
  
  :- use_module(junitadapter).
  

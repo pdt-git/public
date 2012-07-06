@@ -275,6 +275,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 											getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 										}
 									});
+									writeCurrentProcessPortToFile();
 								}
 							}
 						} catch (Throwable e) {
@@ -1180,9 +1181,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		if(automatedSelector != null){
 			automatedSelector.update();
 		}
+		writeCurrentProcessPortToFile();
+	}
+
+	public void writeCurrentProcessPortToFile() {
 		try {
 			int port = (Integer)currentPif.getClass().getMethod("getPort").invoke(currentPif);
-			File portFile = new File(System.getProperty("java.io.tmpdir")+File.separator + "pdtconsoleActivePort.txt");
+			File portFile = new File(System.getProperty("java.io.tmpdir")+File.separator + "pdt_console_active_port.txt");
 			FileWriter writer = new FileWriter(portFile,false);
 			writer.write(""+port+"\n");
 			writer.close();
