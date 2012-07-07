@@ -70,9 +70,9 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	private PDTBreakpointHandler() {
+		checkForPif();
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		PrologRuntimePlugin.getDefault().registerReconsultHook(this);
-		checkForPif();
 	}
 
 	private void checkForPif() {
