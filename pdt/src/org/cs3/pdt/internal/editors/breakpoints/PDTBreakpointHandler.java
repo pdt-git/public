@@ -514,6 +514,10 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	@Override
 	public void activePrologInterfaceChanged(PrologInterface pif) {
+		if (currentPif == pif) {
+			return;
+		}
+		
 		removePifListener();
 
 		currentPif = pif;

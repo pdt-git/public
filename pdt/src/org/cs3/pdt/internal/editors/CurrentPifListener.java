@@ -114,6 +114,10 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 
 	@Override
 	public void activePrologInterfaceChanged(PrologInterface pif) {
+		if (currentPif == pif) {
+			return;
+		}
+		
 		PDTPlugin.getDefault().notifyDecorators();
 		
 		removePifListener();
