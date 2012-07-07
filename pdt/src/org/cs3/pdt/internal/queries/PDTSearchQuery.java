@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.search.PrologSearchResult;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
@@ -116,19 +115,10 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private IStatus doSearch()
-			throws PrologInterfaceException, PrologException, IOException,
-			NumberFormatException {
-
-		if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole() == null){
-			return Status.CANCEL_STATUS;
-		}
-		else {
-			PrologSession session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-
-			processFoundClauses(findReferencedClauses(session));
-			return Status.OK_STATUS;
-		}
+	private IStatus doSearch() throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
+		PrologSession session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+		processFoundClauses(findReferencedClauses(session));
+		return Status.OK_STATUS;
 	}
 
 	/**
