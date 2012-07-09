@@ -44,10 +44,10 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
@@ -63,31 +63,29 @@ public class RunUnitTestAction extends Action {
 	
 	@Override
 	public void run() {
-		if (PDTUtils.checkForActivePif(true)) {
-			// get input from active editor
-			IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
-			if (input == null) {
-				Debug.warning("Consult action triggered, but active editor input is null.");
-				return;
-			}
-			
-			if (input instanceof IFileEditorInput) {
-				// file from workspace 
-				IFileEditorInput fileInput = (IFileEditorInput) input;
-				IFile workspaceFile = fileInput.getFile();
-				runUnitTest(workspaceFile);
-			} else if(input instanceof FileStoreEditorInput) {
-//				// external file
-//				FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
-//				File file = new File(fileInput.getURI());
-//				consultExternalFile(file);
-			} else {
-				Debug.warning("Consult action triggered, but active editor input is no file.");
-				return;
-			}
+		// get input from active editor
+		IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
+		if (input == null) {
+			Debug.warning("Consult action triggered, but active editor input is null.");
+			return;
+		}
+
+		if (input instanceof IFileEditorInput) {
+			// file from workspace 
+			IFileEditorInput fileInput = (IFileEditorInput) input;
+			IFile workspaceFile = fileInput.getFile();
+			runUnitTest(workspaceFile);
+		} else if(input instanceof FileStoreEditorInput) {
+			//				// external file
+			//				FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
+			//				File file = new File(fileInput.getURI());
+			//				consultExternalFile(file);
+		} else {
+			Debug.warning("Consult action triggered, but active editor input is no file.");
+			return;
 		}
 	}
-	
+
 
 	private void runUnitTest(IFile workspaceFile) {
 		final IFile f;
@@ -110,46 +108,39 @@ public class RunUnitTestAction extends Action {
 				return;
 			}
 		}
-		if (PDTUtils.checkForActivePif(true)) {
-			PrologSession session = null;
-			try {
-				PrologInterface pif = PDTUtils.getActiveConsolePif();
-				session = pif.getSession();
-				String prologFileName = PDTUtils.getPrologFileName(f);
-				String query = "junitadapter:unit_test(UnitName,Test,'"
-						+ prologFileName + "',Line)";
-				if (session.queryOnce(query) != null) {
-					session.queryOnce("assert(junitadapter:file_to_test('"
-							+ prologFileName + "'))");
+		PrologSession session = null;
+		try {
+			PrologInterface pif = PDTUtils.getActivePif();
+			session = pif.getSession();
+			String prologFileName = PDTUtils.getPrologFileName(f);
+			String query = "junitadapter:unit_test(UnitName,Test,'"
+					+ prologFileName + "',Line)";
+			if (session.queryOnce(query) != null) {
+				session.queryOnce("assert(junitadapter:file_to_test('"
+						+ prologFileName + "'))");
 
-					ILaunchConfiguration[] launchConfigurations = DebugPlugin
-							.getDefault().getLaunchManager()
-							.getLaunchConfigurations();
-					ILaunchConfiguration plunit = null;
-					for (ILaunchConfiguration iLaunchConfiguration : launchConfigurations) {
-						if (iLaunchConfiguration.getName().equals("PLUnitTest")) {
-							plunit = iLaunchConfiguration;
-							break;
-						}
-					}
-					if (plunit != null) {
-						DebugUITools.launch(plunit, ILaunchManager.RUN_MODE);
-
+				ILaunchConfiguration[] launchConfigurations = DebugPlugin
+						.getDefault().getLaunchManager()
+						.getLaunchConfigurations();
+				ILaunchConfiguration plunit = null;
+				for (ILaunchConfiguration iLaunchConfiguration : launchConfigurations) {
+					if (iLaunchConfiguration.getName().equals("PLUnitTest")) {
+						plunit = iLaunchConfiguration;
+						break;
 					}
 				}
-			} catch (Exception e) {
-				Debug.report(e);
-			} finally {
-				if (session != null) {
-					session.dispose();
-				}
+				if (plunit != null) {
+					DebugUITools.launch(plunit, ILaunchManager.RUN_MODE);
 
+				}
+			}
+		} catch (Exception e) {
+			Debug.report(e);
+		} finally {
+			if (session != null) {
+				session.dispose();
 			}
 		}
-
-
 	}
 	
-
-
 }

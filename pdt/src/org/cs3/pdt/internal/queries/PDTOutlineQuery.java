@@ -39,7 +39,6 @@ public class PDTOutlineQuery {
 	@SuppressWarnings("unchecked")
 	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
-		String module = "user";
 		for (Map<String, Object> predicate : result) {
 			String module = predicate.get("Entity").toString();
 			int entityLine = Integer.parseInt( predicate.get("EntityLine").toString() );

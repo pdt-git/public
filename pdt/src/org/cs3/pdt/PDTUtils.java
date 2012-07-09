@@ -46,8 +46,14 @@ import java.io.IOException;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.ui.util.UIUtils;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
@@ -110,6 +116,10 @@ public final class PDTUtils {
 
 		IPath filepath = new Path(enclFile);
 		return Util.prologFileName(filepath.toFile());
+	}
+
+	public static PrologInterface getActivePif() {
+		return PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 	}
 
 }

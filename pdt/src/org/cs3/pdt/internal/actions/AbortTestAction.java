@@ -50,12 +50,12 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;
@@ -68,39 +68,37 @@ public class AbortTestAction implements IObjectActionDelegate {
 
 	@Override
 	public void run(IAction action) {
-		if (PDTUtils.checkForActivePif(true)) {
-			// get input from active editor
-			IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
-			if (input == null) {
-				Debug.warning("Consult action triggered, but active editor input is null.");
-				return;
-			}
-				PrologSession s = null;
-				try {
-					PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-					Set<String> keys = registry.getAllKeys();
-					for (String key : keys) {
-						PrologInterface pif = registry.getPrologInterface(key);
-						String threadId = readThreadIdFromFile();
-						int pifPort = (Integer)pif.getClass().getMethod("getPort").invoke(pif);
-						if(pifPort == port){
-							s=pif.getSession();
-							if(threadId != null){
-								s.queryOnce("catch(thread_signal('"+threadId +"', abort),_,fail)");
-							}
-							return;
-						}
-					}
-					
-					Debug.warning("No PrologInterface with port "+ port + " found.");
-				} catch (Exception e) {
-					Debug.report(e);
-				} finally {
-					if(s!=null)
-						s.dispose();
-				}
-
+		// get input from active editor
+		IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
+		if (input == null) {
+			Debug.warning("Consult action triggered, but active editor input is null.");
+			return;
 		}
+		PrologSession s = null;
+		try {
+			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			Set<String> keys = registry.getAllKeys();
+			for (String key : keys) {
+				PrologInterface pif = registry.getPrologInterface(key);
+				String threadId = readThreadIdFromFile();
+				int pifPort = (Integer)pif.getClass().getMethod("getPort").invoke(pif);
+				if(pifPort == port){
+					s=pif.getSession();
+					if(threadId != null){
+						s.queryOnce("catch(thread_signal('"+threadId +"', abort),_,fail)");
+					}
+					return;
+				}
+			}
+
+			Debug.warning("No PrologInterface with port "+ port + " found.");
+		} catch (Exception e) {
+			Debug.report(e);
+		} finally {
+			if(s!=null)
+				s.dispose();
+		}
+
 	}
 
 	private String readThreadIdFromFile() throws IOException {

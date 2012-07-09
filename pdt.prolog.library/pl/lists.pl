@@ -4,7 +4,7 @@
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
-    intersection/3,           % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
+    ctc_intersection/3,           % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
     union_sorted/3,           % (+Set1,+Set2,?Union)! 
     union_order_preserving/3, % (+Set1,+Set2,?Union)!
     remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
@@ -69,7 +69,7 @@ union_inters__([X|T1],[Y|T2],NewU, NewI):-
    ).
 
 
-intersection(S1,S2,I) :-
+ctc_intersection(S1,S2,I) :-
    % prevent propagating side-effects of unification to the call site
    copy_term(S2,S2C), 
    % start with shorter list (for better performance)    

@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.internal.editors;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -51,7 +50,6 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
@@ -60,16 +58,14 @@ import org.cs3.pdt.internal.actions.RunUnitTestAction;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.ExternalPrologFilesProjectUtils;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.metadata.GoalProvider;
-import org.cs3.pl.metadata.PredicateReadingUtilities;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pdt.metadata.Goal;
+import org.cs3.pdt.metadata.GoalProvider;
+import org.cs3.pdt.metadata.PredicateReadingUtilities;
+import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -78,13 +74,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -175,15 +166,6 @@ public class PLEditor extends TextEditor {
 //		addProblemMarkers(); // here happens the save & reconsult
 //		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
 		setFocus();
-
-					}
-				});
-				return Status.OK_STATUS;
-			}
-		};
-		j.setPriority(Job.SHORT);
-		j.setRule(getCurrentIFile());
-		j.schedule();
 	}
 
 	/**

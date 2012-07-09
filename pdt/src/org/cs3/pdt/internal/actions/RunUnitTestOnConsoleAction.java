@@ -1,16 +1,13 @@
 package org.cs3.pdt.internal.actions;
 
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
