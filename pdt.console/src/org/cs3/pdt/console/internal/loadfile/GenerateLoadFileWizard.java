@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -70,9 +69,7 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 		try {
 			file.setPersistentProperty(KEY, "true");
 			
-			PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
-
-			consolePlugin.addEntryPoint(file);
+			PrologRuntimeUIPlugin.getDefault().addEntryPoint(file);
 			
 			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 

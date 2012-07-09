@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -25,7 +24,7 @@ import org.eclipse.ui.IActionDelegate;
 public class ToggleEntryPointAction implements IActionDelegate {
 
 	public static final String PDT_ENTRY_POINT = "pdt_entry_point";
-	public static final QualifiedName KEY = new QualifiedName("pdt", "entry.point");
+	public static final QualifiedName KEY = PrologRuntimeUIPlugin.ENTRY_POINT_KEY;
 	
 	public ToggleEntryPointAction() {
 	}
@@ -98,11 +97,9 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		try {
 			file.setPersistentProperty(KEY, Boolean.toString(b));
 			if (b) {
-				PrologConsolePlugin.getDefault().addEntryPoint(file);
-//				PDTPlugin.getDefault().addEntryPoint(file);
+				PrologRuntimeUIPlugin.getDefault().addEntryPoint(file);
 			} else {
-				PrologConsolePlugin.getDefault().removeEntryPoint(file);
-//				PDTPlugin.getDefault().removeEntryPoint(file);
+				PrologRuntimeUIPlugin.getDefault().removeEntryPoint(file);
 			}
 		} catch (CoreException e) {
 			e.printStackTrace();

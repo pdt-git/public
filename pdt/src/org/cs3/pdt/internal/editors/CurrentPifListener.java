@@ -5,7 +5,6 @@ import static org.cs3.prolog.common.QueryUtils.bT;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -98,7 +97,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		try {
 			currentPif.queryOnce(bT("remove_entry_points", "_"));
 			
-			for (IFile file : PrologConsolePlugin.getDefault().getEntryPoints()) {
+			for (IFile file : PrologRuntimeUIPlugin.getDefault().getEntryPoints()) {
 				try {
 					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
 					currentPif.queryOnce(bT("add_entry_point", Util.quoteAtom(prologFileName)));
