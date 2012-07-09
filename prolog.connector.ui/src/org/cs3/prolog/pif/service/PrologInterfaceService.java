@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import org.cs3.prolog.common.FileUtils;
@@ -143,66 +144,9 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	
 	@Override
 	public void consultFile(final IFile file) {
-		Job job = new Job("Consult " + file.getFullPath().toString()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					consultFileImpl(file, monitor);
-				} catch (PrologInterfaceException e) {
-					Debug.report(e);
-					return Status.CANCEL_STATUS;
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.setRule(file);
-		job.schedule();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void consultFileImpl(IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
-		HashSet<ConsultListener> consultListenersClone;
-		synchronized (consultListeners) {
-			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
-		}
-		PrologInterface pif = getActivePrologInterface();
-		if (pif == null) {
-			return;
-		}
-		
-		monitor.beginTask("Consult " +  file.getFullPath().toString(), consultListenersClone.size() * 3);
-
-		for (ConsultListener listener : consultListenersClone) {
-			monitor.subTask("Notify Listener");
-			listener.beforeConsult(pif, file, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-		}
-		boolean success = executeReload(pif, file, new SubProgressMonitor(monitor, consultListenersClone.size(), SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-		if (success) {
-			for (ConsultListener listener : consultListenersClone) {
-				monitor.subTask("Notify Listener");
-				listener.afterConsult(pif, file, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-			}
-		}
-		monitor.done();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private boolean executeReload(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
-		TreeSet<PDTReloadExecutor> executorsClone;
-		synchronized (pdtReloadExecutors) {
-			executorsClone = (TreeSet<PDTReloadExecutor>) pdtReloadExecutors.clone();
-		}
-		monitor.beginTask("Execute reload", executorsClone.size());
-		for (PDTReloadExecutor executor : executorsClone) {
-			monitor.subTask("Execute reload");
-			boolean success = executor.executePDTReload(pif, file, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-			if (success) {
-				monitor.done();
-				return true;
-			}
-		}
-		monitor.done();
-		return false;
+		ArrayList<IFile> fileList = new ArrayList<IFile>();
+		fileList.add(file);
+		consultFiles(fileList);
 	}
 	
 	@Override
@@ -236,7 +180,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 			return;
 		}
 		
-		monitor.beginTask("Consult " +  files.size() + " file(s)", consultListenersClone.size() * 3);
+		monitor.beginTask("Consult " +  files.size() + " file(s)", consultListenersClone.size() * 4);
 		
 		for (ConsultListener listener : consultListenersClone) {
 			monitor.subTask("Notify Listener");
@@ -247,14 +191,32 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		boolean success = executeReload(pif, files, new SubProgressMonitor(monitor, consultListenersClone.size()));
 		
 		if (success) {
+			monitor.subTask("Collect all consulted files");
+			List<String> allConsultedFiles = collectConsultedFiles(pif, new SubProgressMonitor(monitor, consultListenersClone.size()));
+			
 			for (ConsultListener listener : consultListenersClone) {
 				monitor.subTask("Notify Listener");
-				listener.afterConsult(pif, files, new SubProgressMonitor(monitor, 1));
+				listener.afterConsult(pif, files, allConsultedFiles, new SubProgressMonitor(monitor, 1));
 			}
 		}
 		monitor.done();
 	}
 	
+	private List<String> collectConsultedFiles(PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("", 1);
+		
+		List<String> result = new ArrayList<String>();
+		
+		List<Map<String, Object>> reloadedFiles = pif.queryAll("pdtplugin:pdt_reloaded_file(File)");
+		for (Map<String, Object> reloadedFile : reloadedFiles) {
+			result.add(reloadedFile.get("File").toString());
+		}
+		
+		monitor.done();
+		
+		return result;
+	}
+
 	@SuppressWarnings("unchecked")
 	private boolean executeReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		TreeSet<PDTReloadExecutor> executorsClone;

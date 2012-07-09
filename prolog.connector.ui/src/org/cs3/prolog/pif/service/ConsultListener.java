@@ -9,9 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface ConsultListener {
 	
-	void beforeConsult(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException;
 	void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException; 
-	void afterConsult(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException;
-	void afterConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException; 
+	void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException; 
 	
 }
