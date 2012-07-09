@@ -82,13 +82,13 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		}
 	}
 	
-	private static final String DEFAULT_CONSOLE = "Default Console";
+	private static final String DEFAULT_PROCESS = "Default Process";
 	
 	private PrologInterface getDefaultPrologInterface() {
 		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-		Subscription subscription = registry.getSubscription(DEFAULT_CONSOLE);
+		Subscription subscription = registry.getSubscription(DEFAULT_PROCESS);
 		if (subscription == null) {
-			subscription = new DefaultSubscription(DEFAULT_CONSOLE + "_indepent", DEFAULT_CONSOLE, "Independent prolog process", DEFAULT_CONSOLE + " (Prolog)");
+			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", DEFAULT_PROCESS + " (Prolog)");
 			registry.addSubscription(subscription);
 		}
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);

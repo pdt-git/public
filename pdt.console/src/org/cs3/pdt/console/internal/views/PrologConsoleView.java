@@ -46,7 +46,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -73,7 +72,6 @@ import org.cs3.prolog.connector.ui.PrologContextTracker;
 import org.cs3.prolog.connector.ui.PrologContextTrackerEvent;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
-import org.cs3.prolog.load.FileSearchPathConfigurator;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
@@ -126,7 +124,6 @@ import org.eclipse.ui.progress.UIJob;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole, ActivePrologInterfaceListener {
 
-	private static final String DEFAULT_CONSOLE = "Default Console";
 	private static final String KILLABLE = "killable";
 
 	private final class ClearAction extends Action {
@@ -334,14 +331,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 								if (oldPif != null) {
 									String currentKey = registry.getKey(oldPif);
 
-									if (!currentKey.equals(DEFAULT_CONSOLE)) {
-										setPrologInterface(registry.getPrologInterface(DEFAULT_CONSOLE));
-									}
-
 									oldPif.clearConsultedFiles();
 									oldPif.stop();
 
-									if (!currentKey.equals(DEFAULT_CONSOLE) && "true".equals(oldPif.getAttribute(KILLABLE))) {
+									if ("true".equals(oldPif.getAttribute(KILLABLE))) {
 										Set<Subscription> subscriptionsForPif = registry.getSubscriptionsForPif(currentKey);
 										for (Subscription s : subscriptionsForPif) {
 											registry.removeSubscription(s);
@@ -637,10 +630,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		try {
 			createPartControl_impl(parent);
-			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-			if (registry.getAllKeys().size() == 0) {
-				activateNewPrologProcess(registry, DEFAULT_CONSOLE);
-			}
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t.getLocalizedMessage(), t);
