@@ -17,6 +17,7 @@ import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -81,7 +82,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		PDTPlugin.getDefault().addDecorator(this);
 
 		// get active pif from console
-		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
+		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 
 		if (currentPif == null) {
 			if (element instanceof IFile) {
@@ -158,7 +159,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		modifiedSourceFiles.clear();
 		dirs.clear();
 		
-		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
+		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 		if (currentPif == null) {
 			return;
 		}

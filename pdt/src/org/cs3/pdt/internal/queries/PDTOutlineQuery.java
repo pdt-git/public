@@ -5,14 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.session.PrologSession;
 
 
@@ -21,17 +18,9 @@ public class PDTOutlineQuery {
 	public static Map<String, OutlineModuleElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {	
 		PrologSession session=null;
 		try {
-			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-			if(console==null || console.getPrologInterface() == null){
-				//				MessageBox messageBox = new MessageBox(
-				//						shell, SWT.ICON_WARNING| SWT.OK);
-				//
-				//				messageBox.setText("Outline");
-				//				messageBox.setMessage("Cannot open outline, no active Prolog Console found.");
-				//				messageBox.open();
-				return new HashMap<String, OutlineModuleElement>();
-			}
-			session = console.getPrologInterface().getSession();
+			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+			
+			session.queryOnce("pdt_editor_reload:wait_for_reload_finished");
 
 			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
 			List<Map<String, Object>> result = session.queryAll(query);

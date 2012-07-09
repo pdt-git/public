@@ -104,11 +104,17 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 			@Override
 			public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
+				synchronized (subjects) {
+					subjects.clear();
+				}
 				stop(session);
 			}
 
 			@Override
 			public void onError(PrologInterface pif) {
+				synchronized (subjects) {
+					subjects.clear();
+				}
 				session=null;
 			}
 
@@ -199,7 +205,13 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	}
 
-	private void enableSubject(String subject) throws PrologInterfaceException {
+	private synchronized void enableSubject(String subject) throws PrologInterfaceException {
+		synchronized (subjects) {
+			if (subjects.contains(subject)) {
+				Debug.warning("Aborted enableSubject: " + subject + " is already active");
+				return;
+			}
+		}
 		if (session == null) {
 			session = pif.getAsyncSession(PrologInterface.NONE);
 			session.addBatchListener(this);

@@ -52,7 +52,6 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ConsultAction;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
@@ -66,7 +65,6 @@ import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -159,7 +157,8 @@ public class PLEditor extends TextEditor {
 //		}
 		Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
 		breakpointHandler.backupMarkers(getCurrentIFile(), document);
-		new ConsultAction().consultFromActiveEditor();
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+//		new ConsultAction().consultFromActiveEditor();
 //		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
 //		addProblemMarkers(); // here happens the save & reconsult
 //		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
@@ -316,12 +315,10 @@ public class PLEditor extends TextEditor {
 			
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {
-				if (PDTUtils.checkForActivePif(true)) {
-					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
-					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-					int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
-					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
-				};
+				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
+				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		});
 
@@ -642,21 +639,17 @@ public class PLEditor extends TextEditor {
 		Action toggleBreakpointAction = new Action("Toggle breakpoint") {
 			@Override
 			public void run() {
-				if (PDTUtils.checkForActivePif(true)) {
-					int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
-					Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-					int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
 
-					breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
-				}
+				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		};
 		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
 			@Override
 			public void run() {
-				if (PDTUtils.checkForActivePif(true)) {
-					breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
-				}
+				breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
 			}
 		};
 

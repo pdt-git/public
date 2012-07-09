@@ -82,4 +82,16 @@
              schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
              sequence="CTRL+SHIFT+V"/>
     </extension>
+    <extension
+          point="org.cs3.prolog.connector.bootstrapContribution">
+       <fileContribution
+             id="pdt.console.pl.fileContribution"
+             path="pl/loader.pl">
+       </fileContribution>
+       <fileSearchPathContribution
+             alias="lib_pdt_console_pl"
+             id="pdt.console.pl.fileSearchPathContribution"
+             path="pl/">
+       </fileSearchPathContribution>
+    </extension>
  </plugin>

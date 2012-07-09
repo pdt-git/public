@@ -205,6 +205,7 @@ pdt_stop_console_server:-
     ).
 
 :- multifile(consult_server:pif_shutdown_hook/0).
+:- dynamic(consult_server:pif_shutdown_hook/0).
 consult_server:pif_shutdown_hook:-
     pdt_stop_console_server.
 
