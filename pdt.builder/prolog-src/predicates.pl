@@ -6,6 +6,7 @@
 						compute_all_predicate_properties/0,
 						compute_predicate_properties_for_files/1]).
 :- ensure_loaded(pdt_factbase).
+:- use_module(library(lists)).
 
 derive_all_predicates:-
     forall(

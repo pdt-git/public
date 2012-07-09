@@ -34,6 +34,9 @@
  * All previous facts for Template are retracted  
  * from Module before generating the new facts. 
  */
+ 
+ :- use_module(library(lists)).
+ 
 :- module_transparent generate_all_in_module/3,
                       generate_all_in_module/4.
                       

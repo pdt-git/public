@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
 public abstract class StructuredFieldEditorPreferencePage extends FieldEditorPreferencePage {
@@ -31,6 +33,20 @@ public abstract class StructuredFieldEditorPreferencePage extends FieldEditorPre
     protected void adjustGridLayout() {
     	for (EditorGroup eg : editorGroups.values()) {
     		eg.adjustGroupAndEditors();
+    	}
+    }
+    
+    protected void adjustLayoutForElement(Composite element) {
+    	Composite parent = element.getParent();
+    	EditorGroup editorGroup = editorGroups.get(parent);
+    	if (editorGroup != null) {
+    		Object layoutData = element.getLayoutData();
+    		if (layoutData instanceof GridData) {
+    			((GridData) layoutData).horizontalSpan = editorGroup.getMaxColumns();
+    			((GridData) layoutData).horizontalAlignment = SWT.FILL;
+    		} else {
+    			element.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, editorGroup.getMaxColumns(), 1));
+    		}
     	}
     }
 

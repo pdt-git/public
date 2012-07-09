@@ -22,7 +22,7 @@ public class PDTOutlineQuery {
 			
 			session.queryOnce("pdt_editor_reload:wait_for_reload_finished");
 
-			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
+			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, EntityLine, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {
@@ -39,9 +39,9 @@ public class PDTOutlineQuery {
 	@SuppressWarnings("unchecked")
 	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
-		String module = "user";
 		for (Map<String, Object> predicate : result) {
-			module = predicate.get("Entity").toString();
+			String module = predicate.get("Entity").toString();
+			int entityLine = Integer.parseInt( predicate.get("EntityLine").toString() );
 			String name = predicate.get("Functor").toString();
 			String kindOfEntity = predicate.get("KindOfEntity").toString();
 			int arity=Integer.parseInt(predicate.get("Arity").toString());
@@ -53,7 +53,7 @@ public class PDTOutlineQuery {
 				properties = (Vector<String>)prop;
 			}				
 			if (!modules.containsKey(module)) {
-				modules.put(module, new OutlineModuleElement(module, kindOfEntity));
+				modules.put(module, new OutlineModuleElement(fileName, module, entityLine, kindOfEntity));
 			}
 			OutlineModuleElement currentModuleElem = modules.get(module);
 			String label = module+":"+name+"/"+arity;

@@ -15,6 +15,9 @@
 
 % Conditional loading:
 
+:- use_module(library(backcomp)).
+:- use_module(library(memfile)).
+
 :- module_transparent consult_if_not_yet/2.
 
 consult_if_not_yet(File,Head) :-

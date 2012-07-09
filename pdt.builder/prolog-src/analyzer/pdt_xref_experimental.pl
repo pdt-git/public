@@ -5,6 +5,7 @@
 
 :- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(properties).
+:- use_module(library(lists)).
 %:- ensure_loaded('../pdt_factbase.pl').
 %:- use_module('../modules_and_visibility').
     /*********************************************

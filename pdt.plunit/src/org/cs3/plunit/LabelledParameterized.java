@@ -2,10 +2,13 @@ package org.cs3.plunit;
 
 
 import java.lang.reflect.Method;
-import java.security.Policy.Parameters;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.runner.Description;
 import org.junit.runners.Parameterized;
@@ -16,6 +19,13 @@ public class LabelledParameterized extends Parameterized {
 
     private List<String> labels;
 
+    private List<String> testLabels;
+
+    private List<Description> suiteDescriptions;
+
+    private Map<String, Description> fileSuite = new HashMap<String, Description>();
+
+    private Map<String, Map<String,Description>> fileSuites = new HashMap<String, Map<String,Description>>();
 
     private Description labelledDescription;
 
@@ -30,16 +40,40 @@ public class LabelledParameterized extends Parameterized {
     private void initialiseLabels() throws Exception {
         Collection<Object[]> parameterArrays = getParameterArrays();
         labels = new ArrayList<String>();
+        testLabels = new ArrayList<String>();
+        suiteDescriptions = new ArrayList<Description>();
         for (Object[] parameterArray : parameterArrays) {
-            String label = parameterArray[0].toString();
-            labels.add(label);
+            String fileName = parameterArray[3].toString();
+            // parameterArray[1].toString()
+            suiteDescriptions.add(addToSuiteAndGetUnitDescription(fileName,parameterArray));
+            labels.add(fileName);
+            testLabels.add(parameterArray[0].toString());
         }
 
 
     }
 
 
-    private Collection<Object[]> getParameterArrays() throws Exception {
+    private Description addToSuiteAndGetUnitDescription(String fileName, Object[] parameterArray) {
+		String module = parameterArray[1].toString();
+		if(fileSuite.get(fileName)==null){
+			fileSuite.put(fileName,Description.createSuiteDescription(fileName));
+			HashMap<String, Description> suiteMapping = new HashMap<String,Description>();
+			fileSuites.put(fileName,suiteMapping);
+		}
+		if(fileSuites.get(fileName).get(module)==null){
+			Description description = Description.createSuiteDescription(module);
+			Map<String, Description> suiteMapping = fileSuites.get(fileName);
+			suiteMapping.put(module, description);
+			fileSuites.get(fileName).put(module,description);
+			fileSuite.get(fileName).addChild(description);
+			return description;
+		}
+		return fileSuites.get(fileName).get(module);
+	}
+
+
+	private Collection<Object[]> getParameterArrays() throws Exception {
         Method testClassMethod = getDeclaredMethod(this.getClass(),
                 "getTestClass");
         Class<?> returnType = testClassMethod.getReturnType();
@@ -144,7 +178,7 @@ public class LabelledParameterized extends Parameterized {
     private void generateLabelledDescription() throws Exception {
         Description originalDescription = super.getDescription();
         labelledDescription = Description
-                .createSuiteDescription(originalDescription.getDisplayName());
+                .createSuiteDescription("plunit");
         ArrayList<Description> childDescriptions = originalDescription
                 .getChildren();
         int childCount = childDescriptions.size();
@@ -152,17 +186,29 @@ public class LabelledParameterized extends Parameterized {
             throw new Exception(
                     "Number of labels and number of parameters must match.");
 
+        for (Description description : fileSuite.values()) {
+            labelledDescription.addChild(description);
+		}
 
         for (int i = 0; i < childDescriptions.size(); i++) {
             Description childDescription = childDescriptions.get(i);
-            String label = labels.get(i);
-            Description newDescription = Description
-                    .createSuiteDescription(label);
+//            String label = labels.get(i);
+//            
+            Description suiteDescription = suiteDescriptions.get(i);
+//            = Description
+//                    .createSuiteDescription(label);
             ArrayList<Description> grandChildren = childDescription
                     .getChildren();
-            for (Description grandChild : grandChildren)
-                newDescription.addChild(grandChild);
-            labelledDescription.addChild(newDescription);
+            for (Description grandChild : grandChildren){
+            	//grandChild.getClass().getField("fDisplayName").set(grandChildren,testLabels.get(i) );
+//            	Description newGrandChild = Description
+//                        .createSuiteDescription(
+//                        		//testLabels.get(i),
+//                        		grandChild.getDisplayName(),
+//                        		(java.lang.annotation.Annotation[]) grandChild.getAnnotations().toArray(new java.lang.annotation.Annotation[0]));
+            	suiteDescription.addChild(grandChild);
+            }
+           // labelledDescription.addChild(newDescription);
         }
     }
 

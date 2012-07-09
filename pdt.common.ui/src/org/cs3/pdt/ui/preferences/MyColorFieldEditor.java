@@ -11,6 +11,7 @@ public class MyColorFieldEditor extends ColorFieldEditor implements FieldEditorF
     	this.parent = parent;
 	}
 	
+	@Override
 	public void adjustColumns(int numColumns) {
 		adjustForNumColumns(numColumns);
 	}

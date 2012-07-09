@@ -44,23 +44,20 @@ package org.cs3.pdt.metadata;
 import java.util.List;
 
 /**
- * A handle Prolog predicate.
+ * A handle to a Prolog predicate.
  * 
- * An instance of this class is a handle to a prolog predicate.
+ * An instance of this class is a handle to identify a prolog predicate, 
+ *  e.g. when passing it around as argument to method calls.
  * 
- * Two predicates are considered equal, if there module, name and arity are equal.
- * 
- * An instance is really not much more than a name to identify a predicate, e.g. when
- * passing it arround as argument to method calls.
+ * Two predicates are considered equal, if their module, name and arity are equal.
  * 
  * Other properties besides module, name and arity may be attached to an instance. 
  * Predefined property names are EXPORTED, MULTIFILE, DYNAMIC, MODULE_TRANSPARENT.
+ * The predefined property keys may only be used with the meaning declared in the 
+ * description of the respective key.
  * 
- * Implementations are not required to attach this information. 
- * Implementations are allowed to attach any other information. However, the predefined
- * property keys may only be used with the meaning declared in the description of the
- * respective key.    
- *  
+ * Implementations are not required to attach this additional information. 
+ * Implementations are allowed to attach any other information.     
  *  
  * @author lukas
  *

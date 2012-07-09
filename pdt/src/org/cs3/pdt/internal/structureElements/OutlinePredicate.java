@@ -16,8 +16,8 @@ public class OutlinePredicate extends Predicate implements PrologTreeElement{
 		this.fileName = fileName;
 	}
 	
-	public void addOccurence(PredicateOccuranceElement occurance) {
-		occurences.add(occurance);
+	public void addOccurence(PredicateOccuranceElement occurrence) {
+		occurences.add(occurrence);
 	}
 
 	public int getLine() {

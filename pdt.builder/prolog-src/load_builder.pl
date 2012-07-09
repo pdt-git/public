@@ -1,6 +1,7 @@
 %:- ensure_loaded(source_files).
 :- ensure_loaded('parse_util').
 :- use_module('analyzer/metapred_finder').
+:- use_module(library(lists)).
 
 
 ensure_generated_factbase_for_source_file(File) :-

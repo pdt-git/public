@@ -3,6 +3,7 @@
 									get_predicate_referenced_as/4,
 									exporting/3]).
 
+:- use_module(library(lists)).
 :- ensure_loaded('pdt_factbase').
 
 :- dynamic exporting/3.	%exporting(Module,PredId,FileId)

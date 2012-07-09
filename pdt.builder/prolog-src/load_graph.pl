@@ -1,5 +1,6 @@
 :- module(load_graph,[build_new_load_graph/0, build_load_graph/0]).
 :- ensure_loaded(parse_util).
+:- use_module(library(lists)).
 
 
 /**

@@ -220,11 +220,18 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		OutlinePredicate predicate=null;
 		String selectedFile = "";
 		int line;
-		if ((elem != null) && (elem instanceof OutlinePredicate)) { 
+		
+		if (elem == null) return;
+		
+		if (elem instanceof OutlineModuleElement) { 
+			OutlineModuleElement module = (OutlineModuleElement)elem;
+			line = module.getLine();
+			selectedFile = module.getFilePath();
+		} else if (elem instanceof OutlinePredicate) { 
 			predicate = (OutlinePredicate)elem;
 			line = predicate.getLine();
 			selectedFile = predicate.getFileName();
-		} else if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
+		} else if (elem instanceof PredicateOccuranceElement) {
 			PredicateOccuranceElement occurance = (PredicateOccuranceElement)elem;
 			line = occurance.getLine();
 			selectedFile = occurance.getFile();
@@ -235,7 +242,9 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		
 		String editorFileName = editor.getPrologFileName();
 		if (selectedFile.equals(editorFileName)) {
-			editor.gotoLine(line);
+			if (line > 0) {  // line = 0 means we do not have any line information
+				editor.gotoLine(line);
+			}
 		} else {
 			IFile file;
 			try {

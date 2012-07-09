@@ -79,7 +79,10 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	}
 	
 	private String getSignatureForMatch(PrologMatch match) {
-		return match.getDeclOrDef() + match.getName() + match.getArity();
+		return /* Andreas Becker, 28.6.2012: Damit Deklaration und Definition
+		          zusammen gezeigt werden, muss  folgendes entfernt werden:
+		          match.getDeclOrDef() + 
+		       */ match.getName() + match.getArity();
 	}
 
 	@Override

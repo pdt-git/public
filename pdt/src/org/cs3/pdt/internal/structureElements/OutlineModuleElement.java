@@ -3,13 +3,19 @@ package org.cs3.pdt.internal.structureElements;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OutlineModuleElement implements PrologTreeElement{
-	private String name;
-	private String kind;
+import org.cs3.pdt.metadata.PrologSourceLocation;
+
+public class OutlineModuleElement 
+       extends PrologSourceLocation
+       implements PrologTreeElement{
+	private String name;  
+	private String kind;   // Legal values are "module" (Prolog) or "entity" (Logtalk)
 	private Map<String, OutlinePredicate> predicates= new HashMap<String,OutlinePredicate>();
 	
-	public OutlineModuleElement(String name, String kindOfEntity) {
+	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity) {
+		super(filePath,line);
 		this.name = name;
+		kind = kindOfEntity;
 	}
 	
 	public boolean hasPredicate(String key) {
@@ -46,4 +52,5 @@ public class OutlineModuleElement implements PrologTreeElement{
 	public String getLabel() {
 		return name;
 	}
+
 }

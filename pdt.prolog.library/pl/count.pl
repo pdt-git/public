@@ -6,6 +6,7 @@
  *  - Semantic: Counting derivations (success) versus results.
  *  - Implementation: Based on nb_setargs/3, flag/3 or findall/3.
  * *********************************************************** */
+:- use_module(library(lists)).
  
 count_facts(Goal, Nr) :-
   predicate_property(Goal, number_of_clauses(Nr)).
