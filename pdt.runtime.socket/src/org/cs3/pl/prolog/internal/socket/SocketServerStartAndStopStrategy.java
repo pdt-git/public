@@ -62,9 +62,9 @@ import java.util.Map;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 

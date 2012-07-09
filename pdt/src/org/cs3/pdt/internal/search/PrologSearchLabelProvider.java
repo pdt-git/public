@@ -4,23 +4,27 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
+import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pl.common.ExternalPrologFilesProjectUtils;
-import org.cs3.pl.metadata.PrologElement;
+import org.cs3.pdt.metadata.PrologElement;
+import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
-public class PrologSearchLabelProvider implements ILabelProvider {
+public class PrologSearchLabelProvider extends LabelProvider implements IStyledLabelProvider {
 
 	PrologSearchLabelProvider() {
+	}
+
+	@Override
+	public StyledString getStyledText(Object element) {
+		return new StyledString(getText(element));
 	}
 
 	@Override
@@ -60,10 +64,6 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 	}
 
-	private Image setCategoryImage(ISharedImages sharedImagaes) {
-		return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
-	}
-
 	@Override
 	public String getText(Object element) {
 		if(element instanceof SearchPredicateElement){
@@ -89,20 +89,4 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		return "no label";
 	}
 
-	@Override
-	public void addListener(ILabelProviderListener listener) {
-	}
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-	}
 }

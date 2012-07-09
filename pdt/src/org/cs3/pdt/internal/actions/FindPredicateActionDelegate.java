@@ -46,27 +46,21 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.metadata.SourceLocation;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pdt.metadata.Goal;
+import org.cs3.pdt.metadata.SourceLocation;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -78,14 +72,11 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 public class FindPredicateActionDelegate extends TextEditorAction {
 	private ITextEditor editor;
 
-	
-
 	/**
 	 *  
 	 */
 	public FindPredicateActionDelegate(ITextEditor editor) {
-		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),
-				FindPredicateActionDelegate.class.getName(), editor); 
+		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI), FindPredicateActionDelegate.class.getName(), editor);
 		this.editor = editor;
 
 	}
@@ -96,43 +87,37 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	@Override
 	public void run() {
 		try {
-			final Goal goal = ((PLEditor) editor)
-					.getSelectedPrologElement();
+			final Goal goal = ((PLEditor) editor).getSelectedPrologElement();
 			Shell shell = editor.getEditorSite().getShell();
 			if (goal == null) {
-				
-				UIUtils.displayMessageDialog(shell,
-						"PDT Plugin",
-						"Cannot locate a predicate at the specified location.");
+
+				UIUtils.displayMessageDialog(shell, "PDT Plugin", "Cannot locate a predicate at the specified location.");
 				return;
 			}
 			final IFile file = UIUtils.getFileInActiveEditor();
-			if(file==null){
-//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), shell, 
-//						PDT.ERR_NO_ACTIVE_FILE, PDT.CX_FIND_PREDICATE, null);
+			if (file == null) {
+				// UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+				// shell,
+				// PDT.ERR_NO_ACTIVE_FILE, PDT.CX_FIND_PREDICATE, null);
 			}
-			
+
 			Job j = new Job("Searching predicate definition") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						monitor.beginTask("searching...",
-								IProgressMonitor.UNKNOWN);
-						
-						
-							run_impl(goal,file);
-						
+						monitor.beginTask("searching...", IProgressMonitor.UNKNOWN);
+
+						run_impl(goal, file);
 
 					} catch (Throwable e) {
 						Debug.report(e);
-						
+
 					} finally {
 						monitor.done();
 					}
 					return Status.OK_STATUS;
 				}
 
-				
 			};
 			j.schedule();
 		} catch (Throwable t) {
@@ -144,110 +129,84 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	public void dispose() {
 	}
 
-	
-	
 	private static class SourceLocationAndIsMultifileResult {
 		SourceLocation location;
 		boolean isMultifileResult;
+
 		SourceLocationAndIsMultifileResult(SourceLocation location, boolean isMultifileResult) {
 			this.location = location;
 			this.isMultifileResult = isMultifileResult;
 		}
 	}
+
 	private void run_impl(Goal goal, IFile file) throws CoreException {
-		IPrologProject plprj=null;
-		if(file!=null){ 
-			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
-		}
-		if(plprj== null){ // no Prolog nature set
-			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole(); 
-			if (console != null && console.getPrologInterface() != null) {
-				PrologSession session = null;
-				try {
-					session = console.getPrologInterface().getSession();
-					SourceLocationAndIsMultifileResult res = findFirstClauseLocation_withoutPdtNature(goal, session); 
-					if (res != null) {
-						if (res.location != null) {
-							PDTUtils.showSourceLocation(res.location);
-						}
-						if (res.isMultifileResult) {
-							new FindDefinitionsActionDelegate(editor).run();
-						}
-					}
-					return;
-				} catch (Exception e) {
-					Debug.report(e);
-				} finally {
-					if (session != null)
-						session.dispose();
+		PrologSession session = null;
+		try {
+			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+			SourceLocationAndIsMultifileResult res = findFirstClauseLocation(goal, session);
+			if (res != null) {
+				if (res.location != null) {
+					PDTUtils.showSourceLocation(res.location);
 				}
-			} else {
-				UIUtils.getDisplay().asyncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						MessageBox messageBox = new MessageBox(UIUtils.getActiveShell(), SWT.ICON_WARNING| SWT.OK);
-
-						messageBox.setText("Open Declaration");
-						messageBox.setMessage("Cannot open declaration. No PDT Nature assigned and no active Prolog Console available for a fallback.");
-						messageBox.open();					}
-				});
-			}
-		}
-		else {
-			PrologInterface pif = plprj.getMetadataPrologInterface();
-			SourceLocation loc;
-			try {
-				loc = findFirstClauseLocation_withPdtNature((Goal) goal, pif);
-				if (loc != null) {
-					PDTUtils.showSourceLocation(loc);
+				if (res.isMultifileResult) {
+					new FindDefinitionsActionDelegate(editor).run();
 				}
-			} catch (PrologInterfaceException e) {
-				Debug.report(e);
-				Shell shell = editor.getSite().getShell();
-
-				UIUtils.displayErrorDialog(shell, "PrologInterface Error",
-						"The connection to the Prolog process was lost. ");
 			}
+			return;
+		} catch (Exception e) {
+			Debug.report(e);
+		} finally {
+			if (session != null)
+				session.dispose();
 		}
-		
+//		UIUtils.getDisplay().asyncExec(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				MessageBox messageBox = new MessageBox(UIUtils.getActiveShell(), SWT.ICON_WARNING | SWT.OK);
+//
+//				messageBox.setText("Open Declaration");
+//				messageBox.setMessage("Cannot open declaration. No active Prolog Console available for a fallback.");
+//				messageBox.open();
+//			}
+//		});
+
 	}
 
-	private SourceLocationAndIsMultifileResult findFirstClauseLocation_withoutPdtNature(Goal goal,
-			PrologSession session) throws PrologInterfaceException {
+	private SourceLocationAndIsMultifileResult findFirstClauseLocation(Goal goal, PrologSession session) throws PrologInterfaceException {
 		// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
 		String enclFile = UIUtils.getFileFromActiveEditor();
 		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
-			
+
 		// Folgendes liefert bei Prolog-Libraries die falschen Ergebnisse,
 		// obwohl das aufgerufene Prädikat das Richtige tut, wenn es direkt
 		// in einem Prolog-Prozess aufgerufen wird:
-//					if(goal.getModule()==null) {
-//						String query = "module_of_file('" + enclFile + "',Module)";
-//						String referencedModule = (String) session.queryOnce(query).get("Module");
-//						goal.setModule(referencedModule);
-//					}
-		// In der Klasse DefinitionsSearchQuery funktioniert es aber! 
-		
+		// if(goal.getModule()==null) {
+		// String query = "module_of_file('" + enclFile + "',Module)";
+		// String referencedModule = (String)
+		// session.queryOnce(query).get("Module");
+		// goal.setModule(referencedModule);
+		// }
+		// In der Klasse DefinitionsSearchQuery funktioniert es aber!
+
 		String module = "_";
-		if(goal.getModule()!=null)
-			module ="'"+ goal.getModule()+ "'";
-		
+		if (goal.getModule() != null)
+			module = "'" + goal.getModule() + "'";
+
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
-		
-		String query = "pdt_search:find_primary_definition_visible_in('"
-			+enclFile+ "'," +quotedTerm+ "," +module+ ",File,Line,MultifileResults)";
+
+		String query = "pdt_search:find_primary_definition_visible_in('" + enclFile + "'," + quotedTerm + "," + module + ",File,Line,MultifileResults)";
 		Debug.info("open declaration: " + query);
-		Map<String, Object> clause =  session.queryOnce(query);
+		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {
 			return null;
 		}
-		if(clause.get("File")== null){
+		if (clause.get("File") == null) {
 			throw new RuntimeException("Cannot resolve file for primary declaration of " + quotedTerm);
 		}
-		SourceLocation location = new SourceLocation((String)clause.get("File"), false);
-		location.setLine(Integer.parseInt((String)clause.get("Line")));
+		SourceLocation location = new SourceLocation((String) clause.get("File"), false);
+		location.setLine(Integer.parseInt((String) clause.get("Line")));
 		boolean otherLocations = "yes".equalsIgnoreCase(clause.get("MultifileResults").toString());
 		return new SourceLocationAndIsMultifileResult(location, otherLocations);
 	}

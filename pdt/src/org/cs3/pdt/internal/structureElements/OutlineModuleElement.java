@@ -30,6 +30,7 @@ public class OutlineModuleElement
 		predicates.put(key, predicate);
 	}
 	
+	@Override
 	public boolean hasChildren() {
 		return !(predicates.isEmpty());
 	}

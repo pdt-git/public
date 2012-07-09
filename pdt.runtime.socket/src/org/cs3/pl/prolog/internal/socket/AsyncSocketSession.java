@@ -47,7 +47,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;

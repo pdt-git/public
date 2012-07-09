@@ -48,7 +48,7 @@ import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;

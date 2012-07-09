@@ -45,10 +45,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 public class TestPredicateTest extends TestCase {
 	 
@@ -110,7 +110,7 @@ public class TestPredicateTest extends TestCase {
 			}
 
 			if (failed)
-				fail(testMessage);
+				fail(resultString);
 
 			testMessage += "test('" + getName() + "') defined at \n" + filename
 					+ ":" + line + ".\nfailed.\n";

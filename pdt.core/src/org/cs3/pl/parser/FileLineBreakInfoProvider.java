@@ -50,7 +50,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 
 /**
  */

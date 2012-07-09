@@ -51,17 +51,17 @@ public class PLQuickAssistProcessor implements IQuickAssistProcessor {
 		if (model == null)
 			return fgNoSuggestionsProposal;
 
-		List proposals= computeProposals(context, model);
+		List<?> proposals= computeProposals(context, model);
 		if (proposals.isEmpty())
 			return fgNoSuggestionsProposal;
 
 		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
-	private List computeProposals(IQuickAssistInvocationContext context, IAnnotationModel model) {
+	private List<?> computeProposals(IQuickAssistInvocationContext context, IAnnotationModel model) {
 		int offset= context.getOffset();
 		ArrayList<MarkerAnnotation> annotationList= new ArrayList<MarkerAnnotation>();
-		Iterator iter= model.getAnnotationIterator();
+		Iterator<?> iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Annotation annotation= (Annotation)iter.next();
 			if (canFix(annotation)) {

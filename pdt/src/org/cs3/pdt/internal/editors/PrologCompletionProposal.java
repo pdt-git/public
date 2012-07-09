@@ -14,14 +14,14 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	
 	
 
-	private IQuickAssistInvocationContext context;
+//	private IQuickAssistInvocationContext context;
 	private MarkerAnnotation annotation;
 	private boolean showWizard;
 
 	public PrologCompletionProposal(IQuickAssistInvocationContext context,
 			MarkerAnnotation annotation, boolean showWizard) {
 		this.annotation = annotation;
-		this.context = context;
+//		this.context = context;
 		this.showWizard = showWizard;
 	}
 
@@ -55,13 +55,11 @@ public class PrologCompletionProposal implements ICompletionProposal {
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IContextInformation getContextInformation() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

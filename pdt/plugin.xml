@@ -12,26 +12,26 @@
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="org.cs3.pdt.preferences.PreferenceInitializer">
+          class="org.cs3.pdt.internal.preferences.PreferenceInitializer">
     </initializer>
  </extension>
  
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          class="org.cs3.pdt.preferences.PreferencePage"
+          class="org.cs3.pdt.internal.preferences.PreferencePage"
           id="org.cs3.pdt.internal.preferences.PDTPreferencePage"
           name="PDT">
     </page>
     <page
           category="org.cs3.pdt.preferences.PreferencePageEditor"
-          class="org.cs3.pdt.preferences.PreferencePageEditorColors"
+          class="org.cs3.pdt.internal.preferences.PreferencePageEditorColors"
           id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
     </page>
     <page
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.preferences.PreferencePageEditor"
+          class="org.cs3.pdt.internal.preferences.PreferencePageEditor"
           id="org.cs3.pdt.preferences.PreferencePageEditor"
           name="Editor">
     </page>
@@ -67,17 +67,6 @@
 
  <extension
          point="org.eclipse.ui.popupMenus">      
-      <viewerContribution
-            id="pdt.viewercontribution.console.contextmenu"
-            targetID="org.cs3.pdt.console.internal.views.PrologConsoleView">
-         <action
-               class="org.cs3.pdt.internal.actions.GotoErrorLineViewActionDelegate"
-               id="pdt.action.goto_error_line"
-               label="Goto Error Line"
-               menubarPath="additions"/>
-      </viewerContribution>
-      
-      
        <objectContribution
             adaptable="false"
             id="pdt.entry.point.contribution"
@@ -297,7 +286,7 @@
          parentId="org.eclipse.ui.textEditorScope"/>
 </extension>
 <extension
-      point="org.cs3.pdt.runtime.ui.prologContextTracker">
+      point="org.cs3.prolog.connector.ui.prologContextTracker">
    <tracker
          class="org.cs3.pdt.internal.editors.PLEditorTracker"
          id="pdt.track.pleditor"
@@ -456,7 +445,7 @@
             state="false">
          <enablement>
             <objectClass
-                  name="org.cs3.pl.metadata.Predicate">
+                  name="org.cs3.pdt.metadata.Predicate">
             </objectClass>
          </enablement>
       </decorator>
@@ -478,7 +467,7 @@
       <decorator
             adaptable="true"
             class="org.cs3.pdt.internal.decorators.EntryPointDecoratorContributor"
-            icon="icons/entry_point.png"
+            icon="icons/entry_point.gif"
             id="org.cs3.pdt.entry.point.decorator"
             label="PDT Entry Point Decorator"
             lightweight="true"
@@ -540,7 +529,7 @@
         verticalRulerPreferenceValue="true"/>
   </extension>
   <extension
-        point="org.cs3.pdt.runtime.bootstrapContribution">
+        point="org.cs3.prolog.connector.bootstrapContribution">
      <fileContribution
            id="org.cs3.pdt.fileContribution"
            path="pl/load.pl">

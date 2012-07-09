@@ -45,10 +45,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.console.prolog.PrologConsoleEvent;
-import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.console.prolog.PrologConsoleService;
+import org.cs3.pdt.console.PrologConsole;
+import org.cs3.pdt.console.PrologConsoleEvent;
+import org.cs3.pdt.console.PrologConsoleListener;
+import org.cs3.pdt.console.PrologConsoleService;
 
 public class DefaultPrologConsoleService implements PrologConsoleService, PrologConsoleListener {
 
@@ -166,7 +166,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
 			l.activePrologInterfaceChanged(e);
-		}		
+		}
 	}
 
 	public void fireConsoleLostFocus(PrologConsole console) {

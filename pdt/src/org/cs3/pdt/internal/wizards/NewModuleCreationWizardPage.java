@@ -51,6 +51,7 @@ public class NewModuleCreationWizardPage extends WizardNewFileCreationPage {
 	 * @see WizardNewFileCreationPage#setFileExtension(String)
 	 * @since 3.3
 	 */
+	@Override
 	public String getFileExtension() {
 		return "pl";
 	}
@@ -62,6 +63,7 @@ public class NewModuleCreationWizardPage extends WizardNewFileCreationPage {
 	 * 
 	 * @return initial contents to be given to new file resource instances
 	 */
+	@Override
 	protected InputStream getInitialContents() {
 		String content =":- module(" + getFileName().substring(0, getFileName().length()-3) + ",[\n\t\t\n\t]).\n";
 		return new ByteArrayInputStream(content.getBytes());

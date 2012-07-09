@@ -47,9 +47,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.LogBuffer;
-import org.cs3.pl.common.SimpleLogBuffer;
+import org.cs3.pl.common.logging.Debug;
+import org.cs3.pl.common.logging.LogBuffer;
+import org.cs3.pl.common.logging.SimpleLogBuffer;
 import org.cs3.pl.prolog.internal.Reusable;
 
 public class ReusableSocket extends Socket implements Reusable {

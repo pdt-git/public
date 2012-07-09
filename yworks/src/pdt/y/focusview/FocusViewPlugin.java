@@ -264,7 +264,8 @@ public class FocusViewPlugin extends ViewPart {
 	protected void updateInfo() {
 		final String text = statusText + " " + infoText;
 		new UIJob("Update Status") {
-		    public IStatus runInUIThread(IProgressMonitor monitor) {
+		    @Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
 		        if (info.isDisposed()) {
 		        	return Status.CANCEL_STATUS;
 		        } else {
@@ -363,6 +364,7 @@ public class FocusViewPlugin extends ViewPart {
 				t.setVisible(false);
 			}
 			
+			@Override
 			public void mouseMoved(final double x, final double y) {
 				super.mouseMoved(x, y);
 				
@@ -459,7 +461,8 @@ public class FocusViewPlugin extends ViewPart {
 						|| !currentFocusView.getFilePath().equals(fileInfo.getPrologFileName())) {
 					
 					new UIJob("Update Context View") {
-					    public IStatus runInUIThread(IProgressMonitor monitor) {
+					    @Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
 					    	
 					    	FocusView f = swichFocusView(fileInfo.getPrologFileName());
 					    	

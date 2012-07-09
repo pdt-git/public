@@ -53,6 +53,7 @@ public class FileAppearancePreferences
 	 * of preferences. Each field editor knows how to save and
 	 * restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		
 		addField(new ColorFieldEditor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, "&File Background Color    ", wrap(getFieldEditorParent())));
@@ -63,6 +64,7 @@ public class FileAppearancePreferences
 		addField(new ColorFieldEditor(APPEARANCE_NONMODULE_HEADER_COLOR, "&Non Module File  ", wrap(fileHeaderColor, cellData)));
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 	

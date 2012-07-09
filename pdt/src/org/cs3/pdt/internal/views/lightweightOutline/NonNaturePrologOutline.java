@@ -115,8 +115,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		viewer.setLabelProvider(labelProvider);
 
-		viewer.setComparer(new PrologOutlineComparer());
-
 		viewer.addSelectionChangedListener(this);
 		
 		
@@ -242,7 +240,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		} else {
 			IFile file;
 			try {
-				file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(selectedFile);
+				file = FileUtils.findFileForLocation(selectedFile);
 				SourceLocation loc = createLocation(predicate, line, file);
 				PDTUtils.showSourceLocation(loc);
 			} catch (IOException e) {
@@ -265,7 +263,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 
 	private SourceLocation createLocation(OutlinePredicate predicate,
 			int line, IFile file) {
-		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		loc.setLine(line);
 		loc.setPredicateName(predicate.getFunctor());

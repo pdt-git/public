@@ -14,6 +14,7 @@ class OutlineTreeViewer extends TreeViewer {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Object[] getFilteredChildren(Object parent) {
 		Object[] result = getRawChildren(parent);
 		ViewerFilter[] filters = getFilters();

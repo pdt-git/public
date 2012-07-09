@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLPartitionScanner;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
@@ -180,14 +178,6 @@ public abstract class PrologContentAssistProcessor {
 
 	public String getErrorMessage() {
 		return "Error Message?";
-	}
-
-	protected IPrologProject getProject() throws CoreException {
-		IFile file = getFile();
-		if (file == null) {
-			return null;
-		}
-		return PDTCoreUtils.getPrologProject(file);
 	}
 
 }

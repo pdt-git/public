@@ -48,9 +48,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.FileUtils;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;

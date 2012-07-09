@@ -8,11 +8,9 @@
 
 
 % TODO: The following four lines are duplicated in the loader.pl file: 
-:- user:consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
-:- use_module(pdt_runtime_builder_analyzer(pdt_xref_experimental)).
-% if you uncomment the next line, remove the predicate from the module/2 export list
-% :- reexport(pdt_xref_experimental, [find_reference_to/12]).
-:- use_module(pdt_runtime_builder_analyzer(properties)).
+:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
+:- use_module(pdt_builder_analyzer(pdt_xref_experimental)).
+:- use_module(pdt_builder_analyzer(properties)).
 :- use_module(pdt_prolog_library(utils4modules)).
 
 :- use_module(split_file_path).                    % general utility

@@ -52,7 +52,7 @@ import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pl.metadata.Goal;
+import org.cs3.pdt.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;

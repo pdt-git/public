@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.actions;
 
-import static org.cs3.pl.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -8,12 +8,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
@@ -34,7 +34,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	public void run(IAction action) {
 		if (selectedFiles != null) {
 			
-			PrologInterface pif = PDTUtils.getActiveConsolePif();
+			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 			if (isSelectionChecked()) {
 				for (IFile file : selectedFiles) {
 					setEntryPoint(file, false, pif);

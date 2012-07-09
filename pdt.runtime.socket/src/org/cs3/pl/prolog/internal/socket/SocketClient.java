@@ -58,8 +58,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.internal.ReusablePool;
 

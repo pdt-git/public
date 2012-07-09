@@ -3,7 +3,7 @@ package org.cs3.pl.prolog.internal.socket;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.cs3.pl.common.LogBuffer;
+import org.cs3.pl.common.logging.LogBuffer;
 
 class InputStreamProxy extends InputStream {
 	private InputStream in;

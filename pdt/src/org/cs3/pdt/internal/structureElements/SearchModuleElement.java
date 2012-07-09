@@ -30,6 +30,7 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 		}
 	}
 	
+	@Override
 	public String getLabel() {
 		return label;
 	}

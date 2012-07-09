@@ -19,4 +19,6 @@
  
  :- use_module(junitadapter).
  
+ :- use_module(junitadapter).
+ 
 % :- consult(pdt_xref_experimental).     % find_references, ...

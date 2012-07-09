@@ -5,7 +5,6 @@ import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_NUMBER_OF_LINES;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;

@@ -52,11 +52,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ConsultAction;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
@@ -75,7 +71,6 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -95,10 +90,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.MessageDialogWithToggle;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -114,9 +106,6 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
@@ -180,21 +169,12 @@ public class PLEditor extends TextEditor {
 		Document document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
 		breakpointHandler.backupMarkers(getCurrentIFile(), document);
-		new ConsultAction().consultFromActiveEditor();
-		// breakpointHandler.updateBreakpointMarkers(getCurrentIFile(),
-		// getPrologFileName(), document);
-		// addProblemMarkers(); // here happens the save & reconsult
-		// breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(),
-		// document);
-		Job j = new Job("consult file from workspace") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				UIUtils.getDisplay().asyncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						// UIUtils.getActiveEditor().setFocus();
-						setFocus();
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+//		new ConsultAction().consultFromActiveEditor();
+//		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
+//		addProblemMarkers(); // here happens the save & reconsult
+//		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
+		setFocus();
 
 					}
 				});
@@ -269,67 +249,6 @@ public class PLEditor extends TextEditor {
 		j.schedule();
 	}
 
-	// private void addProblemMarkers() {
-	// try {
-	// // current file in editor is either an external file or the pdt nature is
-	// not assigned:
-	// IEditorInput editorInput = getEditorInput();
-	// if (editorInput instanceof IFileEditorInput) {
-	// PLMarkerUtils.updateFileMarkers(((IFileEditorInput)editorInput).getFile());
-	// } else if (editorInput instanceof FileStoreEditorInput) {
-	// if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!=
-	// null){
-	// new ConsultActionDelegate().run(null);
-	// }
-	// }
-	//
-	// } catch (CoreException e) {
-	// Debug.report(e);
-	// }
-	// }
-
-	protected abstract class AbstractSelectionChangedListener implements
-			ISelectionChangedListener {
-
-		/**
-		 * Installs this selection changed listener with the given selection
-		 * provider. If the selection provider is a post selection provider,
-		 * post selection changed events are the preferred choice, otherwise
-		 * normal selection changed events are requested.
-		 * 
-		 * @param selectionProvider
-		 */
-		public void install(ISelectionProvider selectionProvider) {
-			if (selectionProvider == null)
-				return;
-
-			if (selectionProvider instanceof IPostSelectionProvider) {
-				IPostSelectionProvider provider = (IPostSelectionProvider) selectionProvider;
-				provider.addPostSelectionChangedListener(this);
-			} else {
-				selectionProvider.addSelectionChangedListener(this);
-			}
-		}
-
-		/**
-		 * Removes this selection changed listener from the given selection
-		 * provider.
-		 * 
-		 * @param selectionProviderstyle
-		 */
-		public void uninstall(ISelectionProvider selectionProvider) {
-			if (selectionProvider == null)
-				return;
-
-			if (selectionProvider instanceof IPostSelectionProvider) {
-				IPostSelectionProvider provider = (IPostSelectionProvider) selectionProvider;
-				provider.removePostSelectionChangedListener(this);
-			} else {
-				selectionProvider.removeSelectionChangedListener(this);
-			}
-		}
-	}
-
 	public PLEditor() {
 		super();
 		try {
@@ -360,8 +279,6 @@ public class PLEditor extends TextEditor {
 	private static final String MATCHING_BRACKETS = "matching.brackets";
 
 	private static final String MATCHING_BRACKETS_COLOR = "matching.brackets.color";
-
-	private static final boolean DEACTIVATE_ADD_PROLOG_PROJECT_DIALOG = true;
 
 	public static long OCCURRENCE_UPDATE_DELAY = 300;
 
@@ -429,19 +346,10 @@ public class PLEditor extends TextEditor {
 
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {
-				if (PDTUtils.checkForActivePif(true)) {
-					int currentLine = getVerticalRuler()
-							.getLineOfLastMouseButtonActivity() + 1;
-					Document doc = (Document) getDocumentProvider()
-							.getDocument(getEditorInput());
-					int currentOffset = PDTCoreUtils
-							.convertPhysicalToLogicalOffset(
-									doc,
-									getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
-					breakpointHandler.toogleBreakpoint(getCurrentIFile(),
-							currentLine, currentOffset);
-				}
-				;
+				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
+				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		});
 
@@ -536,10 +444,11 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				new ConsultAction().consultFromActiveEditor();
-				// addProblemMarkers();
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+//				new ConsultAction().consultFromActiveEditor();
+////				addProblemMarkers();
 				informViewsAboutChangedEditor();
-				// executeConsult();
+////				executeConsult();
 			}
 
 			public void informViewsAboutChangedEditor() {
@@ -770,27 +679,17 @@ public class PLEditor extends TextEditor {
 		Action toggleBreakpointAction = new Action("Toggle breakpoint") {
 			@Override
 			public void run() {
-				if (PDTUtils.checkForActivePif(true)) {
-					int currentLine = getVerticalRuler()
-							.getLineOfLastMouseButtonActivity() + 1;
-					Document doc = (Document) getDocumentProvider()
-							.getDocument(getEditorInput());
-					int currentOffset = PDTCoreUtils
-							.convertPhysicalToLogicalOffset(doc,
-									getCurrentLineOffset(currentLine));
+				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
+				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
+				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
 
-					breakpointHandler.toogleBreakpoint(getCurrentIFile(),
-							currentLine, currentOffset);
-				}
+				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		};
 		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
 			@Override
 			public void run() {
-				if (PDTUtils.checkForActivePif(true)) {
-					breakpointHandler
-							.removeBreakpointFactsForFile(getPrologFileName());
-				}
+				breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
 			}
 		};
 
@@ -885,8 +784,7 @@ public class PLEditor extends TextEditor {
 	protected void doSetInput(IEditorInput input) throws CoreException {
 
 		setDocumentProvider(createDocumentProvider(input));
-
-		checkForPrologNature(input);
+		
 		if (fOutlinePage != null) {
 			fOutlinePage.setInput(input);
 		}
@@ -921,64 +819,6 @@ public class PLEditor extends TextEditor {
 			return new ExternalDocumentProvider();
 		} else {
 			return new PLDocumentProvider();
-		}
-	}
-
-	private void checkForPrologNature(IEditorInput input) {
-		IFileEditorInput editorInput = null;
-		if (input instanceof IFileEditorInput) {
-			editorInput = (IFileEditorInput) input;
-
-		}
-		if (editorInput == null) {
-			return;
-		}
-		IProject project = editorInput.getFile().getProject();
-		if (!project.exists()) { // opened external file
-			return;
-		}
-
-		IPrologProject plProject = null;
-
-		try {
-			if (project.hasNature(PDTCore.NATURE_ID)) {
-				plProject = (IPrologProject) editorInput.getFile().getProject()
-						.getNature(PDTCore.NATURE_ID);
-			}
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
-		if (plProject == null && !DEACTIVATE_ADD_PROLOG_PROJECT_DIALOG) {
-			String dialogTitle = "Add Prolog Nature?";
-			String dialogMessage = "The project "
-					+ project.getName()
-					+ " is not a Prolog Project. Do you wish to make it a Prolog Project?";
-			String toggleMessage = null;
-			PDTPlugin plugin = PDTPlugin.getDefault();
-			String key = PDT.PREF_ADD_NATURE_ON_OPEN;
-			String pref = plugin.getPreferenceValue(key,
-					MessageDialogWithToggle.PROMPT);
-			boolean toggleState = false;
-			boolean shouldAddNature = MessageDialogWithToggle.ALWAYS
-					.equals(pref);
-			IPreferenceStore store = plugin.getPreferenceStore();
-			if (MessageDialogWithToggle.PROMPT.equals(pref)) {
-				MessageDialogWithToggle toggle = MessageDialogWithToggle
-						.openYesNoQuestion(getEditorSite().getShell(),
-								dialogTitle, dialogMessage, toggleMessage,
-								toggleState, store, key);
-				shouldAddNature = IDialogConstants.YES_ID == toggle
-						.getReturnCode();
-			}
-			if (shouldAddNature) {
-				try {
-					PDTCoreUtils.addPDTNature(project);
-				} catch (CoreException e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
-				}
-			}
 		}
 	}
 

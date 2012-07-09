@@ -16,11 +16,11 @@ package pdt.y.focusview;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.connector.DefaultSubscription;
+import org.cs3.prolog.lifecycle.LifeCycleHook;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 import pdt.y.main.PluginActivator;
 

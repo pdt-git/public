@@ -43,7 +43,7 @@ package org.cs3.pdt.core.internal.actions;
 
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;

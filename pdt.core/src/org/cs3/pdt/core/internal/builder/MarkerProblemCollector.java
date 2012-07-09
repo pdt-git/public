@@ -46,7 +46,7 @@ package org.cs3.pdt.core.internal.builder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;

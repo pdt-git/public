@@ -1,28 +1,26 @@
 package org.cs3.pdt.internal.editors;
 
-import static org.cs3.pl.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.console.prolog.PrologConsoleEvent;
-import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.prolog.PrologEventDispatcher;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceEvent;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceListener;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 
-public class CurrentPifListener implements PrologInterfaceListener, PrologConsoleListener {
+public class CurrentPifListener implements PrologInterfaceListener, ActivePrologInterfaceListener {
 
 	private static final String FILE_LOADED = "file_loaded";
 	private static final String PDT_EDIT = "pdt_edit_hook";
@@ -71,18 +69,6 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 	PrologInterface currentPif;
 	private PrologEventDispatcher currentDispatcher;
 	
-	@Override
-	public void consoleRecievedFocus(PrologConsoleEvent e) {
-		if (currentPif == null) {
-			Object source = e.getSource();
-			if (source instanceof PrologConsole){
-				PrologConsole console = (PrologConsole) source;
-				currentPif = console.getPrologInterface();
-				addPifListener();
-			}
-		}
-	}
-	
 	private void addPifListener() {
 		if (currentPif != null) {
 			Debug.debug("add edit registry listener for pif " + currentPif.toString());
@@ -107,33 +93,6 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 			}
 		}
 	}
-	@Override
-	public void consoleLostFocus(PrologConsoleEvent e) {}
-
-	@Override
-	public void consoleVisibilityChanged(PrologConsoleEvent e) {
-		PDTPlugin.getDefault().notifyDecorators();
-	}
-
-	@Override
-	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
-		Object source = e.getSource();
-		if (source instanceof PrologConsole){
-			
-			PDTPlugin.getDefault().notifyDecorators();
-
-//			if (PDTUtils.checkForActivePif(false)) {
-				removePifListener();
-				
-				PrologConsole console = (PrologConsole) source;
-				currentPif = console.getPrologInterface();
-				
-				addPifListener();
-				
-				updateEntryPoints();
-//			}
-		}
-	}
 
 	private void updateEntryPoints() {
 		try {
@@ -151,6 +110,23 @@ public class CurrentPifListener implements PrologInterfaceListener, PrologConsol
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+		if (currentPif == pif) {
+			return;
+		}
+		
+		PDTPlugin.getDefault().notifyDecorators();
+		
+		removePifListener();
+		
+		currentPif = pif;
+		
+		addPifListener();
+		
+		updateEntryPoints();
 	}
 
 }
