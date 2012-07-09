@@ -46,7 +46,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1375,8 +1374,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	@Override
-	public void activePrologInterfaceChanged(PrologInterface pif) {
-		setPrologInterface(pif);
+	public void activePrologInterfaceChanged(final PrologInterface pif) {
+		Display display = getSite().getShell().getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					activePrologInterfaceChanged(pif);
+				}
+			});
+		} else {
+			setPrologInterface(pif);
+		}
 	}
 
 }

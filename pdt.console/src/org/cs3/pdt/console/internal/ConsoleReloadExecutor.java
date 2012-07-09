@@ -96,6 +96,15 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		if (activeConsolePif == null || !activeConsolePif.equals(pif)) {
 			activePrologConsole.setPrologInterface(pif);
 		}
+		if (!pif.isUp()) {
+			try {
+				pif.start();
+				activePrologConsole.ensureConnectionForCurrentPrologInterface();
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+				return false;
+			}
+		}
 		ConsoleModel model = activePrologConsole.getModel();
 		model.setLineBuffer(" ");
 		model.commitLineBuffer();

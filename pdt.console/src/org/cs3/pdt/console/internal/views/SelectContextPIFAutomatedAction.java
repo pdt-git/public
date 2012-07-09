@@ -78,12 +78,13 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		setMenuCreator(this);
 	}
 
-	private void setImageDescriptorSensitive() {
-		Set<String> trackers= getActiveTrackers();
-		if(trackers.isEmpty()) setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
-		else setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.FOLLOW_MODE));
+	void setImageDescriptorSensitive() {
+		Set<String> trackers = getActiveTrackers();
+		if (trackers.isEmpty()) {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
+		} else {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.FOLLOW_MODE));
+		}
 		
 	}
 
@@ -391,14 +392,22 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
 			setToolTipText("no pif selected");
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 			return;
 		}
 		String key = reg.getKey(pif);
 		if (key == null) {
 			setToolTipText("unregisterd Prologinterface???");
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 			return;
 		}
 		setToolTipText(key);
+		Set<String> trackers = getActiveTrackers();
+		if (trackers.isEmpty()) {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+		} else {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.FOLLOW_MODE));
+		}
 
 	}
 }
