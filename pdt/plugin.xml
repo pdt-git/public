@@ -183,11 +183,6 @@
                 id="org.cs3.pdt.internal.actions.AbortTestAction"
                 label="Abort Prolog Test">
           </action>
-            <action
-                class="org.cs3.pdt.internal.actions.RunUnitTestOnConsoleAction"
-                id="org.cs3.pdt.internal.actions.RunUnitTestAction"
-                label="Run Test on Prolog Console">
-          </action>
        </objectContribution>
  </extension>
  
