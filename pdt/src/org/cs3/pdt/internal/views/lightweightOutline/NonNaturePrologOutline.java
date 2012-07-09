@@ -49,6 +49,7 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDT;
@@ -62,7 +63,13 @@ import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
+import org.cs3.prolog.pif.service.ConsultListener;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -84,7 +91,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 
-public class NonNaturePrologOutline extends ContentOutlinePage {
+public class NonNaturePrologOutline extends ContentOutlinePage implements ConsultListener, ActivePrologInterfaceListener {
 	private static final int EXPANDING_LEVEL = 2;
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
@@ -151,6 +158,9 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		
 		hookContextMenu(parent);
 		setInput(editor.getEditorInput());
+		
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 	}
 
 
@@ -263,7 +273,44 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	@Override
 	public void dispose() {
 		super.dispose();
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
 		contentProvider.dispose();
 		model.dispose();
+	}
+
+	@Override
+	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("", 1);
+		monitor.done();
+	}
+
+	@Override
+	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("", 1);
+		
+		String editorFile = editor.getPrologFileName();
+		if (allConsultedFiles.contains(editorFile)) {
+			getSite().getShell().getDisplay().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					setInput(null);
+				}
+			});
+		}
+		
+		monitor.done();
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (model != null && !model.hasChildren()) {
+					setInput(null);
+				}
+			}
+		});
 	}
 }
