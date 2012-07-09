@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 
@@ -32,6 +33,18 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	}
 	
 	private PrologInterface activePrologInterface;
+	
+	private static final ISchedulingRule activePifChangedRule = new ISchedulingRule() {
+		@Override
+		public boolean isConflicting(ISchedulingRule rule) {
+			return this == rule;
+		}
+		
+		@Override
+		public boolean contains(ISchedulingRule rule) {
+			return this == rule;
+		}
+	};
 	
 	@Override
 	public PrologInterface getActivePrologInterface() {
@@ -56,14 +69,28 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private synchronized void fireActivePrologInterfaceChanged(PrologInterface pif) {
-		ArrayList<ActivePrologInterfaceListener> listenersClone;
-		synchronized (activePrologInterfaceListeners) {
-			listenersClone = (ArrayList<ActivePrologInterfaceListener>) activePrologInterfaceListeners.clone();
-		}
-		for (ActivePrologInterfaceListener listener : listenersClone) {
-			listener.activePrologInterfaceChanged(pif);
-		}
+	private synchronized void fireActivePrologInterfaceChanged(final PrologInterface pif) {
+		Job job = new Job("Active PrologInterface changed: notify listeners") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				ArrayList<ActivePrologInterfaceListener> listenersClone;
+				synchronized (activePrologInterfaceListeners) {
+					listenersClone = (ArrayList<ActivePrologInterfaceListener>) activePrologInterfaceListeners.clone();
+				}
+				
+				monitor.beginTask("Active PrologInterface changed: notify listeners", listenersClone.size());
+				
+				for (ActivePrologInterfaceListener listener : listenersClone) {
+					listener.activePrologInterfaceChanged(pif);
+					monitor.worked(1);
+				}
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(activePifChangedRule);
+		job.schedule();
 	}
 	
 	private ArrayList<ActivePrologInterfaceListener> activePrologInterfaceListeners = new ArrayList<ActivePrologInterfaceListener>();
