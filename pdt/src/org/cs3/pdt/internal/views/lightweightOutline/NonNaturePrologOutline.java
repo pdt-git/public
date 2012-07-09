@@ -77,6 +77,8 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -91,7 +93,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 
-public class NonNaturePrologOutline extends ContentOutlinePage implements ConsultListener, ActivePrologInterfaceListener {
+public class NonNaturePrologOutline extends ContentOutlinePage implements ConsultListener, ActivePrologInterfaceListener, IDoubleClickListener {
 	private static final int EXPANDING_LEVEL = 2;
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
@@ -99,8 +101,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	private PLEditor editor;
 	private ILabelProvider labelProvider;
 	private Menu contextMenu;
-//	private StringMatcher matcher;
-	
+	//	private StringMatcher matcher;
+
 	public NonNaturePrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
@@ -110,29 +112,31 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		super.createControl(parent);
 
 		TreeViewer viewer = getTreeViewer();
-		
+
 		contentProvider = new OutlineContentProvider();
 		viewer.setContentProvider(contentProvider);
-		
-//		labelProvider = new OutlineLabelProvider();
-		
+
+		//		labelProvider = new OutlineLabelProvider();
+
 		labelProvider = new DecoratingLabelProvider(new OutlineLabelProvider(), 
 				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		viewer.setLabelProvider(labelProvider);
 
-		viewer.addSelectionChangedListener(this);
-		
-		
+//		viewer.addSelectionChangedListener(this);
+
+		viewer.addDoubleClickListener(this);
+
+
 		model = new PrologSourceFileModel(new HashMap<String,OutlineModuleElement>());
-		
+
 		viewer.setInput(model);
-		
+
 		viewer.setAutoExpandLevel(EXPANDING_LEVEL);
-		
+
 		IActionBars actionBars = getSite().getActionBars();
 		IToolBarManager toolBarManager = actionBars.getToolBarManager();
-//		Action action = new LexicalSortingAction(viewer);
-//		toolBarManager.add(action);
+		//		Action action = new LexicalSortingAction(viewer);
+		//		toolBarManager.add(action);
 		Action action = new ToggleSortAction(getTreeViewer());
 		toolBarManager.add(action);
 		ToggleFilterAction action2 = new ToggleFilterAction(
@@ -153,12 +157,12 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				PDTPlugin.getDefault().getPreferenceStore(),
 				PDT.PREF_OUTLINE_FILTER_SYSTEM);
 		toolBarManager.add(action3);
-//		action = new FilterActionMenu(this);
-//		toolBarManager.add(action);
-		
+		//		action = new FilterActionMenu(this);
+		//		toolBarManager.add(action);
+
 		hookContextMenu(parent);
 		setInput(editor.getEditorInput());
-		
+
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 	}
@@ -168,7 +172,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		// Other plug-ins can contribute their actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-	
+
 	private void hookContextMenu(Composite parent) {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
@@ -184,7 +188,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		viewer.getControl().setMenu(contextMenu);
 	}
 
-	
+
 	@Override
 	public TreeViewer getTreeViewer() {
 		return super.getTreeViewer();
@@ -192,22 +196,22 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 	public void setInput(Object information) {
 		String fileName = editor.getPrologFileName();
-		
+
 		Map<String,OutlineModuleElement> modules;
 		TreeViewer treeViewer = getTreeViewer();
 		if (fileName != "") {
 			try {			
 				modules = PDTOutlineQuery.getProgramElementsForFile(fileName);
 				model.update(modules);
-				
+
 				treeViewer.setInput(model);
 				treeViewer.setAutoExpandLevel(EXPANDING_LEVEL);
 
 			} catch(Exception e) {
-				
+
 			}
 		}
-		
+
 		if (treeViewer != null) {
 			treeViewer.refresh();
 		}
@@ -220,9 +224,9 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		OutlinePredicate predicate=null;
 		String selectedFile = "";
 		int line;
-		
+
 		if (elem == null) return;
-		
+
 		if (elem instanceof OutlineModuleElement) { 
 			OutlineModuleElement module = (OutlineModuleElement)elem;
 			line = module.getLine();
@@ -239,20 +243,21 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		} else {
 			return;
 		}
-		
+
 		String editorFileName = editor.getPrologFileName();
 		if (selectedFile.equals(editorFileName)) {
 			if (line > 0) {  // line = 0 means we do not have any line information
 				editor.gotoLine(line);
 			}
 		} else {
-			IFile file;
-			try {
-				file = FileUtils.findFileForLocation(selectedFile);
-				SourceLocation loc = createLocation(predicate, line, file);
-				PDTUtils.showSourceLocation(loc);
-			} catch (IOException e) {
-			}
+			// FIXME: ask user if he wants to switch to the other file
+			//			IFile file;
+			//			try {
+			//				file = FileUtils.findFileForLocation(selectedFile);
+			//				SourceLocation loc = createLocation(predicate, line, file);
+			//				PDTUtils.showSourceLocation(loc);
+			//			} catch (IOException e) {
+			//			}
 		}
 	}
 
@@ -274,8 +279,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		loc.setLine(line);
-		loc.setPredicateName(predicate.getFunctor());
-		loc.setArity(predicate.getArity());
+		if(predicate != null) {
+			loc.setPredicateName(predicate.getFunctor());
+			loc.setArity(predicate.getArity());
+		}
 		return loc;
 	}
 
@@ -297,7 +304,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
-		
+
 		String editorFile = editor.getPrologFileName();
 		if (allConsultedFiles.contains(editorFile)) {
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
@@ -307,7 +314,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				}
 			});
 		}
-		
+
 		monitor.done();
 	}
 
@@ -321,5 +328,47 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				}
 			}
 		});
+	}
+
+	@Override
+	public void doubleClick(DoubleClickEvent event) {
+
+		IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+		Object elem = selection.getFirstElement();
+		if (elem == null) return;
+
+		OutlinePredicate predicate=null;
+		String selectedFile = "";
+		int line;
+
+
+		if (elem instanceof OutlineModuleElement) { 
+			OutlineModuleElement module = (OutlineModuleElement)elem;
+			line = module.getLine();
+			selectedFile = module.getFilePath();
+		} else if (elem instanceof OutlinePredicate) { 
+			predicate = (OutlinePredicate)elem;
+			line = predicate.getLine();
+			selectedFile = predicate.getFileName();
+		} else if (elem instanceof PredicateOccuranceElement) {
+			PredicateOccuranceElement occurance = (PredicateOccuranceElement)elem;
+			line = occurance.getLine();
+			selectedFile = occurance.getFile();
+			predicate = (OutlinePredicate)occurance.getParent();
+		} else {
+			return;
+		}
+
+		String editorFileName = editor.getPrologFileName();
+		if (!selectedFile.equals(editorFileName)) {
+
+			IFile file;
+			try {
+				file = FileUtils.findFileForLocation(selectedFile);
+				SourceLocation loc = createLocation(predicate, line, file);
+				PDTUtils.showSourceLocation(loc);
+			} catch (IOException e) {
+			}
+		}
 	}
 }

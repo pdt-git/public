@@ -53,7 +53,7 @@ public class PDTOutlineQuery {
 				properties = (Vector<String>)prop;
 			}				
 			if (!modules.containsKey(module)) {
-				modules.put(module, new OutlineModuleElement(fileName, module, entityLine, kindOfEntity));
+				modules.put(module, new OutlineModuleElement(getOccuranceFileName(properties, fileName), module, entityLine, kindOfEntity));
 			}
 			OutlineModuleElement currentModuleElem = modules.get(module);
 			String label = module+":"+name+"/"+arity;
