@@ -164,8 +164,8 @@ public class PrologCompletionProvider {
 		} else if (completions.size() == 1) {
 			
 			if (head.equals(completion.getFunctor() + "(")) {
-				head = completion.getFunctor();
-				pos--;
+				r.newLine = completion.getFunctor() + completion.getArglist() + tail;
+				r.newPos = pos - prefix.length() + completion.getFunctor().length() - 1;
 			}
 			
 			if (head.startsWith(completion.getFunctor()) && !head.equals(completion.getFunctor())) {
