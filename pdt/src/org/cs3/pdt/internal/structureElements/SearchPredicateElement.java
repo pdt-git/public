@@ -116,4 +116,9 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 		return "Search: " + super.getSignature();
 	}
 	
+	@Override
+	public boolean equals(Object object) {
+		return this == object;
+	}
+	
 }
