@@ -63,6 +63,7 @@ import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -195,6 +196,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	}
 
 	public void setInput(Object information) {
+		if (model == null) {
+			return;
+		}
+		
 		String fileName = editor.getPrologFileName();
 
 		Map<String,OutlineModuleElement> modules;
@@ -208,7 +213,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				treeViewer.setAutoExpandLevel(EXPANDING_LEVEL);
 
 			} catch(Exception e) {
-
+				Debug.report(e);
 			}
 		}
 
