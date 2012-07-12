@@ -662,6 +662,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.getParent().addListener(SWT.Hide, handler);
 		parent.getParent().addListener(SWT.FocusOut, handler);
 		PrologConsolePlugin.getDefault().getPrologConsoleService().registerPrologConsole(this);
+		getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		GridLayout layout = new GridLayout(1, true);
 		layout.horizontalSpacing = 0;
