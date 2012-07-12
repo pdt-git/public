@@ -113,7 +113,7 @@ public class PrologCompletionProvider {
 
 	}
 
-	TreeSet<String> completions = null;
+	TreeSet<Completion> completions = null;
 
 	private PrologInterface pif;
 
@@ -133,6 +133,7 @@ public class PrologCompletionProvider {
 		if (pif == null) {
 			return null;
 		}
+		
 		_Result r = new _Result();
 		r.line = line;
 		r.pos = pos;
@@ -144,7 +145,7 @@ public class PrologCompletionProvider {
 
 		try {
 			r.options = new TreeSet<String>();
-			completions = new TreeSet<String>();
+			completions = new TreeSet<Completion>();
 			
 			findPredicatesWithPrefix(null, prefix, null, r.options, completions);
 		} catch (NumberFormatException e) {
@@ -155,17 +156,32 @@ public class PrologCompletionProvider {
 			Debug.report(e);
 		}
 
-		String completion = completions == null || completions.isEmpty() ? ""
+		Completion completion = completions == null || completions.isEmpty() ? new Completion("",0)
 				: completions.first();
 		if (completions == null || completions.size() == 0) {
 			r.newLine = line;
 			r.newPos = pos;
 		} else if (completions.size() == 1) {
-			r.newLine = head + completion.substring(prefix.length()) + tail;
-			r.newPos = pos - prefix.length() + completion.length();
+			
+			if (head.equals(completion.getFunctor() + "(")) {
+				head = completion.getFunctor();
+				pos--;
+			}
+			
+			if (head.startsWith(completion.getFunctor()) && !head.equals(completion.getFunctor())) {
+				r.newLine = head;
+				r.newPos = pos;
+			} else {
+				r.newLine = head + completion.getFunctor().substring(prefix.length()) + completion.getArglist() + tail;
+				r.newPos = pos - prefix.length() + completion.getFunctor().length();
+				if(completion.getArity() > 0) {
+					r.newPos++;
+				}
+			}
+			
 		} else {
 			int commonLength = getCommonLength();
-			String commonPart = completion.substring(prefix.length(),
+			String commonPart = completion.getFunctor().substring(prefix.length(),
 					commonLength);
 			r.newLine = head + commonPart + tail;
 			r.newPos = pos - prefix.length() + commonLength;
@@ -173,7 +189,7 @@ public class PrologCompletionProvider {
 		return r;
 	}
 
-	public void findPredicatesWithPrefix(String module, String prefix, String filename, TreeSet<String> signatures, TreeSet<String> functors) throws NumberFormatException, PrologException,
+	public void findPredicatesWithPrefix(String module, String prefix, String filename, TreeSet<String> signatures, TreeSet<Completion> functors) throws NumberFormatException, PrologException,
 			PrologInterfaceException {
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
@@ -189,7 +205,7 @@ public class PrologCompletionProvider {
 				int arity = Integer.parseInt(result.get("Arity").toString());
 				String name = result.get("Name").toString();
 				signatures.add(name + "/" + arity);
-				functors.add(name);
+				functors.add(new Completion(name,arity));
 			}
 		} finally {
 			if (session != null) {
@@ -204,8 +220,8 @@ public class PrologCompletionProvider {
 		int len = 1;
 		while (true) {
 
-			String first = Util.unquoteAtom(completions.first());
-			String last = Util.unquoteAtom(completions.last());
+			String first = Util.unquoteAtom(completions.first().getFunctor());
+			String last = Util.unquoteAtom(completions.last().getFunctor());
 			if (first.length() < len || last.length() < len) {
 				break;
 			}
