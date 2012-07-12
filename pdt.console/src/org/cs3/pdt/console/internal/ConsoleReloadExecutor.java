@@ -95,6 +95,10 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		PrologInterface activeConsolePif = activePrologConsole.getPrologInterface();
 		if (activeConsolePif == null || !activeConsolePif.equals(pif)) {
 			activePrologConsole.setPrologInterface(pif);
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+			}
 		}
 		if (!pif.isUp()) {
 			try {
