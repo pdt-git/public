@@ -16,4 +16,4 @@ public class PrologSourceLocation {
 	public int getLine() {
 		return line;
 	}
-
+}
