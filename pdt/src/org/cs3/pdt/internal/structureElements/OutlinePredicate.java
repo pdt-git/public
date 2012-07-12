@@ -97,5 +97,10 @@ public class OutlinePredicate extends Predicate implements PrologTreeElement{
 		return "Outline: " + super.getSignature();
 	}
 	
+	@Override
+	public boolean equals(Object object) {
+		return this == object;
+	}
+	
 }
 
