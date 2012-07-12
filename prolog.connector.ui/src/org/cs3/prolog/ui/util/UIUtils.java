@@ -158,8 +158,11 @@ public final class UIUtils {
 		return (IWorkbenchPage) new _SyncReturn() {
 			@Override
 			Object getRVal() {
-				return PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-						.getActivePage();
+				IWorkbenchWindow workbench = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				if (workbench == null) {
+					return null;
+				}
+				return workbench.getActivePage();
 			}
 		}.rval;
 	}
