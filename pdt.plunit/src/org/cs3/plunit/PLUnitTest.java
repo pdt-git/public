@@ -24,7 +24,7 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(LabelledParameterized.class)
 public class PLUnitTest extends AbstractPrologTestCase{
 
-	protected static final long TEST_TIMEOUT = 10000;
+	protected static final long TEST_TIMEOUT = 15000;
 	private String testname;
 	private String unit;
 
