@@ -5,25 +5,25 @@ import java.util.List;
 
 import org.cs3.pdt.metadata.Predicate;
 
-public class OutlinePredicate extends Predicate implements PrologTreeElement{
+public class OutlinePredicateElement extends Predicate implements PrologTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
 	
 	private String fileName;
-	private List<PredicateOccuranceElement> occurences = new ArrayList<PredicateOccuranceElement>();
+	private List<OutlineClauseElement> occurences = new ArrayList<OutlineClauseElement>();
 	
-	public OutlinePredicate(String module, String functor, int arity, List<String> properties, String fileName){
+	public OutlinePredicateElement(String module, String functor, int arity, List<String> properties, String fileName){
 		super(module, functor, arity, properties);
 		this.fileName = fileName;
 	}
 	
-	public void addOccurence(PredicateOccuranceElement occurrence) {
+	public void addOccurence(OutlineClauseElement occurrence) {
 		occurences.add(occurrence);
 	}
 
 	public int getLine() {
 		int line = -1;
 		int defLine = -1;
-		for (PredicateOccuranceElement occurence : occurences) {
+		for (OutlineClauseElement occurence : occurences) {
 			int occuranceLine = occurence.getLine();
 			String type = occurence.getType();
 			if ((line < 0) || occuranceLine < line) {

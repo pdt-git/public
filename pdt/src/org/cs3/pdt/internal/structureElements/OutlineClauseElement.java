@@ -1,14 +1,14 @@
 package org.cs3.pdt.internal.structureElements;
 
 
-public class PredicateOccuranceElement implements PrologTreeElement{
+public class OutlineClauseElement implements PrologTreeElement{
 	private String label;
 	private int line;
 	private String type;
 	private PrologTreeElement parent;
 	private String file;
 	
-	public PredicateOccuranceElement(String label, String file, int line, String type, PrologTreeElement parent) {
+	public OutlineClauseElement(String label, String file, int line, String type, PrologTreeElement parent) {
 		this.label = label;
 		this.line = line;
 		this.type = type;
@@ -53,10 +53,10 @@ public class PredicateOccuranceElement implements PrologTreeElement{
 	
 	@Override
 	public boolean equals(Object object) {
-		if (object == null || !(object instanceof PredicateOccuranceElement)) {
+		if (object == null || !(object instanceof OutlineClauseElement)) {
 			return false;
 		} else {
-			PredicateOccuranceElement other = (PredicateOccuranceElement) object;
+			OutlineClauseElement other = (OutlineClauseElement) object;
 			return (file.equals(other.file) && label.equals(other.label) && line == other.line);
 		}
 	}

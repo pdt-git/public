@@ -3,8 +3,8 @@
  */
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -13,12 +13,12 @@ final class PositionalPrologOutlineSorter extends ViewerSorter {
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		
-		if ((e1 instanceof OutlinePredicate) && (e2 instanceof OutlinePredicate)) {
-			return ((OutlinePredicate)e1).getLine() - ((OutlinePredicate)e2).getLine();
+		if ((e1 instanceof OutlinePredicateElement) && (e2 instanceof OutlinePredicateElement)) {
+			return ((OutlinePredicateElement)e1).getLine() - ((OutlinePredicateElement)e2).getLine();
 		}
-		if ((e1 instanceof PredicateOccuranceElement) && (e2 instanceof PredicateOccuranceElement)) {
-			PredicateOccuranceElement occ1 = (PredicateOccuranceElement)e1;
-			PredicateOccuranceElement occ2 = (PredicateOccuranceElement)e2;
+		if ((e1 instanceof OutlineClauseElement) && (e2 instanceof OutlineClauseElement)) {
+			OutlineClauseElement occ1 = (OutlineClauseElement)e1;
+			OutlineClauseElement occ2 = (OutlineClauseElement)e2;
 			if (occ1.getType().equals(occ2.getType()))
 				return (occ1).getLine() - (occ2).getLine();
 			if ((occ1.getType().equals("declaration")) || (occ2.getType().equals("multifile")))

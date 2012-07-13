@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.session.PrologSession;
@@ -58,11 +58,11 @@ public class PDTOutlineQuery {
 			OutlineModuleElement currentModuleElem = modules.get(module);
 			String label = module+":"+name+"/"+arity;
 
-			OutlinePredicate prologPredicate;
+			OutlinePredicateElement prologPredicate;
 			if (currentModuleElem.hasPredicate(label)) {
 				prologPredicate = currentModuleElem.getPredicate(label);
 			} else {
-				prologPredicate = new OutlinePredicate(module, name, arity, properties, fileName);
+				prologPredicate = new OutlinePredicateElement(module, name, arity, properties, fileName);
 				currentModuleElem.addChild(label, prologPredicate);
 			}
 			
@@ -70,7 +70,7 @@ public class PDTOutlineQuery {
 					properties);
 			String occuranceFile = getOccuranceFileName(properties, fileName);
 			
-			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), occuranceFile, line, type, prologPredicate));
+			prologPredicate.addOccurence(new OutlineClauseElement(occuranceLabel.toString(), occuranceFile, line, type, prologPredicate));
 		}
 
 		return modules;

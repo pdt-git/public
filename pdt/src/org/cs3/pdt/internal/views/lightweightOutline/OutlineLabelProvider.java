@@ -2,7 +2,7 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.cs3.pdt.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -40,7 +40,7 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 //			if(module.hasChildren())
 				return ImageRepository.getImage(ImageRepository.PACKAGE);
 		}
-		if (element instanceof PredicateOccuranceElement) {
+		if (element instanceof OutlineClauseElement) {
 			return ImageRepository.getImage(ImageRepository.SEARCH_MATCH);
 		}
 		return null;

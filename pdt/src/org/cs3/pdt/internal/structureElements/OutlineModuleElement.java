@@ -10,7 +10,7 @@ public class OutlineModuleElement
        implements PrologTreeElement{
 	private String name;  
 	private String kind;   // Legal values are "module" (Prolog) or "entity" (Logtalk)
-	private Map<String, OutlinePredicate> predicates= new HashMap<String,OutlinePredicate>();
+	private Map<String, OutlinePredicateElement> predicates= new HashMap<String,OutlinePredicateElement>();
 	
 	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity) {
 		super(filePath,line);
@@ -22,11 +22,11 @@ public class OutlineModuleElement
 		return predicates.containsKey(key);
 	}
 	
-	public OutlinePredicate getPredicate(String key) {
+	public OutlinePredicateElement getPredicate(String key) {
 		return predicates.get(key);
 	}
 	
-	public void addChild(String key, OutlinePredicate predicate) {
+	public void addChild(String key, OutlinePredicateElement predicate) {
 		predicates.put(key, predicate);
 	}
 	

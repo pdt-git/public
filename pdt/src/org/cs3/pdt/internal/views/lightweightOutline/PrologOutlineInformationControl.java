@@ -15,8 +15,8 @@ import java.util.Map;
 
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
@@ -228,12 +228,12 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	public void gotoSelectedElement() {
 		Object selection = getSelectedElement();
 		int line = -1;
-		if (selection instanceof OutlinePredicate) {
-			OutlinePredicate predicate=(OutlinePredicate)selection;
+		if (selection instanceof OutlinePredicateElement) {
+			OutlinePredicateElement predicate=(OutlinePredicateElement)selection;
 			line = predicate.getLine()-1;
 		} 
-		if (selection instanceof PredicateOccuranceElement) {
-			PredicateOccuranceElement occurance = (PredicateOccuranceElement)selection;
+		if (selection instanceof OutlineClauseElement) {
+			OutlineClauseElement occurance = (OutlineClauseElement)selection;
 			line = occurance.getLine()-1;
 		}
 		ISelection textSelection;

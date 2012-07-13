@@ -1,8 +1,8 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -10,10 +10,10 @@ public class HideSystemPredicatesFilter extends ViewerFilter {
 
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof PredicateOccuranceElement) {
+		if (element instanceof OutlineClauseElement) {
 			return true;
-		} else if (element instanceof OutlinePredicate) {
-			OutlinePredicate p = (OutlinePredicate) element;
+		} else if (element instanceof OutlinePredicateElement) {
+			OutlinePredicateElement p = (OutlinePredicateElement) element;
 			return !p.getFunctor().startsWith("$");
 		} else if (element instanceof OutlineModuleElement) {
 			OutlineModuleElement m = (OutlineModuleElement) element;
