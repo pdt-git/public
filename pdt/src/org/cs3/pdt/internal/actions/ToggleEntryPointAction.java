@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -15,7 +17,6 @@ import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,9 +24,6 @@ import org.eclipse.ui.IActionDelegate;
 
 public class ToggleEntryPointAction implements IActionDelegate {
 
-	public static final String PDT_ENTRY_POINT = "pdt_entry_point";
-	public static final QualifiedName KEY = PrologRuntimeUIPlugin.ENTRY_POINT_KEY;
-	
 	public ToggleEntryPointAction() {
 	}
 
@@ -84,7 +82,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	
 	private boolean isEntryPoint(IFile file) {
 		try {
-			String prop = file.getPersistentProperty(KEY);
+			String prop = file.getPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY);
 			if (prop != null && prop.equalsIgnoreCase("true")) {
 				return true;
 			}
@@ -95,11 +93,11 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	
 	private void setEntryPoint(IFile file, boolean b, PrologInterface pif) {
 		try {
-			file.setPersistentProperty(KEY, Boolean.toString(b));
+			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, Boolean.toString(b));
 			if (b) {
-				PrologRuntimeUIPlugin.getDefault().addEntryPoint(file);
+				PDTCommonPlugin.getDefault().addEntryPoint(file);
 			} else {
-				PrologRuntimeUIPlugin.getDefault().removeEntryPoint(file);
+				PDTCommonPlugin.getDefault().removeEntryPoint(file);
 			}
 		} catch (CoreException e) {
 			e.printStackTrace();
@@ -110,9 +108,9 @@ public class ToggleEntryPointAction implements IActionDelegate {
 				String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
 				
 				if (b) {
-					pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
+					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, Util.quoteAtom(prologFileName)));
 				} else {
-					pif.queryOnce(bT("remove_entry_points", "'" + prologFileName + "'"));
+					pif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, Util.quoteAtom(prologFileName)));
 				}
 			} catch (IOException e) {
 				Debug.report(e);

@@ -5,6 +5,8 @@ import static org.cs3.prolog.common.QueryUtils.bT;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -95,12 +97,12 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 
 	private void updateEntryPoints() {
 		try {
-			currentPif.queryOnce(bT("remove_entry_points", "_"));
+			currentPif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, "_"));
 			
-			for (IFile file : PrologRuntimeUIPlugin.getDefault().getEntryPoints()) {
+			for (IFile file : PDTCommonPlugin.getDefault().getEntryPoints()) {
 				try {
 					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
-					currentPif.queryOnce(bT("add_entry_point", Util.quoteAtom(prologFileName)));
+					currentPif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, Util.quoteAtom(prologFileName)));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

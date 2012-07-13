@@ -75,17 +75,12 @@ import org.cs3.prolog.pif.service.IPrologInterfaceService;
 import org.cs3.prolog.pif.service.PrologInterfaceService;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -105,8 +100,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 	private final static Object contextTrackerMux = new Object();
 	private static final Object preferencesMux = new Object();
-
-	public static final QualifiedName ENTRY_POINT_KEY = new QualifiedName("pdt", "entry.point");
 	
 	public PrologRuntimeUIPlugin() {
 		super();
@@ -118,25 +111,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 	}
 	
-	@Override
-	public void start(BundleContext context) throws Exception{
-		super.start(context);
-		ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
-			@Override
-			public boolean visit(IResource resource) throws CoreException {
-				if (resource instanceof IFile) {
-					IFile file = (IFile) resource;
-					if ("true".equalsIgnoreCase(file.getPersistentProperty(ENTRY_POINT_KEY))) {
-						addEntryPoint(file);
-					}
-				}
-				return true;
-			}
-			
-		});
-
-	}
-
 	/**
 	 * Returns the shared instance.
 	 */
@@ -481,18 +455,4 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		return prologInterfaceService;
 	}
 	
-	private Set<IFile> entryPoints = new HashSet<IFile>();
-
-	public void addEntryPoint(IFile f) {
-		entryPoints.add(f);
-	}
-
-	public void removeEntryPoint(IFile f) {
-		entryPoints.remove(f);
-	}
-
-	public Set<IFile> getEntryPoints() {
-		return entryPoints;
-	}
-
 }

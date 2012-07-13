@@ -4,8 +4,8 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ToggleEntryPointAction;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 public class EntryPointDecoratorContributor implements ILightweightLabelDecorator, OptionProviderListener {
 
+	private static final String ENTRY_POINT_SUFFIX = " [entry point]";
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
 	@Override
@@ -61,11 +62,11 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 		IFile file = (IFile) element;
 		try {
 			if (file.exists()) {
-				String isEntryPoint = file.getPersistentProperty(ToggleEntryPointAction.KEY);
+				String isEntryPoint = file.getPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY);
 				
 				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
 					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
-					decoration.addSuffix(" [entry point]");
+					decoration.addSuffix(ENTRY_POINT_SUFFIX);
 				}
 			}
 			
