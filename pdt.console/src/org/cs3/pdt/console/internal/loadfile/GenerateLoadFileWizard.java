@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -16,7 +18,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -28,8 +29,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 
 public class GenerateLoadFileWizard extends Wizard implements INewWizard {
-
-	private static final QualifiedName KEY = new QualifiedName("pdt", "entry.point");
 
 	private List<String> consultedFiles;
 	
@@ -67,9 +66,9 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 
 	public void addEntryPoint(IFile file) {
 		try {
-			file.setPersistentProperty(KEY, "true");
+			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, "true");
 			
-			PrologRuntimeUIPlugin.getDefault().addEntryPoint(file);
+			PDTCommonPlugin.getDefault().addEntryPoint(file);
 			
 			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 
@@ -77,7 +76,7 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 				try {
 					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
 
-					pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
+					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, "'" + prologFileName + "'"));
 				} catch (IOException e) {
 					Debug.report(e);
 				} catch (PrologInterfaceException e) {
