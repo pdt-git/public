@@ -77,7 +77,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -89,7 +88,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
@@ -117,10 +115,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		contentProvider = new OutlineContentProvider();
 		viewer.setContentProvider(contentProvider);
 
-		//		labelProvider = new OutlineLabelProvider();
+		labelProvider = new OutlineLabelProvider();
 
-		labelProvider = new DecoratingLabelProvider(new OutlineLabelProvider(), 
-				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
+//		labelProvider = new DecoratingLabelProvider(new OutlineLabelProvider(), 
+//				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		viewer.setLabelProvider(labelProvider);
 
 //		viewer.addSelectionChangedListener(this);
@@ -204,21 +202,25 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 		Map<String,OutlineModuleElement> modules;
 		TreeViewer treeViewer = getTreeViewer();
-		if (fileName != "") {
+		if (!fileName.isEmpty()) {
+			Object[] expandedElements = null;
 			try {			
 				modules = PDTOutlineQuery.getProgramElementsForFile(fileName);
 				model.update(modules);
 
+				expandedElements = treeViewer.getExpandedElements();
 				treeViewer.setInput(model);
 				treeViewer.setAutoExpandLevel(EXPANDING_LEVEL);
 
 			} catch(Exception e) {
 				Debug.report(e);
 			}
-		}
-
-		if (treeViewer != null) {
-			treeViewer.refresh();
+			if (treeViewer != null) {
+				treeViewer.refresh();
+				if (expandedElements != null && expandedElements.length > 0) {
+					treeViewer.setExpandedElements(expandedElements);
+				}
+			}
 		}
 	}
 

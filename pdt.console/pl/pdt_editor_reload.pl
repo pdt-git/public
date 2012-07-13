@@ -47,7 +47,8 @@ pdt_reload__(Files):-
 pdt_reload__(File):-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::pdt_reload(File).
+    logtalk_adapter::pdt_reload(File),
+    assertz(reloaded_file(File)).
 
 % SWI-Prolog
 pdt_reload__(File):-

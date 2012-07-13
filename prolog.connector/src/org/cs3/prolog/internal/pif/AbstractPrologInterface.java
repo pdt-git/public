@@ -691,6 +691,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 				IFile file = FileUtils.findFileForLocation(fileName);
 				if(file == null){
 					System.out.println("DEBUG");
+					continue;
 				}
 				String isEntryPoint = file.getPersistentProperty(new QualifiedName("pdt", "entry.point"));
 

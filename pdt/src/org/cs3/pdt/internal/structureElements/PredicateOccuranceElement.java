@@ -46,4 +46,19 @@ public class PredicateOccuranceElement implements PrologTreeElement{
 		return file;
 	}
 
+	@Override
+	public int hashCode() {
+		return (file + label).hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (object == null || !(object instanceof PredicateOccuranceElement)) {
+			return false;
+		} else {
+			PredicateOccuranceElement other = (PredicateOccuranceElement) object;
+			return (file.equals(other.file) && label.equals(other.label) && line == other.line);
+		}
+	}
+
 }

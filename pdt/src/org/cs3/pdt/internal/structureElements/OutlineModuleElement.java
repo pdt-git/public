@@ -53,4 +53,19 @@ public class OutlineModuleElement
 		return name;
 	}
 
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (object == null || !(object instanceof OutlineModuleElement)) {
+			return false;
+		} else {
+			OutlineModuleElement other = (OutlineModuleElement) object;
+			return (name.equals(other.name) && kind.equals(other.kind));
+		}
+	}
+
 }

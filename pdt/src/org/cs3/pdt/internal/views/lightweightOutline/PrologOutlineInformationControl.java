@@ -24,7 +24,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -39,7 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
@@ -108,9 +106,9 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		treeViewer.addFilter(new NamePatternFilter(this, this.getMatcher()));
 
 
-		//fInnerLabelProvider= new OutlineLabelProvider();
-		fInnerLabelProvider =  new DecoratingLabelProvider(new OutlineLabelProvider(), 
-				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
+		fInnerLabelProvider = new OutlineLabelProvider();
+//		fInnerLabelProvider =  new DecoratingLabelProvider(new OutlineLabelProvider(), 
+//				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		treeViewer.setLabelProvider(fInnerLabelProvider);
 
 		fLexicalSortingAction= new LexicalSortingAction(/*this,*/ treeViewer);

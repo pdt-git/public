@@ -95,11 +95,13 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 			@Override
 			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-				Set<String> subjects = listenerLists.keySet();
-				for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
-					String subject = it.next();
-					enableSubject(subject);
-				}				
+				synchronized (listenerLists) {
+					Set<String> subjects = listenerLists.keySet();
+					for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
+						String subject = it.next();
+						enableSubject(subject);
+					}				
+				}
 			}
 
 			@Override

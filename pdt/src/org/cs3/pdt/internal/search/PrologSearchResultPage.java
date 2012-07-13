@@ -57,13 +57,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ToolTip;
@@ -143,6 +146,32 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 					}
 				}
 			}
+		});
+		viewer.addTreeListener(new ITreeViewerListener() {
+			@Override
+			public void treeExpanded(TreeExpansionEvent event) {
+				final AbstractTreeViewer treeViewer = event.getTreeViewer();
+				PrologSearchTreeContentProvider contentProvider = (PrologSearchTreeContentProvider) treeViewer.getContentProvider();
+				final Object element = event.getElement();
+				int expandLevel = 1;
+				Object[] children = contentProvider.getChildren(element);
+				while (children.length == 1) {
+					expandLevel++;
+					children = contentProvider.getChildren(children[0]);
+				}
+				if (expandLevel > 1) {
+					final int finalExpandLevel = expandLevel;
+					treeViewer.getControl().getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							treeViewer.expandToLevel(element, finalExpandLevel);
+						}
+					});
+				}
+			}
+			
+			@Override
+			public void treeCollapsed(TreeExpansionEvent event) {}
 		});
 	}
 	
