@@ -153,13 +153,13 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 				final AbstractTreeViewer treeViewer = event.getTreeViewer();
 				PrologSearchTreeContentProvider contentProvider = (PrologSearchTreeContentProvider) treeViewer.getContentProvider();
 				final Object element = event.getElement();
-				int expandLevel = 0;
+				int expandLevel = 1;
 				Object[] children = contentProvider.getChildren(element);
 				while (children.length == 1) {
 					expandLevel++;
 					children = contentProvider.getChildren(children[0]);
 				}
-				if (expandLevel > 0) {
+				if (expandLevel > 1) {
 					final int finalExpandLevel = expandLevel;
 					treeViewer.getControl().getDisplay().asyncExec(new Runnable() {
 						@Override
