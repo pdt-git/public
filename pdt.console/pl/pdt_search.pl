@@ -296,7 +296,7 @@ find_definition_contained_in(File, Module, ModuleLine, module, Functor, Arity, S
     (	member(multifile, PropertyList0)
     -> (	defined_in_file(Module, Functor, Arity, _, DeclFile, Line),
     		(	DeclFile \= File
-    		-> 	(	module_property(MultiModule, file(DeclFile)),
+    		-> 	(	once(module_of_file(DeclFile, MultiModule)),% module_property(MultiModule, file(DeclFile)),
     				append([for(MultiModule), defining_file(DeclFile)], PropertyList0, PropertyList),
     				SearchCategory = multifile
     			)
