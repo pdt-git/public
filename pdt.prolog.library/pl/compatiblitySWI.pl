@@ -253,6 +253,7 @@ printf(_format) :-
 println :-
     printf('~n').
 
+:- module_transparent assert1T/1.
 
 /*
 	assert1T(+Term)
