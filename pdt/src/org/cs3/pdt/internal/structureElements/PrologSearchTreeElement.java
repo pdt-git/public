@@ -6,6 +6,4 @@ public interface PrologSearchTreeElement extends PrologTreeElement{
 	
 	void removeMatch(PrologMatch match);
 	
-	Object getParent();
-	
 }

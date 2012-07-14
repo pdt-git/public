@@ -9,11 +9,14 @@ public class PrologSourceFileModel {
 	private Map<String, OutlineModuleElement> modules;
 	
 	public PrologSourceFileModel(Map<String, OutlineModuleElement> modules) {
-		this.modules = modules;
+		update(modules);
 	}
 	
 	public void update(Map<String,OutlineModuleElement> modules){
 		this.modules = modules;
+		for (OutlineModuleElement module : modules.values()) {
+			module.setParent(this);
+		}
 	}
 	
 	public boolean hasChildren() {

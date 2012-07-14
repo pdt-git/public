@@ -1,29 +1,31 @@
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.cs3.pdt.metadata.Predicate;
 
-public class OutlinePredicateElement extends Predicate implements PrologTreeElement{
+public class OutlinePredicateElement extends Predicate implements PrologOutlineTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
 	
 	private String fileName;
-	private List<OutlineClauseElement> occurences = new ArrayList<OutlineClauseElement>();
+	private List<OutlineClauseElement> clauses = new ArrayList<OutlineClauseElement>();
+	private HashMap<String, OutlineFileElement> otherFiles = new HashMap<String, OutlineFileElement>();
+	private List<Object> allChildren = new ArrayList<Object>();
+
+	private Object parent;
 	
-	public OutlinePredicateElement(String module, String functor, int arity, List<String> properties, String fileName){
+	public OutlinePredicateElement(Object parent, String module, String functor, int arity, List<String> properties, String fileName){
 		super(module, functor, arity, properties);
 		this.fileName = fileName;
+		this.parent = parent;
 	}
 	
-	public void addOccurence(OutlineClauseElement occurrence) {
-		occurences.add(occurrence);
-	}
-
 	public int getLine() {
 		int line = -1;
 		int defLine = -1;
-		for (OutlineClauseElement occurence : occurences) {
+		for (OutlineClauseElement occurence : clauses) {
 			int occuranceLine = occurence.getLine();
 			String type = occurence.getType();
 			if ((line < 0) || occuranceLine < line) {
@@ -46,15 +48,13 @@ public class OutlinePredicateElement extends Predicate implements PrologTreeElem
 				String numberString = property.substring(18, property.length()-1);
 				return Integer.parseInt(numberString);
 			} 
-//			else if (property.contains("clauses")) {
-//				String numberString = property.substring(8, property.length()-1);
-//				return Integer.parseInt(numberString);
-//			}
-//			else {
-//			}
 		}
-		return occurences.size();
-//		return 0;
+		
+		int numClauses = clauses.size();
+		for (OutlineFileElement outlineFileElement : otherFiles.values()) {
+			numClauses += outlineFileElement.numberOfClauses();
+		}
+		return numClauses;
 	}
 	
 	public String getFileName() {
@@ -63,12 +63,12 @@ public class OutlinePredicateElement extends Predicate implements PrologTreeElem
 
 	@Override
 	public boolean hasChildren() {
-		return !occurences.isEmpty();
+		return !allChildren.isEmpty();
 	}
 
 	@Override
 	public Object[] getChildren() {
-		return occurences.toArray();
+		return allChildren.toArray();
 	}
 
 	@Override
@@ -88,13 +88,35 @@ public class OutlinePredicateElement extends Predicate implements PrologTreeElem
 	}
 	
 	@Override
-	public String toString() {
-		return super.getSignature();
+	public boolean equals(Object object) {
+		if (object == null || !(object instanceof OutlinePredicateElement)) {
+			return false;
+		} else {
+			return super.equals(object);
+		}
 	}
 	
 	@Override
-	public String getSignature() {
-		return "Outline: " + super.getSignature();
+	public Object getParent() {
+		return parent;
+	}
+
+	@Override
+	public void addClause(PrologClause clause) {
+		if (clause.isFromOtherFile()) {
+			String occuranceFile = clause.getOccuranceFile();
+			OutlineFileElement outlineFileElement = otherFiles.get(occuranceFile);
+			if (outlineFileElement == null) {
+				outlineFileElement = new OutlineFileElement(this, occuranceFile);
+				otherFiles.put(occuranceFile, outlineFileElement);
+				allChildren.add(outlineFileElement);
+			}
+			outlineFileElement.addClause(clause);
+		} else {
+			OutlineClauseElement clauseElement = new OutlineClauseElement(this, clause);
+			clauses.add(clauseElement);
+			allChildren.add(clauseElement);
+		}
 	}
 	
 }

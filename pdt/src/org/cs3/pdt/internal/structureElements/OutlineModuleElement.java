@@ -5,12 +5,11 @@ import java.util.Map;
 
 import org.cs3.pdt.metadata.PrologSourceLocation;
 
-public class OutlineModuleElement 
-       extends PrologSourceLocation
-       implements PrologTreeElement{
+public class OutlineModuleElement extends PrologSourceLocation implements PrologOutlineTreeElement{
 	private String name;  
 	private String kind;   // Legal values are "module" (Prolog) or "entity" (Logtalk)
 	private Map<String, OutlinePredicateElement> predicates= new HashMap<String,OutlinePredicateElement>();
+	private Object parent;
 	
 	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity) {
 		super(filePath,line);
@@ -39,10 +38,6 @@ public class OutlineModuleElement
 		return kind;
 	}
 	
-	public void dispose() {
-		predicates.clear();
-	}
-
 	@Override
 	public Object[] getChildren() {
 		return predicates.values().toArray();
@@ -66,6 +61,30 @@ public class OutlineModuleElement
 			OutlineModuleElement other = (OutlineModuleElement) object;
 			return (name.equals(other.name) && kind.equals(other.kind));
 		}
+	}
+	
+	public void setParent(Object parent) {
+		this.parent = parent;
+	}
+
+	@Override
+	public Object getParent() {
+		return parent;
+	}
+
+	@Override
+	public void addClause(PrologClause clause) {
+		String signature = getSignature(clause);
+		OutlinePredicateElement predicateElement = predicates.get(signature);
+		if (predicateElement == null) {
+			predicateElement = new OutlinePredicateElement(this, clause.getEntity(), clause.getFunctor(), clause.getArity(), clause.getProperties(), clause.getFile());
+			predicates.put(signature, predicateElement);
+		}
+		predicateElement.addClause(clause);
+	}
+	
+	private String getSignature(PrologClause clause) {
+		return clause.getFunctor() + "/" + clause.getArity();
 	}
 
 }

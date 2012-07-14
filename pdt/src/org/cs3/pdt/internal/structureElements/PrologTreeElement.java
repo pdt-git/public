@@ -7,4 +7,6 @@ public interface PrologTreeElement {
 	public Object[] getChildren();
 	
 	public String getLabel();
+
+	Object getParent();
 }

@@ -58,6 +58,7 @@ import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
+import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
 import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
@@ -246,7 +247,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			OutlineClauseElement occurance = (OutlineClauseElement)elem;
 			line = occurance.getLine();
 			selectedFile = occurance.getFile();
-			predicate = (OutlinePredicateElement)occurance.getParent();
+//			predicate = (OutlinePredicateElement)occurance.getParent();
 		} else {
 			return;
 		}
@@ -281,15 +282,12 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		return elem;
 	}
 
-	private SourceLocation createLocation(OutlinePredicateElement predicate,
-			int line, IFile file) {
+	private SourceLocation createLocation(String functor, int arity, int line, IFile file) {
 		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		loc.setLine(line);
-		if(predicate != null) {
-			loc.setPredicateName(predicate.getFunctor());
-			loc.setArity(predicate.getArity());
-		}
+		loc.setPredicateName(functor);
+		loc.setArity(arity);
 		return loc;
 	}
 
@@ -344,9 +342,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		Object elem = selection.getFirstElement();
 		if (elem == null) return;
 
-		OutlinePredicateElement predicate=null;
+		String functor = null;
+		int arity = 0;
 		String selectedFile = "";
-		int line;
+		int line = 0;
 
 
 		if (elem instanceof OutlineModuleElement) { 
@@ -354,14 +353,21 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			line = module.getLine();
 			selectedFile = module.getFilePath();
 		} else if (elem instanceof OutlinePredicateElement) { 
-			predicate = (OutlinePredicateElement)elem;
+			OutlinePredicateElement predicate = (OutlinePredicateElement)elem;
 			line = predicate.getLine();
 			selectedFile = predicate.getFileName();
+			functor = predicate.getFunctor();
+			arity = predicate.getArity();
 		} else if (elem instanceof OutlineClauseElement) {
-			OutlineClauseElement occurance = (OutlineClauseElement)elem;
-			line = occurance.getLine();
-			selectedFile = occurance.getFile();
-			predicate = (OutlinePredicateElement)occurance.getParent();
+			OutlineClauseElement clause = (OutlineClauseElement)elem;
+			line = clause.getLine();
+			selectedFile = clause.getFile();
+			functor = clause.getFunctor();
+			arity = clause.getArity();
+		} else if (elem instanceof OutlineFileElement) {
+			OutlineFileElement outlineFileElement = (OutlineFileElement) elem;
+			line = outlineFileElement.getFirstLine();
+			selectedFile = outlineFileElement.getFilePath();
 		} else {
 			return;
 		}
@@ -372,7 +378,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			IFile file;
 			try {
 				file = FileUtils.findFileForLocation(selectedFile);
-				SourceLocation loc = createLocation(predicate, line, file);
+				SourceLocation loc = createLocation(functor, arity, line, file);
 				PDTUtils.showSourceLocation(loc);
 			} catch (IOException e) {
 			}
