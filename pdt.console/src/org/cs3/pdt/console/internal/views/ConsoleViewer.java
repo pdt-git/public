@@ -51,7 +51,6 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
@@ -254,7 +253,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
-		contentProposalAdapter = new ContentProposalAdapter(control, new StyledTextContentAdapter(), new ProposalProvider() , KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), null);
+		contentProposalAdapter = new ContentProposalAdapter(
+				control,
+				new StyledTextContentAdapter(),
+				new ProposalProvider(),
+				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), KeyStroke.getInstance(SWT.TAB)},
+				null);
 		contentProposalAdapter.setPopupSize(new Point(300, 200));
 		contentProposalAdapter.setLabelProvider(new ConsoleCompletionLabelProvider());
 
