@@ -41,6 +41,9 @@
 
 package org.cs3.pdt.console.internal.views;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +57,8 @@ import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 
 public class PrologCompletionProvider {
+
+	private static final CompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new CompletionProposal[0];
 
 	private class _Result implements CompletionResult {
 
@@ -117,6 +122,33 @@ public class PrologCompletionProvider {
 
 	private PrologInterface pif;
 
+	public CompletionProposal[] getCompletionProposals(String line, int pos) {
+		String head = line.substring(0, pos);
+
+		String[] split = head.split("[^\\w^$]");
+		String prefix = split[split.length - 1];
+		int prefixLength = prefix.length();
+		
+		if (prefixLength <= 0) {
+			return EMPTY_COMPLETION_PROPOSAL;
+		}
+		
+		ArrayList<CompletionProposal> proposals = new ArrayList<CompletionProposal>();
+		String query = bT("pdt_search:find_pred", "'_'", Util.quoteAtom(prefix), "_", "Name", "Arity", "Public", "_" , "_");
+		List<Map<String, Object>> results;
+		try {
+			results = pif.queryAll(query);
+			for (Map<String,Object> result : results) {
+				int arity = Integer.parseInt(result.get("Arity").toString());
+				String name = result.get("Name").toString();
+				proposals.add(new CompletionProposal(name, arity, prefixLength));
+			}
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+		}
+		return proposals.toArray(new CompletionProposal[proposals.size()]);
+	}
+	
 	/**
 	 * complete the line.
 	 * 

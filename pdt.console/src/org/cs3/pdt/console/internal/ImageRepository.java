@@ -100,6 +100,8 @@ public class ImageRepository {
 
 	public static final String PREFERENCES = "preferences.png";
 
+	public static final String PREDICATE_PUBLIC = "public_co.gif";
+
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
         return ImageDescriptor.createFromURL(url);

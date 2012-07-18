@@ -50,6 +50,12 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.IControlContentAdapter;
+import org.eclipse.jface.fieldassist.IControlContentAdapter2;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IDocument;
@@ -76,8 +82,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
@@ -85,6 +89,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -208,6 +213,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	};
 
+	private ContentProposalAdapter contentProposalAdapter;
+
 	public ConsoleViewer(Composite parent, int styles) {
 		createControl(parent, styles);
 		initPreferences();
@@ -247,14 +254,17 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
+		contentProposalAdapter = new ContentProposalAdapter(control, new StyledTextContentAdapter(), new ProposalProvider() , KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), null);
+		contentProposalAdapter.setPopupSize(new Point(300, 200));
+		contentProposalAdapter.setLabelProvider(new ConsoleCompletionLabelProvider());
 
 		control.setTabs(4);
-		control.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				e.doit = false;
-			}
-		});
+//		control.addTraverseListener(new TraverseListener() {
+//			@Override
+//			public void keyTraversed(TraverseEvent e) {
+//				e.doit = false;
+//			}
+//		});
 		control.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -937,14 +947,14 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					event.doit = false;
 					break;
 
-				case ' ':
-					if ((keyMask & SWT.CTRL) != 0) {
-						doCompletion();
-						event.doit = false;
-					}
-					break;
+//				case ' ':
+//					if ((keyMask & SWT.CTRL) != 0) {
+//						doCompletion();
+//						event.doit = false;
+//					}
+//					break;
 				case SWT.TAB:
-					doCompletion();
+//					doCompletion();
 					event.doit = false;
 					break;
 				default:
@@ -1033,9 +1043,15 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 			case SWT.CR:
 			case SWT.KEYPAD_CR:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				model.commitLineBuffer();
 				break;
 			case SWT.ARROW_UP:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				Debug.debug("UP");
 				history.previous();
 				break;
@@ -1043,14 +1059,23 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				if (isNumLock(keyMask, keyCode, keyChar)) {
 					break;
 				}
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				Debug.debug("UP");
 				history.previous();
 				break;
 			case SWT.ARROW_DOWN:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				history.next();
 				break;
 			case SWT.KEYPAD_2:
 				if (isNumLock(keyMask, keyCode, keyChar)) {
+					break;
+				}
+				if (contentProposalAdapter.isProposalPopupOpen()) {
 					break;
 				}
 				history.next();
@@ -1218,4 +1243,81 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 	
+	private class StyledTextContentAdapter implements IControlContentAdapter,IControlContentAdapter2 {
+		
+		@Override
+		public String getControlContents(Control control) {
+			return ((StyledText)control).getText();
+		}
+
+		@Override
+		public int getCursorPosition(Control control) {
+			return ((StyledText)control).getCaretOffset();
+		}
+
+		@Override
+		public Rectangle getInsertionBounds(Control control) {
+			StyledText text= (StyledText)control;
+			Point caretOrigin= text.getLocationAtOffset(text.getCaretOffset());
+			return new Rectangle(caretOrigin.x + text.getClientArea().x, caretOrigin.y + text.getClientArea().y + 3, 1, text.getLineHeight());
+		}
+
+		@Override
+		public void insertControlContents(Control control, String contents, int cursorPosition) {
+			StyledText text= ((StyledText)control);
+			text.insert(contents);
+			cursorPosition= Math.min(cursorPosition, contents.length());
+			text.setCaretOffset(text.getCaretOffset() + cursorPosition);
+		}
+
+		@Override
+		public void setControlContents(Control control, String term, int cursorPosition) {
+			
+			String text = ((StyledText)control).getText();
+			
+			final String after = text.substring(((StyledText)control).getCaretOffset(), text.length());
+			text = text.substring(0, ((StyledText)control).getCaretOffset());
+			
+			// We just add the maximum ammount matched from the term
+			for (int i = term.length(); i > 0; i--) {
+				final String subterm = term.substring(0,i);
+				if (text.endsWith(subterm)) {
+					term = term.substring(i,term.length());
+					break;
+				}
+			}
+			
+			final StringBuffer buf = new StringBuffer();
+			buf.append(text);
+			buf.append(term);
+			final int len = buf.length();
+			buf.append(after);
+			((StyledText)control).setText(buf.toString());
+			((StyledText)control).setCaretOffset(len);
+		}
+
+		@Override
+		public void setCursorPosition(Control control, int index) {
+			((StyledText)control).setCaretOffset(index);
+		}
+
+		@Override
+		public Point getSelection(Control control) {
+			return ((StyledText)control).getSelection();
+		}
+
+		@Override
+		public void setSelection(Control control, Point range) {
+			((StyledText)control).setSelection(range);
+		}
+	}
+	private class ProposalProvider implements IContentProposalProvider {
+
+		@Override
+		public IContentProposal[] getProposals(String contents, int position) {
+			int caretPosition = control.getCaretOffset() - startOfInput;
+			return completionProvider.getCompletionProposals(model.getLineBuffer(), caretPosition);
+		}
+		
+	}
 }
