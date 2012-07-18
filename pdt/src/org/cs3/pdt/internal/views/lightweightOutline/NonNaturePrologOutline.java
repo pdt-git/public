@@ -85,7 +85,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -125,6 +128,19 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 //		viewer.addSelectionChangedListener(this);
 
 		viewer.addDoubleClickListener(this);
+		
+		viewer.getControl().addListener(SWT.Show, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				getSite().getShell().getDisplay().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						System.out.println("PUS");
+						setInput(null);
+					}
+				});
+			}
+		});
 
 
 		model = new PrologSourceFileModel(new HashMap<String,OutlineModuleElement>());
