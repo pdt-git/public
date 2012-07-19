@@ -126,6 +126,9 @@ public class PrologCompletionProvider {
 		String head = line.substring(0, pos);
 
 		String[] split = head.split("[^\\w^$]");
+		if (split.length == 0) {
+			return EMPTY_COMPLETION_PROPOSAL;
+		}
 		String prefix = split[split.length - 1];
 		int prefixLength = prefix.length();
 		
