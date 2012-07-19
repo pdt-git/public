@@ -1888,7 +1888,9 @@ public class ContentProposalAdapter {
 				// Check whether there are any proposals to be shown.
 				recordCursorPosition(); // must be done before getting proposals
 				IContentProposal[] proposals = getProposals();
-				if (proposals.length > 0) {
+				if (proposals.length == 1) {
+					proposalAccepted(proposals[0]);
+				} else if (proposals.length > 1) {
 					if (DEBUG) {
 						System.out.println("POPUP OPENED BY PRECEDING EVENT"); //$NON-NLS-1$
 					}
