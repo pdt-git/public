@@ -29,11 +29,17 @@ public class CompletionProposal implements IContentProposal{
 		}
 		
 		StringBuffer buf = new StringBuffer("(");
+		char c = 'A';
 		for (int i = 0; i < arity; i++) {
 			if(i > 0) {
 				buf.append(", ");
 			}
-			buf.append("_");
+			buf.append(c);
+			if (c == '_' || c == 'Z') {
+				c = '_';
+			} else {
+				c++;
+			}
 		}
 		buf.append(")");
 		return buf.toString();
