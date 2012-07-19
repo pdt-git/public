@@ -135,7 +135,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						System.out.println("PUS");
 						setInput(null);
 					}
 				});
