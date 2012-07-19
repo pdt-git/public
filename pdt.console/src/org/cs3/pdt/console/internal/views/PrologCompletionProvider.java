@@ -44,81 +44,17 @@ package org.cs3.pdt.console.internal.views;
 import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
 
 public class PrologCompletionProvider {
 
 	private static final CompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new CompletionProposal[0];
-
-	private class _Result implements CompletionResult {
-
-		@Override
-		public String getOriginalLineContent() {
-			return line;
-		}
-
-		@Override
-		public int getOriginalCaretPosition() {
-			return pos;
-		}
-
-		@Override
-		public String[] getOptions() {
-			if (options == null) {
-				return null;
-			}
-			String[] result = new String[options.size()];
-			int i = 0;
-			for (Iterator<String> it = options.iterator(); it.hasNext(); i++) {
-				String o = it.next();
-				result[i] = o;
-			}
-			return result;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.cs3.pl.views.ConsoleCompletionProvider#getCaretPosition()
-		 */
-		@Override
-		public int getNewCaretPosition() {
-			return newPos;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.cs3.pl.views.ConsoleCompletionProvider#getNewLineContent()
-		 */
-		@Override
-		public String getNewLineContent() {
-			return newLine;
-		}
-
-		String line = null;
-
-		String newLine = null;
-
-		int newPos = -1;
-
-		TreeSet<String> options = null;
-
-		int pos = -1;
-
-	}
-
-	TreeSet<Completion> completions = null;
 
 	private PrologInterface pif;
 
@@ -152,122 +88,6 @@ public class PrologCompletionProvider {
 		return proposals.toArray(new CompletionProposal[proposals.size()]);
 	}
 	
-	/**
-	 * complete the line.
-	 * 
-	 * @param line
-	 *            the content of the line buffer
-	 * @param pos
-	 *            the carret position
-	 * @return the completed line. If there is no  completeion, the line
-	 *         should be returned unchanged.
-	 * 			If there is more than one option, the provider should
-	 * 			try to do as much as possible.
-	 */
-	public CompletionResult doCompletion(String line, int pos) {
-		if (pif == null) {
-			return null;
-		}
-		
-		_Result r = new _Result();
-		r.line = line;
-		r.pos = pos;
-		String head = line.substring(0, pos);
-		String tail = line.substring(pos);
-
-		String[] split = head.split("[^\\w^$]");
-		String prefix = split[split.length - 1];
-
-		try {
-			r.options = new TreeSet<String>();
-			completions = new TreeSet<Completion>();
-			
-			findPredicatesWithPrefix(null, prefix, null, r.options, completions);
-		} catch (NumberFormatException e) {
-			Debug.report(e);
-		} catch (PrologException e) {
-			Debug.report(e);
-		} catch (PrologInterfaceException e) {
-			Debug.report(e);
-		}
-
-		Completion completion = completions == null || completions.isEmpty() ? new Completion("",0)
-				: completions.first();
-		if (completions == null || completions.size() == 0) {
-			r.newLine = line;
-			r.newPos = pos;
-		} else if (completions.size() == 1) {
-			
-			if (head.equals(completion.getFunctor() + "(")) {
-				r.newLine = completion.getFunctor() + completion.getArglist() + tail;
-				r.newPos = pos - prefix.length() + completion.getFunctor().length() - 1;
-			} else if (head.startsWith(completion.getFunctor()) && !head.equals(completion.getFunctor())) {
-				r.newLine = head;
-				r.newPos = pos;
-			} else {
-				r.newLine = head + completion.getFunctor().substring(prefix.length()) + completion.getArglist() + tail;
-				r.newPos = pos - prefix.length() + completion.getFunctor().length();
-				if(completion.getArity() > 0) {
-					r.newPos++;
-				}
-			}
-			
-		} else {
-			int commonLength = getCommonLength();
-			String commonPart = completion.getFunctor().substring(prefix.length(),
-					commonLength);
-			r.newLine = head + commonPart + tail;
-			r.newPos = pos - prefix.length() + commonLength;
-		}
-		return r;
-	}
-
-	public void findPredicatesWithPrefix(String module, String prefix, String filename, TreeSet<String> signatures, TreeSet<Completion> functors) throws NumberFormatException, PrologException,
-			PrologInterfaceException {
-
-		PrologSession session = pif.getSession(PrologInterface.NONE);
-		try {
-			if (module == null)
-				module = "_";
-			if (filename == null)
-				filename = "_";
-			String query = "pdt_search:find_pred('" + filename + "','" + prefix + "', "
-					+ module + ",Name,Arity,Public,_,_)";
-			List<Map<String,Object>> results = session.queryAll(query);
-			for (Map<String,Object> result : results) {
-				int arity = Integer.parseInt(result.get("Arity").toString());
-				String name = result.get("Name").toString();
-				signatures.add(name + "/" + arity);
-				functors.add(new Completion(name,arity));
-			}
-		} finally {
-			if (session != null) {
-				session.dispose();
-			}
-		}
-
-	}
-
-	// propably there is a smarter way of doing this...
-	int getCommonLength() {
-		int len = 1;
-		while (true) {
-
-			String first = Util.unquoteAtom(completions.first().getFunctor());
-			String last = Util.unquoteAtom(completions.last().getFunctor());
-			if (first.length() < len || last.length() < len) {
-				break;
-			}
-			String a = first.substring(0, len);
-			String b = last.substring(0, len);
-			if (!a.equals(b)) {
-				break;
-			}
-			len++;
-		}
-		return len - 1;
-	}
-
 	public void setPrologInterface(PrologInterface pif) {
 		this.pif = pif;
 	}

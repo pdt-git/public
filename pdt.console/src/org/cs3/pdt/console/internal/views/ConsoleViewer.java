@@ -671,60 +671,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 
-	private void completionAvailable(CompletionResult r) {
-
-		if (!model.getLineBuffer().equals(r.getOriginalLineContent())) {
-			Debug.debug("completion discarded.");
-			return;
-		}
-		if (control.getCaretOffset() - startOfInput != r.getOriginalCaretPosition()) {
-			Debug.debug("completion discarded.");
-			return;
-		}
-
-		String[] options = r.getOptions();
-		Debug.debug("found " + options.length + " completions");
-		model.setLineBuffer(r.getNewLineContent());
-		control.setCaretOffset(r.getNewCaretPosition() + startOfInput);
-
-		if (options.length > 1) {
-			StringBuffer buf = new StringBuffer();
-			buf.append("\n");
-			for (int i = 0; i < options.length; i++) {
-				buf.append(options[i]);
-				buf.append("\t\t\t\t\t\t\t\t");
-			}
-			buf.append("\n");
-			ui_appendOutput(buf.toString());
-		}
-
-	}
-
-	private void doCompletion() {
-		if (completionProvider == null) {
-			return;
-		}
-
-		final int caretPosition = control.getCaretOffset() - startOfInput;
-		Runnable work = new Runnable() {
-			@Override
-			public void run() {
-
-				final CompletionResult r = completionProvider.doCompletion(model.getLineBuffer(), caretPosition);
-				final Runnable notify = new Runnable() {
-					@Override
-					public void run() {
-						completionAvailable(r);
-					}
-				};
-				control.getDisplay().asyncExec(notify);
-			}
-		};
-
-		new Thread(work, "Console Completion Worker").start();
-
-	}
-
 	private void setColorRangeInControl(int start, int end, Color col) {
 		StyleRange range = new StyleRange(start, end, col, control.getBackground());
 		control.setStyleRange(range);
