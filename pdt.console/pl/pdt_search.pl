@@ -355,6 +355,7 @@ find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Li
 %
 %
 find_blacklist('$load_context_module',2,_).
+find_blacklist('$load_context_module',3,_).
 find_blacklist('$mode',2,_).
 find_blacklist('$pldoc',4,_).
 
