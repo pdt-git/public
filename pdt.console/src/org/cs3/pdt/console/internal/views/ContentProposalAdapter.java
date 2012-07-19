@@ -687,12 +687,11 @@ public class ContentProposalAdapter {
 			int initialY = location.y + control.getSize().y + POPUP_OFFSET;
 			// If we are inserting content, use the cursor position to
 			// position the control.
+			Rectangle insertionBounds = null;
 			if (getProposalAcceptanceStyle() == PROPOSAL_INSERT) {
-				Rectangle insertionBounds = controlContentAdapter
-						.getInsertionBounds(control);
+				insertionBounds = controlContentAdapter.getInsertionBounds(control);
 				initialX = initialX + insertionBounds.x;
-				initialY = location.y + insertionBounds.y
-						+ insertionBounds.height;
+				initialY = location.y + insertionBounds.y + insertionBounds.height;
 			}
 
 			// If there is no specified size, force it by setting
@@ -713,10 +712,15 @@ public class ContentProposalAdapter {
 			
 			// If there has been an adjustment causing the popup to overlap 
 			// with the control, then put the popup above the control.
-			if (constrainedBounds.y < initialY)
-				getShell().setBounds(initialX, location.y - popupSize.y, popupSize.x, popupSize.y);
-			else
+			if (constrainedBounds.y < initialY) {
+				if (getProposalAcceptanceStyle() == PROPOSAL_INSERT && insertionBounds != null) {
+					getShell().setBounds(initialX, initialY - popupSize.y - insertionBounds.height, popupSize.x, popupSize.y);
+				} else {
+					getShell().setBounds(initialX, location.y - popupSize.y, popupSize.x, popupSize.y);
+				}
+			} else {
 				getShell().setBounds(initialX, initialY, popupSize.x, popupSize.y);
+			}
 
 			// Now set up a listener to monitor any changes in size.
 			getShell().addListener(SWT.Resize, new Listener() {
