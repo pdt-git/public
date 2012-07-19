@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
@@ -164,7 +165,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			return;
 		}
 		try {
-			List<Map<String, Object>> results = currentPif.queryAll(bT("pdt_source_file", "File", "State"));
+			List<Map<String, Object>> results = currentPif.queryAll(bT(PDTPredicates.PDT_SOURCE_FILE, "File", "State"));
 			lastUpdate = System.currentTimeMillis();
 			for (Map<String, Object> result: results) {
 				String fileName = result.get("File").toString();

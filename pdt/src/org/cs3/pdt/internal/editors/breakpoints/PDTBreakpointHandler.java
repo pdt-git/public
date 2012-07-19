@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.PDTPredicates;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -49,7 +50,6 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	private static final String FILE_LOADED = "file_loaded";
 	private static final String BREAKPOINT_LIFECYCLE_HOOK = "BreakpointLifecycleHook";
 	private static final String SOURCE_FILE = "source_file";
-	private static final String SET_BREAKPOINT = "pdt_set_breakpoint";
 	private static final String DELETE_BREAKPOINT = "delete_breakpoint";
 	private static final String BREAKPOINT_PROPERTY = "breakpoint_property";
 
@@ -128,7 +128,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 								// if the marker is in the current file, recreate information from the document (the marker could be moved)
 								try {
 									int offset = document.getLineInformation(m.getLineNumber() - 1).getOffset();
-									currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(currentIFile), m.getLineNumber(), offset, "Id"));
+									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(currentIFile), m.getLineNumber(), offset, "Id"));
 								} catch (PrologInterfaceException e) {
 									Debug.report(e);
 								} catch (BadLocationException e) {
@@ -137,7 +137,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 							} else {
 								// else, just reset the marker with the same information as before
 								try {
-									currentPif.queryOnce(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
+									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
 								} catch (PrologInterfaceException e) {
 									Debug.report(e);
 								}
@@ -316,7 +316,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) throws PrologInterfaceException {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
-		String query = bT(SET_BREAKPOINT, prologFileName, line, offset, "_");
+		String query = bT(PDTPredicates.PDT_SET_BREAKPOINT, prologFileName, line, offset, "_");
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 		pif.queryOnce(query);
 	}
@@ -382,7 +382,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		if (e.getSubject().equals(ADD_BREAKPOINT)) {
 			String id = e.getEvent();
 			try {
-				Map<String, Object> result = currentPif.queryOnce(bT("pdt_breakpoint_properties", id, "File", "Line", "Offset"));
+				Map<String, Object> result = currentPif.queryOnce(bT(PDTPredicates.PDT_BREAKPOINT_PROPERTIES, id, "File", "Line", "Offset"));
 				String file = result.get("File").toString();
 				int line = Integer.parseInt(result.get("Line").toString());
 				int offset = Integer.parseInt(result.get("Offset").toString());
@@ -480,7 +480,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 						} else {
 							buf.append(", ");
 						}
-						buf.append(bT(SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
+						buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
 						//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 					}
 					Debug.debug("Resetting breakpoints after restart: " + buf.toString());

@@ -146,8 +146,7 @@ public class ConsoleHistory implements ConsoleModelListener {
 		if(! ( value.equals(" ")
 				|| value.equals("")
 				|| value.equals(";")
-				|| value.startsWith("pdt_reload(")
-				|| value.startsWith("pdt_set_breakpoint("))
+				|| value.startsWith("pdt_reload("))
 				) {
 			history.add(e.getCommitText());
 		}
