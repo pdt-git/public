@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model;
 
 
@@ -132,3 +134,4 @@ public void doLayout( final LayoutGraph graph ) {
     }
   }
 }
+

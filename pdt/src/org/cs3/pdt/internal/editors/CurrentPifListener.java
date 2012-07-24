@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -131,3 +133,4 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 	}
 
 }
+

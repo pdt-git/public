@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal;
 
 import java.util.HashSet;
@@ -155,3 +157,4 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 	}
 
 }
+

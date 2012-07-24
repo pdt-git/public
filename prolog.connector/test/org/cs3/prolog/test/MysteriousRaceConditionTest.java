@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
@@ -68,3 +70,4 @@ public class MysteriousRaceConditionTest extends TestCase {
 	}
 
 }
+

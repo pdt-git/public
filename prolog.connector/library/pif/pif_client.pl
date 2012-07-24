@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(pif_client,[
 	pif_create/1,
 	pif_start/1,
@@ -66,3 +68,4 @@ pif_session_dispose/1,
 pif_session_query/2,
 pif_session_query_once/2,
 pif_session_query_all/2.
+

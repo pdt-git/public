@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector.internal.preferences;
 
 import org.cs3.prolog.common.Util;
@@ -51,3 +53,4 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	
 }
+

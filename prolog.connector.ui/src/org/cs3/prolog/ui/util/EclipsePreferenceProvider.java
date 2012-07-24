@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util;
 
 import org.cs3.prolog.common.PreferenceProvider;
@@ -30,3 +32,4 @@ public class EclipsePreferenceProvider implements PreferenceProvider {
 		return value;
 	}
 }
+

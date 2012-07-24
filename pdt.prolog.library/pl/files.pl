@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( ctc_util_files, [
      consult_if_not_yet/2,            % (File, Head)
      export_goal_output/2,            % (File,Goal)
@@ -262,3 +264,4 @@ workspace_root(WorkspaceDirPath) :-
     file_base_name(ProjectDirPath, ProjectDir),     % get name of containing project
     concat(WorkspaceDirPath, ProjectDir, ProjectDirPath), % get path of its containing worksapace
     assert(file_search_path('worspace_root', WorkspaceDirPath)).
+

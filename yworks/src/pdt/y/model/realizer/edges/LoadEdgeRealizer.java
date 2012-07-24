@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.realizer.edges;
 
 import java.awt.Color;
@@ -27,3 +29,4 @@ public class LoadEdgeRealizer extends GenericEdgeRealizer {
 		setLineType(myLineType);
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.ColorFieldEditor;
@@ -29,3 +31,4 @@ public class MyColorFieldEditor extends ColorFieldEditor implements FieldEditorF
 	}
 	
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pl.test;
 
 import java.io.File;
@@ -106,3 +108,4 @@ public class InterpreterTest extends TestCase {
 		return s;
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector.internal;
 
 import java.io.BufferedReader;
@@ -128,3 +130,4 @@ public class PDTRegistryHook implements RegistryHook {
 	}
 
 }
+

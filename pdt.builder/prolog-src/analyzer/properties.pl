@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(properties, [properties_for_predicate/4,
 						entity_property/3]).
 
@@ -37,3 +39,4 @@ look_for_kind_and_property(Head,predicate,Property):-
     predicate_property(Head,Property).
 look_for_kind_and_property(Head,module,Property):-
     module_property(Head,Property).
+

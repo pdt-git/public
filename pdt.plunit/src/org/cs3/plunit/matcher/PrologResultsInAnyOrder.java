@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.matcher;
 
 import java.util.List;
@@ -95,4 +97,5 @@ public class PrologResultsInAnyOrder extends TypeSafeMatcher<List<List<String>>>
 	}
 	
 }
+
 

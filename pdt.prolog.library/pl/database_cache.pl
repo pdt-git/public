@@ -1,4 +1,5 @@
-% Author: Günter Kniesel
+/* $LICENSE_MSG$(gk) */
+
 % Date: 06.10.2004
 
 % 21.2.2011: Added option 'unique'

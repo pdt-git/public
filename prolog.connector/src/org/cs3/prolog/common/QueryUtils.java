@@ -1,9 +1,5 @@
-/**
- * 
- * @partOf PDT Framework
- * @url http://sewiki.iai.uni-bonn.de/research/pdt/
- * @author Patrick Rypalla - patrick@rypalla.de
- */
+/* $LICENSE_MSG$(pr) */
+
 package org.cs3.prolog.common;
 
 import java.util.ArrayList;

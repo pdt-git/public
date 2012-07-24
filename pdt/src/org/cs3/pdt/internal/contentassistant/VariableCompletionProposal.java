@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.contentassistant;
 
 import org.eclipse.jface.text.contentassist.CompletionProposal;
@@ -23,3 +25,4 @@ public class VariableCompletionProposal extends ComparableCompletionProposal{
 		return 0;
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 public interface PrologSearchTreeElement extends PrologTreeElement{
@@ -7,3 +9,4 @@ public interface PrologSearchTreeElement extends PrologTreeElement{
 	void removeMatch(PrologMatch match);
 	
 }
+

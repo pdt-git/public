@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(library(apply)).
 :- use_module(library(charsio)).
 
@@ -79,5 +81,6 @@ get_var_names(Goal, VarNames) :-
 extract_var_name(=(VarName, _), VarName) :- !.
 extract_var_name(VarName, VarName) :- !.
     
+
 
 

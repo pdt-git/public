@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.eclipse.jface.action.Action;
@@ -59,3 +61,4 @@ public class ToggleFilterAction extends Action {
 	}
 	
 }
+

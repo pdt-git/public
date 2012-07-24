@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 write_escaped(Term,Mode):-
     write_term_to_memfile(Term,Mode,Memfile),
@@ -51,3 +53,4 @@ write_escaped_char(Out,'\''):-
 write_escaped_char(Out,C):-
 	put_char(Out,C).	
 	    
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(parse_util_old,[	generate_facts/1, 
 							update_facts/2]).
 
@@ -74,3 +76,4 @@ update_facts(File, Project):-
 %	writeln('generate edges'),
 %	time(derive_edges).
 	
+

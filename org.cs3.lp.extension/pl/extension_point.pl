@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 /** <module> Extension mechanism similar to extension points in Eclipse
 
 Arbitrary modules may contribute to an extension point and are evaluated one after another

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.actions;
 
 import java.util.ResourceBundle;
@@ -57,3 +59,4 @@ public abstract class SearchActionDelegate extends TextEditorAction {
 	}
 
 }
+

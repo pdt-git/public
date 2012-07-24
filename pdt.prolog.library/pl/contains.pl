@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(library(lists)). 
 
 sublist(S, L) :-
@@ -24,3 +26,4 @@ contains(A, B) :-
 contains(A, B) :-
   sublist(B, A),
   B \= [].
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector.internal.test;
 
 import java.io.Reader;
@@ -37,3 +39,4 @@ public class RegistryHandlerTest extends TestCase {
 			new DefaultSAXPrologInterfaceRegistry().load(reader);		
 		}
 }
+

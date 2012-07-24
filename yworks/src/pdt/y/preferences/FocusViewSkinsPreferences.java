@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import org.eclipse.ui.IWorkbench;
@@ -43,3 +45,4 @@ public class FocusViewSkinsPreferences
 	public void init(IWorkbench workbench) {
 	}
 }
+

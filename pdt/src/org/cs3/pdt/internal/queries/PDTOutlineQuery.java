@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.queries;
 
 import java.util.HashMap;
@@ -127,3 +129,4 @@ public class PDTOutlineQuery {
 //	}
 	
 }
+

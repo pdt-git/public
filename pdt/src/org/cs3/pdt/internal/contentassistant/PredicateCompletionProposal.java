@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.contentassistant;
 
 import java.util.Map;
@@ -345,3 +347,4 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 	}
 	
 }
+

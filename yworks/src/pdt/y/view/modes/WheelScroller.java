@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.view.modes;
 
 import java.awt.Dimension;
@@ -53,3 +55,4 @@ public class WheelScroller implements MouseWheelListener
 		return event.getWheelRotation() >= 0;
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal;
 
 import java.io.File;
@@ -70,3 +72,4 @@ public class DeclarativePrologRefactoringInfo extends PrologRefactoringInfo {
 	
 
 }
+

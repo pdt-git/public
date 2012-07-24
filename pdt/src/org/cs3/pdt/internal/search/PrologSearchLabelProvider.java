@@ -1,6 +1,5 @@
-/**
- * 
- */
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;

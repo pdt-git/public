@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal;
 
 import java.util.HashMap;
@@ -50,3 +52,4 @@ public abstract class PrologRefactoringInfo implements OptionProvider{
 
 	
 }
+

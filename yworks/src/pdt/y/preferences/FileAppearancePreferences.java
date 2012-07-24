@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import static pdt.y.preferences.PreferenceConstants.APPEARANCE_MODULE_FILE_BACKGROUND_COLOR;
@@ -90,3 +92,4 @@ public class FileAppearancePreferences
 		return getColor(APPEARANCE_MODULE_FILE_BACKGROUND_COLOR);
 	}
 }
+

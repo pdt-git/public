@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import pdt.y.model.labels.BracketLabel;
@@ -95,3 +97,4 @@ public class PreferenceConstants {
 	
 	public static final String APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE = "APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE";
 }
+

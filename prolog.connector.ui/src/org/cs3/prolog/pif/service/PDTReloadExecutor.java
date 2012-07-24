@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.pif.service;
 
 import java.util.List;
@@ -15,3 +17,4 @@ public interface PDTReloadExecutor {
 	boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException; 
 	
 }
+

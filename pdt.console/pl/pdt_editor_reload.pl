@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 :- module( pdt_editor_reload,
          [ pdt_reload/1                           % Called from ConsultActionDelegate.run()
@@ -201,3 +203,4 @@ trace_reload(Name):-
     assert(reload_trace(Name,T)),
     !.
 trace_reload(_Name).    
+

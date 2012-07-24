@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 :- module(pdt_editor_breakpoints,[
 	pdt_set_breakpoint/4,			% used in PDTBreakpointHandler.java
@@ -35,3 +37,4 @@ user:message_hook(breakpoint(set, Id), _Kind, _Lines) :-
     
 user:message_hook(breakpoint(delete, Id), _Kind, _Lines) :-
     catch(pif_observe:pif_notify(remove_breakpoint,Id),_,true), fail.
+

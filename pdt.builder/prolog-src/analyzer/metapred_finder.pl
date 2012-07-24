@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :-module(metapred_finder, [	get_all_userdefined_meta_predicates/1,
 							find_all_meta_predicates/0]).
 
@@ -113,4 +115,5 @@ update_factbase(Functor, Arity, Module):-
  	assert(parse_util:meta_predT(PId, found)).
     
     
+
 

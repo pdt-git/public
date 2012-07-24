@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.preferences;
 
 import java.io.File;
@@ -80,3 +82,4 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	}
 
 }
+

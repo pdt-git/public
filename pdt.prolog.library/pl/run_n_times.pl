@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$(gk) */
+
 % Different implementations of predicates that call another predicate 
 % a fixed number of times.
 	

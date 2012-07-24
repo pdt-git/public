@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.wizards;
 
 import java.util.ArrayList;
@@ -208,3 +210,4 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
         }
     }
 }
+

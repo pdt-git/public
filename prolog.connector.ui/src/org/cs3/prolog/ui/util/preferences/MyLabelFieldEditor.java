@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.FieldEditor;
@@ -78,3 +80,4 @@ public class MyLabelFieldEditor extends FieldEditor implements FieldEditorForStr
 	}
 
 }
+

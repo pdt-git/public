@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 :- module(pdt_entry_points,[
 	pdt_entry_point/1,
@@ -20,4 +22,5 @@ add_entry_point(File) :-
     
 remove_entry_points(File) :-
     retractall(unfiltered_entry_point(File)).
+
 

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model;
 
 import y.base.DataMap;
@@ -195,3 +197,4 @@ public class GraphDataHolder {
 	}
 
 }
+

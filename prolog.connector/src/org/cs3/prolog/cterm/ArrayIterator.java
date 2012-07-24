@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.cterm;
 
 import java.util.Iterator;
@@ -39,3 +41,4 @@ public class ArrayIterator<T> implements Iterator<T> {
 		throw new UnsupportedOperationException();
 	}
 }
+

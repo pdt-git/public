@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.search;
 
 /*copied and adapted from the jdt source*/
@@ -42,3 +44,4 @@ public abstract class PrologSearchContentProvider implements IStructuredContentP
 	}
 
 }
+

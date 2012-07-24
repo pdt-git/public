@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model;
 
 import pdt.y.preferences.PredicateLayoutPreferences;
@@ -114,3 +116,4 @@ public class GraphLayout {
 	
 	
 }
+

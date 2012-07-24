@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.framework;
 
 import java.util.HashSet;
@@ -47,3 +49,4 @@ public class Filter {
 	}
 
 }
+

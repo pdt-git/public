@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.test;
 
 import junit.framework.Test;
@@ -20,3 +22,4 @@ public class PrologInterfaceTests {
 	}
 
 }
+

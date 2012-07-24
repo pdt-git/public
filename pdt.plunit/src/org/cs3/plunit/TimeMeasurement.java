@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit;
 
 /**
@@ -44,3 +46,4 @@ public class TimeMeasurement
 	}
 
 }
+

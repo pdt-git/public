@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.handlers;
 
 import java.util.HashMap;
@@ -16,3 +18,4 @@ public class ExecuteRefactoringParameterValues implements IParameterValues {
 	}
 
 }
+

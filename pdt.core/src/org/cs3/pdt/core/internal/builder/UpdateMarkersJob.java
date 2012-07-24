@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.core.internal.builder;
 
 import java.util.List;
@@ -216,3 +218,4 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 	}
 
 }
+

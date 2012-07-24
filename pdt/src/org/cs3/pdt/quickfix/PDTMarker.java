@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.quickfix;
 
 import org.eclipse.core.resources.IMarker;
@@ -34,3 +36,4 @@ public class PDTMarker implements IMarkerResolutionGenerator {
 	}
 
 }
+

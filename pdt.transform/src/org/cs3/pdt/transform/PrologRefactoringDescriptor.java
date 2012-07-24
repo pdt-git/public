@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform;
 
 import java.io.File;
@@ -99,3 +101,4 @@ public abstract class PrologRefactoringDescriptor {
 	
 
 }
+

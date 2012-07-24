@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 public abstract class NamedWorkRunnable implements WorkRunnable {
@@ -10,3 +12,4 @@ public abstract class NamedWorkRunnable implements WorkRunnable {
 		return name;
 	}
 }
+

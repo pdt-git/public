@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.realizer.groups;
 
 import java.awt.Color;
@@ -49,3 +51,4 @@ public class FileGroupNodeRealizer extends PrologGroupNodeRealizer {
 		return new FileGroupNodeRealizer(nr);
 	}
 }
+

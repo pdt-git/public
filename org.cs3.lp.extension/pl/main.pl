@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 extension_point_location_fact.
 
 add_extension_point_file_search_paths :-
@@ -9,3 +11,4 @@ add_extension_point_file_search_paths :-
 :- add_extension_point_file_search_paths.
 		
 :- ['extension_point'].
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.framework;
 
 import com.google.common.base.Joiner;
@@ -31,3 +33,4 @@ public class TermUtil {
 		return atoms;
 	}
 }
+

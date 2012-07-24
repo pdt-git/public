@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors.breakpoints;
 
 import org.eclipse.core.resources.IFile;
@@ -50,3 +52,4 @@ public class MarkerBackup {
 		return file.toString() + "[id: " + id + ", line: " + lineNumber + ", offset: " + offset + "]";
 	}
 }
+

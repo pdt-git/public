@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.common;
 
 import java.util.EventObject;
@@ -18,3 +20,4 @@ public class OptionProviderEvent extends EventObject {
 	}
 
 }
+

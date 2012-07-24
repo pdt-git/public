@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector;
 
 
@@ -246,3 +248,4 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	}
 }
+

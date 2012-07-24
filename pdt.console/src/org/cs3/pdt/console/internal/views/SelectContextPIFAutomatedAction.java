@@ -1,6 +1,5 @@
-/**
- * 
- */
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.views;
 
 import java.util.ArrayList;

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.cterm.internal.parser.test;
 
 import java.io.ByteArrayInputStream;
@@ -39,3 +41,4 @@ public class ClauseReferenceTest extends TestCase {
 		return null;
 	}
 }
+

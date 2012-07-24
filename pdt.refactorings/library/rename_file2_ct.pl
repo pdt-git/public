@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(rename_file2,[]).
 :- use_module(library('facade/pdt_workspace')).
 :- use_module(library('facade/pdt_delta')).
@@ -254,3 +256,4 @@ ast_member(Ref,Refs):-
     (	ast_simple_match(Ref,Head)
     ;	ast_member(Ref,Tail) 
     ).
+

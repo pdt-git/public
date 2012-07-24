@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.FileFieldEditor;
@@ -33,3 +35,4 @@ public class MyFileFieldEditor extends FileFieldEditor implements FieldEditorFor
 	}
 
 }
+

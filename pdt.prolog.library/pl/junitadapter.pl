@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :-module(junitadapter, []).
 
 :- use_module(library(plunit)).
@@ -93,5 +95,6 @@ test_failure(blocked,A, Line):-
 %mypred2(Info):-
 %	prolog_current_frame(Frame),
 %	stack_for_frame(Frame,Info).
+
 
 

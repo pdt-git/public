@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.framework;
 
 import static org.junit.Assert.fail;
@@ -144,3 +146,4 @@ public class FactBaseUtil {
 
 
 }
+

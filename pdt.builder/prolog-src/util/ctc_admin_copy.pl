@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 /** 
  * This module provides the infrastructure for managing CTC data 
  * (PEFs) and CTC programs (CTs and CT sequences) in multiple  

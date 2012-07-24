@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.lifecycle;
 
 import java.io.IOException;
@@ -303,3 +305,4 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	}
 	
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 /*******************************************************************************
@@ -383,3 +385,4 @@ public class StringMatcher {
 		return -1;
 	}
 }
+

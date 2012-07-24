@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.contentassistant;
 
 import java.util.ArrayList;
@@ -181,3 +183,4 @@ public abstract class PrologContentAssistProcessor {
 	}
 
 }
+

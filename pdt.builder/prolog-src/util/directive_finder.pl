@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 /**
  * just for testing something with directives
  **/

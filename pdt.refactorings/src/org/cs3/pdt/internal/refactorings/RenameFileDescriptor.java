@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.refactorings;
 
 import java.util.Map;
@@ -92,3 +94,4 @@ public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 		
 	}
 }
+

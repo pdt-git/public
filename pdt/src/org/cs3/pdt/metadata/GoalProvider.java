@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.metadata;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -94,3 +96,4 @@ public class GoalProvider {
 	}
 
 }
+

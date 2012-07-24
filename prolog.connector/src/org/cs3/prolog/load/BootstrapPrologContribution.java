@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.load;
 
 import java.util.Set;
@@ -42,3 +44,4 @@ abstract public class BootstrapPrologContribution {
 		return ((BootstrapPrologContribution)obj).getId().equals(id);
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.internal;
 
 import java.net.URL;
@@ -30,3 +32,4 @@ public class ImageRepository {
     }
 
 }
+

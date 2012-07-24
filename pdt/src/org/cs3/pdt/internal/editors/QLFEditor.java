@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 package org.cs3.pdt.internal.editors;
 
@@ -131,3 +133,4 @@ public class QLFEditor extends MultiPageEditorPart {
 
 	
 }
+

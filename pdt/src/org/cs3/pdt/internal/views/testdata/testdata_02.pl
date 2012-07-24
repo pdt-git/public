@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 replaceForwCall(_call, _parent, _method, _origName, _execReturn,_forwMethod,_forwParams,_recvParam):-
     applyT(_call,_,_,_,_,_,_),
@@ -1024,3 +1026,4 @@ after(_stat, _insertList,_forwMethod,_finallyBlock) :-
 %  createAdviceMethod(JP, Statements,ForwMethod,ForwBody),
 %  add(aopT(JP,'after',ForwMethod)).
   
+

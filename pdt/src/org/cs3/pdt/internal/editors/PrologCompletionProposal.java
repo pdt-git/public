@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.quickfix.PDTMarker;
@@ -64,3 +66,4 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	}
 
 }
+

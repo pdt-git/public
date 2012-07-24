@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$(gk) */
+
  /**
    * Assert the fact in arg1 only if it isn't there already. Succeed otherwise.
    */

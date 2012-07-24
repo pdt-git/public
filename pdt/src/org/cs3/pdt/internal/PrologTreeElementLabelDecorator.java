@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal;
 
 
@@ -43,3 +45,4 @@ public class PrologTreeElementLabelDecorator extends LabelProvider implements IL
 	}
 
 }
+

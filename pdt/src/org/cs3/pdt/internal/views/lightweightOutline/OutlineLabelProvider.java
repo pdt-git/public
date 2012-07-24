@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.ImageRepository;
@@ -71,3 +73,4 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 	}
 
 }
+

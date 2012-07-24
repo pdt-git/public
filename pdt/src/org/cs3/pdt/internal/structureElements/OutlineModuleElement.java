@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.HashMap;
@@ -88,3 +90,4 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 	}
 
 }
+

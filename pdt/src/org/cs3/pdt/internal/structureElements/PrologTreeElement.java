@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 public interface PrologTreeElement {
@@ -10,3 +12,4 @@ public interface PrologTreeElement {
 
 	Object getParent();
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.decorators;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -205,3 +207,4 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 	}
 
 }
+

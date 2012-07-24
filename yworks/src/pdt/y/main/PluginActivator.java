@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.main;
 
 import java.util.LinkedList;
@@ -68,3 +70,4 @@ public class PluginActivator extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 }
+

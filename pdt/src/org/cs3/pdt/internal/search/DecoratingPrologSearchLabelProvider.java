@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.structureElements.SearchFileTreeElement;
@@ -27,3 +29,4 @@ public class DecoratingPrologSearchLabelProvider extends DecoratingStyledCellLab
 		}
 	}
 }
+

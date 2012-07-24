@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import org.eclipse.core.runtime.CoreException;
@@ -31,3 +33,4 @@ public class ExternalDocumentProvider extends TextFileDocumentProvider{
     }
 
 }
+

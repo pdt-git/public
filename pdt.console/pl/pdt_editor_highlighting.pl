@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 % Utility used by pdt/src/org/cs3/pdt/internal/editors/PLScanner.java
 
 :- module( pdt_editor_highlighting,

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences.controls;
 
 import static pdt.y.preferences.PreferenceConstants.BASE_TEMPLATE;
@@ -268,3 +270,4 @@ public class FocusViewSkinsEditor extends FieldEditor {
 		mb.open();
 	}
 }
+

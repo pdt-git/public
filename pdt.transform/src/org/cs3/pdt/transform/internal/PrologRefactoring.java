@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal;
 
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
@@ -18,3 +20,4 @@ public class PrologRefactoring extends ProcessorBasedRefactoring  {
 
 	
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors.breakpoints;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -528,3 +530,4 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.lifecycle;
 
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -18,3 +20,4 @@ public interface IPrologEventDispatcher {
 			PrologInterfaceListener l) throws PrologInterfaceException;
 
 }
+

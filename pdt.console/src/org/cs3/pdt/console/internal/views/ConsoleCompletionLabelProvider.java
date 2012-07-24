@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.views;
 
 import org.cs3.pdt.console.internal.ImageRepository;
@@ -24,3 +26,4 @@ public class ConsoleCompletionLabelProvider extends LabelProvider implements ILa
 	}
 
 }
+

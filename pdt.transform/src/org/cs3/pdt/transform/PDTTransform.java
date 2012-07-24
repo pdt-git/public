@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform;
 
 public interface PDTTransform {
@@ -6,3 +8,4 @@ public interface PDTTransform {
 	public String PLUGIN_ID = "org.cs3.pdt.transform";
 
 }
+

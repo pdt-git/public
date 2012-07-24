@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.internal.editors.PLEditor;
@@ -56,3 +58,4 @@ public class OpenJUnitWrapperTest implements IObjectActionDelegate {
 	}
 
 }
+

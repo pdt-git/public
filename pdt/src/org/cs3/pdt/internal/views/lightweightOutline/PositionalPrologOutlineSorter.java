@@ -1,6 +1,5 @@
-/**
- * 
- */
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.structureElements.OutlineFileElement;

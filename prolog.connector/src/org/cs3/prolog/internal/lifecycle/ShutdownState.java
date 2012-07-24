@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import java.util.HashSet;
@@ -51,3 +53,4 @@ public class ShutdownState extends AbstractState {
 	
 
 }
+

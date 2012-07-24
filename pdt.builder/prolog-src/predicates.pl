@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :-module(predicates,[	derive_all_predicates/0,
 						derive_predicates_of_files/1,
 						%derive_predicate_for_clause/6,
@@ -188,3 +190,4 @@ assert_predicate(CId,Functor,Arity,Module,File,PId):-
     assert(predicateT_ri(Functor,Arity,Module,PId)),
     filePosT(CId,Begin,Length),
     assert(filePosT(PId,Begin,Length)).
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.ArrayList;
@@ -120,4 +122,5 @@ public class OutlinePredicateElement extends Predicate implements PrologOutlineT
 	}
 	
 }
+
 

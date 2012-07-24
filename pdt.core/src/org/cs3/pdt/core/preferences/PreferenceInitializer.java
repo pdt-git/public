@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.core.preferences;
 
 import org.cs3.pdt.core.PDTCore;
@@ -32,3 +34,4 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	}
 
 }
+

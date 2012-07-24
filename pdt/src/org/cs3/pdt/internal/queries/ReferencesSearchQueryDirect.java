@@ -1,6 +1,5 @@
-/**
- * 
- */
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;

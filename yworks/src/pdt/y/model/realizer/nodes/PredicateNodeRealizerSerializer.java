@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.realizer.nodes;
 
 import org.w3c.dom.Element;
@@ -77,3 +79,4 @@ public class PredicateNodeRealizerSerializer extends AbstractNodeRealizerSeriali
 		return null;
 	}
 }
+

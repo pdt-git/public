@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import static pdt.y.preferences.PreferenceConstants.APPEARANCE_LINE_COLOR;
@@ -57,3 +59,4 @@ public class EdgeAppearancePreferences
 		return getColor(APPEARANCE_LINE_COLOR);
 	}
 }
+

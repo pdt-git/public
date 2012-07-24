@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
@@ -111,3 +113,4 @@ public class LifeCycleHookTest extends TestCase {
 		
 	}
 }
+

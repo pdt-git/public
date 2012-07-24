@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.common;
 
 import java.util.HashSet;
@@ -83,3 +85,4 @@ public class PDTCommonPlugin implements BundleActivator {
 	}
 
 }
+

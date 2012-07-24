@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.core;
 
 import java.io.InputStream;
@@ -562,3 +564,4 @@ public class ExternalFile implements IFile {
 		
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import org.cs3.prolog.lifecycle.LifeCycleHook;
@@ -40,3 +42,4 @@ public class UpState extends AbstractState {
 	}
 
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.metadata;
 
 import org.cs3.prolog.common.Util;
@@ -165,3 +167,4 @@ public class PredicateReadingUtilities {
 		}
 	}
 }
+

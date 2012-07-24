@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.pif.socket;
 
 import java.io.BufferedReader;
@@ -167,3 +169,4 @@ public class ValueReader {
 	}
 
 }
+

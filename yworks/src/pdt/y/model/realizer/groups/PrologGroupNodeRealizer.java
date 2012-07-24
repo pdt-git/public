@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.realizer.groups;
 
 import java.awt.Graphics2D;
@@ -99,3 +101,4 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 
 
 }
+

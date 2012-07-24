@@ -1,4 +1,5 @@
-% Author: Günter Kniesel, Frank Mühlschlegel
+/* $LICENSE_MSG$(gk,fm) */
+
 % Date: 13.02.2006, 04.02.2009
 
 % TODO: Move all logging primitives here.

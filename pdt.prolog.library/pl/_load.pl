@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 
  :- consult(logging).       % <- THIS BE FIRST!
@@ -24,3 +26,4 @@
  :- use_module(junitadapter).
  
 % :- consult(pdt_xref_experimental).     % find_references, ...
+

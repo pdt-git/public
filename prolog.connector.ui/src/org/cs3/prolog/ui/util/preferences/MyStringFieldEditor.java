@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -33,3 +35,4 @@ public class MyStringFieldEditor extends StringFieldEditor implements FieldEdito
 	}
 
 }
+

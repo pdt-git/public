@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.core.internal.properties;
 
 import java.util.Iterator;
@@ -155,3 +157,4 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		setPreferenceValue(eventdata[0], eventdata[1]);
 	}
 }
+

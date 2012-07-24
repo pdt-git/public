@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 
@@ -96,3 +98,4 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 		return clause.getArity();
 	}
 }
+

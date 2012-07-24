@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- multifile(logtalk_library_path/2).
 :- dynamic(logtalk_library_path/2).
 logtalk_library_path(pdt_console_pl_lgt, Library) :-
@@ -17,3 +19,4 @@ load_lgt_adapter :-
 	).
 	
 :- initialization( load_lgt_adapter ). 
+

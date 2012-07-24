@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal.wizards;
 
 import org.cs3.pdt.transform.internal.PrologRefactoring;
@@ -19,3 +21,4 @@ public class PrologRefactoringWizard extends RefactoringWizard{
 	}
 
 }
+

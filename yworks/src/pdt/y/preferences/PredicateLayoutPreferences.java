@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING;
@@ -87,3 +89,4 @@ public class PredicateLayoutPreferences
 		return getCurrentPreferences().getBoolean(SHOW_TOOLTIPS);
 	}
 }
+

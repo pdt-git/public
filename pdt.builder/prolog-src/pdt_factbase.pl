@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(pdt_factbase, [	fileT/3,
 							predicateT/5, onloadT/3,
 							directiveT/3, clauseT/5, literalT/6, metaT/6, headT/5,
@@ -59,3 +61,4 @@
 		%TODO: warnings und errors mehr spezialisieren, so dass man sie spezieller updaten kann
 		%		je nach Arbeitsschritt
 		%		error aktuell nur zu Files (auf dauer wohl besser spezieller
+

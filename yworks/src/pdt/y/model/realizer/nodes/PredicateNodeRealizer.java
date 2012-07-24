@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.realizer.nodes;
 
 import java.awt.Color;
@@ -116,3 +118,4 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 
 }
+

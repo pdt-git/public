@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.load;
 
 import java.util.HashSet;
@@ -67,3 +69,4 @@ public class FileSearchPathConfigurator {
 	}
 
 }
+

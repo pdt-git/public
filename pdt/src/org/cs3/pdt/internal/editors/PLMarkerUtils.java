@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import java.io.IOException;
@@ -181,3 +183,4 @@ public class PLMarkerUtils {
 
 
 }
+

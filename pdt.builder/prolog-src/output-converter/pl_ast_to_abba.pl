@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :-module(pl_ast_to_abba, [	write_facts_to_abba/1, 
 							pl_test/0,
 							pl_test/2]).
@@ -165,3 +167,4 @@ pl_test(Project,Output):-
 	writeln('generate abba sources'),
     time(write_facts_to_abba(Output)).     %Ergebnisdatei (abba-Format)
     
+

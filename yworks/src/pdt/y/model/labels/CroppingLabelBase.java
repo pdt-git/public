@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.labels;
 
 import java.awt.Color;
@@ -165,3 +167,4 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 	}
 
 }
+

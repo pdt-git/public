@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal.wizards;
 
 import java.util.HashMap;
@@ -91,3 +93,4 @@ public class PrologRefactoringInputPage extends UserInputWizardPage {
 	}
 
 }
+

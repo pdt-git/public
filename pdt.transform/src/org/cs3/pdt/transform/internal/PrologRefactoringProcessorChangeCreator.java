@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal;
 
 
@@ -8,3 +10,4 @@ public class PrologRefactoringProcessorChangeCreator extends ChangeCreator {
 		this.info = info;
 	}
 }
+

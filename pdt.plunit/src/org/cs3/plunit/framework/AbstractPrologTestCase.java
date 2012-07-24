@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.framework;
 
 
@@ -595,3 +597,4 @@ public abstract class AbstractPrologTestCase {
 	}
 	
 }
+

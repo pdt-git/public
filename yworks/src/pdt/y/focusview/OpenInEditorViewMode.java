@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.focusview;
 
 import java.awt.event.MouseEvent;
@@ -81,3 +83,4 @@ public class OpenInEditorViewMode extends ViewMode {
 		}
 	}
 }
+

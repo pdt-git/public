@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.framework;
 
 import java.io.BufferedReader;
@@ -198,5 +200,6 @@ public class PrologFacade {
 		return Character.isUpperCase(firstCharacter);
 	}
 }
+
 
 

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import java.util.ArrayList;
@@ -98,3 +100,4 @@ public class PLQuickAssistProcessor implements IQuickAssistProcessor {
 		};
 	}
 }
+

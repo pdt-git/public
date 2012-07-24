@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(load_graph,[build_new_load_graph/0, build_load_graph/0]).
 :- ensure_loaded(parse_util).
 :- use_module(library(lists)).
@@ -199,3 +201,4 @@ path_to_list(Path,List):-
     listify_path_element(First,FirstList),
     listify_path_element(Second,SecondList),
     append(FirstList,SecondList,List).
+

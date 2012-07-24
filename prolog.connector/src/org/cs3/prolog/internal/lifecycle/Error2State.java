@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -32,3 +34,4 @@ public class Error2State extends AbstractState{
 		return new DownState(context);
 	}
 }
+

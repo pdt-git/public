@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 % Test data: These should be identified as meta-predicates.
 my_meta_1(Goal) :- 
 	call(Goal).

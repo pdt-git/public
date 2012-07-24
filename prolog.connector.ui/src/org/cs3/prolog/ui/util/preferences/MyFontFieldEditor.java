@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.FontFieldEditor;
@@ -28,3 +30,4 @@ public class MyFontFieldEditor extends FontFieldEditor implements FieldEditorFor
 	}
 	
 }
+

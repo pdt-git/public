@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -66,3 +68,4 @@ public class ErrorState extends AbstractState {
 	}
 
 }
+

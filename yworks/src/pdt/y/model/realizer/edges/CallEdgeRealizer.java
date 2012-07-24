@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.realizer.edges;
 
 import pdt.y.model.GraphModel;
@@ -58,3 +60,4 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 		setLineType(myLineType);
 	}
 }
+

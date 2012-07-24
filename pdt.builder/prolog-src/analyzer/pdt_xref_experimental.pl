@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( pdt_xref,
          [ find_reference_to/12 % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
          ]
@@ -145,3 +147,4 @@ extractModule(Term,Term,_DefModule,_RefHead, termORmetacall) .
 %
 %user:tearDown(decode_reference) :-
 %	retract(user:testpred(1,2)).
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(modules_and_visibility, [	compute_visibility_graph/0,
 									visible_in_module/2,
 									get_predicate_referenced_as/4,
@@ -148,3 +150,4 @@ is_searched_functor(Functor/_A 'as' NewFunctor,Functor,NewFunctor):-
 
 
     
+

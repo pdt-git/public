@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences.controls;
 
 import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE;
@@ -139,3 +141,4 @@ public class RefreshModeFieldEditor extends FieldEditor {
 	}
 
 }
+

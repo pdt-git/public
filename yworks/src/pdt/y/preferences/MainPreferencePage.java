@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE;
@@ -54,3 +56,4 @@ public class MainPreferencePage
 		return mode.equals(REFRESH_MODE_AUTOMATIC);
 	}
 }
+

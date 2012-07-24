@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.pif.service;
 
 import java.util.List;
@@ -13,3 +15,4 @@ public interface ConsultListener {
 	void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException; 
 	
 }
+

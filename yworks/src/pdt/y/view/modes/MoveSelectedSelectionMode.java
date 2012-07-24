@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.view.modes;
 
 import y.base.YCursor;
@@ -49,3 +51,4 @@ public class MoveSelectedSelectionMode extends MoveSelectionMode {
 		}
 	}
 }
+

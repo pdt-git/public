@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(parse_util, [	generate_facts/1, 
 						update_facts/2,
 						assert_new_node/4, 
@@ -211,3 +213,4 @@ assert_new_node(Term,From,To,Id):-
 	assert(termT(Id,Term)),
     Length is To - From,
     assert(filePosT(Id,From,Length)).	
+

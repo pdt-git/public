@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.views;
 /*******************************************************************************
  * Copyright (c) 2006 IBM Corporation and others.
@@ -35,3 +37,4 @@ public interface IContentProposalListener2 {
 	 */
 	public void proposalPopupClosed(ContentProposalAdapter adapter);
 }
+

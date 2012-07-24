@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(simple, []).
 
 a(A):-			%direct meta-argument
@@ -86,3 +88,4 @@ z4(z3) :- 		%non_meta (paramter is only parameter of meta-call with some term ma
 	functor(z3,F, A),
     assert(aT(F, A)).
     
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.framework;
 
 import java.io.File;
@@ -26,3 +28,4 @@ public class PathUtil {
                    .replace("/target/test-classes", "");
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.contentassistant;
 
 import java.util.HashMap;
@@ -150,3 +152,4 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 	}
 
 }
+

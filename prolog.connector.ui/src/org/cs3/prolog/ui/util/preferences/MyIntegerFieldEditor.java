@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.IntegerFieldEditor;
@@ -28,3 +30,4 @@ public class MyIntegerFieldEditor extends IntegerFieldEditor implements FieldEdi
 	}
 
 }
+

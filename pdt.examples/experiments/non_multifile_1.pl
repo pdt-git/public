@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(a1,[aaa/1]).
 
 aaa(1).                  % This definition is found by 
@@ -8,3 +10,4 @@ aaa(1).                  % This definition is found by
 :- multifile bbb/1.
 
 bbb(1).
+

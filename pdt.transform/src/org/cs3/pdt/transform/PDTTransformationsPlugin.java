@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform;
 
 import java.io.File;
@@ -177,3 +179,4 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin implements IStart
 	public void earlyStartup() {
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(library('org/cs3/pdt/model/pdt_index')).
 :- use_module(library('org/cs3/pdt/model/pdt_handle')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
@@ -52,4 +54,5 @@ doc_test(Name):-
 % @param B fürchterlich wichtiges Argument
 %
 aja(_A,_B).
+
 

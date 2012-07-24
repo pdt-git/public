@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import static pdt.y.preferences.PreferenceConstants.APPEARANCE_BORDER_COLOR;
@@ -136,3 +138,4 @@ public class PredicateAppearancePreferences
 		return s_lineTypes[i];
 	}
 }
+

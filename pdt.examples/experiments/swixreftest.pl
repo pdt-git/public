@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(swixreftest,[p1/1,p2/1,p3/1,invoke_super/2]).
 
 :- use_module(swixreftest_super).
@@ -27,3 +29,4 @@ p3(p3). % apparently not called but actually there is
         %  - an instantiated metacall in a supermodule
 
 blub :- meta_predicate(bla).
+

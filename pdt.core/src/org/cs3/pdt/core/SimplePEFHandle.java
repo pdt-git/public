@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.core;
 
 import org.cs3.pl.prolog.PrologInterface;
@@ -33,3 +35,4 @@ public class SimplePEFHandle implements PEFHandle {
 	}
 
 }
+

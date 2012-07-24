@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model;
 
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
@@ -147,3 +149,4 @@ public class GraphModel {
 		return this.dataHolder;
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.view.modes;
 
 import java.awt.event.MouseEvent;
@@ -69,3 +71,4 @@ public void mouseClicked(MouseEvent event) {
 	  return groupNodeRealizer;
   }  
 }  
+

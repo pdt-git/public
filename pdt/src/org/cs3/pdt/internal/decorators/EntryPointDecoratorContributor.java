@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.decorators;
 
 import java.util.Iterator;
@@ -100,3 +102,4 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 	}
 
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.main;
 
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
@@ -236,3 +238,4 @@ public class PDTGraphView extends  JPanel {
 		view.updateView();
 	}
 }
+

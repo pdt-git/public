@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(preparser, [parse/1, parse/2]).
 
 :- ensure_loaded(parse_util).
@@ -128,3 +130,4 @@ parse_head_literal(Head, Pos, ClauseId, Module, _VarNames) :-
    	functor(Head,Functor,Arity),
    	assert(headT(Id,ClauseId,Module,Functor,Arity)). 
  
+

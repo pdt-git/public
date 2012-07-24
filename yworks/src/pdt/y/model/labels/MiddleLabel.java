@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.labels;
 
 import java.awt.FontMetrics;
@@ -60,3 +62,4 @@ public class MiddleLabel extends CroppingLabelBase {
 	}
 
 }
+

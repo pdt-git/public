@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.handlers;
 
 import org.cs3.pdt.transform.PDTTransformationsPlugin;
@@ -80,3 +82,4 @@ public class ExecuteRefactoringHandler implements IHandler {
 	}
 
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.wizards;
 
 
@@ -70,3 +72,4 @@ public class NewModuleCreationWizardPage extends WizardNewFileCreationPage {
 	}
 
 }
+

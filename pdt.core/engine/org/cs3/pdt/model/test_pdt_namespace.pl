@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(test_pdt_namespace,[]).
 
 :- use_module(pdt_namespace).
@@ -147,3 +149,4 @@ test(resolve_base_override,[
 
 
 :- end_tests(namespace).
+

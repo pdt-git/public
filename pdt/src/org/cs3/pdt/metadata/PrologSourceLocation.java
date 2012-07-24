@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.metadata;
 
 public class PrologSourceLocation {
@@ -20,3 +22,4 @@ public class PrologSourceLocation {
 
 
 }
+

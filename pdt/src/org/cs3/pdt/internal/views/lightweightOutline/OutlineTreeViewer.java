@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.eclipse.jface.viewers.TreeViewer;
@@ -25,3 +27,4 @@ class OutlineTreeViewer extends TreeViewer {
 		return result;
 	}
 }
+

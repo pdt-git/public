@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.matcher;
 
 import static org.hamcrest.CoreMatchers.allOf;
@@ -34,3 +36,4 @@ public class CombinableMatcher<T> extends BaseMatcher<T> {
 		return new CombinableMatcher<T>(anyOf(matcher, fMatcher));
 	}
 }
+

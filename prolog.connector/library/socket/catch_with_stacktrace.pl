@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(with_stacktrace,
 	[	call_cleanup_with_stacktrace/4,
 		catch_with_stacktrace/4
@@ -51,3 +53,4 @@ my_exception_hook(Frame,CFrame):-
     ),
     fail.
 	
+

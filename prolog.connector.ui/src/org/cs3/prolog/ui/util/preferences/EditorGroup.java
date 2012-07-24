@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import java.util.ArrayList;
@@ -46,3 +48,4 @@ class EditorGroup {
 	}
 	
 }
+

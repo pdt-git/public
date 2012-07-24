@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.pif.service;
 
 import java.util.List;
@@ -30,3 +32,4 @@ public interface IPrologInterfaceService {
 	void setActivePrologInterface(PrologInterface pif);
 	
 }
+

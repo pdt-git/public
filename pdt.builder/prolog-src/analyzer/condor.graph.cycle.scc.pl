@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$(gk) */
+
 /**
  * This file implements generic graph algorithms in Prolog.
  *  - Tarjan's O(M+N) computation of strongly connected components (SCCs)

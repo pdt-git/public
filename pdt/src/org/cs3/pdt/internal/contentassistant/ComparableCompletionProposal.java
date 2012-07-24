@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.contentassistant;
 
 import org.eclipse.jface.text.IDocument;
@@ -69,3 +71,4 @@ public abstract class ComparableCompletionProposal implements Comparable<Compara
 	}
 
 }
+

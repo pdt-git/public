@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(cross_reference_builder, [derive_edges/0,
 									cross_references_for_predicate/1]).
 
@@ -52,3 +54,4 @@ find_reference_for(LId,Module,Functor,Arity):-
     			%)
    			)
 	).
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(edge_counter,[count_call_edges_between_predicates/0,
 						call_edges_for_predicates/3]).
 
@@ -24,3 +26,4 @@ inc_call_edges_for_predicates(SourceID,TargetID):-
     assert(call_edges_for_predicates(SourceID,TargetID,New_Counter)).
 inc_call_edges_for_predicates(SourceID,TargetID):-  
     assert(call_edges_for_predicates(SourceID,TargetID,1)).
+

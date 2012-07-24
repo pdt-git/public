@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.load.test;
 
 import java.lang.reflect.Array;
@@ -187,3 +189,4 @@ public class FileSearchPathConfiguratorTest extends TestCase {
 	}
 
 }
+

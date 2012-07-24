@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector.internal.preferences;
 
 import java.util.Set;
@@ -202,3 +204,4 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	}
 	
 }
+

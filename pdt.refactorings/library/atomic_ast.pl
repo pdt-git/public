@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- ensure_loaded(library('pef/pef_base')).
 :- ensure_loaded(library('pef/pef_api')).
 :- op(1100,xfy,'||').
@@ -510,3 +512,4 @@ my_functor(Node,Name,Arity):-
 my_var(Node):-
 	pef_type(Node,pef_variable_occurance).    
 	
+

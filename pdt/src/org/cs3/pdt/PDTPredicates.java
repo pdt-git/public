@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt;
 
 public class PDTPredicates {
@@ -14,3 +16,4 @@ public class PDTPredicates {
 	public static final String PDT_SOURCE_FILE = "pdt_source_file";
 	
 }
+

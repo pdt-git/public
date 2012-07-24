@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(library(listing)).
 
 /**
@@ -45,3 +47,4 @@ listing_if_defined_in_module(Module,Pred) :-
 list_defined_pred_if_logging_enabled(Module,Pred) :-
     do_if_logging_enabled(listing_if_defined_in_module(Module,Pred)).
     
+

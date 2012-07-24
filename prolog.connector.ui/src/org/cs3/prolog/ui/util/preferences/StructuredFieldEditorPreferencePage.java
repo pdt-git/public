@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import java.util.HashMap;
@@ -64,3 +66,4 @@ public abstract class StructuredFieldEditorPreferencePage extends FieldEditorPre
     	}
     }
 }
+

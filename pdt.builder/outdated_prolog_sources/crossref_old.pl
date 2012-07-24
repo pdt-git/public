@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 before_version(Major,Minor,Patch) :-                           
    swi_pl_version(Major,Minor,Patch,MaxVersion),
    current_prolog_flag(version, CurrentVersion),
@@ -146,3 +148,4 @@ storeXrefInfoForPreds(SingleNonMetaLiteral, Caller) :-
 
 
 :- else .  % Version of storeXrefInfoForPreds/2 since SWI 5.7.x 
+

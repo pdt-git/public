@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.view.modes;
 
 import javax.swing.AbstractAction;
@@ -44,3 +46,4 @@ public class HierarchicPopupMode extends PopupMode{
 	}
 
 }
+

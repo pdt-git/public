@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(test_pdt_scope,[]).
 
 :- use_module(pdt_scope).
@@ -91,3 +93,4 @@ test(remote_resolve_contrib_overide_stack,[true(fooval-bauval-otherbaumval-bazva
 
 
 :- end_tests(scope).
+

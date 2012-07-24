@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.matcher;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -112,4 +114,5 @@ public class PrologResultsInAnyOrderMatcher extends TypeSafeMatcher<List<List<St
 	}
 	
 }
+
 

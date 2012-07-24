@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 
 :- use_module(pdt_builder_analyzer('metafile_referencer.pl')).
@@ -18,3 +20,4 @@
 % After loading this file call:                 
 % ?- pdt_current_console_server(Port).
 % (e.g. in "PrologConsoleView.java")
+

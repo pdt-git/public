@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.preferences;
 
 import org.cs3.pdt.PDTPlugin;
@@ -138,3 +140,4 @@ public class PreferencePageEditorColors extends StructuredFieldEditorPreferenceP
 	}
 	
 }
+

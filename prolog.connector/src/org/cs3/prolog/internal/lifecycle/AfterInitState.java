@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import java.util.HashMap;
@@ -71,3 +73,4 @@ public class AfterInitState extends AbstractState {
 		return new ShutdownState(context);
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.quickfix;
 
 import org.cs3.prolog.common.logging.Debug;
@@ -119,3 +121,4 @@ public class PDTQuickFix implements IMarkerResolution {
 	}
 
 }
+

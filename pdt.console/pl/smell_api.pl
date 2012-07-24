@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- ensure_loaded(pdt_builder_analyzer('meta_pred_toplevel.pl')).
 
 :- multifile smell_description_pdt/3.
@@ -23,3 +25,4 @@ smell('MissingMetaPredicateDeclaration', File, Offset, 0, QuickfixAction) :-
 % Dummy: Just for testing
 %smell_description_pdt('hallo', 'beschreibung', 'fix beschreibung').
 %smell('hallo', 'l:/work/noth/workspaces/runtime generics/dummdidumm/pl/heididdeliho.pl', 0, 5, '% fix itself\n').
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util;
 
 import org.cs3.prolog.common.Option;
@@ -57,3 +59,4 @@ public class FileListEditorAdapter extends OptionEditor {
 	}
 
 }
+

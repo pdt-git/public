@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.labels;
 
 import java.awt.FontMetrics;
@@ -68,3 +70,4 @@ public class BracketLabel extends CroppingLabelBase {
 	}
 
 }
+

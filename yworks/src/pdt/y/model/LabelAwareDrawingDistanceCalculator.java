@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model;
 
 
@@ -109,3 +111,4 @@ public void dispose(
     }
   }
 }
+

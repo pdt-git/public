@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.ui.util.preferences;
 
 import org.eclipse.jface.preference.DirectoryFieldEditor;
@@ -23,3 +25,4 @@ public class MyDirectoryFieldEditor extends DirectoryFieldEditor implements Fiel
 	}
 
 }
+

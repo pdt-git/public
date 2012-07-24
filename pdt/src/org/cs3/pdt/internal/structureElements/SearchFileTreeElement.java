@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.LinkedHashMap;
@@ -97,3 +99,4 @@ public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptabl
 	}
 
 }
+

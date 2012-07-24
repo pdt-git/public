@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 %:- module(new_builder,[consult_entry_point_and_parse/2]).
 
 :- use_module(parse_util).

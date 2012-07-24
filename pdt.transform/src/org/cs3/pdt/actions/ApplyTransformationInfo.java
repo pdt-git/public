@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.actions;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
@@ -55,3 +57,4 @@ public class ApplyTransformationInfo extends PrologRefactoringInfo{
 	}
 
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.labels;
 
 import java.awt.FontMetrics;
@@ -14,3 +16,4 @@ public class PostfixLabel extends CroppingLabelBase {
 			lines[0] = "..." + lines[0].substring(1);
 	}
 }
+

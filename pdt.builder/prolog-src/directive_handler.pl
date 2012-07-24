@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(directive_handler,[handle_directive/6]).
 
 :- use_module(library(lists)).
@@ -97,3 +99,4 @@ categorize_directive(Functor,Args,ParentId):-
 categorize_directive(_Functor,_Args,_ParentId).
 
    
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(library('/org/cs3/pdt/model/pdt_index')).
 
 put_random_num:-
@@ -22,3 +24,4 @@ test_index:-
 		!.
 		    
     
+

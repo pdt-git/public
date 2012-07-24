@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.matcher;
 
 import org.hamcrest.BaseMatcher;
@@ -30,3 +32,4 @@ public class IsNotSuccessful<E> extends BaseMatcher<E> {
 	}
 
 }
+

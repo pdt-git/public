@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal.wizards;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -16,3 +18,4 @@ public class MyWizard extends RefactoringWizard{
 	}
 
 }
+

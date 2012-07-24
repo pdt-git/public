@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.pif.socket;
 
 public interface SocketCommunicationConstants {
@@ -30,3 +32,4 @@ public interface SocketCommunicationConstants {
 	public static final String SET_OPTION = "SET_OPTION";
 
 }
+

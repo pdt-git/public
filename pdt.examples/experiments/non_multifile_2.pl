@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(a2,[]).
 
 :- dynamic blubber/0.    % This declaration cannot be located by SWI-Prolog
@@ -15,3 +17,4 @@ a:- goal_expansion(_G8464, _G8465).
 
 
 a1:bbb(2). 
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_set')).
 
@@ -136,3 +138,4 @@ load_test:-
 		writeln(done(File)),
 		C>200,
 	!.
+

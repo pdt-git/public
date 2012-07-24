@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 :- module(pdt_editor_edit_hook,[
 ]).
@@ -15,3 +17,4 @@ prolog_edit:edit_source(Location) :-
     ),
     format(atom(A), '~w ~w', [File, Line]),
     catch(pif_observe:pif_notify(pdt_edit_hook,A),_,true).
+

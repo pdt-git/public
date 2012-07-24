@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences.controls;
 
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE;
@@ -265,3 +267,4 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		return 1;
 	}
 }
+

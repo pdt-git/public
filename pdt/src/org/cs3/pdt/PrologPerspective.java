@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -31,3 +33,4 @@ public class PrologPerspective implements IPerspectiveFactory {
 	}
 	
 }
+

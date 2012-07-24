@@ -1,6 +1,5 @@
-/**
- * 
- */
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.load.test;
 
 import java.util.HashSet;

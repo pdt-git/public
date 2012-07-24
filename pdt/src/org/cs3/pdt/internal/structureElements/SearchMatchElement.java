@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 public class SearchMatchElement implements PrologSearchTreeElement {
@@ -61,3 +63,4 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 	}
 
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.io.File;
@@ -82,3 +84,4 @@ public class OutlineFileElement extends PrologSourceLocation implements PrologOu
 		}
 	}
 }
+

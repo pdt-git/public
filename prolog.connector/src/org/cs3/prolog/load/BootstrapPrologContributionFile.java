@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.load;
 
 import java.util.Set;
@@ -24,3 +26,4 @@ public class BootstrapPrologContributionFile extends BootstrapPrologContribution
 
 	
 }
+

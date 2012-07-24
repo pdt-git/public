@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 :- module( pdt_editor_manual_entry,
          [ predicate_manual_entry/4    % (_Module,Pred,Arity,Content)
@@ -90,6 +92,7 @@ manual_entry(Pred,-1,Content) :-
     meta_data_module(_,Pred,ContentString),
     string_to_atom(ContentString,Content).
 */
+
 
 
 

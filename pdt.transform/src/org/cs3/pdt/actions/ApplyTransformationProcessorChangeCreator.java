@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.actions;
 
 import java.util.Map;
@@ -62,3 +64,4 @@ public class ApplyTransformationProcessorChangeCreator extends ChangeCreator{
 
 	
 }
+

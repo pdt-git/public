@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.graphml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,3 +63,4 @@ public class GraphMLReaderTest {
 		assertThat(edge.target(),is(lastNode));
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(loading_roots_finder,[find_loading_roots/0]).
 
 :- ensure_loaded('../parse_util').
@@ -121,3 +123,4 @@ set_level_to_elem(Level,Elem):-
     assert(load_level_ri(Level,Elem)).
     
     
+

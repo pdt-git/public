@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( pdt_xref_backup,
          [ create_pdt_xref_data/2 % To be called before any call to the predicate(s) below
          , find_reference_to_quick/10    % (DefFile, DefModule,Functor,Arity,RefModule,RefHead,RefFile,RefLine,RefClauseRef)
@@ -291,4 +293,5 @@ current_predicate_dummy(m:f/2).
 m:f(1)   :- bla, fail, mini.
 m:f(2)   :- bla, fail, mini, xrdata(X), call(xrdata(X)).
 m:f(1,1) :- blub, invoke(_,_).
+
 

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.focusview;
 
 import static org.eclipse.ui.IWorkbenchCommandConstants.FILE_SAVE;
@@ -557,3 +559,4 @@ public class FocusViewPlugin extends ViewPart {
 		}
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$(gk, tr) */
+
 % Author: Günter Kniesel & Tobias Rho
 % Date:   5. April 2012
 % Licence: EPL

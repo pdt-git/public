@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.preferences;
 
 import java.io.File;
@@ -161,3 +163,4 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 
 
 }
+

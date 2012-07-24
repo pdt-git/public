@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.search;
 
 import java.util.ArrayList;
@@ -567,3 +569,4 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		}
 	}
 }
+

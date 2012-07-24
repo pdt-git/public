@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( xref,
            [buildXrefDb/0,
             reportXref/0, listXref/0
@@ -437,3 +439,4 @@ xrefInfoForFilesOnly(CallerFile,CalledFiles) :-
            _preds^db_xrefFromToFiles(CallerFile, CalledFile,_preds),
            CalledFiles).    
 point4.
+

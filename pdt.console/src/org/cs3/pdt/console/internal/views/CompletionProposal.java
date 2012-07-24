@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.views;
 
 import org.eclipse.jface.fieldassist.IContentProposal;
@@ -61,3 +63,4 @@ public class CompletionProposal implements IContentProposal{
 	}
 
 }
+

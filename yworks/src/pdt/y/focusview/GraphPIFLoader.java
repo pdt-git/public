@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.focusview;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -135,3 +137,4 @@ public class GraphPIFLoader {
 		return true;
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.preferences;
 
 import org.cs3.pdt.PDT;
@@ -75,3 +77,4 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	}
 
 }
+

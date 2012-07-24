@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.preferences;
 
 import org.cs3.pdt.PDT;
@@ -59,3 +61,4 @@ public class PreferencePageEditor extends FieldEditorPreferencePage implements I
 	}
 
 }
+

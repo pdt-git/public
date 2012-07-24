@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								pl_test_graph/0,
@@ -164,3 +166,4 @@ pl_test_graph:-
 pl_test_graph(Project, OutputFile):-
 	write_project_graph_to_file(Project, OutputFile).
     
+

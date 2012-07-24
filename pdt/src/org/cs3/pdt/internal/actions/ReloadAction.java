@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.actions;
 
 import java.util.ArrayList;
@@ -52,3 +54,4 @@ public class ReloadAction implements IObjectActionDelegate  {
 	}
 
 }
+

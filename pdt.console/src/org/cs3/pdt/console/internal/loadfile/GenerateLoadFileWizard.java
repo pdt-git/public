@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal.loadfile;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -152,4 +154,5 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     }
 
 }
+
 

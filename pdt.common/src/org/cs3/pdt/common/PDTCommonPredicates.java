@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.common;
 
 public class PDTCommonPredicates {
@@ -8,3 +10,4 @@ public class PDTCommonPredicates {
 	public static final String REMOVE_ENTRY_POINTS = "remove_entry_points";
 	
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector;
 
 public interface PrologRuntime {
@@ -30,3 +32,4 @@ public interface PrologRuntime {
 
     
 }
+

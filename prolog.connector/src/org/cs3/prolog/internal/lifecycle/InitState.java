@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import java.util.HashMap;
@@ -66,3 +68,4 @@ public class InitState extends AbstractState {
 		return w==null || ! w.hooks.contains(hook);		
 	}
 }
+

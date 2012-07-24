@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(pdt_check_singletons,[pdt_check_singletons/2]).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_dfs')).
@@ -28,3 +30,4 @@ check_singletons_term(Term,Occurance):-
 %    pdt_aterm(Occurance),
 %    pdt_aterm_term_annotation(Occurance,_,Anno),
 %    pdt_annotation_get(Anno,singletons,Singletons)
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.socket.test;
 
 
@@ -52,3 +54,4 @@ public class RestartTest extends TestCase {
 		assertNotNull(session.queryOnce("true"));
 	}
 }
+

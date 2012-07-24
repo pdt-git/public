@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(source_files, [pdt_source_files/1, pdt_source_file/2]).
 
 
@@ -21,3 +23,4 @@ pdt_source_file(File, State) :-
 		)
 	;	State = current
 	).
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.internal.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,3 +53,4 @@ public abstract class ToolBarAction extends Action {
 		return toolTipText;
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.labels;
 
 import java.awt.font.FontRenderContext;
@@ -22,3 +24,4 @@ public class CroppingLabelLayout implements Layout {
 		return false;
 	}
 }
+

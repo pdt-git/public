@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(pdt_annotator_cache,[
 	pdt_cache_time/2,
 	pdt_clear_cache/1,
@@ -207,3 +209,4 @@ pdt_read_cache_index:-
     exists_file(File),
     retractall(cache_index(_Hk,_File,_Time,_Serial)),    
 	consult(pdt_annotator_cache:File).
+

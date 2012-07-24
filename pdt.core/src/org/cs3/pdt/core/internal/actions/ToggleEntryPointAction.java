@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.core.internal.actions;
 
 import java.util.Iterator;
@@ -128,3 +130,4 @@ public class ToggleEntryPointAction implements IObjectActionDelegate {
 	}
 
 }
+

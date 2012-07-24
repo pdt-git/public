@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 :- use_module(library(lists)).
 :- use_module(library(statistics)).
@@ -85,3 +87,4 @@ consult_prolog_files(Dir) :-
       consult(File),
     fail.
 consult_prolog_files(_).   
+

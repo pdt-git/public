@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.transform.internal;
 
 import org.cs3.pdt.core.IPrologProject;
@@ -94,3 +96,4 @@ public class RenameFile implements IEditorActionDelegate{
 		return plProject.getMetadataPrologInterface();
 	}
 }
+

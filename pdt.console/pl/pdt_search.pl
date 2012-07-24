@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
          , find_definitions_categorized/12       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility)
@@ -486,3 +488,4 @@ my_module_of_file(File,Module):-
     ( Module=user                         
     ; Module=system                       
     ).
+

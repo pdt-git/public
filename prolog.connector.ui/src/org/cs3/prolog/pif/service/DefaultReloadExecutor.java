@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.pif.service;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -63,3 +65,4 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	}
 	
 }
+

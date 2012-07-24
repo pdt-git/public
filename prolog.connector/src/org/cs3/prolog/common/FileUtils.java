@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.common;
 
 import java.io.IOException;
@@ -128,3 +130,4 @@ public class FileUtils {
 	}
 	
 }
+

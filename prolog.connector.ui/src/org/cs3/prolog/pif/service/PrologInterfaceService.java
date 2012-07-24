@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.pif.service;
 
 import java.io.IOException;
@@ -265,3 +267,4 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	
 	
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.connector;
 
 import java.io.File;
@@ -475,3 +477,4 @@ public class PrologRuntimePlugin extends Plugin {
 	}
 
 }
+

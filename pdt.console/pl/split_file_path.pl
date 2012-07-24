@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( split_file_path,
       [ split_file_path/5      % (+FullPath, ?Directory, ?FileName,?BaseName,?Extension)
       ]).
@@ -11,3 +13,4 @@ split_file_path(FullPath, Directory, FileName,BaseName,Extension):-
     file_base_name(FullPath,FileName),                   % SWI-Prolog
     file_name_extension(BaseName,Extension,FileName).    % SWI-Prolog
             
+

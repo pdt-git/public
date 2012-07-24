@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit;
 
 
@@ -220,3 +222,4 @@ public class LabelledParameterized extends Parameterized {
 
 
 }
+

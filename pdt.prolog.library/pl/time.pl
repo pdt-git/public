@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 
 
 :- module_transparent time/2.    
@@ -86,4 +88,5 @@ reportRuntime(ForWhat,CPUMilisSinceLast) :-
     statistics(real_time,  [_RealSecsSinceStart, RealSecsSinceLast]), 
     log_on_stdout('~a: CPU = ~a milliseconds, real time ca. ~a seconds~n', 
            [ForWhat,CPUMilisSinceLast,RealSecsSinceLast]).    
+
 

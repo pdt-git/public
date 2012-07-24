@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.actions;
 
 import org.cs3.pdt.core.IPrologProject;
@@ -83,3 +85,4 @@ public class ApplyTransformation implements IEditorActionDelegate{
 		return plProject.getMetadataPrologInterface();
 	}
 }
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- consult('../load_builder').
 
 :- use_module(library(lists)).
@@ -92,3 +94,4 @@ lookup_filename_and_offset(Module:Term, FileName, Offset):-
     parse_util:predicateT(PId,FileId,_,_,_),
     parse_util:fileT(FileId,FileName,_),
     parse_util:filePosT(PId,Offset,_).  
+

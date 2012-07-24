@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(literal_parser, [parse_bodies]).
 
 :- use_module('analyzer/metafile_referencer').
@@ -102,3 +104,4 @@ parse_body_literals(Literal, Pos, ParentId, ClauseId, Module, _VarNames) :-
 process_meta_argument( (Nr,MetaTerm), Pos, ParentId, ClauseId, Module, VarNames) :- 
     nth1(Nr,Pos,TermPos),
     parse_body_literals(MetaTerm, TermPos, ParentId, ClauseId, Module, VarNames). 
+

@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import java.util.HashMap;
@@ -304,3 +306,4 @@ public abstract class LifeCycle {
 	public abstract void disposeSessions() throws Throwable;
 
 }
+

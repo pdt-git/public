@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 import java.util.HashMap;
@@ -161,3 +163,4 @@ public abstract class AbstractState implements State {
 	}
 
 }
+

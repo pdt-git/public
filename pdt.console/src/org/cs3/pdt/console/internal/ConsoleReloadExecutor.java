@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.console.internal;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -122,3 +124,4 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 	}
 
 }
+

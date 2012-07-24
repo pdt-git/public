@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import org.eclipse.jface.text.IDocument;
@@ -65,3 +67,4 @@ public final class NoCompletionsProposal implements ICompletionProposal {
 	}
 
 }
+

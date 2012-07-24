@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.model.labels;
 
 import java.util.Map;
@@ -26,3 +28,4 @@ public class NodeLabelConfigurationsInitializer {
 		factory.addConfiguration(label.getClass().getSimpleName(), implementationsMap);
 	}
 }
+

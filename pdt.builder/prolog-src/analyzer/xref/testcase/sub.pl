@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(sub,[]).
 
 :- use_module(super).
@@ -11,3 +13,4 @@ b(1).
 
 d(1).
 d(2).
+

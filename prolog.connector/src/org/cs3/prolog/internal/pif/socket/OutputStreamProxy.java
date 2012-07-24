@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.pif.socket;
 
 import java.io.IOException;
@@ -51,3 +53,4 @@ class OutputStreamProxy extends OutputStream {
 		logBuf.log("write", (char) b);
 	}
 }
+

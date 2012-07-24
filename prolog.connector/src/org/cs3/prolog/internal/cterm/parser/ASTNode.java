@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.cterm.parser;
 
 public class ASTNode extends SimpleNode {
@@ -48,3 +50,4 @@ public class ASTNode extends SimpleNode {
 	}
 	
 }
+

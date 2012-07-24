@@ -1,4 +1,3 @@
-package org.cs3.pdt.console.internal.views;
 /*******************************************************************************
  * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
@@ -11,8 +10,9 @@ package org.cs3.pdt.console.internal.views;
  *     Hannes Erven <hannes@erven.at> - Bug 293841 - [FieldAssist] NumLock keyDown event should not close the proposal popup [with patch]
  *******************************************************************************/
 
-import java.util.ArrayList;
+package org.cs3.pdt.console.internal.views;
 
+import java.util.ArrayList;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.bindings.keys.KeyStroke;
@@ -2218,3 +2218,4 @@ public class ContentProposalAdapter {
 	}
 
 }
+

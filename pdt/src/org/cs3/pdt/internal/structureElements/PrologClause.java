@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.List;
@@ -91,3 +93,4 @@ public class PrologClause {
 		return isFromOtherFile;
 	}
 }
+

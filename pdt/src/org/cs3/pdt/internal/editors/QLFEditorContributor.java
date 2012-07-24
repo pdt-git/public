@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.editors;
 
 import org.eclipse.ui.IEditorPart;
@@ -13,3 +15,4 @@ public class QLFEditorContributor extends MultiPageEditorActionBarContributor {
 	public void setActivePage(IEditorPart activeEditor) {}
 
 }
+

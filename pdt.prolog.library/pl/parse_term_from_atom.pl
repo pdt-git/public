@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module( parse_term_from_atom,
          [ atom_to_term/4       % (+TermAtom,Term,VarNames,TermPos)
          , find_term_in_atom/4  % (+Atom,+SearchTerm,From,To)
@@ -92,3 +94,4 @@ extract_position( list_position(From, To, _, _),        From,To) :- !.
 
   
       
+

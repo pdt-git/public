@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.prolog.internal.lifecycle;
 
 public class DownState extends AbstractState {
@@ -22,3 +24,4 @@ public boolean isDown() {
 		return this; //ignore errors while down.
 	}
 }
+

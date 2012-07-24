@@ -1,4 +1,5 @@
-% Author: Guenter Kniesel
+/* $LICENSE_MSG$(gk) */
+
 % Date: 25.06.2006
 
 /*

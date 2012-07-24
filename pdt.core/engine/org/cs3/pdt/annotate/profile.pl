@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- use_module(pdt_annotator).
 :- use_module(op_annotator).
 :- use_module(fileref_annotator).
@@ -33,3 +35,4 @@ lulu:-
 	['z:/eclipse/runtime-new_configuration/work/tester/pefs.pl']
 		)
 	). 	 
+

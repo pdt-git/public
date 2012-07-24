@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package pdt.y.preferences;
 
 import java.util.LinkedList;
@@ -90,3 +92,4 @@ public abstract class PreferencePageBase
 		return w;
 	}
 }
+

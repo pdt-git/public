@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 :- module(graphML_api,[ prepare_for_writing/2,
 						finish_writing/1,
 						write_file/6,
@@ -231,5 +233,6 @@ close_edge(Stream):-
 write_data(Stream,Key,Value):-
 	format(Stream, '   <data key="~w">~w</data>~n', [Key,Value]).	
 	
+
 
 

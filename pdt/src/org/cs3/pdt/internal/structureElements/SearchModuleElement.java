@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.LinkedHashMap;
@@ -91,4 +93,5 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	}
 
 }
+
 

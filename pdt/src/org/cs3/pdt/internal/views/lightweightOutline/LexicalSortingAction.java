@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.eclipse.jface.action.Action;
@@ -49,3 +51,4 @@ class LexicalSortingAction extends Action {
 //				this.prologOutlineInformationControl.getDialogSettings().put(STORE_LEXICAL_SORTING_CHECKED, on);
 		}
 	}
+

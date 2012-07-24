@@ -1,3 +1,5 @@
+/* $LICENSE_MSG$ */
+
 package org.cs3.plunit.matcher;
 
 import org.hamcrest.Description;
@@ -37,3 +39,4 @@ public class IsSuccessful<E> extends TypeSafeMatcher<E> {
 	}
 
 }
+
