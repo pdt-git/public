@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :- module(properties, [properties_for_predicate/4,
 						entity_property/3]).
@@ -39,4 +50,5 @@ look_for_kind_and_property(Head,predicate,Property):-
     predicate_property(Head,Property).
 look_for_kind_and_property(Head,module,Property):-
     module_property(Head,Property).
+
 

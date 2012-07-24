@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :-module(pl_ast_to_abba, [	write_facts_to_abba/1, 
 							pl_test/0,
@@ -167,4 +178,5 @@ pl_test(Project,Output):-
 	writeln('generate abba sources'),
     time(write_facts_to_abba(Output)).     %Ergebnisdatei (abba-Format)
     
+
 

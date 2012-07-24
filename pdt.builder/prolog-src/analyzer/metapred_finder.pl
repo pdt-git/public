@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :-module(metapred_finder, [	get_all_userdefined_meta_predicates/1,
 							find_all_meta_predicates/0]).
@@ -115,5 +126,6 @@ update_factbase(Functor, Arity, Module):-
  	assert(parse_util:meta_predT(PId, found)).
     
     
+
 
 

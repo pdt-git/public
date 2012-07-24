@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 %:- ensure_loaded(source_files).
 :- ensure_loaded('parse_util').
@@ -61,3 +72,4 @@ pl_test(Project):-
 	
 pl_test_fix:-	
     pl_test(['C:/Data/Git-Data/pdt.git/pdt.runtime.builder/prolog-src']). 
+

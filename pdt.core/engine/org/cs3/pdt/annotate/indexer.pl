@@ -1,4 +1,16 @@
-/* $LICENSE_MSG$(ld) */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Lukas Degener (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :-module(clause_indexer,[
 	pdt_update_index/1,
@@ -209,6 +221,7 @@ matcher(Elm,Elms,Prop,InProps,OutProps,OutElms):-
 	%head < Elms. There may be a match further down the list.
 	pdt_chop_before(Elm,Elms,NextElms),	    
 	matcher(Elm,NextElms,Prop,InProps,OutProps,OutElms).
+
 
 
 

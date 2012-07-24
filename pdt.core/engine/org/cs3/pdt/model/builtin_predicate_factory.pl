@@ -1,4 +1,16 @@
-/* $LICENSE_MSG$(ld) */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Lukas Degener (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :-module(builtin_predicate_factory,[
 	pdt_index_builtins/0
@@ -51,4 +63,5 @@ index_builtin(Module,Name,Arity,IX,NextIX):-
 	
 %index_entry(+Signature, +Props, -Key, -Value)
 index_entry(Module:Name/Arity, Props,Name, handle(id(Module:Name/Arity), builtin_predicate,Props)).	
+
 

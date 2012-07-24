@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 % Utility used by pdt/src/org/cs3/pdt/internal/editors/PLScanner.java
 
@@ -89,3 +100,4 @@ predicate_name_with_unary_property_(Name,Property,Arg) :-
 	predicate_property(_M:Head,Property),
 	functor(Head,Name,_),
 	Name \= '[]'.
+

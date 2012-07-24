@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :- use_module(library('org/cs3/pdt/model/pdt_index')).
 :- use_module(library('org/cs3/pdt/model/pdt_handle')).
@@ -54,5 +65,6 @@ doc_test(Name):-
 % @param B fürchterlich wichtiges Argument
 %
 aja(_A,_B).
+
 
 

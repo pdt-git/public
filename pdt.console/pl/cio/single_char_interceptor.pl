@@ -1,4 +1,16 @@
-/* $LICENSE_MSG$(ld) */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Lukas Degener (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :- module(single_char_interceptor,[arch_lib_name/1,sci_install/0, sci_setting/2]).
 
@@ -124,4 +136,5 @@ sci_install:-
     set_stream(Out,tty(true)).    
 
         
+
 

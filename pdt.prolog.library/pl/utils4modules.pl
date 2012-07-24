@@ -1,4 +1,16 @@
-/* $LICENSE_MSG$(gk) */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Günter Kniesel (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 % Date: 25.06.2006
 
@@ -158,3 +170,4 @@ assert_in_module(Mod,Head,Body, Goal) :- assert( :(Mod,Head,Body) ), call(Goal).
 %       Mod = mmmm, Head=uuu(4), Goal=':'(mmmm,uuu(X)), assert_in_module(Mod,Head, Goal).
 
 */
+

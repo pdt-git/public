@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :- module(graphML_api,[ prepare_for_writing/2,
 						finish_writing/1,
@@ -233,6 +244,7 @@ close_edge(Stream):-
 write_data(Stream,Key,Value):-
 	format(Stream, '   <data key="~w">~w</data>~n', [Key,Value]).	
 	
+
 
 
 

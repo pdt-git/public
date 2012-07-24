@@ -1,4 +1,15 @@
-/* $LICENSE_MSG$ */
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
 :- module(metafile_referencer, [file_references_for_metacall/3,	%Arg1=ContextModule %Arg2=MetaCall %Arg3=References (see description)
 								file_references_for_call/3,		%Arg1=ContextModule %Arg2=Term %Arg3=FileSet
@@ -178,4 +189,5 @@ known_meta_predicate(Module,Name,Arity,Definition):-
     
     
     
+
 
