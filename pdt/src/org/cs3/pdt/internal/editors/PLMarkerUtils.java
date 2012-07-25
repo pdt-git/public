@@ -57,13 +57,14 @@ public class PLMarkerUtils {
 				+ severity);
 	}
 
-	public static void addMarkers(PrologInterface pif, IProgressMonitor monitor) {
+	public static void addMarkers(PrologInterface pif, List<String> allConsultedFiles, IProgressMonitor monitor) {
 		monitor.beginTask("Update markers", 2);
 		PrologSession session =null;
 		try {
 			session = pif.getSession();
 			Map<String, IFile> reloadedFiles = new HashMap<String, IFile>();
 			monitor.subTask("add markers for errors and warnings");
+			collectIFilesForFileNames(allConsultedFiles, reloadedFiles);
 			addMarkersForErrorsAndWarnings(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), reloadedFiles);
 			monitor.subTask("Update Prolog Smells Detectors");
 			addMarkersForSmellDetectors(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), reloadedFiles);
@@ -88,30 +89,11 @@ public class PLMarkerUtils {
 	}
 	
 	private static void addMarkersForErrorsAndWarnings(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> reloadedFiles) throws PrologInterfaceException, CoreException {
-		List<Map<String, Object>> reloadedFilesQueryResuot = session.queryAll(bT(PrologConnectorPredicates.RELOADED_FILE, "File"));
 		List<Map<String, Object>> msgs = session.queryAll(bT(PrologConnectorPredicates.ERRORS_AND_WARNINGS, "Kind", "Line", "Length", "Message", "File"));
-		monitor.beginTask("add markers for errors and warnings", reloadedFilesQueryResuot.size() + msgs.size());
+		monitor.beginTask("add markers for errors and warnings", reloadedFiles.size() + msgs.size());
 		
-		HashSet<IFile> clearedFiles = new HashSet<IFile>();
-		for (Map<String, Object> reloadedFile : reloadedFilesQueryResuot) {
-			String fileName = reloadedFile.get("File").toString();
-			IFile file = null;
-			try {
-				file = FileUtils.findFileForLocation(fileName);
-			} catch (IOException e1) {
-				monitor.worked(1);
-				continue;
-			} catch (IllegalArgumentException e2){
-				monitor.worked(1);
-				continue;
-			}
-			if (file == null || !file.exists()){
-				monitor.worked(1);
-				continue;
-			}
+		for (IFile file : reloadedFiles.values()) {
 			file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-			clearedFiles.add(file);
-			reloadedFiles.put(fileName, file);
 			monitor.worked(1);
 		}
 		
@@ -127,22 +109,8 @@ public class PLMarkerUtils {
 			String fileName = msg.get("File").toString();
 			IFile file = reloadedFiles.get(fileName);
 			if (file == null) {
-				try {
-					file = FileUtils.findFileForLocation(fileName);
-				} catch (IOException e1) {
-					monitor.worked(1);
-					continue;
-				} catch (IllegalArgumentException e2){
-					monitor.worked(1);
-					continue;
-				}
-				if (file == null || !file.exists()){
-					monitor.worked(1);
-					continue;
-				}
-				file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-				clearedFiles.add(file);
-				reloadedFiles.put(fileName, file);
+				monitor.worked(1);
+				continue;
 			}
 			
 			IMarker marker = file.createMarker(IMarker.PROBLEM);
@@ -194,6 +162,23 @@ public class PLMarkerUtils {
 			monitor.worked(1);
 		}
 		monitor.done();
+	}
+	
+	private static void collectIFilesForFileNames(List<String> fileNames, Map<String, IFile> fileNameToIFiles) {
+		for (String fileName : fileNames) {
+			IFile file = null;
+			try {
+				file = FileUtils.findFileForLocation(fileName);
+			} catch (IOException e1) {
+				continue;
+			} catch (IllegalArgumentException e2){
+				continue;
+			}
+			if (file == null || !file.exists()){
+				continue;
+			}
+			fileNameToIFiles.put(fileName, file);
+		}
 	}
 
 

@@ -31,7 +31,7 @@ public class EditorConsultListener implements ConsultListener {
 
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
-		PLMarkerUtils.addMarkers(pif, monitor);
+		PLMarkerUtils.addMarkers(pif, allConsultedFiles, monitor);
 	}
 	
 }
