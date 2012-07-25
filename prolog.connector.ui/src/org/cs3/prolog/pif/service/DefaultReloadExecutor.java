@@ -41,23 +41,14 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 			return true;
 		}
 		
-		boolean first = true;
-		StringBuffer buffer = new StringBuffer("[");
-		for (IFile f : files) {
-			if (first) {
-				first = false;
-			} else {
-				buffer.append(", ");
-			}
-			try {
-				buffer.append(Util.quoteAtom(Util.prologFileName(f)));
-			} catch (IOException e) {
-				Debug.report(e);
-				return false;
-			}
-		};
-		buffer.append("]");
-		pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, buffer.toString()));
+		String fileList = null;
+		try {
+			fileList = Util.quotedPrologFileNameList(files);
+		} catch (IOException e) {
+			Debug.report(e);
+			return false;
+		}
+		pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, fileList));
 		monitor.done();
 		return true;
 	}

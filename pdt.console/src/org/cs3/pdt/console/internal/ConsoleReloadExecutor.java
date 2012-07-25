@@ -51,23 +51,14 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		}
 		
 		try {
-			boolean first = true;
-			StringBuffer buffer = new StringBuffer("[");
-			for (IFile f : files) {
-				if (first) {
-					first = false;
-				} else {
-					buffer.append(", ");
-				}
-				try {
-					buffer.append(Util.quoteAtom(Util.prologFileName(f)));
-				} catch (IOException e) {
-					Debug.report(e);
-					return false;
-				}
-			};
-			buffer.append("]");
-			String query = bT(PrologConnectorPredicates.PDT_RELOAD, buffer.toString());
+			String fileList = null;
+			try {
+				fileList = Util.quotedPrologFileNameList(files);
+			} catch (IOException e) {
+				Debug.report(e);
+				return false;
+			}
+			String query = bT(PrologConnectorPredicates.PDT_RELOAD, fileList);
 			return executeQueryOnConsole(pif, query);
 		} finally {
 			monitor.done();

@@ -213,6 +213,21 @@ public class Util {
 		return mac;
 	}
 
+	public static String quotedPrologFileNameList(Collection<IFile> files) throws IOException {
+		boolean first = true;
+		StringBuffer buffer = new StringBuffer("[");
+		for (IFile f : files) {
+			if (first) {
+				first = false;
+			} else {
+				buffer.append(", ");
+			}
+			buffer.append(Util.quoteAtom(Util.prologFileName(f)));
+		};
+		buffer.append("]");
+		return buffer.toString();
+	}
+	
 	public static String prologFileName(IFile file) throws IOException {
 		return prologFileName(file.getLocation().toFile().getCanonicalFile());
 	}
