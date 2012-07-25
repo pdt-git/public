@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 
-:- module( pdt_editor_manual_entry,
+:- module( pdt_manual_entry,
          [ predicate_manual_entry/4    % (_Module,Pred,Arity,Content)
          , manual_entry/3              % Preferably use predicate_manual_entry/4 
            % Duplicates most of the above and a predicate from 

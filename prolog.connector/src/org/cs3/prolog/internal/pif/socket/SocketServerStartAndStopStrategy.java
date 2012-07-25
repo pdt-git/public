@@ -96,6 +96,10 @@ private static JackTheProcessRipper processRipper;
 		try {			
 			initializeBuffers(socketPif, process);
 			waitForProcessToGetRunning(socketPif, process);
+			String errorLogFileContent = getErrorLogFileContent(socketPif);
+			if (errorLogFileContent != null) {
+				Debug.warning("Prolog errors during initialization:\n" + errorLogFileContent);
+			}
 			return process;
 		} catch (IOException e) {
 			e.printStackTrace();

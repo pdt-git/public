@@ -11,7 +11,6 @@
  * 
  ****************************************************************************/
 
-:- [pdt_entry_points].
-:- [pdt_manual_entry].
-:- [pdt_search].
-
+:- [pdt_editor_breakpoints].
+:- [pdt_editor_edit_hook].
+:- [pdt_editor_highlighting].

@@ -15,10 +15,19 @@ package org.cs3.pdt.common;
 
 public class PDTCommonPredicates {
 
+	// entry points
 	public static final String MODULE_PDT_ENTRY_POINTS = "pdt_entry_points";
 	public static final String PDT_ENTRY_POINT = "pdt_entry_point";
 	public static final String ADD_ENTRY_POINT = "add_entry_point";
 	public static final String REMOVE_ENTRY_POINTS = "remove_entry_points";
+	
+	// search
+	public static final String FIND_REFERENCE_TO = "pdt_search:find_reference_to";
+	public static final String FIND_DEFINITIONS_CATEGORIZED = "pdt_search:find_definitions_categorized";
+	public static final String FIND_PRIMARY_DEFINITION_VISIBLE_IN = "pdt_search:find_primary_definition_visible_in";
+	public static final String FIND_DEFINITION_CONTAINED_IN = "pdt_search:find_definition_contained_in";
+	public static final String FIND_PRED = "pdt_search:find_pred";
+	public static final String FIND_PRED_FOR_EDITOR_COMPLETION = "pdt_search:find_pred_for_editor_completion";
 	
 }
 

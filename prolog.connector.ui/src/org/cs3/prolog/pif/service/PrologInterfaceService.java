@@ -13,6 +13,8 @@
 
 package org.cs3.prolog.pif.service;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,6 +26,7 @@ import java.util.TreeSet;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.DefaultSubscription;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.Subscription;
@@ -247,7 +250,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		
 		List<String> result = new ArrayList<String>();
 		
-		List<Map<String, Object>> reloadedFiles = pif.queryAll("pdtplugin:pdt_reloaded_file(File)");
+		List<Map<String, Object>> reloadedFiles = pif.queryAll(bT(PrologConnectorPredicates.RELOADED_FILE, "File"));
 		for (Map<String, Object> reloadedFile : reloadedFiles) {
 			result.add(reloadedFile.get("File").toString());
 		}

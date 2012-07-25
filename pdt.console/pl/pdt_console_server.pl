@@ -64,14 +64,18 @@
 :- module(pdt_console_server,[
 	pdt_current_console_server/1,
 	pdt_start_console_server/2,
-	pdt_stop_console_server/0
+	pdt_stop_console_server/0,
+	console_thread_name/1
 ]).
 :- use_module(library(socket)).
 :- use_module(library(backcomp)).
 :- use_module(library(lists)).
  
 
-:- dynamic(console_thread_name/1).
+console_thread_name(Name) :-
+	console_thread_name__(Name).
+
+:- dynamic(console_thread_name__/1).
 
 prolog_server(Port, Name, Options) :-
 	tcp_socket(ServerSocket),
@@ -108,8 +112,8 @@ server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer):-
 		      ID,
 		      [ alias(Alias)
 		      ]),
-	retractall(console_thread_name(_)),
-	assert(console_thread_name(ID)),
+	retractall(console_thread_name__(_)),
+	assertz(console_thread_name__(ID)),
 	server_loop_impl(ServerSocket, Name, Options).
  
 service_client(InStream, OutStream, Peer, Options) :-

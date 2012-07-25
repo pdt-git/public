@@ -14,11 +14,14 @@
 
 package org.cs3.pdt.internal.actions;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.metadata.Goal;
 import org.cs3.pdt.metadata.SourceLocation;
@@ -169,7 +172,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
 
-		String query = "pdt_search:find_primary_definition_visible_in('" + enclFile + "'," + quotedTerm + "," + module + ",File,Line,MultifileResults)";
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "MultifileResults");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {

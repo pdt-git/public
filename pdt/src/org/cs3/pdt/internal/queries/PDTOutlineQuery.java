@@ -13,14 +13,19 @@
 
 package org.cs3.pdt.internal.queries;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.PrologClause;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.session.PrologSession;
 
@@ -32,9 +37,18 @@ public class PDTOutlineQuery {
 		try {
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 			
-			session.queryOnce("pdt_editor_reload:wait_for_reload_finished");
+			session.queryOnce(PrologConnectorPredicates.WAIT_FOR_RELOAD_FINISHED);
 
-			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, EntityLine, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
+			String query = bT(PDTCommonPredicates.FIND_DEFINITION_CONTAINED_IN,
+					Util.quoteAtom(fileName),
+					"Entity",
+					"EntityLine",
+					"KindOfEntity",
+					"Functor",
+					"Arity",
+					"TypeOfDef",
+					"Line",
+					"PropertyList");
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {

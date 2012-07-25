@@ -14,12 +14,16 @@
 
 package org.cs3.pdt.internal.editors;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTPredicates;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -169,11 +173,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		try {
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 			Map<String, Object> solutions = session
-					.queryOnce("pdt_editor_highlighting:predicates_with_property(" 
-							+ property
-							+ ",'" 
-							+ file.getName()
-							+ "',Predicates)");
+					.queryOnce(bT(PDTPredicates.PREDICATES_WITH_PROPERTY, property, Util.quoteAtom(file.getName()), "Predicates")); 
 
 			if (solutions == null)
 				return null;

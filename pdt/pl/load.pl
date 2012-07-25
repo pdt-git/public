@@ -11,8 +11,7 @@
  * 
  ****************************************************************************/
 
-:- [pdt_editor_breakpoints].
-:- [pdt_editor_edit_hook].
 :- [source_files].
-
+:- ['editor/load'].
+:- [pdt_smells].
 

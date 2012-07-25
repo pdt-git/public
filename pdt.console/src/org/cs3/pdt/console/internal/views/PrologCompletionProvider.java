@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterface;
@@ -46,7 +47,7 @@ public class PrologCompletionProvider {
 		}
 		
 		ArrayList<CompletionProposal> proposals = new ArrayList<CompletionProposal>();
-		String query = bT("pdt_search:find_pred", "'_'", Util.quoteAtom(prefix), "_", "Name", "Arity", "Public", "_" , "_");
+		String query = bT(PDTCommonPredicates.FIND_PRED, "'_'", Util.quoteAtom(prefix), "_", "Name", "Arity", "Public", "_" , "_");
 		List<Map<String, Object>> results;
 		try {
 			results = pif.queryAll(query);

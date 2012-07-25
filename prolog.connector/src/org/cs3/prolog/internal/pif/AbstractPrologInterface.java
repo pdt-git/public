@@ -16,6 +16,8 @@
  */
 package org.cs3.prolog.internal.pif;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.PreferenceProvider;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.cterm.CTermUtil;
@@ -644,7 +647,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 					}
 
 					try {
-						queryOnce("pdt_reload([" + reconsultQuery + "])");
+						queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, "[" + reconsultQuery + "]"));
 					} catch (PrologInterfaceException e) {
 						Debug.report(e);
 					}

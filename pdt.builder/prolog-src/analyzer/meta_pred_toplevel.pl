@@ -15,9 +15,9 @@
 
 :- use_module(library(lists)).
 
-:- multifile(pdt_editor_reload:pdt_reload_listener/1).
+:- multifile(pdt_reload:pdt_reload_listener/1).
 
-pdt_editor_reload:pdt_reload_listener(Files) :-
+pdt_reload:pdt_reload_listener(Files) :-
     with_mutex(meta_pred_finder,
 		(	flag(pdt_generate_factbase, true, true)
 		->	generate_factbase_with_metapred_analysis(Files)

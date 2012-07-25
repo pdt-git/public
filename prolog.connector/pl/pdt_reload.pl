@@ -12,12 +12,12 @@
  ****************************************************************************/
 
 
-:- module( pdt_editor_reload,
+:- module( pdt_reload,
          [ pdt_reload/1                           % Called from ConsultActionDelegate.run()
-         , activate_warning_and_error_tracing/0   % Called from PLMarkerUtils.addMarkers()
-         , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
+%         , activate_warning_and_error_tracing/0   % Called from PLMarkerUtils.addMarkers()
+%         , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
          , errors_and_warnings/5                  % Called from PLMarkerUtils.run()
-         , pdt_reloaded_file/1
+         , reloaded_file/1
          , wait_for_reload_finished/0
          ]).
 
@@ -61,7 +61,7 @@ pdt_reload__(File):-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::pdt_reload(File),
-    assertz(reloaded_file(File)).
+    assertz(reloaded_file__(File)).
 
 % SWI-Prolog
 pdt_reload__(File):-
@@ -94,13 +94,13 @@ pdt_reload_listener(Files) :-
 
 :- dynamic(traced_messages/4).
 :- dynamic(warning_and_error_tracing/0).
-:- dynamic(reloaded_file/1).
+:- dynamic(reloaded_file__/1).
 
 activate_warning_and_error_tracing :- 
     trace_reload(begin),
     assertz(in_reload),
 	retractall(traced_messages(_,_,_,_)),
-	retractall(reloaded_file(_)),
+	retractall(reloaded_file__(_)),
 	assertz(warning_and_error_tracing).
 
 deactivate_warning_and_error_tracing :-
@@ -135,7 +135,7 @@ user:message_hook(_Term, Level,Lines) :-
 user:message_hook(load_file(start(_, file(_, FullPath))), _, _) :-
 	with_mutex('reloadMutex', (
 		warning_and_error_tracing,
-		assertz(reloaded_file(FullPath)),
+		assertz(reloaded_file__(FullPath)),
 		fail
 	)).
                /*************************************
@@ -156,9 +156,9 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 		memory_file_to_atom(Handle,Message),
 	    free_memory_file(Handle).
 
-pdt_reloaded_file(LoadedFile) :-
+reloaded_file(LoadedFile) :-
 	wait_for_reload_finished,
-	reloaded_file(LoadedFile).
+	reloaded_file__(LoadedFile).
    
 wait_for_reload_finished :-
    reset_timout_counter,

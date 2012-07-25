@@ -13,12 +13,15 @@
 
 package org.cs3.pdt.internal.contentassistant;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.prolog.common.Util;
@@ -115,7 +118,16 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			String enclFile = UIUtils.getFileFromActiveEditor();
 			String moduleArg = module != null ? Util.quoteAtom(module) : "Module";
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-			String query = "pdt_search:find_pred_for_editor_completion('" + enclFile + "','" + prefix + "'," + moduleArg + ",Name,Arity,Public,Builtin,Doc,Kind)";
+			String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION,
+					Util.quoteAtom(enclFile),
+					Util.quoteAtom(prefix),
+					moduleArg,
+					"Name",
+					"Arity",
+					"Public",
+					"Builtin",
+					"Doc",
+					"Kind");
 			List<Map<String, Object>> predicates = session.queryAll(query);
 			Debug.info("find predicates with prefix: " + query);
 			for (Map<String, Object> predicate : predicates) {

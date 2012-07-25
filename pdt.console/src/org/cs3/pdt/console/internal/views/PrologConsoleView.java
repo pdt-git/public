@@ -14,6 +14,8 @@
 
 package org.cs3.pdt.console.internal.views;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,6 +30,7 @@ import java.util.Set;
 
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PDTConsolePredicates;
 import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
@@ -713,7 +716,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		deactivateGuiTracerAction = new ConsoleQueryAction("Deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
-		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), "pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, abort),_,fail)") {
+		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + "catch(thread_signal(ID, abort),_,fail)") {
 			@Override
 			public void run(){
 				super.run();
@@ -737,7 +740,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		traceAction = new PifQueryAction(
 				"Interrupt running query and start tracing",
 				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
-				"pdt_console_server:console_thread_name(ID), catch(thread_signal(ID, trace),_,fail)");
+				bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + "catch(thread_signal(ID, trace),_,fail)");
 		
 		pasteFileNameAction = new PasteAction("Paste filename",
 				"Paste the name of the current editor file", ImageRepository
@@ -1020,15 +1023,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
-			String queryString = 
-//					"use_module(lib_pdt_console_pl(pdt_console_server)), "
-				"pdt_console_server:pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")";
+			String queryString = bT(PDTConsolePredicates.PDT_START_CONSOLE_SERVER,
+					"Port",
+					Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)));
 			Debug.info("starting console server using: " + queryString);
 
 			Map<String,?> result = session.queryOnce(queryString);
 			if (result == null) {
 				Debug.info("starting server failed, which may mean that it is actualy running already.");
-				result = session.queryOnce("pdt_current_console_server(Port)");
+				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
 				if(result==null){
 					throw new RuntimeException("No Server running.");
 				}
@@ -1192,10 +1195,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		Map<String,?> result = null;
 		try {
 //			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
-			result = session.queryOnce( "pdt_start_console_server(Port, " + Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)) + ")");
+			result = session.queryOnce(bT(PDTConsolePredicates.PDT_START_CONSOLE_SERVER,
+					"Port",
+					Util.quoteAtom(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif))));
 			if (result == null) {
 				startServer(pif, session);
-				result = session.queryOnce("pdt_current_console_server(Port)");
+				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
 			}
 			if (result == null) {
 				throw new RuntimeException("could not install console server");

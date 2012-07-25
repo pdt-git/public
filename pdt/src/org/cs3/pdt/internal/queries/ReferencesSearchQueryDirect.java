@@ -13,11 +13,14 @@
 
 package org.cs3.pdt.internal.queries;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.metadata.Goal;
 import org.cs3.prolog.common.FileUtils;
@@ -54,12 +57,19 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (module.equals("''"))
 			module2 = "Module";
 		
-		String query = "find_reference_to(" 
-			             +name+  ", " 
-			             +arity+ ", " 
-			             +file+  ", " 
-			             +module2
-		                 +",RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList)";
+		String query = bT(PDTCommonPredicates.FIND_REFERENCE_TO,
+				name,
+				arity,
+				file,
+				module2,
+				"RefModule",
+				"RefName",
+				"RefArity",
+				"RefFile",
+				"RefLine",
+				"Nth",
+				"Kind",
+				"PropertyList");
 		return query;
 	}
 

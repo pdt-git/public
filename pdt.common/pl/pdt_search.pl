@@ -17,6 +17,7 @@
          , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/8
          , find_pred/8
+         , find_pred_for_editor_completion/9
          ]).
 
 
@@ -26,7 +27,7 @@
 :- use_module(pdt_builder_analyzer(properties)).
 :- use_module(pdt_prolog_library(utils4modules)).
 
-:- use_module(split_file_path).                    % general utility
+:- use_module(prolog_connector_pl(split_file_path)).                    % general utility
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
 

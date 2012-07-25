@@ -14,6 +14,8 @@
 package org.cs3.pdt;
 
 public class PDTPredicates {
+	
+	private PDTPredicates() {}
 
 	// edit hook
 	public static final String PDT_EDIT_HOOK = "pdt_edit_hook";
@@ -26,6 +28,11 @@ public class PDTPredicates {
 	public static final String PDT_SOURCE_FILES = "pdt_source_files";
 	public static final String PDT_SOURCE_FILE = "pdt_source_file";
 	
+	// editor highlighting
+	public static final String PREDICATES_WITH_PROPERTY = "pdt_editor_highlighting:predicates_with_property";
+	
+	// smells
+	public static final String SMELL_MARKER_PDT = "pdt_smells:smell_marker_pdt";
 }
 
 

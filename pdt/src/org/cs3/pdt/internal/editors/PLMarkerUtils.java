@@ -13,16 +13,20 @@
 
 package org.cs3.pdt.internal.editors;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.quickfix.PDTMarker;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -84,8 +88,8 @@ public class PLMarkerUtils {
 	}
 	
 	private static void addMarkersForErrorsAndWarnings(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> reloadedFiles) throws PrologInterfaceException, CoreException {
-		List<Map<String, Object>> reloadedFilesQueryResuot = session.queryAll("pdtplugin:pdt_reloaded_file(File)");
-		List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message,File)");
+		List<Map<String, Object>> reloadedFilesQueryResuot = session.queryAll(bT(PrologConnectorPredicates.RELOADED_FILE, "File"));
+		List<Map<String, Object>> msgs = session.queryAll(bT(PrologConnectorPredicates.ERRORS_AND_WARNINGS, "Kind", "Line", "Length", "Message", "File"));
 		monitor.beginTask("add markers for errors and warnings", reloadedFilesQueryResuot.size() + msgs.size());
 		
 		HashSet<IFile> clearedFiles = new HashSet<IFile>();
@@ -163,7 +167,7 @@ public class PLMarkerUtils {
 		monitor.beginTask("Update Prolog Smells Detectors", reloadedFiles.size());
 
 		for (String fileName : reloadedFiles.keySet()) {
-			String query = "smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, '" + fileName + "', Start, Length)";
+			String query = bT(PDTPredicates.SMELL_MARKER_PDT, "Name", "Description", "QuickfixDescription", "QuickfixAction", Util.quoteAtom(fileName), "Start", "Length");
 			List<Map<String, Object>> msgsSmells = session.queryAll(query);
 			
 			if(msgsSmells!=null) {

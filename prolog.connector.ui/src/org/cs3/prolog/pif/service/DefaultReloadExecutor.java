@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -36,7 +37,7 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	public boolean executePDTReload(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		try {
-			pif.queryOnce(bT("pdt_reload", Util.quoteAtom(Util.prologFileName(file))));
+			pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, Util.quoteAtom(Util.prologFileName(file))));
 			return true;
 		} catch (IOException e) {
 			Debug.report(e);
@@ -70,7 +71,7 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 			}
 		};
 		buffer.append("]");
-		pif.queryOnce(bT("pdt_reload", buffer.toString()));
+		pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, buffer.toString()));
 		monitor.done();
 		return true;
 	}

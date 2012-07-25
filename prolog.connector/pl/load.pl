@@ -11,7 +11,5 @@
  * 
  ****************************************************************************/
 
-:- [pdt_entry_points].
-:- [pdt_manual_entry].
-:- [pdt_search].
-
+ :- [split_file_path].
+ :- [pdt_reload].
