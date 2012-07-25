@@ -43,20 +43,6 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 	}
 	
 	@Override
-	public boolean executePDTReload(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
-		monitor.beginTask("", 1);
-		try {
-			String query = bT(PrologConnectorPredicates.PDT_RELOAD, Util.quoteAtom(Util.prologFileName(file)));
-			return executeQueryOnConsole(pif, query);
-		} catch (IOException e) {
-			Debug.report(e);
-			return false;
-		} finally {
-			monitor.done();
-		}
-	}
-
-	@Override
 	public boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		if (files.isEmpty()) {

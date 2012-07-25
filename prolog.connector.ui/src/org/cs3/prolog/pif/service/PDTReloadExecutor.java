@@ -24,7 +24,6 @@ public interface PDTReloadExecutor {
 	
 	int getPriority();
 	
-	boolean executePDTReload(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException;
 	boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException; 
 	
 }

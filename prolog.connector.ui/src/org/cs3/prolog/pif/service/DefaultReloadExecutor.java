@@ -32,20 +32,6 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	public int getPriority() {
 		return 0;
 	}
-	
-	@Override
-	public boolean executePDTReload(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
-		monitor.beginTask("", 1);
-		try {
-			pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, Util.quoteAtom(Util.prologFileName(file))));
-			return true;
-		} catch (IOException e) {
-			Debug.report(e);
-			return false;
-		} finally {
-			monitor.done();
-		}
-	}
 
 	@Override
 	public boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
