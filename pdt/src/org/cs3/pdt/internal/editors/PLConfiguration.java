@@ -43,9 +43,9 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.internal.contentassistant.NaivPrologContentAssistProcessor;
 import org.cs3.pdt.internal.views.lightweightOutline.PrologOutlineInformationControl;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -53,7 +53,7 @@ import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IAutoIndentStrategy;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -170,9 +170,8 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	}
 
 	@Override
-	public IAutoIndentStrategy getAutoIndentStrategy(
-			ISourceViewer sourceViewer, String contentType) {
-		return new PLAutoIndentStrategy();
+	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
+		return new IAutoEditStrategy[]{new PLAutoIndentStrategy()};
 	}
 
 	@Override
@@ -284,6 +283,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	 */
 	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer, final String commandId) {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE;
 				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
@@ -292,6 +292,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		};
 	}
 	
+	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		QuickAssistAssistant assist = new QuickAssistAssistant();
 		assist.setQuickAssistProcessor(new PLQuickAssistProcessor());

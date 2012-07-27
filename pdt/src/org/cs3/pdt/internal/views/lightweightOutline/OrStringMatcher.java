@@ -17,6 +17,7 @@ class OrStringMatcher extends StringMatcher {
 		fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
 	}
 
+	@Override
 	public boolean match(String text) {
 		return fMatcher2.match(text) || fMatcher1.match(text);
 	}

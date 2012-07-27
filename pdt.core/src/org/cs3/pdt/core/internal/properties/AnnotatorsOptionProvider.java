@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderExtension;
 import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PrologInterface;

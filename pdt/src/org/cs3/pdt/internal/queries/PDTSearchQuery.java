@@ -55,12 +55,11 @@ import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.internal.structureElements.SearchMatchElement;
 import org.cs3.pdt.internal.structureElements.SearchModuleElement;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pdt.metadata.Goal;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -78,7 +77,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private Map<String, SearchModuleElement> moduleElements = new HashMap<String, SearchModuleElement>();
 	private LinkedHashSet<String> signatures = new LinkedHashSet<String>();
 
-	public PDTSearchQuery(PrologInterface pif, Goal goal) {
+	public PDTSearchQuery(Goal goal) {
 		this.goal = goal;
 		result = new PrologSearchResult(this, goal);
 	}
@@ -98,7 +97,6 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		}
 	}
 	
-	// TODO: The progress monitor parameter is never used. 
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
 			BadLocationException, IOException, PrologException, PrologInterfaceException {
 		result.removeAll();
@@ -107,11 +105,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throw new NullPointerException();
 		}
 
-//		if(pif!= null){ // The project has the PDT nature
-//			return searchIfPDTNatureIsSet();
-//		} else {                                 
-			return searchIfPDTNatureIsMissing(); 
-//		}
+		return doSearch(); 
 	}
 
 	/**
@@ -121,7 +115,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private IStatus searchIfPDTNatureIsMissing()
+	private IStatus doSearch()
 			throws PrologInterfaceException, PrologException, IOException,
 			NumberFormatException {
 

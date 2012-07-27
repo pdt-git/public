@@ -45,9 +45,9 @@ package org.cs3.pdt.ui.util;
 
 import java.util.HashMap;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
+import org.cs3.pl.common.logging.Debug;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;

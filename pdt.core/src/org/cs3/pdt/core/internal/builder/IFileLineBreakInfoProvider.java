@@ -47,7 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.parser.StringLineBreakInfoProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;

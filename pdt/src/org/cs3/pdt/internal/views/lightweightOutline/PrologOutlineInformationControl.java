@@ -17,8 +17,7 @@ import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
-import org.cs3.pdt.internal.views.PrologFileContentModel;
-import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -80,6 +79,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected Text createFilterText(Composite parent) {
 		Text text= super.createFilterText(parent);
 		text.addKeyListener(getKeyAdapter());
@@ -89,6 +89,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -129,6 +130,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected String getStatusFieldText() {
 		return "";
 	}
@@ -137,6 +139,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getId()
 	 * @since 3.0
 	 */
+	@Override
 	protected String getId() {
 		return "org.eclipse.jdt.internal.ui.text.QuickOutline"; //$NON-NLS-1$
 	}
@@ -144,6 +147,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setInput(Object information) {
 		if(information instanceof String) {
 			String fileName = (String)information;
@@ -159,13 +163,14 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 			return;
 		}
 
-		inputChanged(fInput, (PrologFileContentModel)information);
+		inputChanged(fInput, information);
 
 	}
 
 	private KeyAdapter getKeyAdapter() {
 		if (fKeyAdapter == null) {
 			fKeyAdapter= new KeyAdapter() {
+				@Override
 				public void keyPressed(KeyEvent e) {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
@@ -193,6 +198,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#fillViewMenu(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	protected void fillViewMenu(IMenuManager viewMenu) {
 		super.fillViewMenu(viewMenu);
 
@@ -204,6 +210,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setMatcherString(java.lang.String, boolean)
 	 * @since 3.2
 	 */
+	@Override
 	protected void setMatcherString(String pattern, boolean update) {
 		fPattern= pattern;
 		if (pattern.length() == 0) {

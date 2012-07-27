@@ -4,8 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 
-public class SearchFileTreeElement implements PrologSearchTreeElement {
+public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptable {
 	
 	private LinkedHashMap<PrologMatch, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<PrologMatch, SearchMatchElement>();
 	private IFile file;
@@ -83,6 +85,15 @@ public class SearchFileTreeElement implements PrologSearchTreeElement {
 	@Override
 	public Object getParent() {
 		return parent;
+	}
+
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+		if (adapter.equals(IResource.class)) {
+			return file;
+		} else { 
+			return null;
+		}
 	}
 
 }

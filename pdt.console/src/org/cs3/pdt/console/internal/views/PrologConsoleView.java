@@ -54,33 +54,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
+import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.console.preferences.PreferencePageMain;
-import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.runtime.ui.PrologContextTracker;
-import org.cs3.pdt.runtime.ui.PrologContextTrackerEvent;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.NewConsoleHistory;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.FileSearchPathConfigurator;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.DefaultSubscription;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Subscription;
+import org.cs3.prolog.connector.ui.PrologContextTracker;
+import org.cs3.prolog.connector.ui.PrologContextTrackerEvent;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.lifecycle.LifeCycleHook;
+import org.cs3.prolog.load.FileSearchPathConfigurator;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
+import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -125,7 +124,7 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole, ActivePrologInterfaceListener {
 
 	private static final String DEFAULT_CONSOLE = "Default Console";
 	private static final String KILLABLE = "killable";
@@ -602,7 +601,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 	}
 
-	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
+	public static final String HOOK_ID = PDTConsole.CONSOLE_VIEW_ID;
 	private ConsoleViewer viewer;
 	private Composite partControl;
 	private PrologInterface currentPif;
@@ -672,8 +671,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.getParent().addListener(SWT.Show, handler);
 		parent.getParent().addListener(SWT.Hide, handler);
 		parent.getParent().addListener(SWT.FocusOut, handler);
-		PrologConsolePlugin.getDefault().getPrologConsoleService()
-		.registerPrologConsole(this);
+		PrologConsolePlugin.getDefault().getPrologConsoleService().registerPrologConsole(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		GridLayout layout = new GridLayout(1, true);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -700,7 +699,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 
-	private void loadHistory(NewConsoleHistory history) {
+	private void loadHistory(ConsoleHistory history) {
 
 		try {
 			FileInputStream in = new FileInputStream(getHistoryFile());
@@ -712,7 +711,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	}
 
-	@SuppressWarnings("deprecation")
 	private void createActions() {
 		cutAction = new Action() {
 			@Override
@@ -737,20 +735,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			@Override
 			public void run() {
 				viewer.selectAll();
-			}
-		};
-		new Action(){
-
-			@Override
-			public void run() {
-				PrologInterface pif = getPrologInterface();
-				if(pif==null){
-					return;
-				}
-				if (!(pif instanceof AbstractPrologInterface)){
-					return;
-				}
-				((AbstractPrologInterface)pif).debug_wakeupPoledSessions();
 			}
 		};
 		clearAction = new ClearAction("Clear", "Clear console output",
@@ -806,8 +790,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		};
 		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
-
-		//Object service = IServiceLocator.getService(Class);
 
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
 		keyBindingService.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
@@ -1118,21 +1100,21 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	 */
 	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
-		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
+		ConsoleHistory history = viewer.getHistory();
 		saveHistory(history);
 		disconnect(pif);
 	}
 
 	@Override
 	public void onError(PrologInterface pif) {
-		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
+		ConsoleHistory history = viewer.getHistory();
 		saveHistory(history);
 		disconnect(pif);
 
 
 	}
 
-	private void saveHistory(NewConsoleHistory history) {
+	private void saveHistory(ConsoleHistory history) {
 		if (history == null) {
 			return;
 		}
@@ -1174,6 +1156,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			}
 			reconfigureViewer(currentPif);
 			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
+			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().setActivePrologInterface(currentPif);
 
 		} else {
 			Debug.debug("no pif (yet).");
@@ -1318,7 +1301,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			PrologCompletionProvider completionProvider = new PrologCompletionProvider();
 			completionProvider.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
-			NewConsoleHistory history = new NewConsoleHistory();
+			ConsoleHistory history = new ConsoleHistory();
 			viewer.setHistory(history);
 			loadHistory(history);
 		} else {
@@ -1398,6 +1381,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	@Override
 	public void lateInit(PrologInterface pif) {
 		;
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+		setPrologInterface(pif);
 	}
 
 }

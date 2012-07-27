@@ -1,8 +1,8 @@
 package org.cs3.pdt.quickfix;
 
 import org.cs3.pdt.internal.actions.ConsultAction;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;

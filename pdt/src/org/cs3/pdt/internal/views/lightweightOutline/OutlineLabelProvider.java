@@ -4,7 +4,7 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
-import org.cs3.pl.metadata.Predicate;
+import org.cs3.pdt.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;

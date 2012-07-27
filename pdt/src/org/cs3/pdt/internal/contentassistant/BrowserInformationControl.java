@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 
-import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.internal.text.html.HTML2TextReader;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;

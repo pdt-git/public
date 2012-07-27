@@ -1,6 +1,6 @@
 package pdt.y.focusview;
 
-import static org.cs3.pl.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -13,25 +13,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.ResourceFileLocator;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.ResourceFileLocator;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Subscription;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 import pdt.y.main.PDTGraphView;
 
 public class GraphPIFLoader {
 	private static final String FILE_TO_CONSULT = "pl_ast_to_graphML";
-	private static final String PATH_ALIAS = "pdt_runtime_builder_graphml_creator";
+	private static final String PATH_ALIAS = "pdt_builder_graphml_creator";
 	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
 
 	private File helpFile;

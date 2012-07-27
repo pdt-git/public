@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
-import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pdt.metadata.Goal;
+import org.cs3.prolog.common.FileUtils;
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -21,8 +20,8 @@ import org.eclipse.core.resources.IFile;
 public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
 	
-	public ReferencesSearchQueryDirect(PrologInterface pif, Goal goal) {
-		super(pif, goal);
+	public ReferencesSearchQueryDirect(Goal goal) {
+		super(goal);
 		setSearchType("References to");
 	}
 
@@ -69,8 +68,8 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}
-		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("RefFile"));
-		int line = Integer.parseInt((String) m.get("RefLine"));
+		IFile file = FileUtils.findFileForLocation(m.get("RefFile").toString());
+		int line = Integer.parseInt(m.get("RefLine").toString());
 
 		PrologMatch match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
 		return match;

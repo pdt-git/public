@@ -65,27 +65,12 @@ and/or distributed.
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.swt"/>
-      <import plugin="org.cs3.pdt.common"/>
-      <import plugin="org.cs3.pdt.core"/>
-      <import plugin="org.cs3.pdt.runtime.ui"/>
+      <import plugin="org.cs3.prolog.connector.ui"/>
       <import plugin="org.cs3.pdt.console"/>
-      <import plugin="org.cs3.pdt.common.ui"/>
    </requires>
 
    <plugin
-         id="org.cs3.pdt.common.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.cs3.pdt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.cs3.pdt.common"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -97,26 +82,13 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.core"
+         id="org.cs3.prolog.connector"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.runtime"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.cs3.pdt.runtime.socket"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.cs3.pdt.runtime.ui"
+         id="org.cs3.prolog.connector.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -134,7 +106,7 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.runtime.builder"
+         id="org.cs3.pdt.builder"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

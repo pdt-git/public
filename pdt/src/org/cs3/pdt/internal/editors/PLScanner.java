@@ -43,23 +43,16 @@ package org.cs3.pdt.internal.editors;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.TextAttribute;
@@ -102,7 +95,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 				URI uri = storeEditorInput.getURI();
 				String path = uri.getPath();
 				try {
-					file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(path);
+					file = FileUtils.findFileForLocation(path);
 				} catch (IOException e) {
 
 				}
@@ -192,39 +185,14 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	}
 
 
-	/* The two different implementations that are used here should be
-	 * reconciled / integrated. I see no reason, why the current 
-	 * NonPDT behaviour should not be applied also if the PDT nature 
-	 * is active.  -- GK, April 2011
-	 */
-	private String[] getPredicatesWithProperty(String property) throws PrologInterfaceException, CoreException {
-		IPrologProject plProject = getPLProjectForFile(file);
-		
-		if (plProject == null) // The project does NOT have the PDT nature
-			return getPredicatesWithProperty__NonPDT(property);
-		else
-			return getPredicatesWithProperty__PDT(property);
-	}
-
-	public IPrologProject getPLProjectForFile(IFile file) throws CoreException {
-		IProject project = file.getProject();
-		if (project != null && project.exists() && project.hasNature(PDTCore.NATURE_ID)) {
-			return (IPrologProject) project.getNature(PDTCore.NATURE_ID);
-		};
-		return null;
-	}
-
 	/**
-	 * getPredicatesWithProperty__NonPDT(String property)
+	 * getPredicatesWithProperty(String property)
 	 * 
 	 * Get names of predicates that have a certain property. This implementation
 	 * (by Tobias Rho) is for projects that DO NOT have the PDT nature.
 	 * 
-	 * TODO: Integrate / reoncile the two versions.
-	 * 
-	 * @param plProject
 	 */
-	public String[] getPredicatesWithProperty__NonPDT(String property) {
+	private String[] getPredicatesWithProperty(String property) throws PrologInterfaceException, CoreException {
 		PrologConsole console = PrologConsolePlugin.getDefault()
 				.getPrologConsoleService().getActivePrologConsole();
 		if (console == null || console.getPrologInterface() == null) {
@@ -255,43 +223,6 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 				session.dispose();
 		}
 		return null;
-	}
-
-	/**
-	 * getPredicatesWithProperty__PDT(String property, IPrologProject plProject )
-	 * 
-	 * Get names of predicates that have a certain property. This implementation
-	 * (by Lukas Degener) is for projects that have the PDT nature.
-	 * 
-	 * TODO: Integrate / reoncile the two versions.
-	 * 
-	 * @param plProject
-	 */
-	private String[] getPredicatesWithProperty__PDT(String property) {
-		PrologSession session = null;
-		try {
-			IPrologProject plProject = getPLProjectForFile(file);
-			session = plProject.getMetadataPrologInterface().getSession(
-					PrologInterface.NONE);
-			List<Map<String, Object>> solutions = session
-					.queryAll("predicate_property(M:P," + property
-							+ "),functor(P,Name,_)"); // M:P also gets unused
-														// pred's
-			List<String> keywords = new ArrayList<String>();
-			for (Iterator<Map<String, Object>> it = solutions.iterator(); it
-					.hasNext();) {
-				Map<String, Object> si = it.next();
-				String name = (String) si.get("Name");
-				keywords.add(name);
-			}
-			return keywords.toArray(new String[0]);
-		} catch (Exception e) {
-			Debug.report(e);
-			return new String[0];
-		} finally {
-			if (session != null)
-				session.dispose();
-		}
 	}
 
 	@Override

@@ -46,7 +46,7 @@ package org.cs3.pdt.core.internal.builder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.parser.Task;
 import org.cs3.pl.parser.TaskCollector;
 import org.eclipse.core.resources.IFile;

@@ -21,6 +21,7 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Object[] getChildren(Object element) {
 		if(element instanceof PrologSourceFileModel) {
 			return ((PrologSourceFileModel)element).getElements();
@@ -34,6 +35,7 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 
 	}
@@ -41,6 +43,7 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void dispose() {
 
 	}

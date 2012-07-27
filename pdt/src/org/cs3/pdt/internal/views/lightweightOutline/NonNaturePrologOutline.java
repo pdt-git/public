@@ -54,16 +54,14 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
-import org.cs3.pdt.internal.views.PrologOutlineComparer;
-import org.cs3.pdt.internal.views.ToggleSortAction;
-import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pdt.metadata.SourceLocation;
+import org.cs3.prolog.common.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -114,8 +112,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		labelProvider = new DecoratingLabelProvider(new OutlineLabelProvider(), 
 				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		viewer.setLabelProvider(labelProvider);
-
-		viewer.setComparer(new PrologOutlineComparer());
 
 		viewer.addSelectionChangedListener(this);
 		
@@ -233,7 +229,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		} else {
 			IFile file;
 			try {
-				file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(selectedFile);
+				file = FileUtils.findFileForLocation(selectedFile);
 				SourceLocation loc = createLocation(predicate, line, file);
 				PDTUtils.showSourceLocation(loc);
 			} catch (IOException e) {
@@ -256,7 +252,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 
 	private SourceLocation createLocation(OutlinePredicate predicate,
 			int line, IFile file) {
-		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
 		loc.isWorkspacePath = file.isAccessible();
 		loc.setLine(line);
 		loc.setPredicateName(predicate.getFunctor());

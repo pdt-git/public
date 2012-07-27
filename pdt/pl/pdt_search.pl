@@ -151,8 +151,23 @@ clause_location(Module,Name,Arity,N,File,Line) :-
 imports_pred_from(Sub,Head,Super) :-
     predicate_property(Sub:Head, imported_from(Super)).
 
-% visibility+ContextModule,+Name,+Arity,?DeclModule)
+%% visibility(+ContextModule,+Name,+Arity,?DeclModule)
       
+    
+    
+visibility(ContextModule,Name,Arity,DeclModule, supermodule) :-
+    defined_in(ContextModule,Name,Arity,DeclModule),
+    ContextModule \== DeclModule. 
+
+visibility(ContextModule,Name,Arity,DeclModule, local) :-
+    defined_in(ContextModule,Name,Arity,DeclModule),
+    ContextModule == DeclModule.
+
+visibility(ContextModule,Name,Arity,DeclModule, submodule) :-
+    defined_in(DeclModule,Name,Arity,DeclModule),
+    % DeclModule is a submodule of ContextModule
+    defined_in(DeclModule,_,_,ContextModule), % submodule
+    ContextModule \== DeclModule. 
 visibility(ContextModule,Name,Arity,DeclModule, invisible) :-    
     % There is some DeclaringModule 
     defined_in(DeclModule,Name,Arity,DeclModule),
@@ -162,21 +177,8 @@ visibility(ContextModule,Name,Arity,DeclModule, invisible) :-
     functor(Head,Name,Arity),
     \+ imports_pred_from(DeclModule,Head,ContextModule),
     \+ imports_pred_from(ContextModule,Head,DeclModule).
-    
-    
-visibility(ContextModule,Name,Arity,DeclModule, submodule) :-
-    defined_in(DeclModule,Name,Arity,DeclModule),
-    % DeclModule is a submodule of ContextModule
-    defined_in(DeclModule,_,_,ContextModule), % submodule
-    ContextModule \== DeclModule. 
 
-visibility(ContextModule,Name,Arity,DeclModule, supermodule) :-
-    defined_in(ContextModule,Name,Arity,DeclModule),
-    ContextModule \== DeclModule. 
-    
-visibility(ContextModule,Name,Arity,DeclModule, local) :-
-    defined_in(ContextModule,Name,Arity,DeclModule),
-    ContextModule == DeclModule.
+
    
    
         /***********************************************************************

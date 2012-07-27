@@ -61,13 +61,13 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
@@ -192,7 +192,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private void removeBuilder(String builderId) throws CoreException {
 		IProjectDescription descr = project.getProject().getDescription();
-		org.cs3.pl.common.Debug.debug("deconfigure was called");
+		org.cs3.pl.common.logging.Debug.debug("deconfigure was called");
 		ICommand builders[] = descr.getBuildSpec();
 		int index = -1;
 		for (int i = 0; i < builders.length; i++) {

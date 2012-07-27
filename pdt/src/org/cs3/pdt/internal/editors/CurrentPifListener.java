@@ -1,23 +1,23 @@
 package org.cs3.pdt.internal.editors;
 
-import static org.cs3.pl.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.PrologConsole;
+import org.cs3.pdt.console.PrologConsoleEvent;
+import org.cs3.pdt.console.PrologConsoleListener;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.console.prolog.PrologConsoleEvent;
-import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.prolog.PrologEventDispatcher;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceEvent;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceListener;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;

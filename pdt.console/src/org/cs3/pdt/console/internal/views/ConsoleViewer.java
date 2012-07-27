@@ -43,16 +43,13 @@ package org.cs3.pdt.console.internal.views;
 
 import java.io.File;
 
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.ConsoleModelEvent;
+import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.CompletionResult;
-import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.pl.console.ConsoleHistory;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.ConsoleModelEvent;
-import org.cs3.pl.console.ConsoleModelListener;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IDocument;
@@ -149,7 +146,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	StyledText control;
 
 	private ConsoleModel model;
-	private ConsoleCompletionProvider completionProvider;
+	private PrologCompletionProvider completionProvider;
 	private ConsoleHistory history;
 	private boolean thatWasMe;
 	private int startOfInput = 0;
@@ -426,7 +423,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @param completionProvider
 	 *            The completionProvider to set.
 	 */
-	public void setCompletionProvider(ConsoleCompletionProvider completionProvider) {
+	public void setCompletionProvider(PrologCompletionProvider completionProvider) {
 		this.completionProvider = completionProvider;
 	}
 
@@ -474,7 +471,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		private String contents;
 		private ConsoleHistory history;
 		private ConsoleModel model;
-		public ConsoleCompletionProvider completionProvider;
+		public PrologCompletionProvider completionProvider;
 		public int caretPosition;
 		private StyleRange[] styleRanges;
 
@@ -1067,7 +1064,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	}
 
-	public ConsoleCompletionProvider getCompletionProvider() {
+	public PrologCompletionProvider getCompletionProvider() {
 		return completionProvider;
 	}
 

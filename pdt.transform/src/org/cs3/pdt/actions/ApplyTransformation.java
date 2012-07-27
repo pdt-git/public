@@ -5,7 +5,7 @@ import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.transform.internal.wizards.MyWizard;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;

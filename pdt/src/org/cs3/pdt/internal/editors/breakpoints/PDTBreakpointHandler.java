@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.editors.breakpoints;
 
-import static org.cs3.pl.prolog.QueryUtils.bT;
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,26 +11,26 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.console.PrologConsole;
+import org.cs3.pdt.console.PrologConsoleEvent;
+import org.cs3.pdt.console.PrologConsoleListener;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.console.PrologConsoleService;
 import org.cs3.pdt.internal.actions.QueryConsoleThreadAction;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.console.prolog.PrologConsoleEvent;
-import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.console.prolog.PrologConsoleService;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologEventDispatcher;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
-import org.cs3.pl.prolog.internal.ReconsultHook;
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.lifecycle.LifeCycleHook;
+import org.cs3.prolog.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceEvent;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceListener;
+import org.cs3.prolog.pif.ReconsultHook;
+import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -77,7 +77,7 @@ public class PDTBreakpointHandler implements PrologConsoleListener, PrologInterf
 
 	private PDTBreakpointHandler() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService().addPrologConsoleListener(this);
-		AbstractPrologInterface.registerReconsultHook(this);
+		PrologRuntimePlugin.getDefault().registerReconsultHook(this);
 		checkForPif();
 	}
 

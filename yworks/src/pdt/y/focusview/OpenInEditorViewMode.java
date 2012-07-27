@@ -1,11 +1,10 @@
 package pdt.y.focusview;
 
 import java.awt.event.MouseEvent;
-import java.io.FileNotFoundException;
 import java.util.Map;
 
-import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
@@ -49,9 +48,9 @@ public class OpenInEditorViewMode extends ViewMode {
 			if(result==null)
 				return;
 
-			final String filename = (String) result.get("FileName");
-			final int start = Integer.parseInt((String) result.get("Pos"));
-			final int length = Integer.parseInt((String) result.get("Len"));
+			final String filename = result.get("FileName").toString();
+			final int start = Integer.parseInt(result.get("Pos").toString());
+			final int length = Integer.parseInt(result.get("Len").toString());
 
 			//			ExecutorService executor = Executors.newCachedThreadPool();
 			//			FutureTask<String> futureParser = new FutureTask<String>(new Runnable() {
@@ -73,10 +72,8 @@ public class OpenInEditorViewMode extends ViewMode {
 				@Override
 				public void run() {
 					try {
-						PDTCoreUtils.selectInEditor(start, length, filename);
+						UIUtils.selectInPrologEditor(start, length, filename);
 					} catch (PartInitException e) {
-						e.printStackTrace();
-					} catch (FileNotFoundException e) {
 						e.printStackTrace();
 					}
 				}

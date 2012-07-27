@@ -45,7 +45,7 @@
 %:- use_module(library('pldoc/doc_html'), []).
 %:- use_module(library('http/html_write'), []).
 
-:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
+:- use_module(pdt_builder_analyzer('metafile_referencer.pl')).
 
 :- use_module(pdt_prolog_library(utils4modules)).
 

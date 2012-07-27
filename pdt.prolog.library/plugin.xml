@@ -6,7 +6,7 @@
    version="1.0.0.qualifier"
 >
    <extension
-         point="org.cs3.pdt.runtime.bootstrapContribution">
+         point="org.cs3.prolog.connector.bootstrapContribution">
       <fileSearchPathContribution
             alias="pdt_prolog_library"
             id="pdt.prolog.library"
