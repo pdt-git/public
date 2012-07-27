@@ -14,16 +14,12 @@ public class Utils {
 		StringBuffer buf = new StringBuffer();
 		 
 		try {
- 
 			String sCurrentLine = "";
- 
 			br = new BufferedReader(new FileReader(f));
- 
 			while ((sCurrentLine = br.readLine()) != null) {
 				buf.append(sCurrentLine);
 				buf.append("\n");
 			}
- 
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -41,7 +37,6 @@ public class Utils {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
 			writer.write(str);
-			writer.write("\n");
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
