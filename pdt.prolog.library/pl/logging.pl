@@ -1,8 +1,23 @@
-% Author: Günter Kniesel, Frank Mühlschlegel
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Günter Kniesel, Frank Mühlschlegel (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 % Date: 13.02.2006, 04.02.2009
 
 % TODO: Move all logging primitives here.
    
+:- use_module(library(lists)).
+
 consult_silent_if_logging_disabled(FileOrFiles) :-
     (  not(loggingEnabled) 
     -> consult_silent(FileOrFiles)          % load without printing a  message.
@@ -245,4 +260,5 @@ log(Stream,Formatterm,Atomlist) :-
 %        ; true ).
 %switchOffLoggingIfDesired(_uniqueNr,_what) .  % Go on logging if in batch mode.
 %
+
 

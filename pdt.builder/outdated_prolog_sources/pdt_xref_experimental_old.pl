@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :- module( pdt_xref_backup,
          [ create_pdt_xref_data/2 % To be called before any call to the predicate(s) below
          , find_reference_to_quick/10    % (DefFile, DefModule,Functor,Arity,RefModule,RefHead,RefFile,RefLine,RefClauseRef)
@@ -291,4 +304,6 @@ current_predicate_dummy(m:f/2).
 m:f(1)   :- bla, fail, mini.
 m:f(2)   :- bla, fail, mini, xrdata(X), call(xrdata(X)).
 m:f(1,1) :- blub, invoke(_,_).
+
+
 

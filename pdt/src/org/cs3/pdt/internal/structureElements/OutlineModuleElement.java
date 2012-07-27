@@ -1,26 +1,44 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.structureElements;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class OutlineModuleElement implements PrologTreeElement{
-	private String name;
-	private String kind;
-	private Map<String, OutlinePredicate> predicates= new HashMap<String,OutlinePredicate>();
+import org.cs3.pdt.metadata.PrologSourceLocation;
+
+public class OutlineModuleElement extends PrologSourceLocation implements PrologOutlineTreeElement{
+	private String name;  
+	private String kind;   // Legal values are "module" (Prolog) or "entity" (Logtalk)
+	private Map<String, OutlinePredicateElement> predicates= new HashMap<String,OutlinePredicateElement>();
+	private Object parent;
 	
-	public OutlineModuleElement(String name, String kindOfEntity) {
+	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity) {
+		super(filePath,line);
 		this.name = name;
+		kind = kindOfEntity;
 	}
 	
 	public boolean hasPredicate(String key) {
 		return predicates.containsKey(key);
 	}
 	
-	public OutlinePredicate getPredicate(String key) {
+	public OutlinePredicateElement getPredicate(String key) {
 		return predicates.get(key);
 	}
 	
-	public void addChild(String key, OutlinePredicate predicate) {
+	public void addChild(String key, OutlinePredicateElement predicate) {
 		predicates.put(key, predicate);
 	}
 	
@@ -33,10 +51,6 @@ public class OutlineModuleElement implements PrologTreeElement{
 		return kind;
 	}
 	
-	public void dispose() {
-		predicates.clear();
-	}
-
 	@Override
 	public Object[] getChildren() {
 		return predicates.values().toArray();
@@ -46,4 +60,46 @@ public class OutlineModuleElement implements PrologTreeElement{
 	public String getLabel() {
 		return name;
 	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (object == null || !(object instanceof OutlineModuleElement)) {
+			return false;
+		} else {
+			OutlineModuleElement other = (OutlineModuleElement) object;
+			return (name.equals(other.name) && kind.equals(other.kind));
+		}
+	}
+	
+	public void setParent(Object parent) {
+		this.parent = parent;
+	}
+
+	@Override
+	public Object getParent() {
+		return parent;
+	}
+
+	@Override
+	public void addClause(PrologClause clause) {
+		String signature = getSignature(clause);
+		OutlinePredicateElement predicateElement = predicates.get(signature);
+		if (predicateElement == null) {
+			predicateElement = new OutlinePredicateElement(this, clause.getEntity(), clause.getFunctor(), clause.getArity(), clause.getProperties(), clause.getFile());
+			predicates.put(signature, predicateElement);
+		}
+		predicateElement.addClause(clause);
+	}
+	
+	private String getSignature(PrologClause clause) {
+		return clause.getFunctor() + "/" + clause.getArity();
+	}
+
 }
+
+

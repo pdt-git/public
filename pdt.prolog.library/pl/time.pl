@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 
 
 :- module_transparent time/2.    
@@ -86,4 +99,6 @@ reportRuntime(ForWhat,CPUMilisSinceLast) :-
     statistics(real_time,  [_RealSecsSinceStart, RealSecsSinceLast]), 
     log_on_stdout('~a: CPU = ~a milliseconds, real time ca. ~a seconds~n', 
            [ForWhat,CPUMilisSinceLast,RealSecsSinceLast]).    
+
+
 

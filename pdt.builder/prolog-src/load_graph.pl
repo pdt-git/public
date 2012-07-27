@@ -1,5 +1,19 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :- module(load_graph,[build_new_load_graph/0, build_load_graph/0]).
 :- ensure_loaded(parse_util).
+:- use_module(library(lists)).
 
 
 /**
@@ -198,3 +212,5 @@ path_to_list(Path,List):-
     listify_path_element(First,FirstList),
     listify_path_element(Second,SecondList),
     append(FirstList,SecondList,List).
+
+

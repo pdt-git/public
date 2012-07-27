@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.prolog.pif.service;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -7,6 +20,7 @@ import java.util.List;
 
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -18,20 +32,6 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	public int getPriority() {
 		return 0;
 	}
-	
-	@Override
-	public boolean executePDTReload(PrologInterface pif, IFile file, IProgressMonitor monitor) throws PrologInterfaceException {
-		monitor.beginTask("", 1);
-		try {
-			pif.queryOnce(bT("pdt_reload", Util.quoteAtom(Util.prologFileName(file))));
-			return true;
-		} catch (IOException e) {
-			Debug.report(e);
-			return false;
-		} finally {
-			monitor.done();
-		}
-	}
 
 	@Override
 	public boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
@@ -41,25 +41,18 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 			return true;
 		}
 		
-		boolean first = true;
-		StringBuffer buffer = new StringBuffer("[");
-		for (IFile f : files) {
-			if (first) {
-				first = false;
-			} else {
-				buffer.append(", ");
-			}
-			try {
-				buffer.append(Util.quoteAtom(Util.prologFileName(f)));
-			} catch (IOException e) {
-				Debug.report(e);
-				return false;
-			}
-		};
-		buffer.append("]");
-		pif.queryOnce(bT("pdt_reload", buffer.toString()));
+		String fileList = null;
+		try {
+			fileList = Util.quotedPrologFileNameList(files);
+		} catch (IOException e) {
+			Debug.report(e);
+			return false;
+		}
+		pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, fileList));
 		monitor.done();
 		return true;
 	}
 	
 }
+
+

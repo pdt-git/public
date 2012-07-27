@@ -41,7 +41,7 @@
       <editor
             name="PL Editor"
             icon="icons/prolog_file_transparent.png"
-            extensions="pl , plt, lgt"
+            extensions="pl , plt, lgt, pro, yap"
             class="org.cs3.pdt.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
@@ -69,7 +69,7 @@
          point="org.eclipse.ui.popupMenus">      
        <objectContribution
             adaptable="false"
-            id="pdt.entry.point.contribution"
+            id="pdt.popupMenu.contribution.pl"
             nameFilter="*.pl"
             objectClass="org.eclipse.core.resources.IFile">
            <menu
@@ -101,10 +101,43 @@
                tooltip="If checked, the file is considered as a &quot;main&quot; file.">
          </action>
       </objectContribution>
+       <objectContribution
+             adaptable="false"
+             id="pdt.popupMenu.contribution.pro"
+             nameFilter="*.pro"
+             objectClass="org.eclipse.core.resources.IFile">
+          <menu
+                id="org.cs3.pdt.menu"
+                label="Prolog Development Tools">
+             <separator
+                   name="group0">
+             </separator>
+             <separator
+                   name="group1">
+             </separator>
+          </menu>
+          <action
+                class="org.cs3.pdt.internal.actions.ReloadAction"
+                icon="icons/prolog_file_consulted.png"
+                id="org.cs3.pdt.internal.actions.reload"
+                label="(Re)consult"
+                menubarPath="org.cs3.pdt.menu/group0"
+                style="push">
+          </action>
+          <action
+                class="org.cs3.pdt.internal.actions.ToggleEntryPointAction"
+                icon="icons/entry_point.gif"
+                id="pdt.actions.toggle_entry_point"
+                label="Mark as Entry Point"
+                menubarPath="org.cs3.pdt.menu/group0"
+                style="toggle"
+                tooltip="If checked, the file is considered as a &quot;main&quot; file.">
+          </action>
+       </objectContribution>
       
        <objectContribution
             adaptable="false"
-            id="pdt.consult.contribution"
+            id="pdt.popupMenu.contribution.qlf"
             nameFilter="*.qlf"
             objectClass="org.eclipse.core.resources.IFile">
            <menu
@@ -138,7 +171,7 @@
       
        <objectContribution
             adaptable="false"
-            id="pdt.consult.contribution"
+            id="pdt.popupMenu.contribution.lgt"
             nameFilter="*.lgt"
             objectClass="org.eclipse.core.resources.IFile">
            <menu
@@ -177,6 +210,11 @@
                 class="org.cs3.pdt.internal.actions.OpenJUnitWrapperAction"
                 id="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
                 label="Open Prolog Test">
+          </action>
+            <action
+                class="org.cs3.pdt.internal.actions.AbortTestAction"
+                id="org.cs3.pdt.internal.actions.AbortTestAction"
+                label="Abort Prolog Test">
           </action>
        </objectContribution>
  </extension>
@@ -224,6 +262,11 @@
          name="Consult"/>
    <command
          categoryId="org.cs3.pdt.editing"
+         description="Run Unit Test"
+         id="org.eclipse.pdt.ui.edit.run.unit.test"
+         name="Run Unit Test"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
          id="org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc"
          name="name">
    </command>
@@ -254,6 +297,12 @@
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F9"/>
+
+   <key
+         commandId="org.eclipse.pdt.ui.edit.run.unit.test"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+U"/>
          
 </extension>
 <extension
@@ -512,6 +561,9 @@
      <fileContribution
            id="org.cs3.pdt.fileContribution"
            path="pl/load.pl">
+        <dependency
+              contribution="org.cs3.pdt.common.fileContribution">
+        </dependency>
      </fileContribution>
      <fileSearchPathContribution
            alias="pdt_pl"

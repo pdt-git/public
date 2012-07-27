@@ -11,6 +11,15 @@
                 id="pdt.runtime.library.pif.contribution"
                 path="library/pif">
           </fileSearchPathContribution>
+          <fileContribution
+                id="prolog.connector.fileContribution"
+                path="pl/load.pl">
+          </fileContribution>
+          <fileSearchPathContribution
+                alias="prolog_connector_pl"
+                id="org.cs3.prolog.connector.pl.path"
+                path="pl/">
+          </fileSearchPathContribution>
        </extension>
        <extension
              point="org.cs3.prolog.connector.prologLibrary">

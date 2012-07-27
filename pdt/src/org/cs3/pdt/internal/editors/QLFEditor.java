@@ -1,10 +1,23 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 
 package org.cs3.pdt.internal.editors;
 
 import java.io.File;
 
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.actions.ConsultAction;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
@@ -95,7 +108,7 @@ public class QLFEditor extends MultiPageEditorPart {
 					@Override
 					public void handleEvent(Event event) {
 
-						new ConsultAction().consultFromActiveEditor();
+						PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
 					}
 					
 				});
@@ -131,3 +144,5 @@ public class QLFEditor extends MultiPageEditorPart {
 
 	
 }
+
+

@@ -1,46 +1,17 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% test
-% This file is part of the Prolog Development Tool (PDT)
-% 
-% Author: Lukas Degener (among others) 
-% E-mail: degenerl@cs.uni-bonn.de
-% WWW: http://roots.iai.uni-bonn.de/research/pdt 
-% Copyright (C): 2004-2006, CS Dept. III, University of Bonn
-% 
-% All rights reserved. This program is  made available under the terms 
-% of the Eclipse Public License v1.0 which accompanies this distribution, 
-% and is available at http://www.eclipse.org/legal/epl-v10.html
-% 
-% In addition, you may at your option use, modify and redistribute any
-% part of this program under the terms of the GNU Lesser General Public
-% License (LGPL), version 2.1 or, at your option, any later version of the
-% same license, as long as
-% 
-% 1) The program part in question does not depend, either directly or
-%   indirectly, on parts of the Eclipse framework and
-%   
-% 2) the program part in question does not include files that contain or
-%   are derived from third-party work and are therefor covered by special
-%   license agreements.
-%   
-% You should have received a copy of the GNU Lesser General Public License
-% along with this program; if not, write to the Free Software Foundation,
-% Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-%   
-% ad 1: A program part is said to "depend, either directly or indirectly,
-%   on parts of the Eclipse framework", if it cannot be compiled or cannot
-%   be run without the help or presence of some part of the Eclipse
-%   framework. All java classes in packages containing the "pdt" package
-%   fragment in their name fall into this category.
-%   
-% ad 2: "Third-party code" means any code that was originaly written as
-%   part of a project other than the PDT. Files that contain or are based on
-%   such code contain a notice telling you so, and telling you the
-%   particular conditions under which they may be used, modified and/or
-%   distributed.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Lukas Degener, Fabian Noth (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
 
-% Author: Lukas
 % Date: 23.10.2004
 
 :- module(consult_server,[
@@ -58,6 +29,7 @@
 
 :- use_module(library(socket)).
 :- use_module(library(memfile)).
+:- use_module(library(debug)).
 
 option_default(interprete_lists,true).
 option_default(canonical,false).
@@ -140,9 +112,9 @@ consult_server(Port):-
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
-	concat_atom([consult_server,'@',Port],Alias),
+	atomic_list_concat([consult_server,'@',Port],Alias),
 	%accept_loop(ServerSocket).
-	recordz(pif_flag,port(Port)),
+	recordz(pif_flag,port(Port),_),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
 
 consult_server(Port,Lockfile):-
@@ -150,9 +122,8 @@ consult_server(Port,Lockfile):-
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
-	concat_atom([consult_server,'@',Port],Alias),
-	%accept_loop(ServerSocket).
-	recordz(pif_flag,port(Port)),
+	atomic_list_concat([consult_server,'@',Port],Alias),
+	recordz(pif_flag,port(Port),_),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]),
 	create_lock_file(Lockfile).
 
@@ -183,7 +154,7 @@ accept_loop_impl(ServerSocket) :-
 
 accept_loop_impl_X(ServerSocket,Slave):-
     debug(consult_server(shutdown),"Checking for shutdown flag. ~n",[]),
-    recorded(pif_flag,shutdown),    
+    recorded(pif_flag,shutdown,_),    
     !,
     debug(consult_server(shutdown),"Shutdown flag is set. We are closing down. ~n",[]),
     tcp_close_socket(Slave),
@@ -252,8 +223,8 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	% then we have to kick the accept loop out of the tcp_accept/3 call.
 	% we do this by simply opening a connection to the listen port.
 
-	recordz(pif_flag,shutdown),
-	recorded(pif_flag,port(Port)),
+	recordz(pif_flag,shutdown,_),
+	recorded(pif_flag,port(Port),_),
 	tcp_socket(Socket),
 	tcp_connect(Socket,localhost:Port),
 	tcp_close_socket(Socket).
@@ -329,9 +300,9 @@ handle_batch_messages(OutStream):-
 
 record_abort_request(Type,Id):-
     thread_self(Thread),
-    (	recorded(pif_batch_abort,request(Thread,Type,Id))
+    (	recorded(pif_batch_abort,request(Thread,Type,Id),_)
     ->	true
-    ;	recordz(pif_batch_abort,request(Thread,Type,Id))
+    ;	recordz(pif_batch_abort,request(Thread,Type,Id),_)
     ).
     
 
@@ -344,7 +315,7 @@ erase_abort_request(Type,Id):-
     
 abort_requested(Type,Id):-
 	thread_self(Thread),
-	recorded(pif_batch_abort,request(Thread,Type,Id)).    
+	recorded(pif_batch_abort,request(Thread,Type,Id),_).    
 
 aborting:-
     abort_requested(async,_).
@@ -609,7 +580,7 @@ unused_thread_name(Prefix,Suffix,Name):-
 	unused_thread_name(Prefix,Suffix,0,Name).	
 	
 unused_thread_name(Prefix,Suffix,Try,Name):-
-	concat_atom([Prefix,Try,Suffix],A),
+	atomic_list_concat([Prefix,Try,Suffix],A),
 	(	current_thread(A,_)
 	->	plus(Try,1,Next),
 		unused_thread_name(Prefix,Suffix,Next,Name)
@@ -731,3 +702,4 @@ user:prolog_exception_hook(In,_Out,_Frame,CFrame):-
 	;		
 	)
 	*/	
+

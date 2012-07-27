@@ -1,8 +1,22 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :- module(modules_and_visibility, [	compute_visibility_graph/0,
 									visible_in_module/2,
 									get_predicate_referenced_as/4,
 									exporting/3]).
 
+:- use_module(library(lists)).
 :- ensure_loaded('pdt_factbase').
 
 :- dynamic exporting/3.	%exporting(Module,PredId,FileId)
@@ -147,3 +161,5 @@ is_searched_functor(Functor/_A 'as' NewFunctor,Functor,NewFunctor):-
 
 
     
+
+

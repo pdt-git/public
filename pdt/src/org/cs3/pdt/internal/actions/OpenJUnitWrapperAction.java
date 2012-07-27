@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.internal.editors.PLEditor;
@@ -29,7 +42,11 @@ public class OpenJUnitWrapperAction implements IObjectActionDelegate {
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		
+		if(!(selection instanceof ITreeSelection)){
+			return;
+		}
 		ITreeSelection tree = (ITreeSelection)selection;
+		
 		ITestCaseElement tc = (ITestCaseElement)tree.getFirstElement();
 		fileName = ((ITestSuiteElement)tc.getParentContainer().getParentContainer()).getSuiteTypeName();
 		String[] args= tc.getTestMethodName().substring(6,tc.getTestMethodName().length()-1).split(":");
@@ -59,3 +76,5 @@ public class OpenJUnitWrapperAction implements IObjectActionDelegate {
 	}
 
 }
+
+

@@ -1,4 +1,17 @@
-% Author: Günter Kniesel
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Günter Kniesel (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 % Date: 06.10.2004
 
 % 21.2.2011: Added option 'unique'
@@ -34,6 +47,9 @@
  * All previous facts for Template are retracted  
  * from Module before generating the new facts. 
  */
+ 
+ :- use_module(library(lists)).
+ 
 :- module_transparent generate_all_in_module/3,
                       generate_all_in_module/4.
                       
@@ -105,3 +121,4 @@ generate_in_module(Module,Template,Call,Options) :-
 %    G1 =.. [FOld|Arg],
 %    concat(Prefix,FOld,F),
 %    G2 =.. [F|Arg].
+

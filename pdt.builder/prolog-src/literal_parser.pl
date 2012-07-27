@@ -1,6 +1,20 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :- module(literal_parser, [parse_bodies]).
 
 :- use_module('analyzer/metafile_referencer').
+:- use_module(library(lists)).
 :- ensure_loaded(parse_util).
 
 %Todo: Kommentar verfassen
@@ -101,3 +115,5 @@ parse_body_literals(Literal, Pos, ParentId, ClauseId, Module, _VarNames) :-
 process_meta_argument( (Nr,MetaTerm), Pos, ParentId, ClauseId, Module, VarNames) :- 
     nth1(Nr,Pos,TermPos),
     parse_body_literals(MetaTerm, TermPos, ParentId, ClauseId, Module, VarNames). 
+
+

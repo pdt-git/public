@@ -1,4 +1,17 @@
-% Author: Guenter Kniesel
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Günter Kniesel (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 % Date: 25.06.2006
 
 /*
@@ -23,6 +36,9 @@
            ]
  ).
  
+:- use_module(library(lists)).
+:- use_module(library(listing)).
+
 :- doc_collect(true).
 
 :- module_transparent(call_and_report_contex_module/1).
@@ -110,8 +126,15 @@ listing_in_module(Module,Goal)  :- listing( Module:Goal ).
  */   
 copy_module_predicate(InpMod, OutMod, Head) :-
    copy_predicate_clauses(InpMod:Head, OutMod:Head).  % SWI-PL
-   
- 
+%
+%   NON-SWIPL implementation:
+% 
+%   all( copy_module_clause(InpMod, OutMod, Head) ).
+%  
+%
+%copy_module_clause(InpMod, OutMod, Head) :-
+%   clause_in_module(InpMod,Head,Body),
+%   assert_in_module(OutMod,Head,Body).  
    
 /*
  * Move all clauses whose head unifies Arg3 from module Arg1 to 
@@ -148,3 +171,4 @@ assert_in_module(Mod,Head,Body, Goal) :- assert( :(Mod,Head,Body) ), call(Goal).
 %       Mod = mmmm, Head=uuu(4), Goal=':'(mmmm,uuu(X)), assert_in_module(Mod,Head, Goal).
 
 */
+

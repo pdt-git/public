@@ -1,10 +1,26 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.queries;
+
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.internal.structureElements.PrologMatch;
 import org.cs3.pdt.metadata.Goal;
 import org.cs3.prolog.common.FileUtils;
@@ -18,8 +34,8 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {		
-		String file = "'"+goal.getFile()+"'";
-		if (goal.getFile().equals(""))
+		String file = "'"+goal.getFilePath()+"'";
+		if (goal.getFilePath().equals(""))
 			file = "OrigFile";
 
 		String module2 = module;
@@ -30,9 +46,19 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 		//String term = Util.quoteAtom(origTerm);
 		
 		
-		String query = "pdt_search:find_definitions_categorized(" 
-			            + file + "," + goal.getLine() + "," + term + ", Functor, Arity, "+ module2 + 
-			            ", DeclOrDef, DefiningModule, File, Line, PropertyList, Visibility)";
+		String query = bT(PDTCommonPredicates.FIND_DEFINITIONS_CATEGORIZED,
+				file,
+				goal.getLine(),
+				term,
+				"Functor",
+				"Arity",
+				module2,
+				"DeclOrDef",
+				"DefiningModule",
+				"File",
+				"Line",
+				"PropertyList",
+				"Visibility");
 		return query;
 	}
 
@@ -63,3 +89,5 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 	}
 	
 }
+
+

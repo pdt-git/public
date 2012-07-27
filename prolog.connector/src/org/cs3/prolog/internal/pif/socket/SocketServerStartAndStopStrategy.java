@@ -1,42 +1,15 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
- * Author: Lukas Degener (among others) 
- * E-mail: degenerl@cs.uni-bonn.de
- * WWW: http://roots.iai.uni-bonn.de/research/pdt 
- * Copyright (C): 2004-2006, CS Dept. III, University of Bonn
+ * Author: Lukas Degener (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
  * 
- * All rights reserved. This program is  made available under the terms 
- * of the Eclipse Public License v1.0 which accompanies this distribution, 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * In addition, you may at your option use, modify and redistribute any
- * part of this program under the terms of the GNU Lesser General Public
- * License (LGPL), version 2.1 or, at your option, any later version of the
- * same license, as long as
- * 
- * 1) The program part in question does not depend, either directly or
- *   indirectly, on parts of the Eclipse framework and
- *   
- * 2) the program part in question does not include files that contain or
- *   are derived from third-party work and are therefor covered by special
- *   license agreements.
- *   
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *   
- * ad 1: A program part is said to "depend, either directly or indirectly,
- *   on parts of the Eclipse framework", if it cannot be compiled or cannot
- *   be run without the help or presence of some part of the Eclipse
- *   framework. All java classes in packages containing the "pdt" package
- *   fragment in their name fall into this category.
- *   
- * ad 2: "Third-party code" means any code that was originaly written as
- *   part of a project other than the PDT. Files that contain or are based on
- *   such code contain a notice telling you so, and telling you the
- *   particular conditions under which they may be used, modified and/or
- *   distributed.
  ****************************************************************************/
 
 /*
@@ -64,6 +37,7 @@ import org.cs3.prolog.common.InputStreamPump;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntime;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.internal.pif.ServerStartAndStopStrategy;
 import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
@@ -116,13 +90,21 @@ private static JackTheProcessRipper processRipper;
 	}
 
 	private Process startSocketServer(SocketPrologInterface socketPif) {
-		socketPif.setLockFile(Util.getLockFile());
-		socketPif.setErrorLogFile(Util.getLockFile());
+		File lockFile = Util.getLockFile();
+		socketPif.setLockFile(lockFile);
+		PrologRuntimePlugin.getDefault().addTempFile(lockFile);
+		File errorLogFile = Util.getLockFile();
+		socketPif.setErrorLogFile(errorLogFile);
+		PrologRuntimePlugin.getDefault().addTempFile(errorLogFile);
 		int port = getFreePort(socketPif);
 		Process process = getNewProcess(socketPif, port);
 		try {			
 			initializeBuffers(socketPif, process);
 			waitForProcessToGetRunning(socketPif, process);
+			String errorLogFileContent = getErrorLogFileContent(socketPif);
+			if (errorLogFileContent != null) {
+				Debug.warning("Prolog errors during initialization:\n" + errorLogFileContent);
+			}
 			return process;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -248,6 +230,7 @@ private static JackTheProcessRipper processRipper;
 		File tmpFile = null;
 		try {
 			tmpFile = File.createTempFile("socketPif", null);
+			PrologRuntimePlugin.getDefault().addTempFile(tmpFile);
 			writeInitialisationToTempFile(socketPif, port, tmpFile);
 		} catch (IOException e) {
 			Debug.report(e);
@@ -299,13 +282,13 @@ private static JackTheProcessRipper processRipper;
 		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
 		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
 		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
+		tmpWriter.println(":- [library(consult_server)].");
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
 			BootstrapPrologContribution contribution = it.next();
 			tmpWriter.println(":- "+contribution.getPrologInitStatement()+".");
 		}
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker2.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":- [library(consult_server)].");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
 		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + Util.prologFileName(socketPif.getErrorLogFile()) + "').");
@@ -400,3 +383,5 @@ private static JackTheProcessRipper processRipper;
 		return lockFile != null && lockFile.exists();
 	}
 }
+
+

@@ -1,16 +1,29 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
+import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pdt.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IStyledLabelProvider*/ {
@@ -41,15 +54,13 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 //			if(module.hasChildren())
 				return ImageRepository.getImage(ImageRepository.PACKAGE);
 		}
-		if (element instanceof PredicateOccuranceElement) {
-			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
-			return setCategoryImage(sharedImagaes);
+		if (element instanceof OutlineClauseElement) {
+			return ImageRepository.getImage(ImageRepository.SEARCH_MATCH);
+		}
+		if (element instanceof OutlineFileElement) {
+			return ImageRepository.getImage(ImageRepository.PROLOG_FILE);
 		}
 		return null;
-	}
-
-	private Image setCategoryImage(ISharedImages sharedImagaes) {
-		return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
 	}
 
 	@Override
@@ -73,3 +84,5 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 	}
 
 }
+
+

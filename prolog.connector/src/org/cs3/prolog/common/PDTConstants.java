@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.prolog.common;
 
 // Guenter Kniesel, 23.9.2010: Adapted to changes in SWI-Prolog 5.9.9: 
@@ -41,3 +54,5 @@ the same executable name on all platforms.
 	   stack on 32-bit and 256Mb on 64-bit hardware. This probably 
 	   results in fewer complaints about running out-of-stack.
 */
+
+

@@ -1,11 +1,28 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.internal.structureElements.PrologOutlineTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvider  {
+
+
+	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
 
 	/**
@@ -57,27 +74,35 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 
 	@Override
 	public Object[] getElements(Object element) {
-		if(element instanceof PrologSourceFileModel) {
-			if(((PrologSourceFileModel)element).hasChildren())
+		if (element instanceof PrologSourceFileModel) {
+			if (((PrologSourceFileModel)element).hasChildren()) {
 				return ((PrologSourceFileModel)element).getElements();
-		}	
-		if(element instanceof PrologTreeElement) {
+			}
+		} else if (element instanceof PrologTreeElement) {
 			return ((PrologTreeElement)element).getChildren();
 		}
-		return new Object[0];
+		return EMPTY_OBJECT_ARRAY;
 	}
 
 
 	@Override
 	public Object getParent(Object element) {
-		return null;
+		if (element instanceof PrologOutlineTreeElement) {
+			return ((PrologOutlineTreeElement) element).getParent();
+		} else {
+			return EMPTY_OBJECT_ARRAY;
+		}
 	}
 
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if(element instanceof PrologTreeElement)
+		if (element instanceof PrologTreeElement) {
 			return ((PrologTreeElement)element).hasChildren();
-		return false;
+		} else {
+			return false;
+		}
 	}
 }
+
+

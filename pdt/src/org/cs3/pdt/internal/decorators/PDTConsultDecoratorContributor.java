@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.decorators;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -11,12 +24,14 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -81,7 +96,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		PDTPlugin.getDefault().addDecorator(this);
 
 		// get active pif from console
-		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
+		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 
 		if (currentPif == null) {
 			if (element instanceof IFile) {
@@ -158,12 +173,12 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		modifiedSourceFiles.clear();
 		dirs.clear();
 		
-		PrologInterface currentPif = PDTUtils.getActiveConsolePif();
+		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 		if (currentPif == null) {
 			return;
 		}
 		try {
-			List<Map<String, Object>> results = currentPif.queryAll(bT("pdt_source_file", "File", "State"));
+			List<Map<String, Object>> results = currentPif.queryAll(bT(PDTPredicates.PDT_SOURCE_FILE, "File", "State"));
 			lastUpdate = System.currentTimeMillis();
 			for (Map<String, Object> result: results) {
 				String fileName = result.get("File").toString();
@@ -203,3 +218,5 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 	}
 
 }
+
+

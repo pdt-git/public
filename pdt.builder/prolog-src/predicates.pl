@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :-module(predicates,[	derive_all_predicates/0,
 						derive_predicates_of_files/1,
 						%derive_predicate_for_clause/6,
@@ -6,6 +19,7 @@
 						compute_all_predicate_properties/0,
 						compute_predicate_properties_for_files/1]).
 :- ensure_loaded(pdt_factbase).
+:- use_module(library(lists)).
 
 derive_all_predicates:-
     forall(
@@ -187,3 +201,5 @@ assert_predicate(CId,Functor,Arity,Module,File,PId):-
     assert(predicateT_ri(Functor,Arity,Module,PId)),
     filePosT(CId,Begin,Length),
     assert(filePosT(PId,Begin,Length)).
+
+

@@ -1,18 +1,32 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.queries;
+
+import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.OutlinePredicate;
-import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.PrologClause;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.session.PrologSession;
 
 
@@ -21,21 +35,20 @@ public class PDTOutlineQuery {
 	public static Map<String, OutlineModuleElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {	
 		PrologSession session=null;
 		try {
-			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-			if(console==null || console.getPrologInterface() == null){
-				//				MessageBox messageBox = new MessageBox(
-				//						shell, SWT.ICON_WARNING| SWT.OK);
-				//
-				//				messageBox.setText("Outline");
-				//				messageBox.setMessage("Cannot open outline, no active Prolog Console found.");
-				//				messageBox.open();
-				return new HashMap<String, OutlineModuleElement>();
-			}
-			session = console.getPrologInterface().getSession();
+			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 			
-			session.queryOnce("pdt_editor_reload:wait_for_reload_finished");
+			session.queryOnce(PrologConnectorPredicates.WAIT_FOR_RELOAD_FINISHED);
 
-			String query = "pdt_search:find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
+			String query = bT(PDTCommonPredicates.FIND_DEFINITION_CONTAINED_IN,
+					Util.quoteAtom(fileName),
+					"Entity",
+					"EntityLine",
+					"KindOfEntity",
+					"Functor",
+					"Arity",
+					"TypeOfDef",
+					"Line",
+					"PropertyList");
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {
@@ -52,9 +65,9 @@ public class PDTOutlineQuery {
 	@SuppressWarnings("unchecked")
 	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
-		String module = "user";
 		for (Map<String, Object> predicate : result) {
-			module = predicate.get("Entity").toString();
+			String module = predicate.get("Entity").toString();
+			int entityLine = Integer.parseInt( predicate.get("EntityLine").toString() );
 			String name = predicate.get("Functor").toString();
 			String kindOfEntity = predicate.get("KindOfEntity").toString();
 			int arity=Integer.parseInt(predicate.get("Arity").toString());
@@ -64,65 +77,82 @@ public class PDTOutlineQuery {
 			List<String> properties = null;
 			if (prop instanceof Vector<?>) {
 				properties = (Vector<String>)prop;
-			}				
-			if (!modules.containsKey(module)) {
-				modules.put(module, new OutlineModuleElement(module, kindOfEntity));
-			}
-			OutlineModuleElement currentModuleElem = modules.get(module);
-			String label = module+":"+name+"/"+arity;
-
-			OutlinePredicate prologPredicate;
-			if (currentModuleElem.hasPredicate(label)) {
-				prologPredicate = currentModuleElem.getPredicate(label);
 			} else {
-				prologPredicate = new OutlinePredicate(module, name, arity, properties, fileName);
-				currentModuleElem.addChild(label, prologPredicate);
+				properties = new Vector<String>();
 			}
+			PrologClause clause = new PrologClause(fileName, module, entityLine, kindOfEntity, name, arity, line, type, properties);
+			OutlineModuleElement moduleElement = modules.get(module);
+			if (moduleElement == null) {
+				moduleElement = new OutlineModuleElement(clause.getOccuranceFile(), module, entityLine, kindOfEntity);
+				modules.put(module, moduleElement);
+			}
+			moduleElement.addClause(clause);
 			
-			StringBuffer occuranceLabel = calculateOccuranceLabel(line, type,
-					properties);
-			String occuranceFile = getOccuranceFileName(properties, fileName);
 			
-			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), occuranceFile, line, type, prologPredicate));
+//			if (!modules.containsKey(module)) {
+//				modules.put(module, new OutlineModuleElement(clause.getOccuranceFile(), module, entityLine, kindOfEntity));
+//			}
+//			OutlineModuleElement currentModuleElem = modules.get(module);
+//			String label = module+":"+name+"/"+arity;
+//
+//			OutlinePredicateElement prologPredicate;
+//			if (currentModuleElem.hasPredicate(label)) {
+//				prologPredicate = currentModuleElem.getPredicate(label);
+//			} else {
+//				prologPredicate = new OutlinePredicateElement(null, module, name, arity, properties, fileName);
+//				currentModuleElem.addChild(label, prologPredicate);
+//			}
+//			
+//			String occuranceLabel = calculateOccuranceLabel(line, type, properties);
+//			String occuranceFile = getOccuranceFileName(properties, fileName);
+//			
+//			OutlineClauseElement occurrence = new OutlineClauseElement(occuranceLabel.toString(), occuranceFile, line, type, prologPredicate);
+//			if (occuranceFile.equals(fileName)) {
+//				prologPredicate.addOccurence(occurrence);
+//			} else {
+//				prologPredicate.addClauseToFile(occuranceFile, occurrence);
+//			}
 		}
 
 		return modules;
 	}
 
-	public static StringBuffer calculateOccuranceLabel(int line, String type,
-			List<String> properties) {
-		StringBuffer occuranceLabel = new StringBuffer("Line: ");
-		occuranceLabel.append(Integer.toString(line));
-		occuranceLabel.append(" (");
-		occuranceLabel.append(type);
-		if (type.equals("multifile")) {
-			for (String property : properties) {
-				if (property.startsWith("from(")) {
-					occuranceLabel.append(" @ ");
-					occuranceLabel.append((String) property.subSequence(5, property.length()-1));
-				} else if (property.startsWith("for(")) {
-					occuranceLabel.append(" @ ");
-					occuranceLabel.append((String) property.subSequence(4, property.length()-1));
-				}
-			}
-		}
-		occuranceLabel.append(")");
-		return occuranceLabel;
-	}
-	
-	private static String getOccuranceFileName(List<String> properties, String file) {
-		String selectedFile="";
-		if (properties.contains("multifile")) {
-			for (String property : properties) {
-				if (property.startsWith("defining_file(")) {
-					selectedFile = property.substring(15, property.length()-2);
-				}
-			}
-		}
-		if (selectedFile.equals("")) {
-			selectedFile = file;
-		}
-		return selectedFile;
-	}
+//	public static String calculateOccuranceLabel(int line, String type,
+//			List<String> properties) {
+//		StringBuffer occuranceLabel = new StringBuffer("Line: ");
+//		occuranceLabel.append(Integer.toString(line));
+//		occuranceLabel.append(" (");
+//		occuranceLabel.append(type);
+////		if (type.equals("multifile")) {
+////			for (String property : properties) {
+////				if (property.startsWith("from(")) {
+////					occuranceLabel.append(" @ ");
+////					occuranceLabel.append((String) property.subSequence(5, property.length()-1));
+////				} else if (property.startsWith("for(")) {
+////					occuranceLabel.append(" @ ");
+////					occuranceLabel.append((String) property.subSequence(4, property.length()-1));
+////				}
+////			}
+////		}
+//		occuranceLabel.append(")");
+//		return occuranceLabel.toString();
+//	}
+//	
+//	private static String getOccuranceFileName(List<String> properties, String file) {
+//		String selectedFile = null;
+//		if (properties.contains("multifile")) {
+//			for (String property : properties) {
+//				if (property.startsWith("defining_file(")) {
+//					selectedFile = property.substring(15, property.length()-2);
+//				}
+//			}
+//		}
+//		if (selectedFile == null) {
+//			selectedFile = file;
+//		}
+//		return selectedFile;
+//	}
 	
 }
+
+

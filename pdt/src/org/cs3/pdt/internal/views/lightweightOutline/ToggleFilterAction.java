@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.eclipse.jface.action.Action;
@@ -5,6 +18,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.swt.custom.BusyIndicator;
 
 public class ToggleFilterAction extends Action {
 	
@@ -47,11 +61,25 @@ public class ToggleFilterAction extends Action {
 	@Override
 	public void run() {
 		if (isChecked()) {
-			viewer.addFilter(filter);
-			setImageDescriptor(active);
+			viewer.getControl().setRedraw(false);
+			BusyIndicator.showWhile(viewer.getControl().getDisplay(), new Runnable() {
+				@Override
+				public void run() {
+					viewer.addFilter(filter);
+					setImageDescriptor(active);
+				}
+			});
+			viewer.getControl().setRedraw(true);
 		} else {
-			viewer.removeFilter(filter);
-			setImageDescriptor(inactive);
+			viewer.getControl().setRedraw(false);
+			BusyIndicator.showWhile(viewer.getControl().getDisplay(), new Runnable() {
+				@Override
+				public void run() {
+					viewer.removeFilter(filter);
+					setImageDescriptor(inactive);
+				}
+			});
+			viewer.getControl().setRedraw(true);
 		}
 		if (store != null && key != null) {
 			store.setValue(key, isChecked());
@@ -59,3 +87,5 @@ public class ToggleFilterAction extends Action {
 	}
 	
 }
+
+

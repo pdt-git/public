@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.console.internal.loadfile;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -6,10 +19,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -17,7 +31,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -29,8 +42,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 
 public class GenerateLoadFileWizard extends Wizard implements INewWizard {
-
-	private static final QualifiedName KEY = new QualifiedName("pdt", "entry.point");
 
 	private List<String> consultedFiles;
 	
@@ -68,27 +79,21 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 
 	public void addEntryPoint(IFile file) {
 		try {
-			file.setPersistentProperty(KEY, "true");
+			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, "true");
 			
-			PrologConsolePlugin consolePlugin = PrologConsolePlugin.getDefault();
-
-			consolePlugin.addEntryPoint(file);
+			PDTCommonPlugin.getDefault().addEntryPoint(file);
 			
-			PrologConsole activePrologConsole = consolePlugin.getPrologConsoleService().getActivePrologConsole();
-			if (activePrologConsole != null) {
+			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 
-				PrologInterface pif = activePrologConsole.getPrologInterface();
-				
-				if (pif != null) {
-					try {
-						String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+			if (pif != null) {
+				try {
+					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
 
-						pif.queryOnce(bT("add_entry_point", "'" + prologFileName + "'"));
-					} catch (IOException e) {
-						Debug.report(e);
-					} catch (PrologInterfaceException e) {
-						Debug.report(e);
-					}
+					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, "'" + prologFileName + "'"));
+				} catch (IOException e) {
+					Debug.report(e);
+				} catch (PrologInterfaceException e) {
+					Debug.report(e);
 				}
 			}
 		} catch (CoreException e) {
@@ -160,4 +165,6 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     }
 
 }
+
+
 

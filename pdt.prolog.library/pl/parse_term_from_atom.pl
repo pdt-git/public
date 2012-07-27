@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :- module( parse_term_from_atom,
          [ atom_to_term/4       % (+TermAtom,Term,VarNames,TermPos)
          , find_term_in_atom/4  % (+Atom,+SearchTerm,From,To)
@@ -92,3 +105,5 @@ extract_position( list_position(From, To, _, _),        From,To) :- !.
 
   
       
+
+

@@ -1,9 +1,23 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 :- consult('../load_builder').
 
+:- use_module(library(lists)).
 
-:- multifile(pdt_editor_reload:pdt_reload_listener/1).
+:- multifile(pdt_reload:pdt_reload_listener/1).
 
-pdt_editor_reload:pdt_reload_listener(Files) :-
+pdt_reload:pdt_reload_listener(Files) :-
     with_mutex(meta_pred_finder,
 		(	flag(pdt_generate_factbase, true, true)
 		->	generate_factbase_with_metapred_analysis(Files)
@@ -91,3 +105,5 @@ lookup_filename_and_offset(Module:Term, FileName, Offset):-
     parse_util:predicateT(PId,FileId,_,_,_),
     parse_util:fileT(FileId,FileName,_),
     parse_util:filePosT(PId,Offset,_).  
+
+

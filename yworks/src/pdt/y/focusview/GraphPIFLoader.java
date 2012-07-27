@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package pdt.y.focusview;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -13,8 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import org.cs3.pdt.console.PrologConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -56,48 +67,43 @@ public class GraphPIFLoader {
 		String prologNameOfFileToConsult = PATH_ALIAS + "(" + FILE_TO_CONSULT + ")";
 
 		try {
-			PrologConsole activeConsole = PrologConsolePlugin.getDefault()
-					.getPrologConsoleService().getActivePrologConsole();
+			pif = getActivePifEnsuringFocusViewSubscription();
+			if (pif != null) {
 
-			if (activeConsole != null) {
-				pif = getPifForActiveConsole(activeConsole);
-				if (pif != null) {
+				String query = "consult(" + prologNameOfFileToConsult + ").";
+				sendQueryToCurrentPiF(query);
 
-					String query = "consult(" + prologNameOfFileToConsult + ").";
-					sendQueryToCurrentPiF(query);
+				sendQueryToCurrentPiF(bT("ensure_generated_factbase_for_source_file", Util.quoteAtom(focusFileForParsing)));
 
-					sendQueryToCurrentPiF(bT("ensure_generated_factbase_for_source_file", Util.quoteAtom(focusFileForParsing)));
-					
-					query = "write_focus_to_graphML('" + focusFileForParsing
-							+ "','" + Util.prologFileName(helpFile)
-							+ "', Dependencies).";
-					Map<String, Object> output = sendQueryToCurrentPiF(query);
+				query = "write_focus_to_graphML('" + focusFileForParsing
+						+ "','" + Util.prologFileName(helpFile)
+						+ "', Dependencies).";
+				Map<String, Object> output = sendQueryToCurrentPiF(query);
 
-					dependencies.clear();
-					if (output != null) {
-						@SuppressWarnings("unchecked")
-						Vector<String> deps = (Vector<String>) output.get("Dependencies");
-						dependencies.addAll(deps);
-					}
-
-					// query =
-					// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
-					// Map<String, Object> result = sendQueryToCurrentPiF(query);
-					// result.get("FocusId");
-
-					FutureTask<?> futureTask = new FutureTask<Object>(
-							new Runnable() {
-								@Override
-								public void run() {
-									try {
-										view.loadGraph(helpFile.toURI().toURL());
-									} catch (MalformedURLException e) {
-										Debug.rethrow(e);
-									}
-								};
-							}, null);
-					executor.execute(futureTask);
+				dependencies.clear();
+				if (output != null) {
+					@SuppressWarnings("unchecked")
+					Vector<String> deps = (Vector<String>) output.get("Dependencies");
+					dependencies.addAll(deps);
 				}
+
+				// query =
+				// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
+				// Map<String, Object> result = sendQueryToCurrentPiF(query);
+				// result.get("FocusId");
+
+				FutureTask<?> futureTask = new FutureTask<Object>(
+						new Runnable() {
+							@Override
+							public void run() {
+								try {
+									view.loadGraph(helpFile.toURI().toURL());
+								} catch (MalformedURLException e) {
+									Debug.rethrow(e);
+								}
+							};
+						}, null);
+				executor.execute(futureTask);
 			}
 		} catch (PrologException e1) {
 			e1.printStackTrace();
@@ -114,8 +120,8 @@ public class GraphPIFLoader {
 		return result;
 	}
 
-	public PrologInterface getPifForActiveConsole(PrologConsole activeConsole) {
-		PrologInterface pif = activeConsole.getPrologInterface();
+	public PrologInterface getActivePifEnsuringFocusViewSubscription() {
+		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 		if (pif == null) {
 			return null;
 		}
@@ -142,3 +148,5 @@ public class GraphPIFLoader {
 		return true;
 	}
 }
+
+

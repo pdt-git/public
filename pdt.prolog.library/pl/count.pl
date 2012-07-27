@@ -1,4 +1,17 @@
-% Author: Günter Kniesel
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Günter Kniesel (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 % Date:   12.06.2004
 
 /* ***********************************************************
@@ -6,6 +19,7 @@
  *  - Semantic: Counting derivations (success) versus results.
  *  - Implementation: Based on nb_setargs/3, flag/3 or findall/3.
  * *********************************************************** */
+:- use_module(library(lists)).
  
 count_facts(Goal, Nr) :-
   predicate_property(Goal, number_of_clauses(Nr)).
@@ -140,3 +154,4 @@ all_external_groups :-
             externT(Class)
    ).
    
+
