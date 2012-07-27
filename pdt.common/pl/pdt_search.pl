@@ -312,7 +312,7 @@ find_definition_contained_in(File, Module, ModuleLine, module, Functor, Arity, S
     		(	DeclFile \= File
     		-> 	(	once(module_of_file(DeclFile, MultiModule)),% module_property(MultiModule, file(DeclFile)),
     				append([for(MultiModule), defining_file(DeclFile)], PropertyList0, PropertyList),
-    				SearchCategory = multifile
+    				SearchCategory = definition %multifile
     			)
     		;	(	PropertyList = PropertyList0,
     				SearchCategory = definition

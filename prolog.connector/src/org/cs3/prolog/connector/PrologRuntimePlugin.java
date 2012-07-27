@@ -66,6 +66,15 @@ public class PrologRuntimePlugin extends Plugin {
 		super.start(context);
 	}
 	
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		super.stop(context);
+		for (File tempFile : tempFiles) {
+			try {
+				tempFile.delete();
+			} catch (SecurityException e) {}
+		}
+	}
 	
 	/**
 	 * Returns the shared instance.
@@ -485,6 +494,14 @@ public class PrologRuntimePlugin extends Plugin {
 	
 	public Set<ReconsultHook> getReconsultHooks() {
 		return currentHooks;
+	}
+	
+	private Set<File> tempFiles = new HashSet<File>();
+	
+	public void addTempFile(File tempFile) {
+		if (tempFile != null) {
+			tempFiles.add(tempFile);
+		}
 	}
 
 }

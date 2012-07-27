@@ -83,7 +83,7 @@ public class PDTOutlineQuery {
 			PrologClause clause = new PrologClause(fileName, module, entityLine, kindOfEntity, name, arity, line, type, properties);
 			OutlineModuleElement moduleElement = modules.get(module);
 			if (moduleElement == null) {
-				moduleElement = new OutlineModuleElement(clause.getOccuranceFile(), module, entityLine, kindOfEntity);
+				moduleElement = new OutlineModuleElement(clause.getOccuranceFile(), module, entityLine, kindOfEntity, fileName);
 				modules.put(module, moduleElement);
 			}
 			moduleElement.addClause(clause);

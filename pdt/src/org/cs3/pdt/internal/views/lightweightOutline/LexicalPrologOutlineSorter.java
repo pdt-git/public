@@ -15,6 +15,7 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.internal.structureElements.OutlineFileElement;
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -22,7 +23,23 @@ final class LexicalPrologOutlineSorter extends ViewerSorter {
 
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		if ((e1 instanceof OutlineClauseElement) && (e2 instanceof OutlineFileElement)) {
+		if ((e1 instanceof OutlineModuleElement) && (e2 instanceof OutlineModuleElement)) {
+			OutlineModuleElement m1 = (OutlineModuleElement) e1;
+			OutlineModuleElement m2 = (OutlineModuleElement) e2;
+			if (m1.fileEqualToEditorFile()){
+				if (m2.fileEqualToEditorFile()) {
+					return m1.getLine() - m2.getLine();
+				} else {
+					return -1;
+				}
+			} else {
+				if (m2.fileEqualToEditorFile()) {
+					return 1;
+				} else {
+					return m1.getName().compareTo(m2.getName());
+				}
+			}
+		} else if ((e1 instanceof OutlineClauseElement) && (e2 instanceof OutlineFileElement)) {
 			return -1;
 		} else if ((e1 instanceof OutlineFileElement) && (e2 instanceof OutlineClauseElement)) {
 			return 1;
