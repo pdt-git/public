@@ -13,26 +13,31 @@
 
 package org.cs3.pdt.console.internal.views;
 
+import org.cs3.pdt.common.Util;
 import org.eclipse.jface.fieldassist.IContentProposal;
 
 public class CompletionProposal implements IContentProposal{
 
-//	private String functor;
+	private String functor;
 	private int arity;
-//	private int prefixLength;
+	private int prefixLength;
 	private String label;
+	private String doc;
 	private String content;
 	
-	public CompletionProposal(String functor, int arity, int prefixLength) {
-//		this.functor = functor;
+	public CompletionProposal(String functor, int arity, int prefixLength, String doc) {
+		this.functor = functor;
 		this.arity = arity;
-//		this.prefixLength = prefixLength;
+		this.prefixLength = prefixLength;
+		this.doc = doc;
 		label = functor + "/" + arity;
-		content = (functor + getArglist()).substring(prefixLength);
 	}
 	
 	@Override
 	public String getContent() {
+		if (content == null) {
+			content = (functor + getArglist()).substring(prefixLength);
+		}
 		return content;
 	}
 
@@ -41,17 +46,23 @@ public class CompletionProposal implements IContentProposal{
 			return "";
 		}
 		
+		String[] argNames = Util.getPredicateArgNamesFromDocumentation(doc);
+		
 		StringBuffer buf = new StringBuffer("(");
 		char c = 'A';
 		for (int i = 0; i < arity; i++) {
-			if(i > 0) {
+			if (i > 0) {
 				buf.append(", ");
 			}
-			buf.append(c);
-			if (c == '_' || c == 'Z') {
-				c = '_';
+			if (argNames != null) {
+				buf.append(argNames[i]);
 			} else {
-				c++;
+				buf.append(c);
+				if (c == '_' || c == 'Z') {
+					c = '_';
+				} else {
+					c++;
+				}
 			}
 		}
 		buf.append(")");
@@ -60,7 +71,7 @@ public class CompletionProposal implements IContentProposal{
 	
 	@Override
 	public int getCursorPosition() {
-		return content.length();
+		return getContent().length();
 	}
 
 	@Override
