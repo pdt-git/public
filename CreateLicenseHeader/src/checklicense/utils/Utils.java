@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Fabian Noth
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package checklicense.utils;
 
 import java.io.BufferedReader;
@@ -14,16 +28,12 @@ public class Utils {
 		StringBuffer buf = new StringBuffer();
 		 
 		try {
- 
 			String sCurrentLine = "";
- 
 			br = new BufferedReader(new FileReader(f));
- 
 			while ((sCurrentLine = br.readLine()) != null) {
 				buf.append(sCurrentLine);
 				buf.append("\n");
 			}
- 
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -41,7 +51,6 @@ public class Utils {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
 			writer.write(str);
-			writer.write("\n");
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
