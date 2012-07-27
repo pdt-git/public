@@ -26,11 +26,13 @@ public class OutlineFileElement extends PrologSourceLocation implements PrologOu
 	
 	private List<OutlineClauseElement> clauses = new ArrayList<OutlineClauseElement>();
 	private Object parent;
+	private String label;
 	
 	public OutlineFileElement(Object parent, String file) {
 		super(file, 1);
 		fullFileName = file;
 		fileName = getFileName(file);
+		label = fileName + " (multifile)";
 		this.parent = parent;
 	}
 
@@ -46,7 +48,7 @@ public class OutlineFileElement extends PrologSourceLocation implements PrologOu
 
 	@Override
 	public String getLabel() {
-		return fileName;
+		return label;
 	}
 	
 	private String getFileName(String fullPathOfFile) {
