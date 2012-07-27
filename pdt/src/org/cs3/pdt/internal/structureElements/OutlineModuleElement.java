@@ -23,11 +23,13 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 	private String kind;   // Legal values are "module" (Prolog) or "entity" (Logtalk)
 	private Map<String, OutlinePredicateElement> predicates= new HashMap<String,OutlinePredicateElement>();
 	private Object parent;
+	private boolean fileEqualToEditorFile;
 	
-	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity) {
+	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity, String editorFileName) {
 		super(filePath,line);
 		this.name = name;
 		kind = kindOfEntity;
+		fileEqualToEditorFile = editorFileName.equals(filePath);
 	}
 	
 	public boolean hasPredicate(String key) {
@@ -51,6 +53,14 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 		return kind;
 	}
 	
+	public boolean fileEqualToEditorFile() {
+		return fileEqualToEditorFile;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
 	@Override
 	public Object[] getChildren() {
 		return predicates.values().toArray();
@@ -58,7 +68,7 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 
 	@Override
 	public String getLabel() {
-		return name;
+		return getName();
 	}
 
 	@Override
