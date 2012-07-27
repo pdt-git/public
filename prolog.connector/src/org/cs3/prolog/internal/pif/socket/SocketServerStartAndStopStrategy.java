@@ -37,6 +37,7 @@ import org.cs3.prolog.common.InputStreamPump;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntime;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.internal.pif.ServerStartAndStopStrategy;
 import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
@@ -89,8 +90,12 @@ private static JackTheProcessRipper processRipper;
 	}
 
 	private Process startSocketServer(SocketPrologInterface socketPif) {
-		socketPif.setLockFile(Util.getLockFile());
-		socketPif.setErrorLogFile(Util.getLockFile());
+		File lockFile = Util.getLockFile();
+		socketPif.setLockFile(lockFile);
+		PrologRuntimePlugin.getDefault().addTempFile(lockFile);
+		File errorLogFile = Util.getLockFile();
+		socketPif.setErrorLogFile(errorLogFile);
+		PrologRuntimePlugin.getDefault().addTempFile(errorLogFile);
 		int port = getFreePort(socketPif);
 		Process process = getNewProcess(socketPif, port);
 		try {			
@@ -225,6 +230,7 @@ private static JackTheProcessRipper processRipper;
 		File tmpFile = null;
 		try {
 			tmpFile = File.createTempFile("socketPif", null);
+			PrologRuntimePlugin.getDefault().addTempFile(tmpFile);
 			writeInitialisationToTempFile(socketPif, port, tmpFile);
 		} catch (IOException e) {
 			Debug.report(e);
