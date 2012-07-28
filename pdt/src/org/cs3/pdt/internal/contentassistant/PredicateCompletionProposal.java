@@ -206,11 +206,11 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 			for (int i=0; i<arity; i++) {
 				if (i==0) {
 					buf.append("${");
-					buf.append(args[i].trim());
+					buf.append(args[i]);
 					buf.append("}");
 				} else {
 					buf.append(", ${");
-					buf.append(args[i].trim());
+					buf.append(args[i]);
 					buf.append("}");
 				}
 			}

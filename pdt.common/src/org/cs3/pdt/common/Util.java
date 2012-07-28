@@ -3,11 +3,12 @@ package org.cs3.pdt.common;
 public class Util {
 	
 	private static final String SPAN_HIDDEN = "<span style={display:none}>";
+	private static final String NO_DOCUMENTATION = "NO_DOC";
 	
 	public static String[] getPredicateArgNamesFromDocumentation(String doc) {
 		String[] names = null;
-		if (doc != null) {
-			if(doc.startsWith("<dl>\n<dt")){
+		if (doc != null && !doc.equals(NO_DOCUMENTATION)) {
+			if (doc.contains("<dt class=\"pubdef\">")){
 				if (doc.indexOf("arglist") > 0 && doc.indexOf("</var>") > doc.indexOf("arglist")) {
 					String commaSeparatedArgs = doc.substring(doc.indexOf("arglist") + 10, doc.indexOf("</var>") -1);
 					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\?", "");
@@ -17,7 +18,7 @@ public class Util {
 					for (int i = 0; i < names.length; i++) {
 						int typeSeparator = names[i].indexOf(':');
 						if (typeSeparator >= 0) {
-							names[i] = names[i].substring(0, typeSeparator);
+							names[i] = names[i].substring(0, typeSeparator).trim();
 						}
 					}
 				}
