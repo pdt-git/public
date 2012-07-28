@@ -18,7 +18,6 @@
 :- object(logtalk_adapter).
 
 :- public([
-	pdt_reload/1,
 	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
@@ -49,51 +48,6 @@
 
 %:- use_module(pdt_prolog_library(utils4modules)).
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
-
-
-:- if(current_logtalk_flag(version, version(3, _, _))).
-	:- multifile(logtalk::message_hook/3).
-	:- dynamic(logtalk::message_hook/3).
-
-	logtalk::message_hook(Term, _Kind, _Tokens) :-
-%		nonvar(Term),
-%		arg(1, Term, Path),
-%		is_absolute_file_path(Path),
-%		arg(2, Term, Lines),
-%		(	integer(Lines)
-%			% if integer(Lines), Lines =< 0 -> no line number available
-%		;	Lines = Begin - End,
-%		 	integer(Begin),
-%			integer(End)
-%		),
-		fail.
-:- endif.
-
-               /*************************************
-                * PDT RELOAD                       *
-                *************************************/
-
-%% pdt_reload(File) is det.
-%
-% wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
-
-% Logtalk
-pdt_reload(FullPath) :-
-	write(FullPath), nl,
-	split_file_path:split_file_path(FullPath, Directory, File, BaseName, lgt),
-	setup_call_cleanup(
-		working_directory(Current, Directory),     % SWI-Prolog
-		logtalk_reload(Directory, File, BaseName),
-		working_directory(_, Current)              % SWI-Prolog
-   ).
-
-logtalk_reload(Directory, File, BaseName) :-
-	(	logtalk::loaded_file(File, Directory, Options) ->
-		% we're reloading a source file; use the same explicit compilation options as before
-		logtalk_load(BaseName, Options)
-	;	% first time; assume only implicit compilation options
-		logtalk_load(BaseName)
-	).
 
 
         /***********************************************************************
