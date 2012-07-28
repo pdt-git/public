@@ -13,8 +13,8 @@
 
 :- multifile(logtalk_library_path/2).
 :- dynamic(logtalk_library_path/2).
-logtalk_library_path(pdt_pl_lgt, Library) :-
-	absolute_file_name(pdt_pl('lgt/loader.pl'), FilePath),
+logtalk_library_path(pdt_common_pl_lgt, Library) :-
+	absolute_file_name(pdt_common_pl('lgt/loader.pl'), FilePath),
 	file_directory_name(FilePath,Directory),
 	atom_concat(Directory, '/', Library).
 
@@ -23,8 +23,8 @@ load_lgt_adapter :-
     -> logtalk_load([
             library(types_loader),
             library(metapredicates_loader),
-		    pdt_pl_lgt(utils4entities),
-			pdt_pl_lgt(logtalk_adapter)
+		    pdt_common_pl_lgt(utils4entities),
+			pdt_common_pl_lgt(logtalk_adapter)
        ])
 	;  true
 	).

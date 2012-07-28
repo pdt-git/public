@@ -11,5 +11,5 @@
  * 
  ****************************************************************************/
 
- :- [split_file_path].
- :- [pdt_reload].          % pdt_reload/1 & friends
+ :- use_module(split_file_path).
+ :- use_module(pdt_reload).          % pdt_reload/1 & friends

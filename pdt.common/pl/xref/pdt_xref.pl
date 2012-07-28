@@ -19,7 +19,7 @@
 
 :- use_module(pdt_prolog_library(utils4modules)).
 
-:- use_module( properties, [properties_for_predicate/4] ).
+:- use_module( pdt_common_pl(properties), [properties_for_predicate/4] ).
 :- use_module(library(lists)).
 
 %:- ensure_loaded('../pdt_factbase.pl').

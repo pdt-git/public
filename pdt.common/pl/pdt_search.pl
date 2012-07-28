@@ -23,7 +23,7 @@
 :- use_module( prolog_connector_pl(split_file_path),
              [ split_file_path/4                % (File,Folder,FileName,BaseName,Extension)
              ] ).
-:- use_module( pdt_xref, 
+:- reexport(   'xref/pdt_xref', 
              [ find_reference_to/12             % ...
              ] ).
 :- use_module( properties, 
@@ -39,7 +39,7 @@
 
 
 % TODO: Why this import?
-:- user:consult(pdt_runtime_builder_analyzer('meta_pred_toplevel.pl')).
+:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
 
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
