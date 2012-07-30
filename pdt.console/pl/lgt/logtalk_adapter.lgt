@@ -52,10 +52,10 @@
 
 
 :- if(current_logtalk_flag(version, version(3, _, _))).
-	:- multifile(logtalk::message_hook/3).
-	:- dynamic(logtalk::message_hook/3).
+	:- multifile(logtalk::message_hook/4).
+	:- dynamic(logtalk::message_hook/4).
 
-	logtalk::message_hook(Term, _Kind, _Tokens) :-
+	logtalk::message_hook(_Term, _Kind, _Component, _Tokens) :-
 %		nonvar(Term),
 %		arg(1, Term, Path),
 %		is_absolute_file_path(Path),
@@ -503,9 +503,9 @@ deactivate_warning_and_error_tracing:-
 %
 % @author trho
 %
-:- multifile(user:message_hook/3).
+:- multifile(user::message_hook/3).
 
-user:message_hook(_Term, Level, Lines) :-
+user::message_hook(_Term, Level, Lines) :-
 	warning_and_error_tracing,
 	pdt_term_position(StartLine),
 	assertz(traced_messages(Level, StartLine, Lines)),
