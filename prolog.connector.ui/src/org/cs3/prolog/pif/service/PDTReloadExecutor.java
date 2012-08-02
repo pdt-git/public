@@ -1,9 +1,10 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
+ * Author: Andreas Becker
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * Copyright (C): 2012, CS Dept. III, University of Bonn
  * 
  * All rights reserved. This program is  made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,12 +21,28 @@ import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * This interface is used to define an executor of the pdt_reload/1 predicate
+ * during the consulting process in an {@link IPrologInterfaceService}.
+ */
 public interface PDTReloadExecutor {
-	
+
+	/**
+	 * @return The priority of this executor.
+	 */
 	int getPriority();
-	
-	boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException; 
-	
+
+	/**
+	 * @param pif
+	 *            the {@link PrologInterface} on which the pdt_reload/1
+	 *            predicate is called to consult the list of files
+	 * @param files
+	 *            a list of files which should be consulted
+	 * @param monitor
+	 *            a progress monitor
+	 * @return True if consulting is successful, otherwise false
+	 * @throws PrologInterfaceException
+	 */
+	boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException;
+
 }
-
-
