@@ -50,9 +50,11 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 			return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 		}
 		if(element instanceof OutlineModuleElement) {
-			//			ModuleOutlineElement module = (ModuleOutlineElement)element;
-//			if(module.hasChildren())
+			if (((OutlineModuleElement) element).fileEqualToEditorFile()) {
 				return ImageRepository.getImage(ImageRepository.PACKAGE);
+			} else {
+				return ImageRepository.getImage(ImageRepository.MODULE_FOREIGN);
+			}
 		}
 		if (element instanceof OutlineClauseElement) {
 			return ImageRepository.getImage(ImageRepository.SEARCH_MATCH);
