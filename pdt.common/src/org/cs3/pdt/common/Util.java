@@ -18,8 +18,9 @@ public class Util {
 					for (int i = 0; i < names.length; i++) {
 						int typeSeparator = names[i].indexOf(':');
 						if (typeSeparator >= 0) {
-							names[i] = names[i].substring(0, typeSeparator).trim();
+							names[i] = names[i].substring(0, typeSeparator);
 						}
+						names[i] = names[i].trim();
 					}
 				}
 			} else if (doc.indexOf(SPAN_HIDDEN) > 0 && doc.indexOf("</span>") > 0) {
