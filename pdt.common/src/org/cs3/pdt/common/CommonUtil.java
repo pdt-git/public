@@ -1,6 +1,14 @@
 package org.cs3.pdt.common;
 
-public class Util {
+import java.io.File;
+
+import org.cs3.prolog.common.Util;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.part.FileEditorInput;
+
+public class CommonUtil {
 	
 	private static final String SPAN_HIDDEN = "<span style={display:none}>";
 	private static final String NO_DOCUMENTATION = "NO_DOC";
@@ -32,6 +40,21 @@ public class Util {
 			}
 		}
 		return names;
+	}
+	
+	public static String prologFileName(IEditorInput input) {
+		if (input instanceof FileEditorInput) {
+			FileEditorInput fileEditorInput = (FileEditorInput)input;
+			IPath path = fileEditorInput.getPath();
+			File file = path.toFile();
+			return Util.prologFileName(file);
+		}
+		if (input instanceof FileStoreEditorInput) {
+			FileStoreEditorInput e = (FileStoreEditorInput)input;
+			File file = new File(e.getURI());
+			return Util.prologFileName(file);
+		}
+		return input.getName();
 	}
 
 }
