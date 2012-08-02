@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.prolog.pif.service;
+package org.cs3.prolog.internal.pif.service;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
@@ -23,6 +23,7 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.PDTReloadExecutor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
