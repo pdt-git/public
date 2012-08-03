@@ -103,9 +103,11 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
 			throws PrologException, PrologInterfaceException {
 		
-		String module = "Module";               // Modul ist freie Variable
+		String module;               
 		if(goal.getModule()!=null)
 			module ="'"+ goal.getModule()+ "'"; // Modul ist explizit gesetzt
+		else
+			module = "Module";                  // Modul ist freie Variable
 
 		String query = buildSearchQuery(goal, module);
 		

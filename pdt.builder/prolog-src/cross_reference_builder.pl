@@ -50,7 +50,7 @@ find_reference_for(LId,Module,Functor,Arity):-
    		)
    	->	assert(call_edge(Id,LId))	
 	;	catch(	(	(	functor(Term, Functor, Arity),
-    					declared_in_module(Module, Term, DefModule),
+    					defined_in(Module, Term, DefModule),
     					/*(	var(Module)
     					->	
     					;	*/predicate_property(DefModule:Term, built_in)

@@ -69,7 +69,7 @@ initialize_meta_pred_search:-
     
   
 find_predefined_metas(Spec, Module):-
-    declared_in_module(Module,Functor, Arity, Module),
+    defined_in(Module,Functor, Arity, Module),
     functor(Head,Functor,Arity),
     predicate_property(Module:Head, built_in),
    	predicate_property(Module:Head, meta_predicate(Spec)),

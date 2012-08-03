@@ -3,7 +3,7 @@
  * 
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * Copyright (C): 2012, CS Dept. III, University of Bonn
  * 
  * All rights reserved. This program is  made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,22 +13,19 @@
 
 :- multifile(logtalk_library_path/2).
 :- dynamic(logtalk_library_path/2).
-logtalk_library_path(pdt_console_pl_lgt, Library) :-
-	absolute_file_name(lib_pdt_console_pl('lgt/loader.pl'), FilePath),
+logtalk_library_path(prolog_connector_pl_lgt, Library) :-
+	absolute_file_name(prolog_connector_pl('lgt/loader.pl'), FilePath),
 	file_directory_name(FilePath,Directory),
 	atom_concat(Directory, '/', Library).
 
-load_lgt_adapter :-
+load_lgt_reload_adapter :-
     (current_predicate(user:logtalk_load/1)
     -> logtalk_load([
-            library(types_loader),
-            library(metapredicates_loader),
-		    pdt_console_pl_lgt(utils4entities),
-			pdt_console_pl_lgt(logtalk_adapter)
+			prolog_connector_pl_lgt(logtalk_reload_adapter)
        ])
 	;  true
 	).
 	
-:- initialization( load_lgt_adapter ). 
+:- initialization( load_lgt_reload_adapter ). 
 
 

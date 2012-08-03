@@ -12,35 +12,48 @@
  ****************************************************************************/
 
 :- module( pdt_xref,
-         [ find_reference_to/12 % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+         [ find_reference_to/12 % +Functor,+Arity,?DefFile,?DefModule,
+                                % ?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind,?PropertyList
          ]
          ).
 
 :- use_module(pdt_prolog_library(utils4modules)).
-:- use_module(properties).
+
+:- use_module( pdt_common_pl(properties), [properties_for_predicate/4] ).
 :- use_module(library(lists)).
+
 %:- ensure_loaded('../pdt_factbase.pl').
 %:- use_module('../modules_and_visibility').
     /*********************************************
      * FIND REFERENCES TO A PARTICULAR PREDICATE *
      ********************************************/
-
+find_unique( Goal ) :-
+    setof( Goal, Goal, Set),
+    member(Goal, Set).
+    
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,?PropertyList)
-find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-
+find_reference_to(Functor,Arity,DefFile, SearchMod,
+                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-
+    find_unique(  find_reference_to__(Functor,Arity,DefFile, SearchMod,
+                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) ).
+    
+find_reference_to__(Functor,Arity,DefFile, SearchMod,
+                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-                  
 	( nonvar(DefFile)
-    -> module_of_file(DefFile,DefModule)
+    -> module_of_file(DefFile,SearchMod)
     ; true % Defining File and defining Module remain free ==> 
            % Search for references to independent definitions
            % <-- Does that make sense???
     ),
     ( var(Arity) % Need to backtrack over all declared Functor/Arity combinations:
-    -> ( setof( Functor/Arity, DefModule^current_predicate(DefModule:Functor/Arity), Set),
+    -> ( setof( Functor/Arity, SearchMod^current_predicate(SearchMod:Functor/Arity), Set),
          member(Functor/Arity, Set)
        )
     ; true % Arity already bound in input
     ),
-    functor(T,Functor,Arity),
-    pdt_xref_data(DefModule:T,RefModule:RefHead,Ref,Kind),
+    functor(SearchTerm,Functor,Arity),
+    pdt_xref_data(SearchMod:SearchTerm,RefModule:RefHead,Ref,Kind),
+
     functor(RefHead,RefName,RefArity),
     predicate_property(RefModule:RefHead,_),
     nth_clause(RefModule:RefHead,Nth,Ref),
@@ -50,19 +63,20 @@ find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefName,RefArity,Re
 
 go :- % To list all results quickly call 
       % ?- pdt_xref:go, fail.
-    find_reference_to(defined_in_file,6,__DefFile, __DefModule,RefModule,RefHead,RefFile,RefLine,Nth,Kind,_PropertyList),
+    find_reference_to(defined_in_file,6,__DefFile, __DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,_PropertyList),
     format( '~a reference from ~a:~w clause ~a, line ~a, file ~n~a~n~n',
-            [Kind, RefModule,RefHead, Nth, RefLine, RefFile]
+            [Kind, RefModule,RefName,RefArity, Nth, RefLine, RefFile]
     ).
-
-
+	
 
 pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
    current_predicate(RefModule:F/A),     % For all defined predicates
    functor(RefHead,F,A),   
    nth_clause(RefModule:RefHead,_N,Ref),   % For all their clauses
-   '$xr_member'(Ref, X),					% Get a term referenced by that clause
-   extractModule(X,T,DefModule,RefHead,Kind).     % (via SWI-Prolog's internal xref data)
+   '$xr_member'(Ref, QualifiedTerm),					% Get a term referenced by that clause
+   is_reference_to(DefModule:T,RefHead,QualifiedTerm,Kind).     % (via SWI-Prolog's internal xref data)
+ 
+
    
 %pdt_xref_data(DefModule:DefHead,RefModule:RefHead,Ref, Kind) :-
 %    functor(DefHead, DefFunctor, DefArity),
@@ -77,25 +91,31 @@ pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
 %    predicate_property(RefModule:RefHead, _),
 %    clause(RefModule:RefHead, Ref),
 %	 parse_util:termT(RefLitId, RefTerm),
-%    extractModule(RefModule:RefTerm,DefHead,DeclModule,RefHead,Kind).
+%    is_reference_to(DeclModule:DefHead,RefHead,RefModule:RefTerm,Kind).
 	    
-      
 
+is_reference_to(DefModule:DefTerm, RefHead, Reference, RefKind) :-
+    ( Reference = RefModule:RefTerm
+    -> is_reference_to__(DefModule,DefTerm, RefHead, RefModule, RefTerm, RefKind)
+    ;  is_reference_to__(DefModule,DefTerm, RefHead, _______, Reference, RefKind)
+    ).
 
-extractModule(_:T,_,_,_,_) :- 
-    var(T),
+is_reference_to__(DefModule,DefTerm, RefHead, RefModule, RefTerm, RefKind) :- 
+    nonvar(DefTerm),
+    nonvar(RefTerm),
+    DefTerm=RefTerm,  % It is a reference! Determine its kind:
+    ref_kind(DefModule, DefTerm, RefHead, RefModule,  RefKind).
+
+ref_kind(DefModule, _, _, RefModule, RefKind) :-     
+    DefModule == RefModule,
     !,
-    fail.
-extractModule(DefModule:Term,Term,DefModule,_RefHead, call) :-
-    !. 
-extractModule(Module:Term,Term,DefModule,_RefHead, call) :-
+    RefKind = call.
+ref_kind(_, _, '$mode'(_, _), _, RefKind) :- 
     !,
-    declared_in_module(Module, Term, DefiningModule),
-    declared_in_module(DefModule, Term, DefiningModule).    
-extractModule(Term,Term,_DefModule,'$mode'(_, _), prologdoc) :-
-    !.
-extractModule(Term,Term,_DefModule,_RefHead, termORmetacall) .      
-                     
+    RefKind=prologdoc.   
+ref_kind(_, _, _, _, RefKind) :- 
+    RefKind=termORmetacall.
+             
 
 %               /********************************************
 %                * FIND REFERENCES TO A PREDICATE DEFINITON *

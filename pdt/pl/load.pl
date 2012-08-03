@@ -1,3 +1,5 @@
+
+
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
@@ -11,7 +13,11 @@
  * 
  ****************************************************************************/
 
-:- [source_files].
+%:- module(pdtplugin,[]). 
+
+%:- consult('lgt/loader.pl').                   % Search, outline etc. for Logtalk
+
+:- use_module(source_files).
 :- ['editor/load'].
-:- [pdt_smells].
+:- use_module(pdt_smells).
 
