@@ -498,7 +498,6 @@ public class FocusViewPlugin extends ViewPart {
 			if (part instanceof IEditorPart) {
 				IEditorPart editorPart = (IEditorPart) part;
 				final String fileName = CommonUtil.prologFileName(editorPart.getEditorInput());
-				System.out.println(fileName);
 				if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro")) {
 					return;
 				}
