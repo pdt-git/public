@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.CommonUtil;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.cterm.CTerm;
@@ -41,7 +42,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 public class PredicateCompletionProposal extends ComparableCompletionProposal implements ICompletionProposalExtension5,ICompletionProposalExtension3, ICompletionProposalExtension2, IInformationControlCreator{
-	private static final String SPAN_HIDDEN = "<span style={display:none}>";
 	private int offset;
 	private int length;
 	private int arity;
@@ -189,26 +189,7 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 			return name;
 		}
 		String[] args = null; 
-		if (doc != null) {
-			if(doc.startsWith("<dl>\n<dt")){
-				if (doc.indexOf("arglist") > 0 && doc.indexOf("</var>") > doc.indexOf("arglist")) {
-					String commaSeparatedArgs = doc.substring(doc.indexOf("arglist") + 10, doc.indexOf("</var>") -1);
-					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\?", "");
-					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\-", "");
-					commaSeparatedArgs = commaSeparatedArgs.replaceAll("\\+", "");
-					args = commaSeparatedArgs.split(",");
-					for (int i = 0; i < args.length; i++) {
-						int typeSeparator = args[i].indexOf(':');
-						if (typeSeparator >= 0) {
-							args[i] = args[i].substring(0, typeSeparator);
-						}
-					}
-				}
-			} else if (doc.indexOf(SPAN_HIDDEN) > 0 && doc.indexOf("</span>") > 0) {
-				String head = doc.substring(doc.indexOf(SPAN_HIDDEN) + SPAN_HIDDEN.length(), doc.indexOf("</span>"));
-				args = head.substring(head.indexOf("(") + 1, head.lastIndexOf(")")).split(",");
-			}
-		}
+		args = CommonUtil.getPredicateArgNamesFromDocumentation(doc);
 		StringBuffer buf = new StringBuffer(name);
 		buf.append("(");
 		if (args == null) {
@@ -225,11 +206,11 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 			for (int i=0; i<arity; i++) {
 				if (i==0) {
 					buf.append("${");
-					buf.append(args[i].trim());
+					buf.append(args[i]);
 					buf.append("}");
 				} else {
 					buf.append(", ${");
-					buf.append(args[i].trim());
+					buf.append(args[i]);
 					buf.append("}");
 				}
 			}

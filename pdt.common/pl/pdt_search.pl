@@ -20,14 +20,27 @@
          , find_pred_for_editor_completion/9
          ]).
 
+:- use_module( prolog_connector_pl(split_file_path),
+             [ split_file_path/4                % (File,Folder,FileName,BaseName,Extension)
+             ] ).
+:- reexport(   'xref/pdt_xref', 
+             [ find_reference_to/12             % ...
+             ] ).
+:- use_module( properties, 
+             [ properties_for_predicate/4
+             ] ).
+:- use_module( pdt_prolog_library(utils4modules),
+             [ module_of_file/2                 % (File,FileModule)
+             , defined_in/4             % (SubModule,Name,Arity,DeclModule),
+             , defined_in_module/3              % (Module,Name,Arity),
+             , declared_in_file/4               % (Module,Name,Arity,Location)
+             , defined_in_files/4               % (Module,Name,Arity,Locations)
+             ] ).
 
-% TODO: The following four lines are duplicated in the loader.pl file: 
+
+% TODO: Why this import?
 :- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
-:- use_module(pdt_builder_analyzer(pdt_xref_experimental)).
-:- use_module(pdt_builder_analyzer(properties)).
-:- use_module(pdt_prolog_library(utils4modules)).
 
-:- use_module(prolog_connector_pl(split_file_path)).                    % general utility
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
 
@@ -39,6 +52,10 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
+
+% find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
+%                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
+%                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
 % Logtalk
 find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
     Term \= _:_,
@@ -312,7 +329,7 @@ find_definition_contained_in(File, Module, ModuleLine, module, Functor, Arity, S
     		(	DeclFile \= File
     		-> 	(	once(module_of_file(DeclFile, MultiModule)),% module_property(MultiModule, file(DeclFile)),
     				append([for(MultiModule), defining_file(DeclFile)], PropertyList0, PropertyList),
-    				SearchCategory = multifile
+    				SearchCategory = definition %multifile
     			)
     		;	(	PropertyList = PropertyList0,
     				SearchCategory = definition

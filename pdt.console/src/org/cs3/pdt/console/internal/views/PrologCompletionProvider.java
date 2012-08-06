@@ -47,14 +47,15 @@ public class PrologCompletionProvider {
 		}
 		
 		ArrayList<CompletionProposal> proposals = new ArrayList<CompletionProposal>();
-		String query = bT(PDTCommonPredicates.FIND_PRED, "'_'", Util.quoteAtom(prefix), "_", "Name", "Arity", "Public", "_" , "_");
+		String query = bT(PDTCommonPredicates.FIND_PRED, "'_'", Util.quoteAtom(prefix), "_", "Name", "Arity", "Public", "_" , "Doc");
 		List<Map<String, Object>> results;
 		try {
 			results = pif.queryAll(query);
 			for (Map<String,Object> result : results) {
 				int arity = Integer.parseInt(result.get("Arity").toString());
 				String name = result.get("Name").toString();
-				proposals.add(new CompletionProposal(name, arity, prefixLength));
+				String doc = result.get("Doc").toString();
+				proposals.add(new CompletionProposal(name, arity, prefixLength, doc));
 			}
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);

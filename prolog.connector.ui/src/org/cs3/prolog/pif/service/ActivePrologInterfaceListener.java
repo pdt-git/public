@@ -1,9 +1,10 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
+ * Author: Andreas Becker
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * Copyright (C): 2012, CS Dept. III, University of Bonn
  * 
  * All rights reserved. This program is  made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,10 +16,18 @@ package org.cs3.prolog.pif.service;
 
 import org.cs3.prolog.pif.PrologInterface;
 
+/**
+ * This interface is used to listen to the active {@link PrologInterface}
+ * defined by an {@link IPrologInterfaceService}.
+ */
 public interface ActivePrologInterfaceListener {
 
+	/**
+	 * The active {@link PrologInterface} has changed
+	 * 
+	 * @param pif
+	 *            the new {@link PrologInterface}
+	 */
 	void activePrologInterfaceChanged(PrologInterface pif);
-	
+
 }
-
-

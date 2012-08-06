@@ -45,10 +45,13 @@
 
 pdt_reload(FileOrFiles) :-
 	with_mutex('reloadMutex',(
-		activate_warning_and_error_tracing,
-		pdt_reload__(FileOrFiles),
-		deactivate_warning_and_error_tracing,
-		notify_reload_listeners(FileOrFiles)
+		setup_call_cleanup(
+			activate_warning_and_error_tracing,
+			(	pdt_reload__(FileOrFiles),
+				notify_reload_listeners(FileOrFiles)
+			),
+			deactivate_warning_and_error_tracing
+		)
 	)).
 
 pdt_reload__(Files):-
@@ -60,7 +63,7 @@ pdt_reload__(Files):-
 pdt_reload__(File):-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::pdt_reload(File),
+    logtalk_reload_adapter::pdt_reload(File),
     assertz(reloaded_file__(File)).
 
 % SWI-Prolog

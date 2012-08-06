@@ -17,7 +17,6 @@
 								]).
 								
 :- use_module(pdt_prolog_library(utils4modules)).
-:- use_module(pdt_xref_experimental).
 
 :- use_module(library(lists)).
 

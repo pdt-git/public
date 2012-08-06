@@ -51,7 +51,8 @@ call_and_report_contex_module(Goal) :-
 report_contex_module(M) :- context_module(M),
     log_on_stdout('Context module = ~w.~n',[M]).
     
-
+   
+    
 /*
  * call_in_module(+Module, +Head) is nondet
  * 

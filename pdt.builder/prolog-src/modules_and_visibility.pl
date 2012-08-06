@@ -96,8 +96,8 @@ build_export_edge(Functor/Arity,FileId):-	% this has to be a predicate imported 
 %
 get_predicate_referenced_as(Module, Functor, Arity, PId):-
     predicateT_ri(Functor, Arity, _AModule,PId),
-    visible_in_module(PId, Module)
-    , !.
+    visible_in_module(PId, Module), 
+    !.
 get_predicate_referenced_as(Module, Functor, Arity, PId):-
     visible_in_module_as(PId, Module, Functor,[Module]),    
 	predicateT(PId,_,_,Arity,_),
@@ -105,7 +105,7 @@ get_predicate_referenced_as(Module, Functor, Arity, PId):-
 get_predicate_referenced_as(Module, Functor, Arity, Predefined):-
     functor(Term, Functor, Arity),
     predicate_property(Module:Term, built_in),
-    declared_in_module(Module, Term, DefModule),
+    defined_in(DefModule, Functor, Arity),
     Predefined = predefined(DefModule, Functor, Arity).
     
 
