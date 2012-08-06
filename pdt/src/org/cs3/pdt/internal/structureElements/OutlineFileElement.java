@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.cs3.pdt.common.metadata.PrologSourceLocation;
 
-public class OutlineFileElement extends PrologSourceLocation implements PrologOutlineTreeElement, Comparable<OutlineFileElement> {
+public class OutlineFileElement extends PrologSourceLocation implements PrologOutlineTreeElement {
 
 	private String fullFileName;
 	private String fileName;
@@ -73,11 +73,10 @@ public class OutlineFileElement extends PrologSourceLocation implements PrologOu
 		}
 	}
 
-	@Override
-	public int compareTo(OutlineFileElement o) {
-		return fullFileName.compareTo(o.fullFileName);
+	public String getFileName() {
+		return fileName;
 	}
-
+	
 	@Override
 	public Object getParent() {
 		return parent;
