@@ -86,7 +86,7 @@ module_of_file(File,Module):-
                                            % whose name starts with $
 module_of_file(File,Module):-
     atom(File),                            % If File is provided as input
-    \+ module_property(Module,file(File)), % and there is no module in that file
+    \+ module_property(_,file(File)),      % and there is no module in that file
     ( Module=user                          % the default module is 'user'
     ; Module=system                        % but it could also be 'system'
     ).
