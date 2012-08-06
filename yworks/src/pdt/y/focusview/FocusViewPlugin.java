@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import org.cs3.pdt.common.CommonUtil;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.eclipse.albireo.core.SwingControl;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -497,7 +497,7 @@ public class FocusViewPlugin extends ViewPart {
 		public void partActivated(IWorkbenchPart part) {
 			if (part instanceof IEditorPart) {
 				IEditorPart editorPart = (IEditorPart) part;
-				final String fileName = CommonUtil.prologFileName(editorPart.getEditorInput());
+				final String fileName = PDTCommonUtil.prologFileName(editorPart.getEditorInput());
 				if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro")) {
 					return;
 				}

@@ -27,15 +27,15 @@ import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
-import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
-import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -367,7 +367,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			try {
 				file = FileUtils.findFileForLocation(selectedFile);
 				SourceLocation loc = createLocation(functor, arity, line, file);
-				PDTUtils.showSourceLocation(loc);
+				PDTCommonUtil.showSourceLocation(loc);
 			} catch (IOException e) {
 			}
 		}

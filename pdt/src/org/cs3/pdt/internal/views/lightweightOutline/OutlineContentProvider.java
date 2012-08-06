@@ -13,8 +13,8 @@
 
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologOutlineTreeElement;
-import org.cs3.pdt.internal.structureElements.PrologTreeElement;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;

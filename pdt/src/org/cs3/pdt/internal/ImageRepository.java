@@ -64,10 +64,6 @@ public class ImageRepository {
 
     public final static String PE_TERM = "term.gif";
     
-    public final static String FILE = "prolog_file.gif";
-    
-    public final static String MATCH = "sample.gif";
-    
     public final static String PACKAGE = "package_obj.gif";
     
     public static final String MODULE_FOREIGN = "module_foreign.png";
@@ -76,8 +72,6 @@ public class ImageRepository {
     
     public final static String PROLOG_FILE_UNCONSULTED = "prolog_file.gif";
 
-    public static final String PROLOG_CONSULTED = "consulted.png";
-    
     public static final String PROLOG_ENTRY_POINT = "entry_point.gif";
     
     public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
@@ -95,8 +89,6 @@ public class ImageRepository {
 	
 
     public static final String PE_ATOM = "atom.png";
-
-	public static final String BREAK = "break.gif";
 
 	public static final String RESTART = "restart.gif";
 

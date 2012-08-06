@@ -16,7 +16,7 @@ package org.cs3.pdt.internal.structureElements;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cs3.pdt.metadata.PrologSourceLocation;
+import org.cs3.pdt.common.metadata.PrologSourceLocation;
 
 public class OutlineModuleElement extends PrologSourceLocation implements PrologOutlineTreeElement{
 	private String name;  

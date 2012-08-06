@@ -23,6 +23,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
@@ -31,7 +32,6 @@ import org.cs3.pdt.internal.actions.RunUnitTestAction;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
-import org.cs3.pdt.metadata.Goal;
 import org.cs3.pdt.metadata.GoalProvider;
 import org.cs3.pdt.metadata.PredicateReadingUtilities;
 import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;

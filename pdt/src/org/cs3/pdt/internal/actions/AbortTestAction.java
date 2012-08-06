@@ -22,7 +22,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
 
-import org.cs3.pdt.PDTUtils;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;

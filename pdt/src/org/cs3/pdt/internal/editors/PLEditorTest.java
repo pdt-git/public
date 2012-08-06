@@ -22,7 +22,7 @@ package org.cs3.pdt.internal.editors;
 
 import junit.framework.TestCase;
 
-import org.cs3.pdt.metadata.Goal;
+import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.metadata.GoalProvider;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;

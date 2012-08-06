@@ -25,7 +25,6 @@ import java.util.Vector;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTPredicates;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;

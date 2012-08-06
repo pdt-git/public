@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.cs3.pdt.metadata.Predicate;
+import org.cs3.pdt.common.metadata.Predicate;
 
 public class OutlinePredicateElement extends Predicate implements PrologOutlineTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;

@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.internal.editors;
 
-import org.cs3.pdt.common.CommonUtil;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;
 
@@ -25,7 +25,7 @@ public class PDTChangedFileInformation implements ISelection{
 	}
 	
 	public String getPrologFileName() {
-		return CommonUtil.prologFileName(editorInput);
+		return PDTCommonUtil.prologFileName(editorInput);
 	}
 
 	@Override

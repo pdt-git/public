@@ -13,6 +13,7 @@
 
 package org.cs3.pdt.metadata;
 
+import org.cs3.pdt.common.metadata.Goal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 

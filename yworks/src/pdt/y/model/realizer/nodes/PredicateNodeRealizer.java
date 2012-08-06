@@ -17,8 +17,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import pdt.y.model.GraphModel;
-import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PredicateAppearancePreferences;
+import pdt.y.preferences.PredicateLayoutPreferences;
 import y.geom.YDimension;
 import y.view.LineType;
 import y.view.NodeLabel;

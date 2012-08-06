@@ -13,6 +13,7 @@
 package org.cs3.pdt.console.internal.views;
 
 import java.util.ArrayList;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.bindings.keys.KeyStroke;

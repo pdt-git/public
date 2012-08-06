@@ -22,16 +22,20 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class PDTCommonPlugin implements BundleActivator {
+public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator {
 
 	public static final QualifiedName ENTRY_POINT_KEY = new QualifiedName("pdt", "entry.point");
 	
 	private static BundleContext context;
 
 	private static PDTCommonPlugin plugin;
+	
+	public static final String PLUGIN_ID = "org.cs3.pdt.common";
 	
 	public PDTCommonPlugin() {
 		super();
@@ -55,13 +59,13 @@ public class PDTCommonPlugin implements BundleActivator {
 	 */
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
-		PDTCommonPlugin.context = null;
+		super.stop(bundleContext);
 	}
 	
 	
 	@Override
 	public void start(BundleContext bundleContext) throws Exception{
-		PDTCommonPlugin.context = bundleContext;
+		super.start(bundleContext);
 		ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
 			@Override
 			public boolean visit(IResource resource) throws CoreException {
@@ -76,6 +80,21 @@ public class PDTCommonPlugin implements BundleActivator {
 			
 		});
 
+	}
+	
+	/**
+	 * Returns a section in the Prolog plugin's dialog settings. If the section doesn't exist yet, it is created.
+	 *
+	 * @param name the name of the section
+	 * @return the section of the given name
+	 */
+	public IDialogSettings getDialogSettingsSection(String name) {
+		IDialogSettings dialogSettings= getDialogSettings();
+		IDialogSettings section= dialogSettings.getSection(name);
+		if (section == null) {
+			section= dialogSettings.addNewSection(name);
+		}
+		return section;
 	}
 	
 	/* 

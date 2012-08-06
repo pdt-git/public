@@ -17,12 +17,12 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.ComparisonFailure;
+import junit.framework.TestCase;
+
 import org.cs3.prolog.load.FileSearchPathConfigurator;
 import org.cs3.prolog.load.PrologLibrary;
 import org.cs3.prolog.load.PrologLibraryManager;
-
-import junit.framework.ComparisonFailure;
-import junit.framework.TestCase;
 
 public class FileSearchPathConfiguratorTest extends TestCase {
 	PrologLibraryManager mgr;

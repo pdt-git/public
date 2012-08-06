@@ -14,6 +14,7 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.Map;
+
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 
 

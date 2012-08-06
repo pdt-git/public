@@ -85,7 +85,7 @@ public class OpenInEditorViewMode extends ViewMode {
 				@Override
 				public void run() {
 					try {
-						UIUtils.selectInPrologEditor(start, length, filename);
+						UIUtils.selectInEditor(start, length, filename, true);
 					} catch (PartInitException e) {
 						e.printStackTrace();
 					}

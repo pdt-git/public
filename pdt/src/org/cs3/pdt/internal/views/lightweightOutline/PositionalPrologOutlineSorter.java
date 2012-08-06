@@ -13,10 +13,10 @@
 
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
-import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 

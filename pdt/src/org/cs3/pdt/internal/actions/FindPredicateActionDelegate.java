@@ -20,11 +20,11 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.metadata.Goal;
-import org.cs3.pdt.metadata.SourceLocation;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -122,7 +122,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			SourceLocationAndIsMultifileResult res = findFirstClauseLocation(goal, session);
 			if (res != null) {
 				if (res.location != null) {
-					PDTUtils.showSourceLocation(res.location);
+					PDTCommonUtil.showSourceLocation(res.location);
 				}
 				if (res.isMultifileResult) {
 					new FindDefinitionsActionDelegate(editor).run();

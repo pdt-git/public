@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.common.CommonUtil;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.cterm.CTerm;
@@ -189,7 +189,7 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 			return name;
 		}
 		String[] args = null; 
-		args = CommonUtil.getPredicateArgNamesFromDocumentation(doc);
+		args = PDTCommonUtil.getPredicateArgNamesFromDocumentation(doc);
 		StringBuffer buf = new StringBuffer(name);
 		buf.append("(");
 		if (args == null) {

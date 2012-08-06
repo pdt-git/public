@@ -17,8 +17,8 @@ package org.cs3.pdt.internal.actions;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.internal.queries.DefinitionsSearchQuery;
-import org.cs3.pdt.metadata.Goal;
+import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.pdt.common.queries.DefinitionsSearchQuery;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;

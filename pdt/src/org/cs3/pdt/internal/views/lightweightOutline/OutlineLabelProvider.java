@@ -13,12 +13,12 @@
 
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.common.metadata.Predicate;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
-import org.cs3.pdt.internal.structureElements.PrologTreeElement;
-import org.cs3.pdt.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;

@@ -30,7 +30,6 @@ import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
 import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -174,21 +173,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 
 	@Override
 	public void earlyStartup() {
-	}
-
-	/**
-	 * Returns a section in the Prolog plugin's dialog settings. If the section doesn't exist yet, it is created.
-	 *
-	 * @param name the name of the section
-	 * @return the section of the given name
-	 */
-	public IDialogSettings getDialogSettingsSection(String name) {
-		IDialogSettings dialogSettings= getDialogSettings();
-		IDialogSettings section= dialogSettings.getSection(name);
-		if (section == null) {
-			section= dialogSettings.addNewSection(name);
-		}
-		return section;
 	}
 
 	public ColorManager getColorManager() {

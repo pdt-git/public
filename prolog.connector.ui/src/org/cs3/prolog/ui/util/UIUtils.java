@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -340,30 +341,57 @@ public final class UIUtils {
 		return null;
 	}
 	
-	public static void selectInPrologEditor(int start, int length, String filename) throws PartInitException {
-		selectInPrologEditor(start, length, filename, true);
-	}
-	
-	public static void selectInPrologEditor(int start, int length, String filename, boolean activate) throws PartInitException {
+	public static void selectInEditor(int start, int length, String filename, boolean activate) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
-			selectInPrologEditor(start, length, file, activate);
+			selectInEditor(start, length, file, activate);
 		} catch (IOException e) {
 			Debug.report(e);
 		}
 	}
 	
-	public static void selectInPrologEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
+	public static void selectInEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
 		if (file == null) {
 			return;
 		}
 		IEditorPart editor = UIUtils.openInEditor(file, activate);
-		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(getActiveEditor().getEditorInput());
-		int end = Util.logicalToPhysicalOffset(document, start+length);
+		if (editor == null || !(editor instanceof AbstractTextEditor)) {
+			return;
+		}
+		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
+		int end = Util.logicalToPhysicalOffset(document, start + length);
 		start = Util.logicalToPhysicalOffset(document, start);
 		length = end - start;
-		ISelection selection = new TextSelection(document,start,length);
+		ISelection selection = new TextSelection(document, start, length);
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);
+	}
+
+	public static void selectInEditor(int line, String filename, boolean activate) throws PartInitException {
+		try {
+			IFile file = FileUtils.findFileForLocation(filename);
+			selectInEditor(line, file, activate);
+		} catch (IOException e) {
+			Debug.report(e);
+		}
+	}
+	
+	public static void selectInEditor(int line, IFile file, boolean activate) throws PartInitException {
+		if (file == null) {
+			return;
+		}
+		IEditorPart editor = UIUtils.openInEditor(file, activate);
+		if (editor == null || !(editor instanceof AbstractTextEditor)) {
+			return;
+		}
+		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
+		int offset;
+		try {
+			offset = document.getLineInformation(line - 1).getOffset();
+			TextSelection newSelection = new TextSelection(document, offset, 0);
+			editor.getEditorSite().getSelectionProvider().setSelection(newSelection);
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		}
 	}
 
 }

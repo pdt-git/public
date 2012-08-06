@@ -13,6 +13,8 @@
 
 package org.cs3.pdt.internal.structureElements;
 
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
+
 public interface PrologOutlineTreeElement extends PrologTreeElement {
 	
 	void addClause(PrologClause clause);

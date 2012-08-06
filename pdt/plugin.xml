@@ -220,15 +220,6 @@
  </extension>
  
 <extension
-		id="PrologSearchResultPage"
-		point="org.eclipse.search.searchResultViewPages">
-		<viewPage
-			id="org.cs3.pl.search.PrologSearchViewPage"
-			searchResultClass="org.cs3.pdt.internal.search.PrologSearchResult"
-			class="org.cs3.pdt.internal.search.PrologSearchResultPage">
-		</viewPage>
-	</extension>
-<extension
       point="org.eclipse.ui.perspectiveExtensions">
    <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
       <view
@@ -452,15 +443,6 @@
          </description>
       </wizard>
     </extension>
-   <extension
-         point="org.eclipse.search.searchPages">
-      <page
-            class="org.cs3.pdt.internal.search.PrologSearchPage"
-            icon="icons/filter.gif"
-            id="org.cs3.pdt.prologSearchPage"
-            label="Prolog search">
-      </page>
-   </extension>
    <extension
          point="org.eclipse.ui.decorators">
       <decorator

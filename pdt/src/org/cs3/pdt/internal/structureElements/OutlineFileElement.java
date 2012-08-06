@@ -17,7 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.pdt.metadata.PrologSourceLocation;
+import org.cs3.pdt.common.metadata.PrologSourceLocation;
 
 public class OutlineFileElement extends PrologSourceLocation implements PrologOutlineTreeElement, Comparable<OutlineFileElement> {
 

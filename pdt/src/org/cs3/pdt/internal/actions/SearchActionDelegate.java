@@ -15,8 +15,8 @@ package org.cs3.pdt.internal.actions;
 
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.metadata.Goal;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.search.ui.ISearchQuery;
