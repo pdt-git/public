@@ -25,11 +25,11 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 	private Object parent;
 	private boolean fileEqualToEditorFile;
 	
-	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity, String editorFileName) {
+	public OutlineModuleElement(String filePath, String name, int line, String kindOfEntity, boolean fileEqualToEditorFile) {
 		super(filePath,line);
 		this.name = name;
 		kind = kindOfEntity;
-		fileEqualToEditorFile = editorFileName.equals(filePath);
+		this.fileEqualToEditorFile = fileEqualToEditorFile;
 	}
 	
 	public boolean hasPredicate(String key) {

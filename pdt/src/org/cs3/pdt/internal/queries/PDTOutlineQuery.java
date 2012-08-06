@@ -27,6 +27,8 @@ import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 
 
@@ -52,7 +54,7 @@ public class PDTOutlineQuery {
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {
-				return extractResults(result, fileName);
+				return extractResults(result, fileName, session);
 			}
 		}catch(Exception e){
 			Debug.report(e);
@@ -63,7 +65,7 @@ public class PDTOutlineQuery {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
+	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName, PrologSession session) throws PrologException, PrologInterfaceException {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		for (Map<String, Object> predicate : result) {
 			String module = predicate.get("Entity").toString();
@@ -83,7 +85,13 @@ public class PDTOutlineQuery {
 			PrologClause clause = new PrologClause(fileName, module, entityLine, kindOfEntity, name, arity, line, type, properties);
 			OutlineModuleElement moduleElement = modules.get(module);
 			if (moduleElement == null) {
-				moduleElement = new OutlineModuleElement(clause.getOccuranceFile(), module, entityLine, kindOfEntity, fileName);
+				boolean fileAndModuleFileEqual = true;
+				if ("module".equals(kindOfEntity)) {
+					if (session.queryOnce(bT("module_of_file", Util.quoteAtom(fileName), Util.quoteAtom(module))) == null) {
+						fileAndModuleFileEqual = false;
+					}
+				}
+				moduleElement = new OutlineModuleElement(clause.getOccuranceFile(), module, entityLine, kindOfEntity, fileAndModuleFileEqual);
 				modules.put(module, moduleElement);
 			}
 			moduleElement.addClause(clause);
