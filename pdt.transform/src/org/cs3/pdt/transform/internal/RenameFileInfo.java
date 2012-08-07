@@ -3,13 +3,13 @@
  */
 package org.cs3.pdt.transform.internal;
 
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologLibraryManager;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.common.SimpleOption;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.load.PrologLibraryManager;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 
 public final class RenameFileInfo extends PrologRefactoringInfo {

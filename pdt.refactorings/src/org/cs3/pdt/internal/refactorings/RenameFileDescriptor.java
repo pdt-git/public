@@ -15,13 +15,12 @@ package org.cs3.pdt.internal.refactorings;
 
 import java.util.Map;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.transform.PrologRefactoringDescriptor;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.common.SimpleOption;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;

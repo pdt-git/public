@@ -16,8 +16,8 @@ package org.cs3.pdt.transform;
 import java.io.File;
 import java.util.Map;
 
-import org.cs3.pl.common.Option;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.pif.PrologInterface;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPart;

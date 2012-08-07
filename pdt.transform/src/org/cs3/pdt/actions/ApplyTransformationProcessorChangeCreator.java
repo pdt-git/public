@@ -16,9 +16,9 @@ package org.cs3.pdt.actions;
 import java.util.Map;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.TextFileChange;

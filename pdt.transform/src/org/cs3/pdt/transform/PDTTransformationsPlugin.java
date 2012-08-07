@@ -17,7 +17,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.cs3.pl.common.logging.Debug;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;

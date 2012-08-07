@@ -14,11 +14,11 @@
 package org.cs3.pdt.actions;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologLibraryManager;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.load.PrologLibraryManager;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 public class ApplyTransformationInfo extends PrologRefactoringInfo{
 

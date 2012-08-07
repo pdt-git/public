@@ -16,11 +16,11 @@ package org.cs3.pdt.transform.internal.wizards;
 import java.util.HashMap;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
-import org.cs3.pdt.ui.util.OptionEditor;
-import org.cs3.pdt.ui.util.PropertyEditor;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.OptionProvider;
-import org.cs3.pl.common.logging.Debug;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.common.OptionProvider;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.OptionEditor;
+import org.cs3.prolog.ui.util.PropertyEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;

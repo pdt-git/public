@@ -20,12 +20,12 @@ import java.util.Map;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
 import org.cs3.pdt.transform.internal.RenameResourceChange;
-import org.cs3.pl.common.FileUtils;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.common.logging.Debug;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
