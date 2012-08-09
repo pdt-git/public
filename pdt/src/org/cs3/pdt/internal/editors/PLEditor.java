@@ -304,7 +304,7 @@ public class PLEditor extends TextEditor {
 			public void mouseDoubleClick(MouseEvent e) {
 				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
+				int currentOffset = UIUtils.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
 				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		});
@@ -637,7 +637,7 @@ public class PLEditor extends TextEditor {
 			public void run() {
 				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
-				int currentOffset = Util.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
+				int currentOffset = UIUtils.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
 
 				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
