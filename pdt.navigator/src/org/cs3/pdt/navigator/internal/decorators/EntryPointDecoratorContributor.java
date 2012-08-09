@@ -11,14 +11,13 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.decorators;
+package org.cs3.pdt.navigator.internal.decorators;
 
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.navigator.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -70,7 +69,7 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 			return;
 		}
 		
-		PDTPlugin.getDefault().addDecorator(this);
+		PDTCommonPlugin.getDefault().addDecorator(this);
 		
 		IFile file = (IFile) element;
 		try {

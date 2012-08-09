@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.actions;
+package org.cs3.pdt.navigator.internal.actions;
 
 import java.util.ArrayList;
 import java.util.Iterator;

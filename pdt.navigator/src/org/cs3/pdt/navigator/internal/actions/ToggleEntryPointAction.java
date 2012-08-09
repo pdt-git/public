@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.actions;
+package org.cs3.pdt.navigator.internal.actions;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.prolog.common.Util;
@@ -54,7 +53,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 					setEntryPoint(file, true, pif);
 				}
 			}
-			PDTPlugin.getDefault().notifyDecorators();
+			PDTCommonPlugin.getDefault().notifyDecorators();
 			
 		}
 		

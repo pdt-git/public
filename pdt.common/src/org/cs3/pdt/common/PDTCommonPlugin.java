@@ -16,6 +16,7 @@ package org.cs3.pdt.common;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.cs3.prolog.common.OptionProviderListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
@@ -114,6 +115,22 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		return entryPoints;
 	}
 
+	private Set<OptionProviderListener> decorators = new HashSet<OptionProviderListener>();
+	
+	public void addDecorator(OptionProviderListener decorator) {
+		decorators.add(decorator);
+	}
+	
+	public void removeDecorator(OptionProviderListener decorator) {
+		decorators.remove(decorator);
+	}
+	
+	public void notifyDecorators() {
+		for (OptionProviderListener d : decorators) {
+			d.valuesChanged(null);
+		}
+	}
+	
 }
 
 
