@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.decorators;
+package org.cs3.pdt.navigator.internal.decorators;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
@@ -23,9 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTPredicates;
-import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.navigator.PDTNavigatorPredicates;
+import org.cs3.pdt.navigator.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.Util;
@@ -92,7 +92,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		}
 		elementDecorated.put(element, System.currentTimeMillis());
 
-		PDTPlugin.getDefault().addDecorator(this);
+		PDTCommonPlugin.getDefault().addDecorator(this);
 
 		// get active pif from console
 		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
@@ -177,7 +177,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			return;
 		}
 		try {
-			List<Map<String, Object>> results = currentPif.queryAll(bT(PDTPredicates.PDT_SOURCE_FILE, "File", "State"));
+			List<Map<String, Object>> results = currentPif.queryAll(bT(PDTNavigatorPredicates.PDT_SOURCE_FILE, "File", "State"));
 			lastUpdate = System.currentTimeMillis();
 			for (Map<String, Object> result: results) {
 				String fileName = result.get("File").toString();

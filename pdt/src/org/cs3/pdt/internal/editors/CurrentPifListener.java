@@ -17,7 +17,6 @@ import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.io.IOException;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
@@ -54,7 +53,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		for (String s : parts) {
 			currentPif.addConsultedFile(s);
 		}
-		PDTPlugin.getDefault().notifyDecorators();
+		PDTCommonPlugin.getDefault().notifyDecorators();
 	}
 
 	public void openFileInEditor(String event) {
@@ -132,7 +131,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 			return;
 		}
 		
-		PDTPlugin.getDefault().notifyDecorators();
+		PDTCommonPlugin.getDefault().notifyDecorators();
 		
 		removePifListener();
 		

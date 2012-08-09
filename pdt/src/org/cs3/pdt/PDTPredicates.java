@@ -24,10 +24,6 @@ public class PDTPredicates {
 	public static final String PDT_SET_BREAKPOINT = "pdt_set_breakpoint";
 	public static final String PDT_BREAKPOINT_PROPERTIES = "pdt_breakpoint_properties";
 
-	// source files
-	public static final String PDT_SOURCE_FILES = "pdt_source_files";
-	public static final String PDT_SOURCE_FILE = "pdt_source_file";
-	
 	// editor highlighting
 	public static final String PREDICATES_WITH_PROPERTY = "pdt_editor_highlighting:predicates_with_property";
 	

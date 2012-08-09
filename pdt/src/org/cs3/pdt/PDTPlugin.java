@@ -16,14 +16,11 @@ package org.cs3.pdt;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.internal.editors.EditorConsultListener;
-import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
@@ -217,24 +214,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 		return selection;
 	}
 
-	
-	
-	Set<OptionProviderListener> decorators = new HashSet<OptionProviderListener>();
-	
-	public void addDecorator(OptionProviderListener decorator) {
-		decorators.add(decorator);
-	}
-	
-	public void removeDecorator(OptionProviderListener decorator) {
-		decorators.remove(decorator);
-	}
-	
-	public void notifyDecorators() {
-		for (OptionProviderListener d : decorators) {
-			d.valuesChanged(null);
-		}
-	}
-	
 }
 
 

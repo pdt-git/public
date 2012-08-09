@@ -23,6 +23,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
@@ -426,7 +427,7 @@ public class PLEditor extends TextEditor {
 				// consult the file and update the problem markers, too.
 				if (!shouldAbortSaving()) {
 					PLEditor.super.doSave(new NullProgressMonitor());
-					PDTPlugin.getDefault().notifyDecorators();
+					PDTCommonPlugin.getDefault().notifyDecorators();
 				}
 				// addProblemMarkers();
 				// setFocus();
