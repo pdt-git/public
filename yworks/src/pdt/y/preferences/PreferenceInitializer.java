@@ -212,6 +212,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		FileInputStream stream = new FileInputStream(path);
 		ObjectInputStream objStream = new ObjectInputStream(stream);
 		String[][] preferences = (String[][])objStream.readObject();
+		objStream.close();
 		
 		for (String[] p : preferences) {
 			store.setValue(p[0], p[1]);
