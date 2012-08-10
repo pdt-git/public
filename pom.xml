@@ -75,13 +75,13 @@
     <module>pdt</module>
     <module>pdt.common</module>
     <module>pdt.console</module>
-    <module>pdt.connector</module>
-    <module>pdt.connector.ui</module>
+    <module>prolog.connector</module>
+    <module>prolog.connector.ui</module>
     <module>pdt.contextview</module>
     <module>pdt.builder</module>
     <module>pdt.feature</module>
     <module>pdt.navigator</module>
-    <module>pdt.prolog.library</module>
+    <module>prolog.library</module>
     <module>pdt.updatesite</module>
     <module>org.cs3.lp.extension</module>
   </modules>

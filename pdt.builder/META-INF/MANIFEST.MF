@@ -6,4 +6,4 @@ Bundle-SymbolicName: org.cs3.pdt.builder;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.cs3.prolog.connector,
- org.cs3.pdt.prolog.library
+ org.cs3.prolog.library
