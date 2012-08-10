@@ -11,10 +11,10 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.preferences;
+package org.cs3.pdt.common.internal.preferences;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.PDTCommon;
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
@@ -36,7 +36,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 
 	public PreferencePage() {
 		super(GRID);
-		setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(PDTCommonPlugin.getDefault().getPreferenceStore());
 	}
 
 	/**
@@ -63,17 +63,17 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 //		
 		
 		// Determines the verbosity of the debug log file.			
-		RadioGroupFieldEditor rgfe_level = new RadioGroupFieldEditor(PDT.PREF_DEBUG_LEVEL, "Debug Level", 5, new String[][] {
+		RadioGroupFieldEditor rgfe_level = new RadioGroupFieldEditor(PDTCommon.PREF_DEBUG_LEVEL, "Debug Level", 5, new String[][] {
 				{ "none", "NONE" }, { "error", "ERROR" }, { "warning", "WARNING" }, { "info", "INFO" }, { "debug", "DEBUG" } },
 				getFieldEditorParent(), true);
 		addField(rgfe_level);
 
-		RadioGroupFieldEditor rgfe_output = new RadioGroupFieldEditor(PDT.PREF_DEBUG_OUTPUT_TO, "Debug Output to", 3, new String[][] {
+		RadioGroupFieldEditor rgfe_output = new RadioGroupFieldEditor(PDTCommon.PREF_DEBUG_OUTPUT_TO, "Debug Output to", 3, new String[][] {
 				{ "logfile", "LOGFILE" }, { "console", "CONSOLE" } }, getFieldEditorParent(), true);
 		addField(rgfe_output);
 
 		// A file to which debug output of the PDT will be writen
-		addField(new DirectoryFieldEditor(PDT.PREF_CLIENT_LOG_FILE_DIR, "Log file location", getFieldEditorParent()));		
+		addField(new DirectoryFieldEditor(PDTCommon.PREF_CLIENT_LOG_FILE_DIR, "Log file location", getFieldEditorParent()));		
 
 	}
 

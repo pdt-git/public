@@ -19,18 +19,13 @@
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          class="org.cs3.pdt.internal.preferences.PreferencePage"
-          id="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          name="PDT">
-    </page>
-    <page
           category="org.cs3.pdt.preferences.PreferencePageEditor"
           class="org.cs3.pdt.internal.preferences.PreferencePageEditorColors"
           id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
     </page>
     <page
-          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
           class="org.cs3.pdt.internal.preferences.PreferencePageEditor"
           id="org.cs3.pdt.preferences.PreferencePageEditor"
           name="Editor">

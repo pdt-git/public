@@ -35,4 +35,18 @@
       </page>
    </extension>
 
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer
+          class="org.cs3.pdt.common.internal.preferences.PreferenceInitializer">
+    </initializer>
+ </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="org.cs3.pdt.common.internal.preferences.PreferencePage"
+          id="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
+          name="PDT">
+    </page>
+ </extension>
 </plugin>

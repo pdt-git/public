@@ -14,7 +14,6 @@
 
 package org.cs3.pdt;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +26,6 @@ import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
 import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -96,49 +93,12 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 	}
 
 	/**
-	 * 
-	 */
-	public void reconfigure() {
-		try {
-			reconfigureDebugOutput();
-
-		} catch (Throwable e) {
-			Debug.report(e);
-		}
-	}
-
-	private void reconfigureDebugOutput() throws FileNotFoundException {
-		String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL, "WARNING");
-		String debugOutputTo = getPreferenceValue(PDT.PREF_DEBUG_OUTPUT_TO, "LOGFILE");
-		String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE_DIR, System.getProperty("java.io.tmpdir"));
-		
-		Debug.setDebugLevel(debugLevel);
-		Debug.setLogDir(logFileName);	
-		Debug.setOutputTo(debugOutputTo);
-		
-		
-	}
-
-	/**
 	 * This method is called upon plug-in activation
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			super.start(context);
-			reconfigureDebugOutput();
-			IPropertyChangeListener debugPropertyChangeListener = new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent e) {
-					try {
-						PDTPlugin.getDefault().reconfigureDebugOutput();
-					} catch (FileNotFoundException e1) {
-						Debug.report(e1);
-					}
-				}
-
-			};	
-			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 			
 			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(new CurrentPifListener());
 			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(new EditorConsultListener());
