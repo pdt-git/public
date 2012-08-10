@@ -20,9 +20,15 @@ import java.io.IOException;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
@@ -359,8 +365,8 @@ public final class UIUtils {
 			return;
 		}
 		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
-		int end = Util.logicalToPhysicalOffset(document, start + length);
-		start = Util.logicalToPhysicalOffset(document, start);
+		int end = logicalToPhysicalOffset(document, start + length);
+		start = logicalToPhysicalOffset(document, start);
 		length = end - start;
 		ISelection selection = new TextSelection(document, start, length);
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);
@@ -394,5 +400,35 @@ public final class UIUtils {
 		}
 	}
 
+	public static int logicalToPhysicalOffset(IDocument doc, int offset) {
+		return Util.logicalToPhysicalOffset(doc.get(), offset);
+	}
+	
+	public static int physicalToLogicalOffset(IDocument doc, int offset) {
+		return Util.physicalToLogicalOffset(doc.get(), offset);
+	}
+	
+	public static IDocument getDocument(IFile file) throws CoreException{
+		IPath path = file.getFullPath();
+		return getDocument(path,LocationKind.IFILE);
+	}
+
+	public static IDocument getDocument(File file) throws CoreException{
+		IPath path = new Path(file.getAbsolutePath());
+		return getDocument(path,LocationKind.NORMALIZE);
+	}
+
+	public static IDocument getDocument(IPath location, LocationKind kind) throws CoreException{
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+			manager.connect(location, kind,null);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(location,kind);
+			// note: could be null
+			return buffer.getDocument();
+		}
+		finally {
+			manager.disconnect(location, kind,null);
+		}
+	}	
 }
 

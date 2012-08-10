@@ -73,16 +73,14 @@
   </build>
   <modules>
     <module>pdt</module>
-    <module>pdt.common.ui</module>
     <module>pdt.common</module>
     <module>pdt.console</module>
-    <module>pdt.core</module>
+    <module>pdt.connector</module>
+    <module>pdt.connector.ui</module>
+    <module>pdt.builder</module>
     <module>pdt.feature</module>
+    <module>pdt.navigator</module>
     <module>pdt.prolog.library</module>
-    <module>pdt.runtime</module>
-    <module>pdt.runtime.builder</module>
-    <module>pdt.runtime.ui</module>
-    <module>pdt.runtime.socket</module>
     <module>pdt.updatesite</module>
     <module>org.cs3.lp.extension</module>
     <module>yworks</module>

@@ -30,6 +30,7 @@ import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -141,7 +142,7 @@ public class PLMarkerUtils {
 			
 			if(msgsSmells!=null) {
 				IFile file = reloadedFiles.get(fileName);
-				IDocument doc = Util.getDocument(file);
+				IDocument doc = UIUtils.getDocument(file);
 				for (Map<String, Object> msg : msgsSmells) {
 					IMarker marker = file.createMarker(IMarker.PROBLEM);
 					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
@@ -150,7 +151,7 @@ public class PLMarkerUtils {
 					
 					String msgText = (String)msg.get("Description");
 					int startPl = Integer.parseInt(msg.get("Start").toString());
-					int start = Util.logicalToPhysicalOffset(doc,startPl);
+					int start = UIUtils.logicalToPhysicalOffset(doc,startPl);
 					int length = Integer.parseInt(msg.get("Length").toString());
 					
 					MarkerUtilities.setCharStart(marker, start);
