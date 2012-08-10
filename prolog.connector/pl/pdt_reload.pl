@@ -1,6 +1,7 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
+ * Author: Tobias Rho, Andreas Becker, Fabian Noth
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
  * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
