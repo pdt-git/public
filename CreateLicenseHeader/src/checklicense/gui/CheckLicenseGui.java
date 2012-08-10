@@ -54,7 +54,7 @@ public class CheckLicenseGui extends JFrame {
 
 	private static final String BORDER_TITLE = "Files";
 	private static final long serialVersionUID = 1L;
-	private static final File LAST_PATH_FILE = new File("data/last_path.txt");
+	private static final File LAST_PATH_FILE = new File("data/path.txt");
 	private JPanel contentPane;
 	private JTextField textField;
 	private CheckLicense check;

@@ -105,12 +105,12 @@ public class CheckLicense {
 		return !code.startsWith(licenseTop) || !code.contains(licenseBottom);
 	}
 	
-	public boolean hasHeaderWithoutAuthor(String oldCode) {
-		return oldCode.startsWith(licenseNoAuthor);
+	public boolean hasHeaderWithoutAuthor(String code) {
+		return code.startsWith(licenseNoAuthor);
 	}
 
-	public boolean hasHeaderWithAuthor(String oldCode) {
-		return oldCode.startsWith(licenseTop + authorLine) && oldCode.contains(licenseBottom);
+	public boolean hasHeaderWithAuthor(String code) {
+		return code.startsWith(licenseTop + authorLine) && code.contains(licenseBottom);
 	}
 	
 	private boolean hasValidFileExtension(File f) {
