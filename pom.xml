@@ -72,17 +72,17 @@
     </plugins>
   </build>
   <modules>
-    <module>pdt</module>
+    <module>pdt.builder</module>
     <module>pdt.common</module>
     <module>pdt.console</module>
-    <module>prolog.connector</module>
-    <module>prolog.connector.ui</module>
     <module>pdt.contextview</module>
-    <module>pdt.builder</module>
+    <module>pdt.editor</module>
     <module>pdt.feature</module>
     <module>pdt.navigator</module>
-    <module>prolog.library</module>
     <module>pdt.updatesite</module>
+    <module>prolog.library</module>
+    <module>prolog.connector</module>
+    <module>prolog.connector.ui</module>
     <module>org.cs3.lp.extension</module>
   </modules>
 </project>
