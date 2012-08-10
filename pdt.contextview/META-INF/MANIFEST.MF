@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: PDT yWorks Basics
-Bundle-SymbolicName: pdt.yworks.basics;singleton:=true
+Bundle-Name: PDT Contextview
+Bundle-SymbolicName: org.cs3.pdt.contextview;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

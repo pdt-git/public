@@ -119,7 +119,7 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="pdt.yworks.basics"
+         id="org.cs3.pdt.contextview"
          download-size="0"
          install-size="0"
          version="0.0.0"
