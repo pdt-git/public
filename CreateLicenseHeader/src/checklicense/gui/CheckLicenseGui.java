@@ -47,13 +47,14 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
 import static checklicense.CheckLicense.NO_AUTHOR;
-import static checklicense.CheckLicense.NO_HEADER;;
+import static checklicense.CheckLicense.NO_HEADER;
+import static checklicense.CheckLicense.HEADER_WITH_AUTHOR;;
 
 public class CheckLicenseGui extends JFrame {
 
 	private static final String BORDER_TITLE = "Files";
 	private static final long serialVersionUID = 1L;
-	private static final File LAST_PATH_FILE = new File("data/last_path.txt");
+	private static final File LAST_PATH_FILE = new File("data/path.txt");
 	private JPanel contentPane;
 	private JTextField textField;
 	private CheckLicense check;
@@ -174,10 +175,12 @@ public class CheckLicenseGui extends JFrame {
 					showNoAuthor();
 				} else if (NO_HEADER.equals(comboBox.getSelectedItem())) {
 					showNoHeader();
+				} else if (HEADER_WITH_AUTHOR.equals(comboBox.getSelectedItem())) {
+					showWithAuthor();
 				}
 			}
 		});
-		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {NO_HEADER, NO_AUTHOR}));
+		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {NO_HEADER, NO_AUTHOR, HEADER_WITH_AUTHOR}));
 		pnlList.add(comboBox, BorderLayout.NORTH);
 		
 		JPanel panel_2 = new JPanel();
@@ -190,30 +193,62 @@ public class CheckLicenseGui extends JFrame {
 		panel_2.add(tfAuthor);
 		tfAuthor.setColumns(20);
 		
-		JButton btnAddLicenseHeader = new JButton("Add License Header");
+		JButton btnAddLicenseHeader = new JButton("Set Header");
 		panel_2.add(btnAddLicenseHeader);
+		
+		JButton btnAddAuthor = new JButton("Add Author");
+		btnAddAuthor.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent arg0) {
+				addAuthor();
+			}
+		});
+		panel_2.add(btnAddAuthor);
 		btnAddLicenseHeader.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent arg0) {
-				for(String s : list.getSelectedValuesList()) {
-					check.addHeaderToFile(s, tfAuthor.getText());
-				}
-				if (list.getSelectedValuesList().isEmpty()) {
-					JOptionPane.showMessageDialog(CheckLicenseGui.this, "You have to select at least one file to add the license header.", "no file selected", JOptionPane.INFORMATION_MESSAGE);
-				}
-
-				String content = Utils.readFileToString(new File(list.getSelectedValue()));
-				textArea.setText(content);
-				textArea.setCaretPosition(0);
+				setHeader();
 			}
 		});
 	}
 
+	protected void addAuthor() {
+		 if (tfAuthor.getText().trim().isEmpty()) {
+			 return;
+		 }
+		 for(String s : list.getSelectedValuesList()) {
+			 check.addAuthorToFile(s, tfAuthor.getText().trim());
+		 }
+		 if (list.getSelectedValuesList().isEmpty()) {
+			 JOptionPane.showMessageDialog(CheckLicenseGui.this, "You have to select at least one file to add the license header.", "no file selected", JOptionPane.INFORMATION_MESSAGE);
+		 }
+
+		 String content = Utils.readFileToString(new File(list.getSelectedValue()));
+		 textArea.setText(content);
+		 textArea.setCaretPosition(0);
+	}
+	
+	public void setHeader() {
+		for(String s : list.getSelectedValuesList()) {
+			check.addHeaderToFile(s, tfAuthor.getText().trim());
+		}
+		if (list.getSelectedValuesList().isEmpty()) {
+			JOptionPane.showMessageDialog(CheckLicenseGui.this, "You have to select at least one file to add the license header.", "no file selected", JOptionPane.INFORMATION_MESSAGE);
+		}
+
+		String content = Utils.readFileToString(new File(list.getSelectedValue()));
+		textArea.setText(content);
+		textArea.setCaretPosition(0);
+	}
+	
 	protected void showNoAuthor() {
 		list.setModel(models.get(NO_AUTHOR));
 	}
 
 	protected void showNoHeader() {
 		list.setModel(models.get(NO_HEADER));
+	}
+	
+	protected void showWithAuthor() {
+		list.setModel(models.get(HEADER_WITH_AUTHOR));
 	}
 
 	private final HashMap<String, DefaultListModel<String>> models = new HashMap<>();
@@ -234,7 +269,11 @@ public class CheckLicenseGui extends JFrame {
 			showNoAuthor();
 		} else if (NO_HEADER.equals(comboBox.getSelectedItem())) {
 			showNoHeader();
+		} else if (HEADER_WITH_AUTHOR.equals(comboBox.getSelectedItem())) {
+			showWithAuthor();
 		}
 	}
+
+	
 
 }

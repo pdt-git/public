@@ -16,5 +16,37 @@
            path="pl/">
      </fileSearchPathContribution>
   </extension>
+<extension
+		id="PrologSearchResultPage"
+		point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id="org.cs3.pl.search.PrologSearchViewPage"
+			searchResultClass="org.cs3.pdt.common.search.PrologSearchResult"
+			class="org.cs3.pdt.common.search.PrologSearchResultPage">
+		</viewPage>
+	</extension>
+   <extension
+         point="org.eclipse.search.searchPages">
+      <page
+            class="org.cs3.pdt.common.search.PrologSearchPage"
+            icon="icons/filter.gif"
+            id="org.cs3.pdt.prologSearchPage"
+            label="Prolog search">
+      </page>
+   </extension>
 
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer
+          class="org.cs3.pdt.common.internal.preferences.PreferenceInitializer">
+    </initializer>
+ </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="org.cs3.pdt.common.internal.preferences.PreferencePage"
+          id="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
+          name="PDT">
+    </page>
+ </extension>
 </plugin>

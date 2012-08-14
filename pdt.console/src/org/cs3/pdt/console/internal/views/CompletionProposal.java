@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import org.cs3.pdt.common.CommonUtil;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.eclipse.jface.fieldassist.IContentProposal;
 
 public class CompletionProposal implements IContentProposal{
@@ -46,7 +46,7 @@ public class CompletionProposal implements IContentProposal{
 			return "";
 		}
 		
-		String[] argNames = CommonUtil.getPredicateArgNamesFromDocumentation(doc);
+		String[] argNames = PDTCommonUtil.getPredicateArgNamesFromDocumentation(doc);
 		
 		StringBuffer buf = new StringBuffer("(");
 		char c = 'A';

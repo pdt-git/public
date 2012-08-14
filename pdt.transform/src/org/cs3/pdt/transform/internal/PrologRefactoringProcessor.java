@@ -19,11 +19,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;

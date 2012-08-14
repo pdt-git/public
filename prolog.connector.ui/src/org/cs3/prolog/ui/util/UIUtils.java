@@ -20,15 +20,22 @@ import java.io.IOException;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -340,31 +347,88 @@ public final class UIUtils {
 		return null;
 	}
 	
-	public static void selectInPrologEditor(int start, int length, String filename) throws PartInitException {
-		selectInPrologEditor(start, length, filename, true);
-	}
-	
-	public static void selectInPrologEditor(int start, int length, String filename, boolean activate) throws PartInitException {
+	public static void selectInEditor(int start, int length, String filename, boolean activate) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
-			selectInPrologEditor(start, length, file, activate);
+			selectInEditor(start, length, file, activate);
 		} catch (IOException e) {
 			Debug.report(e);
 		}
 	}
 	
-	public static void selectInPrologEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
+	public static void selectInEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
 		if (file == null) {
 			return;
 		}
 		IEditorPart editor = UIUtils.openInEditor(file, activate);
-		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(getActiveEditor().getEditorInput());
-		int end = Util.logicalToPhysicalOffset(document, start+length);
-		start = Util.logicalToPhysicalOffset(document, start);
+		if (editor == null || !(editor instanceof AbstractTextEditor)) {
+			return;
+		}
+		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
+		int end = logicalToPhysicalOffset(document, start + length);
+		start = logicalToPhysicalOffset(document, start);
 		length = end - start;
-		ISelection selection = new TextSelection(document,start,length);
+		ISelection selection = new TextSelection(document, start, length);
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);
 	}
 
+	public static void selectInEditor(int line, String filename, boolean activate) throws PartInitException {
+		try {
+			IFile file = FileUtils.findFileForLocation(filename);
+			selectInEditor(line, file, activate);
+		} catch (IOException e) {
+			Debug.report(e);
+		}
+	}
+	
+	public static void selectInEditor(int line, IFile file, boolean activate) throws PartInitException {
+		if (file == null) {
+			return;
+		}
+		IEditorPart editor = UIUtils.openInEditor(file, activate);
+		if (editor == null || !(editor instanceof AbstractTextEditor)) {
+			return;
+		}
+		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
+		int offset;
+		try {
+			offset = document.getLineInformation(line - 1).getOffset();
+			TextSelection newSelection = new TextSelection(document, offset, 0);
+			editor.getEditorSite().getSelectionProvider().setSelection(newSelection);
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		}
+	}
+
+	public static int logicalToPhysicalOffset(IDocument doc, int offset) {
+		return Util.logicalToPhysicalOffset(doc.get(), offset);
+	}
+	
+	public static int physicalToLogicalOffset(IDocument doc, int offset) {
+		return Util.physicalToLogicalOffset(doc.get(), offset);
+	}
+	
+	public static IDocument getDocument(IFile file) throws CoreException{
+		IPath path = file.getFullPath();
+		return getDocument(path,LocationKind.IFILE);
+	}
+
+	public static IDocument getDocument(File file) throws CoreException{
+		IPath path = new Path(file.getAbsolutePath());
+		return getDocument(path,LocationKind.NORMALIZE);
+	}
+
+	public static IDocument getDocument(IPath location, LocationKind kind) throws CoreException{
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+			manager.connect(location, kind,null);
+			ITextFileBuffer buffer= manager.getTextFileBuffer(location,kind);
+			// note: could be null
+			return buffer.getDocument();
+		}
+		finally {
+			manager.disconnect(location, kind,null);
+		}
+	}	
 }
 

@@ -11,7 +11,7 @@
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
           class="org.cs3.prolog.connector.internal.preferences.PreferencePage"
           id="org.cs3.prolog.connector.preferences.PreferencePage"
           name="Prolog Processes">

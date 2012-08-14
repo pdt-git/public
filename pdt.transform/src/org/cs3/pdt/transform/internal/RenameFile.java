@@ -13,13 +13,11 @@
 
 package org.cs3.pdt.transform.internal;
 
-import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.transform.internal.wizards.PrologRefactoringWizard;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.logging.Debug;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;

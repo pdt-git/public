@@ -14,9 +14,9 @@
 
 package org.cs3.prolog.common.test;
 
-import org.cs3.prolog.common.Util;
-
 import junit.framework.TestCase;
+
+import org.cs3.prolog.common.Util;
 
 public class UtilTest extends TestCase {
 	
