@@ -13,6 +13,7 @@
 
 package org.cs3.pdt;
 
+import org.cs3.pdt.console.internal.views.PrologConsoleView;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -34,7 +35,7 @@ public class PrologPerspective implements IPerspectiveFactory {
 		String editorArea = layout.getEditorArea();
 
 		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, (float) 0.2, editorArea);
-		layout.addView("org.cs3.pdt.console.internal.views.PrologConsoleView", IPageLayout.BOTTOM, (float) 0.65, editorArea);
+		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float) 0.8, editorArea);
 		
 //		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
