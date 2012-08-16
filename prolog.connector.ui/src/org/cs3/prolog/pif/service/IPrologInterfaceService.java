@@ -26,8 +26,8 @@ import org.eclipse.core.resources.IFile;
  * The active PrologInterface can be accessed and set.
  * {@link ActivePrologInterfaceListener}s can be registered to listen to each
  * change of the active PrologInterface.<br/>
- * Consults can be triggered via the three <code>consultFile(s)</code> methods.
- * The consult will be done in the active PrologInterface. The call of the
+ * Consults can be triggered via the <code>consultFile(s)</code> methods.
+ * The consult will be done in the active PrologInterface or in a given PrologInterface. The call of the
  * consult predicate <code>pdt_reload/1</code> is executed by the registered
  * {@link PDTReloadExecutor} with the highest priority. If an executor fails,
  * the next one will be tried out. Utility methods to retrieve file names
@@ -37,7 +37,7 @@ import org.eclipse.core.resources.IFile;
  * This service can be acquired via
  * 
  * <pre>
- * PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService
+ * PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService()
  * </pre>
  * 
  */
@@ -84,6 +84,16 @@ public interface IPrologInterfaceService {
 	void consultFile(IFile file);
 
 	/**
+	 * Consults a file into the given PrologInterface.
+	 * 
+	 * @param file
+	 *            the file
+	 * @param pif
+	 *            the PrologInterface
+	 */
+	void consultFile(IFile file, PrologInterface pif);
+
+	/**
 	 * Consults a file into the active PrologInterface.
 	 * 
 	 * @param file
@@ -92,6 +102,16 @@ public interface IPrologInterfaceService {
 	void consultFile(String file);
 
 	/**
+	 * Consults a file into the given PrologInterface.
+	 * 
+	 * @param file
+	 *            the file
+	 * @param pif
+	 *            the PrologInterface
+	 */
+	void consultFile(String file, PrologInterface pif);
+	
+	/**
 	 * Consults a list of files into the active PrologInterface.
 	 * 
 	 * @param files
@@ -99,6 +119,16 @@ public interface IPrologInterfaceService {
 	 */
 	void consultFiles(List<IFile> files);
 
+	/**
+	 * Consults a list of files into the given PrologInterface.
+	 * 
+	 * @param files
+	 *            the list of files
+	 * @param pif
+	 *            the PrologInterface
+	 */
+	void consultFiles(List<IFile> files, PrologInterface pif);
+	
 	/**
 	 * Registers an {@link ActivePrologInterfaceListener}.
 	 * 
