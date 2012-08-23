@@ -127,7 +127,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	
 	private Combo fPattern;
 	private ISearchPageContainer fContainer;
-	private Button fCaseSensitive;
 	
 	private Button[] fSearchFor;
 	private Button[] fLimitTo;
@@ -304,6 +303,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		Control expressionComposite= createExpression(result);
 		expressionComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1));
 		
+		Label explainingLabel = new Label(result, SWT.WRAP);
+		explainingLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1));
+		explainingLabel.setText("Enter the search string as Functor/Arity (e. g. member/2). If no arity is specified,\n- the 'Declarations && Definitions' search will find predicates with any arity and\n- the 'References' search will assume arity 0");
+		
 		Label separator= new Label(result, SWT.NONE);
 		separator.setVisible(false);
 		GridData data= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
@@ -408,7 +411,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		int limitTo = initialData.getLimitTo();
 		fillLimitToGroup(limitTo);
 		fPattern.setText(initialData.getPattern());
-		fCaseSensitive.setEnabled(true);
 		
 //		fInitialData= initialData;
 	}
@@ -423,6 +425,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			createButton(result, SWT.RADIO, "Module", MODULE, false),
 			createButton(result, SWT.RADIO, "Predicate", PREDICATE, false),
 		};
+		fSearchFor[0].setEnabled(false);
+		fSearchFor[1].setSelection(true);
 			
 		// Fill with dummy radio buttons
 		Label filler= new Label(result, SWT.NONE);
@@ -447,10 +451,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			children[i].dispose();
 		}		
 		ArrayList<Button> buttons= new ArrayList<Button>();
-		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations & Definitions", DECLARATIONS, limitTo == DECLARATIONS));
+		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations && Definitions", DECLARATIONS, limitTo == DECLARATIONS));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "References", REFERENCES, limitTo == REFERENCES));
 		
-		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
+		fLimitTo= buttons.toArray(new Button[buttons.size()]);
 		
 		SelectionAdapter listener= new SelectionAdapter() {
 			@Override
