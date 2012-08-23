@@ -181,28 +181,43 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	
 	@Override
 	public void consultFile(String file) {
+		consultFile(file, getActivePrologInterface());
+	}
+
+	@Override
+	public void consultFile(String file, PrologInterface pif) {
 		try {
-			consultFile(FileUtils.findFileForLocation(file));
+			consultFile(FileUtils.findFileForLocation(file), pif);
 		} catch (IOException e) {
 			Debug.report(e);
 			return;
 		}
 	}
-	
+
 	@Override
 	public void consultFile(final IFile file) {
-		ArrayList<IFile> fileList = new ArrayList<IFile>();
-		fileList.add(file);
-		consultFiles(fileList);
+		consultFile(file, getActivePrologInterface());
 	}
 	
 	@Override
-	public void consultFiles(final List<IFile> files) {
+	public void consultFile(IFile file, PrologInterface pif) {
+		ArrayList<IFile> fileList = new ArrayList<IFile>();
+		fileList.add(file);
+		consultFiles(fileList, pif);
+	}
+	
+	@Override
+	public void consultFiles(List<IFile> files) {
+		consultFiles(files, getActivePrologInterface());
+	}
+	
+	@Override
+	public void consultFiles(final List<IFile> files, final PrologInterface pif) {
 		Job job = new Job("Consult " + files.size() + " file(s)") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					consultFilesImpl(files, monitor);
+					consultFilesImpl(files, pif, monitor);
 				} catch (PrologInterfaceException e) {
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
@@ -217,14 +232,10 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void consultFilesImpl(List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	private void consultFilesImpl(List<IFile> files, PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
 		HashSet<ConsultListener> consultListenersClone;
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
-		}
-		PrologInterface pif = getActivePrologInterface();
-		if (pif == null) {
-			return;
 		}
 		
 		monitor.beginTask("Consult " +  files.size() + " file(s)", consultListenersClone.size() * 4);
