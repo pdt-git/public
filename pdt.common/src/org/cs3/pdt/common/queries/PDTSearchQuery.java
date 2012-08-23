@@ -105,7 +105,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throws PrologException, PrologInterfaceException {
 		
 		String module;               
-		if(goal.getModule()!=null)
+		if(goal.getModule()!=null && !goal.getModule().isEmpty())
 			module ="'"+ goal.getModule()+ "'"; // Modul ist explizit gesetzt
 		else
 			module = "Module";                  // Modul ist freie Variable

@@ -95,7 +95,7 @@ public class PrologElement
 			modulePart = "";
 		else 
 			modulePart = contextModule + ":";
-		return modulePart + functorName + "/" + arity;
+		return modulePart + functorName + "/" + (arity == -1 ? "(" + arity + ")" : arity);
 	}
 
 	@Override

@@ -52,7 +52,35 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, ''):-
+	var(EnclFile),
+	!,    
+    search_term_to_predicate_indicator(Term, Functor/Arity),
+    current_predicate(_:Functor/Arity),
+    find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
+    member(DeclOrDef-DefiningModule-Location,Sources),
+    member(File-Lines,Location),
+    member(Line,Lines),
+    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
 
+find_decl_or_def_2(Name,Arity,Declarations) :-
+   setof( declaration-DeclModule-Location, Name^Arity^ 
+          ( declared_but_undefined(DeclModule,Name,Arity),
+            declared_in_file(DeclModule,Name,Arity,Location)
+          ),
+          Declarations).
+    
+find_decl_or_def_2(Name,Arity,Definitions) :-
+   setof( definition-DefiningModule-Locations, Name^Arity^  % Locations is list of File-Lines terms
+          ( defined_in_module(DefiningModule,Name,Arity),
+            defined_in_files(DefiningModule,Name,Arity,Locations)
+%            results_context_category_label(defined, Visibility, VisibilityText)
+          ),
+          Definitions
+    ). 
+    
+    
+    
 % find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
 %                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
 %                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
@@ -62,6 +90,10 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
+    
+
+
+    
     
 find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
     referenced_entity(EnclFile, ReferencedModule),    
@@ -78,6 +110,10 @@ referenced_entity(EnclFile, ReferencedModule) :-
     ;  module_of_file(EnclFile,ReferencedModule)   % Implicit module reference
     ).
 
+search_term_to_predicate_indicator(_:Functor/(-1), Functor/_Arity) :- !.
+search_term_to_predicate_indicator(Functor/(-1), Functor/_Arity) :- !.
+search_term_to_predicate_indicator(_:Functor/Arity, Functor/Arity) :- !.
+search_term_to_predicate_indicator(Functor/Arity, Functor/Arity) :- !.
 search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
 search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor, Arity).
 

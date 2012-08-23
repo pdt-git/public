@@ -34,7 +34,11 @@ public class Goal extends PrologElement {
 	}
 	
 	public String getTermString() {
-		return termString;
+		if (termString != null) {
+			return termString;
+		} else {
+			return getSignature();
+		}
 	}
 
 }

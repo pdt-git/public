@@ -154,10 +154,26 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		PDTSearchQuery searchQuery;
 		
 		Goal goal;
-		if (searchFor == PREDICATE)
-			goal = new Goal("", "", data.pattern, -1, data.pattern);
-		else
+		if (searchFor == PREDICATE) {
+			String functor = "";
+			int arity = 0;
+			int lastSlash = data.pattern.lastIndexOf("/");
+			if (lastSlash == -1) {
+				functor = data.pattern;
+				if (limitTo == DECLARATIONS) {
+					arity = -1;
+				}
+			} else {
+				try {
+					arity = Integer.parseInt(data.pattern.substring(lastSlash + 1));
+				} catch (NumberFormatException e) {}
+				functor = data.pattern.substring(0, lastSlash);
+			}
+			goal = new Goal("", null, functor, arity, null);
+		} else {
+			// TODO: search for modules !!!
 			goal = new Goal("", data.pattern, "", -1, data.pattern+":Predicate");
+		}
 
 		if (limitTo == REFERENCES)
 			searchQuery = new ReferencesSearchQueryDirect(goal);

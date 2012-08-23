@@ -70,7 +70,11 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 	throws IOException {
 		String definingModule = m.get("DefiningModule").toString();
 		String functor = m.get("Functor").toString();
-		int arity = Integer.parseInt(m.get("Arity").toString());
+		int arity=-1;
+		try {
+			arity = Integer.parseInt(m.get("Arity").toString());
+		} catch (NumberFormatException e) {}
+		
 		IFile file = FileUtils.findFileForLocation(m.get("File").toString());
 		int line = Integer.parseInt(m.get("Line").toString());
 
