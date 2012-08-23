@@ -321,8 +321,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	}
 
 	/**
-	 * get a PrologInterface to a given key. This is a convenience method to
-	 * "just get the darn thing". This will create the PrologInterface if
+	 * get a PrologInterface to a given key. This will create the PrologInterface if
 	 * the registry does not contain it, and register it with the registry. No
 	 * subscription will be added to the history.
 	 * 
