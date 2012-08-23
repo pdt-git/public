@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.common.search.PrologSearchPage;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PDTConsolePredicates;
@@ -75,6 +76,7 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -581,6 +583,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	private Action pasteAction;
 	private Action selectAllAction;
 	private ClearAction clearAction;
+	private Action searchAction;
 	//	private GuiTracerAction guiTracerAction;
 	private PasteAction pasteFileNameAction;
 	private RestartAction restartAction;
@@ -706,6 +709,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		};
 		clearAction = new ClearAction("Clear", "Clear console output",
 				ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
+		searchAction = new Action("Open Search Dialog") {
+			@Override
+			public void run() {
+				NewSearchUI.openSearchDialog(getSite().getWorkbenchWindow(), PrologSearchPage.EXTENSION_POINT_ID);
+			}
+		};
 		//		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
 		//				new String[] {"activate guitracer", "deactivate guitracer"},  
 		//				new String[] {"activate GUI tracer", "deactivate GUI tracer"}, 
@@ -817,6 +826,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				manager.add(clearAction);
 				manager.add(new Separator("#Clipboard-end"));
 				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.add(searchAction);
 				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end"));
 			}
 
