@@ -29,6 +29,7 @@
          point="org.eclipse.search.searchPages">
       <page
             class="org.cs3.pdt.common.search.PrologSearchPage"
+            extensions="pl:90,pro:90,lgt:90"
             icon="icons/filter.gif"
             id="org.cs3.pdt.prologSearchPage"
             label="Prolog search">
