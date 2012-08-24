@@ -24,6 +24,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -45,12 +46,12 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (goal.getArity() < 0) 
 			arity = "Arity";
 		
-		String file = "'"+goal.getFilePath()+"'";
+		String file = Util.quoteAtom(goal.getFilePath());
 		if (goal.getFilePath().equals(""))
 			file = "File";
-		
-		String name = "'"+goal.getFunctor()+"'";
-		if (goal.getFunctor().equals(""))
+
+		String name = Util.quoteAtomIfNeeded(goal.getFunctor());
+		if (goal.getFunctor().isEmpty())
 			name = "Predicate";
 		
 		String module2 = module;
@@ -73,15 +74,13 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		return query;
 	}
 
-	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
 
-		String module = (String)m.get("RefModule");
-		String name = (String)m.get("RefName");
-		int arity = Integer.parseInt((String)m.get("RefArity"));
+		String module = m.get("RefModule").toString();
+		String name = m.get("RefName").toString();
+		int arity = Integer.parseInt(m.get("RefArity").toString());
 		
 		List<String> properties = null;
 		Object prop = m.get("PropertyList");

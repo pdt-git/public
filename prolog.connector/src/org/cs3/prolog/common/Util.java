@@ -944,6 +944,14 @@ public class Util {
 		return executable.toString();
 	}
 
+	public static String quoteAtomIfNeeded(String term) {
+		if (term.startsWith("'") && term.endsWith("'")) {
+			return term;
+		} else {
+			return "'" + term.replace("'", "\\'") + "'";
+		}
+	}
+
 
 }
 

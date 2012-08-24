@@ -105,7 +105,8 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput && match instanceof PrologMatch) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			return ((PrologMatch)match).getFile().equals(fi.getFile());
+			IFile fileForMatch = ((PrologMatch)match).getFile();
+			return (fileForMatch != null && fileForMatch.equals(fi.getFile()));
 		}
 		return false;
 	}
@@ -146,7 +147,8 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 				if (obj instanceof SearchPredicateElement) {
 					SearchPredicateElement predicate = (SearchPredicateElement) obj;
 					for (SearchFileTreeElement fileTreeElement : predicate.getFileTreeElements()) {
-						if (fileTreeElement.getFile().equals(file)) {
+						IFile fileForTreeElement = fileTreeElement.getFile();
+						if (fileForTreeElement != null && fileForTreeElement.equals(file)) {
 							for (PrologMatch match : fileTreeElement.getOccurrences()) {
 								result.add(match);
 							}
