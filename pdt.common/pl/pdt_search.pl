@@ -230,8 +230,8 @@ find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile
 % The second argument is just an atom contianing the string representation of the term:     
 find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
-    extract_name_arity(Term,Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Head,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult).
+    extract_name_arity(Term,_Head,Name,Arity),
+    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult).
 
 retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	(	module_property(Module, file(EnclFile))
