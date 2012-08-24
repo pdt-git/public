@@ -13,7 +13,7 @@
 
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
-         , find_definitions_categorized/12       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility)
+         , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
          , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/8
          , find_pred/8
@@ -52,11 +52,16 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, ''):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, '', ExactMatch):-
 	var(EnclFile),
-	!,    
-    search_term_to_predicate_indicator(Term, Functor/Arity),
-    current_predicate(_:Functor/Arity),
+	!,
+	(ExactMatch == true
+	-> (search_term_to_predicate_indicator(Term, Functor/Arity),
+        current_predicate(_:Functor/Arity))
+	;  (search_term_to_predicate_indicator(Term, FunctorPrefix/Arity),
+        current_predicate(_:Functor/Arity),
+        once(sub_atom(Functor,_,_,_,FunctorPrefix)))
+	),
     find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
     member(DeclOrDef-DefiningModule-Location,Sources),
     member(File-Lines,Location),
@@ -85,7 +90,7 @@ find_decl_or_def_2(Name,Arity,Definitions) :-
 %                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
 %                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
 % Logtalk
-find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
+find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility, _ExactMatch):-
     Term \= _:_,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
@@ -95,7 +100,7 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
 
     
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility, _ExactMatch):-
     referenced_entity(EnclFile, ReferencedModule),    
     search_term_to_predicate_indicator(Term, Functor/Arity),
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)

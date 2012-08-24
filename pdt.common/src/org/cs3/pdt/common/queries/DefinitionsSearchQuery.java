@@ -24,6 +24,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 
 public class DefinitionsSearchQuery extends PDTSearchQuery {
@@ -33,9 +34,9 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {		
-		String file = "'"+goal.getFilePath()+"'";
-		if (goal.getFilePath().equals(""))
+	protected String buildSearchQuery(Goal goal, String module) {
+		String file = Util.quoteAtom(goal.getFilePath());
+		if (goal.getFilePath().isEmpty())
 			file = "OrigFile";
 
 		String module2 = module;
@@ -43,8 +44,6 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 			module2 = "Module";
 		
 		String term = goal.getTermString();
-		//String term = Util.quoteAtom(origTerm);
-		
 		
 		String query = bT(PDTCommonPredicates.FIND_DEFINITIONS_CATEGORIZED,
 				file,
@@ -58,13 +57,11 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 				"File",
 				"Line",
 				"PropertyList",
-				"Visibility");
+				"Visibility",
+				Boolean.toString(goal.isExactMatch()));
 		return query;
 	}
 
-
-
-	@SuppressWarnings("unchecked")
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {

@@ -22,6 +22,7 @@ import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.DefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.queries.ReferencesSearchQueryDirect;
+import org.cs3.prolog.common.Util;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -56,11 +57,13 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		private final int searchFor;
 		private final int limitTo;
 		private final String pattern;
+		private final boolean exactMatch;
 				
-		public SearchPatternData(int searchFor, int limitTo, String pattern) {
+		public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch) {
 			this.searchFor= searchFor;
 			this.limitTo= limitTo;
 			this.pattern= pattern;
+			this.exactMatch = exactMatch;
 		}
 
 		public int getLimitTo() {
@@ -74,10 +77,15 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			return searchFor;
 		}
 		
+		public boolean isExactMatch() {
+			return exactMatch;
+		}
+		
 		public void store(IDialogSettings settings) {
 			settings.put("searchFor", searchFor); //$NON-NLS-1$
 			settings.put("pattern", pattern); //$NON-NLS-1$
 			settings.put("limitTo", limitTo); //$NON-NLS-1$
+			settings.put("exactMatch", exactMatch); //$NON-NLS-1$
 		}
 		
 		public static SearchPatternData create(IDialogSettings settings) {
@@ -89,8 +97,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			try {
 				int searchFor= settings.getInt("searchFor"); //$NON-NLS-1$
 				int limitTo= settings.getInt("limitTo"); //$NON-NLS-1$
+				boolean exactMatch = settings.getBoolean("exactMatch"); //$NON-NLS-1$
 				
-				return new SearchPatternData(searchFor, limitTo, pattern);
+				return new SearchPatternData(searchFor, limitTo, pattern, exactMatch);
 			} catch (NumberFormatException e) {
 				return null;
 			}
@@ -130,6 +139,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	
 	private Button[] fSearchFor;
 	private Button[] fLimitTo;
+	private Button limitToExact;
 	private Group fLimitToGroup;
 	
 	public PrologSearchPage() {
@@ -168,10 +178,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				} catch (NumberFormatException e) {}
 				functor = data.pattern.substring(0, lastSlash);
 			}
-			goal = new Goal("", null, functor, arity, null);
+			goal = new Goal("", null, Util.quoteAtom(functor), arity, null, data.isExactMatch());
 		} else {
 			// TODO: search for modules !!!
-			goal = new Goal("", data.pattern, "", -1, data.pattern+":Predicate");
+			goal = new Goal("", data.pattern, "", -1, data.pattern+":Predicate", data.isExactMatch());
 		}
 
 		if (limitTo == REFERENCES)
@@ -254,7 +264,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		match= new SearchPatternData(
 				getSearchFor(),
 				getLimitTo(),
-				pattern
+				pattern,
+				limitToExact.getSelection()
 		);
 			
 		fPreviousSearchPatterns.add(0, match); // insert on top
@@ -325,7 +336,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				int limitTo = getLimitTo();
-				fillLimitToGroup(limitTo);
+				fillLimitToGroup(limitTo, true);
 			}
 		};
 
@@ -409,7 +420,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
 		setSearchFor(initialData.getSearchFor());
 		int limitTo = initialData.getLimitTo();
-		fillLimitToGroup(limitTo);
+		fillLimitToGroup(limitTo, initialData.isExactMatch());
 		fPattern.setText(initialData.getPattern());
 		
 //		fInitialData= initialData;
@@ -441,11 +452,11 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		fLimitToGroup.setText("Limit To"); 
 		fLimitToGroup.setLayout(new GridLayout(2, false));
 
-		fillLimitToGroup(DECLARATIONS);
+		fillLimitToGroup(DECLARATIONS, true);
 		return fLimitToGroup;
 	}
 		
-	private void fillLimitToGroup(int limitTo) {
+	private void fillLimitToGroup(int limitTo, boolean exactMatches) {
 		Control[] children= fLimitToGroup.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			children[i].dispose();
@@ -453,7 +464,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		ArrayList<Button> buttons= new ArrayList<Button>();
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations && Definitions", DECLARATIONS, limitTo == DECLARATIONS));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "References", REFERENCES, limitTo == REFERENCES));
-		
+		limitToExact = createButton(fLimitToGroup, SWT.CHECK, "Exact matches only", 0, exactMatches);
+		buttons.add(limitToExact);
 		fLimitTo= buttons.toArray(new Button[buttons.size()]);
 		
 		SelectionAdapter listener= new SelectionAdapter() {
@@ -507,7 +519,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 //		fInitialData= initData;
 		setSearchFor(initData.getSearchFor());
 		int limitTo = initData.getLimitTo();
-		fillLimitToGroup(limitTo);
+		fillLimitToGroup(limitTo, initData.isExactMatch());
 		fPattern.setText(initData.getPattern());
 	}
 	
@@ -519,7 +531,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				i++;
 			}
 			if (i > 0) {
-				return new SearchPatternData(PREDICATE, REFERENCES, selectedText.substring(0, i));
+				return new SearchPatternData(PREDICATE, REFERENCES, selectedText.substring(0, i),true);
 			}
 		}
 		return null;
@@ -530,7 +542,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
 
-		return new SearchPatternData(PREDICATE, REFERENCES, ""); //$NON-NLS-1$
+		return new SearchPatternData(PREDICATE, REFERENCES, "", true); //$NON-NLS-1$
 	}
 	
 	/*
