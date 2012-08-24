@@ -63,6 +63,28 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     member(Line,Lines),
     properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
 
+
+% find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
+%                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
+%                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
+% Logtalk
+find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
+    Term \= _:_,
+    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
+    !,
+    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
+    
+    
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
+    referenced_entity(EnclFile, ReferencedModule),    
+    search_term_to_predicate_indicator(Term, Functor/Arity),
+    find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
+    member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
+    member(File-Lines,Location),
+    member(Line,Lines),
+    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+
+
 find_decl_or_def_2(Name,Arity,Declarations) :-
    setof( declaration-DeclModule-Location, Name^Arity^ 
           ( declared_but_undefined(DeclModule,Name,Arity),
@@ -78,31 +100,6 @@ find_decl_or_def_2(Name,Arity,Definitions) :-
           ),
           Definitions
     ). 
-    
-    
-    
-% find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
-%                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
-%                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
-% Logtalk
-find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
-    Term \= _:_,
-    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
-    !,
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
-    
-
-
-    
-    
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility):-
-    referenced_entity(EnclFile, ReferencedModule),    
-    search_term_to_predicate_indicator(Term, Functor/Arity),
-    find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
-    member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
-    member(File-Lines,Location),
-    member(Line,Lines),
-    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
 
 referenced_entity(EnclFile, ReferencedModule) :- 
     (  atom(ReferencedModule)
@@ -343,10 +340,6 @@ primary_location(Locations,_,File,FirstLine) :-
 
 % Called from PDTOutlineQuery.java
 
-find_definition_contained_in(File, Module, Kind, Functor, Arity, SearchCategory, Line, PropertyList) :-
-    find_definition_contained_in(File, Module, _, Kind, Functor, Arity, SearchCategory, Line, PropertyList).
-    
-
 find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
@@ -380,6 +373,25 @@ find_definition_contained_in(File, Module, ModuleLine, module, Functor, Arity, S
     	)
     ),
     \+find_blacklist(Functor,Arity,Module).
+  
+        
+find_definition_contained_in(File, Module, Kind, Functor, Arity, SearchCategory, Line, PropertyList) :-
+    find_definition_contained_in(File, Module, _, Kind, Functor, Arity, SearchCategory, Line, PropertyList).
+    
+% The following clause searches for clauses inside the given file, which contribute to multifile 
+% predicates, defined in foreign modules.
+find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Line, PropertyList):-
+    module_property(FileModule, file(File)),
+    declared_in_module(Module,Head),
+    Module \= FileModule,
+    predicate_property(Module:Head, multifile),
+    nth_clause(Module:Head,_,Ref),
+    clause_property(Ref,file(File)),     
+    clause_property(Ref,line_count(Line)),
+    functor(Head, Functor, Arity),
+    properties_for_predicate(Module, Functor, Arity, PropertyList0),
+    append([from(Module)], PropertyList0, PropertyList),
+    \+find_blacklist(Functor,Arity,Module).
 
 
 % pdt_strip_module(+ModuleHead,?Module,-ModuleLine,?Head) is det
@@ -397,24 +409,7 @@ pdt_strip_module(Module:Head,Module,Line,Head) :-
      module_property(Module, line_count(Line)).  % ... get its line number
 pdt_strip_module(Head,user,1,Head).              
 	
-% TODO: Reconcile the above with utils4modules_visibility.pl::module_of_file/2
-  
-        
-% The following clause searches for clauses inside the given file, which contribute to multifile 
-% predicates, defined in foreign modules.
-find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Line, PropertyList):-
-    module_property(FileModule, file(File)),
-    declared_in_module(Module,Head),
-    Module \= FileModule,
-    predicate_property(Module:Head, multifile),
-    nth_clause(Module:Head,_,Ref),
-    clause_property(Ref,file(File)),     
-    clause_property(Ref,line_count(Line)),
-    functor(Head, Functor, Arity),
-    properties_for_predicate(Module, Functor, Arity, PropertyList0),
-    append([from(Module)], PropertyList0, PropertyList),
-    \+find_blacklist(Functor,Arity,Module).
-   
+% TODO: Reconcile the above with utils4modules_visibility.pl::module_of_file/2   
 
 %% find_blacklist(?Functor, ?Arity, ?Module) is nondet.
 %
