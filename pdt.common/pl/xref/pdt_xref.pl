@@ -12,8 +12,8 @@
  ****************************************************************************/
 
 :- module( pdt_xref,
-         [ find_reference_to/12 % +Functor,+Arity,?DefFile,?DefModule,
-                                % ?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind,?PropertyList
+         [ find_reference_to/13 % +Functor,+Arity,?DefFile,?DefModule,
+                                % ?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind,?PropertyList,?ExactMatch
          ]
          ).
 
@@ -32,12 +32,12 @@ find_unique( Goal ) :-
     member(Goal, Set).
     
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,?PropertyList)
-find_reference_to(Functor,Arity,DefFile, SearchMod,
+find_reference_to(Functor,Arity,DefFile, SearchMod, ExactMatch,
                   RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-
-    find_unique(  find_reference_to__(Functor,Arity,DefFile, SearchMod,
+    find_unique(  find_reference_to__(Functor,Arity,DefFile, SearchMod, ExactMatch,
                   RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) ).
     
-find_reference_to__(Functor,Arity,DefFile, SearchMod,
+find_reference_to__(Functor,Arity,DefFile, SearchMod, ExactMatch,
                   RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-                  
 	( nonvar(DefFile)
     -> module_of_file(DefFile,SearchMod)
@@ -45,21 +45,25 @@ find_reference_to__(Functor,Arity,DefFile, SearchMod,
            % Search for references to independent definitions
            % <-- Does that make sense???
     ),
-    ( var(Arity) % Need to backtrack over all declared Functor/Arity combinations:
-    -> ( setof( Functor/Arity, SearchMod^current_predicate(SearchMod:Functor/Arity), Set),
-         member(Functor/Arity, Set)
-       )
-    ; true % Arity already bound in input
-    ),
-    functor(SearchTerm,Functor,Arity),
-    pdt_xref_data(SearchMod:SearchTerm,RefModule:RefHead,Ref,Kind),
+%    ( var(Arity) % Need to backtrack over all declared Functor/Arity combinations:
+%    -> ( setof( Functor/Arity, SearchMod^current_predicate(SearchMod:Functor/Arity), Set),
+%         member(Functor/Arity, Set)
+%       )
+%    ; true % Arity already bound in input
+%    ),
+%    functor(SearchTerm,Functor,Arity),
+    pdt_xref_data(SearchMod:Functor/Arity,ExactMatch,RefModule:RefHead,Ref,Kind),
 
     functor(RefHead,RefName,RefArity),
     predicate_property(RefModule:RefHead,_),
     nth_clause(RefModule:RefHead,Nth,Ref),
     clause_property(Ref, file(RefFile)),
     clause_property(Ref, line_count(RefLine)),
-    properties_for_predicate(RefModule,RefName,RefArity,PropertyList).
+    properties_for_predicate(RefModule,RefName,RefArity,PropertyList),
+    ( var(Functor) -> Functor = '' ; true),
+    ( var(Arity) -> Arity = '' ; true),
+    ( var(DefFile) -> DefFile = '' ; true),
+    ( var(SearchMod) -> SearchMod = '' ; true).
 
 go :- % To list all results quickly call 
       % ?- pdt_xref:go, fail.
@@ -69,12 +73,12 @@ go :- % To list all results quickly call
     ).
 	
 
-pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
+pdt_xref_data(DefModule:T,ExactMatch,RefModule:RefHead,Ref, Kind) :-
    current_predicate(RefModule:F/A),     % For all defined predicates
    functor(RefHead,F,A),   
    nth_clause(RefModule:RefHead,_N,Ref),   % For all their clauses
    '$xr_member'(Ref, QualifiedTerm),					% Get a term referenced by that clause
-   is_reference_to(DefModule:T,RefHead,QualifiedTerm,Kind).     % (via SWI-Prolog's internal xref data)
+   is_reference_to(DefModule:T,ExactMatch,RefHead,QualifiedTerm,Kind).     % (via SWI-Prolog's internal xref data)
  
 
    
@@ -94,17 +98,37 @@ pdt_xref_data(DefModule:T,RefModule:RefHead,Ref, Kind) :-
 %    is_reference_to(DeclModule:DefHead,RefHead,RefModule:RefTerm,Kind).
 	    
 
-is_reference_to(DefModule:DefTerm, RefHead, Reference, RefKind) :-
+is_reference_to(DefModule:DefSignature, ExactMatch, RefHead, Reference, RefKind) :-
     ( Reference = RefModule:RefTerm
-    -> is_reference_to__(DefModule,DefTerm, RefHead, RefModule, RefTerm, RefKind)
-    ;  is_reference_to__(DefModule,DefTerm, RefHead, _______, Reference, RefKind)
+    -> is_reference_to__(DefModule,DefSignature, ExactMatch, RefHead, RefModule, RefTerm,   RefKind)
+    ;  is_reference_to__(DefModule,DefSignature, ExactMatch, RefHead, _,         Reference, RefKind)
     ).
 
-is_reference_to__(DefModule,DefTerm, RefHead, RefModule, RefTerm, RefKind) :- 
-    nonvar(DefTerm),
+is_reference_to__(DefModule,DefFunctor/DefArity, ExactMatch, RefHead, RefModule, RefTerm, RefKind) :-
+	nonvar(DefModule),
+	var(DefFunctor),
     nonvar(RefTerm),
-    DefTerm=RefTerm,  % It is a reference! Determine its kind:
-    ref_kind(DefModule, DefTerm, RefHead, RefModule,  RefKind).
+    !, % Reference to module
+    (	ExactMatch == true
+    ->	DefModule == RefModule
+    ;	once(sub_atom(RefModule, _, _, _, DefModule))
+    ),
+    ref_kind(DefModule, DefFunctor/DefArity, RefHead, RefModule,  RefKind).
+
+is_reference_to__(DefModule,DefFunctor/DefArity, ExactMatch, RefHead, RefModule, RefTerm, RefKind) :- 
+    nonvar(DefFunctor),
+    nonvar(RefTerm),
+    functor(RefTerm, RefFunctor, RefArity),
+    (	ExactMatch == true
+    ->	DefFunctor == RefFunctor
+    ;	once(sub_atom(RefFunctor, _, _, _, DefFunctor))
+    ),
+    (	(var(DefArity); DefArity == -1)
+    ->	true
+    ;	DefArity == RefArity
+    ),
+%    DefTerm=RefTerm,  % It is a reference! Determine its kind:
+    ref_kind(DefModule, DefFunctor/DefArity, RefHead, RefModule,  RefKind).
 
 ref_kind(DefModule, _, _, RefModule, RefKind) :-     
     DefModule == RefModule,

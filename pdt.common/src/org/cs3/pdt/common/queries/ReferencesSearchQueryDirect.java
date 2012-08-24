@@ -63,6 +63,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 				arity,
 				file,
 				module2,
+				Boolean.toString(goal.isExactMatch()),
 				"RefModule",
 				"RefName",
 				"RefArity",

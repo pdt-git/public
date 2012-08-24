@@ -18,6 +18,7 @@
          , find_definition_contained_in/8
          , find_pred/8
          , find_pred_for_editor_completion/9
+         , find_module_reference/10
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),
@@ -555,3 +556,21 @@ my_module_of_file(File,Module):-
     ).
 
 
+find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, File, Line, PropertyList) :-
+	once(properties_for_predicate(system, load_files, 2, PropertyList)),
+	find_use_module(Module, ExactMatch, _, _, File, Line). 
+
+find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, File, Line, PropertyList) :-
+	find_reference_to(_, _, _, Module, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, _, _, PropertyList).
+
+find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line) :-
+	(	ExactMatch == true
+	->	ModuleOrPart = Module
+	;	current_module(Module),
+		sub_atom(Module, _, _, _, ModuleOrPart)
+	),
+	module_property(Module, file(ModuleFile)),
+	source_file_property(ModuleFile, load_context(LoadingModule, File:Line, OptionList)),
+%	member(if(not_loaded), OptionList),
+	member(must_be_module(true), OptionList).
+	

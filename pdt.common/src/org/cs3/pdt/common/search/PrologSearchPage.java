@@ -169,9 +169,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			int lastSlash = data.pattern.lastIndexOf("/");
 			if (lastSlash == -1) {
 				functor = data.pattern;
-				if (limitTo == DECLARATIONS) {
-					arity = -1;
-				}
+				arity = -1;
 			} else {
 				try {
 					arity = Integer.parseInt(data.pattern.substring(lastSlash + 1));
@@ -311,8 +309,15 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		layout.horizontalSpacing= 10;
 		result.setLayout(layout);
 		
-		Control expressionComposite= createExpression(result);
-		expressionComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1));
+		Composite expressionContainer = new Composite(result, SWT.NONE);
+		expressionContainer.setLayout(new GridLayout(2, false));
+		expressionContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
+		Control expressionComposite= createExpression(expressionContainer);
+		expressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		limitToExact = createButton(expressionContainer, SWT.CHECK, "Exact matches only", 0, true);
+		limitToExact.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 		
 		Label explainingLabel = new Label(result, SWT.WRAP);
 		explainingLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1));
@@ -422,6 +427,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		int limitTo = initialData.getLimitTo();
 		fillLimitToGroup(limitTo, initialData.isExactMatch());
 		fPattern.setText(initialData.getPattern());
+		limitToExact.setSelection(initialData.isExactMatch());
 		
 //		fInitialData= initialData;
 	}
@@ -464,9 +470,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		ArrayList<Button> buttons= new ArrayList<Button>();
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations && Definitions", DECLARATIONS, limitTo == DECLARATIONS));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "References", REFERENCES, limitTo == REFERENCES));
-		limitToExact = createButton(fLimitToGroup, SWT.CHECK, "Exact matches only", 0, exactMatches);
-		buttons.add(limitToExact);
 		fLimitTo= buttons.toArray(new Button[buttons.size()]);
+		limitToExact.setSelection(exactMatches);
 		
 		SelectionAdapter listener= new SelectionAdapter() {
 			@Override
@@ -483,14 +488,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	protected final void performLimitToSelectionChanged(Button button) {
-		if (button.getSelection()) {
-			for (int i= 0; i < fLimitTo.length; i++) {
-				Button curr= fLimitTo[i];
-				if (curr != button) {
-					curr.setSelection(false);
-				}
-			}
-		}
+//		if (button.getSelection()) {
+//			for (int i= 0; i < fLimitTo.length; i++) {
+//				Button curr= fLimitTo[i];
+//				if (curr != button) {
+//					curr.setSelection(false);
+//				}
+//			}
+//		}
 	}
 		
 	private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
