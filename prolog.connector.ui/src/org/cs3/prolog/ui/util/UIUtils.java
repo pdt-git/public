@@ -397,6 +397,8 @@ public final class UIUtils {
 			editor.getEditorSite().getSelectionProvider().setSelection(newSelection);
 		} catch (BadLocationException e) {
 			Debug.report(e);
+		} catch (Exception e) {
+			Debug.report(e);
 		}
 	}
 
