@@ -30,7 +30,11 @@ import org.eclipse.core.resources.IFile;
 public class DefinitionsSearchQuery extends PDTSearchQuery {
 	public DefinitionsSearchQuery(Goal goal) {
 		super(goal);
-		setSearchType("Definitions and declarations of");
+		if (goal.isExactMatch()) {
+			setSearchType("Definitions and declarations of");
+		} else {
+			setSearchType("Definitions and declarations containing");			
+		}
 	}
 
 	@Override

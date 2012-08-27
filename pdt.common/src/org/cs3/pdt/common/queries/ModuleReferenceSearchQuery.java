@@ -24,57 +24,31 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
-import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 
-/**
- * @author gk
- *
- */
-public class ReferencesSearchQueryDirect extends PDTSearchQuery {
+public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 
 	
-	public ReferencesSearchQueryDirect(Goal goal) {
+	public ModuleReferenceSearchQuery(Goal goal) {
 		super(goal);
 		if (goal.isExactMatch()) {
-			setSearchType("References to");
+			setSearchType("References to module");
 		} else {
-			setSearchType("References to predicates containing");			
+			setSearchType("References to modules containing");			
 		}
 	}
 
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		String arity = Integer.toString(goal.getArity());
-		if (goal.getArity() < 0) 
-			arity = "Arity";
-		
-		String file = Util.quoteAtom(goal.getFilePath());
-		if (goal.getFilePath().isEmpty())
-			file = "File";
-
-		String name = Util.quoteAtomIfNeeded(goal.getFunctor());
-		if (goal.getFunctor().isEmpty())
-			name = "Predicate";
-		
-		String module2 = module;
-		if (module.equals("''"))
-			module2 = "Module";
-		
-		String query = bT(PDTCommonPredicates.FIND_REFERENCE_TO,
-				name,
-				arity,
-				file,
-				module2,
+		String query = bT(PDTCommonPredicates.FIND_MODULE_REFERENCE,
+				module,
 				Boolean.toString(goal.isExactMatch()),
+				"RefFile",
+				"RefLine",
 				"RefModule",
 				"RefName",
 				"RefArity",
-				"RefFile",
-				"RefLine",
-				"Nth",
-				"Kind",
 				"PropertyList");
 		return query;
 	}
@@ -97,10 +71,6 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
 		PrologMatch match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
 		return match;
-	}
-	
-	public boolean isCategorized(){
-		return false;
 	}
 	
 }

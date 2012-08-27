@@ -30,6 +30,7 @@ import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologException;
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.Match;
 
 public abstract class PDTSearchQuery implements ISearchQuery {
 
@@ -105,10 +107,11 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throws PrologException, PrologInterfaceException {
 		
 		String module;               
-		if(goal.getModule()!=null && !goal.getModule().isEmpty())
-			module ="'"+ goal.getModule()+ "'"; // Modul ist explizit gesetzt
-		else
-			module = "Module";                  // Modul ist freie Variable
+		if (goal.getModule() != null && !goal.getModule().isEmpty()) {
+			module = Util.quoteAtomIfNeeded(goal.getModule());
+		} else {
+			module = "Module";                  // Modul is free variable
+		}
 
 		String query = buildSearchQuery(goal, module);
 		
@@ -117,9 +120,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		List<Map<String, Object>> clauses = getResultForQuery(session, query);
 		
 		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
-		if(clauses.size()>0 && goal.getModule()==null){
-			goal.setModule(clauses.get(0).get("Module").toString());
-		}
+//		if (clauses.size() > 0 && goal.getModule() == null){
+//			goal.setModule(clauses.get(0).get("Module").toString());
+//		}
 		return clauses;
 	}
 	
@@ -140,7 +143,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 */
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 	throws IOException, NumberFormatException {
-		PrologMatch match;
+		Match match;
 		moduleElements.clear();
 		predForSignature.clear();
 		signatures.clear();
@@ -154,7 +157,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		}
 	}
 	
-	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
+	protected abstract Match constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
 	protected PrologMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int line, List<String> properties, String visibility, String declOrDef) {
 		String signature = declOrDef + visibility + definingModule + functor + arity + line;

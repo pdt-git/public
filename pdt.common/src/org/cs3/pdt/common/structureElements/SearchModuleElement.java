@@ -15,6 +15,8 @@ package org.cs3.pdt.common.structureElements;
 
 import java.util.LinkedHashMap;
 
+import org.eclipse.core.resources.IFile;
+
 public class SearchModuleElement implements PrologSearchTreeElement, Comparable<SearchModuleElement> {
 	
 	private String label;
@@ -23,6 +25,7 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	private Object parent;
 	
 	private LinkedHashMap<String, SearchPredicateElement> predForSignature = new LinkedHashMap<String, SearchPredicateElement>();
+	private ModuleMatch match;
 	
 	public SearchModuleElement(Object parent, String name, String visibility) {
 		this.parent = parent;
@@ -64,7 +67,12 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 
 	@Override
 	public int compareTo(SearchModuleElement o) {
-		return o.visibilityCode - this.visibilityCode;
+		int visibilityDifference = o.visibilityCode - this.visibilityCode;
+		if (visibilityDifference != 0) {
+			return visibilityDifference;
+		} else {
+			return name.compareTo(o.getName());
+		}
 	}
 
 	@Override
@@ -92,15 +100,40 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	}
 	
 	private String getSignatureForMatch(PrologMatch match) {
-		return /* Andreas Becker, 28.6.2012: Damit Deklaration und Definition
-		          zusammen gezeigt werden, muss  folgendes entfernt werden:
-		          match.getDeclOrDef() + 
-		       */ match.getName() + match.getArity();
+		return match.getName() + match.getArity();
 	}
 
 	@Override
 	public Object getParent() {
 		return parent;
+	}
+	
+	public void setParent(Object parent) {
+		this.parent = parent;
+	}
+	
+	public int getLine() {
+		if (match == null) {
+			return -1;
+		} else {
+			return match.getOffset();
+		}
+	}
+	
+	public IFile getFile() {
+		if (match == null) {
+			return null;
+		} else {
+			return match.getFile();
+		}
+	}
+
+	public void setMatch(ModuleMatch match) {
+		this.match = match;
+	}
+	
+	public ModuleMatch getMatch() {
+		return match;
 	}
 
 }

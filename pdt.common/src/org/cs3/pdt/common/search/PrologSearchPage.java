@@ -19,6 +19,8 @@ import java.util.List;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.DefinitionsSearchQuery;
+import org.cs3.pdt.common.queries.ModuleDefinitionsSearchQuery;
+import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.queries.ReferencesSearchQueryDirect;
 import org.cs3.prolog.common.Util;
@@ -48,8 +50,12 @@ import org.eclipse.swt.widgets.Label;
 
 public class PrologSearchPage extends DialogPage implements ISearchPage {
 
+    private static final String PREDICATE_HINT = "Enter the search string as Functor/Arity (e. g. member/2). If no arity is specified, predicates with any arity will be found";
+    private static final String MODULE_HINT = "Search for module definitions or for references to predicates declared in this module";
+    
+    private static final String[] hints = new String[]{MODULE_HINT, PREDICATE_HINT};
 
-    private static class SearchPatternData {
+	private static class SearchPatternData {
         private static final String SEARCH_FOR = "searchFor";
         private static final String PATTERN2 = "pattern";
         private static final String LIMIT_TO = "limitTo";
@@ -135,6 +141,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private Button[] searchForRadioButtons;
     private Button[] limitToRadioButtons;
     private Button exactMatchCheckBox;
+	private Label explainingLabel;
 
     //---- Action Handling ------------------------------------------------
 
@@ -149,7 +156,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         int searchFor = data.getSearchFor();
         int limitTo = data.getLimitTo();
 
-        PDTSearchQuery searchQuery;
+        PDTSearchQuery searchQuery = null;
 
         Goal goal;
         if (searchFor == PREDICATE) {
@@ -166,15 +173,22 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 functor = data.pattern.substring(0, lastSlash);
             }
             goal = new Goal("", null, Util.quoteAtom(functor), arity, null, data.isExactMatch());
+            
+            if (limitTo == REFERENCES) {
+            	searchQuery = new ReferencesSearchQueryDirect(goal);
+            } else {
+            	searchQuery = new DefinitionsSearchQuery(goal);
+            }
         } else {
-            // TODO: search for modules !!!
-            goal = new Goal("", data.pattern, "", -1, data.pattern+":Predicate", data.isExactMatch());
+        	boolean exactMatch = data.isExactMatch();
+			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
+            
+            if (limitTo == REFERENCES) {
+            	searchQuery = new ModuleReferenceSearchQuery(goal);
+            } else {
+            	searchQuery = new ModuleDefinitionsSearchQuery(goal);
+            }
         }
-
-        if (limitTo == REFERENCES)
-            searchQuery = new ReferencesSearchQueryDirect(goal);
-        else
-            searchQuery = new DefinitionsSearchQuery(goal);
 
         NewSearchUI.activateSearchResultView();
         NewSearchUI.runQueryInForeground(null,searchQuery);
@@ -242,7 +256,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             Button button = searchForRadioButtons[i];
             button.setSelection(searchFor == getIntData(button));
         }
+        updateLabel(searchFor);
     }
+
+	private void updateLabel(int searchFor) {
+		if (searchFor >= 0 && searchFor < hints.length) {
+        	explainingLabel.setText(hints[searchFor]);
+        }
+	}
 
     private void setLimitTo(int limitTo) {
         for (int i = 0; i < limitToRadioButtons.length; i++) {
@@ -337,9 +358,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         Control expressionComposite = createExpression(result);
         expressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-        Label explainingLabel = new Label(result, SWT.WRAP);
-        explainingLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1));
-        explainingLabel.setText("Enter the search string as Functor/Arity (e. g. member/2). If no arity is specified, predicates with any arity will be found");
+        explainingLabel = new Label(result, SWT.WRAP);
+        GridData labelLayoutData = new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1);
+        labelLayoutData.heightHint = convertHeightInCharsToPixels(2);
+		explainingLabel.setLayoutData(labelLayoutData);
 
         Label separator = new Label(result, SWT.NONE);
         separator.setVisible(false);
@@ -405,7 +427,17 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 createButton(result, SWT.RADIO, "Module", MODULE, false),
                 createButton(result, SWT.RADIO, "Predicate", PREDICATE, true),
         };
-        searchForRadioButtons[0].setEnabled(false);
+        
+        for (Button button : searchForRadioButtons) {
+        	button.addSelectionListener(new SelectionAdapter() {
+				@Override
+        		public void widgetSelected(SelectionEvent e) {
+					if (e.getSource() instanceof Button) {
+						updateLabel(getIntData((Button) e.getSource()));
+					}
+				}
+			});
+        }
 
         return result;
     }

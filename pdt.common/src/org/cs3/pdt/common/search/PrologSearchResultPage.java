@@ -21,8 +21,10 @@ package org.cs3.pdt.common.search;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.pdt.common.metadata.SourceLocation;
+import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
+import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -97,7 +99,9 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 				if (selection instanceof TreeSelection) {
 					Object firstElement = ((TreeSelection) selection).getFirstElement();
 					Match m = null;
-					if (firstElement instanceof SearchPredicateElement) {
+					if (firstElement instanceof SearchModuleElement) {
+						m = ((SearchModuleElement) firstElement).getMatch();
+					} else if (firstElement instanceof SearchPredicateElement) {
 						m = ((SearchPredicateElement) firstElement).getFirstOccurrence();
 					} else if (firstElement instanceof SearchFileTreeElement) {
 						m = ((SearchFileTreeElement) firstElement).getFirstMatch();
@@ -163,15 +167,20 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	
 	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		PrologMatch prologMatch = (PrologMatch)match;
-		SearchPredicateElement element = prologMatch.getPredicateElement();
-		IFile file = prologMatch.getFile();
-		if(prologMatch.isLineLocation()) {
-			SourceLocation loc = createLocation(element, file, prologMatch);
-			PDTCommonUtil.showSourceLocation(loc);
-			return;
+		if (match instanceof PrologMatch) {
+			PrologMatch prologMatch = (PrologMatch)match;
+			SearchPredicateElement element = prologMatch.getPredicateElement();
+			IFile file = prologMatch.getFile();
+			if(prologMatch.isLineLocation()) {
+				SourceLocation loc = createLocation(element, file, prologMatch);
+				PDTCommonUtil.showSourceLocation(loc);
+				return;
+			}
+			UIUtils.selectInEditor(currentOffset, currentLength, file, activate);
+		} else if (match instanceof ModuleMatch) {
+			ModuleMatch moduleMatch = (ModuleMatch) match;
+			UIUtils.selectInEditor(moduleMatch.getOffset(), moduleMatch.getFile(), activate);
 		}
-		UIUtils.selectInEditor(currentOffset, currentLength, file, activate);
 	}
 
 	private SourceLocation createLocation(SearchPredicateElement element, IFile file, PrologMatch prologMatch) {
