@@ -46,8 +46,10 @@ public class PreferencePageEditor extends FieldEditorPreferencePage implements I
 	@Override
 	public void createFieldEditors() {
 		addField(new BooleanFieldEditor(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "Ask before saving external files", getFieldEditorParent()));
-		
+
 		addField(new BooleanFieldEditor(PDT.PREF_AUTO_COMPLETE_ARGLIST, "Create arglist in auto completion", getFieldEditorParent()));
+
+		addField(new BooleanFieldEditor(PDT.PREF_CONSULT_ON_SAVE, "Consult file on save", getFieldEditorParent()));
 		
 //		// A comma separated list of filter ids that should be activated at startup
 //		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline",

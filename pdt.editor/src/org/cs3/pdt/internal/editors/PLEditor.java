@@ -96,7 +96,7 @@ public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
-	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
+	public static String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
 	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
@@ -125,20 +125,16 @@ public class PLEditor extends TextEditor {
 			return;
 		}
 		super.doSave(progressMonitor);
-		// TRHO: Experimental:
-		// try {
-		// Thread.sleep(200);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		Document document = (Document) getDocumentProvider().getDocument(
-				getEditorInput());
-		breakpointHandler.backupMarkers(getCurrentIFile(), document);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
-//		new ConsultAction().consultFromActiveEditor();
-//		breakpointHandler.updateBreakpointMarkers(getCurrentIFile(), getPrologFileName(), document);
-//		addProblemMarkers(); // here happens the save & reconsult
-//		breakpointHandler.updateMarkers(markerBackup, getCurrentIFile(), document);
+		
+		boolean shouldConsult = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_CONSULT_ON_SAVE, "true"));
+		
+		if (shouldConsult) {
+			Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+			breakpointHandler.backupMarkers(getCurrentIFile(), document);
+			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+		}
+		
+		PDTCommonPlugin.getDefault().notifyDecorators();
 		setFocus();
 	}
 
@@ -148,9 +144,7 @@ public class PLEditor extends TextEditor {
 	 */
 	private boolean shouldAbortSaving() {
 		if (isExternalInput()) {
-			boolean showWarning = Boolean.parseBoolean(PDTPlugin.getDefault()
-					.getPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING,
-							"true"));
+			boolean showWarning = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, "true"));
 			if (showWarning) {
 				MessageDialog m = new MessageDialog(
 						getEditorSite().getShell(),
@@ -275,7 +269,7 @@ public class PLEditor extends TextEditor {
 		createMenuEntryForContentAssist(menuMgr, bundle);
 
 		createMenuEntryForReconsult(menuMgr, bundle);
-		createMenuEntryForSaveAndReconsult(menuMgr, bundle);
+		createMenuEntryForSaveWithoutReconsult(menuMgr, bundle);
 		createMenuEntryForRunUnitTest(menuMgr, bundle);
 
 		createMenuEntryForToggleComments(menuMgr, bundle);
@@ -416,11 +410,11 @@ public class PLEditor extends TextEditor {
 				COMMAND_CONSULT);
 	}
 
-	private void createMenuEntryForSaveAndReconsult(MenuManager menuMgr,
+	private void createMenuEntryForSaveWithoutReconsult(MenuManager menuMgr,
 			ResourceBundle bundle) {
 		Action action;
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
-				+ ".SaveAndConsultAction", this) {
+				+ ".SaveNoConsultAction", this) {
 			@Override
 			public void run() {
 				// must be super, otherwise doSave will
@@ -429,12 +423,9 @@ public class PLEditor extends TextEditor {
 					PLEditor.super.doSave(new NullProgressMonitor());
 					PDTCommonPlugin.getDefault().notifyDecorators();
 				}
-				// addProblemMarkers();
-				// setFocus();
 			}
 		};
-		addAction(menuMgr, action, "Save", SEP_PDT_EDIT,
-				COMMAND_SAVE_AND_CONSULT);
+		addAction(menuMgr, action, "Save without consult", SEP_PDT_EDIT, COMMAND_SAVE_NO_CONSULT);
 	}
 
 	private void createMenuEntryForRunUnitTest(MenuManager menuMgr,
