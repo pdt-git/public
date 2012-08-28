@@ -23,6 +23,7 @@ import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.ui.util.preferences.MyBooleanFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyDirectoryFieldEditor;
+import org.cs3.prolog.ui.util.preferences.MyFileFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyIntegerFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyLabelFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyStringFieldEditor;
@@ -76,19 +77,39 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		Group executableGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		executableGroup.setText("Executable");
 		
-		invocation = new MyStringFieldEditor(PrologRuntime.PREF_INVOCATION, "Prolog invocation", executableGroup);
+		invocation = new MyStringFieldEditor(PrologRuntime.PREF_INVOCATION, "OS invocation", executableGroup);
 		addField(invocation);
 		
 		// eg. xpce or /usr/bin/xpce
-		executable = new MyStringFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
+		executable = new MyFileFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
+		executable.getLabelControl(executableGroup).setToolTipText("Don't enter quotes, they will be added automatically.");
 		addField(executable);
 		
 		commandLineArguments = new MyStringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);
+		commandLineArguments.getLabelControl(executableGroup).setToolTipText("See SWI-Prolog manual for a list of possible command line arguments.");
 		addField(commandLineArguments);
 		
-		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup);
+		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup) {
+			@Override
+			protected boolean doCheckState() {
+				String value = getStringValue();
+				String[] files = value.split(",");
+				for (String file : files) {
+					if (file.contains(" ")) {
+						if (!(file.startsWith("\"") && file.endsWith("\""))
+								&& !(file.startsWith("'") && file.endsWith("'"))) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		};
+		startupFiles.setErrorMessage("File paths containing white spaces must be enclosed in double quotes. To enter multiple files, separate them by a comma.");
+		startupFiles.getLabelControl(executableGroup).setToolTipText("Can be multiple files, seperated by commas.\nAdd quotes if needed!\n\nExample: \"c:/my files/dummy.pl\" dummy2.pl");
+
 		addField(startupFiles);
-		
+
 		executeablePreviewLabel = new MyLabelFieldEditor(executableGroup, "Executable preview");
 		addField(executeablePreviewLabel);
 		
