@@ -1,6 +1,16 @@
-/**
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
  * 
- */
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.console.internal.views;
 
 import java.util.ArrayList;
@@ -13,15 +23,15 @@ import java.util.Set;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.runtime.ui.PrologContextTracker;
-import org.cs3.pdt.runtime.ui.PrologContextTrackerListener;
-import org.cs3.pdt.runtime.ui.PrologContextTrackerService;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.PrologInterfaceRegistry;
+import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Subscription;
+import org.cs3.prolog.connector.ui.PrologContextTracker;
+import org.cs3.prolog.connector.ui.PrologContextTrackerListener;
+import org.cs3.prolog.connector.ui.PrologContextTrackerService;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -78,12 +88,13 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		setMenuCreator(this);
 	}
 
-	private void setImageDescriptorSensitive() {
-		Set<String> trackers= getActiveTrackers();
-		if(trackers.isEmpty()) setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
-		else setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.FOLLOW_MODE));
+	void setImageDescriptorSensitive() {
+		Set<String> trackers = getActiveTrackers();
+		if (trackers.isEmpty()) {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
+		} else {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.FOLLOW_MODE));
+		}
 		
 	}
 
@@ -391,14 +402,23 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
 			setToolTipText("no pif selected");
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 			return;
 		}
 		String key = reg.getKey(pif);
 		if (key == null) {
 			setToolTipText("unregisterd Prologinterface???");
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 			return;
 		}
 		setToolTipText(key);
+		Set<String> trackers = getActiveTrackers();
+		if (trackers.isEmpty()) {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+		} else {
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.FOLLOW_MODE));
+		}
 
 	}
 }
+

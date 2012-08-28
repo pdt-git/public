@@ -1,13 +1,26 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.transform.internal.wizards;
 
 import java.util.HashMap;
 
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
-import org.cs3.pdt.ui.util.OptionEditor;
-import org.cs3.pdt.ui.util.PropertyEditor;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.OptionProvider;
+import org.cs3.prolog.common.Option;
+import org.cs3.prolog.common.OptionProvider;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.OptionEditor;
+import org.cs3.prolog.ui.util.PropertyEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -91,3 +104,5 @@ public class PrologRefactoringInputPage extends UserInputWizardPage {
 	}
 
 }
+
+

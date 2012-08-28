@@ -1,58 +1,33 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
- * Author: Lukas Degener (among others) 
- * E-mail: degenerl@cs.uni-bonn.de
- * WWW: http://roots.iai.uni-bonn.de/research/pdt 
- * Copyright (C): 2004-2006, CS Dept. III, University of Bonn
+ * Author: Lukas Degener (among others)
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
  * 
- * All rights reserved. This program is  made available under the terms 
- * of the Eclipse Public License v1.0 which accompanies this distribution, 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * In addition, you may at your option use, modify and redistribute any
- * part of this program under the terms of the GNU Lesser General Public
- * License (LGPL), version 2.1 or, at your option, any later version of the
- * same license, as long as
- * 
- * 1) The program part in question does not depend, either directly or
- *   indirectly, on parts of the Eclipse framework and
- *   
- * 2) the program part in question does not include files that contain or
- *   are derived from third-party work and are therefor covered by special
- *   license agreements.
- *   
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *   
- * ad 1: A program part is said to "depend, either directly or indirectly,
- *   on parts of the Eclipse framework", if it cannot be compiled or cannot
- *   be run without the help or presence of some part of the Eclipse
- *   framework. All java classes in packages containing the "pdt" package
- *   fragment in their name fall into this category.
- *   
- * ad 2: "Third-party code" means any code that was originaly written as
- *   part of a project other than the PDT. Files that contain or are based on
- *   such code contain a notice telling you so, and telling you the
- *   particular conditions under which they may be used, modified and/or
- *   distributed.
  ****************************************************************************/
 
 package org.cs3.pdt.console.internal.views;
 
 import java.io.File;
 
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.ConsoleModelEvent;
+import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.CompletionResult;
-import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.pl.console.ConsoleHistory;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.ConsoleModelEvent;
-import org.cs3.pl.console.ConsoleModelListener;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.IControlContentAdapter;
+import org.eclipse.jface.fieldassist.IControlContentAdapter2;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IDocument;
@@ -79,8 +54,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
@@ -88,6 +61,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -149,7 +123,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	StyledText control;
 
 	private ConsoleModel model;
-	private ConsoleCompletionProvider completionProvider;
+	private PrologCompletionProvider completionProvider;
 	private ConsoleHistory history;
 	private boolean thatWasMe;
 	private int startOfInput = 0;
@@ -211,6 +185,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	};
 
+	private ContentProposalAdapter contentProposalAdapter;
+
 	public ConsoleViewer(Composite parent, int styles) {
 		createControl(parent, styles);
 		initPreferences();
@@ -250,14 +226,22 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
+		contentProposalAdapter = new ContentProposalAdapter(
+				control,
+				new StyledTextContentAdapter(),
+				new ProposalProvider(),
+				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), KeyStroke.getInstance(SWT.TAB)},
+				null);
+		contentProposalAdapter.setPopupSize(new Point(300, 200));
+		contentProposalAdapter.setLabelProvider(new ConsoleCompletionLabelProvider());
 
 		control.setTabs(4);
-		control.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				e.doit = false;
-			}
-		});
+//		control.addTraverseListener(new TraverseListener() {
+//			@Override
+//			public void keyTraversed(TraverseEvent e) {
+//				e.doit = false;
+//			}
+//		});
 		control.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -426,7 +410,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @param completionProvider
 	 *            The completionProvider to set.
 	 */
-	public void setCompletionProvider(ConsoleCompletionProvider completionProvider) {
+	public void setCompletionProvider(PrologCompletionProvider completionProvider) {
 		this.completionProvider = completionProvider;
 	}
 
@@ -474,7 +458,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		private String contents;
 		private ConsoleHistory history;
 		private ConsoleModel model;
-		public ConsoleCompletionProvider completionProvider;
+		public PrologCompletionProvider completionProvider;
 		public int caretPosition;
 		private StyleRange[] styleRanges;
 
@@ -658,60 +642,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		} else {
 			ui_setEnabled(false);
 		}
-	}
-
-	private void completionAvailable(CompletionResult r) {
-
-		if (!model.getLineBuffer().equals(r.getOriginalLineContent())) {
-			Debug.debug("completion discarded.");
-			return;
-		}
-		if (control.getCaretOffset() - startOfInput != r.getOriginalCaretPosition()) {
-			Debug.debug("completion discarded.");
-			return;
-		}
-
-		String[] options = r.getOptions();
-		Debug.debug("found " + options.length + " completions");
-		model.setLineBuffer(r.getNewLineContent());
-		control.setCaretOffset(r.getNewCaretPosition() + startOfInput);
-
-		if (options.length > 1) {
-			StringBuffer buf = new StringBuffer();
-			buf.append("\n");
-			for (int i = 0; i < options.length; i++) {
-				buf.append(options[i]);
-				buf.append("\t\t\t\t\t\t\t\t");
-			}
-			buf.append("\n");
-			ui_appendOutput(buf.toString());
-		}
-
-	}
-
-	private void doCompletion() {
-		if (completionProvider == null) {
-			return;
-		}
-
-		final int caretPosition = control.getCaretOffset() - startOfInput;
-		Runnable work = new Runnable() {
-			@Override
-			public void run() {
-
-				final CompletionResult r = completionProvider.doCompletion(model.getLineBuffer(), caretPosition);
-				final Runnable notify = new Runnable() {
-					@Override
-					public void run() {
-						completionAvailable(r);
-					}
-				};
-				control.getDisplay().asyncExec(notify);
-			}
-		};
-
-		new Thread(work, "Console Completion Worker").start();
-
 	}
 
 	private void setColorRangeInControl(int start, int end, Color col) {
@@ -940,14 +870,14 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					event.doit = false;
 					break;
 
-				case ' ':
-					if ((keyMask & SWT.CTRL) != 0) {
-						doCompletion();
-						event.doit = false;
-					}
-					break;
+//				case ' ':
+//					if ((keyMask & SWT.CTRL) != 0) {
+//						doCompletion();
+//						event.doit = false;
+//					}
+//					break;
 				case SWT.TAB:
-					doCompletion();
+//					doCompletion();
 					event.doit = false;
 					break;
 				default:
@@ -1036,9 +966,15 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 			case SWT.CR:
 			case SWT.KEYPAD_CR:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				model.commitLineBuffer();
 				break;
 			case SWT.ARROW_UP:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				Debug.debug("UP");
 				history.previous();
 				break;
@@ -1046,14 +982,23 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				if (isNumLock(keyMask, keyCode, keyChar)) {
 					break;
 				}
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				Debug.debug("UP");
 				history.previous();
 				break;
 			case SWT.ARROW_DOWN:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
 				history.next();
 				break;
 			case SWT.KEYPAD_2:
 				if (isNumLock(keyMask, keyCode, keyChar)) {
+					break;
+				}
+				if (contentProposalAdapter.isProposalPopupOpen()) {
 					break;
 				}
 				history.next();
@@ -1067,7 +1012,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	}
 
-	public ConsoleCompletionProvider getCompletionProvider() {
+	public PrologCompletionProvider getCompletionProvider() {
 		return completionProvider;
 	}
 
@@ -1221,4 +1166,83 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 	
+	private class StyledTextContentAdapter implements IControlContentAdapter,IControlContentAdapter2 {
+		
+		@Override
+		public String getControlContents(Control control) {
+			return ((StyledText)control).getText();
+		}
+
+		@Override
+		public int getCursorPosition(Control control) {
+			return ((StyledText)control).getCaretOffset();
+		}
+
+		@Override
+		public Rectangle getInsertionBounds(Control control) {
+			StyledText text= (StyledText)control;
+			Point caretOrigin= text.getLocationAtOffset(text.getCaretOffset());
+			return new Rectangle(caretOrigin.x + text.getClientArea().x, caretOrigin.y + text.getClientArea().y + 3, 1, text.getLineHeight());
+		}
+
+		@Override
+		public void insertControlContents(Control control, String contents, int cursorPosition) {
+			StyledText text= ((StyledText)control);
+			text.insert(contents);
+			cursorPosition= Math.min(cursorPosition, contents.length());
+			text.setCaretOffset(text.getCaretOffset() + cursorPosition);
+		}
+
+		@Override
+		public void setControlContents(Control control, String term, int cursorPosition) {
+			
+			String text = ((StyledText)control).getText();
+			
+			final String after = text.substring(((StyledText)control).getCaretOffset(), text.length());
+			text = text.substring(0, ((StyledText)control).getCaretOffset());
+			
+			// We just add the maximum ammount matched from the term
+			for (int i = term.length(); i > 0; i--) {
+				final String subterm = term.substring(0,i);
+				if (text.endsWith(subterm)) {
+					term = term.substring(i,term.length());
+					break;
+				}
+			}
+			
+			final StringBuffer buf = new StringBuffer();
+			buf.append(text);
+			buf.append(term);
+			final int len = buf.length();
+			buf.append(after);
+			((StyledText)control).setText(buf.toString());
+			((StyledText)control).setCaretOffset(len);
+		}
+
+		@Override
+		public void setCursorPosition(Control control, int index) {
+			((StyledText)control).setCaretOffset(index);
+		}
+
+		@Override
+		public Point getSelection(Control control) {
+			return ((StyledText)control).getSelection();
+		}
+
+		@Override
+		public void setSelection(Control control, Point range) {
+			((StyledText)control).setSelection(range);
+		}
+	}
+	private class ProposalProvider implements IContentProposalProvider {
+
+		@Override
+		public IContentProposal[] getProposals(String contents, int position) {
+			int caretPosition = control.getCaretOffset() - startOfInput;
+			return completionProvider.getCompletionProposals(model.getLineBuffer(), caretPosition);
+		}
+		
+	}
 }
+
+

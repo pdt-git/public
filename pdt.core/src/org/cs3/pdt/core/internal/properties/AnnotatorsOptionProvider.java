@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package org.cs3.pdt.core.internal.properties;
 
 import java.util.Iterator;
@@ -6,13 +19,13 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderExtension;
 import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.common.logging.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PrologInterface;
@@ -155,3 +168,5 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		setPreferenceValue(eventdata[0], eventdata[1]);
 	}
 }
+
+
