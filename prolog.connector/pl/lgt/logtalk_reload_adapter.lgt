@@ -14,10 +14,10 @@
 :- object(logtalk_reload_adapter).
 
 :- if(current_logtalk_flag(version, version(3, _, _))).
-	:- multifile(logtalk::message_hook/3).
-	:- dynamic(logtalk::message_hook/3).
+	:- multifile(logtalk::message_hook/4).
+	:- dynamic(logtalk::message_hook/4).
 
-	logtalk::message_hook(Term, _Kind, _Tokens) :-
+	logtalk::message_hook(_Term, _Kind, _Component, _Tokens) :-
 %		nonvar(Term),
 %		arg(1, Term, Path),
 %		is_absolute_file_path(Path),
@@ -32,7 +32,7 @@
 :- endif.
 
                /*************************************
-                * PDT RELOAD                       *
+                * PDT RELOAD                        *
                 *************************************/
 
 :- public(pdt_reload/1).

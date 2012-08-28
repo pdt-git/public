@@ -457,9 +457,9 @@ deactivate_warning_and_error_tracing:-
 %
 % @author trho
 %
-:- multifile(user:message_hook/3).
+:- multifile(user::message_hook/3).
 
-user:message_hook(_Term, Level, Lines) :-
+user::message_hook(_Term, Level, Lines) :-
 	warning_and_error_tracing,
 	pdt_term_position(StartLine),
 	assertz(traced_messages(Level, StartLine, Lines)),
