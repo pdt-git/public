@@ -32,7 +32,7 @@
             extensions="pl:90,pro:90,lgt:90"
             icon="icons/filter.gif"
             id="org.cs3.pdt.prologSearchPage"
-            label="Prolog search">
+            label="Prolog Search">
       </page>
    </extension>
 
