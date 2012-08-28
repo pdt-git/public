@@ -183,7 +183,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	private synchronized void enableSubject(String subject) throws PrologInterfaceException {
 		synchronized (subjects) {
 			if (subjects.contains(subject)) {
-				Debug.warning("Aborted enableSubject: " + subject + " is already active");
+				Debug.info("Aborted enableSubject: " + subject + " is already active");
 				return;
 			}
 		}
