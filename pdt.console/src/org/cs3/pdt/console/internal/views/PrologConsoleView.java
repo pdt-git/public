@@ -725,7 +725,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		deactivateGuiTracerAction = new ConsoleQueryAction("Deactivate GUI tracer", ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER), "noguitracer");
 		threadMonitorAction = new ConsoleQueryAction("Show SWI thread monitor", ImageRepository.getImageDescriptor(ImageRepository.THREAD_MONITOR), "user:prolog_ide(thread_monitor)");
 		debugMonitorAction = new ConsoleQueryAction("Show SWI debug message monitor", ImageRepository.getImageDescriptor(ImageRepository.DEBUG_MONITOR), "user:prolog_ide(debug_monitor)");
-		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + "catch(thread_signal(ID, abort),_,fail)") {
+		abortAction = new PifQueryAction("Abort running query", ImageRepository.getImageDescriptor(ImageRepository.ABORT), bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + ", catch(thread_signal(ID, abort),_,fail)") {
 			@Override
 			public void run(){
 				super.run();
