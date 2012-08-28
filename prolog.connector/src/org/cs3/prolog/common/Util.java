@@ -938,7 +938,13 @@ public class Util {
 	public static String createExecutable(String invocation, String execution, String commandLineArguments, String startupFiles) {
 		StringBuffer executable = new StringBuffer(invocation);
 		executable.append(" ");
+		if (isWindows()) {
+			executable.append("\"");
+		}
 		executable.append(execution);
+		if (isWindows()) {
+			executable.append("\"");
+		}
 		
 		if (commandLineArguments != null && !commandLineArguments.isEmpty() && !commandLineArguments.trim().isEmpty()) {
 			executable.append(" ");
