@@ -567,7 +567,14 @@ public class Util {
 	
 	public static String getExecutablePreference() {
 		if (isWindows()) {
-			return findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES);
+			String exec = findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES);
+			if (exec.startsWith("\"")) {
+				exec = exec.substring(1);
+			}
+			if (exec.endsWith("\"")) {
+				exec = exec.substring(0, exec.length() - 1);
+			}
+			return exec;
 		} else {
 			return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
 		}
