@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.prolog.library"
    name="PrologLibrary"
-   version="1.0.0.qualifier"
+   version="2.0.0.qualifier"
 >
    <extension
          point="org.cs3.prolog.connector.bootstrapContribution">
