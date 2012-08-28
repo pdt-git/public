@@ -46,8 +46,9 @@ public class PrologPerspective implements IPerspectiveFactory {
 		IFolderLayout bottomFolder = layout.createFolder(CONSOLE_FOLDER, IPageLayout.BOTTOM, 0.65f, editorArea);
 		bottomFolder.addView(PrologConsoleView.HOOK_ID);
 		bottomFolder.addView(IPageLayout.ID_PROBLEM_VIEW);
-		bottomFolder.addView(NewSearchUI.SEARCH_VIEW_ID);
-		layout.addView("pdt.view.focus", IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
+//		bottomFolder.addView(NewSearchUI.SEARCH_VIEW_ID);
+		layout.addView(NewSearchUI.SEARCH_VIEW_ID, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
+//		layout.addView("pdt.view.focus", IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
 		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, 0.2f, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, 0.8f, editorArea);
 	}
