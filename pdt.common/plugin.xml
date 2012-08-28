@@ -30,7 +30,7 @@
       <page
             class="org.cs3.pdt.common.search.PrologSearchPage"
             extensions="pl:90,pro:90,lgt:90"
-            icon="icons/filter.gif"
+            icon="icons/prolog_file_transparent.png"
             id="org.cs3.pdt.prologSearchPage"
             label="Prolog Search">
       </page>
