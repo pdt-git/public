@@ -158,8 +158,8 @@ public class CreateLicenseHeader {
 
 
 	public static void main(String[] args) {
-		CreateLicenseHeader create = new CreateLicenseHeader();
-		create.create();
+//		CreateLicenseHeader create = new CreateLicenseHeader();
+//		create.create();
 	}
 	
 	
