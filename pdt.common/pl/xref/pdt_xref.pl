@@ -78,7 +78,8 @@ pdt_xref_data(DefModule:T,ExactMatch,RefModule:RefHead,Ref, Kind) :-
 	functor(RefHead,F,A),   
 	nth_clause(RefModule:RefHead,_N,Ref),   % For all their clauses
 	'$xr_member'(Ref, QualifiedTerm),					% Get a term referenced by that clause
-	(	QualifiedTerm = M:_
+	(	var(DefFunctor),
+		QualifiedTerm = M:_
 	->	M \== RefModule
 	;	true
 	), 
