@@ -73,7 +73,7 @@ go :- % To list all results quickly call
     ).
 	
 
-pdt_xref_data(DefModule:T,ExactMatch,RefModule:RefHead,Ref, Kind) :-
+pdt_xref_data(DefModule:DefFunctor/DefArity,ExactMatch,RefModule:RefHead,Ref, Kind) :-
 	current_predicate(RefModule:F/A),     % For all defined predicates
 	functor(RefHead,F,A),   
 	nth_clause(RefModule:RefHead,_N,Ref),   % For all their clauses
@@ -83,7 +83,7 @@ pdt_xref_data(DefModule:T,ExactMatch,RefModule:RefHead,Ref, Kind) :-
 	->	M \== RefModule
 	;	true
 	), 
-	is_reference_to(DefModule:T,ExactMatch,RefHead,QualifiedTerm,Kind).     % (via SWI-Prolog's internal xref data)
+	is_reference_to(DefModule:DefFunctor/DefArity,ExactMatch,RefHead,QualifiedTerm,Kind).     % (via SWI-Prolog's internal xref data)
  
 
    
