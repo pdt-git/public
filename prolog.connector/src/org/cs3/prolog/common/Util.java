@@ -19,12 +19,15 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.ServerSocket;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,6 +36,8 @@ import java.util.Vector;
 
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -963,6 +968,74 @@ public class Util {
 		} else {
 			return "'" + term.replace("'", "\\'") + "'";
 		}
+	}
+
+	/*
+	 * save URL from urlString to file outputFile
+	 */
+	public static boolean saveUrlToFile(String urlString, File outputFile, IProgressMonitor monitor)
+	{	
+		
+		URL url;
+		try {
+			url = new URL(urlString.replace(" ", "%20"));
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			conn.connect();
+
+			int responseCode = conn.getResponseCode();
+
+			if (responseCode == HttpURLConnection.HTTP_OK)
+			{
+				if (monitor != null)
+				{
+					int size = conn.getContentLength();
+					monitor.beginTask("Downloading " + outputFile.getName(), size);
+				}
+				OutputStream os = new FileOutputStream(outputFile);
+
+				byte tmp_buffer[] = new byte[4096];
+				InputStream is = conn.getInputStream();
+				int n;
+				while ((n = is.read(tmp_buffer)) > 0) {
+					os.write(tmp_buffer, 0, n);
+					os.flush();
+					if (monitor != null)
+						monitor.worked(4096);
+				}
+				is.close();
+				os.close();
+				return true;
+			} else {
+				return false;
+				//throw new IllegalStateException("HTTP response: " + responseCode);
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		
+	}
+	
+	/*
+	 * get filesize from URL from urlString
+	 */
+	public static int getFilesizeFromUrl(String urlString)
+		throws  IllegalStateException, IOException
+	{	
+		
+		URL url = new URL(urlString.replace(" ", "%20"));
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		conn.connect();
+		
+		int responseCode = conn.getResponseCode();
+		
+		if (responseCode == HttpURLConnection.HTTP_OK)
+		{
+			return conn.getContentLength();
+		} else {
+	    throw new IllegalStateException("HTTP response: " + responseCode);
+	}
 	}
 
 
