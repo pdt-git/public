@@ -705,7 +705,7 @@ public class Util {
 		// Hack to resolve the issue of locating xpce in MacOS
 		if (isMacOS()) {
 			appendPath = new String[1];
-			appendPath[0] = "PATH=PATH:/opt/local/bin";
+			appendPath[0] = "PATH=$PATH:/opt/local/bin";
 		}
 
 		try {
