@@ -2,4 +2,3 @@
 *.cvsignore
 /pdt.log
 /.gitignore
-/*.jtransformerProperties
