@@ -475,11 +475,11 @@ public class PrologRuntimePlugin extends Plugin {
 
 	}
 	
-	public PrologInterface newPrologInterface() {
+	public static PrologInterface newPrologInterface() {
 		return newPrologInterface(null);
 	}
 	
-	public PrologInterface newPrologInterface(String name) {
+	public static PrologInterface newPrologInterface(String name) {
 		return new SocketPrologInterface(name);
 	}
 
