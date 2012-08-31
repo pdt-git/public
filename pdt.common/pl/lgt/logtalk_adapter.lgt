@@ -260,14 +260,14 @@ find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity,
 		atom_concat(FromDirectory, FromFile, FromPath),
 		% we add a from/1 property just to simplify coding in the Java side
 		Properties = [(multifile), from(From), defining_file(FromPath)| Properties0],
-		SearchCategory = (multifile)
+		SearchCategory = definition %multifile
 	;	% entity multifile definitions
 		entity_property(Entity, Kind, provides(Functor/Arity, For, Properties0)),
 		% we add a for/1 + defining_file/1 properties just to simplify coding in the Java side
 		entity_property(Entity, Kind, file(DefiningFile, DefiningDirectory)),
 		atom_concat(DefiningDirectory, DefiningFile, DefiningFullPath),
 		Properties = [(multifile), for(For), defining_file(DefiningFullPath)| Properties0],
-		SearchCategory = (multifile)
+		SearchCategory = definition %multifile
 	),
 	list::memberchk(line_count(Line), Properties).
 
