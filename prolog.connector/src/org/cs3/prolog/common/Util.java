@@ -956,7 +956,7 @@ public class Util {
 			executable.append(commandLineArguments);
 		}
 		if (startupFiles != null && !startupFiles.isEmpty() && !startupFiles.trim().isEmpty()) {
-			executable.append(" -f ");
+			executable.append(" -s ");
 			executable.append(startupFiles);
 		}
 		return executable.toString();
