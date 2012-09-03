@@ -3,17 +3,18 @@
       id="PDTFeature"
       label="Prolog Development Tools"
       version="2.0.0.qualifier"
-      provider-name="http://roots.iai.uni-bonn.de">
+      provider-name="http://sewiki.iai.uni-bonn.de">
 
    <description url="http://roots.iai.uni-bonn.de/research/pdt/">
-      [Enter Feature Description here.]
+      The PDT is a Prolog IDE provided as a plug-in for the Eclipse Platform. All PDT features are implemented for SWI-Prolog, most also for Logtalk. All native SWI-Prolog development tools (graphical tracer / debugger, profiler, …) can be used within the PDT.
+	  
+The PDT offers amongst other things: a Prolog Editor (with syntax highlighting, code completion, outline, breakpoints and more), a Prolog Console for interaction with multiple Prolog processes, a Context View visualizing call relations.
    </description>
 
    <copyright url="http://roots.iai.uni-bonn.de/research/pdt/download/README.copyright">
-      Copyright (C): 2004-2010, CS Dept. III, University of Bonn
-
-E-mail: pdt@iai.uni-bonn.de
-WWW: http://roots.iai.uni-bonn.de/research/pdt 
+      Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+E-mail: pdt@lists.iai.uni-bonn.de
+WWW: http://sewiki.iai.uni-bonn.de/research/pdt/
 All rights reserved.
    </copyright>
 
@@ -48,7 +49,7 @@ and/or distributed.
    </license>
 
    <url>
-      <update label="ROOTS Update Site" url="http://roots.iai.uni-bonn.de/downloads/update-site"/>
+      <update label="PDT Update Site" url="http://sewiki.iai.uni-bonn.de/public-downloads/update-site-pdt/"/>
    </url>
 
    <requires>
