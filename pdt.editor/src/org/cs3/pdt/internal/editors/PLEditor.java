@@ -394,7 +394,12 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+				IFile currentIFile = getCurrentIFile();
+				if (currentIFile != null) {
+					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
+				} else {
+					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
+				}
 //				new ConsultAction().consultFromActiveEditor();
 ////				addProblemMarkers();
 				informViewsAboutChangedEditor();
