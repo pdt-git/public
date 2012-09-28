@@ -92,6 +92,46 @@ test(user_module) :-
 
 :- begin_tests(search).
 
+get_editor_data(from_super, ResultList) :-
+	module_property(search_demo, file(File)),
+	findall(
+		[Functor,Arity,DefiningModule,Visibility],
+		pdt_search:find_definitions_categorized(File,0,abc(_),Functor,Arity,_Module,_DeclOrDef,DefiningModule,_File,_Line,_PropertyList,Visibility,true),
+		ResultList
+	).
+
+get_editor_data(from_sub, ResultList) :-
+	module_property(search_demo_sub, file(File)),
+	findall(
+		[Functor,Arity,DefiningModule,Visibility],
+		pdt_search:find_definitions_categorized(File,0,abc(_),Functor,Arity,_Module,_DeclOrDef,DefiningModule,_File,_Line,_PropertyList,Visibility,true),
+		ResultList
+	).
+
+test(from_editor_local) :-
+	get_editor_data(from_super, ResultList1),
+	member([abc, 1, search_demo, local], ResultList1),
+	get_editor_data(from_sub, ResultList2),
+	member([abc, 1, search_demo_sub, local], ResultList2),
+	!.
+
+test(from_editor_super) :-
+	get_editor_data(from_sub, ResultList),
+	member([abc, 1, search_demo, super], ResultList),
+	!.
+
+test(from_editor_sub) :-
+	get_editor_data(from_super, ResultList),
+	member([abc, 1, search_demo_sub, sub], ResultList),
+	!.
+
+test(from_editor_invisible) :-
+	get_editor_data(from_super, ResultList1),
+	member([abc, 1, other_module, invisible], ResultList1),
+	get_editor_data(from_sub, ResultList2),
+	member([abc, 1, other_module, invisible], ResultList2),
+	!.
+
 test(search_global_pred_defs_exact_arity) :-
 	findall(
 		[Functor,Arity,DefiningModule],
@@ -144,7 +184,6 @@ test(search_global_pred_refs_exact) :-
 		pdt_search:find_reference_to('abc',1,_File,_Module,true,RefModule,RefName,RefArity,_RefFile,_RefLine,Nth,_Kind,_PropertyList),
 		ResultList
 	),
-	length(ResultList,2),
 	member([search_demo, p, 1, 1],ResultList),
 	member([search_demo, p, 1, 2],ResultList),
 	!.
