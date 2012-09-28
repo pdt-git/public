@@ -180,8 +180,9 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
          
 
 visibility(super, ContextModule,Name,Arity,DeclModule) :-
-    declared_in_module(ContextModule,Name,Arity,DeclModule),
-    ContextModule \== DeclModule. 
+	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
+%    declared_in_module(ContextModule,Name,Arity,DeclModule),
+%    ContextModule \== DeclModule. 
     
    
 visibility(local, ContextModule,Name,Arity,DeclModule) :-
@@ -189,19 +190,23 @@ visibility(local, ContextModule,Name,Arity,DeclModule) :-
     ContextModule == DeclModule.
     
 visibility(sub, ContextModule,Name,Arity,DeclModule) :-
-    declared_in_module(DeclModule,Name,Arity,DeclModule),
-    % DeclModule is a submodule of ContextModule
-    declared_in_module(DeclModule,_,_,ContextModule), % submodule
-    ContextModule \== DeclModule. 
+	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden).
+%    declared_in_module(DeclModule,Name,Arity,DeclModule),
+%    % DeclModule is a submodule of ContextModule
+%    declared_in_module(DeclModule,_,_,ContextModule), % submodule
+%    ContextModule \== DeclModule. 
 visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
     % Take care to generate all values befor using negation.
     % Otherwise the clause will not be able to generate values.
     % Negation DOES NOT generate values for unbound variables!
     
-    % There is some DeclaringModule 
+    % There is some DeclaringModule
     declared_in_module(DeclModule,Name,Arity,DeclModule),
-    \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
-    \+ declared_in_module(DeclModule,_,_,ContextModule).
+    ContextModule \== DeclModule,
+	\+ module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden),
+	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
+%    \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
+%    \+ declared_in_module(DeclModule,_,_,ContextModule).
 
         /***********************************************************************
          * Find Primary Definition                                             *
@@ -584,3 +589,24 @@ find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line)
 %	member(if(not_loaded), OptionList),
 	member(must_be_module(true), OptionList).
 	
+module_imports_predicate_from(Module, Name, Arity, SuperModule, Case) :-
+	has_super_module(Module, SuperModule),
+	visible_in_module(Module, Name, Arity),
+	
+	(	defined_in_module(Module, Name, Arity)
+	->	(	module_property(SuperModule, exports(ExportList)),
+			member(Name/Arity, ExportList)
+		->	Case = overridden
+		;	Case = local
+		)
+	;	functor(Head, Name, Arity),
+		(	predicate_property(Module:Head, imported_from(SuperModule))
+		->	Case = imported
+		;	Case = not_imported
+		)
+	).
+
+has_super_module(Module, SuperModule) :-	
+	module_property(SuperModule, file(SuperModuleFile)),
+	source_file_property(SuperModuleFile, load_context(Module, _, _OptionList)).
+ 
