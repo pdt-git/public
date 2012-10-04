@@ -263,8 +263,8 @@ extract_name_arity(Term,Head,Name,Arity) :-
 
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
-find_primary_definition_visible_in__(_,Term,_,_,_,File,Line,no):-
-    find_file(Term,File,Line).
+find_primary_definition_visible_in__(EnclFile,Term,_,_,_,File,Line,no):-
+    find_file(EnclFile,Term,File,Line).
 
 %  b) a literal (call or clause head):    
 find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
@@ -278,9 +278,9 @@ find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,M
 
 % If Term is a loading directive, find the related file,
 % eventually interpreting a FileSPec that contains an alias
-find_file(Term,File,Line) :-
+find_file(EnclFile,Term,File,Line) :-
     extract_file_spec(Term,FileSpec),
-    catch( absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File),
+    catch( absolute_file_name(FileSpec,[relative_to(EnclFile), solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File),
            _,
            fail
     ),
@@ -293,6 +293,9 @@ find_file(Term,File,Line) :-
 % name within an alias but not the complete alias.
 extract_file_spec(consult(FileSpec),FileSpec) :- !.
 extract_file_spec(use_module(FileSpec),FileSpec) :- !.
+extract_file_spec(use_module(FileSpec,_),FileSpec) :- !.
+extract_file_spec(reexport(FileSpec),FileSpec) :- !.
+extract_file_spec(reexport(FileSpec,_),FileSpec) :- !.
 extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
     
