@@ -566,11 +566,12 @@ my_module_of_file(File,Module):-
 
 
 find_module_definition(SearchModule, ExactMatch, File, Line, Module) :-
-	current_module(Module, File),
+	current_module(Module),
 	(	ExactMatch == true
 	->	SearchModule = Module
 	;	once(sub_atom(Module, _, _, _, SearchModule))
 	),
+	module_property(Module, file(File)),
 	module_property(Module, line_count(Line)).
 	
 
