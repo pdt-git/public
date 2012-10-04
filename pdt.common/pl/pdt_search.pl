@@ -576,7 +576,13 @@ find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, Pro
 	find_use_module(Module, ExactMatch, _, _, File, Line). 
 
 find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
-	find_reference_to(_, _, _, Module, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, _, _, PropertyList).
+	search_module_name(Module, ExactMatch, SearchModule),
+	find_reference_to(_, _, _, SearchModule, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, _, _, PropertyList).
+
+search_module_name(Module, true, Module) :- !.
+search_module_name(ModulePart, false, Module) :-
+	current_module(Module),
+	once(sub_atom(Module, _, _, _, ModulePart)).
 
 find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line) :-
 	(	ExactMatch == true

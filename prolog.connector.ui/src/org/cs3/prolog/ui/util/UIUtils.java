@@ -348,15 +348,23 @@ public final class UIUtils {
 	}
 	
 	public static void selectInEditor(int start, int length, String filename, boolean activate) throws PartInitException {
+		selectInEditor(start, length, filename, activate, true);
+	}
+	
+	public static void selectInEditor(int start, int length, String filename, boolean activate, boolean adjustOffset) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
-			selectInEditor(start, length, file, activate);
+			selectInEditor(start, length, file, activate, adjustOffset);
 		} catch (IOException e) {
 			Debug.report(e);
 		}
 	}
 	
 	public static void selectInEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
+		selectInEditor(start, length, file, activate, true);
+	}
+	
+	public static void selectInEditor(int start, int length, IFile file, boolean activate, boolean adjustOffset) throws PartInitException {
 		if (file == null) {
 			return;
 		}
@@ -365,8 +373,10 @@ public final class UIUtils {
 			return;
 		}
 		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
-		int end = logicalToPhysicalOffset(document, start + length);
-		start = logicalToPhysicalOffset(document, start);
+		if (adjustOffset) {
+			start = logicalToPhysicalOffset(document, start);
+		}
+		int end = start + length;
 		length = end - start;
 		ISelection selection = new TextSelection(document, start, length);
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);

@@ -176,7 +176,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 				PDTCommonUtil.showSourceLocation(loc);
 				return;
 			}
-			UIUtils.selectInEditor(currentOffset, currentLength, file, activate);
+			UIUtils.selectInEditor(currentOffset, currentLength, file, activate, false);
 		} else if (match instanceof ModuleMatch) {
 			ModuleMatch moduleMatch = (ModuleMatch) match;
 			UIUtils.selectInEditor(moduleMatch.getOffset(), moduleMatch.getFile(), activate);
