@@ -2,7 +2,7 @@
 <feature
       id="PDTFeature"
       label="Prolog Development Tools"
-      version="1.0.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="http://roots.iai.uni-bonn.de">
 
    <description url="http://roots.iai.uni-bonn.de/research/pdt/">
@@ -52,40 +52,33 @@ and/or distributed.
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.junit"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.swt"/>
-      <import plugin="org.cs3.pdt.common"/>
-      <import plugin="org.cs3.pdt.core"/>
-      <import plugin="org.cs3.pdt.runtime.ui"/>
-      <import plugin="org.cs3.pdt.console"/>
-      <import plugin="org.cs3.pdt.common.ui"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.junit"/>
+      <import plugin="org.eclipse.core.filesystem"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.core.filebuffers"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ltk.core.refactoring"/>
+      <import plugin="org.eclipse.ltk.ui.refactoring"/>
+      <import plugin="org.eclipse.jdt.junit.core"/>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.jdt.junit"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.debug.ui"/>
    </requires>
 
    <plugin
-         id="org.cs3.pdt.common.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.cs3.pdt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.cs3.pdt.common"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -97,37 +90,16 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.core"
+         id="org.cs3.prolog.connector"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.runtime"
+         id="org.cs3.prolog.connector.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
-   <plugin
-         id="org.cs3.pdt.runtime.socket"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.cs3.pdt.runtime.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.cs3.pdt.runtime.socket.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
 
    <plugin
          id="org.cs3.lp.extension"
@@ -136,22 +108,33 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.prolog.library"
+         id="org.cs3.prolog.library"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.runtime.builder"
+         id="org.cs3.pdt.builder"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="pdt.yworks.basics"
+         id="org.cs3.pdt.common"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.editor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.navigator"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>

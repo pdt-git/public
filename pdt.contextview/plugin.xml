@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+
+      <view
+            name="PDT Context View"
+            category="org.cs3.pdt"
+            class="pdt.y.focusview.FocusView"
+            id="pdt.view.focus">
+      </view>
+      
+      <view
+            name="PDT Global View"
+            category="org.cs3.pdt"
+            class="pdt.y.focusview.GlobalView"
+            id="pdt.view.global">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="pdt.y.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
+            class="pdt.y.preferences.MainPreferencePage"
+            id="pdt.y.focusview.preferences.PreferencePage"
+            name="Context View">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.FileAppearancePreferences"
+            id="pdt.y.preferences.FileAppearance"
+            name="File Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.PredicateAppearancePreferences"
+            id="pdt.y.preferences.PredicateAppearance"
+            name="Predicate Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.PredicateLayoutPreferences"
+            id="pdt.y.focusview.preferences.LayoutPreferences"
+            name="Predicate Layout">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.EdgeAppearancePreferences"
+            id="pdt.y.preferences.EdgeAppearance"
+            name="Edge Appearance">
+      </page>
+      <page
+            category="pdt.y.focusview.preferences.PreferencePage"
+            class="pdt.y.preferences.SkinsPreferencePage"
+            id="pdt.y.preferences.FocusViewSkinsPreferences"
+            name="Skins">
+      </page>
+   </extension>
+</plugin>

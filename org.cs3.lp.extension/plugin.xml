@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.cs3.pdt.runtime.bootstrapContribution">
+         point="org.cs3.prolog.connector.bootstrapContribution">
       <fileSearchPathContribution
             alias="org_cs3_lp_extension"
             id="org.cs3.lp.extension"
