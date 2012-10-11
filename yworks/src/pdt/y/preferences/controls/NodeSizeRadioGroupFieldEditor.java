@@ -92,7 +92,7 @@ public class NodeSizeRadioGroupFieldEditor extends FieldEditor {
 		
 		new Label(group, SWT.NONE).setText("Height");
 		
-		cmbNumberOfLines = new Combo(group, SWT.NONE);
+		cmbNumberOfLines = new Combo(group, SWT.READ_ONLY);
         cmbNumberOfLines.add("1");
         cmbNumberOfLines.add("2");
         cmbNumberOfLines.add("3");

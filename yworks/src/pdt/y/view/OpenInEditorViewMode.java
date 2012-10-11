@@ -1,4 +1,4 @@
-package pdt.y.focusview;
+package pdt.y.view;
 
 import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;

@@ -8,8 +8,15 @@
       <view
             name="PDT Context View"
             category="org.cs3.pdt"
-            class="pdt.y.focusview.FocusViewPlugin"
+            class="pdt.y.view.FocusView"
             id="pdt.view.focus">
+      </view>
+      
+      <view
+            name="PDT Global View"
+            category="org.cs3.pdt"
+            class="pdt.y.view.GlobalView"
+            id="pdt.view.global">
       </view>
    </extension>
    <extension
@@ -52,7 +59,7 @@
       </page>
       <page
             category="pdt.y.focusview.preferences.PreferencePage"
-            class="pdt.y.preferences.FocusViewSkinsPreferences"
+            class="pdt.y.preferences.SkinsPreferencePage"
             id="pdt.y.preferences.FocusViewSkinsPreferences"
             name="Skins">
       </page>

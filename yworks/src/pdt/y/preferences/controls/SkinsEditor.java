@@ -16,10 +16,13 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
@@ -27,17 +30,30 @@ import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.preferences.PreferenceInitializer;
 
-public class FocusViewSkinsEditor extends FieldEditor {
+public class SkinsEditor extends FieldEditor {
 
+	private RowLayout rowLayout;
 	private Combo templatesCombo;
 	private Text newTemplateName;
 	
-	public FocusViewSkinsEditor(Composite parent) {
-		
-		init(BASE_TEMPLATE, "Preferences Management");
-		
+	public SkinsEditor(Composite parent) {
 		createControl(parent);
+		
+		rowLayout = new RowLayout(SWT.HORIZONTAL);
+		//rowLayout.spacing = 10;
+//		rowLayout.marginTop = 5;
+//		rowLayout.marginLeft = 9;
     }
+	
+	protected Composite wrap(Composite parent) {
+		Composite row = new Composite(parent, SWT.NONE);
+		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
+		layout.spacing = 10;
+		layout.marginTop = 5;
+		layout.marginLeft = 9;
+		row.setLayout(layout);
+		return row;
+	}
 	
 	@Override
 	protected void adjustForNumColumns(int numColumns) { }
@@ -45,42 +61,32 @@ public class FocusViewSkinsEditor extends FieldEditor {
 	@Override
 	protected void doFillIntoGrid(Composite parent, int numColumns) {
 		
-		Composite container = new Composite(parent, SWT.NONE);
+		new Label(wrap(parent), SWT.NONE).setText("A \"skin\" is a set of Focus View preferences.");
 		
-		GridLayout layout = new GridLayout();
-        layout.marginWidth = 0;
-        layout.marginHeight = 20;
-        layout.horizontalSpacing = HORIZONTAL_GAP;
-        layout.numColumns = 4;
-        
-        container.setLayout(layout);
+		GridData fullRowgd = new GridData(GridData.FILL_HORIZONTAL);
+		fullRowgd.horizontalSpan = numColumns;
 		
-		GridData fullRowgd = new GridData();
-		fullRowgd.horizontalSpan = 4;
-		getLabelControl(container).setLayoutData(fullRowgd);
-		
-        GridData gd = new GridData();
-        gd.widthHint = 120;
+		Composite row = wrap(parent);
         
-        GridData gdBtns = new GridData();
-        gdBtns.widthHint = 70;
+		new Label(row, SWT.NONE).setText("Current skin:  ");
+		templatesCombo = new Combo(row, SWT.READ_ONLY);
+        createRemoveAllTemplatesButton(row);
         
-		new Label(container, SWT.NONE).setText("Import base template:");
-		templatesCombo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
-		templatesCombo.setLayoutData(gd);
-        createImportButton(container).setLayoutData(gdBtns);
-        createRemoveAllTemplatesButton(container).setLayoutData(gdBtns);
+        //createImportButton(parent).setLayoutData(rdBtns);
         
-        new Label(container, SWT.NONE).setText("Save current preferences as template:");
-        newTemplateName = new Text(container, SWT.BORDER);
-        newTemplateName.setLayoutData(gd);
-        createSavePreferencesSetButton(container).setLayoutData(gdBtns);
+//        new Label(container, SWT.NONE).setText("Save current preferences as template:");
+//        newTemplateName = new Text(container, SWT.BORDER);
+//        newTemplateName.setLayoutData(gd);
+//        createSavePreferencesSetButton(container).setLayoutData(gdBtns);
         
-        Composite importExportButtonsContainer = new Composite(container, SWT.NONE);
+        Group importExportButtonsContainer = new Group(parent, SWT.NONE);
+        importExportButtonsContainer.setText("Save skins");
         importExportButtonsContainer.setLayoutData(fullRowgd);
         
         GridLayout bottomLayout = new GridLayout();
-        bottomLayout.horizontalSpacing = HORIZONTAL_GAP;
+        bottomLayout.horizontalSpacing = 10;
+        bottomLayout.marginWidth = 10;
+        bottomLayout.marginHeight = 10;
         bottomLayout.numColumns = 2;
 
         importExportButtonsContainer.setLayout(bottomLayout);
@@ -92,7 +98,7 @@ public class FocusViewSkinsEditor extends FieldEditor {
 	private Button createRemoveAllTemplatesButton(Composite container) {
 		Button button = new Button(container, SWT.PUSH);
 		
-		button.setText(" Clear list ");
+		button.setText(" Delete current skin ");
 		
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override

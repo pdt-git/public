@@ -1,5 +1,6 @@
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
+								write_global_to_graphML/2,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
@@ -30,31 +31,69 @@ write_facts_to_graphML(Project, File):-
  	finish_writing(OutStream).
 
 
-write_focus_to_graphML(FocusFile, File, Dependencies):-
+write_focus_to_graphML(FocusFile, GraphFile, Dependencies):-
+    write_to_graphML(GraphFile, write_focus_facts_to_graphML(FocusFile, DependentFiles)),
+    file_paths(DependentFiles, Dependencies).  
+
+write_global_to_graphML(ProjectFilePaths, GraphFile):-
+    file_paths(ProjectFiles, ProjectFilePaths),
+    write_to_graphML(GraphFile, write_global_facts_to_graphML(ProjectFiles)).
+
+write_to_graphML(GraphFile, CALL) :-
     with_mutex(prolog_factbase,
     	with_mutex(meta_pred_finder,
     		setup_call_cleanup(
-    			prepare_for_writing(File,OutStream),
-				write_focus_facts_to_graphML(FocusFile, Dependencies, OutStream),
+    			prepare_for_writing(GraphFile,OutStream),
+				(
+					add_output_stream_to_call(CALL, OutStream, EXTCALL),
+					EXTCALL
+				),
   	  			finish_writing(OutStream)
   	  		)
   	 	)
-  	 ).  
-  	 
-write_focus_facts_to_graphML(FocusFile, Dependencies, OutStream):-
+  	 ).
+
+add_output_stream_to_call(CALL, OutStream, CALL2) :-
+    CALL =.. L1,
+    append(L1, [OutStream], L2),
+    CALL2 =.. L2.
+
+write_global_facts_to_graphML(ProjectFilePaths, OutStream) :-
+    file_paths(ProjectFiles, ProjectFilePaths),
+	findall([Source, Predicate],
+		(
+    		call_edges_for_predicates(Source, Predicate, _Counter),
+			predicateT(Source, File1, _, _, _),
+			predicateT(Predicate, File2, _, _, _),
+			member(File1, ProjectFiles),
+			member(File2, ProjectFiles)
+    	),
+    	FoundCalls
+    ),
+    
+    flatten(FoundCalls, PredicatesFromCalls),
+    list_to_set(PredicatesFromCalls, Predicates),
+    write_predicates(OutStream, _, Predicates),
+    
+    list_to_set(FoundCalls, Calls),
+    forall(
+    	member([S, P], Calls), 
+    	write_call_edge(OutStream, S, P)
+    ).
+    
+write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
     fileT_ri(FocusFile,FocusId), !,
 %	fileT(FocusId,FocusFile,Module),
 %	write_file(OutStream,FocusFile,FocusId,FocusFile,Module),	
 	
 	count_call_edges_between_predicates,
-	collect_ids_for_focus_file(FocusId,Files, CorrespondingPredicates,Calls),
+	collect_ids_for_focus_file(FocusId,DependentFiles, CorrespondingPredicates,Calls),
 	
-   	write_files(FocusFile, Files, CorrespondingPredicates, OutStream),
+   	write_files(FocusFile, DependentFiles, CorrespondingPredicates, OutStream),
     forall(
     	member((SourceId,TargetId),Calls),
     	write_call_edge(OutStream,SourceId,TargetId)
-    ),
-    file_paths(Files, Dependencies).
+    ).
     
 file_paths([], []).
 file_paths([Id|IdTail], [Path|PathTail]) :-

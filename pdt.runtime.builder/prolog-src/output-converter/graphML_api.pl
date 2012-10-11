@@ -2,7 +2,8 @@
 						finish_writing/1,
 						write_file/6,
 						write_call_edge/3,
-						write_load_edge/3]).
+						write_load_edge/3,
+						write_predicates/3]).
 
 :- ensure_loaded('../pdt_factbase.pl').
 :- use_module('../analyzer/edge_counter').

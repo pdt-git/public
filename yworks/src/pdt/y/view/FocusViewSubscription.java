@@ -11,7 +11,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
  ****************************************************************************/
-package pdt.y.focusview;
+package pdt.y.view;
 
 import java.util.ArrayList;
 import java.util.List;

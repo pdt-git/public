@@ -21,7 +21,7 @@ public abstract class PreferencePageBase
 
 	private List<FieldEditor> editors = new LinkedList<FieldEditor>();
 	private GridData parentData;
-	protected GridData defaultAligmentData;
+	protected static GridData defaultAligmentData;
 	
 	public PreferencePageBase() {
 		super(GRID);
@@ -33,6 +33,7 @@ public abstract class PreferencePageBase
         parentData.verticalIndent = 5;
         
         defaultAligmentData = new GridData();
+        defaultAligmentData.horizontalSpan = 2;
         defaultAligmentData.horizontalIndent = 9;
         defaultAligmentData.verticalIndent = 5;
 	}
@@ -76,11 +77,11 @@ public abstract class PreferencePageBase
 		return predicateBgColor;
 	}
 	
-	protected Composite wrap(Composite parent) {
+	public Composite wrap(Composite parent) {
 		return wrap(parent, null);
 	}
 	
-	protected Composite wrap(Composite parent, Object layoutData) {
+	public Composite wrap(Composite parent, Object layoutData) {
 		
 		Composite w = new Composite(parent, SWT.NONE);
 		if (layoutData == null) {

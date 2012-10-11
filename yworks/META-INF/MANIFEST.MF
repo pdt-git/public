@@ -50,7 +50,6 @@ Export-Package: org.eclipse.albireo.core;
  org.hamcrest.object;uses:="org.hamcrest",
  org.hamcrest.text;uses:="org.hamcrest",
  org.hamcrest.xml;uses:="org.w3c.dom,org.hamcrest,javax.xml.namespace",
- pdt.y.focusview,
  pdt.y.graphml;x-internal:=true,
  pdt.y.main;
   uses:="org.eclipse.jface.resource,
@@ -68,5 +67,6 @@ Export-Package: org.eclipse.albireo.core;
    y.base,
    y.layout,
    y.view.hierarchy",
+ pdt.y.view,
  y.base,
  y.view;x-friends:="pdt.yworks.focusview"
