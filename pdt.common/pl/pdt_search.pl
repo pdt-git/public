@@ -20,6 +20,7 @@
          , find_pred_for_editor_completion/9
          , find_module_definition/5
          , find_module_reference/8
+         , find_alternative_predicates/7
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),
@@ -235,7 +236,7 @@ find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile
 % The second argument is just an atom contianing the string representation of the term:     
 find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,ResultKind) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
-    extract_name_arity(Term,_Head,Name,Arity),
+    extract_name_arity(Term, _,_Head,Name,Arity),
     find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
 
 retrieve_term_from_atom(EnclFile, TermString, Term) :-
@@ -246,7 +247,7 @@ retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	;	atom_to_term(TermString, Term, _)
 	).
 
-extract_name_arity(Term,Head,Name,Arity) :-
+extract_name_arity(Term,Module,Head,Name,Arity) :-
     (  var(Term) 
     -> throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
      ; true
@@ -254,7 +255,7 @@ extract_name_arity(Term,Head,Name,Arity) :-
     % Special treatment of Name/Arity terms:
     (  Term = Name/Arity
     -> true
-     ; (  Term = _Module:Term2
+     ; (  Term = Module:Term2
        -> functor(Term2, Name, Arity)
        ;  functor(Term,Name,Arity)
        )
@@ -335,6 +336,22 @@ primary_location(Locations,_,File,FirstLine) :-
     sort(All, Sorted),
     Sorted = [ NrOfClauses-File-FirstLine |_ ].
     
+
+find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, RefFile, RefLine) :-
+	retrieve_term_from_atom(EnclFile, TermString, Term),
+	extract_name_arity(Term,Module, Head,_Name,_Arity),
+	(	var(Module)
+	->	once(module_of_file(EnclFile,FileModule)),
+		dwim_predicate(FileModule:Head, RefModule:RefHead)
+	;	dwim_predicate(Module:Head, RefModule:RefHead)
+	),
+	functor(RefHead, RefName, RefArity),
+	(	predicate_property(RefModule:RefHead, file(RefFile)),
+		predicate_property(RefModule:RefHead, line_count(RefLine))
+	->	true
+	;	RefFile = foreign,
+		RefLine = -1
+	).
 
         /***********************************************************************
          * Find Definitions in File                                            *
