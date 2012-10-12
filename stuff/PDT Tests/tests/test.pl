@@ -233,16 +233,16 @@ test(search_global_module_refs_exact) :-
 test(primary_definition_unique) :-
 	module_property(other_module, file(TestFile)),
 	module_property(lists, file(ListsFile)),
-	pdt_search:find_primary_definition_visible_in(TestFile,'member(_, [_,_])',_ReferencedModule,MainFile,_FirstLine,MultifileResult),
+	pdt_search:find_primary_definition_visible_in(TestFile,'member(_, [_,_])',_ReferencedModule,MainFile,_FirstLine,ResultKind),
 	MainFile == ListsFile,
-	MultifileResult == no,
+	ResultKind == single,
 	!.
 
 test(primary_definition_ambiguous) :-
 	module_property(outline_demo_multifile_contribution, file(TestFile)),
 	module_property(outline_demo, file(OutlineDemoFile)),
-	pdt_search:find_primary_definition_visible_in(TestFile,'outline_demo:likes(jack_torrance, the_overlook_hotel)',_ReferencedModule,MainFile,FirstLine,MultifileResult),
-	MultifileResult == yes,
+	pdt_search:find_primary_definition_visible_in(TestFile,'outline_demo:likes(jack_torrance, the_overlook_hotel)',_ReferencedModule,MainFile,FirstLine,ResultKind),
+	ResultKind == (multifile),
 	(	MainFile == TestFile,
 		FirstLine == 8
 	;	MainFile == OutlineDemoFile,

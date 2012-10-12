@@ -39,13 +39,20 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
+
+import com.sun.org.apache.regexp.internal.RE;
 
 /**
  * @see IWorkbenchWindowActionDelegate
  */
 public class FindPredicateActionDelegate extends TextEditorAction {
+//	private static final String RESULT_KIND_SINGLE = "single";
+	private static final String RESULT_KIND_MULTIFILE = "multifile";
+	private static final String RESULT_KIND_DYNAMIC = "dynamic";
+	private static final String RESULT_KIND_FOREIGN = "foreign";
 	private ITextEditor editor;
 
 	/**
@@ -105,13 +112,13 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	public void dispose() {
 	}
 
-	private static class SourceLocationAndIsMultifileResult {
+	private static class SourceLocationAndResultKind {
 		SourceLocation location;
-		boolean isMultifileResult;
+		String resultKind;
 
-		SourceLocationAndIsMultifileResult(SourceLocation location, boolean isMultifileResult) {
+		SourceLocationAndResultKind(SourceLocation location, String resultKind) {
 			this.location = location;
-			this.isMultifileResult = isMultifileResult;
+			this.resultKind = resultKind;
 		}
 	}
 
@@ -119,14 +126,30 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		PrologSession session = null;
 		try {
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-			SourceLocationAndIsMultifileResult res = findFirstClauseLocation(goal, session);
+			SourceLocationAndResultKind res = findFirstClauseLocation(goal, session);
 			if (res != null) {
 				if (res.location != null) {
 					PDTCommonUtil.showSourceLocation(res.location);
+					if (RESULT_KIND_MULTIFILE.equals(res.resultKind)) {
+						new FindDefinitionsActionDelegate(editor).run();
+					}
+				} else {
+					if (RESULT_KIND_DYNAMIC.equals(res.resultKind)) {
+						UIUtils.displayMessageDialog(
+								editor.getSite().getShell(),
+								"Dynamic predicate declared in user",
+								"There is no Prolog source code for this predicate.");
+						return;
+					} else if (RESULT_KIND_FOREIGN.equals(res.resultKind)) {
+						UIUtils.displayMessageDialog(
+								editor.getSite().getShell(),
+								"External language predicate",
+								"There is no Prolog source code for this predicate (only compiled external language code).");
+						return;
+					}
 				}
-				if (res.isMultifileResult) {
-					new FindDefinitionsActionDelegate(editor).run();
-				}
+			} else {
+				// misspelt
 			}
 			return;
 		} catch (Exception e) {
@@ -149,7 +172,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 	}
 
-	private SourceLocationAndIsMultifileResult findFirstClauseLocation(Goal goal, PrologSession session) throws PrologInterfaceException {
+	private SourceLocationAndResultKind findFirstClauseLocation(Goal goal, PrologSession session) throws PrologInterfaceException {
 		// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
 		String enclFile = UIUtils.getFileFromActiveEditor();
 		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
@@ -172,19 +195,23 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
 
-		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "MultifileResults");
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "ResultKind");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {
 			return null;
 		}
+		String resultKind = clause.get("ResultKind").toString();
+		if (RESULT_KIND_FOREIGN.equals(resultKind) || RESULT_KIND_DYNAMIC.equals(resultKind)) {
+			return new SourceLocationAndResultKind(null, resultKind);
+		}
+		
 		if (clause.get("File") == null) {
 			throw new RuntimeException("Cannot resolve file for primary declaration of " + quotedTerm);
 		}
 		SourceLocation location = new SourceLocation((String) clause.get("File"), false);
 		location.setLine(Integer.parseInt((String) clause.get("Line")));
-		boolean otherLocations = "yes".equalsIgnoreCase(clause.get("MultifileResults").toString());
-		return new SourceLocationAndIsMultifileResult(location, otherLocations);
+		return new SourceLocationAndResultKind(location, resultKind);
 	}
 
 }
