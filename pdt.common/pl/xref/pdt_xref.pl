@@ -35,6 +35,13 @@ find_unique( Goal ) :-
     
 :- dynamic(result/3).
 
+assert_result(QGoal, _, clause_term_position(Ref, TermPosition)) :-
+    QGoal = _:Goal,
+    assertz(result(Goal, Ref, TermPosition)),
+    !.
+
+assert_result(_,_,_).
+
 assert_result(QGoal-clause_term_position(Ref, TermPosition)) :-
 	QGoal = _:Goal,
 	assertz(result(Goal, Ref, TermPosition)),
