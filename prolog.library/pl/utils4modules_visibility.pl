@@ -266,7 +266,7 @@ declared_in_file(Module,Name,Arity,[File-[Line]]) :-
     functor(Head,Name,Arity),
     predicate_property(Module:Head,foreign),
     !,
-    File = 'No Prolog source code (only compiled external language code)',
+    File = foreign,
     Line = 0.
 declared_in_file(Module,_Name,_Arity,[File-[Line]]) :-
     module_property(Module, file(File)),  % declaration in known file
@@ -274,8 +274,8 @@ declared_in_file(Module,_Name,_Arity,[File-[Line]]) :-
     Line=1.                                        % guess the unknown line nr
 declared_in_file(Module,Name,Arity,[File-[Line]]) :-
     functor(Head,Name,Arity),
-    predicate_property(Module:Head,foreign),
-    File = 'Dynamic predicate, no Prolog source code (only dynamic code)' ,  
+    predicate_property(Module:Head,dynamic),
+    File = (dynamic) ,  
     Line = 0.
 
 %% 

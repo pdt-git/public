@@ -16,6 +16,7 @@ package org.cs3.pdt.internal.actions;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -37,8 +38,17 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
@@ -46,6 +56,10 @@ import org.eclipse.ui.texteditor.TextEditorAction;
  * @see IWorkbenchWindowActionDelegate
  */
 public class FindPredicateActionDelegate extends TextEditorAction {
+//	private static final String RESULT_KIND_SINGLE = "single";
+	private static final String RESULT_KIND_MULTIFILE = "multifile";
+	private static final String RESULT_KIND_DYNAMIC = "dynamic";
+	private static final String RESULT_KIND_FOREIGN = "foreign";
 	private ITextEditor editor;
 
 	/**
@@ -105,27 +119,59 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	public void dispose() {
 	}
 
-	private static class SourceLocationAndIsMultifileResult {
+	private static class SourceLocationAndResultKind {
 		SourceLocation location;
-		boolean isMultifileResult;
+		String resultKind;
 
-		SourceLocationAndIsMultifileResult(SourceLocation location, boolean isMultifileResult) {
+		SourceLocationAndResultKind(SourceLocation location, String resultKind) {
 			this.location = location;
-			this.isMultifileResult = isMultifileResult;
+			this.resultKind = resultKind;
 		}
 	}
 
-	private void run_impl(Goal goal, IFile file) throws CoreException {
+	private void run_impl(final Goal goal, IFile file) throws CoreException {
 		PrologSession session = null;
 		try {
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-			SourceLocationAndIsMultifileResult res = findFirstClauseLocation(goal, session);
+			SourceLocationAndResultKind res = findFirstClauseLocation(goal, session);
 			if (res != null) {
 				if (res.location != null) {
 					PDTCommonUtil.showSourceLocation(res.location);
+					if (RESULT_KIND_MULTIFILE.equals(res.resultKind)) {
+						new FindDefinitionsActionDelegate(editor).run();
+					}
+				} else {
+					if (RESULT_KIND_DYNAMIC.equals(res.resultKind)) {
+						UIUtils.displayMessageDialog(
+								editor.getSite().getShell(),
+								"Dynamic predicate declared in user",
+								"There is no Prolog source code for this predicate.");
+						return;
+					} else if (RESULT_KIND_FOREIGN.equals(res.resultKind)) {
+						UIUtils.displayMessageDialog(
+								editor.getSite().getShell(),
+								"External language predicate",
+								"There is no Prolog source code for this predicate (only compiled external language code).");
+						return;
+					}
 				}
-				if (res.isMultifileResult) {
-					new FindDefinitionsActionDelegate(editor).run();
+			} else {
+				final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(Util.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+				if (result.isEmpty()) {
+					UIUtils.displayMessageDialog(
+							editor.getSite().getShell(),
+							"Undefined predicate",
+							"The selected predicate is not defined.");
+					return;
+				} else {
+					editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), goal, result);
+							alternativeDialog.setBlockOnOpen(false);
+							alternativeDialog.open();
+						}
+					});
 				}
 			}
 			return;
@@ -149,7 +195,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 	}
 
-	private SourceLocationAndIsMultifileResult findFirstClauseLocation(Goal goal, PrologSession session) throws PrologInterfaceException {
+	private SourceLocationAndResultKind findFirstClauseLocation(Goal goal, PrologSession session) throws PrologInterfaceException {
 		// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
 		String enclFile = UIUtils.getFileFromActiveEditor();
 		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
@@ -172,21 +218,120 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
 
-		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "MultifileResults");
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "ResultKind");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {
 			return null;
 		}
+		String resultKind = clause.get("ResultKind").toString();
+		if (RESULT_KIND_FOREIGN.equals(resultKind) || RESULT_KIND_DYNAMIC.equals(resultKind)) {
+			return new SourceLocationAndResultKind(null, resultKind);
+		}
+		
 		if (clause.get("File") == null) {
 			throw new RuntimeException("Cannot resolve file for primary declaration of " + quotedTerm);
 		}
 		SourceLocation location = new SourceLocation((String) clause.get("File"), false);
 		location.setLine(Integer.parseInt((String) clause.get("Line")));
-		boolean otherLocations = "yes".equalsIgnoreCase(clause.get("MultifileResults").toString());
-		return new SourceLocationAndIsMultifileResult(location, otherLocations);
+		return new SourceLocationAndResultKind(location, resultKind);
 	}
+	
+	private static class AlternativeDialog extends Dialog {
 
+		private List<Map<String, Object>> alternatives;
+		private org.eclipse.swt.widgets.List list;
+		private Goal goal;
+
+		protected AlternativeDialog(Shell parentShell, Goal goal, List<Map<String, Object>> alternatives) {
+			super(parentShell);
+			setShellStyle(getShellStyle() | SWT.RESIZE);
+			this.alternatives = alternatives;
+			this.goal = goal;
+		}
+		
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			Composite composite = (Composite) super.createDialogArea(parent);
+			
+			Label label = new Label(composite, SWT.WRAP);
+			label.setText("The selected predicate " + goal.getSignature() + " was not found. A list of similar predicates is listed below.\n" +
+					"Select a predicate and press OK to jump to it.");
+			
+		    GridData gridData = new GridData();
+		    gridData.grabExcessHorizontalSpace = true;
+		    gridData.horizontalAlignment = GridData.FILL;
+		    gridData.heightHint = convertHeightInCharsToPixels(3);
+		    
+		    label.setLayoutData(gridData);
+			
+			list = new org.eclipse.swt.widgets.List(composite, SWT.NONE);
+			for (Map<String, Object> alternative : alternatives) {
+				list.add(getTextForPred(alternative));
+			}
+			list.setSelection(0);
+			
+		    gridData = new GridData();
+		    gridData.grabExcessHorizontalSpace = true;
+		    gridData.horizontalAlignment = GridData.FILL;
+		    gridData.grabExcessVerticalSpace = true;
+		    gridData.verticalAlignment = GridData.FILL;
+		    
+		    list.setLayoutData(gridData);
+
+			return composite;
+		}
+		
+		private String getTextForPred(Map<String, Object> predicate) {
+			StringBuffer buf = new StringBuffer();
+			buf.append(predicate.get("RefModule"));
+			buf.append(":");
+			buf.append(predicate.get("RefName"));
+			buf.append("/");
+			buf.append(predicate.get("RefArity"));
+			if ("-1".equals(predicate.get("RefLine"))) {
+				buf.append(" (no source)");
+			}
+			return buf.toString();
+		}
+		
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		}
+		
+		@Override
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			newShell.setText("Undefined predicate");
+		}
+		
+		@Override
+		protected Point getInitialSize() {
+			return new Point(400, 300);
+		}
+		
+		@Override
+		protected void okPressed() {
+			int selection = list.getSelectionIndex();
+			if (selection >= 0) {
+				Map<String, Object> predicate = alternatives.get(selection);
+				if (!"-1".equals(predicate.get("RefLine"))) {
+					try {
+						UIUtils.selectInEditor(Integer.parseInt(predicate.get("RefLine").toString()), predicate.get("RefFile").toString(), true);
+					} catch (PartInitException e) {
+						Debug.report(e);
+					} catch (NumberFormatException e) {
+						Debug.report(e);
+					}
+				}
+			}
+			super.okPressed();
+		}
+
+	}
+	
 }
+
 
 

@@ -20,6 +20,7 @@
          , find_pred_for_editor_completion/9
          , find_module_definition/5
          , find_module_reference/8
+         , find_alternative_predicates/7
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),
@@ -214,7 +215,7 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/ 
 
-%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine,?MultifileResult)
+%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine,?ResultKind)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity 
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either 
@@ -223,19 +224,20 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
 %
 % Used for the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
-
+% 
+% ResultKind is one of: single, multifile, foreign, dynamic
         
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,no) :-
+find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,single) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine).
 
 
 % The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
+find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,ResultKind) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
-    extract_name_arity(Term,_Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult).
+    extract_name_arity(Term, _,_Head,Name,Arity),
+    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
 
 retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	(	module_property(Module, file(EnclFile))
@@ -245,7 +247,7 @@ retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	;	atom_to_term(TermString, Term, _)
 	).
 
-extract_name_arity(Term,Head,Name,Arity) :-
+extract_name_arity(Term,Module,Head,Name,Arity) :-
     (  var(Term) 
     -> throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
      ; true
@@ -253,7 +255,7 @@ extract_name_arity(Term,Head,Name,Arity) :-
     % Special treatment of Name/Arity terms:
     (  Term = Name/Arity
     -> true
-     ; (  Term = _Module:Term2
+     ; (  Term = Module:Term2
        -> functor(Term2, Name, Arity)
        ;  functor(Term,Name,Arity)
        )
@@ -263,15 +265,21 @@ extract_name_arity(Term,Head,Name,Arity) :-
 
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
-find_primary_definition_visible_in__(EnclFile,Term,_,_,_,File,Line,no):-
+find_primary_definition_visible_in__(EnclFile,Term,_,_,_,File,Line,single):-
     find_file(EnclFile,Term,File,Line).
 
 %  b) a literal (call or clause head):    
-find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,MultifileResult) :-
+find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind) :-
 	find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
 	(	Locations = [_,_|_]
-	->	MultifileResult = yes
-	;	MultifileResult = no
+	->	ResultKind = (multifile)
+	;	Locations = [Location],
+		(	Location = (dynamic)-_ ->
+			ResultKind = (dynamic)
+		; 	Location = foreign-_ -> 
+			ResultKind = foreign
+		; 	ResultKind = single
+		)
 	),
 	primary_location(Locations,DefiningModule,MainFile,FirstLine).
 
@@ -328,6 +336,22 @@ primary_location(Locations,_,File,FirstLine) :-
     sort(All, Sorted),
     Sorted = [ NrOfClauses-File-FirstLine |_ ].
     
+
+find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, RefFile, RefLine) :-
+	retrieve_term_from_atom(EnclFile, TermString, Term),
+	extract_name_arity(Term,Module, Head,_Name,_Arity),
+	(	var(Module)
+	->	once(module_of_file(EnclFile,FileModule)),
+		dwim_predicate(FileModule:Head, RefModule:RefHead)
+	;	dwim_predicate(Module:Head, RefModule:RefHead)
+	),
+	functor(RefHead, RefName, RefArity),
+	(	predicate_property(RefModule:RefHead, file(RefFile)),
+		predicate_property(RefModule:RefHead, line_count(RefLine))
+	->	true
+	;	RefFile = foreign,
+		RefLine = -1
+	).
 
         /***********************************************************************
          * Find Definitions in File                                            *
