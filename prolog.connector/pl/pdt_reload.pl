@@ -116,7 +116,7 @@ deactivate_warning_and_error_tracing :-
 %% message_hook(+Term, +Level,+ Lines) is det. 
 %
 % intercept prolog messages to collect term positions and 
-% error/warning messages in traced_messages/3
+% error/warning messages in traced_messages/5
 % 
 % @author trho
 %  
