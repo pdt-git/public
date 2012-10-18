@@ -133,8 +133,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	final String PLACEHOLDER_INFO = "INFO";
 	final String PLACEHOLDER_SPACETAB = "  ";
 	final String PLACEHOLDER_THREESTARS = "***";
-	private final char WARNING_CHAR = '*';
-	private final char ERROR_CHAR = '!';
+	private final String WARNING_CHAR = "*";
+	private final String ERROR_CHAR = "!";
 
 	private Color LastOutputColor = null;
 	private boolean LineFeedOccured = true;
@@ -694,10 +694,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				if (lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING) &&
 						row.contains(PLACEHOLDER_LGT_UNDEFINED)) {
 					LastOutputColor = COLOR_DEBUG;
-				} else if (UpperCaseRow.charAt(0) == WARNING_CHAR || lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
+				} else if (lineStartsWith(UpperCaseRow, WARNING_CHAR) || lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
 						lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING)) {
 					LastOutputColor = COLOR_WARNING;
-				} else if (UpperCaseRow.charAt(0) == ERROR_CHAR ||lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
+				} else if (lineStartsWith(UpperCaseRow, ERROR_CHAR) ||lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
 					LastOutputColor = COLOR_ERROR;
 				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_DEBUG)) {
 					LastOutputColor = COLOR_DEBUG;
