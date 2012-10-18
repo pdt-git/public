@@ -72,6 +72,7 @@ add_output_stream_to_call(CALL, OutStream, CALL2) :-
     CALL2 =.. L2.
 
 write_global_facts_to_graphML(ProjectFiles, OutStream) :-
+    count_call_edges_between_predicates,
 	findall([Source, Predicate],
 		(
     		call_edges_for_predicates(Source, Predicate, _Counter),
