@@ -30,11 +30,8 @@ import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.IControlContentAdapter2;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -65,8 +62,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private static class _TextSelection implements ITextSelection {
@@ -138,6 +133,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	final String PLACEHOLDER_INFO = "INFO";
 	final String PLACEHOLDER_SPACETAB = "  ";
 	final String PLACEHOLDER_THREESTARS = "***";
+	private final char WARNING_CHAR = '*';
+	private final char ERROR_CHAR = '!';
 
 	private Color LastOutputColor = null;
 	private boolean LineFeedOccured = true;
@@ -305,26 +302,26 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 							return;
 						}
 						String link = control.getTextRange(selectedStyle.start, selectedStyle.length);
-						String[] fileAndLine = link.split("pl:");
-						if (fileAndLine.length >= 2) {
-							if (new File(fileAndLine[0] + "pl").exists()) {
-								try {
-									int line = Integer.parseInt(fileAndLine[1]) - 1;
+						if (link.contains("pl:")) {
+							String[] fileAndLine = link.split("pl:");
+							if (fileAndLine.length >= 2) {
+								if (new File(fileAndLine[0] + "pl").exists()) {
 									try {
-										IEditorPart editor = UIUtils.openInEditor(fileAndLine[0] + "pl");
-										if (!(editor instanceof AbstractTextEditor)) {
-											return;
-										}
-										
-										AbstractTextEditor textEditor = (AbstractTextEditor) editor;
-										IDocument document = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
-										IRegion region = document.getLineInformation(line);
-										ISelection selection = new TextSelection(document,region.getOffset(),region.getLength());
-										textEditor.getEditorSite().getSelectionProvider().setSelection(selection);
+										int line = Integer.parseInt(fileAndLine[1]);
+										UIUtils.selectInEditor(line, fileAndLine[0] + "pl", true);
 									} catch(Exception ex){
 									}
-								} catch (NumberFormatException ex) {
 								}
+							}
+						} else if (link.startsWith("in file ")) {
+							try {
+								link = link.substring(8, link.lastIndexOf("-"));
+								String[] fileAndLine = link.split(" between lines ");
+								if (fileAndLine.length >= 2 && new File(fileAndLine[0]).exists()) {
+									int line = Integer.parseInt(fileAndLine[1]);
+									UIUtils.selectInEditor(line, fileAndLine[0], true);
+								}
+							} catch (Exception ex) {
 							}
 						}
 					}
@@ -697,10 +694,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				if (lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING) &&
 						row.contains(PLACEHOLDER_LGT_UNDEFINED)) {
 					LastOutputColor = COLOR_DEBUG;
-				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
+				} else if (UpperCaseRow.charAt(0) == WARNING_CHAR || lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
 						lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING)) {
 					LastOutputColor = COLOR_WARNING;
-				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
+				} else if (UpperCaseRow.charAt(0) == ERROR_CHAR ||lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
 					LastOutputColor = COLOR_ERROR;
 				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_DEBUG)) {
 					LastOutputColor = COLOR_DEBUG;
@@ -1115,7 +1112,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		try {
 			int end = line.indexOf(".pl:");
 			if (end == -1) {
-				return null;
+				int lgtFileStart = line.indexOf("in file ");
+				if (lgtFileStart == -1) {
+					return null;
+				} else {
+					return new Position(lgtFileStart, line.length() - lgtFileStart);
+				}
 			} else {
 				end += 4;
 			}
