@@ -96,14 +96,14 @@ pdt_reload_listener(Files) :-
 % Store SWI-Prolog error and warning messages as
 % traced_messages(Level, Line, Lines, File) facts.
 
-:- dynamic(traced_messages/4).
+:- dynamic(traced_messages/5).
 :- dynamic(warning_and_error_tracing/0).
 :- dynamic(reloaded_file__/1).
 
 activate_warning_and_error_tracing :- 
     trace_reload(begin),
     assertz(in_reload),
-	retractall(traced_messages(_,_,_,_)),
+	retractall(traced_messages(_,_,_,_,_)),
 	retractall(reloaded_file__(_)),
 	assertz(warning_and_error_tracing).
 
@@ -129,8 +129,8 @@ user:message_hook(_Term, Level,Lines) :-
 		warning_and_error_tracing,
 		prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
 		prolog_load_context(source, File),
-		assertz(traced_messages(Level, Line,Lines, File)),
-		trace_reload(traced_messages(Level, Line,Lines, File)),
+		assertz(traced_messages(swi, Level, Line,Lines, File)),
+		trace_reload(traced_messages(swi, Level, Line,Lines, File)),
 	%	assertz(user:am(_Term, Level,Lines)),
 		fail
 	)).
@@ -150,7 +150,7 @@ user:message_hook(load_file(start(_, file(_, FullPath))), _, _) :-
 %
 errors_and_warnings(Level,Line,0,Message, File) :-
 		wait_for_reload_finished,
-	    traced_messages(Level, Line, Lines, File),
+	    traced_messages(swi, Level, Line, Lines, File),
 	    trace_reload(e_w(Lines)),
 	%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
 	    new_memory_file(Handle),
@@ -159,6 +159,11 @@ errors_and_warnings(Level,Line,0,Message, File) :-
 	    close(Stream),
 		memory_file_to_atom(Handle,Message),
 	    free_memory_file(Handle).
+
+errors_and_warnings(Level,Line,0,Message, File) :-
+	wait_for_reload_finished,
+	traced_messages(logtalk, Level, Line, Tokens, File),
+	with_output_to(atom(Message), (current_output(S), logtalk::print_message_tokens(S, '', Tokens))).
 
 reloaded_file(LoadedFile) :-
 	wait_for_reload_finished,
