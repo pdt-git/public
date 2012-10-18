@@ -17,10 +17,13 @@
 	:- multifile(logtalk::message_hook/4).
 	:- dynamic(logtalk::message_hook/4).
 
-	logtalk::message_hook(_Term, Kind, core, Tokens) :-
+	logtalk::message_hook(Term, Kind, core, Tokens) :-
 	    with_mutex('reloadMutex', (
 			{pdt_reload:warning_and_error_tracing},
-			logtalk_load_context(term_position, StartLine-_EndLine),
+			(	arg(2, Term, StartLine-_EndLine) ->
+				true
+			;	logtalk_load_context(term_position, StartLine-_EndLine)
+			),
 			logtalk_load_context(file, File),
 			logtalk_load_context(directory, Directory),
 			atom_concat(Directory, File, Path),
