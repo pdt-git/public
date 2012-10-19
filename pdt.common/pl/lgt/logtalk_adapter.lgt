@@ -144,15 +144,15 @@ search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Fu
 search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor, Arity).
 
 
-visibility_text(declaration, local,		'Local declaration' ) :- !.
+visibility_text(declaration, local,		'Local' ) :- !.
 visibility_text(declaration, super,   	'Inherited' ) :- !.
-visibility_text(declaration, sub, 		'Descendant declaration') :- !.
-visibility_text(declaration, invisible,	'Locally invisible declaration') :- !.
+visibility_text(declaration, sub, 		'Descendant') :- !.
+visibility_text(declaration, invisible,	'Invisible') :- !.
 
-visibility_text(definition, local,		'Local definition' ) :- !.
+visibility_text(definition, local,		'Local' ) :- !.
 visibility_text(definition, super,   	'Inherited' ) :- !.
-visibility_text(definition, sub, 		'Descendant definition') :- !.
-visibility_text(definition, invisible,	'Locally invisible definition') :- !.
+visibility_text(definition, sub, 		'Descendant') :- !.
+visibility_text(definition, invisible,	'Invisible') :- !.
 
 
 
