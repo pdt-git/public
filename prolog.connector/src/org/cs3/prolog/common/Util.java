@@ -37,7 +37,6 @@ import java.util.Vector;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
