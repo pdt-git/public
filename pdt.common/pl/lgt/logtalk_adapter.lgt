@@ -19,6 +19,7 @@
 
 :- public([
 	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+	find_entity_definition/5,
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/9,
@@ -48,6 +49,31 @@
 
 %:- use_module(pdt_prolog_library(utils4modules)).
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
+
+
+find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+	(	current_object(Entity)
+	;	current_protocol(Entity)
+	;	current_category(Entity)
+	),
+	functor(Entity, Functor, _),
+	(	ExactMatch == true
+	->	SearchString = Functor
+	;	once(sub_atom(Functor, _, _, _, SearchString))
+	),
+	entity_property(Entity, _, file(Base, Directory)),
+	atom_concat(Directory, Base, File),
+	entity_property(Entity, _, lines(Line, _)).
+
+find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+	current_logtalk_flag(modules, supported),
+	current_module(Entity),
+	(	ExactMatch == true
+	->	SearchString = Entity
+	;	once(sub_atom(Entity, _, _, _, SearchString))
+	),
+	module_property(Entity, file(File)),
+	module_property(Entity, line_count(Line)).
 
 
         /***********************************************************************

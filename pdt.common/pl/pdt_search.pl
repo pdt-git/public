@@ -18,7 +18,7 @@
          , find_definition_contained_in/9
          , find_pred/8
          , find_pred_for_editor_completion/9
-         , find_module_definition/5
+         , find_entity_definition/5
          , find_module_reference/8
          , find_alternative_predicates/7
          ]).
@@ -571,6 +571,15 @@ my_module_of_file(File,Module):-
     ; Module=system                       
     ).
 
+
+find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+	current_predicate(logtalk_load/1),
+	!,
+	logtalk_adapter::find_entity_definition(SearchString, ExactMatch, File, Line, Entity).
+
+find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+	find_module_definition(SearchString, ExactMatch, File, Line, Entity).
+	
 
 find_module_definition(SearchModule, ExactMatch, File, Line, Module) :-
 	current_module(Module),

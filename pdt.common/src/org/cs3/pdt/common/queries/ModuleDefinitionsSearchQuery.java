@@ -26,7 +26,7 @@ public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		String query = bT(PDTCommonPredicates.FIND_MODULE_DEFINITION,
+		String query = bT(PDTCommonPredicates.FIND_ENTITY_DEFINITION,
 				module,
 				Boolean.toString(goal.isExactMatch()),
 				"File",
