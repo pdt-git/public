@@ -768,11 +768,6 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		),
 		DeclOrDef = definition,
 		Visibility = super
-	;	% local definition
-		Entity = This,
-		entity_property(This, Kind, defines(Functor/Arity, Properties)),
-		DeclOrDef = definition,
-		Visibility = local
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line_count(Line), Properties).
