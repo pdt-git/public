@@ -101,7 +101,7 @@ find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This,
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
 
-find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, [invisible| Properties], Visibility) :-
 	(	current_object(Entity)
 	;	current_protocol(Entity)
 	;	current_category(Entity)
