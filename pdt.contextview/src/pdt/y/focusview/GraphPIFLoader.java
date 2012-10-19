@@ -45,7 +45,7 @@ public class GraphPIFLoader {
 	private static final String PATH_ALIAS = "pdt_builder_graphml_creator";
 	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
 
-	private File helpFile;
+	protected File helpFile;
 	private PDTGraphView view;
 	private PrologInterface pif;
 	private ExecutorService executor = Executors.newCachedThreadPool();
@@ -74,14 +74,13 @@ public class GraphPIFLoader {
 				sendQueryToCurrentPiF(query);
 
 				sendQueryToCurrentPiF(bT("ensure_generated_factbase_for_source_file", Util.quoteAtom(focusFileForParsing)));
-
-				query = "write_focus_to_graphML('" + focusFileForParsing
-						+ "','" + Util.prologFileName(helpFile)
-						+ "', Dependencies).";
+					
+				query = generateQuery(focusFileForParsing, helpFile);
 				Map<String, Object> output = sendQueryToCurrentPiF(query);
 
 				dependencies.clear();
-				if (output != null) {
+					
+				if (output != null && output.containsKey("Dependencies")) {
 					@SuppressWarnings("unchecked")
 					Vector<String> deps = (Vector<String>) output.get("Dependencies");
 					dependencies.addAll(deps);
@@ -110,6 +109,14 @@ public class GraphPIFLoader {
 		} catch (PrologInterfaceException e) {
 			e.printStackTrace();
 		}
+	}
+
+	protected String generateQuery(String focusFileForParsing, File helpFile) {
+		String query;
+		query = "write_focus_to_graphML('" + focusFileForParsing
+				+ "','" + Util.prologFileName(helpFile)
+				+ "', Dependencies).";
+		return query;
 	}
 	
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
@@ -148,5 +155,3 @@ public class GraphPIFLoader {
 		return true;
 	}
 }
-
-

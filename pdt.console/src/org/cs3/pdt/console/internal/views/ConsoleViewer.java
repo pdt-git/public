@@ -230,7 +230,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				control,
 				new StyledTextContentAdapter(),
 				new ProposalProvider(),
-				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), KeyStroke.getInstance(SWT.TAB)},
+				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, ' '), KeyStroke.getInstance(SWT.TAB)},
 				null);
 		contentProposalAdapter.setPopupSize(new Point(300, 200));
 		contentProposalAdapter.setLabelProvider(new ConsoleCompletionLabelProvider());
