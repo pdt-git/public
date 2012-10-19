@@ -156,22 +156,30 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					}
 				}
 			} else {
-				final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(Util.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
-				if (result.isEmpty()) {
+				if (!"lgt".equals(file.getFileExtension())) {
+					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(Util.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+					if (result.isEmpty()) {
+						UIUtils.displayMessageDialog(
+								editor.getSite().getShell(),
+								"Undefined predicate",
+								"The selected predicate is not defined.");
+						return;
+					} else {
+						editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), goal, result);
+								alternativeDialog.setBlockOnOpen(false);
+								alternativeDialog.open();
+							}
+						});
+					}
+				} else {
 					UIUtils.displayMessageDialog(
 							editor.getSite().getShell(),
 							"Undefined predicate",
 							"The selected predicate is not defined.");
 					return;
-				} else {
-					editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), goal, result);
-							alternativeDialog.setBlockOnOpen(false);
-							alternativeDialog.open();
-						}
-					});
 				}
 			}
 			return;
@@ -218,7 +226,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
 
-		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "ResultKind");
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), goal.getLine(), quotedTerm, module, "File", "Line", "ResultKind");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {

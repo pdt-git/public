@@ -14,7 +14,7 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
          , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
-         , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
+         , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
          , find_pred/8
          , find_pred_for_editor_completion/9
@@ -90,7 +90,7 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
-    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList).
 
 
 find_decl_or_def_2(Name,Arity,Declarations) :-
@@ -215,7 +215,7 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/ 
 
-%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine,?ResultKind)
+%% find_primary_definition_visible_in(+EnclFile,+SelectedLine,+TermString,?ReferencedModule,?MainFile,?FirstLine,?ResultKind)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity 
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either 
@@ -227,17 +227,9 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
 % 
 % ResultKind is one of: single, multifile, foreign, dynamic
         
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,single) :-
-    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
-    !,
-    logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine).
-
-
-% The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,ResultKind) :-
+find_primary_definition_visible_in(EnclFile,SelectedLine,TermString,ReferencedModule,MainFile,FirstLine,ResultKind) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
-    extract_name_arity(Term, _,_Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
+	find_primary_definition_visible_in_(EnclFile,SelectedLine,Term,ReferencedModule,MainFile,FirstLine,ResultKind).
 
 retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	(	module_property(Module, file(EnclFile))
@@ -246,6 +238,16 @@ retrieve_term_from_atom(EnclFile, TermString, Term) :-
 		read_term(Stream, Term, [module(Module)])
 	;	atom_to_term(TermString, Term, _)
 	).
+
+find_primary_definition_visible_in_(EnclFile, SelectedLine,Term,ReferencedModule,MainFile,FirstLine,single) :-
+    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
+    !,
+    logtalk_adapter::find_primary_definition_visible_in(EnclFile, SelectedLine,Term,_Functor,_Arity,ReferencedModule,MainFile,FirstLine).
+
+% The second argument is just an atom contianing the string representation of the term:     
+find_primary_definition_visible_in_(EnclFile,_SelectedLine,Term,ReferencedModule,MainFile,FirstLine,ResultKind) :-
+    extract_name_arity(Term, _,_Head,Name,Arity),
+    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
 
 extract_name_arity(Term,Module,Head,Name,Arity) :-
     (  var(Term) 
