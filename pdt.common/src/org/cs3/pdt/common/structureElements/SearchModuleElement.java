@@ -37,11 +37,11 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 		}
 		if ("invisible".equalsIgnoreCase(visibility)) {
 			visibilityCode = 1; 
-		} else if ("sub".equalsIgnoreCase(visibility)) {
+		} else if ("sub".equalsIgnoreCase(visibility) || "descendant".equalsIgnoreCase(visibility)) {
 			visibilityCode = 2; 
 		} else if ("local".equalsIgnoreCase(visibility)) {
 			visibilityCode = 3; 
-		} else if ("super".equalsIgnoreCase(visibility)) {
+		} else if ("super".equalsIgnoreCase(visibility) || "inherited".equalsIgnoreCase(visibility)) {
 			visibilityCode = 4; 
 		}
 	}

@@ -29,6 +29,7 @@ public class ImageRepository {
     public static final String PE_PROTECTED = "protected_co.gif";
     public static final String PE_PRIVATE = "private_co.gif";
     public static final String PE_LOCAL = "variable.gif";
+    public static final String PE_INVISIBLE = "invisible.gif";
 
     public static final String FILE = "prolog_file.gif";
     public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
