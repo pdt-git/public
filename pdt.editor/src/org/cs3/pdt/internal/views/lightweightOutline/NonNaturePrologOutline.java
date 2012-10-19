@@ -20,6 +20,8 @@
  */
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
@@ -338,8 +341,36 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 		if (elem instanceof OutlineModuleElement) { 
 			OutlineModuleElement module = (OutlineModuleElement)elem;
-			line = module.getLine();
-			selectedFile = module.getFilePath();
+			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			if ("module".equals(module.getKind())) {
+				try {
+					Map<String, Object> result = pif.queryOnce(bT("module_property", Util.quoteAtom(module.getName()), "file(File)"),
+							bT("module_property", Util.quoteAtom(module.getName()), "line_count(Line)"));
+					if (result == null) {
+						return;
+					} else {
+						selectedFile = result.get("File").toString();
+						line = Integer.parseInt(result.get("Line").toString());
+					}
+				} catch (Exception e) {
+					Debug.report(e);
+					return;
+				}
+			} else {
+				try {
+					Map<String, Object> result = pif.queryOnce(bT("utils4entities::entity_property", Util.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
+							bT("utils4entities::entity_property", Util.quoteAtom(module.getName()), "_", "lines(Line, _)"));
+					if (result == null) {
+						return;
+					} else {
+						selectedFile = result.get("Folder").toString() + result.get("FileName").toString();
+						line = Integer.parseInt(result.get("Line").toString());
+					}
+				} catch (Exception e) {
+					Debug.report(e);
+					return;
+				}
+			}
 		} else if (elem instanceof OutlinePredicateElement) { 
 			OutlinePredicateElement predicate = (OutlinePredicateElement)elem;
 			line = predicate.getLine();

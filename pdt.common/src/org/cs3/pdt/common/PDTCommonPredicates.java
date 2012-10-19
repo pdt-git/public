@@ -25,6 +25,7 @@ public class PDTCommonPredicates {
 	public static final String FIND_REFERENCE_TO = "pdt_search:find_reference_to";
 	public static final String FIND_DEFINITIONS_CATEGORIZED = "pdt_search:find_definitions_categorized";
 	public static final String FIND_PRIMARY_DEFINITION_VISIBLE_IN = "pdt_search:find_primary_definition_visible_in";
+	public static final String FIND_ALTERNATIVE_PREDICATES = "pdt_search:find_alternative_predicates";
 	public static final String FIND_DEFINITION_CONTAINED_IN = "pdt_search:find_definition_contained_in";
 	public static final String FIND_PRED = "pdt_search:find_pred";
 	public static final String FIND_PRED_FOR_EDITOR_COMPLETION = "pdt_search:find_pred_for_editor_completion";

@@ -93,6 +93,10 @@ public interface ConsoleModel {
 	 */
 	abstract public boolean isConnected();
 
+	void registerQueryExpansion(QueryExpansion e);
+
+	void unregisterQueryExpansion(QueryExpansion e);
+
 }
 
 

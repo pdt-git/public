@@ -24,7 +24,10 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 
 public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 
@@ -67,9 +70,26 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 			properties = (Vector<String>)prop;
 		}
 		IFile file = FileUtils.findFileForLocation(m.get("RefFile").toString());
-		int line = Integer.parseInt(m.get("RefLine").toString());
-
-		PrologMatch match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
+		String offsetOrLine = m.get("RefLine").toString();
+		
+		PrologMatch match = null;
+		
+		if (offsetOrLine.indexOf("-") >= 0) {
+			String[] positions = offsetOrLine.split("-");
+			int offset = Integer.parseInt(positions[0]);
+			int length = Integer.parseInt(positions[1]) - offset;
+			try {
+				match = createUniqueMatch(module, name, arity, file, UIUtils.logicalToPhysicalOffset(UIUtils.getDocument(file), offset), length, properties, null, "definition");
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+		} else {
+			int line = Integer.parseInt(offsetOrLine);
+			match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
+		}
+//		int line = Integer.parseInt(m.get("RefLine").toString());
+//
+//		PrologMatch match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
 		return match;
 	}
 	

@@ -15,6 +15,7 @@ package org.cs3.pdt.common.structureElements;
 
 import java.util.List;
 
+import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
@@ -30,7 +31,8 @@ public class PrologMatch extends Match{
 	private SearchPredicateElement predicateElement;
 	private String name;
 	private int arity;
-	private List<String> properties; 
+	private List<String> properties;
+	private String label;
 	
 	public PrologMatch(SearchMatchElement searchMatchElement, String visibility, String module, String name, int arity, List<String> properties, IFile file, int line, String declOrDef) {
 		super(searchMatchElement, UNIT_LINE, line - 1, 1);
@@ -111,12 +113,24 @@ public class PrologMatch extends Match{
 	}
 
 	public String getLabel() {
-		StringBuffer label = new StringBuffer("Line ");
-		label.append(Integer.toString(getLine()));
-		label.append(" (");
-		label.append(declOrDef);
-		label.append(")");
-		return label.toString();
+		if (label == null) {
+			if (isLineLocation) {
+				StringBuffer label = new StringBuffer("Line ");
+				label.append(Integer.toString(getLine()));
+				label.append(" (");
+				label.append(declOrDef);
+				label.append(")");
+				return label.toString();
+			} else {
+				for (String property : properties) {
+					if (property.startsWith("goal(")) {
+						label = Util.unquoteAtom(property.substring(5, property.length() - 1));
+						break;
+					}
+				}
+			}
+		}
+		return label;
 	}
 	
 }
