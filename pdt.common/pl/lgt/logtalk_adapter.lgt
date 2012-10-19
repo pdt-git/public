@@ -96,11 +96,11 @@ find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef
 	list::memberchk(line_count(Line), Properties).
 
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, declaration, Properties) :-
-	entity_property(Entity, _Kind, declares(SearchFunctor/SearchArity, Properties)).
+	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)).
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
-	entity_property(Entity, _Kind, defines(SearchFunctor/SearchArity, Properties)).
+	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)).
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
-	entity_property(Entity, _Kind, includes(SearchFunctor/SearchArity, Properties)).
+	entity_property(Entity, _Kind, includes(Functor/Arity, Properties)).
 
 
         /***********************************************************************
