@@ -805,11 +805,10 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 	functor(Template, Functor, Arity),
 	(	% declaration
 		(	current_object(This) ->
-			(	This<<predicate_property(Template, declared_in(Entity)) ->
-				true
-			;	\+ instantiates_class(This, _),
-				\+ specializes_class(This, _),
-				create_object(Obj, [instantiates(This)], [], []),
+			(	\+ instantiates_class(This, _),
+				\+ specializes_class(This, _) ->
+				This<<predicate_property(Template, declared_in(Entity))
+			;	create_object(Obj, [instantiates(This)], [], []),
 				Obj<<predicate_property(Template, declared_in(Entity)),
 				abolish_object(Obj)
 			)
