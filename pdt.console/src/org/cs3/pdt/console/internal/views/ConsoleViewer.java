@@ -64,6 +64,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 public class ConsoleViewer extends Viewer implements ConsoleModelListener {
+	private static final String BETWEEN_LINES = " between lines ";
+	private static final String ABOVE_LINE = " above line ";
+	
 	private static class _TextSelection implements ITextSelection {
 
 		private int offset;
@@ -315,10 +318,16 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 							}
 						} else if (link.startsWith("in file ")) {
 							try {
-								link = link.substring(8, link.lastIndexOf("-"));
-								String[] fileAndLine = link.split(" between lines ");
-								if (fileAndLine.length >= 2 && new File(fileAndLine[0]).exists()) {
-									int line = Integer.parseInt(fileAndLine[1]);
+								String[] fileAndLine = null;
+								if (link.contains(BETWEEN_LINES)) {
+									link = link.substring(8, link.lastIndexOf("-"));
+									fileAndLine = link.split(BETWEEN_LINES);
+								} else if (link.contains(ABOVE_LINE)) {
+									link = link.substring(8);
+									fileAndLine = link.split(ABOVE_LINE);
+								}
+								if (fileAndLine != null && fileAndLine.length >= 2 && new File(fileAndLine[0]).exists()) {
+									int line = Integer.parseInt(fileAndLine[1].trim());
 									UIUtils.selectInEditor(line, fileAndLine[0], true);
 								}
 							} catch (Exception ex) {
