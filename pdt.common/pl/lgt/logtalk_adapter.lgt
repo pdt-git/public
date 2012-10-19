@@ -21,7 +21,7 @@
 	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_entity_definition/5,
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
-	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
+	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/9,
 	get_pred/7,
 	find_pred/8,
@@ -163,7 +163,7 @@ visibility_text(definition, invisible,	'Invisible') :- !.
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/
 
-%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
+%% find_primary_definition_visible_in(+EnclFile,+ClickedLine,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either
@@ -173,58 +173,49 @@ visibility_text(definition, invisible,	'Invisible') :- !.
 % Used for the open declaration action in
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
-% The second argument is just an atom contianing the string representation of the term:
-find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
-	atom_to_term(TermString,Term,_Bindings),
-	find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine).
-
-% Now the second argument is a real term:
-find_primary_definition_visible_in__(_,Term,_,_,_,File,Line) :-
-	extract_file_spec(Term,FileSpec),
-	catch(absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File), _, fail),
-	access_file(File, read),
-	!,
-	Line=1.
-
-find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
-	find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
-	primary_location(Locations,DefiningModule,MainFile,FirstLine).
+find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, _, FullPath, Line) :-
+	source_file_entity(EnclFile, ClickedLine, This),
+	search_term_to_predicate_indicator(Term, Functor/Arity),
+	decode(Term, This, Entity, _Kind, _Template, Location, _Properties, definition, Visibility),
+	Visibility \== invisible,
+	Location = [Directory, File, [Line]],
+	atom_concat(Directory, File, FullPath).
 
 
 % Work regardelessly whether the user selected the entire consult/use_module
 % statement or just the file spec. Does NOT work if he only selected a file
 % name within an alias but not the complete alias.
-extract_file_spec(consult(FileSpec),FileSpec) :- !.
-extract_file_spec(use_module(FileSpec),FileSpec) :- !.
-extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
-extract_file_spec(Term,Term).
-
-find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
-	module_of_file(EnclFile,FileModule),
-	(  atom(ReferencedModule)
-	-> true                            % Explicit module reference
-	;  ReferencedModule = FileModule   % Implicit module reference
-	),
-	(  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
-	-> defined_in_files(DefiningModule,Name,Arity,Locations)
-	;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
-	     defined_in_files(DeclaringModule,Name,Arity,Locations)
-	   )
-	).
-
-primary_location(Locations,DefiningModule,File,FirstLine) :-
-	member(File-Lines,Locations),
-	module_of_file(File,DefiningModule),
-	!,
-	Lines = [FirstLine|_].
-primary_location(Locations,_,File,FirstLine) :-
-	findall(
-		NrOfClauses-File-FirstLine,
-		(member(File-Lines,Locations), length(Lines,NrOfClauses), Lines=[FirstLine|_]),
-		All
-		),
-	sort(All, Sorted),
-	Sorted = [ NrOfClauses-File-FirstLine |_ ].
+%extract_file_spec(consult(FileSpec),FileSpec) :- !.
+%extract_file_spec(use_module(FileSpec),FileSpec) :- !.
+%extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
+%extract_file_spec(Term,Term).
+%
+%find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
+%	module_of_file(EnclFile,FileModule),
+%	(  atom(ReferencedModule)
+%	-> true                            % Explicit module reference
+%	;  ReferencedModule = FileModule   % Implicit module reference
+%	),
+%	(  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
+%	-> defined_in_files(DefiningModule,Name,Arity,Locations)
+%	;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+%	     defined_in_files(DeclaringModule,Name,Arity,Locations)
+%	   )
+%	).
+%
+%primary_location(Locations,DefiningModule,File,FirstLine) :-
+%	member(File-Lines,Locations),
+%	module_of_file(File,DefiningModule),
+%	!,
+%	Lines = [FirstLine|_].
+%primary_location(Locations,_,File,FirstLine) :-
+%	findall(
+%		NrOfClauses-File-FirstLine,
+%		(member(File-Lines,Locations), length(Lines,NrOfClauses), Lines=[FirstLine|_]),
+%		All
+%		),
+%	sort(All, Sorted),
+%	Sorted = [ NrOfClauses-File-FirstLine |_ ].
 
 
         /***********************************************************************
