@@ -20,7 +20,8 @@
 :- public([
 	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
 	find_entity_definition/5,
-	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
+	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
+	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
 	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/9,
 	get_pred/7,
@@ -74,6 +75,28 @@ find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	),
 	module_property(Entity, file(File)),
 	module_property(Entity, line_count(Line)).
+
+
+find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
+	(	atom(Term) ->
+		true
+	;	Term = SearchFunctor/SearchArity
+	),
+	(	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)),
+		DeclOrDef = declaration
+	;	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
+		DeclOrDef = definition
+	;	entity_property(Entity, _Kind, includes(Functor/Arity, Properties)),
+		DeclOrDef = definition
+	),
+	(	ExactMatch == true ->
+		SearchFunctor = Functor,
+		SearchArity = Arity
+	;	once(sub_atom(Functor, _, _, _, SearchFunctor)),
+		SearchArity = Arity
+	),
+	Location = [Directory, File, [Line]],
+	atom_concat(Directory, File, FullPath).
 
 
         /***********************************************************************
