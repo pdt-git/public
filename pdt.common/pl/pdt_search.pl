@@ -14,6 +14,7 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
          , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
+         , find_definitions_categorized/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
          , find_pred/8
@@ -55,21 +56,28 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, '', ExactMatch):-
-	var(EnclFile),
-	!,
-	(ExactMatch == true
-	-> (search_term_to_predicate_indicator(Term, Functor/Arity),
-        current_predicate(_:Functor/Arity))
-	;  (search_term_to_predicate_indicator(Term, FunctorPrefix/Arity),
-        current_predicate(_:Functor/Arity),
-        once(sub_atom(Functor,_,_,_,FunctorPrefix)))
+%% find_definitions_categorized(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
+% 
+find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList):-
+	(	atom(Term)
+	->	SearchFunctor = Term
+	;	Term = SearchFunctor/Arity
+	),
+	(	ExactMatch == true
+	->	Functor = SearchFunctor,
+		current_predicate(DefiningModule:Functor/Arity)
+	;	current_predicate(DefiningModule:Functor/Arity),
+		once(sub_atom(Functor,_,_,_,SearchFunctor))
 	),
     find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
     member(DeclOrDef-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
-    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList).
+
+find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList) :-
+	current_predicate(logtalk_load/1),
+	logtalk_adapter::find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList).
 
 
 % find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
@@ -389,7 +397,7 @@ find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arit
 find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
     SearchCategory = definition,
     
-    module_of_file(ContextFile, ContextModule),
+%    module_of_file(ContextFile, ContextModule),
     % Backtrack over all predicates defined in File
     % including multifile contributions to other modules:
     source_file(ModuleHead, ContextFile),
@@ -404,13 +412,13 @@ find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Fu
     % predicate, even when they occur in other files
     defined_in_file(DefiningModule, Functor, Arity, _, DefiningFile, Line),
     (	DefiningFile == ContextFile
-    ->	(	DefiningModule == ContextModule
+    ->	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% local definition
     		PropertyList = [local(DefiningModule)|PropertyList0]
 	    ;	% contribution of ContextModule for DefiningModule	
     		PropertyList = [for(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	)
-    ;	(	DefiningModule == ContextModule
+    ;	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% contribution from DefiningFile to ContextModule, ContextFile
     		PropertyList = [from(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	;	% other file to itself

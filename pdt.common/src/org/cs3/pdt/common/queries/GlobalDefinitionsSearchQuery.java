@@ -24,11 +24,10 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
-import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 
-public class DefinitionsSearchQuery extends PDTSearchQuery {
-	public DefinitionsSearchQuery(Goal goal) {
+public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
+	public GlobalDefinitionsSearchQuery(Goal goal) {
 		super(goal);
 		if (goal.isExactMatch()) {
 			setSearchType("Definitions and declarations of");
@@ -39,30 +38,24 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		String file = Util.quoteAtom(goal.getFilePath());
-		if (goal.getFilePath().isEmpty())
-			file = "OrigFile";
-
-		String module2 = module;
-		if (module.equals("''"))
-			module2 = "Module";
+		String term;
 		
-		String term = goal.getTermString();
+		if (goal.getArity() == -1) {
+			term = goal.getFunctor();
+		} else {
+			term = goal.getSignature();
+		}
 		
 		String query = bT(PDTCommonPredicates.FIND_DEFINITIONS_CATEGORIZED,
-				file,
-				goal.getLine(),
 				term,
+				Boolean.toString(goal.isExactMatch()),
+				"DefiningModule",
 				"Functor",
 				"Arity",
-				module2,
 				"DeclOrDef",
-				"DefiningModule",
 				"File",
 				"Line",
-				"PropertyList",
-				"Visibility",
-				Boolean.toString(goal.isExactMatch()));
+				"PropertyList");
 		return query;
 	}
 
@@ -85,10 +78,9 @@ public class DefinitionsSearchQuery extends PDTSearchQuery {
 			properties = (Vector<String>)prop;
 		}	
 		String declOrDef = m.get("DeclOrDef").toString();
-		String visibility = m.get("Visibility").toString();
 
 		PrologMatch match = createUniqueMatch(definingModule, functor, arity,
-				file, line, properties, visibility, declOrDef);
+				file, line, properties, "", declOrDef);
 		
 		return match;
 	}
