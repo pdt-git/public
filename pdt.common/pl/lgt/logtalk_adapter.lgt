@@ -176,11 +176,11 @@ visibility_text(definition, invisible,	'Invisible') :- !.
 find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, _, FullPath, Line) :-
 	source_file_entity(EnclFile, ClickedLine, This),
 	search_term_to_predicate_indicator(Term, Functor/Arity),
-	decode(Term, This, Entity, _Kind, _Template, Location, _Properties, definition, Visibility),
+	decode(Term, This, Entity, _Kind, _Template, Location, Properties, definition, Visibility),
 	Visibility \== invisible,
 	Location = [Directory, File, [Line]],
-	atom_concat(Directory, File, FullPath).
-
+	atom_concat(Directory, File, FullPath),
+	list::memberchk(line_count(Line), Properties).
 
 % Work regardelessly whether the user selected the entire consult/use_module
 % statement or just the file spec. Does NOT work if he only selected a file
