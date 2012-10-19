@@ -79,24 +79,28 @@ find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 
 find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
 	(	atom(Term) ->
-		true
+		Term = SearchFunctor
 	;	Term = SearchFunctor/SearchArity
 	),
-	(	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)),
-		DeclOrDef = declaration
-	;	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
-		DeclOrDef = definition
-	;	entity_property(Entity, _Kind, includes(Functor/Arity, Properties)),
-		DeclOrDef = definition
-	),
 	(	ExactMatch == true ->
-		SearchFunctor = Functor,
-		SearchArity = Arity
-	;	once(sub_atom(Functor, _, _, _, SearchFunctor)),
-		SearchArity = Arity
+		any_predicate_declaration_or_definition(SearchFunctor, SearchArity, Entity, Kind, DeclOrDef, Properties),
+		Functor = SearchFunctor,
+		Arity = SearchArity
+	;	any_predicate_declaration_or_definition(Functor, SearchArity, Entity, Kind, DeclOrDef, Properties),
+		once(sub_atom(Functor, _, _, _, SearchFunctor)),
+		Functor = SearchFunctor,
+		Arity = SearchArity
 	),
-	Location = [Directory, File, [Line]],
-	atom_concat(Directory, File, FullPath).
+	entity_property(Entity, Kind, file(File, Directory)),
+	atom_concat(Directory, File, FullPath),
+	list::memberchk(line_count(Line), Properties).
+
+any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, declaration, Properties) :-
+	entity_property(Entity, _Kind, declares(SearchFunctor/SearchArity, Properties)).
+any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
+	entity_property(Entity, _Kind, defines(SearchFunctor/SearchArity, Properties)).
+any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
+	entity_property(Entity, _Kind, includes(SearchFunctor/SearchArity, Properties)).
 
 
         /***********************************************************************
