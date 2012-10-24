@@ -14,6 +14,9 @@
 
 package org.cs3.pdt.internal.actions;
 
+import static org.cs3.pdt.common.search.SearchConstants.RESULT_KIND_DYNAMIC;
+import static org.cs3.pdt.common.search.SearchConstants.RESULT_KIND_FOREIGN;
+import static org.cs3.pdt.common.search.SearchConstants.RESULT_KIND_MULTIFILE;
 import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.util.List;
@@ -56,10 +59,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
  * @see IWorkbenchWindowActionDelegate
  */
 public class FindPredicateActionDelegate extends TextEditorAction {
-//	private static final String RESULT_KIND_SINGLE = "single";
-	private static final String RESULT_KIND_MULTIFILE = "multifile";
-	private static final String RESULT_KIND_DYNAMIC = "dynamic";
-	private static final String RESULT_KIND_FOREIGN = "foreign";
+	
 	private ITextEditor editor;
 
 	/**
