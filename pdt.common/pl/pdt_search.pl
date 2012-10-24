@@ -65,8 +65,8 @@ find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, D
 	),
 	(	ExactMatch == true
 	->	Functor = SearchFunctor,
-		current_predicate(DefiningModule:Functor/Arity)
-	;	current_predicate(DefiningModule:Functor/Arity),
+		declared_in_module(DefiningModule, Functor, Arity, DefiningModule)
+	;	declared_in_module(DefiningModule, Functor, Arity, DefiningModule),
 		once(sub_atom(Functor,_,_,_,SearchFunctor))
 	),
     find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
