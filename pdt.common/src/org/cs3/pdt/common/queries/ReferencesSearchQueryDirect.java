@@ -95,7 +95,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}
-		IFile file = FileUtils.findFileForLocation(m.get("RefFile").toString());
+		IFile file = findFile(m.get("RefFile").toString());
 		String offsetOrLine = m.get("RefLine").toString();
 		
 		PrologMatch match = null;

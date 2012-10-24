@@ -26,10 +26,12 @@ import javax.swing.text.BadLocationException;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.search.PrologSearchResult;
+import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
+import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -224,6 +226,14 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	protected Goal getGoal() {
 		return goal;
+	}
+	
+	protected IFile findFile(String fileName) throws IOException {
+		if (fileName == null || SearchConstants.RESULT_KIND_DYNAMIC.equals(fileName) || SearchConstants.RESULT_KIND_FOREIGN.equals(fileName)) {
+			return null;
+		} else {
+			return FileUtils.findFileForLocation(fileName);
+		}
 	}
 	
 }

@@ -22,7 +22,6 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.prolog.common.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
@@ -68,7 +67,7 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 			arity = Integer.parseInt(m.get("Arity").toString());
 		} catch (NumberFormatException e) {}
 		
-		IFile file = FileUtils.findFileForLocation(m.get("File").toString());
+		IFile file = findFile(m.get("File").toString());
 		int line = Integer.parseInt(m.get("Line").toString());
 
 		Object prop = m.get("PropertyList");

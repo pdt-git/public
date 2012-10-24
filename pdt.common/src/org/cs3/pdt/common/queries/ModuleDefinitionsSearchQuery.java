@@ -38,7 +38,7 @@ public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 	@Override
 	protected Match constructPrologMatchForAResult(Map<String, Object> m) throws IOException {
 		String module = m.get("Module").toString();
-		IFile file = FileUtils.findFileForLocation(m.get("File").toString());
+		IFile file = findFile(m.get("File").toString());
 		int line = Integer.parseInt(m.get("Line").toString());
 		
 		SearchModuleElement moduleElement = new SearchModuleElement(null, module, null);
