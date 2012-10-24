@@ -220,8 +220,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		// In der Klasse DefinitionsSearchQuery funktioniert es aber!
 
 		String module = "_";
-		if (goal.getModule() != null)
-			module = "'" + goal.getModule() + "'";
+		if (goal.getModule() != null) {
+			module = Util.quoteAtomIfNeeded(goal.getModule());
+		}
 
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
