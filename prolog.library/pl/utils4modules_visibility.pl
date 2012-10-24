@@ -297,14 +297,14 @@ defined_in_files(Module,Name,Arity,Locations) :-
                     defined_in_file(Module,Name,Arity, N,File,Line),
                     Lines
              ),
-             SrcLocations
-    ),
-    (  SrcLocations == []
-    -> ( declared_in_module(Module,Name,Arity,DeclaringModule),
-         declared_in_file(DeclaringModule,Name,Arity,DeclLocation),
-         Locations = DeclLocation
-       ) 
-    ;  Locations = SrcLocations
+             Locations
+%    ),
+%    (  SrcLocations == []
+%    -> ( declared_in_module(Module,Name,Arity,DeclaringModule),
+%         declared_in_file(DeclaringModule,Name,Arity,DeclLocation),
+%         Locations = DeclLocation
+%       ) 
+%    ;  Locations = SrcLocations
     ).
 
 

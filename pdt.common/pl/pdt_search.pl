@@ -40,7 +40,7 @@
              , declared_in_file/4               % (Module,Name,Arity,Location)
              , defined_in_files/4               % (Module,Name,Arity,Locations)
              ] ).
-
+:- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 % TODO: Why this import?
 :- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
@@ -318,17 +318,24 @@ extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
     
 find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
-    module_of_file(EnclFile,FileModule),
-    (  atom(ReferencedModule)
-    -> true                            % Explicit module reference
-    ;  ReferencedModule = FileModule   % Implicit module reference
-    ),
-    (  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
-    -> defined_in_files(DefiningModule,Name,Arity,Locations)
-    ;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
-    defined_in_files(DeclaringModule,Name,Arity,Locations)
-       )
-    ).
+	module_of_file(EnclFile,FileModule),
+	(	atom(ReferencedModule)
+	->	true                            % Explicit module reference
+	;	ReferencedModule = FileModule   % Implicit module reference
+	),
+	(	defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
+	->	defined_in_files(DefiningModule,Name,Arity,Locations0),
+		(	Locations0 == []
+		->	declared_in_file(DefiningModule, Name, Arity, Locations)
+		;	Locations0 = Locations
+		)
+	;	declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+		defined_in_files(DeclaringModule,Name,Arity,Locations0),
+		(	Locations0 == []
+		->	declared_in_file(DefiningModule, Name, Arity, Locations)
+		;	Locations0 = Locations
+		)
+	).
 
 primary_location(Locations,DefiningModule,File,FirstLine) :-
     member(File-Lines,Locations),
