@@ -158,7 +158,7 @@ public class SocketSession implements PrologSession {
 
 	private List<String> getVariableNames(String query) {
 		try {
-			String getVarQuery = "get_var_names(" + Util.quoteAtom(query) + ",Vars)";
+			String getVarQuery = "get_var_names(" + quoteQuery(query) + ",Vars)";
 			Map<String, Object> result = queryOnce(getVarQuery);
 			String varString = result.get("Vars").toString();
 			if (varString.isEmpty()) {
@@ -170,6 +170,31 @@ public class SocketSession implements PrologSession {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	private String quoteQuery(String query) {
+		if (query.startsWith("'") && query.endsWith("'")) {
+			return query;
+		} else {
+			StringBuffer buf = new StringBuffer("\'");
+			int backSlashCounter = 0;
+			for (int i = 0; i < query.length(); i++) {
+				char c = query.charAt(i);
+				if (c == '\\') {
+					backSlashCounter++;
+				} else if (c == '\'') {
+					if (backSlashCounter % 2 == 0) {
+						buf.append('\\');
+					}
+					backSlashCounter = 0;
+				} else {
+					backSlashCounter = 0;
+				}
+				buf.append(c);
+			}
+			buf.append('\'');
+			return buf.toString();
+		}
 	}
 
 
