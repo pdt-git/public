@@ -188,6 +188,10 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
 % compute here).               
          
 
+visibility(super, ContextModule,Name,Arity,system) :-
+	declared_in_module(ContextModule, Name, Arity, system),
+	!.
+
 visibility(super, ContextModule,Name,Arity,DeclModule) :-
 	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
 %    declared_in_module(ContextModule,Name,Arity,DeclModule),
