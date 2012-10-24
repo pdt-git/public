@@ -18,9 +18,7 @@
  */
 package org.cs3.pdt.common.search;
 
-import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.internal.ImageRepository;
-import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
@@ -28,7 +26,6 @@ import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -169,28 +166,15 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		if (match instanceof PrologMatch) {
 			PrologMatch prologMatch = (PrologMatch)match;
-			SearchPredicateElement element = prologMatch.getPredicateElement();
-			IFile file = prologMatch.getFile();
-			if(prologMatch.isLineLocation()) {
-				SourceLocation loc = createLocation(element, file, prologMatch);
-				PDTCommonUtil.showSourceLocation(loc);
-				return;
+			if (prologMatch.isLineLocation()) {
+				UIUtils.selectInEditor(prologMatch.getLine(), prologMatch.getFile(), activate);
+			} else {
+				UIUtils.selectInEditor(currentOffset, currentLength, prologMatch.getFile(), activate, false);
 			}
-			UIUtils.selectInEditor(currentOffset, currentLength, file, activate, false);
 		} else if (match instanceof ModuleMatch) {
 			ModuleMatch moduleMatch = (ModuleMatch) match;
 			UIUtils.selectInEditor(moduleMatch.getOffset(), moduleMatch.getFile(), activate);
 		}
-	}
-
-	private SourceLocation createLocation(SearchPredicateElement element, IFile file, PrologMatch prologMatch) {
-		SourceLocation loc = new SourceLocation(file.getRawLocation().toPortableString(), false);
-		loc.isWorkspacePath = file.isAccessible();
-		
-		loc.setLine(prologMatch.getLine());
-		loc.setPredicateName(element.getFunctor());
-		loc.setArity(element.getArity());
-		return loc;
 	}
 
 }

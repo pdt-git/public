@@ -111,7 +111,6 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 			fileToFileTreeElement.put(fileTreeElement.getFile(), fileTreeElement);
 		}
 		fileTreeElement.addMatch(match);
-		match.setPredicateElement(this);
 	}
 
 	@Override

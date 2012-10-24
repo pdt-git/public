@@ -29,7 +29,6 @@ public class PrologMatch extends Match{
 	private boolean isLineLocation= false;
 	private String visibility;
 	private String declOrDef;
-	private SearchPredicateElement predicateElement;
 	private String name;
 	private int arity;
 	private List<String> properties;
@@ -101,18 +100,6 @@ public class PrologMatch extends Match{
 		return file;
 	}
 	
-	public void setPredicateElement(SearchPredicateElement element) {
-		predicateElement = element;
-	}
-	
-	public SearchPredicateElement getPredicateElement() {
-		if (predicateElement == null) {
-			return (SearchPredicateElement) ((SearchFileTreeElement)((SearchMatchElement)getElement()).getParent()).getParent();
-		} else {
-			return predicateElement;
-		}
-	}
-
 	public String getLabel() {
 		if (label == null) {
 			if (isLineLocation) {
