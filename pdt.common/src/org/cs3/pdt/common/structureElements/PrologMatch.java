@@ -15,6 +15,7 @@ package org.cs3.pdt.common.structureElements;
 
 import java.util.List;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
@@ -122,12 +123,7 @@ public class PrologMatch extends Match{
 				label.append(")");
 				return label.toString();
 			} else {
-				for (String property : properties) {
-					if (property.startsWith("goal(")) {
-						label = Util.unquoteAtom(property.substring(5, property.length() - 1));
-						break;
-					}
-				}
+				label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
 			}
 		}
 		return label;

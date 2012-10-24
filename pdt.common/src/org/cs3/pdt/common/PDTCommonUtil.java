@@ -15,6 +15,7 @@
 package org.cs3.pdt.common;
 
 import java.io.File;
+import java.util.List;
 
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.prolog.common.Util;
@@ -116,6 +117,15 @@ public class PDTCommonUtil {
 		}
 		
 		
+	}
+
+	public static String getProperty(String property, List<String> properties) {
+		for (String p : properties) {
+			if (p.startsWith(property)) {
+				return p.substring(property.length() + 1, p.length() - 1);
+			}
+		}
+		return null;
 	}
 
 }
