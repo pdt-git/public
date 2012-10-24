@@ -262,20 +262,23 @@ find_primary_definition_visible_in_(EnclFile,_SelectedLine,Term,ReferencedModule
     find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
 
 extract_name_arity(Term,Module,Head,Name,Arity) :-
-    (  var(Term) 
-    -> throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
-     ; true
-    ),
-    % Special treatment of Name/Arity terms:
-    (  Term = Name/Arity
-    -> true
-     ; (  Term = Module:Term2
-       -> functor(Term2, Name, Arity)
-       ;  functor(Term,Name,Arity)
-       )
-    ),
-    % Create most general head
-    functor(Head,Name,Arity).
+	(	var(Term) 
+	->	throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
+	;	true
+	),
+	% Special treatment of Name/Arity terms:
+	(	Term = Module:Name/Arity
+	->	true
+	;	(	Term = Name/Arity
+		->	true
+		;	(	Term = Module:Term2
+			->	functor(Term2, Name, Arity)
+			;	functor(Term,Name,Arity)
+			)
+		)
+	),
+	% Create most general head
+	functor(Head,Name,Arity).
 
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
