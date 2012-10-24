@@ -22,10 +22,10 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.search.ui.text.Match;
 
 public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 	public ContextAwareDefinitionsSearchQuery(Goal goal) {
@@ -67,8 +67,7 @@ public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 	}
 
 	@Override
-	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
-	throws IOException {
+	protected Match constructPrologMatchForAResult(Map<String, Object> m) throws IOException {
 		String definingModule = m.get("DefiningModule").toString();
 		String functor = m.get("Functor").toString();
 		int arity=-1;
@@ -87,8 +86,12 @@ public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 		String declOrDef = m.get("DeclOrDef").toString();
 		String visibility = m.get("Visibility").toString();
 
-		PrologMatch match = createUniqueMatch(definingModule, functor, arity,
-				file, line, properties, visibility, declOrDef);
+		Match match;
+		if (file == null) {
+			match = createUniqueMatch(definingModule, functor, arity, properties, visibility, declOrDef);
+		} else {
+			match = createUniqueMatch(definingModule, functor, arity, file, line, properties, visibility, declOrDef);
+		}
 		
 		return match;
 	}

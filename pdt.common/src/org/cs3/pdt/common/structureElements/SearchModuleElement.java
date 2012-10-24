@@ -101,7 +101,31 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	private String getSignatureForMatch(PrologMatch match) {
 		return match.getName() + match.getArity();
 	}
+	
+	public void removeMatch(PredicateMatch match) {
+		String signature = getSignatureForMatch(match);
+		SearchPredicateElement searchPredicateElement = predForSignature.get(signature);
+		searchPredicateElement.removeMatch(match);
+		if (!searchPredicateElement.hasMatches()) {
+			predForSignature.remove(signature);
+		}
+	}
+	
+	public void addMatch(PredicateMatch match) {
+		String signature = getSignatureForMatch(match);
+		SearchPredicateElement element = predForSignature.get(signature);
+		if (element == null) {
+			element = (SearchPredicateElement) match.getElement();
+			element.setParent(this);
+			predForSignature.put(signature, element);
+		}
+		element.addMatch(match);
+	}
 
+	private String getSignatureForMatch(PredicateMatch match) {
+		return match.getName() + match.getArity();
+	}
+	
 	@Override
 	public Object getParent() {
 		return parent;

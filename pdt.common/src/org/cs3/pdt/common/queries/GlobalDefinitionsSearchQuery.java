@@ -22,9 +22,9 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.FileUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.search.ui.text.Match;
 
 public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 	public GlobalDefinitionsSearchQuery(Goal goal) {
@@ -60,8 +60,7 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 	}
 
 	@Override
-	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
-	throws IOException {
+	protected Match constructPrologMatchForAResult(Map<String, Object> m) throws IOException {
 		String definingModule = m.get("DefiningModule").toString();
 		String functor = m.get("Functor").toString();
 		int arity=-1;
@@ -79,8 +78,12 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 		}	
 		String declOrDef = m.get("DeclOrDef").toString();
 
-		PrologMatch match = createUniqueMatch(definingModule, functor, arity,
-				file, line, properties, "", declOrDef);
+		Match match;
+		if (file == null) {
+			match = createUniqueMatch(definingModule, functor, arity, properties, "", declOrDef);
+		} else {
+			match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", declOrDef);
+		}
 		
 		return match;
 	}

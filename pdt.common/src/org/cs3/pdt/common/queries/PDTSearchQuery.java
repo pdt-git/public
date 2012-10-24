@@ -15,8 +15,8 @@
 package org.cs3.pdt.common.queries;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +26,9 @@ import javax.swing.text.BadLocationException;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.search.PrologSearchResult;
+import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
-import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -49,9 +49,8 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	private Goal goal;
 	private PrologSearchResult result;
-	private Map<String, SearchPredicateElement> predForSignature = new HashMap<String, SearchPredicateElement>();
-	private Map<String, SearchModuleElement> moduleElements = new HashMap<String, SearchModuleElement>();
 	private LinkedHashSet<String> signatures = new LinkedHashSet<String>();
+	private LinkedHashMap<String, SearchPredicateElement> predicates = new LinkedHashMap<String, SearchPredicateElement>();
 
 	public PDTSearchQuery(Goal goal) {
 		this.goal = goal;
@@ -115,8 +114,6 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 		String query = buildSearchQuery(goal, module);
 		
-		predForSignature.clear();
-		
 		List<Map<String, Object>> clauses = getResultForQuery(session, query);
 		
 		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
@@ -144,9 +141,8 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 	throws IOException, NumberFormatException {
 		Match match;
-		moduleElements.clear();
-		predForSignature.clear();
 		signatures.clear();
+		predicates.clear();
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
@@ -181,6 +177,23 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			SearchMatchElement searchMatchElement = new SearchMatchElement();
 			PrologMatch match = new PrologMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, offset, length, declOrDef);
 			searchMatchElement.setMatch(match);
+			return match;
+		}
+	}
+	
+	protected PredicateMatch createUniqueMatch(String definingModule, String functor, int arity, List<String> properties, String visibility, String declOrDef) {
+		String signature = declOrDef + visibility + definingModule + functor + arity + "#";
+		if (signatures.contains(signature)) {
+			return null;
+		} else {
+			signatures.add(signature);
+			String predicateSignature = visibility + definingModule + functor + arity;
+			SearchPredicateElement searchPredicateElement = predicates.get(predicateSignature);
+			if (searchPredicateElement == null) {
+				searchPredicateElement = new SearchPredicateElement(null, definingModule, functor, arity, properties);
+				predicates.put(predicateSignature, searchPredicateElement);
+			}
+			PredicateMatch match = new PredicateMatch(searchPredicateElement, visibility, definingModule, functor, arity, properties, declOrDef);
 			return match;
 		}
 	}
