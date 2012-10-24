@@ -78,7 +78,6 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	@Override
 	public void removeMatch(PrologMatch match) {
 		String signature = getSignatureForMatch(match);
-		predForSignature.get(signature);
 		if (predForSignature.containsKey(signature)) {
 			SearchPredicateElement predicateElement = predForSignature.get(signature);
 			predicateElement.removeMatch(match);
