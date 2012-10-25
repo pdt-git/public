@@ -35,7 +35,7 @@
 
 :- uses(list, [length/2, member/2, selectchk/3]).
 :- uses(meta, [map/3::maplist/3]).
-:- uses(utils4entities, [source_file_entity/3, entity_property/3]).
+:- uses(utils4entities, [source_file_entity/3, entity/1, entity_property/3]).
 
 %:- use_module(library(pldoc/doc_library)).
 %:- use_module(library(explain)).
@@ -53,10 +53,7 @@
 
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
-	(	current_object(Entity)
-	;	current_protocol(Entity)
-	;	current_category(Entity)
-	),
+	entity(Entity),
 	functor(Entity, Functor, _),
 	(	ExactMatch == true
 	->	SearchString = Functor
@@ -128,10 +125,7 @@ find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This,
 	atom_concat(Directory, File, FullPath).
 
 find_definitions_categorized0(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, [invisible| Properties], Visibility) :-
-	(	current_object(Entity)
-	;	current_protocol(Entity)
-	;	current_category(Entity)
-	),
+	entity(Entity),
 	Entity \= This,
 	(	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)),
 		DeclOrDef = declaration,
