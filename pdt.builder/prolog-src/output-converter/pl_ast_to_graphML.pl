@@ -49,7 +49,10 @@ write_focus_to_graphML(FocusFile, GraphFile, Dependencies):-
     file_paths(DependentFiles, Dependencies).  
 
 write_global_to_graphML(ProjectFilePaths, GraphFile):-
-    file_paths(ProjectFiles, ProjectFilePaths),
+    findall(Path, (
+    		source_file(Path), member(Path, ProjectFilePaths)
+    	), ConsultedFilePaths),
+    file_paths(ProjectFiles, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_global_facts_to_graphML(ProjectFiles)).
 
 write_to_graphML(GraphFile, CALL) :-
