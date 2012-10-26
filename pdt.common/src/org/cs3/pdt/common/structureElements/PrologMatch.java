@@ -103,17 +103,26 @@ public class PrologMatch extends Match{
 	public String getLabel() {
 		if (label == null) {
 			if (isLineLocation) {
-				StringBuffer label = new StringBuffer("Line ");
-				label.append(Integer.toString(getLine()));
-				label.append(" (");
-				label.append(declOrDef);
-				label.append(")");
-				return label.toString();
+				String firstArgument = PDTCommonUtil.getProperty("first_argument", properties);
+				if (firstArgument != null) {
+					label = getLine() + ": " + Util.unquoteAtom(firstArgument);
+				} else {
+					StringBuffer buf = new StringBuffer("Line ");
+					buf.append(Integer.toString(getLine()));
+					buf.append(" (");
+					buf.append(declOrDef);
+					buf.append(")");
+					label = buf.toString();
+				}
 			} else {
 				label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
 			}
 		}
 		return label;
+	}
+	
+	public void setLabel(String label) {
+		this.label = label;
 	}
 	
 }

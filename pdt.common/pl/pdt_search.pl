@@ -72,8 +72,12 @@ find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, D
     find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
     member(DeclOrDef-DefiningModule-Location,Sources),
     member(File-Lines,Location),
-    member(Line,Lines),
-    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList).
+    member(location(Line, Ref),Lines),
+    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList0),
+    (	first_argument_of_clause(Ref, FirstArgument)
+    ->	PropertyList = [FirstArgument|PropertyList0]
+    ;	PropertyList = PropertyList0
+    ).
 
 find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList) :-
 	current_predicate(logtalk_load/1),
@@ -97,8 +101,12 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
     member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
     member(File-Lines,Location),
-    member(Line,Lines),
-    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList).
+    member(location(Line, Ref),Lines),
+    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList0),
+    (	first_argument_of_clause(Ref, FirstArgument)
+    ->	PropertyList = [FirstArgument|PropertyList0]
+    ;	PropertyList = PropertyList0
+    ).
 
 
 find_decl_or_def_2(Name,Arity,Declarations) :-
@@ -188,22 +196,25 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
 % compute here).               
          
 
-visibility(super, ContextModule,Name,Arity,system) :-
-	declared_in_module(ContextModule, Name, Arity, system),
-	!.
-
 visibility(super, ContextModule,Name,Arity,DeclModule) :-
-	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
+	(	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden)
+	;	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, imported)
+	),
+	!.
 %    declared_in_module(ContextModule,Name,Arity,DeclModule),
 %    ContextModule \== DeclModule. 
     
    
 visibility(local, ContextModule,Name,Arity,DeclModule) :-
     declared_in_module(ContextModule,Name,Arity,DeclModule),
-    ContextModule == DeclModule.
+    ContextModule == DeclModule,
+    !.
     
 visibility(sub, ContextModule,Name,Arity,DeclModule) :-
-	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden).
+	(	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden)
+	;	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, imported)
+	),
+	!.
 %    declared_in_module(DeclModule,Name,Arity,DeclModule),
 %    % DeclModule is a submodule of ContextModule
 %    declared_in_module(DeclModule,_,_,ContextModule), % submodule
@@ -217,7 +228,9 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
     declared_in_module(DeclModule,Name,Arity,DeclModule),
     ContextModule \== DeclModule,
 	\+ module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden),
-	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
+	\+ module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, imported),
+	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden),
+	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, imported).
 %    \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
 %    \+ declared_in_module(DeclModule,_,_,ContextModule).
 
@@ -348,12 +361,12 @@ primary_location(Locations,DefiningModule,File,FirstLine) :-
     member(File-Lines,Locations),
     module_of_file(File,DefiningModule),
     !,
-    Lines = [FirstLine|_].
+    Lines = [location(FirstLine, _Ref)|_].
 primary_location(Locations,_,File,FirstLine) :-
     findall( NrOfClauses-File-FirstLine,
              ( member(File-Lines,Locations),
                length(Lines,NrOfClauses),
-               Lines=[FirstLine|_]
+               Lines=[location(FirstLine, _Ref)|_]
              ),
              All
     ),
@@ -424,22 +437,40 @@ find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Fu
 
     % In the case of a multifile predicate, we want to find all clauses for this 
     % predicate, even when they occur in other files
-    defined_in_file(DefiningModule, Functor, Arity, _, DefiningFile, Line),
+    defined_in_file(DefiningModule, Functor, Arity, Ref, _, DefiningFile, Line),
     (	DefiningFile == ContextFile
     ->	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% local definition
-    		PropertyList = [local(DefiningModule)|PropertyList0]
+    		PropertyList1 = [local(DefiningModule)|PropertyList0]
 	    ;	% contribution of ContextModule for DefiningModule	
-    		PropertyList = [for(DefiningModule), defining_file(DefiningFile) | PropertyList0]
+    		PropertyList1 = [for(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	)
     ;	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% contribution from DefiningFile to ContextModule, ContextFile
-    		PropertyList = [from(DefiningModule), defining_file(DefiningFile) | PropertyList0]
+    		PropertyList1 = [from(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	;	% other file to itself
-    		PropertyList = [remote(DefiningModule), defining_file(DefiningFile) | PropertyList0]
+    		PropertyList1 = [remote(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	)
+    ),
+    (	first_argument_of_clause(Ref, FirstArg)
+    ->	PropertyList = [FirstArg|PropertyList1]
+    ;	PropertyList = PropertyList1
     ).
-        
+
+first_argument_of_clause(Ref, first_argument(Arg)) :-
+	catch(clause(_:Head, _, Ref), _, fail),
+	arg(1, Head, FirstArg),
+	(	var(FirstArg)
+	->	clause_info(Ref, _, _, Varnames), 
+		arg(1, Varnames, FirstVarName),
+		Arg = FirstVarName
+	;	functor(FirstArg, F, N),
+		(	N == 0
+		->	Arg = F
+		;	format(atom(Arg), '~w/~w', [F, N])
+		)
+	).
+
 % pdt_strip_module(+ModuleHead,?Module,-ModuleLine,?Head) is det
 % pdt_strip_module(-ModuleHead,?Module,-ModuleLine,+Head) is det
 %
