@@ -28,6 +28,9 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 
@@ -79,13 +82,31 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 			int offset = Integer.parseInt(positions[0]);
 			int length = Integer.parseInt(positions[1]) - offset;
 			try {
-				match = createUniqueMatch(module, name, arity, file, UIUtils.logicalToPhysicalOffset(UIUtils.getDocument(file), offset), length, properties, null, "definition");
+				IDocument document = UIUtils.getDocument(file);
+				int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
+				match = createUniqueMatch(module, name, arity, file, convertedOffset, length, properties, null, "definition");
+				if (match != null) {
+					match.setLabel(document.get(convertedOffset, length));
+				}
 			} catch (CoreException e) {
+				Debug.report(e);
+			} catch (BadLocationException e) {
 				Debug.report(e);
 			}
 		} else {
-			int line = Integer.parseInt(offsetOrLine);
-			match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
+			try {
+				int line = Integer.parseInt(offsetOrLine);
+				match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
+				if (match != null) {
+					IDocument document = UIUtils.getDocument(file);
+					IRegion lineInformation = document.getLineInformation(line - 1);
+					match.setLabel(document.get(lineInformation.getOffset(), lineInformation.getLength()));
+				}
+			} catch (CoreException e) {
+				Debug.report(e);
+			} catch (BadLocationException e) {
+				Debug.report(e);
+			}
 		}
 //		int line = Integer.parseInt(m.get("RefLine").toString());
 //
