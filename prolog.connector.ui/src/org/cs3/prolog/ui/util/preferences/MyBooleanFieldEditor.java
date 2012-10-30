@@ -40,6 +40,10 @@ public class MyBooleanFieldEditor extends BooleanFieldEditor implements FieldEdi
 		return parent;
 	}
 	
+	public void setBooleanValue(boolean value) {
+		getChangeControl(parent).setSelection(value);
+	}
+	
 }
 
 

@@ -305,10 +305,31 @@ public final class UIUtils {
 	 * @return
 	 * @throws PartInitException
 	 */
-	static public IEditorPart openInEditor(IFile file, boolean activate)
+	static public IEditorPart openInEditor(final IFile file, boolean activate)
 			throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p = getActivePage();
+//			try {
+//				
+//				long length = EFS.getStore(file.getLocationURI()).fetchInfo().getLength();
+//				System.out.println("XXXXXXXXXXXX  " + length);
+//				if (length > 10000) {
+//					Boolean result = (Boolean) new _SyncReturn() {
+//						@Override
+//						Object getRVal() {
+//							boolean answer = MessageDialog.openQuestion(getActiveShell(), "Open file " + file.getName(), "The file " + file.getName() + " is larger than 10. Continue opening the file?");
+//							return new Boolean(answer);
+//						}
+//					}.rval;
+//					System.out.println("XXXXXXXXXXXX  " + result);
+//					if (!result) {
+//						return null;
+//					}
+//				}
+//			} catch (CoreException e) {
+//				Debug.report(e);
+//				return null;
+//			}
 			if (p != null) {
 				IEditorPart editorPart = IDE.openEditor(p, file, activate);
 				return editorPart;

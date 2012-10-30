@@ -26,6 +26,8 @@ public interface PrologRuntime {
 
 
     // Preferences
+    public static final String PREF_CONFIGURATION = "pif.configuration";
+    
     public static final String EP_TRACKERS = "prologContextTracker";
 	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
 	public static final String PREF_SERVER_LOGDIR = "pif.server_log_dir";

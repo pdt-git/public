@@ -20,6 +20,7 @@ package org.cs3.pdt.common.search;
 
 import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
+import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
@@ -174,6 +175,8 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		} else if (match instanceof ModuleMatch) {
 			ModuleMatch moduleMatch = (ModuleMatch) match;
 			UIUtils.selectInEditor(moduleMatch.getOffset(), moduleMatch.getFile(), activate);
+		} else if (match instanceof PredicateMatch) {
+			UIUtils.displayMessageDialog(getSite().getShell(), "Show Match", "There is no source code for this predicate.");
 		}
 	}
 
