@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
@@ -82,7 +83,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throw new NullPointerException();
 		}
 
-		return doSearch(); 
+		return doSearch(monitor); 
 	}
 
 	/**
@@ -92,9 +93,14 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private IStatus doSearch() throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
+	private IStatus doSearch(IProgressMonitor monitor) throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
 		PrologSession session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-		processFoundClauses(findReferencedClauses(session));
+		monitor.beginTask("Searching...", 2);
+		monitor.subTask("Running Prolog query");
+		List<Map<String, Object>> results = findReferencedClauses(session, new SubProgressMonitor(monitor, 1));
+		monitor.subTask("Processing results");
+		processFoundClauses(results, new SubProgressMonitor(monitor, 1));
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 
@@ -104,9 +110,10 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws PrologException
 	 * @throws PrologInterfaceException
 	 */
-	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
+	private List<Map<String, Object>> findReferencedClauses(PrologSession session, IProgressMonitor monitor)
 			throws PrologException, PrologInterfaceException {
 		
+		monitor.beginTask("", 1);
 		String module;               
 		if (goal.getModule() != null && !goal.getModule().isEmpty()) {
 			module = Util.quoteAtomIfNeeded(goal.getModule());
@@ -122,6 +129,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 //		if (clauses.size() > 0 && goal.getModule() == null){
 //			goal.setModule(clauses.get(0).get("Module").toString());
 //		}
+		monitor.done();
 		return clauses;
 	}
 	
@@ -140,11 +148,12 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private void processFoundClauses(List<Map<String, Object>> clauses)
+	private void processFoundClauses(List<Map<String, Object>> clauses, IProgressMonitor monitor)
 	throws IOException, NumberFormatException {
 		Match match;
 		signatures.clear();
 		predicates.clear();
+		monitor.beginTask("", clauses.size());
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
@@ -152,7 +161,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			if ((result != null) && (match != null)) {
 				result.addMatch(match);
 			}
+			monitor.worked(1);
 		}
+		monitor.done();
 	}
 	
 	protected abstract Match constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
