@@ -1066,8 +1066,8 @@ public class Util {
 			buf.append(", ");
 			buf.append("LOGTALKUSER=");
 			buf.append(System.getenv("LOGTALKUSER"));
+			return buf.toString();
 		}
-		return "";
 	}
 
 
