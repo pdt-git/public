@@ -48,7 +48,7 @@ consult_if_not_yet(File,_) :-
     format(' *** ERROR loading ~k. ~n', [File]).   
 
 
-/**
+/*
  * predicate_loaded_from(+Head,?File)
  *   Return in Arg2 
  *    - the File from which the predicate with head Arg1 was loaded 
@@ -65,7 +65,7 @@ predicate_loaded_from(Head,File) :- predicate_property(Head,file(F)),
 predicate_loaded_from(Head,File) :- predicate_property(Head,_),
                                     File = unknown.
 
-/**
+/*
  * Report that predicate Arg1 has already been loaded from 
  * file Arg2 instead of file Arg3.
  */
@@ -73,7 +73,7 @@ report_already_loaded(Head,F1,F2) :-
     functor(Head,Fkt,N),
     format(' *** Definition of ~a/~a  *not* loaded from ~k~n        because it is already loaded from ~k~n', [Fkt,N,F2,F1]).
 
-/**
+/*
  * ctc_home_dir(CTCHomeOrPWD)
  *   Get the value of CTC home directory in an 
  *   operating system independent syntax. If it
@@ -89,7 +89,7 @@ ctc_home_dir(Dir) :-
 pwd(Path) :-  
 	absolute_file_name('', Path).
 	
-/**
+/*
  * report_to_file_in_ctchome(+Call : a single literal)
  * report_to_file_in_ctchome(+Call : a single literal, -File)
  *
@@ -143,7 +143,7 @@ with_input_from(S,G) :- is_stream(S), !,
    setup_call_cleanup( set_input(S), once(G), set_input(S0)).
 
 
-/**
+/*
  * with_output_to_folder(+Directory: Path,        +Call : a single literal)
  * with_output_to_folder(+Directory: Path, -File, +Call : a single literal)
  *
@@ -172,7 +172,7 @@ with_output_to_folder(Folder,File,Call) :-
 report_to_file(Folder,Call) :- with_output_to_folder(Folder,Call).
 
 
-/**
+/*
  * export_all_results(+File, +Goal)
  *   Open an output stream for File and redirect the  output
  *   of the goal to that stream. Find all solution for Goal
@@ -226,7 +226,7 @@ export_goal_output(File,Goal)  :-  with_output_to_file(File,write,Goal).
 %    told,
 %    tell(CurrentOutput).
         
-/**
+/*
  * Return in Arg4 the path to a unique file in folder Arg1.
  * The file name is created from the prefix passed
  * in Arg2 by appending the time of the invocation of this 
@@ -239,7 +239,7 @@ create_timestamped_file_path(Directory,Prefix,Suffix,FilePath) :-
 create_timestamped_folder_path(Directory,Timestamped) :-
     create_timestamp(Timestamp),
     concat_atom([Directory,Timestamp],Timestamped).    
-/**
+/*
  * create_timestamp(?TimeStampAtom)
  *   Return in Arg1 an atom representing the time of the 
  *   invocation of this predicate in the form 
@@ -259,7 +259,7 @@ create_timestamp_2(TimeStampAtom) :-
     Seconds is truncate(S), 
     format(atom(TimeStampAtom), '~a.~a.~a ~a:~a:~d', [D,M,Y,H,Mn,Seconds]).
     
-/** 
+/*
  * Determine the absolute path to the root directory of the current 
  * workspace ASSUNIMG that this file is three levels deeper:
  *  --> WorkspaceDirPath/ProjectDir/FileDir/thisfile

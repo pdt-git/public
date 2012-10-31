@@ -67,7 +67,7 @@ call_in_module(Module,Goal) :-
    ).
 
    
-/** 
+/*
  * assert_in_module(?Mod,?Head      ) is det
  *
  * Assert clauses in an explicitly specified module. 

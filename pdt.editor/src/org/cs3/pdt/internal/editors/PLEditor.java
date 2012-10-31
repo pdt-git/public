@@ -131,7 +131,9 @@ public class PLEditor extends TextEditor {
 		if (shouldConsult) {
 			Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
 			breakpointHandler.backupMarkers(getCurrentIFile(), document);
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+			if (getCurrentIFile() != null) {
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+			}
 		}
 		
 		PDTCommonPlugin.getDefault().notifyDecorators();
