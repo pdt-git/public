@@ -103,9 +103,22 @@ find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, declaration, Properties) :-
 	entity_property(Entity, Kind, declares(Functor/Arity, Properties)).
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
-	entity_property(Entity, Kind, defines(Functor/Arity, Properties)).
-any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
-	entity_property(Entity, Kind, includes(Functor/Arity, Properties)).
+	(	entity_property(Entity, Kind, defines(Functor/Arity, Properties0))
+	;	entity_property(Entity, Kind, includes(Functor/Arity, _From, Properties0))
+	),
+	% we add a scope property to ensure that the correct visibility icon is used when showing search results
+	functor(Predicate, Functor, Arity),
+	(	catch(decode(Predicate, Entity, _, _, _, _, DeclarationProperties, declaration, _),_,fail) ->
+		% found the scope declaration
+		(	member((public), DeclarationProperties) ->
+			Properties = [(public)| Properties0]
+		;	member(protected, DeclarationProperties) ->
+			Properties = [protected| Properties0]
+		;	Properties = [private| Properties0]
+		)
+	;	% no scope declaration; local predicate
+		Properties = [local| Properties0]
+	).
 
 
         /***********************************************************************
@@ -143,7 +156,7 @@ find_definitions_categorized0(Term, Functor, Arity, This, DeclOrDef, Entity, Ful
 	;	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
 		DeclOrDef = definition,
 		Visibility = invisible
-	;	entity_property(Entity, _Kind, includes(Functor/Arity, Properties)),
+	;	entity_property(Entity, _Kind, includes(Functor/Arity, _, Properties)),
 		DeclOrDef = definition,
 		Visibility = invisible
 	),
