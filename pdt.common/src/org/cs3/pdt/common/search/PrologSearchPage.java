@@ -437,6 +437,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		public void widgetSelected(SelectionEvent e) {
 					if (e.getSource() instanceof Button) {
 						updateLabel(getIntData((Button) e.getSource()), getLimitTo());
+						updateOKStatus();
 					}
 				}
 			});
@@ -460,6 +461,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		public void widgetSelected(SelectionEvent e) {
 					if (e.getSource() instanceof Button) {
 						updateLabel(getSearchFor(), getIntData((Button) e.getSource()));
+						updateOKStatus();
 					}
 				}
 			});
@@ -486,6 +488,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         String pattern = getPattern();
         if (pattern.length() == 0) {
             return false;
+        } else if (getSearchFor() == MODULE) {
+        	return true;
         }
         return getFunctorAndArity(pattern) != null;
     }
