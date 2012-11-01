@@ -58,7 +58,7 @@
 
 %% find_definitions_categorized(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
 % 
-find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList):-
+find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList):-
 	(	atom(Term)
 	->	SearchFunctor = Term
 	;	Term = SearchFunctor/Arity
@@ -70,13 +70,15 @@ find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, D
 		once(sub_atom(Functor,_,_,_,SearchFunctor))
 	),
     find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
-    member(DeclOrDef-DefiningModule-Location,Sources),
-    member(File-Lines,Location),
+    member(DeclOrDef-DefiningModule-Locations,Sources),
+    member(File-Lines,Locations),
     member(location(Line, Ref),Lines),
     properties_for_predicate(DefiningModule,Functor,Arity,PropertyList0),
-    (	first_argument_of_clause(Ref, FirstArgument)
-    ->	PropertyList = [FirstArgument|PropertyList0]
-    ;	PropertyList = PropertyList0
+    (	head_position_of_clause(Ref, Position)
+    ->	Location = Position,
+    	PropertyList = [line(Line)|PropertyList0]
+    ;	Location = Line,
+    	PropertyList = PropertyList0
     ).
 
 find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList) :-
@@ -95,19 +97,36 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
     
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility, _ExactMatch):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File, Location, PropertyList, Visibility, _ExactMatch):-
     referenced_entity(EnclFile, ReferencedModule),    
     search_term_to_predicate_indicator(Term, Functor/Arity),
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
-    member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
-    member(File-Lines,Location),
+    member(DeclOrDef-Visibility-DefiningModule-Locations,Sources),
+    member(File-Lines,Locations),
     member(location(Line, Ref),Lines),
     properties_for_predicate(DefiningModule,Functor,Arity,PropertyList0),
-    (	first_argument_of_clause(Ref, FirstArgument)
-    ->	PropertyList = [FirstArgument|PropertyList0]
-    ;	PropertyList = PropertyList0
+    (	head_position_of_clause(Ref, Position)
+    ->	Location = Position,
+    	PropertyList = [line(Line)|PropertyList0]
+    ;	Location = Line,
+    	PropertyList = PropertyList0
     ).
 
+head_position_of_clause(Ref, Position) :-
+	clause_info(Ref, _, TermPosition, _),
+	(	clause_property(Ref, fact)
+	->	% fact
+		TermPosition = HeadPosition
+	;	% clause with body
+		TermPosition = term_position(_, _, _, _, [HeadPosition|_])
+	),
+	(	HeadPosition = Start-End
+	->	% no arguments
+		true
+	;	% at least one argument
+		HeadPosition = term_position(Start, End, _, _, _)
+	),
+	format(atom(Position), '~w-~w', [Start, End]).
 
 find_decl_or_def_2(Name,Arity,Declarations) :-
    setof( declaration-DeclModule-Location, Name^Arity^ 

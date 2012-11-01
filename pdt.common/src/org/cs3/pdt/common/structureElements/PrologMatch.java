@@ -17,7 +17,12 @@ import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.text.Match;
 
 public class PrologMatch extends Match{
@@ -57,8 +62,34 @@ public class PrologMatch extends Match{
 		this.arity = arity;
 		this.properties = properties;
 		isLineLocation = false;
+		convertOffsetAndCreateLabel(offset, offset + length);
 	}
 	
+	private void convertOffsetAndCreateLabel(int offset, int end) {
+		IDocument document;
+		try {
+			document = UIUtils.getDocument(file);
+			int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
+			setOffset(convertedOffset);
+			int convertedEnd = UIUtils.logicalToPhysicalOffset(document, end);
+			int length = convertedEnd - convertedOffset;
+			setLength(length);
+			String text = document.get(convertedOffset, length);
+			if (text != null) {
+				String line = PDTCommonUtil.getProperty("line", properties);
+				if (line != null) {
+					label = line + ": " + text.replaceAll("\n|\r", "");
+				} else {
+					label = text.replaceAll("\n|\r", "");
+				}
+			}
+		} catch (CoreException e) {
+			Debug.report(e);
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		}
+	}
+
 	public int getLine() {
 		return line;
 	}

@@ -68,7 +68,7 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 		} catch (NumberFormatException e) {}
 		
 		IFile file = findFile(m.get("File").toString());
-		int line = Integer.parseInt(m.get("Line").toString());
+		String offsetOrLine = m.get("Line").toString();
 
 		Object prop = m.get("PropertyList");
 		List<String> properties = null;
@@ -81,7 +81,15 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 		if (file == null) {
 			match = createUniqueMatch(definingModule, functor, arity, properties, "", declOrDef);
 		} else {
-			match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", declOrDef);
+			if (offsetOrLine.indexOf("-") >= 0) {
+				String[] positions = offsetOrLine.split("-");
+				int offset = Integer.parseInt(positions[0]);
+				int length = Integer.parseInt(positions[1]) - offset;
+				match = createUniqueMatch(definingModule, functor, arity, file, offset, length, properties, "", declOrDef);
+			} else {
+				int line = Integer.parseInt(offsetOrLine);
+				match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", declOrDef);
+			}
 		}
 		
 		return match;
