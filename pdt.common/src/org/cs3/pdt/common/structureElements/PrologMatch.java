@@ -71,7 +71,7 @@ public class PrologMatch extends Match{
 			long fileLength = EFS.getStore(file.getLocationURI()).fetchInfo().getLength();
 			if (fileLength > 1024 * 1024) {
 				isLineLocation = true;
-				String lineProperty = PDTCommonUtil.getProperty("line", properties);
+				String lineProperty = PDTCommonUtil.getProperty("clause_line", properties);
 				if (lineProperty == null) {
 					line = 1;
 				} else {

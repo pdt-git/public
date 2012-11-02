@@ -50,7 +50,7 @@ assert_result(QGoal-clause_term_position(Ref, TermPosition)) :-
 assert_result(_). 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,?PropertyList)
-find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,[line(Line),goal(ReferencingGoalAsAtom)|PropertyList]) :-
+find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList]) :-
 	retractall(result(_, _, _)),
 	(	var(Functor), var(SearchMod) -> !, fail ; true),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
