@@ -42,6 +42,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.search.ui.ISearchQuery;
@@ -162,6 +163,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 				result.addMatch(match);
 			}
 			monitor.worked(1);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 		}
 		monitor.done();
 	}
