@@ -298,38 +298,18 @@ public final class UIUtils {
 	}
 
 	/**
-	 * Open file in its default editor.
+	 * Use PDTCommonUtil.openIdEditor(IFile, boolean) instead.
 	 * 
 	 * @param file
 	 * @param activate
 	 * @return
 	 * @throws PartInitException
 	 */
+	@Deprecated
 	static public IEditorPart openInEditor(final IFile file, boolean activate)
 			throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p = getActivePage();
-//			try {
-//				
-//				long length = EFS.getStore(file.getLocationURI()).fetchInfo().getLength();
-//				System.out.println("XXXXXXXXXXXX  " + length);
-//				if (length > 10000) {
-//					Boolean result = (Boolean) new _SyncReturn() {
-//						@Override
-//						Object getRVal() {
-//							boolean answer = MessageDialog.openQuestion(getActiveShell(), "Open file " + file.getName(), "The file " + file.getName() + " is larger than 10. Continue opening the file?");
-//							return new Boolean(answer);
-//						}
-//					}.rval;
-//					System.out.println("XXXXXXXXXXXX  " + result);
-//					if (!result) {
-//						return null;
-//					}
-//				}
-//			} catch (CoreException e) {
-//				Debug.report(e);
-//				return null;
-//			}
 			if (p != null) {
 				IEditorPart editorPart = IDE.openEditor(p, file, activate);
 				return editorPart;
@@ -338,6 +318,10 @@ public final class UIUtils {
 		return null;
 	}
 
+	/**
+	 * Use PDTCommonUtil.openInEditor(String) instead.
+	 */
+	@Deprecated
 	public static IEditorPart openInEditor(String fileName) {
 		try {
 			Path path = new Path(new File(fileName).getCanonicalPath());
@@ -368,10 +352,18 @@ public final class UIUtils {
 		return null;
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, String, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, String filename, boolean activate) throws PartInitException {
 		selectInEditor(start, length, filename, activate, true);
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, String, boolean, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, String filename, boolean activate, boolean adjustOffset) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
@@ -381,10 +373,18 @@ public final class UIUtils {
 		}
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, IFile, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
 		selectInEditor(start, length, file, activate, true);
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, IFile, boolean, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, IFile file, boolean activate, boolean adjustOffset) throws PartInitException {
 		if (file == null) {
 			return;
@@ -403,6 +403,10 @@ public final class UIUtils {
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);
 	}
 
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, String, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int line, String filename, boolean activate) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
@@ -412,6 +416,10 @@ public final class UIUtils {
 		}
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, IFile, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int line, IFile file, boolean activate) throws PartInitException {
 		if (file == null) {
 			return;

@@ -16,13 +16,13 @@ package org.cs3.pdt.console.internal.views;
 
 import java.io.File;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.ConsoleModelEvent;
 import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
@@ -311,7 +311,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 								if (new File(fileAndLine[0] + "pl").exists()) {
 									try {
 										int line = Integer.parseInt(fileAndLine[1]);
-										UIUtils.selectInEditor(line, fileAndLine[0] + "pl", true);
+										PDTCommonUtil.selectInEditor(line, fileAndLine[0] + "pl", true);
 									} catch(Exception ex){
 									}
 								}
@@ -328,7 +328,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 								}
 								if (fileAndLine != null && fileAndLine.length >= 2 && new File(fileAndLine[0]).exists()) {
 									int line = Integer.parseInt(fileAndLine[1].trim());
-									UIUtils.selectInEditor(line, fileAndLine[0], true);
+									PDTCommonUtil.selectInEditor(line, fileAndLine[0], true);
 								}
 							} catch (Exception ex) {
 							}

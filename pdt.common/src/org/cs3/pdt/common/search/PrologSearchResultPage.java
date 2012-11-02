@@ -18,6 +18,7 @@
  */
 package org.cs3.pdt.common.search;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
@@ -168,13 +169,13 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		if (match instanceof PrologMatch) {
 			PrologMatch prologMatch = (PrologMatch)match;
 			if (prologMatch.isLineLocation()) {
-				UIUtils.selectInEditor(prologMatch.getLine(), prologMatch.getFile(), activate);
+				PDTCommonUtil.selectInEditor(prologMatch.getLine(), prologMatch.getFile(), activate);
 			} else {
-				UIUtils.selectInEditor(currentOffset, currentLength, prologMatch.getFile(), activate, false);
+				PDTCommonUtil.selectInEditor(currentOffset, currentLength, prologMatch.getFile(), activate, false);
 			}
 		} else if (match instanceof ModuleMatch) {
 			ModuleMatch moduleMatch = (ModuleMatch) match;
-			UIUtils.selectInEditor(moduleMatch.getOffset(), moduleMatch.getFile(), activate);
+			PDTCommonUtil.selectInEditor(moduleMatch.getOffset(), moduleMatch.getFile(), activate);
 		} else if (match instanceof PredicateMatch) {
 			UIUtils.displayMessageDialog(getSite().getShell(), "Show Match", "There is no source code for this predicate.");
 		}

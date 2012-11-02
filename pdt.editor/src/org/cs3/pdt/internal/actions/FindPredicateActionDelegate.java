@@ -327,7 +327,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				Map<String, Object> predicate = alternatives.get(selection);
 				if (!"-1".equals(predicate.get("RefLine"))) {
 					try {
-						UIUtils.selectInEditor(Integer.parseInt(predicate.get("RefLine").toString()), predicate.get("RefFile").toString(), true);
+						PDTCommonUtil.selectInEditor(Integer.parseInt(predicate.get("RefLine").toString()), predicate.get("RefFile").toString(), true);
 					} catch (PartInitException e) {
 						Debug.report(e);
 					} catch (NumberFormatException e) {
