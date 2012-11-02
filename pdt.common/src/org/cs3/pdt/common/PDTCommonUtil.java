@@ -176,11 +176,11 @@ public class PDTCommonUtil {
 			throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p = UIUtils.getActivePage();
-			final long limit = PDTCommonPlugin.getDefault().getPreferenceStore().getLong(PDTCommon.PREF_FILE_SIZE_LIMIT) * 1024;
+			final long limit = PDTCommonPlugin.getDefault().getPreferenceStore().getLong(PDTCommon.PREF_FILE_SIZE_LIMIT);
 			if (limit > 0) {
 				try {
 					long length = EFS.getStore(file.getLocationURI()).fetchInfo().getLength();
-					if (length > limit) {
+					if (length > limit * 1024) {
 						Boolean answer = (Boolean) new _SyncReturn() {
 							@Override
 							Object getRVal() {
@@ -219,12 +219,14 @@ public class PDTCommonUtil {
 				}
 			} else {
 				final IEditorPart part = openInEditor(file, false);
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						part.setFocus();
-					}
-				});
+				if (part != null) {
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							part.setFocus();
+						}
+					});
+				}
 				return part;
 			}
 		} catch (IOException e) {
