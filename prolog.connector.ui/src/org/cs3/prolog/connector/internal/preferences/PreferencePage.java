@@ -22,6 +22,7 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.ui.util.preferences.MyBooleanFieldEditor;
@@ -206,7 +207,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		super.initialize();
 		updateExecuteablePreviewLabelText();
 		fillConfigLabels();
-		selectConfig(getPreferenceStore().getString(PrologRuntime.PREF_CONFIGURATION));
+		selectConfig(getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
 	}
 
 	private BooleanFieldEditor getMetaPredEditor(){
@@ -234,14 +235,14 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			
 			isNewPrefExecutable = true;
 			updateExecuteablePreviewLabelText();
-		} else if (prefName.equals(PrologRuntime.PREF_CONFIGURATION)) {
+		} else if (prefName.equals(PrologRuntimeUI.PREF_CONFIGURATION)) {
 			setValues(PreferenceConfiguration.getInstance().getPreferenceStore(event.getNewValue().toString()));
 		}
     }
 	
 	@Override
 	public boolean performOk() {
-		getPreferenceStore().setValue(PrologRuntime.PREF_CONFIGURATION, getIdForLabel(configurationList.getText()));
+		getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, getIdForLabel(configurationList.getText()));
 		saveValuesToSpecificStore();
 		if(isNewPrefExecutable) {
 			updatePrologInterfaceExecutables();	

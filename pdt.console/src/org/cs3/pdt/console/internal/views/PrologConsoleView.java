@@ -53,7 +53,6 @@ import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.session.PrologSession;
-import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -206,8 +205,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 										getPrologInterface().reset();
 										Thread.sleep(1000);
 									}
-									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
-									
 									final String reconsultFiles = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_NONE);
 									
 									if (reconsultFiles.equals(PDTConsole.RECONSULT_NONE)) {
