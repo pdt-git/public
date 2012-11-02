@@ -17,6 +17,7 @@ import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -73,7 +74,13 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(rgfe_output);
 
 		// A file to which debug output of the PDT will be writen
-		addField(new DirectoryFieldEditor(PDTCommon.PREF_CLIENT_LOG_FILE_DIR, "Log file location", getFieldEditorParent()));		
+		addField(new DirectoryFieldEditor(PDTCommon.PREF_CLIENT_LOG_FILE_DIR, "Log file location", getFieldEditorParent()));
+		
+		IntegerFieldEditor fileSizeLimit = new IntegerFieldEditor(PDTCommon.PREF_FILE_SIZE_LIMIT, "Warn before opening files larger than (in kB)", getFieldEditorParent(), 6);
+		String toolTip = "Show a warning before opening Prolog files which are larger than the specified limit.\nThe value 0 disables the warning.";
+		fileSizeLimit.getLabelControl(getFieldEditorParent()).setToolTipText(toolTip);
+		fileSizeLimit.getTextControl(getFieldEditorParent()).setToolTipText(toolTip);
+		addField(fileSizeLimit);
 
 	}
 

@@ -47,6 +47,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDTCommon.PREF_DEBUG_LEVEL, "WARNING");
 		store.setDefault(PDTCommon.PREF_DEBUG_OUTPUT_TO,"LOGFILE");
 		store.setDefault(PDTCommon.PREF_CLIENT_LOG_FILE_DIR, location);
+		store.setDefault(PDTCommon.PREF_FILE_SIZE_LIMIT, 5000l);
 	}
 
 	private String getLocation() throws IOException {

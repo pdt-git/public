@@ -144,6 +144,26 @@ public class PDTCommonUtil {
 		return null;
 	}
 
+	private abstract static class _SyncReturn implements Runnable {
+		public Object rval;
+
+		_SyncReturn() {
+			Display display = UIUtils.getDisplay();
+			if (Display.getCurrent() != display) {
+				display.syncExec(this);
+			} else {
+				run();
+			}
+		}
+
+		@Override
+		public void run() {
+			rval = getRVal();
+		}
+
+		abstract Object getRVal();
+	}
+	
 	/**
 	 * Open file in its default editor.
 	 * 
@@ -156,6 +176,27 @@ public class PDTCommonUtil {
 			throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p = UIUtils.getActivePage();
+			final long limit = PDTCommonPlugin.getDefault().getPreferenceStore().getLong(PDTCommon.PREF_FILE_SIZE_LIMIT) * 1024;
+			if (limit > 0) {
+				try {
+					long length = EFS.getStore(file.getLocationURI()).fetchInfo().getLength();
+					if (length > limit) {
+						Boolean answer = (Boolean) new _SyncReturn() {
+							@Override
+							Object getRVal() {
+								boolean answer = MessageDialog.openQuestion(UIUtils.getActiveShell(), "Open file " + file.getName(), "The file " + file.getName() + " is larger than " + limit + "kB. Continue opening the file?");
+								return new Boolean(answer);
+							}
+						}.rval;
+						if (!answer) {
+							return null;
+						}
+					}
+				} catch (CoreException e) {
+					Debug.report(e);
+					return null;
+				}
+			}
 			if (p != null) {
 				IEditorPart editorPart = IDE.openEditor(p, file, activate);
 				return editorPart;
