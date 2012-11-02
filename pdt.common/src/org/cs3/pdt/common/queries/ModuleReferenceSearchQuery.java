@@ -81,18 +81,7 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 			String[] positions = offsetOrLine.split("-");
 			int offset = Integer.parseInt(positions[0]);
 			int length = Integer.parseInt(positions[1]) - offset;
-			try {
-				IDocument document = UIUtils.getDocument(file);
-				int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
-				match = createUniqueMatch(module, name, arity, file, convertedOffset, length, properties, null, "definition");
-				if (match != null) {
-					match.setLabel(document.get(convertedOffset, length));
-				}
-			} catch (CoreException e) {
-				Debug.report(e);
-			} catch (BadLocationException e) {
-				Debug.report(e);
-			}
+			match = createUniqueMatch(module, name, arity, file, offset, length, properties, null, "definition");
 		} else {
 			try {
 				int line = Integer.parseInt(offsetOrLine);
