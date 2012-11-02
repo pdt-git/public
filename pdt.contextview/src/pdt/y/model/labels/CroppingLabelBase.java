@@ -35,7 +35,7 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 			double width, double height) {
 
 		gfx.setColor(Color.BLACK);
-		FontMetrics fontmtx = gfx.getFontMetrics(label.getFont());
+		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
 
 		if (width < 16 || height < 16) {
 			return;
@@ -58,11 +58,14 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 			return;
 		}
 		
-		int maxLineWidth = (int) (width - 2 * BORDER_PADDING) - 16;
+		int maxLineWidth = (int) (width - 2 * BORDER_PADDING) - 24;
 		int maxLinesCnt = (int) (height / lineHeight);
 		int linesCnt = (int) Math.ceil(bounds.getWidth() / maxLineWidth);
 		int avgLineWidth = (int) (bounds.getWidth() / linesCnt);
 
+		if (maxLineWidth <= 0)
+			return;
+		
 		if (linesCnt <= maxLinesCnt) {
 			String[] lines = new String[linesCnt];
 
@@ -162,7 +165,7 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 			if (l == null || "".equals(l)) continue;
 			
 			Rectangle2D bounds = fontmtx.getStringBounds(l, gfx);
-
+			
 			gfx.drawString(l, (int) (x + width / 2 - bounds.getWidth() / 2), (int) y);
 		}
 	}

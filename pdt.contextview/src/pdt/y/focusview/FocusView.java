@@ -83,6 +83,8 @@ import y.view.ViewMode;
 
 public class FocusView extends ViewPart {
 
+	public static final String CONSULT_COMMAND_ID = "org.eclipse.pdt.ui.edit.consult";
+	
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private Composite viewContainer;
 	private Label info;
@@ -582,7 +584,7 @@ public class FocusView extends ViewPart {
 		@Override
 		public void postExecuteSuccess(String commandId, Object returnValue) {
 			IWorkbenchPage wb = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			if (commandId.equals(FILE_SAVE)) {
+			if (commandId.equals(FILE_SAVE) || commandId.equals(CONSULT_COMMAND_ID)) {
 				setDirtyFocusView(getFileLocation(wb.getActiveEditor()));
 			}
 			else if (commandId.equals(FILE_SAVE_ALL)) {

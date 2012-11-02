@@ -75,37 +75,39 @@ add_output_stream_to_call(CALL, OutStream, CALL2) :-
     CALL2 =.. L2.
 
 write_global_facts_to_graphML(ProjectFiles, OutStream) :-
+    findall(
+    	PredId,
+    	(
+			member(FileId, ProjectFiles),
+    		predicateT(PredId,FileId,_,_,_)
+    	),
+    	Predicates
+    ),
     count_call_edges_between_predicates,
-	findall([Source, Predicate],
+	findall([SourcePredicate, TargetPredicate],
 		(
-    		call_edges_for_predicates(Source, Predicate, _Counter),
-			predicateT(Source, File1, _, _, _),
-			predicateT(Predicate, File2, _, _, _),
-			member(File1, ProjectFiles),
-			member(File2, ProjectFiles)
+    		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
+			member(SourcePredicate, Predicates),
+			member(TargetPredicate, Predicates)
     	),
     	FoundCalls
     ),
     
-    flatten(FoundCalls, PredicatesFromCalls),
-    list_to_set(PredicatesFromCalls, Predicates),
     write_predicates(OutStream, _, Predicates),
     
     list_to_set(FoundCalls, Calls),
     forall(
-    	member([S, P], Calls), 
-    	write_call_edge(OutStream, S, P)
+    	member([S, T], Calls), 
+    	write_call_edge(OutStream, S, T)
     ).
     
 write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
     fileT_ri(FocusFile,FocusId), !,
-%	fileT(FocusId,FocusFile,Module),
-%	write_file(OutStream,FocusFile,FocusId,FocusFile,Module),	
 	
 	count_call_edges_between_predicates,
-	collect_ids_for_focus_file(FocusId,DependentFiles, CorrespondingPredicates,Calls),
+	collect_ids_for_focus_file(FocusId,DependentFiles, ReferencedPredicates,Calls),
 	
-   	write_files(FocusFile, DependentFiles, CorrespondingPredicates, OutStream),
+   	write_files(FocusFile, DependentFiles, ReferencedPredicates, OutStream),
     forall(
     	member((SourceId,TargetId),Calls),
     	write_call_edge(OutStream,SourceId,TargetId)
