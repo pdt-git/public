@@ -310,7 +310,7 @@ public class PLEditor extends TextEditor {
 	 */
 	private void createInspectionMenu(MenuManager menuMgr) {
 		addAction(menuMgr, new FindPredicateActionDelegate(this),
-				"Open Primary Declaration", SEP_PDT_SEARCH,
+				"Open Primary Definition or Declaration", SEP_PDT_SEARCH,
 				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 
 		addAction(menuMgr, new FindDefinitionsActionDelegate(this),

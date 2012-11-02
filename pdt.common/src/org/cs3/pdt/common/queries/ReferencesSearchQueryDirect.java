@@ -29,6 +29,8 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 /**
  * @author gk
@@ -95,7 +97,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}
-		IFile file = FileUtils.findFileForLocation(m.get("RefFile").toString());
+		IFile file = findFile(m.get("RefFile").toString());
 		String offsetOrLine = m.get("RefLine").toString();
 		
 		PrologMatch match = null;
@@ -104,11 +106,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 			String[] positions = offsetOrLine.split("-");
 			int offset = Integer.parseInt(positions[0]);
 			int length = Integer.parseInt(positions[1]) - offset;
-			try {
-				match = createUniqueMatch(module, name, arity, file, UIUtils.logicalToPhysicalOffset(UIUtils.getDocument(file), offset), length, properties, null, "definition");
-			} catch (CoreException e) {
-				Debug.report(e);
-			}
+			match = createUniqueMatch(module, name, arity, file, offset, length, properties, null, "definition");
 		} else {
 			int line = Integer.parseInt(offsetOrLine);
 			match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");

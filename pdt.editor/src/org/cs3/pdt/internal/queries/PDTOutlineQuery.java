@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.pdt.internal.EditorUtil;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.PrologClause;
 import org.cs3.prolog.common.Util;
@@ -83,7 +83,7 @@ public class PDTOutlineQuery {
 			} else {
 				properties = new Vector<String>();
 			}
-			String forEntity = EditorUtil.getProperty("for", properties);
+			String forEntity = PDTCommonUtil.getProperty("for", properties);
 			if (forEntity != null) {
 				module = forEntity;
 			}

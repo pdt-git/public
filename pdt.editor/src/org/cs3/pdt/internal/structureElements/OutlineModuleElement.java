@@ -16,8 +16,8 @@ package org.cs3.pdt.internal.structureElements;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.PrologSourceLocation;
-import org.cs3.pdt.internal.EditorUtil;
 
 public class OutlineModuleElement extends PrologSourceLocation implements PrologOutlineTreeElement{
 	private String name;  
@@ -105,7 +105,7 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 			predicates.put(signature, predicateElement);
 		}
 		predicateElement.addClause(clause);
-		if (EditorUtil.getProperty("for", clause.getProperties()) != null) {
+		if (PDTCommonUtil.getProperty("for", clause.getProperties()) != null) {
 			fileEqualToEditorFile = false; 
 		}
 	}

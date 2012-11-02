@@ -298,14 +298,15 @@ public final class UIUtils {
 	}
 
 	/**
-	 * Open file in its default editor.
+	 * Use PDTCommonUtil.openIdEditor(IFile, boolean) instead.
 	 * 
 	 * @param file
 	 * @param activate
 	 * @return
 	 * @throws PartInitException
 	 */
-	static public IEditorPart openInEditor(IFile file, boolean activate)
+	@Deprecated
+	static public IEditorPart openInEditor(final IFile file, boolean activate)
 			throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p = getActivePage();
@@ -317,6 +318,10 @@ public final class UIUtils {
 		return null;
 	}
 
+	/**
+	 * Use PDTCommonUtil.openInEditor(String) instead.
+	 */
+	@Deprecated
 	public static IEditorPart openInEditor(String fileName) {
 		try {
 			Path path = new Path(new File(fileName).getCanonicalPath());
@@ -347,10 +352,18 @@ public final class UIUtils {
 		return null;
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, String, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, String filename, boolean activate) throws PartInitException {
 		selectInEditor(start, length, filename, activate, true);
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, String, boolean, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, String filename, boolean activate, boolean adjustOffset) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
@@ -360,10 +373,18 @@ public final class UIUtils {
 		}
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, IFile, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
 		selectInEditor(start, length, file, activate, true);
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, int, IFile, boolean, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int start, int length, IFile file, boolean activate, boolean adjustOffset) throws PartInitException {
 		if (file == null) {
 			return;
@@ -382,6 +403,10 @@ public final class UIUtils {
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);
 	}
 
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, String, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int line, String filename, boolean activate) throws PartInitException {
 		try {
 			IFile file = FileUtils.findFileForLocation(filename);
@@ -391,6 +416,10 @@ public final class UIUtils {
 		}
 	}
 	
+	/**
+	 * Use PDTCommonUtil.openInEditor(int, IFile, boolean) instead.
+	 */
+	@Deprecated
 	public static void selectInEditor(int line, IFile file, boolean activate) throws PartInitException {
 		if (file == null) {
 			return;

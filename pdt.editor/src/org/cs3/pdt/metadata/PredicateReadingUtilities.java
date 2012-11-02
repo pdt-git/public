@@ -13,10 +13,12 @@
 
 package org.cs3.pdt.metadata;
 
+import org.cs3.pdt.internal.editors.PLPartitionScanner;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITypedRegion;
 
 public class PredicateReadingUtilities {
 	
@@ -131,17 +133,19 @@ public class PredicateReadingUtilities {
 
 	public static int findEndOfPredicateName(IDocument document, int end)
 			throws BadLocationException {
-		
+		ITypedRegion partition = document.getPartition(end);
+		predicate_name_is_enclosed_in_quotes = (partition != null && PLPartitionScanner.PL_SINGLE_QUOTED_STRING.equals(partition.getType()));
 		if (predicate_name_is_enclosed_in_quotes) {
-			// Accept any character up to the next simple quote:
-			while ( document.getChar(end)!='\'' 
-					&& end < document.getLength() ) {
-				end++;
-			}
-			// Include the terminal quote
-			end++;
+//			// Accept any character up to the next simple quote:
+//			while ( document.getChar(end)!='\'' 
+//					&& end < document.getLength() ) {
+//				end++;
+//			}
+//			// Include the terminal quote
+//			end++;
 			// Reset flag for next predicate name reading
 			predicate_name_is_enclosed_in_quotes = false;
+			return partition.getOffset() + partition.getLength();
 		} else {
 			// Do not accept special characters that may only occur within quotes:
 			while (Util.isNormalPredicateNameChar(document.getChar(end)) 

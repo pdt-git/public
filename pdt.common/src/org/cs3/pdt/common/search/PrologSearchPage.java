@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.pdt.common.queries.DefinitionsSearchQuery;
+import org.cs3.pdt.common.queries.GlobalDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.ModuleDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
@@ -50,10 +50,12 @@ import org.eclipse.swt.widgets.Label;
 
 public class PrologSearchPage extends DialogPage implements ISearchPage {
 
-    private static final String PREDICATE_HINT = "Enter the search string as Functor/Arity (e. g. member/2). If no arity is specified, predicates with any arity will be found";
-    private static final String MODULE_HINT = "Search for module definitions or for references to predicates declared in this module";
+    private static final String PREDICATE_DEF_HINT = "Search for predicates declarations and definitions (e.g. \"member\" or \"member/2\")";
+    private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\")";
+    private static final String ENTITY_DEF_HINT = "Search for entities (e.g. module \"lists\")";
+    private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
     
-    private static final String[] hints = new String[]{MODULE_HINT, PREDICATE_HINT};
+    private static final String[][] hints = new String[][]{{ENTITY_DEF_HINT, ENTITY_REF_HINT}, {PREDICATE_DEF_HINT, PREDICATE_REF_HINT}};
 
 	private static class SearchPatternData {
         private static final String SEARCH_FOR = "searchFor";
@@ -177,7 +179,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             if (limitTo == REFERENCES) {
             	searchQuery = new ReferencesSearchQueryDirect(goal);
             } else {
-            	searchQuery = new DefinitionsSearchQuery(goal);
+            	searchQuery = new GlobalDefinitionsSearchQuery(goal);
             }
         } else {
         	boolean exactMatch = data.isExactMatch();
@@ -256,12 +258,12 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             Button button = searchForRadioButtons[i];
             button.setSelection(searchFor == getIntData(button));
         }
-        updateLabel(searchFor);
+        updateLabel(searchFor, getLimitTo());
     }
 
-	private void updateLabel(int searchFor) {
-		if (searchFor >= 0 && searchFor < hints.length) {
-        	explainingLabel.setText(hints[searchFor]);
+	private void updateLabel(int searchFor, int limitTo) {
+		if (searchFor >= 0 && searchFor < 2 && limitTo >= 0 && limitTo < 2) {
+        	explainingLabel.setText(hints[searchFor][limitTo]);
         }
 	}
 
@@ -270,6 +272,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             Button button = limitToRadioButtons[i];
             button.setSelection(limitTo == getIntData(button));
         }
+        updateLabel(getSearchFor(), limitTo);
     }
 
     private void setExactMatch(boolean exactMatch) {
@@ -424,7 +427,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         result.setLayout(new GridLayout(2, false));
 
         searchForRadioButtons = new Button[] {
-                createButton(result, SWT.RADIO, "Module", MODULE, false),
+                createButton(result, SWT.RADIO, "Entity", MODULE, false),
                 createButton(result, SWT.RADIO, "Predicate", PREDICATE, true),
         };
         
@@ -433,7 +436,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				@Override
         		public void widgetSelected(SelectionEvent e) {
 					if (e.getSource() instanceof Button) {
-						updateLabel(getIntData((Button) e.getSource()));
+						updateLabel(getIntData((Button) e.getSource()), getLimitTo());
+						updateOKStatus();
 					}
 				}
 			});
@@ -451,6 +455,17 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 createButton(result, SWT.RADIO, "Declarations && Definitions", DECLARATIONS, true),
                 createButton(result, SWT.RADIO, "References", REFERENCES, false)
         };
+        for (Button button : limitToRadioButtons) {
+        	button.addSelectionListener(new SelectionAdapter() {
+				@Override
+        		public void widgetSelected(SelectionEvent e) {
+					if (e.getSource() instanceof Button) {
+						updateLabel(getSearchFor(), getIntData((Button) e.getSource()));
+						updateOKStatus();
+					}
+				}
+			});
+        }
 
         return result;
     }
@@ -473,6 +488,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         String pattern = getPattern();
         if (pattern.length() == 0) {
             return false;
+        } else if (getSearchFor() == MODULE) {
+        	return true;
         }
         return getFunctorAndArity(pattern) != null;
     }

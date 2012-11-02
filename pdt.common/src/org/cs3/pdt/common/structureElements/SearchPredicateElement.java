@@ -13,6 +13,7 @@
 
 package org.cs3.pdt.common.structureElements;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -23,7 +24,7 @@ import org.cs3.pdt.common.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 
 /**
- * used in prolog searches and outlines to represent a predicate.
+ * used in prolog searches to represent a predicate.
  */
 public class SearchPredicateElement extends Predicate implements PrologSearchTreeElement {
 
@@ -31,6 +32,8 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 	
 	private LinkedHashMap<IFile, SearchFileTreeElement> fileToFileTreeElement = new LinkedHashMap<IFile, SearchFileTreeElement>();
 	private Object parent;
+
+	private ArrayList<PredicateMatch> matches;
 	
 	public SearchPredicateElement(Object parent, String module, String predicateName, int arity, List<String> properties) {
 		super(module,predicateName,arity, properties);
@@ -58,11 +61,15 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 	}
 	
 	public int numberOfOccurences() {
-		int sum = 0;
-		for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
-			sum += e.getNumberOfChildren();
+		if (matches == null) {
+			int sum = 0;
+			for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
+				sum += e.getNumberOfChildren();
+			}
+			return sum;
+		} else {
+			return matches.size();
 		}
-		return sum;
 	}
 	
 	public PrologMatch getFirstOccurrence() {
@@ -111,7 +118,6 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 			fileToFileTreeElement.put(fileTreeElement.getFile(), fileTreeElement);
 		}
 		fileTreeElement.addMatch(match);
-		match.setPredicateElement(this);
 	}
 
 	@Override
@@ -122,6 +128,27 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 	@Override
 	public boolean equals(Object object) {
 		return this == object;
+	}
+
+	public void addMatch(PredicateMatch match) {
+		if (matches == null) {
+			matches = new ArrayList<PredicateMatch>();
+		}
+		matches.add(match);
+	}
+	
+	public void removeMatch(PredicateMatch match) {
+		if (matches != null) {
+			matches.remove(match);
+		}
+	}
+	
+	public void setParent(Object parent) {
+		this.parent = parent;
+	}
+
+	public boolean hasMatches() {
+		return (matches != null && !matches.isEmpty());
 	}
 	
 }
