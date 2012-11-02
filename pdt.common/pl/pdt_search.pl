@@ -113,7 +113,7 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, Referen
     ).
 
 head_position_of_clause(Ref, Position) :-
-	clause_info(Ref, _, TermPosition, _),
+	catch(clause_info(Ref, _, TermPosition, _),_,fail),
 	(	clause_property(Ref, fact)
 	->	% fact
 		TermPosition = HeadPosition
