@@ -41,8 +41,6 @@ import org.cs3.prolog.session.PrologSession;
 import pdt.y.main.PDTGraphView;
 
 public class GraphPIFLoader {
-	private static final String FILE_TO_CONSULT = "pl_ast_to_graphML";
-	private static final String PATH_ALIAS = "pdt_builder_graphml_creator";
 	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
 
 	protected File helpFile;
@@ -64,18 +62,13 @@ public class GraphPIFLoader {
 
 	public void queryPrologForGraphFacts(String focusFileForParsing) {
 
-		String prologNameOfFileToConsult = PATH_ALIAS + "(" + FILE_TO_CONSULT + ")";
-
 		try {
 			pif = getActivePifEnsuringFocusViewSubscription();
 			if (pif != null) {
 
-				String query = "consult(" + prologNameOfFileToConsult + ").";
-				sendQueryToCurrentPiF(query);
-
 				sendQueryToCurrentPiF(bT("ensure_generated_factbase_for_source_file", Util.quoteAtom(focusFileForParsing)));
 					
-				query = generateQuery(focusFileForParsing, helpFile);
+				String query = generateQuery(focusFileForParsing, helpFile);
 				Map<String, Object> output = sendQueryToCurrentPiF(query);
 
 				dependencies.clear();

@@ -93,10 +93,10 @@ public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 				String[] positions = offsetOrLine.split("-");
 				int offset = Integer.parseInt(positions[0]);
 				int length = Integer.parseInt(positions[1]) - offset;
-				match = createUniqueMatch(definingModule, functor, arity, file, offset, length, properties, "", declOrDef);
+				match = createUniqueMatch(definingModule, functor, arity, file, offset, length, properties, visibility, declOrDef);
 			} else {
 				int line = Integer.parseInt(offsetOrLine);
-				match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", declOrDef);
+				match = createUniqueMatch(definingModule, functor, arity, file, line, properties, visibility, declOrDef);
 			}
 		}
 		

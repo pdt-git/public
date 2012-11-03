@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -82,6 +83,8 @@ import y.view.ViewMode;
 
 public class FocusView extends ViewPart {
 
+	public static final String CONSULT_COMMAND_ID = "org.eclipse.pdt.ui.edit.consult";
+	
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private Composite viewContainer;
 	private Label info;
@@ -121,6 +124,27 @@ public class FocusView extends ViewPart {
 		initButtons(parent);
 		
 		focusViewCoordinator = new FocusViewCoordinator();
+		String currentPath = getCurrentFilePath();
+		if (currentPath != null) {
+			focusViewCoordinator.swichFocusView(currentPath);
+		}
+	}
+
+	private String getCurrentFilePath() {
+		IWorkbenchPage page = this.getSite().getWorkbenchWindow().getActivePage();
+		if (page == null) {
+			return null;
+		}
+		for (IEditorReference p : page.getEditorReferences()) {
+			IEditorPart editor = p.getEditor(false);
+			if (page.isPartVisible(editor)) {
+				String fileName = PDTCommonUtil.prologFileName(editor.getEditorInput());
+				if (fileName.endsWith(".pl") || !fileName.endsWith(".pro")) {
+					return fileName;
+				}
+			}
+		}
+		return null;
 	}
 
 	protected void initGraphNotLoadedLabel() {
@@ -457,7 +481,6 @@ public class FocusView extends ViewPart {
 		FocusViewControl currentFocusView;
 
 		public FocusViewCoordinator() {
-//			PDTPlugin.getDefault().addSelectionChangedListener(this);
 			
 			FocusView.this.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 			ICommandService service = (ICommandService) PlatformUI
@@ -465,38 +488,6 @@ public class FocusView extends ViewPart {
 		    service.addExecutionListener(this);
 		}
 		
-//		@Override
-//		public void selectionChanged(SelectionChangedEvent event) {
-//			ISelection selection = event.getSelection();
-//			
-//			if (selection instanceof PDTChangedFileInformation) {
-//			
-//				final PDTChangedFileInformation fileInfo = (PDTChangedFileInformation)selection;
-//				
-//				if (currentFocusView == null 
-//						|| !currentFocusView.getFilePath().equals(fileInfo.getPrologFileName())) {
-//					
-//					new UIJob("Update Context View") {
-//					    @Override
-//						public IStatus runInUIThread(IProgressMonitor monitor) {
-//					    	
-//					    	FocusView f = swichFocusView(fileInfo.getPrologFileName());
-//					    	
-//					    	if (f.isEmpty()){
-//					    		FocusViewPlugin.this.setStatusText("[Please activate prolog console, set focus on file and press F9 to load graph]");
-//					    	}
-//					        
-//					    	return Status.OK_STATUS;
-//					    }
-//					}.schedule();
-//				}
-//				if (currentFocusView != null 
-//						&& currentFocusView.isEmpty()) {
-//					currentFocusView.reload();
-//				}
-//			}
-//		}
-
 		@Override
 		public void partActivated(IWorkbenchPart part) {
 			if (part instanceof IEditorPart) {
@@ -521,10 +512,6 @@ public class FocusView extends ViewPart {
 							return Status.OK_STATUS;
 						}
 					}.schedule();
-				}
-				if (currentFocusView != null 
-						&& currentFocusView.isEmpty()) {
-					currentFocusView.reload();
 				}
 			}
 		}
@@ -579,7 +566,7 @@ public class FocusView extends ViewPart {
 
 		protected void refreshCurrentView() {
 			if (MainPreferencePage.isAutomaticUpdate()
-					&& currentFocusView.isDirty()) {
+					&& (currentFocusView.isDirty() || currentFocusView.isEmpty())) {
 				currentFocusView.reload();
 			}
 		}
@@ -595,9 +582,9 @@ public class FocusView extends ViewPart {
 		public void preExecute(String commandId, ExecutionEvent event) { }
 		
 		@Override
-		public void postExecuteSuccess(String commandId, Object returnValue) { 
+		public void postExecuteSuccess(String commandId, Object returnValue) {
 			IWorkbenchPage wb = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			if (commandId.equals(FILE_SAVE)) {
+			if (commandId.equals(FILE_SAVE) || commandId.equals(CONSULT_COMMAND_ID)) {
 				setDirtyFocusView(getFileLocation(wb.getActiveEditor()));
 			}
 			else if (commandId.equals(FILE_SAVE_ALL)) {
