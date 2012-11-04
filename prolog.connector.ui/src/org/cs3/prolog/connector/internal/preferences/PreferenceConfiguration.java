@@ -11,6 +11,7 @@ import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
@@ -31,22 +32,19 @@ public class PreferenceConfiguration {
 		loadConfigurations();
 	}
 	
-	public static final String CONFIGURATION_SWI = "SWI Prolog";
-	public static final String CONFIGURATION_SWI_LOGTALK = "SWI Prolog & Logtalk";
-	
 	public static final String PREF_CONFIGURATIONS = "pif.configurations";
 
 	private static final String DEFAULT_CONFIGURATION_PREFIX = "pif.configuration.default.";
 	
 	
-	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{CONFIGURATION_SWI, CONFIGURATION_SWI_LOGTALK});
+	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK});
 	private ArrayList<String> configurations;
 
 	public static void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(PREF_CONFIGURATIONS, CONFIGURATION_SWI + ";" + CONFIGURATION_SWI_LOGTALK);
+		store.setDefault(PREF_CONFIGURATIONS, PrologRuntimeUI.CONFIGURATION_SWI + ";" + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK);
 		
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + CONFIGURATION_SWI, CONFIGURATION_SWI);
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + CONFIGURATION_SWI_LOGTALK, CONFIGURATION_SWI_LOGTALK);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK);
 	}
 
 	private HashMap<String, PreferenceStore> stores = new HashMap<String, PreferenceStore>();
@@ -68,9 +66,9 @@ public class PreferenceConfiguration {
 	private PreferenceStore createStore(String configuration) {
 		PreferenceStore store = new PreferenceStore(getConfigurationFileName(configuration));
 		String defaultConfiguration = getDefaultConfiguration(configuration);
-		if (defaultConfiguration.equals(CONFIGURATION_SWI)) {
+		if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_SWI)) {
 			initWithSWIPreferences(store);
-		} else if (defaultConfiguration.equals(CONFIGURATION_SWI_LOGTALK)) {
+		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK)) {
 			initWithSWILogtalkPreferences(store);
 		} else {
 			Debug.error("Invalid default configuration " + defaultConfiguration + " of " + configuration);

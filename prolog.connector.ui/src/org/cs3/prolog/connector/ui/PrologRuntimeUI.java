@@ -24,6 +24,8 @@ public class PrologRuntimeUI {
 	
     public static final String PREF_CONFIGURATION = "pif.configuration";
 	public static final String CONFIGURATION_ATTRIBUTE = "preference.configuration";
+	public static final String CONFIGURATION_SWI = "SWI Prolog";
+	public static final String CONFIGURATION_SWI_LOGTALK = "SWI Prolog & Logtalk";
     
 }
 

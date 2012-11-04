@@ -38,7 +38,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		plugin = PrologRuntimeUIPlugin.getDefault();
 		store = plugin.getPreferenceStore();
 
-		store.setDefault(PrologRuntimeUI.PREF_CONFIGURATION, PreferenceConfiguration.CONFIGURATION_SWI);
+		store.setDefault(PrologRuntimeUI.PREF_CONFIGURATION, PrologRuntimeUI.CONFIGURATION_SWI);
 		PreferenceConfiguration.initializeDefaultPreferences(store);
 		
 		PreferenceConfiguration.initWithSWIPreferences(store);
