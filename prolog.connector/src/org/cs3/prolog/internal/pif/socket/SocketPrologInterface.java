@@ -107,9 +107,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	@Override
 	public void initOptions(PreferenceProvider provider) {
 		super.initOptions(provider);
-		setServerPort(provider.getPreference(PrologRuntime.PREF_PORT));
+//		setServerPort(provider.getPreference(PrologRuntime.PREF_PORT));
 		setHidePlwin(provider.getPreference(PrologRuntime.PREF_HIDE_PLWIN));
-		setUseSessionPooling(true);
+//		setUseSessionPooling(true);
 		setServerLogDir(provider.getPreference(PrologRuntime.PREF_SERVER_LOGDIR));		
 
 	}
