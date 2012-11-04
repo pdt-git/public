@@ -177,7 +177,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		hidePrologWindow = new MyBooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent());
 		addField(hidePrologWindow);
 		
-		genFactbase = new MyBooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
+		genFactbase = new MyBooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Create prolog metadata (Experimental)", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
@@ -191,7 +191,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			}
 		};
 		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
-		metaPred = new MyBooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		metaPred = new MyBooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Run meta predicate analysis after loading a prolog file (Experimental)", getFieldEditorParent());
 		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
