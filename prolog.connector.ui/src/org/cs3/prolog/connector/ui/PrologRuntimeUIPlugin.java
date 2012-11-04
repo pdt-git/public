@@ -38,6 +38,7 @@ import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.internal.DefaultPrologContextTrackerService;
+import org.cs3.prolog.connector.internal.preferences.PreferenceConfiguration;
 import org.cs3.prolog.internal.pif.service.PrologInterfaceService;
 import org.cs3.prolog.lifecycle.IPrologEventDispatcher;
 import org.cs3.prolog.lifecycle.UDPEventDispatcher;
@@ -179,11 +180,12 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 
 	
-	private PrologInterface createPrologInterface(String name, String configurationId) {
+	private PrologInterface createPrologInterface(String name, String configuration) {
 		PrologInterface prologInterface = null;
 		
 		prologInterface = PrologRuntimePlugin.newPrologInterface(name);
-		prologInterface.initOptions(new EclipsePreferenceProvider(this, configurationId));
+		prologInterface.setAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE, configuration);
+		prologInterface.initOptions(new EclipsePreferenceProvider(this, configuration));
 		
 		prologInterface.setFileSearchPath(PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
 		return prologInterface;
@@ -310,9 +312,9 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		return getPrologInterface(key, getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
 	}
 	
-	public PrologInterface getPrologInterface(String key, String configurationId) {
+	public PrologInterface getPrologInterface(String key, String configuration) {
 		DefaultSubscription defaultSubscription = new DefaultSubscription(null, key, null, null);
-		return getPrologInterface(defaultSubscription);
+		return getPrologInterface(defaultSubscription, configuration);
 	}
 
 	/**
@@ -331,13 +333,13 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		return getPrologInterface(s, getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
 	}
 	
-	public PrologInterface getPrologInterface(Subscription s, String configurationId) {
+	public PrologInterface getPrologInterface(Subscription s, String configuration) {
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
 		String pifKey = s.getPifKey();
 		PrologInterface pif = r.getPrologInterface(pifKey);
 		boolean addPifToRegistry = false;
 		if (pif == null) {
-			pif = createPrologInterface(pifKey, configurationId);
+			pif = createPrologInterface(pifKey, configuration);
 			addPifToRegistry = true;
 //			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
 		}
@@ -409,6 +411,10 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 			prologInterfaceService = new PrologInterfaceService();
 		}
 		return prologInterfaceService;
+	}
+	
+	public List<String> getPreferenceConfigurations() {
+		return PreferenceConfiguration.getInstance().getConfigurations();
 	}
 	
 }

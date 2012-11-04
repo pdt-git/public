@@ -1,5 +1,6 @@
 package org.cs3.prolog.connector.internal.preferences;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,52 +27,53 @@ public class PreferenceConfiguration {
 	}
 	
 	private PreferenceConfiguration() {
+		configurations = new ArrayList<String>();
+		loadConfigurations();
 	}
 	
-	public static final String CONFIGURATION_SWI = "config.swi";
-	public static final String CONFIGURATION_SWI_LOGTALK = "config.swi.logtalk";
-	public static final String PREF_CONFIGURATION_IDS = "pif.config.ids";
+	public static final String CONFIGURATION_SWI = "SWI Prolog";
+	public static final String CONFIGURATION_SWI_LOGTALK = "SWI Prolog & Logtalk";
 	
-	private static final String CONFIG_DEFAULT_ID_PREFIX = "pif.config.default.id.";
-	private static final String CONFIG_LABEL_PREFIX = "pif.config.label.";
+	public static final String PREF_CONFIGURATIONS = "pif.configurations";
+
+	private static final String DEFAULT_CONFIGURATION_PREFIX = "pif.configuration.default.";
 	
-	private static final String CONFIG_ID_PREFIX = "user.config.";
-	private static final List<String> defaultConfigs = Arrays.<String>asList(new String[]{CONFIGURATION_SWI, CONFIGURATION_SWI_LOGTALK});
+	
+	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{CONFIGURATION_SWI, CONFIGURATION_SWI_LOGTALK});
+	private ArrayList<String> configurations;
 
 	public static void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(PREF_CONFIGURATION_IDS, CONFIGURATION_SWI + ";" + CONFIGURATION_SWI_LOGTALK);
+		store.setDefault(PREF_CONFIGURATIONS, CONFIGURATION_SWI + ";" + CONFIGURATION_SWI_LOGTALK);
 		
-		store.setDefault(CONFIG_DEFAULT_ID_PREFIX + CONFIGURATION_SWI, CONFIGURATION_SWI);
-		store.setDefault(CONFIG_DEFAULT_ID_PREFIX + CONFIGURATION_SWI_LOGTALK, CONFIGURATION_SWI_LOGTALK);
-		
-		store.setDefault(CONFIG_LABEL_PREFIX + CONFIGURATION_SWI, "SWI Prolog");
-		store.setDefault(CONFIG_LABEL_PREFIX + CONFIGURATION_SWI_LOGTALK, "SWI Prolog & Logtalk");
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + CONFIGURATION_SWI, CONFIGURATION_SWI);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + CONFIGURATION_SWI_LOGTALK, CONFIGURATION_SWI_LOGTALK);
 	}
 
 	private HashMap<String, PreferenceStore> stores = new HashMap<String, PreferenceStore>();
 	
 	public PreferenceStore getPreferenceStore(String configuration) {
-		if (getConfigurationIds().contains(configuration)) {
-			PreferenceStore store = stores.get(configuration);
-			if (store == null) {
-				store = createStore(configuration);
-				stores.put(configuration, store);
+		synchronized (configurations) {
+			if (!configurations.contains(configuration)) {
+				return null;
 			}
-			return store;
-		} else {
-			return null;
 		}
+		PreferenceStore store = stores.get(configuration);
+		if (store == null) {
+			store = createStore(configuration);
+			stores.put(configuration, store);
+		}
+		return store;
 	}
 	
 	private PreferenceStore createStore(String configuration) {
-		PreferenceStore store = new PreferenceStore(PrologRuntimeUIPlugin.getDefault().getStateLocation().append(configuration).toString());
-		String defaultId = getDefaultId(configuration);
-		if (defaultId.equals(CONFIGURATION_SWI)) {
+		PreferenceStore store = new PreferenceStore(getConfigurationFileName(configuration));
+		String defaultConfiguration = getDefaultConfiguration(configuration);
+		if (defaultConfiguration.equals(CONFIGURATION_SWI)) {
 			initWithSWIPreferences(store);
-		} else if (defaultId.equals(CONFIGURATION_SWI_LOGTALK)) {
+		} else if (defaultConfiguration.equals(CONFIGURATION_SWI_LOGTALK)) {
 			initWithSWILogtalkPreferences(store);
 		} else {
-			Debug.error("Invalid default configuration " + defaultId + " of " + configuration);
+			Debug.error("Invalid default configuration " + defaultConfiguration + " of " + configuration);
 		}
 		try {
 			store.load();
@@ -79,69 +81,83 @@ public class PreferenceConfiguration {
 		}
 		return store;
 	}
-	
-	public String getDefaultId(String configuration) {
-		return PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(CONFIG_DEFAULT_ID_PREFIX + configuration);
-	}
-	
-	public String getLabel(String configuration) {
-		return PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(CONFIG_LABEL_PREFIX + configuration);
-	}
 
-	public List<String> getConfigurationIds() {
-		return Arrays.<String>asList(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PREF_CONFIGURATION_IDS).split(";"));
+	private String getConfigurationFileName(String configuration) {
+		return PrologRuntimeUIPlugin.getDefault().getStateLocation().append(configuration).toString();
 	}
 	
-	public List<String> getDefaultConfigurationIds() {
-		return defaultConfigs;
+	public String getDefaultConfiguration(String configuration) {
+		return PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(DEFAULT_CONFIGURATION_PREFIX + configuration);
 	}
 	
-	public String newConfigurationId(String defaultConfig, String label){
-		if (!defaultConfigs.contains(defaultConfig) || label == null || label.isEmpty()) {
-			return null;
+	public List<String> getConfigurations() {
+		List<String> result;
+		synchronized (configurations) {
+			result = new ArrayList<String>(configurations);
 		}
-		List<String> configIds = getConfigurationIds();
-		String lastConfigId = configIds.get(configIds.size() - 1);
-		String newConfigId;
-		if (lastConfigId.startsWith(CONFIG_ID_PREFIX)) {
-			newConfigId = lastConfigId + "0";
-		} else {
-			newConfigId = CONFIG_ID_PREFIX + "0";
-		}
-		StringBuffer buf = new StringBuffer();
-		for (String configId : configIds) {
-			buf.append(configId);
-			buf.append(';');
-		}
-		buf.append(newConfigId);
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PREF_CONFIGURATION_IDS, buf.toString());
-		
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(CONFIG_DEFAULT_ID_PREFIX + newConfigId, defaultConfig);
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(CONFIG_LABEL_PREFIX + newConfigId, label);
-		
-		return newConfigId;
+		return result;
 	}
 	
-	public void deleteConfiguration(String configuration) {
-		List<String> configurationIds = new ArrayList<String>();
-		configurationIds.addAll(getConfigurationIds());
-		if (configurationIds.contains(configuration) && !defaultConfigs.contains(configuration)) {
-			configurationIds.remove(configuration);
-		} else {
-			return;
+	public List<String> getDefaultConfigurations() {
+		return new ArrayList<String>(defaultConfigurations);
+	}
+	
+	public boolean addConfiguration(String configuration, String defaultConfiguration){
+		if (!defaultConfigurations.contains(defaultConfiguration) || configuration == null || configuration.contains(";")) {
+			return false;
 		}
-		stores.remove(configuration);
-		boolean first = true;
-		StringBuffer buf = new StringBuffer();
-		for (String configurationId : configurationIds) {
-			if (!first) {
-				buf.append(';');
+		synchronized (configurations) {
+			if (configurations.contains(configuration)) {
+				return false;
 			} else {
-				first = false;
+				configurations.add(configuration);
 			}
-			buf.append(configurationId);
+			saveConfigurations();
 		}
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PREF_CONFIGURATION_IDS, buf.toString());
+		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(DEFAULT_CONFIGURATION_PREFIX + configuration, defaultConfiguration);
+		return true;
+	}
+	
+	public boolean deleteConfiguration(String configuration) {
+		if (defaultConfigurations.contains(configuration)) {
+			return false;
+		}
+		synchronized (configurations) {
+			if (!configurations.contains(configuration)) {
+				return false;
+			}
+			configurations.remove(configuration);
+			stores.remove(configuration);
+		}
+		saveConfigurations();
+		try {
+			new File(getConfigurationFileName(configuration)).delete();
+		} catch (Exception e) {}
+		return true;
+	}
+	
+	private void loadConfigurations() {
+		synchronized (configurations) {
+			for (String configurationId : PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PREF_CONFIGURATIONS).split(";")) {
+				configurations.add(configurationId);
+			}
+		}
+	}
+	
+	private void saveConfigurations() {
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		synchronized (configurations) {
+			for (String configuration : configurations) {
+				if (!first) {
+					buf.append(';');
+				} else {
+					first = false;
+				}
+				buf.append(configuration);
+			}
+		}
+		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PREF_CONFIGURATIONS, buf.toString());
 	}
 	
 	public static void initWithSWIPreferences(IPreferenceStore store) {
@@ -166,24 +182,10 @@ public class PreferenceConfiguration {
 	}
 
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {
-		store.setDefault(PrologRuntime.PREF_FILE_SEARCH_PATH, PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
-		
-		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
-		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
-		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getStackCommandLineParameters());
+		initWithSWIPreferences(store);
+
 		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
 		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
-		
-		store.setDefault(PrologRuntime.PREF_HOST, "localhost");
-		
-		store.setDefault(PrologRuntime.PREF_TIMEOUT,15000 );
-		store.setDefault(PrologRuntime.PREF_PORT, 9944);
-		store.setDefault(PrologRuntime.PREF_HIDE_PLWIN, true);
-		
-		store.setDefault(PrologRuntime.PREF_GENERATE_FACTBASE, false);
-		store.setDefault(PrologRuntime.PREF_META_PRED_ANALYSIS, false);
-		
-		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
 	}
 
 }
