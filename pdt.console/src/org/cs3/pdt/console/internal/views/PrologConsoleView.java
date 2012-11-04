@@ -47,6 +47,7 @@ import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.ui.PrologContextTracker;
 import org.cs3.prolog.connector.ui.PrologContextTrackerEvent;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.pif.PrologInterface;
@@ -60,6 +61,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -77,6 +79,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -86,6 +90,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -417,10 +422,20 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 	}
 
-	private final class CreateNamedProcessAction extends Action{
+	private final class CreateNamedProcessAction extends Action implements IMenuCreator {
 
+		private Menu menu;
+
+		private CreateNamedProcessAction() {
+			setMenuCreator(this);
+		}
+		
 		@Override
 		public void run(){
+			askForNameAndCreateProcess(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+		}
+
+		private void askForNameAndCreateProcess(final String configuration) {
 			Job j = new UIJob("Creating new Prolog Process")
 			{
 				@Override
@@ -433,7 +448,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 						return Status.CANCEL_STATUS;
 					String pifKey = dialog.getValue();
 
-					PrologInterface pif = activateNewPrologProcess(registry, pifKey);
+					PrologInterface pif = activateNewPrologProcess(registry, pifKey, configuration);
 					pif.setAttribute(KILLABLE, "true");
 					return Status.OK_STATUS;
 				}
@@ -456,7 +471,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 								return null;
 						}
 					};
-					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process", "Enter a new name for your new Prolog process:", defaultPifKey, validator);
+					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process (" + configuration + ")", "Enter a new name for your new Prolog process:", defaultPifKey, validator);
 					return dialog;
 				}
 
@@ -499,6 +514,44 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		@Override
 		public String getText() {
 			return "create process";
+		}
+
+		@Override
+		public void dispose() {
+			if (menu != null) {
+				menu.dispose();
+			}
+		}
+
+		@Override
+		public Menu getMenu(Control parent) {
+			if (menu != null) {
+				menu.dispose();
+			}
+			Menu newMenu = new Menu(parent);
+			List<String> preferenceConfigurations = PrologRuntimeUIPlugin.getDefault().getPreferenceConfigurations();
+			String defaultConfiguration = PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION);
+			for (String preferenceConfiguration : preferenceConfigurations) {
+				MenuItem item = new MenuItem(newMenu, SWT.NONE);
+				item.setText(preferenceConfiguration.replaceAll("&", "&&"));
+				if (preferenceConfiguration.equals(defaultConfiguration)) {
+					item.setImage(ImageRepository.getImage(ImageRepository.NEW_PROCESS));
+				}
+				final String configuration = preferenceConfiguration;
+				item.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						askForNameAndCreateProcess(configuration);
+					}
+				});
+			}
+			menu = newMenu;
+			return menu;
+		}
+
+		@Override
+		public Menu getMenu(Menu parent) {
+			return null;
 		}
 	}
 
@@ -937,10 +990,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	}
 
-	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey) {
+	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey, String configuration) {
 		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " (Prolog)");
 		registry.addSubscription(subscription);
-		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription, configuration);
 
 		if (automatedSelector.getActiveTrackers().isEmpty()){
 			PrologConsoleView.this.setPrologInterface(pif);
@@ -1285,7 +1338,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
-		title.setText(key);
+		Object configuration = pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
+		if (configuration == null) {
+			title.setText(key);
+		} else {
+			title.setText(key + " (" + configuration.toString().replaceAll("&", "&&") + ")");
+		}
 
 		viewer.setEnterSendsSemicolon(false);
 
