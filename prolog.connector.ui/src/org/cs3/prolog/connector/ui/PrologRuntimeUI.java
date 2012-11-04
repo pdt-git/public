@@ -22,6 +22,9 @@ public class PrologRuntimeUI {
 	public static final String LIB_PDT = "pdt.runtime.library.pdt";
 	public static final String LIB_TESTDATA = "pdt.runtime.library.testdata";
 	
+    public static final String PREF_CONFIGURATION = "pif.configuration";
+	public static final String CONFIGURATION_ATTRIBUTE = "preference.configuration";
+    
 }
 
 
