@@ -24,8 +24,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -73,19 +77,28 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 	@Override
 	public void start(BundleContext bundleContext) throws Exception{
 		super.start(bundleContext);
-		ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
+		Job collectEntryPoints = new Job("Collect entry points") {
 			@Override
-			public boolean visit(IResource resource) throws CoreException {
-				if (resource instanceof IFile) {
-					IFile file = (IFile) resource;
-					if ("true".equalsIgnoreCase(file.getPersistentProperty(ENTRY_POINT_KEY))) {
-						addEntryPoint(file);
-					}
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
+						@Override
+						public boolean visit(IResource resource) throws CoreException {
+							if (resource instanceof IFile) {
+								IFile file = (IFile) resource;
+								if ("true".equalsIgnoreCase(file.getPersistentProperty(ENTRY_POINT_KEY))) {
+									addEntryPoint(file);
+								}
+							}
+							return true;
+						}
+					});
+				} catch (CoreException e) {
 				}
-				return true;
+				return Status.OK_STATUS;
 			}
-			
-		});
+		};
+		collectEntryPoints.schedule();
 		reconfigureDebugOutput();
 		IPropertyChangeListener debugPropertyChangeListener = new IPropertyChangeListener() {
 			@Override

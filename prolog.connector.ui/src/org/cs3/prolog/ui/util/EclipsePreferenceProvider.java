@@ -15,14 +15,24 @@ package org.cs3.prolog.ui.util;
 
 import org.cs3.prolog.common.PreferenceProvider;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.internal.preferences.PreferenceConfiguration;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class EclipsePreferenceProvider implements PreferenceProvider {
 
 	private AbstractUIPlugin plugin;
+	private PreferenceStore store;
 
-	public EclipsePreferenceProvider(AbstractUIPlugin plugin) {
+	public EclipsePreferenceProvider(AbstractUIPlugin plugin, String configurationId) {
 		this.plugin = plugin;
+		if (configurationId == null) {
+			this.store = PreferenceConfiguration.getInstance().getPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+		} else {
+			this.store = PreferenceConfiguration.getInstance().getPreferenceStore(configurationId);
+		}
 	}
 	@Override
 	public String getPreference(String key) {
@@ -38,7 +48,11 @@ public class EclipsePreferenceProvider implements PreferenceProvider {
 			return value;
 		}
 		
-		value = plugin.getPreferenceStore().getString(name);
+		if (store.contains(name)) {
+			return store.getString(name);
+		} else {
+			value = plugin.getPreferenceStore().getString(name);
+		}
 		
 		return value;
 	}

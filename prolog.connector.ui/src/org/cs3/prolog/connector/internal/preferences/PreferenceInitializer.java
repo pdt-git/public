@@ -13,7 +13,7 @@
 
 package org.cs3.prolog.connector.internal.preferences;
 
-import org.cs3.prolog.connector.PrologRuntime;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -38,7 +38,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		plugin = PrologRuntimeUIPlugin.getDefault();
 		store = plugin.getPreferenceStore();
 
-		store.setDefault(PrologRuntime.PREF_CONFIGURATION, PreferenceConfiguration.CONFIGURATION_SWI);
+		store.setDefault(PrologRuntimeUI.PREF_CONFIGURATION, PrologRuntimeUI.CONFIGURATION_SWI);
 		PreferenceConfiguration.initializeDefaultPreferences(store);
 		
 		PreferenceConfiguration.initWithSWIPreferences(store);

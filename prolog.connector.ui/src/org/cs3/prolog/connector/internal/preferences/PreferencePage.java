@@ -22,8 +22,10 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.ui.util.EclipsePreferenceProvider;
 import org.cs3.prolog.ui.util.preferences.MyBooleanFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyDirectoryFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyFileFieldEditor;
@@ -43,6 +45,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -73,7 +77,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class PreferencePage extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	
 	
-	private boolean isNewPrefExecutable = false;
+	private boolean preferencesChanged = false;
 	
 	private MyFileFieldEditor executable;
 	private MyStringFieldEditor invocation;
@@ -91,9 +95,9 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 
 	private Combo configurationList;
 
-	private Button newConfig;
+	private Button newConfiguration;
 
-	private Button deleteConfig;
+	private Button deleteConfiguration;
 
 	public PreferencePage() {
 		super(GRID);
@@ -173,7 +177,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		hidePrologWindow = new MyBooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent());
 		addField(hidePrologWindow);
 		
-		genFactbase = new MyBooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Experimental: Create prolog metadata", getFieldEditorParent()){
+		genFactbase = new MyBooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Create prolog metadata (Experimental)", getFieldEditorParent()){
 			@Override
 			public void doLoad(){
 				super.doLoad();
@@ -187,7 +191,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			}
 		};
 		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
-		metaPred = new MyBooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Experimental: Run meta predicate analysis after loading a prolog file", getFieldEditorParent());
+		metaPred = new MyBooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Run meta predicate analysis after loading a prolog file (Experimental)", getFieldEditorParent());
 		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -205,8 +209,8 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	protected void initialize() {
 		super.initialize();
 		updateExecuteablePreviewLabelText();
-		fillConfigLabels();
-		selectConfig(getPreferenceStore().getString(PrologRuntime.PREF_CONFIGURATION));
+		fillConfigurationList();
+		selectConfiguration(getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
 	}
 
 	private BooleanFieldEditor getMetaPredEditor(){
@@ -227,23 +231,21 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		super.propertyChange(event);
 		
 		String prefName = ((FieldEditor)event.getSource()).getPreferenceName();
-		if(prefName.equals(PrologRuntime.PREF_INVOCATION) 
+		if (prefName.equals(PrologRuntime.PREF_INVOCATION) 
 				|| prefName.equals(PrologRuntime.PREF_EXECUTABLE)
 				|| prefName.equals(PrologRuntime.PREF_ADDITIONAL_STARTUP)
 				|| prefName.equals(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS)) {
 			
-			isNewPrefExecutable = true;
 			updateExecuteablePreviewLabelText();
-		} else if (prefName.equals(PrologRuntime.PREF_CONFIGURATION)) {
-			setValues(PreferenceConfiguration.getInstance().getPreferenceStore(event.getNewValue().toString()));
 		}
+		preferencesChanged = true;
     }
 	
 	@Override
 	public boolean performOk() {
-		getPreferenceStore().setValue(PrologRuntime.PREF_CONFIGURATION, getIdForLabel(configurationList.getText()));
+		getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, configurationList.getText());
 		saveValuesToSpecificStore();
-		if(isNewPrefExecutable) {
+		if (preferencesChanged) {
 			updatePrologInterfaceExecutables();	
 		}
 		return super.performOk();
@@ -255,15 +257,13 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	}
 
 	private void updatePrologInterfaceExecutables() {
-
-		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue());
-		
+		String configuration = configurationList.getText();
 		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
 			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());
-			if(pif != null && !(pif.isDown()) ){   // Sinan & Günter, 24.9.2010
-				pif.setExecutable(newExecutable);
+			if (pif != null && configuration.equals(pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
+				pif.initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault(), configuration));
 			}
 		}
 	}
@@ -271,12 +271,12 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	@Override
 	protected void performApply() {
 		performOk();
-		isNewPrefExecutable=false;
+		preferencesChanged = false;
 	}
 	
     @Override
 	protected void performDefaults() {
-    	setDefaultValues(PreferenceConfiguration.getInstance().getPreferenceStore(getIdForLabel(configurationList.getText())));
+    	setDefaultValues(PreferenceConfiguration.getInstance().getPreferenceStore(configurationList.getText()));
         checkState();
         updateApplyButton();
     }
@@ -313,7 +313,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	}
 	
 	private void saveValuesToSpecificStore() {
-		PreferenceStore store = PreferenceConfiguration.getInstance().getPreferenceStore(getIdForLabel(configurationList.getText()));
+		PreferenceStore store = PreferenceConfiguration.getInstance().getPreferenceStore(configurationList.getText());
 		if (store != null) {
 			store.setValue(executable.getPreferenceName(), executable.getStringValue());
 			store.setValue(invocation.getPreferenceName(), invocation.getStringValue());
@@ -346,42 +346,40 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		configurationList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		configurationList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
-				String configurationId = getIdForLabel(configurationList.getText());
-				setValues(PreferenceConfiguration.getInstance().getPreferenceStore(configurationId));
-				deleteConfig.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurationIds().contains(configurationId));
+				String configuration = configurationList.getText();
+				setValues(PreferenceConfiguration.getInstance().getPreferenceStore(configuration));
+				deleteConfiguration.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurations().contains(configuration));
 			}
 		});
 		
-		newConfig = createButton(container, "New...");
-		newConfig.addSelectionListener(new SelectionAdapter() {
+		newConfiguration = createButton(container, "New...");
+		newConfiguration.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				NewConfigurationDialog dialog = new NewConfigurationDialog(newConfig.getShell(), getIdAndLabelArray(PreferenceConfiguration.getInstance().getDefaultConfigurationIds()));
+				NewConfigurationDialog dialog = new NewConfigurationDialog(newConfiguration.getShell(), PreferenceConfiguration.getInstance().getConfigurations(), PreferenceConfiguration.getInstance().getDefaultConfigurations());
 				int result = dialog.open();
-				if (result == Dialog.OK && dialog.getText() != null && !dialog.getText().isEmpty()) {
-					String newConfigurationId = PreferenceConfiguration.getInstance().newConfigurationId(dialog.getId(), dialog.getText());
-					fillConfigLabels();
-					selectConfig(newConfigurationId);
-					setValues(PreferenceConfiguration.getInstance().getPreferenceStore(newConfigurationId));
+				if (result == Dialog.OK && dialog.getConfiguration() != null && !dialog.getConfiguration().isEmpty()) {
+					String newConfiguration = dialog.getConfiguration();
+					PreferenceConfiguration.getInstance().addConfiguration(newConfiguration, dialog.getDefaultConfiguration());
+					fillConfigurationList();
+					selectConfiguration(newConfiguration);
+					setValues(PreferenceConfiguration.getInstance().getPreferenceStore(newConfiguration));
 				}
 			}
 		});
-		deleteConfig = createButton(container, "Delete");
-		deleteConfig.addSelectionListener(new SelectionAdapter() {
+		deleteConfiguration = createButton(container, "Delete");
+		deleteConfiguration.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				boolean answer = MessageDialog.openQuestion(deleteConfig.getShell(), "Delete configuration", "Do you want to delete the configuration \"" + configurationList.getText() + "\"?");
+				boolean answer = MessageDialog.openQuestion(deleteConfiguration.getShell(), "Delete configuration", "Do you want to delete the configuration \"" + configurationList.getText() + "\"?");
 				if (answer) {
-					String configurationId = getIdForLabel(configurationList.getText());
-					String defaultId = PreferenceConfiguration.getInstance().getDefaultId(configurationId);
-					PreferenceConfiguration.getInstance().deleteConfiguration(configurationId);
-					fillConfigLabels();
-					selectConfig(defaultId);
+					String configuration = configurationList.getText();
+					String defaultId = PreferenceConfiguration.getInstance().getDefaultConfiguration(configuration);
+					PreferenceConfiguration.getInstance().deleteConfiguration(configuration);
+					fillConfigurationList();
+					selectConfiguration(defaultId);
 					setValues(PreferenceConfiguration.getInstance().getPreferenceStore(defaultId));
 				}
 			}
 		});
-//		Label label5 = new Label(container, SWT.NONE);
-//		label5.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1));
-//		label5.setText(" ");
 		return container;
 	}
 	
@@ -397,52 +395,34 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		return button;
 	}
 	
-	private String[][] configLabels;
-	
-	private void fillConfigLabels() {
-		configLabels = getIdAndLabelArray(PreferenceConfiguration.getInstance().getConfigurationIds());
+	private void fillConfigurationList() {
 		configurationList.removeAll();
-		for (String[] idAndLabel : configLabels) {
-			configurationList.add(idAndLabel[1]);
+		for (String configId : PreferenceConfiguration.getInstance().getConfigurations()) {
+			configurationList.add(configId);
 		}
 	}
 	
-	private String[][] getIdAndLabelArray(List<String> ids) {
-		String[][] idsAndLabels = new String[ids.size()][0];
-		int i = 0;
-		for (String configurationId : ids) {
-			idsAndLabels[i] = new String[]{configurationId, PreferenceConfiguration.getInstance().getLabel(configurationId)};
-			i++;
-		}
-		return idsAndLabels;
-	}
-	
-	private String getIdForLabel(String label) {
-		for (String[] idAndLabel : configLabels) {
-			if (idAndLabel[1].equals(label)) {
-				return idAndLabel[0];
-			}
-		}
-		return null;
-	}
-
-	private void selectConfig(String configurationId) {
-		configurationList.setText(PreferenceConfiguration.getInstance().getLabel(configurationId));
-		deleteConfig.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurationIds().contains(configurationId));
+	private void selectConfiguration(String configurationId) {
+		configurationList.setText(configurationId);
+		deleteConfiguration.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurations().contains(configurationId));
 	}
 	
 	private static class NewConfigurationDialog extends Dialog {
 
 		private Text text;
-		private String[][] configLabels;
+		private List<String> configurations;
+		private List<String> defaultConfigurations;
 		private Combo combo;
 		
-		private String id;
-		private String label;
+		private String defaultConfiguration;
+		private String configuration;
 
-		protected NewConfigurationDialog(Shell parentShell, String[][] configLabels) {
+		private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':', '\'' };
+		
+		protected NewConfigurationDialog(Shell parentShell, List<String> configurations, List<String> defaultConfigurations) {
 			super(parentShell);
-			this.configLabels = configLabels;
+			this.configurations = configurations;
+			this.defaultConfigurations = defaultConfigurations;
 		}
 		
 		@Override
@@ -459,16 +439,36 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			GridData textLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 			textLayoutData.widthHint = convertWidthInCharsToPixels(50);
 			text.setLayoutData(textLayoutData);
+			text.addVerifyListener(new VerifyListener() {
+				@Override
+				public void verifyText(VerifyEvent e) {
+					for (char c : e.text.toCharArray()) {
+						if (isIllegalCharacter(c)) {
+							e.doit = false;
+							return;
+						}
+					}
+				}
+				
+				private boolean isIllegalCharacter(char c) {
+					for (char illegal : ILLEGAL_CHARACTERS) {
+						if (illegal == c) {
+							return true;
+						}
+					}
+					return false;
+				}
+			});
 			
 			Label label2 = new Label(composite, SWT.NONE);
 			label2.setText("Inherit defaults from");
 			label2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 			
 			combo = new Combo(composite, SWT.READ_ONLY);
-			for (String[] idAndLabel : configLabels) {
-				combo.add(idAndLabel[1]);
+			for (String defaultConfiguration : defaultConfigurations) {
+				combo.add(defaultConfiguration);
 			}
-			combo.setText(configLabels[0][1]);
+			combo.setText(defaultConfigurations.get(0));
 			combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
 			return composite;
@@ -481,25 +481,24 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		}
 		
 		protected void okPressed() {
-			label = text.getText();
-			for (int i = 0; i < configLabels.length; i++) {
-				String selectedLabel = combo.getText();
-				if (selectedLabel.equals(configLabels[i][1])) {
-					id = configLabels[i][0];
-				}
+			if (text.getText().isEmpty()) {
+				MessageDialog.openWarning(getShell(), "New Configuration", "Configuration must not be empty.");
+				return;
+			} else if (configurations.contains(text.getText())) {
+				MessageDialog.openWarning(getShell(), "New Configuration", "Configuration malready exists.");
+				return;
 			}
-			if (id == null) {
-				id = configLabels[0][0];
-			}
+			configuration = text.getText();
+			defaultConfiguration = combo.getText();
 			super.okPressed();
 		}
 		
-		public String getText() {
-			return label;
+		public String getConfiguration() {
+			return configuration;
 		}
 		
-		public String getId() {
-			return id;
+		public String getDefaultConfiguration() {
+			return defaultConfiguration;
 		}
 
 	}
