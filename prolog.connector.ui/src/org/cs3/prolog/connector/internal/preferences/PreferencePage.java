@@ -13,7 +13,7 @@
 
 package org.cs3.prolog.connector.internal.preferences;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +36,6 @@ import org.cs3.prolog.ui.util.preferences.StructuredFieldEditorPreferencePage;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.PreferenceStore;
@@ -90,6 +89,8 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	private MyIntegerFieldEditor timeoutFieldEditor;
 	private MyBooleanFieldEditor hidePrologWindow;
 	private MyBooleanFieldEditor genFactbase;
+	
+	private ArrayList<FieldEditor> editors = new ArrayList<FieldEditor>();
 
 	private Composite configurationSelector;
 
@@ -101,7 +102,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 
 	public PreferencePage() {
 		super(GRID);
-		setPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION)));
 		setDescription("Select a predefined configuration or define a new one. Each configuration affects all settings on this page.");
 	}
 
@@ -181,13 +182,13 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			@Override
 			public void doLoad(){
 				super.doLoad();
-				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
+				metaPred.setEnabled(getBooleanValue(), getFieldEditorParent());
 			}
 			
 			@Override
 			public void doLoadDefault(){
 				super.doLoadDefault();
-				getMetaPredEditor().setEnabled(getBooleanValue(), getFieldEditorParent());
+				metaPred.setEnabled(getBooleanValue(), getFieldEditorParent());
 			}
 		};
 		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
@@ -210,12 +211,9 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		super.initialize();
 		updateExecuteablePreviewLabelText();
 		fillConfigurationList();
-		selectConfiguration(getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+		selectConfiguration(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
 	}
 
-	private BooleanFieldEditor getMetaPredEditor(){
-		return metaPred;
-	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -242,13 +240,32 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
     }
 	
 	@Override
+	public void addField(FieldEditor editor) {
+		editors.add(editor);
+		super.addField(editor);
+	}
+	
+	private void changePreferenceStore(PreferenceStore store) {
+		setPreferenceStore(store);
+		for (FieldEditor editor : editors) {
+			editor.setPreferenceStore(store);
+			editor.load();
+		}
+	}
+	
+	@Override
 	public boolean performOk() {
-		getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, configurationList.getText());
-		saveValuesToSpecificStore();
+		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, configurationList.getText());
+		boolean result = super.performOk();
+		try {
+			((PreferenceStore)getPreferenceStore()).save();
+		} catch (Exception e) {
+			Debug.report(e);
+		}
 		if (preferencesChanged) {
 			updatePrologInterfaceExecutables();	
 		}
-		return super.performOk();
+		return result;
 	}
 	
 	private void updateExecuteablePreviewLabelText() {
@@ -276,63 +293,11 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	
     @Override
 	protected void performDefaults() {
-    	setDefaultValues(PreferenceConfiguration.getInstance().getPreferenceStore(configurationList.getText()));
-        checkState();
-        updateApplyButton();
+    	super.performDefaults();
+//        checkState();
+//        updateApplyButton();
     }
 
-	
-	private void setValues(PreferenceStore store) {
-		if (store != null) {
-			executable.setStringValue(store.getString(executable.getPreferenceName()));
-			invocation.setStringValue(store.getString(invocation.getPreferenceName()));
-			commandLineArguments.setStringValue(store.getString(commandLineArguments.getPreferenceName()));
-			startupFiles.setStringValue(store.getString(startupFiles.getPreferenceName()));
-			metaPred.setBooleanValue(store.getBoolean(metaPred.getPreferenceName()));
-			extraEnvironmentVariables.setStringValue(store.getString(extraEnvironmentVariables.getPreferenceName()));
-			serverLogDir.setStringValue(store.getString(serverLogDir.getPreferenceName()));
-			timeoutFieldEditor.setIntValue(store.getInt(timeoutFieldEditor.getPreferenceName()));
-			hidePrologWindow.setBooleanValue(store.getBoolean(hidePrologWindow.getPreferenceName()));
-			genFactbase.setBooleanValue(store.getBoolean(genFactbase.getPreferenceName()));
-		}
-	}
-	
-	private void setDefaultValues(PreferenceStore store) {
-		if (store != null) {
-			executable.setStringValue(store.getDefaultString(executable.getPreferenceName()));
-			invocation.setStringValue(store.getDefaultString(invocation.getPreferenceName()));
-			commandLineArguments.setStringValue(store.getDefaultString(commandLineArguments.getPreferenceName()));
-			startupFiles.setStringValue(store.getDefaultString(startupFiles.getPreferenceName()));
-			metaPred.setBooleanValue(store.getDefaultBoolean(metaPred.getPreferenceName()));
-			extraEnvironmentVariables.setStringValue(store.getDefaultString(extraEnvironmentVariables.getPreferenceName()));
-			serverLogDir.setStringValue(store.getDefaultString(serverLogDir.getPreferenceName()));
-			timeoutFieldEditor.setIntValue(store.getDefaultInt(timeoutFieldEditor.getPreferenceName()));
-			hidePrologWindow.setBooleanValue(store.getDefaultBoolean(hidePrologWindow.getPreferenceName()));
-			genFactbase.setBooleanValue(store.getDefaultBoolean(genFactbase.getPreferenceName()));
-		}
-	}
-	
-	private void saveValuesToSpecificStore() {
-		PreferenceStore store = PreferenceConfiguration.getInstance().getPreferenceStore(configurationList.getText());
-		if (store != null) {
-			store.setValue(executable.getPreferenceName(), executable.getStringValue());
-			store.setValue(invocation.getPreferenceName(), invocation.getStringValue());
-			store.setValue(commandLineArguments.getPreferenceName(), commandLineArguments.getStringValue());
-			store.setValue(startupFiles.getPreferenceName(), startupFiles.getStringValue());
-			store.setValue(metaPred.getPreferenceName(), metaPred.getBooleanValue());
-			store.setValue(extraEnvironmentVariables.getPreferenceName(), extraEnvironmentVariables.getStringValue());
-			store.setValue(serverLogDir.getPreferenceName(), serverLogDir.getStringValue());
-			store.setValue(timeoutFieldEditor.getPreferenceName(), timeoutFieldEditor.getIntValue());
-			store.setValue(hidePrologWindow.getPreferenceName(), hidePrologWindow.getBooleanValue());
-			store.setValue(genFactbase.getPreferenceName(), genFactbase.getBooleanValue());
-			try {
-				store.save();
-			} catch (IOException e) {
-				Debug.report(e);
-			}
-		}
-	}
-	
 	private Composite createConfigurationSelector(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -347,7 +312,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		configurationList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				String configuration = configurationList.getText();
-				setValues(PreferenceConfiguration.getInstance().getPreferenceStore(configuration));
+				changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(configuration));
 				deleteConfiguration.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurations().contains(configuration));
 			}
 		});
@@ -362,7 +327,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 					PreferenceConfiguration.getInstance().addConfiguration(newConfiguration, dialog.getDefaultConfiguration());
 					fillConfigurationList();
 					selectConfiguration(newConfiguration);
-					setValues(PreferenceConfiguration.getInstance().getPreferenceStore(newConfiguration));
+					changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(newConfiguration));
 				}
 			}
 		});
@@ -376,7 +341,8 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 					PreferenceConfiguration.getInstance().deleteConfiguration(configuration);
 					fillConfigurationList();
 					selectConfiguration(defaultId);
-					setValues(PreferenceConfiguration.getInstance().getPreferenceStore(defaultId));
+					changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(defaultId));
+					PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, defaultId);
 				}
 			}
 		});
@@ -417,7 +383,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		private String defaultConfiguration;
 		private String configuration;
 
-		private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':', '\'' };
+		private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':', '\'', ';' };
 		
 		protected NewConfigurationDialog(Shell parentShell, List<String> configurations, List<String> defaultConfigurations) {
 			super(parentShell);

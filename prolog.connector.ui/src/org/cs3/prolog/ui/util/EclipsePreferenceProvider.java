@@ -28,10 +28,11 @@ public class EclipsePreferenceProvider implements PreferenceProvider {
 
 	public EclipsePreferenceProvider(AbstractUIPlugin plugin, String configurationId) {
 		this.plugin = plugin;
-		if (configurationId == null) {
+		PreferenceStore preferenceStore = PreferenceConfiguration.getInstance().getPreferenceStore(configurationId);
+		if (preferenceStore == null) {
 			this.store = PreferenceConfiguration.getInstance().getPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
 		} else {
-			this.store = PreferenceConfiguration.getInstance().getPreferenceStore(configurationId);
+			this.store = preferenceStore;
 		}
 	}
 	@Override

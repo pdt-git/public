@@ -50,6 +50,9 @@ public class PreferenceConfiguration {
 	private HashMap<String, PreferenceStore> stores = new HashMap<String, PreferenceStore>();
 	
 	public PreferenceStore getPreferenceStore(String configuration) {
+		if (configuration == null) {
+			return null;
+		}
 		synchronized (configurations) {
 			if (!configurations.contains(configuration)) {
 				return null;
