@@ -7,7 +7,7 @@ import pdt.y.main.PDTGraphView;
 public class GlobalView extends FocusView {
 	
 	@Override
-	protected GraphPIFLoader createGraphPIFLoader(PDTGraphView pdtGraphView) {
+	public GraphPIFLoader createGraphPIFLoader(PDTGraphView pdtGraphView) {
 		return new GlobalGraphPIFLoader(pdtGraphView, this);
 	}
 }
