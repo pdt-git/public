@@ -251,6 +251,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			editor.setPreferenceStore(store);
 			editor.load();
 		}
+		updateExecuteablePreviewLabelText();
 	}
 	
 	@Override
