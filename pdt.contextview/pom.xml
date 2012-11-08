@@ -51,7 +51,8 @@
                         <include name="plugin.xml"/>
                       </adjust>
 					  <adjust replaceName="true">
-					    <include name="**/*.properties" />
+					    <include name="y/**/*.properties"/>
+						<include name="y/view/**/resource/*"/>
 					  </adjust>
                   </rename>
                   <!-- There are some external libraries used - Maven knows details. -->
