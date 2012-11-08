@@ -38,6 +38,15 @@
                   <inoutpair in="target/${project.build.finalName}.jar" out="target/${project.build.finalName}.jar" />
                   <!-- Obfuscate classes plus string references. -->
                   <rename>
+					  <keep>
+						<class classes="public" methods="public" fields="public">
+							<patternset>
+								<include name="pdt.y.focusview.FocusView"/>
+								<include name="pdt.y.focusview.GlobalView"/>
+								<include name="pdt.y.preferences.*"/>
+							</patternset>
+						</class>
+					  </keep>
                       <adjust replaceContent="true">
                         <include name="plugin.xml"/>
                       </adjust>
