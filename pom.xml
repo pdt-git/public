@@ -76,6 +76,7 @@
     <module>pdt.builder</module>
     <module>pdt.common</module>
     <module>pdt.console</module>
+    <module>pdt.contextview</module>
     <module>pdt.editor</module>
     <module>pdt.feature</module>
     <module>pdt.navigator</module>
