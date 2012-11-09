@@ -9,6 +9,7 @@ import org.cs3.prolog.pif.service.ConsultListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import pdt.y.focusview.FocusView.FocusViewControl;
 import pdt.y.preferences.MainPreferencePage;
 
 public class GlobalViewCoordinator extends ViewCoordinatorBase implements ConsultListener {
@@ -25,6 +26,10 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase implements Consul
 	
 		
 	public FocusView.FocusViewControl swichFocusView(String path) {
+		if (currentFocusView == null) {
+			currentFocusView = focusView.new FocusViewControl(path);
+			focusView.setCurrentFocusView(currentFocusView);
+		}
 		refreshCurrentView();
 		return currentFocusView;
 	}
