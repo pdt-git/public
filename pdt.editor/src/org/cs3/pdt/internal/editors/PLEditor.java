@@ -314,7 +314,7 @@ public class PLEditor extends TextEditor {
 				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 
 		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
-				"Find all Declarations and Definitions", SEP_PDT_SEARCH,
+				"Find all Definitions and Declarations", SEP_PDT_SEARCH,
 				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
 		addAction(menuMgr, new FindReferencesActionDelegate(this),
