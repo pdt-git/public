@@ -25,11 +25,16 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase implements Consul
 	
 		
 	public FocusView.FocusViewControl swichFocusView(String path) {
-		refreshCurrentView();
+		refreshCurrentView(path);
 		return currentFocusView;
 	}
 
-	protected void refreshCurrentView() {
+	protected void refreshCurrentView(String path) {
+		if (currentFocusView == null) {
+			currentFocusView = focusView.new FocusViewControl(path);
+			focusView.setCurrentFocusView(currentFocusView);
+		}
+		
 		if (MainPreferencePage.isAutomaticUpdate() && currentFocusView != null) {
 			currentFocusView.reload();
 		}
@@ -44,6 +49,9 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase implements Consul
 			List<String> allConsultedFiles, IProgressMonitor monitor)
 			throws PrologInterfaceException {
 		
-		refreshCurrentView();
+		if (files.isEmpty())
+			return;
+		
+		refreshCurrentView(files.get(0).toString());
 	}
 }
