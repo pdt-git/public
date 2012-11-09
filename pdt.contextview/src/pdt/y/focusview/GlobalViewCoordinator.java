@@ -30,10 +30,10 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase implements Consul
 	}
 
 	protected void refreshCurrentView(String path) {
-		if (currentFocusView == null) {
-			currentFocusView = focusView.new FocusViewControl(path);
-			focusView.setCurrentFocusView(currentFocusView);
-		}
+		//if (currentFocusView == null) {
+		currentFocusView = focusView.new FocusViewControl(path);
+		focusView.setCurrentFocusView(currentFocusView);
+		//}
 		
 		if (MainPreferencePage.isAutomaticUpdate() && currentFocusView != null) {
 			currentFocusView.reload();
