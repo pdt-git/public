@@ -19,16 +19,16 @@ import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.preferences.MainPreferencePage;
 
-public class FocusViewCoordinator implements IPartListener, ConsultListener {
+public class FocusViewCoordinator extends ViewCoordinatorBase implements IPartListener, ConsultListener {
 	
 	final HashMap<String, FocusView.FocusViewControl> views = new HashMap<String, FocusView.FocusViewControl>();
 	
-	FocusView focusView;
 	FocusView.FocusViewControl currentFocusView;
 
 	public FocusViewCoordinator(FocusView focusView) {
 		
-		this.focusView = focusView;
+		super(focusView);
+		
 		focusView.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 		
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService()

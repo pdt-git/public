@@ -10,4 +10,9 @@ public class GlobalView extends FocusView {
 	public GraphPIFLoader createGraphPIFLoader(PDTGraphView pdtGraphView) {
 		return new GlobalGraphPIFLoader(pdtGraphView, this);
 	}
+	
+	@Override
+	protected ViewCoordinatorBase createViewCoordinator() {
+		return new GlobalViewCoordinator(this);
+	}
 }

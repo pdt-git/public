@@ -73,7 +73,7 @@ public class FocusView extends ViewPart {
 	private Composite viewContainer;
 	private Label info;
 	private String infoText = "", statusText = "";
-	private FocusViewCoordinator focusViewCoordinator;
+	private ViewCoordinatorBase focusViewCoordinator;
 	
 	public FocusView() {
 		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
@@ -111,11 +111,15 @@ public class FocusView extends ViewPart {
 		
 		initButtons(parent);
 		
-		focusViewCoordinator = new FocusViewCoordinator(this);
+		focusViewCoordinator = createViewCoordinator();
 		String currentPath = getCurrentFilePath();
 		if (currentPath != null) {
 			focusViewCoordinator.swichFocusView(currentPath);
 		}
+	}
+
+	protected ViewCoordinatorBase createViewCoordinator() {
+		return new FocusViewCoordinator(this);
 	}
 
 	private String getCurrentFilePath() {
@@ -302,7 +306,7 @@ public class FocusView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 //		PDTPlugin.getDefault().removeSelectionChangedListener(focusViewCoordinator);
-		getSite().getWorkbenchWindow().getPartService().removePartListener(focusViewCoordinator);
+//		getSite().getWorkbenchWindow().getPartService().removePartListener(focusViewCoordinator);
 	}
 	
 	public class FocusViewControl extends SwingControl {
