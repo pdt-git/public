@@ -34,4 +34,6 @@ public final class PDTCommon {
 	 */
 	public static final String PREF_CLIENT_LOG_FILE_DIR = "pdt.logfile";
 	
+	public static final String PREF_FILE_SIZE_LIMIT = "pdt.file.size.limit";
+	
 }

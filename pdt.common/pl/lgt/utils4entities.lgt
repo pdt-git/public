@@ -1,8 +1,8 @@
-% Author: Guenter Kniesel
+% Authors: Guenter Kniesel, Paulo Moura
 % Date: 25.06.2006
 
 /*
- * This file contains predicates for working with SWI-Prolog modules.
+ * This file contains predicates for working with Logtalk entities.
  */
 :- object(utils4entities).
 
@@ -10,6 +10,7 @@
 	source_file_entity/3,           % File, Line, Entity
 	entity_source_file/3,           % Entity, File, Line
 	entity_multifile_predicate_source_file/6,
+	entity/1,
 	entity_property/3,
 
 	visible_in_entity/3,	        % Entity, Name, Arity
@@ -78,6 +79,15 @@ get_entity_data(File, Directory, Line, Entity, Kind, Properties) :-
 		entity_property(Entity, Kind, Property),
 		Properties
 	).
+
+
+entity(Entity) :-
+	current_object(Entity).
+entity(Entity) :-
+	current_protocol(Entity).
+entity(Entity) :-
+	current_category(Entity).
+
 
 entity_property(Object, object, Property) :-
 	catch(object_property(Object, Property), _, fail).

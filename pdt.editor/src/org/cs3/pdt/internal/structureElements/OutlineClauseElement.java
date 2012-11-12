@@ -13,6 +13,9 @@
 
 package org.cs3.pdt.internal.structureElements;
 
+import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.prolog.common.Util;
+
 
 
 public class OutlineClauseElement implements PrologOutlineTreeElement{
@@ -93,12 +96,17 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 	}
 
 	private String calculateOccuranceLabel() {
-		StringBuffer occuranceLabel = new StringBuffer("Line: ");
-		occuranceLabel.append(Integer.toString(clause.getLine()));
-		occuranceLabel.append(" (");
-		occuranceLabel.append(clause.getType());
-		occuranceLabel.append(")");
-		return occuranceLabel.toString();
+		String firstArgument = PDTCommonUtil.getProperty("first_argument", clause.getProperties());
+		if (firstArgument != null) {
+			return clause.getLine() + ": " + Util.unquoteAtom(firstArgument);
+		} else {
+			StringBuffer occuranceLabel = new StringBuffer("Line: ");
+			occuranceLabel.append(Integer.toString(clause.getLine()));
+			occuranceLabel.append(" (");
+			occuranceLabel.append(clause.getType());
+			occuranceLabel.append(")");
+			return occuranceLabel.toString();
+		}
 	}
 
 	public String getFunctor() {

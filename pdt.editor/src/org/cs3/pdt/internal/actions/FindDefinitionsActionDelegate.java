@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.pdt.common.queries.DefinitionsSearchQuery;
+import org.cs3.pdt.common.queries.ContextAwareDefinitionsSearchQuery;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -34,7 +34,7 @@ public class FindDefinitionsActionDelegate extends SearchActionDelegate {
 
 	@Override
 	protected ISearchQuery connectSearchQuery(Goal data) {
-		ISearchQuery query = new DefinitionsSearchQuery(data);
+		ISearchQuery query = new ContextAwareDefinitionsSearchQuery(data);
 		return query;
 	}
 	

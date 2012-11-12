@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -29,7 +30,6 @@ import org.cs3.prolog.pif.PrologInterfaceEvent;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.PrologInterfaceListener;
 import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
@@ -70,7 +70,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
-				IEditorPart editorPart = UIUtils.openInEditor(fileName);
+				IEditorPart editorPart = PDTCommonUtil.openInEditor(fileName);
 				if (editorPart != null && editorPart instanceof PLEditor){
 					((PLEditor) editorPart).gotoLine(lineNumber);
 				}

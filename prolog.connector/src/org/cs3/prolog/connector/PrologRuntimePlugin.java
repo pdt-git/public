@@ -65,11 +65,13 @@ public class PrologRuntimePlugin extends Plugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		plugin = this;
 	}
 	
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
+		plugin = null;
 		for (File tempFile : tempFiles) {
 			try {
 				tempFile.delete();
@@ -81,8 +83,6 @@ public class PrologRuntimePlugin extends Plugin {
 	 * Returns the shared instance.
 	 */
 	public static PrologRuntimePlugin getDefault() {
-		if (plugin == null)
-			plugin = new PrologRuntimePlugin();
 		return plugin;
 	}
 

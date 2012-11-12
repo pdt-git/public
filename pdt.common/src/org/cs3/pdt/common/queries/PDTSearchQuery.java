@@ -15,8 +15,8 @@
 package org.cs3.pdt.common.queries;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +26,12 @@ import javax.swing.text.BadLocationException;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.search.PrologSearchResult;
+import org.cs3.pdt.common.search.SearchConstants;
+import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
-import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
+import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -40,7 +42,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
@@ -49,9 +53,8 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	private Goal goal;
 	private PrologSearchResult result;
-	private Map<String, SearchPredicateElement> predForSignature = new HashMap<String, SearchPredicateElement>();
-	private Map<String, SearchModuleElement> moduleElements = new HashMap<String, SearchModuleElement>();
 	private LinkedHashSet<String> signatures = new LinkedHashSet<String>();
+	private LinkedHashMap<String, SearchPredicateElement> predicates = new LinkedHashMap<String, SearchPredicateElement>();
 
 	public PDTSearchQuery(Goal goal) {
 		this.goal = goal;
@@ -81,7 +84,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throw new NullPointerException();
 		}
 
-		return doSearch(); 
+		return doSearch(monitor); 
 	}
 
 	/**
@@ -91,9 +94,14 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private IStatus doSearch() throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
+	private IStatus doSearch(IProgressMonitor monitor) throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
 		PrologSession session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-		processFoundClauses(findReferencedClauses(session));
+		monitor.beginTask("Searching...", 2);
+		monitor.subTask("Running Prolog query");
+		List<Map<String, Object>> results = findReferencedClauses(session, new SubProgressMonitor(monitor, 1));
+		monitor.subTask("Processing results");
+		processFoundClauses(results, new SubProgressMonitor(monitor, 1));
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 
@@ -103,9 +111,10 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws PrologException
 	 * @throws PrologInterfaceException
 	 */
-	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
+	private List<Map<String, Object>> findReferencedClauses(PrologSession session, IProgressMonitor monitor)
 			throws PrologException, PrologInterfaceException {
 		
+		monitor.beginTask("", 1);
 		String module;               
 		if (goal.getModule() != null && !goal.getModule().isEmpty()) {
 			module = Util.quoteAtomIfNeeded(goal.getModule());
@@ -115,14 +124,13 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 		String query = buildSearchQuery(goal, module);
 		
-		predForSignature.clear();
-		
 		List<Map<String, Object>> clauses = getResultForQuery(session, query);
 		
 		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
 //		if (clauses.size() > 0 && goal.getModule() == null){
 //			goal.setModule(clauses.get(0).get("Module").toString());
 //		}
+		monitor.done();
 		return clauses;
 	}
 	
@@ -141,12 +149,12 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private void processFoundClauses(List<Map<String, Object>> clauses)
+	private void processFoundClauses(List<Map<String, Object>> clauses, IProgressMonitor monitor)
 	throws IOException, NumberFormatException {
 		Match match;
-		moduleElements.clear();
-		predForSignature.clear();
 		signatures.clear();
+		predicates.clear();
+		monitor.beginTask("", clauses.size());
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
@@ -154,7 +162,12 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			if ((result != null) && (match != null)) {
 				result.addMatch(match);
 			}
+			monitor.worked(1);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 		}
+		monitor.done();
 	}
 	
 	protected abstract Match constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
@@ -181,6 +194,23 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			SearchMatchElement searchMatchElement = new SearchMatchElement();
 			PrologMatch match = new PrologMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, offset, length, declOrDef);
 			searchMatchElement.setMatch(match);
+			return match;
+		}
+	}
+	
+	protected PredicateMatch createUniqueMatch(String definingModule, String functor, int arity, List<String> properties, String visibility, String declOrDef) {
+		String signature = declOrDef + visibility + definingModule + functor + arity + "#";
+		if (signatures.contains(signature)) {
+			return null;
+		} else {
+			signatures.add(signature);
+			String predicateSignature = visibility + definingModule + functor + arity;
+			SearchPredicateElement searchPredicateElement = predicates.get(predicateSignature);
+			if (searchPredicateElement == null) {
+				searchPredicateElement = new SearchPredicateElement(null, definingModule, functor, arity, properties);
+				predicates.put(predicateSignature, searchPredicateElement);
+			}
+			PredicateMatch match = new PredicateMatch(searchPredicateElement, visibility, definingModule, functor, arity, properties, declOrDef);
 			return match;
 		}
 	}
@@ -211,6 +241,14 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	protected Goal getGoal() {
 		return goal;
+	}
+	
+	protected IFile findFile(String fileName) throws IOException {
+		if (fileName == null || SearchConstants.RESULT_KIND_DYNAMIC.equals(fileName) || SearchConstants.RESULT_KIND_FOREIGN.equals(fileName)) {
+			return null;
+		} else {
+			return FileUtils.findFileForLocation(fileName);
+		}
 	}
 	
 }

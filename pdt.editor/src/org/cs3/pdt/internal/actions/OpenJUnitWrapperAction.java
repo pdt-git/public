@@ -13,8 +13,8 @@
 
 package org.cs3.pdt.internal.actions;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jface.action.IAction;
@@ -33,7 +33,7 @@ public class OpenJUnitWrapperAction implements IObjectActionDelegate {
 
 	@Override
 	public void run(IAction action) {
-		IEditorPart editorPart = UIUtils.openInEditor(fileName);
+		IEditorPart editorPart = PDTCommonUtil.openInEditor(fileName);
 		if (editorPart != null && editorPart instanceof PLEditor){
 			((PLEditor) editorPart).gotoLine(lineNumber);
 		}

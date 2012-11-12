@@ -65,13 +65,15 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 		PrologElement pe = (PrologElement) element;
 		if (pe.isPublic() || "user".equals(pe.getModule())) {
 			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
-		} 
-		if (pe.isPrivate()) {
+		} else if (pe.isPrivate()) {
 			return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
-		} if (pe.isLocal()) {
+		} else if (pe.isLocal()) {
 			return ImageRepository.getImage(ImageRepository.PE_LOCAL);
+		} else if (pe.getProperties().contains("invisible")){
+			return ImageRepository.getImage(ImageRepository.PE_INVISIBLE);
+		} else {
+			return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 		}
-		return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 	}
 
 	@Override

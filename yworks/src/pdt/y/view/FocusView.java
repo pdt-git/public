@@ -1,17 +1,4 @@
-/*****************************************************************************
- * This file is part of the Prolog Development Tool (PDT)
- * 
- * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
- * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
- * 
- * All rights reserved. This program is  made available under the terms
- * of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- * 
- ****************************************************************************/
-
-package pdt.y.focusview;
+package pdt.y.view;
 
 import static org.eclipse.ui.IWorkbenchCommandConstants.FILE_SAVE;
 import static org.eclipse.ui.IWorkbenchCommandConstants.FILE_SAVE_ALL;
@@ -21,7 +8,9 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.internal.editors.PDTChangedFileInformation;
+import org.cs3.pl.common.FileUtils;
 import org.eclipse.albireo.core.SwingControl;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -37,6 +26,9 @@ import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Point;
@@ -53,15 +45,12 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-import pdt.y.internal.ImageRepository;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.main.PluginActivator;
@@ -69,7 +58,7 @@ import pdt.y.main.PreferencesUpdateListener;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
-import pdt.y.preferences.FocusViewSkinsPreferences;
+import pdt.y.preferences.SkinsPreferencePage;
 import pdt.y.preferences.MainPreferencePage;
 import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
@@ -80,7 +69,7 @@ import y.view.NodeLabel;
 import y.view.ViewMode;
 
 
-public class FocusViewPlugin extends ViewPart {
+public class FocusView extends ViewPart {
 
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private Composite viewContainer;
@@ -88,7 +77,7 @@ public class FocusViewPlugin extends ViewPart {
 	private String infoText = "", statusText = "";
 	private FocusViewCoordinator focusViewCoordinator;
 	
-	public FocusViewPlugin() {
+	public FocusView() {
 		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
 			@Override
 			public void preferencesUpdated() {
@@ -148,7 +137,8 @@ public class FocusViewPlugin extends ViewPart {
 		
 		
 		toolBarManager.add(new ToolBarAction("Update", "WARNING: Current layout will be rearranged!", 
-				ImageRepository.getImageDescriptor(ImageRepository.REFRESH)) {
+				org.cs3.pdt.internal.ImageRepository.getImageDescriptor(
+						org.cs3.pdt.internal.ImageRepository.REFRESH)) {
 
 				@Override
 				public void performAction() {
@@ -179,7 +169,8 @@ public class FocusViewPlugin extends ViewPart {
 			});
 		
 		toolBarManager.add(new ToolBarAction("Preferences", 
-				ImageRepository.getImageDescriptor(ImageRepository.PREFERENCES)) {
+				org.cs3.pdt.internal.ImageRepository.getImageDescriptor(
+						org.cs3.pdt.internal.ImageRepository.PREFERENCES)) {
 
 				@Override
 				public void performAction() {
@@ -207,7 +198,7 @@ public class FocusViewPlugin extends ViewPart {
 					predicateLayoutPrefs.setTitle("Predicate Layout");
 					node.add(new PreferenceNode("PredicateLayoutPreferences", predicateLayoutPrefs));
 					
-					IPreferencePage skinsPrefs = new FocusViewSkinsPreferences();
+					IPreferencePage skinsPrefs = new SkinsPreferencePage();
 					skinsPrefs.setTitle("Skins");
 					node.add(new PreferenceNode("FocusViewSkinsPreferences", skinsPrefs));
 					
@@ -229,27 +220,27 @@ public class FocusViewPlugin extends ViewPart {
 		return viewContainer;
 	}
 
-	public void setCurrentFocusView(FocusView focusView) {
+	public void setCurrentFocusView(FocusViewControl focusView) {
 		((StackLayout)viewContainer.getLayout()).topControl = focusView;
 		viewContainer.layout();
 	}
 	
 	public void updateCurrentFocusView() {
-		FocusView f = getCurrentFocusView();
+		FocusViewControl f = getCurrentFocusView();
 		if (f != null)
 			f.reload();
 	}
 	
 	public void updateCurrentFocusViewLayout() {
-		FocusView f = getCurrentFocusView();
+		FocusViewControl f = getCurrentFocusView();
 		if (f != null)
 			f.updateLayout();
 	}
 	
-	private FocusView getCurrentFocusView() {
+	private FocusViewControl getCurrentFocusView() {
 		Control f = ((StackLayout)viewContainer.getLayout()).topControl;
-		if (f instanceof FocusView)
-			return (FocusView) f;
+		if (f instanceof FocusViewControl)
+			return (FocusViewControl) f;
 		return null;
 	}
 	
@@ -274,8 +265,7 @@ public class FocusViewPlugin extends ViewPart {
 	protected void updateInfo() {
 		final String text = statusText + " " + infoText;
 		new UIJob("Update Status") {
-		    @Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
+		    public IStatus runInUIThread(IProgressMonitor monitor) {
 		        if (info.isDisposed()) {
 		        	return Status.CANCEL_STATUS;
 		        } else {
@@ -289,11 +279,14 @@ public class FocusViewPlugin extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-//		PDTPlugin.getDefault().removeSelectionChangedListener(focusViewCoordinator);
-		getSite().getWorkbenchWindow().getPartService().removePartListener(focusViewCoordinator);
+		PDTPlugin.getDefault().removeSelectionChangedListener(focusViewCoordinator);
 	}
 	
-	public class FocusView extends SwingControl {
+	protected GraphPIFLoader createGraphPIFLoader(PDTGraphView pdtGraphView) {
+		return  new GraphPIFLoader(pdtGraphView);
+	}
+	
+	public class FocusViewControl extends SwingControl {
 
 		private final String FOCUS_VIEW_IS_OUTDATED = "[FocusView is outdated]";
 		
@@ -303,14 +296,14 @@ public class FocusViewPlugin extends ViewPart {
 		
 		private boolean isDirty = false;
 		
-		public FocusView(final String filePath) {
+		public FocusViewControl(final String filePath) {
 			super(viewContainer, SWT.NONE); 
 			
 			this.filePath = filePath;
 			
 			this.pdtGraphView = new PDTGraphView();
 			
-			this.pifLoader = new GraphPIFLoader(pdtGraphView);
+			this.pifLoader = createGraphPIFLoader(pdtGraphView);
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
 			pdtGraphView.addViewMode(new HoverTrigger(getShell()));
@@ -325,7 +318,7 @@ public class FocusViewPlugin extends ViewPart {
 		}
 		
 		public void setDirty() {
-			FocusViewPlugin.this.setStatusText(FOCUS_VIEW_IS_OUTDATED);
+			FocusView.this.setStatusText(FOCUS_VIEW_IS_OUTDATED);
 			isDirty = true;
 		}
 		
@@ -342,7 +335,7 @@ public class FocusViewPlugin extends ViewPart {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					pifLoader.queryPrologForGraphFacts(filePath);
-					FocusViewPlugin.this.setStatusText("");
+					FocusView.this.setStatusText("");
 					
 					isDirty = false;
 
@@ -375,7 +368,6 @@ public class FocusViewPlugin extends ViewPart {
 				t.setVisible(false);
 			}
 			
-			@Override
 			public void mouseMoved(final double x, final double y) {
 				super.mouseMoved(x, y);
 				
@@ -425,7 +417,7 @@ public class FocusViewPlugin extends ViewPart {
 					
 					String text = sb.toString();
 
-					FocusViewPlugin.this.setInfoText(text);
+					FocusView.this.setInfoText(text);
 					
 					if (PredicateLayoutPreferences.isShowToolTip() && text.startsWith("Predicate")) {
 						Point location = Display.getCurrent().getCursorLocation();
@@ -439,83 +431,49 @@ public class FocusViewPlugin extends ViewPart {
 						t.setVisible(false);
 					}
 				} else {
-					FocusViewPlugin.this.setInfoText("");
+					FocusView.this.setInfoText("");
 					t.setVisible(false);
 				}
 			}
 		}
 	}
 
-	public class FocusViewCoordinator implements /*ISelectionChangedListener, */IExecutionListener, IPartListener {
+	public class FocusViewCoordinator implements ISelectionChangedListener, IExecutionListener {
 		
-		final HashMap<String, FocusView> views = new HashMap<String, FocusView>();
+		final HashMap<String, FocusViewControl> views = new HashMap<String, FocusViewControl>();
 		
-		FocusView currentFocusView;
+		FocusViewControl currentFocusView;
 
 		public FocusViewCoordinator() {
-//			PDTPlugin.getDefault().addSelectionChangedListener(this);
+			PDTPlugin.getDefault().addSelectionChangedListener(this);
 			
-			FocusViewPlugin.this.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 			ICommandService service = (ICommandService) PlatformUI
 				.getWorkbench().getService(ICommandService.class);
 		    service.addExecutionListener(this);
 		}
 		
-//		@Override
-//		public void selectionChanged(SelectionChangedEvent event) {
-//			ISelection selection = event.getSelection();
-//			
-//			if (selection instanceof PDTChangedFileInformation) {
-//			
-//				final PDTChangedFileInformation fileInfo = (PDTChangedFileInformation)selection;
-//				
-//				if (currentFocusView == null 
-//						|| !currentFocusView.getFilePath().equals(fileInfo.getPrologFileName())) {
-//					
-//					new UIJob("Update Context View") {
-//					    @Override
-//						public IStatus runInUIThread(IProgressMonitor monitor) {
-//					    	
-//					    	FocusView f = swichFocusView(fileInfo.getPrologFileName());
-//					    	
-//					    	if (f.isEmpty()){
-//					    		FocusViewPlugin.this.setStatusText("[Please activate prolog console, set focus on file and press F9 to load graph]");
-//					    	}
-//					        
-//					    	return Status.OK_STATUS;
-//					    }
-//					}.schedule();
-//				}
-//				if (currentFocusView != null 
-//						&& currentFocusView.isEmpty()) {
-//					currentFocusView.reload();
-//				}
-//			}
-//		}
-
 		@Override
-		public void partActivated(IWorkbenchPart part) {
-			if (part instanceof IEditorPart) {
-				IEditorPart editorPart = (IEditorPart) part;
-				final String fileName = PDTCommonUtil.prologFileName(editorPart.getEditorInput());
-				if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro")) {
-					return;
-				}
+		public void selectionChanged(SelectionChangedEvent event) {
+			ISelection selection = event.getSelection();
+			
+			if (selection instanceof PDTChangedFileInformation) {
+			
+				final PDTChangedFileInformation fileInfo = (PDTChangedFileInformation)selection;
+				
 				if (currentFocusView == null 
-						|| !currentFocusView.getFilePath().equals(fileName)) {
+						|| !currentFocusView.getFilePath().equals(fileInfo.getPrologFileName())) {
 					
 					new UIJob("Update Context View") {
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							
-							FocusView f = swichFocusView(fileName);
-							
-							if (f.isEmpty()){
-								FocusViewPlugin.this.setStatusText("[Please activate prolog console, set focus on file and press F9 to load graph]");
-							}
-							
-							return Status.OK_STATUS;
-						}
+					    public IStatus runInUIThread(IProgressMonitor monitor) {
+					    	
+					    	FocusViewControl f = swichFocusView(fileInfo.getPrologFileName());
+					    	
+					    	if (f.isEmpty()){
+					    		FocusView.this.setStatusText("[Please activate prolog console, set focus on file and press F9 to load graph]");
+					    	}
+					        
+					    	return Status.OK_STATUS;
+					    }
 					}.schedule();
 				}
 				if (currentFocusView != null 
@@ -524,32 +482,16 @@ public class FocusViewPlugin extends ViewPart {
 				}
 			}
 		}
-
-		@Override
-		public void partBroughtToTop(IWorkbenchPart part) {
-		}
-
-		@Override
-		public void partClosed(IWorkbenchPart part) {
-		}
-
-		@Override
-		public void partDeactivated(IWorkbenchPart part) {
-		}
-
-		@Override
-		public void partOpened(IWorkbenchPart part) {
-		}
 		
-		private FocusView swichFocusView(String path) {
+		private FocusViewControl swichFocusView(String path) {
 			currentFocusView = views.get(path);
 			if (currentFocusView == null) {
-				currentFocusView = new FocusView(path);
+				currentFocusView = new FocusViewControl(path);
 
 				views.put(path, currentFocusView);
 			}
 			
-			FocusViewPlugin.this.setCurrentFocusView(currentFocusView);
+			FocusView.this.setCurrentFocusView(currentFocusView);
 			refreshCurrentView();
 			
 			return currentFocusView;
@@ -563,7 +505,7 @@ public class FocusViewPlugin extends ViewPart {
 			if (!path.endsWith(".pl"))
 				return;
 			
-			for (FocusView f : views.values()) {
+			for (FocusViewControl f : views.values()) {
 				for (String d : f.getDependencies()) {
 					if (path.equals(d)) {
 						f.setDirty();
@@ -617,5 +559,3 @@ public class FocusViewPlugin extends ViewPart {
 		}
 	}
 }
-
-

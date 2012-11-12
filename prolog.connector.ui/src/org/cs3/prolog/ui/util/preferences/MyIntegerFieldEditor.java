@@ -39,6 +39,10 @@ public class MyIntegerFieldEditor extends IntegerFieldEditor implements FieldEdi
 	public Composite getParent() {
 		return parent;
 	}
+	
+	public void setIntValue(int value) {
+		getTextControl().setText(Integer.toString(value));
+	}
 
 }
 

@@ -16,13 +16,13 @@ package org.cs3.pdt.console.internal.views;
 
 import java.io.File;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.ConsoleModelEvent;
 import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
@@ -64,6 +64,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 public class ConsoleViewer extends Viewer implements ConsoleModelListener {
+	private static final String BETWEEN_LINES = " between lines ";
+	private static final String ABOVE_LINE = " above line ";
+	
 	private static class _TextSelection implements ITextSelection {
 
 		private int offset;
@@ -227,7 +230,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				control,
 				new StyledTextContentAdapter(),
 				new ProposalProvider(),
-				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, SWT.SPACE), KeyStroke.getInstance(SWT.TAB)},
+				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, ' '), KeyStroke.getInstance(SWT.TAB)},
 				null);
 		contentProposalAdapter.setPopupSize(new Point(300, 200));
 		contentProposalAdapter.setLabelProvider(new ConsoleCompletionLabelProvider());
@@ -308,18 +311,24 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 								if (new File(fileAndLine[0] + "pl").exists()) {
 									try {
 										int line = Integer.parseInt(fileAndLine[1]);
-										UIUtils.selectInEditor(line, fileAndLine[0] + "pl", true);
+										PDTCommonUtil.selectInEditor(line, fileAndLine[0] + "pl", true);
 									} catch(Exception ex){
 									}
 								}
 							}
 						} else if (link.startsWith("in file ")) {
 							try {
-								link = link.substring(8, link.lastIndexOf("-"));
-								String[] fileAndLine = link.split(" between lines ");
-								if (fileAndLine.length >= 2 && new File(fileAndLine[0]).exists()) {
-									int line = Integer.parseInt(fileAndLine[1]);
-									UIUtils.selectInEditor(line, fileAndLine[0], true);
+								String[] fileAndLine = null;
+								if (link.contains(BETWEEN_LINES)) {
+									link = link.substring(8, link.lastIndexOf("-"));
+									fileAndLine = link.split(BETWEEN_LINES);
+								} else if (link.contains(ABOVE_LINE)) {
+									link = link.substring(8);
+									fileAndLine = link.split(ABOVE_LINE);
+								}
+								if (fileAndLine != null && fileAndLine.length >= 2 && new File(fileAndLine[0]).exists()) {
+									int line = Integer.parseInt(fileAndLine[1].trim());
+									PDTCommonUtil.selectInEditor(line, fileAndLine[0], true);
 								}
 							} catch (Exception ex) {
 							}

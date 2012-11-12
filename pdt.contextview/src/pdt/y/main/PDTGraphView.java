@@ -40,6 +40,7 @@ import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
+import pdt.y.view.modes.WheelScroller;
 import y.base.Node;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
@@ -59,6 +60,8 @@ public class PDTGraphView extends  JPanel {
 	
 	EditMode editMode;
 	NavigationMode navigationMode;
+	Graph2DViewMouseWheelZoomListener wheelZoomListener;
+	WheelScroller wheelScroller;
 
 	private static final long serialVersionUID = -611433500513523511L;
 
@@ -91,6 +94,7 @@ public class PDTGraphView extends  JPanel {
 		
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
+		
 	}
 
 	protected void initNavigationMode() {
@@ -100,12 +104,10 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	private void initMouseZoomSupport() {
-		// why do we need two mouse wheel listeners???
-		//view.addMouseWheelListener(new WheelScroller(view));
+		wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
+		wheelScroller = new WheelScroller(view);
 		
-		Graph2DViewMouseWheelZoomListener wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
-		wheelZoomListener.setCenterZooming(false);
-		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
+		view.getCanvasComponent().addMouseWheelListener(wheelScroller);
 	}
 	
 	private void initKeyListener() {
@@ -141,17 +143,25 @@ public class PDTGraphView extends  JPanel {
 	}
 	
 	public void navigationMode() {
-		view.addViewMode(navigationMode);
 		view.removeViewMode(editMode);
+		view.addViewMode(navigationMode);
+		
+		view.getCanvasComponent().removeMouseWheelListener(wheelScroller);
+		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
 	}
+	
 	public void editMode() {
-		view.addViewMode(editMode);
 		view.removeViewMode(navigationMode);
+		view.addViewMode(editMode);
+		
+		view.getCanvasComponent().removeMouseWheelListener(wheelZoomListener);
+		view.getCanvasComponent().addMouseWheelListener(wheelScroller);
 	}
 
 	public GraphDataHolder getDataHolder() {
 		return model.getDataHolder();
 	}
+	
 	public Graph2D getGraph2D() {
 		return graph;
 	}
@@ -177,7 +187,7 @@ public class PDTGraphView extends  JPanel {
 	private void updateView() {
 		
 		Graphics gfx = view.getGraphics();
-		FontMetrics fontmtx = gfx.getFontMetrics();
+		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
 		
 		int i = 0;
 		int[] lengths = new int[graph.getNodeArray().length];
@@ -186,7 +196,7 @@ public class PDTGraphView extends  JPanel {
 		for (Node node: graph.getNodeArray()) {
 			String text = createFirstLabel(node);
 			
-			int v = (int)fontmtx.getStringBounds(text, gfx).getWidth() + 14;
+			int v = (int)(fontmtx.getStringBounds(text, gfx).getWidth() + 14);
 			lengths[i++] = v;
 		}
 		
@@ -212,7 +222,7 @@ public class PDTGraphView extends  JPanel {
 	protected void initializeBoxSize(Node node, int maximumValue, int medianValue, Graphics gfx, FontMetrics fontmtx) {
 		
 		int width = 0;
-		int height = PredicateLayoutPreferences.getNumberOfLines() * 15 + 10;
+		int height = PredicateLayoutPreferences.getNumberOfLines() * 16 + 20;
 		
 		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
 		

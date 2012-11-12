@@ -1,21 +1,8 @@
-/*****************************************************************************
- * This file is part of the Prolog Development Tool (PDT)
- * 
- * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
- * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
- * 
- * All rights reserved. This program is  made available under the terms
- * of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- * 
- ****************************************************************************/
-
 package pdt.y.preferences;
 
 import org.eclipse.ui.IWorkbench;
 
-import pdt.y.preferences.controls.FocusViewSkinsEditor;
+import pdt.y.preferences.controls.SkinsEditor;
 
 /**
  * This class represents a preference page that
@@ -31,12 +18,10 @@ import pdt.y.preferences.controls.FocusViewSkinsEditor;
  * be accessed directly via the preference store.
  */
 
-public class FocusViewSkinsPreferences
+public class SkinsPreferencePage
 	extends PreferencePageBase {
 
-	public FocusViewSkinsPreferences() {
-		setDescription("Preferences for the PDT Focus View Plugin");
-		
+	public SkinsPreferencePage() {
 		noDefaultAndApplyButton();
 	}
 	
@@ -46,15 +31,11 @@ public class FocusViewSkinsPreferences
 	 * of preferences. Each field editor knows how to save and
 	 * restore itself.
 	 */
-	@Override
 	public void createFieldEditors() {
 		
-		addField(new FocusViewSkinsEditor(getFieldEditorParent()));
+		addField(new SkinsEditor(getFieldEditorParent()));
 	}
 
-	@Override
 	public void init(IWorkbench workbench) {
 	}
 }
-
-

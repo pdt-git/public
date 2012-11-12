@@ -16,9 +16,9 @@ package org.cs3.pdt.internal.editors;
 
 import java.io.File;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,7 +89,7 @@ public class QLFEditor extends MultiPageEditorPart {
 					@Override
 					public void handleEvent(Event event) {
 						
-						UIUtils.openInEditor(plFile.toString());
+						PDTCommonUtil.openInEditor(plFile.toString());
 						
 					}
 				});

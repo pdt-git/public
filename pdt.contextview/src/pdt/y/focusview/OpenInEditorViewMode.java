@@ -16,8 +16,8 @@ package pdt.y.focusview;
 import java.awt.event.MouseEvent;
 import java.util.Map;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
@@ -85,7 +85,7 @@ public class OpenInEditorViewMode extends ViewMode {
 				@Override
 				public void run() {
 					try {
-						UIUtils.selectInEditor(start, length, filename, true);
+						PDTCommonUtil.selectInEditor(start, length, filename, true);
 					} catch (PartInitException e) {
 						e.printStackTrace();
 					}
@@ -94,5 +94,3 @@ public class OpenInEditorViewMode extends ViewMode {
 		}
 	}
 }
-
-

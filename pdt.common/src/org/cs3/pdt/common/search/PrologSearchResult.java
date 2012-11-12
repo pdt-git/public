@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
+import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
@@ -219,6 +220,17 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 				modules.put(signature, searchModuleElement);
 			}
 			searchModuleElement.addMatch(prologMatch);
+		} else if (match instanceof PredicateMatch) {
+			PredicateMatch predicateMatch = (PredicateMatch) match;
+			String module = predicateMatch.getModule();
+			String visibility = predicateMatch.getVisibility();
+			String signature = module + visibility;
+			SearchModuleElement searchModuleElement = modules.get(signature);
+			if (searchModuleElement == null) {
+				searchModuleElement = new SearchModuleElement(this, module, visibility);
+				modules.put(signature, searchModuleElement);
+			}
+			searchModuleElement.addMatch(predicateMatch);
 		} else if (match instanceof ModuleMatch) {
 			ModuleMatch moduleMatch = (ModuleMatch) match;
 			SearchModuleElement element = (SearchModuleElement) moduleMatch.getElement();
@@ -254,6 +266,16 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement != null) {
 				searchModuleElement.removeMatch(prologMatch);
+				if (!searchModuleElement.hasChildren()) {
+					modules.remove(signature);
+				}
+			}
+		} else if (match instanceof PredicateMatch) {
+			PrologMatch predicateMatch = (PrologMatch) match;
+			String signature = predicateMatch.getModule() + predicateMatch.getVisibility();
+			SearchModuleElement searchModuleElement = modules.get(signature);
+			if (searchModuleElement != null) {
+				searchModuleElement.removeMatch(predicateMatch);
 				if (!searchModuleElement.hasChildren()) {
 					modules.remove(signature);
 				}
