@@ -30,6 +30,12 @@
 :- dynamic output_to_memory/3.
 :- dynamic output_to_memory_key/1.
 
+:- if(current_prolog_flag(dialect,swi)).
+table(X) :-
+	write('WARNING: tabling not supported in SWI ('),
+	write(X),
+	write(')\n').
+:- endif.
 
 outdir(A):-
     project_option(_,output_project(A)).
