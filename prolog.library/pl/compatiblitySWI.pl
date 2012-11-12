@@ -37,6 +37,9 @@ table(X) :-
 	write(')\n').
 :- endif.
 
+index_information(Predicate, I) :-
+	predicate_property(Predicate, indexed(I)).
+
 outdir(A):-
     project_option(_,output_project(A)).
 
