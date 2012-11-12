@@ -15,8 +15,15 @@ package org.cs3.pdt.common.structureElements;
 
 import java.util.List;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.Util;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.text.Match;
 
 public class PrologMatch extends Match{
@@ -28,7 +35,6 @@ public class PrologMatch extends Match{
 	private boolean isLineLocation= false;
 	private String visibility;
 	private String declOrDef;
-	private SearchPredicateElement predicateElement;
 	private String name;
 	private int arity;
 	private List<String> properties;
@@ -57,8 +63,49 @@ public class PrologMatch extends Match{
 		this.arity = arity;
 		this.properties = properties;
 		isLineLocation = false;
+		convertOffsetAndCreateLabel(offset, offset + length);
 	}
 	
+	private void convertOffsetAndCreateLabel(int offset, int end) {
+		try {
+			long fileLength = EFS.getStore(file.getLocationURI()).fetchInfo().getLength();
+			if (fileLength > 1024 * 1024) {
+				isLineLocation = true;
+				String lineProperty = PDTCommonUtil.getProperty("clause_line", properties);
+				if (lineProperty == null) {
+					line = 1;
+				} else {
+					try {
+						line = Integer.parseInt(lineProperty);
+					} catch (NumberFormatException e) {
+						line = 1;
+					}
+				}
+			} else {
+				IDocument document;
+				document = UIUtils.getDocument(file);
+				int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
+				setOffset(convertedOffset);
+				int convertedEnd = UIUtils.logicalToPhysicalOffset(document, end);
+				int length = convertedEnd - convertedOffset;
+				setLength(length);
+				String text = document.get(convertedOffset, length);
+				if (text != null) {
+					String line = PDTCommonUtil.getProperty("line", properties);
+					if (line != null) {
+						label = line + ": " + text.replaceAll("\n|\r", "");
+					} else {
+						label = text.replaceAll("\n|\r", "");
+					}
+				}
+			}
+		} catch (CoreException e) {
+			Debug.report(e);
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		}
+	}
+
 	public int getLine() {
 		return line;
 	}
@@ -100,37 +147,29 @@ public class PrologMatch extends Match{
 		return file;
 	}
 	
-	public void setPredicateElement(SearchPredicateElement element) {
-		predicateElement = element;
-	}
-	
-	public SearchPredicateElement getPredicateElement() {
-		if (predicateElement == null) {
-			return (SearchPredicateElement) ((SearchFileTreeElement)((SearchMatchElement)getElement()).getParent()).getParent();
-		} else {
-			return predicateElement;
-		}
-	}
-
 	public String getLabel() {
 		if (label == null) {
 			if (isLineLocation) {
-				StringBuffer label = new StringBuffer("Line ");
-				label.append(Integer.toString(getLine()));
-				label.append(" (");
-				label.append(declOrDef);
-				label.append(")");
-				return label.toString();
+//				String firstArgument = PDTCommonUtil.getProperty("first_argument", properties);
+//				if (firstArgument != null) {
+//					label = getLine() + ": " + Util.unquoteAtom(firstArgument);
+//				} else {
+					StringBuffer buf = new StringBuffer("Line ");
+					buf.append(Integer.toString(getLine()));
+					buf.append(" (");
+					buf.append(declOrDef);
+					buf.append(")");
+					label = buf.toString();
+//				}
 			} else {
-				for (String property : properties) {
-					if (property.startsWith("goal(")) {
-						label = Util.unquoteAtom(property.substring(5, property.length() - 1));
-						break;
-					}
-				}
+				label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
 			}
 		}
 		return label;
+	}
+	
+	public void setLabel(String label) {
+		this.label = label;
 	}
 	
 }

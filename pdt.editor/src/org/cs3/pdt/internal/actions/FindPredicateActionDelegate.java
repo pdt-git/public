@@ -14,6 +14,9 @@
 
 package org.cs3.pdt.internal.actions;
 
+import static org.cs3.pdt.common.search.SearchConstants.RESULT_KIND_DYNAMIC;
+import static org.cs3.pdt.common.search.SearchConstants.RESULT_KIND_FOREIGN;
+import static org.cs3.pdt.common.search.SearchConstants.RESULT_KIND_MULTIFILE;
 import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.util.List;
@@ -56,10 +59,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
  * @see IWorkbenchWindowActionDelegate
  */
 public class FindPredicateActionDelegate extends TextEditorAction {
-//	private static final String RESULT_KIND_SINGLE = "single";
-	private static final String RESULT_KIND_MULTIFILE = "multifile";
-	private static final String RESULT_KIND_DYNAMIC = "dynamic";
-	private static final String RESULT_KIND_FOREIGN = "foreign";
+	
 	private ITextEditor editor;
 
 	/**
@@ -156,22 +156,30 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					}
 				}
 			} else {
-				final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(Util.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
-				if (result.isEmpty()) {
+				if (!"lgt".equals(file.getFileExtension())) {
+					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(Util.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+					if (result.isEmpty()) {
+						UIUtils.displayMessageDialog(
+								editor.getSite().getShell(),
+								"Undefined predicate",
+								"The selected predicate is not defined.");
+						return;
+					} else {
+						editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), goal, result);
+								alternativeDialog.setBlockOnOpen(false);
+								alternativeDialog.open();
+							}
+						});
+					}
+				} else {
 					UIUtils.displayMessageDialog(
 							editor.getSite().getShell(),
 							"Undefined predicate",
 							"The selected predicate is not defined.");
 					return;
-				} else {
-					editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), goal, result);
-							alternativeDialog.setBlockOnOpen(false);
-							alternativeDialog.open();
-						}
-					});
 				}
 			}
 			return;
@@ -212,13 +220,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		// In der Klasse DefinitionsSearchQuery funktioniert es aber!
 
 		String module = "_";
-		if (goal.getModule() != null)
-			module = "'" + goal.getModule() + "'";
+		if (goal.getModule() != null) {
+			module = Util.quoteAtomIfNeeded(goal.getModule());
+		}
 
 		String term = goal.getTermString();
 		String quotedTerm = Util.quoteAtom(term);
 
-		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), quotedTerm, module, "File", "Line", "ResultKind");
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), goal.getLine(), quotedTerm, module, "File", "Line", "ResultKind");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {
@@ -318,7 +327,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				Map<String, Object> predicate = alternatives.get(selection);
 				if (!"-1".equals(predicate.get("RefLine"))) {
 					try {
-						UIUtils.selectInEditor(Integer.parseInt(predicate.get("RefLine").toString()), predicate.get("RefFile").toString(), true);
+						PDTCommonUtil.selectInEditor(Integer.parseInt(predicate.get("RefLine").toString()), predicate.get("RefFile").toString(), true);
 					} catch (PartInitException e) {
 						Debug.report(e);
 					} catch (NumberFormatException e) {

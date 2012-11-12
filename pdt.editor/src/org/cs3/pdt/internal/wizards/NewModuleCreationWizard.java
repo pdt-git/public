@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cs3.prolog.ui.util.UIUtils;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -108,7 +108,7 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 			//selectAndReveal(file);
 				if (file  != null) {
 					try {
-						UIUtils.openInEditor(file, true);
+						PDTCommonUtil.openInEditor(file, true);
 					} catch (PartInitException e) {
 						e.printStackTrace();
 					}

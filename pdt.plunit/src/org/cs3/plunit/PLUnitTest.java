@@ -98,7 +98,9 @@ public class PLUnitTest extends AbstractPrologTestCase{
 						 PrologFacade.queryOnceNewSession("catch(thread_signal('"+threadId +"', abort),_,fail)");
 						 fail("Timeout exceeded: " + TEST_TIMEOUT + " ms, aborted query.");
 					}
-				} catch (InterruptedException | PrologInterfaceException e) {
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (PrologInterfaceException e) {
 					e.printStackTrace();
 				}
 			}

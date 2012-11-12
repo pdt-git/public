@@ -37,11 +37,11 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 		}
 		if ("invisible".equalsIgnoreCase(visibility)) {
 			visibilityCode = 1; 
-		} else if ("sub".equalsIgnoreCase(visibility)) {
+		} else if ("sub".equalsIgnoreCase(visibility) || "descendant".equalsIgnoreCase(visibility)) {
 			visibilityCode = 2; 
 		} else if ("local".equalsIgnoreCase(visibility)) {
 			visibilityCode = 3; 
-		} else if ("super".equalsIgnoreCase(visibility)) {
+		} else if ("super".equalsIgnoreCase(visibility) || "inherited".equalsIgnoreCase(visibility)) {
 			visibilityCode = 4; 
 		}
 	}
@@ -78,7 +78,6 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	@Override
 	public void removeMatch(PrologMatch match) {
 		String signature = getSignatureForMatch(match);
-		predForSignature.get(signature);
 		if (predForSignature.containsKey(signature)) {
 			SearchPredicateElement predicateElement = predForSignature.get(signature);
 			predicateElement.removeMatch(match);
@@ -102,7 +101,31 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	private String getSignatureForMatch(PrologMatch match) {
 		return match.getName() + match.getArity();
 	}
+	
+	public void removeMatch(PredicateMatch match) {
+		String signature = getSignatureForMatch(match);
+		SearchPredicateElement searchPredicateElement = predForSignature.get(signature);
+		searchPredicateElement.removeMatch(match);
+		if (!searchPredicateElement.hasMatches()) {
+			predForSignature.remove(signature);
+		}
+	}
+	
+	public void addMatch(PredicateMatch match) {
+		String signature = getSignatureForMatch(match);
+		SearchPredicateElement element = predForSignature.get(signature);
+		if (element == null) {
+			element = (SearchPredicateElement) match.getElement();
+			element.setParent(this);
+			predForSignature.put(signature, element);
+		}
+		element.addMatch(match);
+	}
 
+	private String getSignatureForMatch(PredicateMatch match) {
+		return match.getName() + match.getArity();
+	}
+	
 	@Override
 	public Object getParent() {
 		return parent;

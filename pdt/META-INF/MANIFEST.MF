@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT
 Bundle-SymbolicName: org.cs3.pdt;singleton:=true
-Bundle-Version: 2.0.0.qualifier
+Bundle-Version: 2.1.0.qualifier
 Bundle-Activator: org.cs3.pdt.PDTPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

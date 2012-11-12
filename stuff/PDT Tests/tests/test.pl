@@ -4,7 +4,7 @@ get_outline_data(host, ResultList) :-
 	module_property(outline_demo, file(File)),
 	findall(
 		[Entity, Name, Arity, Line, PropertyList],
-		pdt_search:find_definition_contained_in(File, Entity, _, Name, Arity, _, Line, PropertyList),
+		pdt_search:find_definition_contained_in(File, Entity, _, _, Name, Arity, _, Line, PropertyList),
 		ResultList
 	).
 
@@ -12,7 +12,7 @@ get_outline_data(contributor, ResultList) :-
 	module_property(outline_demo_multifile_contribution, file(File)),
 	findall(
 		[Entity, Name, Arity, Line, PropertyList],
-		pdt_search:find_definition_contained_in(File, Entity, _, Name, Arity, _, Line, PropertyList),
+		pdt_search:find_definition_contained_in(File, Entity, _, _, Name, Arity, _, Line, PropertyList),
 		ResultList
 	).
 
@@ -21,7 +21,7 @@ get_outline_data(user, ResultList) :-
 	atom_concat(_, 'user_file.pl', File),
 	findall(
 		[Entity, Name, Arity, Line, PropertyList],
-		pdt_search:find_definition_contained_in(File, Entity, _, Name, Arity, _, Line, PropertyList),
+		pdt_search:find_definition_contained_in(File, Entity, _, _, Name, Arity, _, Line, PropertyList),
 		ResultList
 	).
 
@@ -72,7 +72,7 @@ test(multifile_for_other) :-
 	get_outline_data(contributor, ResultList),
 	
 	member([outline_demo, likes, 2, 8, PropertyList], ResultList),
-	\+ member(defining_file(_), PropertyList),
+	member(for(outline_demo), PropertyList),
 	
 	!. 
 
@@ -135,7 +135,7 @@ test(from_editor_invisible) :-
 test(search_global_pred_defs_exact_arity) :-
 	findall(
 		[Functor,Arity,DefiningModule],
-		pdt_search:find_definitions_categorized(_OrigFile,0,'abc'/1,Functor,Arity,_Module,_DeclOrDef,DefiningModule,_File,_Line,_PropertyList,_Visibility,true),
+		pdt_search:find_definitions_categorized('abc'/1,true, DefiningModule, Functor,Arity,_DeclOrDef,_File,_Line,_PropertyList),
 		ResultList
 	),
 	% the search gives lots of duplicate results
@@ -151,7 +151,7 @@ test(search_global_pred_defs_exact_arity) :-
 test(search_global_pred_defs_exact_any) :-
 	findall(
 		[Functor,Arity,DefiningModule],
-		pdt_search:find_definitions_categorized(_OrigFile,0,'exact_search_predicate'/(-1),Functor,Arity,_Module,_DeclOrDef,DefiningModule,_File,_Line,_PropertyList,_Visibility,true),
+		pdt_search:find_definitions_categorized('exact_search_predicate',true,DefiningModule, Functor,Arity,_DeclOrDef,_File,_Line,_PropertyList),
 		ResultList
 	),
 	% the search gives lots of duplicate results
@@ -167,7 +167,7 @@ test(search_global_pred_defs_exact_any) :-
 test(search_global_pred_defs_substring) :- 
 	findall(
 		[Functor, Arity, Module],
-		pdt_search:find_definitions_categorized(_OrigFile,0,'search_string'/(-1),Functor,Arity,Module,_DeclOrDef,_DefiningModule,_File,_Line,_PropertyList,_Visibility,false),
+		pdt_search:find_definitions_categorized('search_string',false,Module,Functor,Arity,_DeclOrDef,_File,_Line,_PropertyList),
 		ResultList
 	),
 	% there must be 4 results
@@ -233,7 +233,7 @@ test(search_global_module_refs_exact) :-
 test(primary_definition_unique) :-
 	module_property(other_module, file(TestFile)),
 	module_property(lists, file(ListsFile)),
-	pdt_search:find_primary_definition_visible_in(TestFile,'member(_, [_,_])',_ReferencedModule,MainFile,_FirstLine,ResultKind),
+	pdt_search:find_primary_definition_visible_in(TestFile,_SelectedLine,'member(_, [_,_])',_ReferencedModule,MainFile,_FirstLine,ResultKind),
 	MainFile == ListsFile,
 	ResultKind == single,
 	!.
@@ -241,7 +241,7 @@ test(primary_definition_unique) :-
 test(primary_definition_ambiguous) :-
 	module_property(outline_demo_multifile_contribution, file(TestFile)),
 	module_property(outline_demo, file(OutlineDemoFile)),
-	pdt_search:find_primary_definition_visible_in(TestFile,'outline_demo:likes(jack_torrance, the_overlook_hotel)',_ReferencedModule,MainFile,FirstLine,ResultKind),
+	pdt_search:find_primary_definition_visible_in(TestFile,_SelectedLine,'outline_demo:likes(jack_torrance, the_overlook_hotel)',_ReferencedModule,MainFile,FirstLine,ResultKind),
 	ResultKind == (multifile),
 	(	MainFile == TestFile,
 		FirstLine == 8
@@ -253,14 +253,14 @@ test(primary_definition_ambiguous) :-
 test(primary_definition_loading_directive_complete) :-
 	module_property(other_module, file(TestFile)),
 	module_property(lists, file(ListsFile)),
-	pdt_search:find_primary_definition_visible_in(TestFile,'use_module(library(lists))',_ReferencedModule,MainFile,_FirstLine,_MultifileResult),
+	pdt_search:find_primary_definition_visible_in(TestFile,_SelectedLine,'use_module(library(lists))',_ReferencedModule,MainFile,_FirstLine,_MultifileResult),
 	ListsFile == MainFile,
 	!.
 
 test(primary_definition_loading_directive_only_alias) :-
 	module_property(other_module, file(TestFile)),
 	module_property(lists, file(ListsFile)),
-	pdt_search:find_primary_definition_visible_in(TestFile,'library(lists)',_ReferencedModule,MainFile,_FirstLine,_MultifileResult),
+	pdt_search:find_primary_definition_visible_in(TestFile,_SelectedLine,'library(lists)',_ReferencedModule,MainFile,_FirstLine,_MultifileResult),
 	ListsFile == MainFile,
 	!.
 

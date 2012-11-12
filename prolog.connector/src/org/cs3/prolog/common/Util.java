@@ -37,7 +37,7 @@ import java.util.Vector;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -710,7 +710,7 @@ public class Util {
 		// Hack to resolve the issue of locating xpce in MacOS
 		if (isMacOS()) {
 			appendPath = new String[1];
-			appendPath[0] = "PATH=$PATH:/opt/local/bin";
+			appendPath[0] = "PATH=$PATH:" + System.getProperty("user.home") + "/bin:/opt/local/bin";
 		}
 
 		try {
@@ -1036,6 +1036,38 @@ public class Util {
 		} else {
 	    throw new IllegalStateException("HTTP response: " + responseCode);
 	}
+	}
+
+	public static String getLogtalkStartupFile() {
+		if (isWindows()) {
+			return "\"%LOGTALKHOME%\\integration\\logtalk_swi.pl\"";
+		} else {
+			String logtalkHome = System.getenv("LOGTALKHOME");
+			if (logtalkHome != null) {
+				return new Path(logtalkHome).append("integration").append("logtalk_swi.pl").toOSString();
+			} else {
+				return "";
+			}
+		}
+	}
+	
+	public static String getLogtalkEnvironmentVariables() {
+		if (isWindows()) {
+			return "";
+		} else {
+			StringBuffer buf = new StringBuffer();
+			String guessedEnvironmentVariables = guessEnvironmentVariables();
+			if (!guessedEnvironmentVariables.isEmpty()) {
+				buf.append(guessedEnvironmentVariables);
+				buf.append(", ");
+			}
+			buf.append("LOGTALKHOME=");
+			buf.append(System.getenv("LOGTALKHOME"));
+			buf.append(", ");
+			buf.append("LOGTALKUSER=");
+			buf.append(System.getenv("LOGTALKUSER"));
+			return buf.toString();
+		}
 	}
 
 

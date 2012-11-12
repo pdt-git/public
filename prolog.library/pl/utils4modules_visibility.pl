@@ -40,6 +40,7 @@
            defined_in_module/4,            % Module, Name, Arity, DefiningModule
            defined_in_files/4,             % Module, Name, Arity, Locations
            defined_in_file/6,              % Module, Name, Arity, Nth,File,StartingLine
+           defined_in_file/7,              % Module, Name, Arity, Ref, Nth,File,StartingLine
            declared_in_file/4              % Module, Name, Arity, Location=[File-[Line]]          
 
            ]
@@ -246,6 +247,9 @@ referenced_but_undeclared(Module,Name,Arity) :-
 %  that define Module:Name/Arity.
  
 defined_in_file(Module,Name,Arity, N,File,Line) :-
+	defined_in_file(Module,Name,Arity, _Ref, N,File,Line).
+
+defined_in_file(Module,Name,Arity, Ref, N,File,Line) :-
     declared_in_module(Module,Name,Arity,Module),
     functor(Head,Name,Arity),
     nth_clause(Module:Head,N,Ref),
@@ -262,17 +266,17 @@ defined_in_file(Module,Name,Arity, N,File,Line) :-
 % which is visible in Module. 
 % Line = 1 (approximating the line number information missing for declarations). 
 
-declared_in_file(Module,Name,Arity,[File-[Line]]) :-
+declared_in_file(Module,Name,Arity,[File-[location(Line, null)]]) :-
     functor(Head,Name,Arity),
     predicate_property(Module:Head,foreign),
     !,
     File = foreign,
     Line = 0.
-declared_in_file(Module,_Name,_Arity,[File-[Line]]) :-
+declared_in_file(Module,_Name,_Arity,[File-[location(Line, null)]]) :-
     module_property(Module, file(File)),  % declaration in known file
     !,
     Line=1.                                        % guess the unknown line nr
-declared_in_file(Module,Name,Arity,[File-[Line]]) :-
+declared_in_file(Module,Name,Arity,[File-[location(Line, null)]]) :-
     functor(Head,Name,Arity),
     predicate_property(Module:Head,dynamic),
     File = (dynamic) ,  
@@ -293,18 +297,18 @@ defined_in_files(Module,Name,Arity,Locations) :-
      
 defined_in_files(Module,Name,Arity,Locations) :-
     findall( File-Lines,
-             setof( Line, Module^Name^Arity^N^
-                    defined_in_file(Module,Name,Arity, N,File,Line),
+             setof( location(Line, Ref), Module^Name^Arity^N^
+                    defined_in_file(Module,Name,Arity, Ref, N, File,Line),
                     Lines
              ),
-             SrcLocations
-    ),
-    (  SrcLocations == []
-    -> ( declared_in_module(Module,Name,Arity,DeclaringModule),
-         declared_in_file(DeclaringModule,Name,Arity,DeclLocation),
-         Locations = DeclLocation
-       ) 
-    ;  Locations = SrcLocations
+             Locations
+%    ),
+%    (  SrcLocations == []
+%    -> ( declared_in_module(Module,Name,Arity,DeclaringModule),
+%         declared_in_file(DeclaringModule,Name,Arity,DeclLocation),
+%         Locations = DeclLocation
+%       ) 
+%    ;  Locations = SrcLocations
     ).
 
 

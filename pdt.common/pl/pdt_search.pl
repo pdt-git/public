@@ -14,11 +14,12 @@
 :- module( pdt_search,
          [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
          , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
-         , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
+         , find_definitions_categorized/9
+         , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
          , find_pred/8
          , find_pred_for_editor_completion/9
-         , find_module_definition/5
+         , find_entity_definition/5
          , find_module_reference/8
          , find_alternative_predicates/7
          ]).
@@ -39,7 +40,7 @@
              , declared_in_file/4               % (Module,Name,Arity,Location)
              , defined_in_files/4               % (Module,Name,Arity,Locations)
              ] ).
-
+:- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 % TODO: Why this import?
 :- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
@@ -55,21 +56,34 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, '', ExactMatch):-
-	var(EnclFile),
-	!,
-	(ExactMatch == true
-	-> (search_term_to_predicate_indicator(Term, Functor/Arity),
-        current_predicate(_:Functor/Arity))
-	;  (search_term_to_predicate_indicator(Term, FunctorPrefix/Arity),
-        current_predicate(_:Functor/Arity),
-        once(sub_atom(Functor,_,_,_,FunctorPrefix)))
+%% find_definitions_categorized(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
+% 
+find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList):-
+	(	atom(Term)
+	->	SearchFunctor = Term
+	;	Term = SearchFunctor/Arity
+	),
+	(	ExactMatch == true
+	->	Functor = SearchFunctor,
+		declared_in_module(DefiningModule, Functor, Arity, DefiningModule)
+	;	declared_in_module(DefiningModule, Functor, Arity, DefiningModule),
+		once(sub_atom(Functor,_,_,_,SearchFunctor))
 	),
     find_decl_or_def_2(Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
-    member(DeclOrDef-DefiningModule-Location,Sources),
-    member(File-Lines,Location),
-    member(Line,Lines),
-    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+    member(DeclOrDef-DefiningModule-Locations,Sources),
+    member(File-Lines,Locations),
+    member(location(Line, Ref),Lines),
+    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList0),
+    (	head_position_of_clause(Ref, Position)
+    ->	Location = Position,
+    	PropertyList = [line(Line)|PropertyList0]
+    ;	Location = Line,
+    	PropertyList = PropertyList0
+    ).
+
+find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList) :-
+	current_predicate(logtalk_load/1),
+	logtalk_adapter::find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList).
 
 
 % find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
@@ -83,15 +97,36 @@ find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This,
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
     
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File,Line, PropertyList, Visibility, _ExactMatch):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File, Location, PropertyList, Visibility, _ExactMatch):-
     referenced_entity(EnclFile, ReferencedModule),    
     search_term_to_predicate_indicator(Term, Functor/Arity),
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
-    member(DeclOrDef-Visibility-DefiningModule-Location,Sources),
-    member(File-Lines,Location),
-    member(Line,Lines),
-    properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
+    member(DeclOrDef-Visibility-DefiningModule-Locations,Sources),
+    member(File-Lines,Locations),
+    member(location(Line, Ref),Lines),
+    properties_for_predicate(DefiningModule,Functor,Arity,PropertyList0),
+    (	head_position_of_clause(Ref, Position)
+    ->	Location = Position,
+    	PropertyList = [line(Line)|PropertyList0]
+    ;	Location = Line,
+    	PropertyList = PropertyList0
+    ).
 
+head_position_of_clause(Ref, Position) :-
+	catch(clause_info(Ref, _, TermPosition, _),_,fail),
+	(	clause_property(Ref, fact)
+	->	% fact
+		TermPosition = HeadPosition
+	;	% clause with body
+		TermPosition = term_position(_, _, _, _, [HeadPosition|_])
+	),
+	(	HeadPosition = Start-End
+	->	% no arguments
+		true
+	;	% at least one argument
+		HeadPosition = term_position(Start, End, _, _, _)
+	),
+	format(atom(Position), '~w-~w', [Start, End]).
 
 find_decl_or_def_2(Name,Arity,Declarations) :-
    setof( declaration-DeclModule-Location, Name^Arity^ 
@@ -181,17 +216,24 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
          
 
 visibility(super, ContextModule,Name,Arity,DeclModule) :-
-	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
+	(	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden)
+	;	module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, imported)
+	),
+	!.
 %    declared_in_module(ContextModule,Name,Arity,DeclModule),
 %    ContextModule \== DeclModule. 
     
    
 visibility(local, ContextModule,Name,Arity,DeclModule) :-
     declared_in_module(ContextModule,Name,Arity,DeclModule),
-    ContextModule == DeclModule.
+    ContextModule == DeclModule,
+    !.
     
 visibility(sub, ContextModule,Name,Arity,DeclModule) :-
-	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden).
+	(	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden)
+	;	module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, imported)
+	),
+	!.
 %    declared_in_module(DeclModule,Name,Arity,DeclModule),
 %    % DeclModule is a submodule of ContextModule
 %    declared_in_module(DeclModule,_,_,ContextModule), % submodule
@@ -205,7 +247,9 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
     declared_in_module(DeclModule,Name,Arity,DeclModule),
     ContextModule \== DeclModule,
 	\+ module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, overridden),
-	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden).
+	\+ module_imports_predicate_from(DeclModule, Name, Arity, ContextModule, imported),
+	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, overridden),
+	\+ module_imports_predicate_from(ContextModule, Name, Arity, DeclModule, imported).
 %    \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
 %    \+ declared_in_module(DeclModule,_,_,ContextModule).
 
@@ -215,7 +259,7 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/ 
 
-%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine,?ResultKind)
+%% find_primary_definition_visible_in(+EnclFile,+SelectedLine,+TermString,?ReferencedModule,?MainFile,?FirstLine,?ResultKind)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity 
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either 
@@ -227,17 +271,9 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
 % 
 % ResultKind is one of: single, multifile, foreign, dynamic
         
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,single) :-
-    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
-    !,
-    logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine).
-
-
-% The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in(EnclFile,TermString,ReferencedModule,MainFile,FirstLine,ResultKind) :-
+find_primary_definition_visible_in(EnclFile,SelectedLine,TermString,ReferencedModule,MainFile,FirstLine,ResultKind) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
-    extract_name_arity(Term, _,_Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
+	find_primary_definition_visible_in_(EnclFile,SelectedLine,Term,ReferencedModule,MainFile,FirstLine,ResultKind).
 
 retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	(	module_property(Module, file(EnclFile))
@@ -247,21 +283,34 @@ retrieve_term_from_atom(EnclFile, TermString, Term) :-
 	;	atom_to_term(TermString, Term, _)
 	).
 
+find_primary_definition_visible_in_(EnclFile, SelectedLine,Term,ReferencedModule,MainFile,FirstLine,single) :-
+    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
+    !,
+    logtalk_adapter::find_primary_definition_visible_in(EnclFile, SelectedLine,Term,_Functor,_Arity,ReferencedModule,MainFile,FirstLine).
+
+% The second argument is just an atom contianing the string representation of the term:     
+find_primary_definition_visible_in_(EnclFile,_SelectedLine,Term,ReferencedModule,MainFile,FirstLine,ResultKind) :-
+    extract_name_arity(Term, _,_Head,Name,Arity),
+    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
+
 extract_name_arity(Term,Module,Head,Name,Arity) :-
-    (  var(Term) 
-    -> throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
-     ; true
-    ),
-    % Special treatment of Name/Arity terms:
-    (  Term = Name/Arity
-    -> true
-     ; (  Term = Module:Term2
-       -> functor(Term2, Name, Arity)
-       ;  functor(Term,Name,Arity)
-       )
-    ),
-    % Create most general head
-    functor(Head,Name,Arity).
+	(	var(Term) 
+	->	throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
+	;	true
+	),
+	% Special treatment of Name/Arity terms:
+	(	Term = Module:Name/Arity
+	->	true
+	;	(	Term = Name/Arity
+		->	true
+		;	(	Term = Module:Term2
+			->	functor(Term2, Name, Arity)
+			;	functor(Term,Name,Arity)
+			)
+		)
+	),
+	% Create most general head
+	functor(Head,Name,Arity).
 
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
@@ -308,28 +357,35 @@ extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
     
 find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
-    module_of_file(EnclFile,FileModule),
-    (  atom(ReferencedModule)
-    -> true                            % Explicit module reference
-    ;  ReferencedModule = FileModule   % Implicit module reference
-    ),
-    (  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
-    -> defined_in_files(DefiningModule,Name,Arity,Locations)
-    ;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
-    defined_in_files(DeclaringModule,Name,Arity,Locations)
-       )
-    ).
+	module_of_file(EnclFile,FileModule),
+	(	atom(ReferencedModule)
+	->	true                            % Explicit module reference
+	;	ReferencedModule = FileModule   % Implicit module reference
+	),
+	(	defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
+	->	defined_in_files(DefiningModule,Name,Arity,Locations0),
+		(	Locations0 == []
+		->	declared_in_file(DefiningModule, Name, Arity, Locations)
+		;	Locations0 = Locations
+		)
+	;	declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+		defined_in_files(DeclaringModule,Name,Arity,Locations0),
+		(	Locations0 == []
+		->	declared_in_file(DefiningModule, Name, Arity, Locations)
+		;	Locations0 = Locations
+		)
+	).
 
 primary_location(Locations,DefiningModule,File,FirstLine) :-
     member(File-Lines,Locations),
     module_of_file(File,DefiningModule),
     !,
-    Lines = [FirstLine|_].
+    Lines = [location(FirstLine, _Ref)|_].
 primary_location(Locations,_,File,FirstLine) :-
     findall( NrOfClauses-File-FirstLine,
              ( member(File-Lines,Locations),
                length(Lines,NrOfClauses),
-               Lines=[FirstLine|_]
+               Lines=[location(FirstLine, _Ref)|_]
              ),
              All
     ),
@@ -387,7 +443,7 @@ find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arit
 find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
     SearchCategory = definition,
     
-    module_of_file(ContextFile, ContextModule),
+%    module_of_file(ContextFile, ContextModule),
     % Backtrack over all predicates defined in File
     % including multifile contributions to other modules:
     source_file(ModuleHead, ContextFile),
@@ -400,22 +456,40 @@ find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Fu
 
     % In the case of a multifile predicate, we want to find all clauses for this 
     % predicate, even when they occur in other files
-    defined_in_file(DefiningModule, Functor, Arity, _, DefiningFile, Line),
+    defined_in_file(DefiningModule, Functor, Arity, Ref, _, DefiningFile, Line),
     (	DefiningFile == ContextFile
-    ->	(	DefiningModule == ContextModule
+    ->	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% local definition
-    		PropertyList = [local(DefiningModule)|PropertyList0]
+    		PropertyList1 = [local(DefiningModule)|PropertyList0]
 	    ;	% contribution of ContextModule for DefiningModule	
-    		PropertyList = [for(DefiningModule), defining_file(DefiningFile) | PropertyList0]
+    		PropertyList1 = [for(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	)
-    ;	(	DefiningModule == ContextModule
+    ;	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% contribution from DefiningFile to ContextModule, ContextFile
-    		PropertyList = [from(DefiningModule), defining_file(DefiningFile) | PropertyList0]
+    		PropertyList1 = [from(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	;	% other file to itself
-    		PropertyList = [remote(DefiningModule), defining_file(DefiningFile) | PropertyList0]
+    		PropertyList1 = [remote(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	)
+    ),
+    (	first_argument_of_clause(Ref, FirstArg)
+    ->	PropertyList = [FirstArg|PropertyList1]
+    ;	PropertyList = PropertyList1
     ).
-        
+
+first_argument_of_clause(Ref, first_argument(Arg)) :-
+	catch(clause(_:Head, _, Ref), _, fail),
+	arg(1, Head, FirstArg),
+	(	var(FirstArg)
+	->	clause_info(Ref, _, _, Varnames), 
+		arg(1, Varnames, FirstVarName),
+		Arg = FirstVarName
+	;	functor(FirstArg, F, N),
+		(	N == 0
+		->	Arg = F
+		;	format(atom(Arg), '~w/~w', [F, N])
+		)
+	).
+
 % pdt_strip_module(+ModuleHead,?Module,-ModuleLine,?Head) is det
 % pdt_strip_module(-ModuleHead,?Module,-ModuleLine,+Head) is det
 %
@@ -571,6 +645,15 @@ my_module_of_file(File,Module):-
     ; Module=system                       
     ).
 
+
+find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+	current_predicate(logtalk_load/1),
+	!,
+	logtalk_adapter::find_entity_definition(SearchString, ExactMatch, File, Line, Entity).
+
+find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+	find_module_definition(SearchString, ExactMatch, File, Line, Entity).
+	
 
 find_module_definition(SearchModule, ExactMatch, File, Line, Module) :-
 	current_module(Module),

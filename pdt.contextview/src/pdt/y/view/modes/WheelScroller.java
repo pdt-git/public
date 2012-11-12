@@ -47,12 +47,12 @@ public class WheelScroller implements MouseWheelListener
 		if (isMouseWheelRotatedUp(event))
 		{
 			if (rectangle.getY() + rectangle.getHeight() - 1 > viewpoint.getY() + viewSize.height / view.getZoom())
-				centerPoint.setLocation(centerPoint.getX(), centerPoint.getY() + event.getScrollAmount());
+				centerPoint.setLocation(centerPoint.getX(), centerPoint.getY() + event.getScrollAmount() * 2 / view.getZoom());
 		}
 		else
 		{
 			if (rectangle.getY() + 1 < viewpoint.getY())
-				centerPoint.setLocation(centerPoint.getX(), centerPoint.getY() - event.getScrollAmount());
+				centerPoint.setLocation(centerPoint.getX(), centerPoint.getY() - event.getScrollAmount() * 2 / view.getZoom());
 		}
 
 		if (rectangle.contains(centerPoint))

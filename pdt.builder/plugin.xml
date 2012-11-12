@@ -21,5 +21,15 @@
             path="prolog-src/analyzer/">
       </fileSearchPathContribution>
    </extension>
+   <extension
+         point="org.cs3.prolog.connector.bootstrapContribution">
+      <fileContribution
+            id="pdt.builder.fileContribution"
+            path="prolog-src/load.pl">
+         <dependency
+               contribution="prolog.connector.fileContribution">
+         </dependency>
+      </fileContribution>
+   </extension>
 
 </plugin>
