@@ -13,8 +13,6 @@
 
 package pdt.y.focusview;
 
-import java.util.List;
-
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -82,10 +80,6 @@ public class FocusView extends ViewPart {
 				updateCurrentFocusView();	
 			}
 		});
-	}
-	
-	public GraphPIFLoader createGraphPIFLoader(PDTGraphView pdtGraphView) {
-		return  new GraphPIFLoader(pdtGraphView);
 	}
 	
 	@Override
@@ -314,26 +308,18 @@ public class FocusView extends ViewPart {
 		private final String FOCUS_VIEW_IS_OUTDATED = "[FocusView is outdated]";
 		
 		private final PDTGraphView pdtGraphView;
-		private final GraphPIFLoader pifLoader;
-		private final String filePath;
+		private final GraphPIFLoaderBase pifLoader;
 		
 		private boolean isDirty = false;
 		
-		public FocusViewControl(String filePath) {
-			super(getViewContainer(), SWT.NONE); 
+		public FocusViewControl(PDTGraphView pdtGraphView, GraphPIFLoaderBase pifLoader) {
+			super(getViewContainer(), SWT.NONE);
 			
-			this.filePath = filePath;
-			
-			this.pdtGraphView = new PDTGraphView();
-			
-			this.pifLoader = createGraphPIFLoader(pdtGraphView);
+			this.pdtGraphView = pdtGraphView;
+			this.pifLoader = pifLoader;
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
 			pdtGraphView.addViewMode(new HoverTrigger(getShell()));
-		}	
-		
-		public String getFilePath() {
-			return filePath;
 		}
 		
 		public boolean isEmpty() {
@@ -349,15 +335,15 @@ public class FocusView extends ViewPart {
 			return isDirty;
 		}
 		
-		public List<String> getDependencies() {
-			return pifLoader.getDependencies();
+		public GraphPIFLoaderBase getPifLoader() {
+			return pifLoader;
 		}
 
 		public void reload() {
-			Job j = new Job("PDT Context View: Reloading Graph") {
+			Job j = new Job("Reloading Graph") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					pifLoader.queryPrologForGraphFacts(filePath);
+					pifLoader.loadGraph();
 					setStatusText("");
 					
 					isDirty = false;

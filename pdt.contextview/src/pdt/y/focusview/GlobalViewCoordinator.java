@@ -1,20 +1,25 @@
 package pdt.y.focusview;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.cs3.prolog.common.FileUtils;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.service.ConsultListener;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.runtime.CoreException;
 
-import pdt.y.preferences.MainPreferencePage;
+import pdt.y.main.PDTGraphView;
 
-public class GlobalViewCoordinator extends ViewCoordinatorBase implements ConsultListener {
+public class GlobalViewCoordinator extends ViewCoordinatorBase {
 	
-	FocusView.FocusViewControl currentFocusView;
-
+	final HashMap<String, FocusView.FocusViewControl> views = new HashMap<String, FocusView.FocusViewControl>();
+	
 	public GlobalViewCoordinator(FocusView focusView)
 	{
 		super(focusView);
@@ -24,34 +29,73 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase implements Consul
 	}
 	
 		
-	public FocusView.FocusViewControl swichFocusView(String path) {
-		refreshCurrentView(path);
-		return currentFocusView;
-	}
-
-	protected void refreshCurrentView(String path) {
-		//if (currentFocusView == null) {
-		currentFocusView = focusView.new FocusViewControl(path);
-		focusView.setCurrentFocusView(currentFocusView);
-		//}
+	public void swichFocusView(String path) {
 		
-		if (MainPreferencePage.isAutomaticUpdate() && currentFocusView != null) {
-			currentFocusView.reload();
+		IProject project = getContainingProject(path);
+		List<String> paths = getFilePaths(project);
+		
+		currentFocusView = views.get(project.getName());
+		
+		if (currentFocusView == null) {
+			PDTGraphView pdtGraphView = new PDTGraphView();
+			GlobalGraphPIFLoader loader = new GlobalGraphPIFLoader(pdtGraphView);
+			
+			currentFocusView = focusView.new FocusViewControl(pdtGraphView, loader);
+
+			loader.setCurrentPath(path);
+			loader.setPaths(paths);
+			refreshCurrentView();
+			
+			views.put(project.getName(), currentFocusView);
 		}
+		
+		focusView.setCurrentFocusView(currentFocusView);
 	}
 
-	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files,
-			IProgressMonitor monitor) throws PrologInterfaceException { }
+
+	private IProject getContainingProject(String path) {
+		IFile file;
+		try {
+			file = FileUtils.findFileForLocation(path);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}		
+		return file.getProject();
+	}
+
+
+	private List<String> getFilePaths(IProject project) {
+		final List<String> paths = new LinkedList<String>();
+		try {			
+			project.accept(new IResourceVisitor() {
+
+				@Override
+				public boolean visit(IResource resource) throws CoreException {
+					if (!(resource instanceof IFile)) 
+						return true;
+					IFile file = (IFile)resource;
+					if (file.getFileExtension().equals("pl")) {
+						try {
+							paths.add(Util.quoteAtom(Util.prologFileName(file)));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					return false;
+				}
+				
+			});
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		return paths;
+	}
+
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files,
-			List<String> allConsultedFiles, IProgressMonitor monitor)
-			throws PrologInterfaceException {
-		
-		if (files.isEmpty())
-			return;
-		
-		refreshCurrentView(files.get(0).toString());
+	protected boolean isCurrentFocusViewActualFor(String path) {
+		return currentFocusView != null 
+				&& ((GlobalGraphPIFLoader)currentFocusView.getPifLoader()).getPaths().contains(path);
 	}
 }
