@@ -15,32 +15,50 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.Map;
 
+import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 
 
 public class PrologSourceFileModel {
 
 	private Map<String, OutlineModuleElement> modules;
+	private static final String FILE_NOT_LOADED_MESSAGE = "File is not loaded in the current process";
+	private String message = null;
 	
 	public PrologSourceFileModel(Map<String, OutlineModuleElement> modules) {
-		update(modules);
+		this(modules, null);
 	}
 	
-	public void update(Map<String,OutlineModuleElement> modules){
+	public PrologSourceFileModel(Map<String, OutlineModuleElement> modules, String fileName) {
+		update(modules, fileName);
+	}
+	
+	public void update(Map<String,OutlineModuleElement> modules, String fileName){
+		message = null;
 		this.modules = modules;
-		for (OutlineModuleElement module : modules.values()) {
-			module.setParent(this);
+		if (modules.isEmpty()) {
+			if (fileName != null && !PDTOutlineQuery.isFileLoaded(fileName)) {
+				message = FILE_NOT_LOADED_MESSAGE;
+			}
+		} else {
+			for (OutlineModuleElement module : modules.values()) {
+				module.setParent(this);
+			}
 		}
 	}
 	
 	public boolean hasChildren() {
-		if((modules == null) || (modules.isEmpty()))
+		if(((modules == null) || (modules.isEmpty())) && message == null)
 			return false;
 		return true;
 	}
 
 	public Object[] getElements() {
-		return modules.values().toArray();
+		if (modules.isEmpty() && message != null) {
+			return new Object[]{message};
+		} else {
+			return modules.values().toArray();
+		}
 	}
 	
 	public void dispose() {

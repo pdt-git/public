@@ -31,6 +31,8 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 	public String getText(Object element) {
 		if(element instanceof PrologTreeElement) {
 			return ((PrologTreeElement) element).getLabel();
+		} else if (element instanceof String) {
+			return (String) element;
 		}
 		return "";
 	}

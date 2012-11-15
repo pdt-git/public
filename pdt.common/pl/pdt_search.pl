@@ -22,6 +22,7 @@
          , find_entity_definition/5
          , find_module_reference/8
          , find_alternative_predicates/7
+         , loaded_file/1
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),
@@ -711,3 +712,11 @@ has_super_module(Module, SuperModule) :-
 	module_property(SuperModule, file(SuperModuleFile)),
 	source_file_property(SuperModuleFile, load_context(Module, _, _OptionList)).
  
+
+loaded_file(FullPath) :-
+	(	split_file_path(FullPath, Directory, File, _, lgt)
+	->	current_predicate(logtalk_load/1),
+		logtalk::loaded_file(File, Directory)
+	;	source_file(FullPath)
+	).
+
