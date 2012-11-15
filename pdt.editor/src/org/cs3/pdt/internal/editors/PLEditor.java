@@ -14,6 +14,8 @@
 
 package org.cs3.pdt.internal.editors;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +25,10 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
@@ -39,6 +44,10 @@ import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
+import org.cs3.prolog.pif.service.ConsultListener;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -90,7 +99,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-public class PLEditor extends TextEditor {
+public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener {
 
 	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
 
@@ -302,6 +311,9 @@ public class PLEditor extends TextEditor {
 				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		});
+		
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
 
 	}
 
@@ -426,6 +438,7 @@ public class PLEditor extends TextEditor {
 				// consult the file and update the problem markers, too.
 				if (!shouldAbortSaving()) {
 					PLEditor.super.doSave(new NullProgressMonitor());
+					updateTitleImage(getEditorInput());
 					PDTCommonPlugin.getDefault().notifyDecorators();
 				}
 			}
@@ -754,15 +767,46 @@ public class PLEditor extends TextEditor {
 		if (textWidget == null)
 			return;
 		if (!isExternalInput(input)) {
-			textWidget.setBackground(new Color(textWidget.getDisplay(),
-					colorManager.getBackgroundColor()));
-			setTitleImage(ImageRepository
-					.getImage(ImageRepository.PROLOG_FILE_UNCONSULTED));
+			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getBackgroundColor()));
 		} else {
-			textWidget.setBackground(new Color(textWidget.getDisplay(),
-					colorManager.getExternBackgroundColor()));
-			setTitleImage(ImageRepository
-					.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));
+			textWidget.setBackground(new Color(textWidget.getDisplay(), colorManager.getExternBackgroundColor()));
+		}
+		updateTitleImage(input);
+	}
+	
+	private void updateTitleImage(IEditorInput input) {
+		if (input instanceof IFileEditorInput) {
+			Map<String, Object> result = null;
+			try {
+				result = PDTUtils.getActivePif().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, Util.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+			}
+			if (ExternalPrologFilesProjectUtils.isExternalFile(((IFileEditorInput) input).getFile())) {
+				if (result == null) {
+					setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL));
+				} else {
+					String state = result.get("State").toString();
+					if ("current".equals(state)) {
+						setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL_CONSULTED));
+					} else {
+						setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL_CONSULTED_OLD));
+					}
+				}
+			} else {
+				if (result == null) {
+					setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_UNCONSULTED));
+				} else {
+					String state = result.get("State").toString();
+					if ("current".equals(state)) {
+						setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_CONSULTED));
+					} else {
+						setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_CONSULTED_OLD));
+					}
+				}
+			}
+		} else {
+			setTitleImage(ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL_NOT_LINKED));
 		}
 	}
 
@@ -1277,6 +1321,45 @@ public class PLEditor extends TextEditor {
 		// String pos = document.get(begin, length);
 
 		return new TextSelection(document, begin, length);
+	}
+
+	@Override
+	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("", 1);
+		monitor.done();
+	}
+
+	@Override
+	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+		monitor.beginTask("", 1);
+		String editorFile = getPrologFileName();
+		if (allConsultedFiles.contains(editorFile)) {
+			getSite().getShell().getDisplay().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					updateTitleImage(getEditorInput());
+				}
+			});
+		}
+
+		monitor.done();
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				updateTitleImage(getEditorInput());
+			}
+		});
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
 	}
 
 }
