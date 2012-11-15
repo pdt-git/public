@@ -438,6 +438,7 @@ find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, 
 find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
+    current_predicate(logtalk_load/1),
     logtalk_adapter::find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
 
 find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
