@@ -28,7 +28,7 @@ pdt_source_file(File, State) :-
 	(	exists_file(File)
 	->	source_file_property(File, 	modified(ModifiedAtConsult)),
 		time_file(File, ModifiedNow),
-		(	ModifiedNow > ModifiedAtConsult
+		(	ModifiedNow > ModifiedAtConsult + 0.001
 		->	State = old
 		;	State = current
 		)

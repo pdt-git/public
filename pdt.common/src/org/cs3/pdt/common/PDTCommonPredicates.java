@@ -32,7 +32,11 @@ public class PDTCommonPredicates {
 	public static final String FIND_MODULE_REFERENCE = "pdt_search:find_module_reference";
 	public static final String FIND_ENTITY_DEFINITION = "pdt_search:find_entity_definition";
 	public static final String LOADED_FILE = "pdt_search:loaded_file";
-	
+
+	// source files
+	public static final String PDT_SOURCE_FILES = "source_files:pdt_source_files";
+	public static final String PDT_SOURCE_FILE = "source_files:pdt_source_file";
+
 }
 
 
