@@ -75,6 +75,18 @@ add_output_stream_to_call(CALL, OutStream, CALL2) :-
     CALL2 =.. L2.
 
 write_global_facts_to_graphML(ProjectFiles, OutStream) :-
+    
+    count_call_edges_between_predicates,
+    
+    forall(	
+		member(FileId, ProjectFiles),
+		(	
+			fileT(FileId,FileName, Module),
+			write_file(OutStream, FileName, all_preds, FileId, FileName, Module),
+    		flush_output(OutStream)
+    	)
+    ),
+    
     findall(
     	PredId,
     	(
@@ -83,7 +95,6 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
     	),
     	Predicates
     ),
-    count_call_edges_between_predicates,
 	findall([SourcePredicate, TargetPredicate],
 		(
     		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
@@ -92,8 +103,6 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
     	),
     	FoundCalls
     ),
-    
-    write_predicates(OutStream, _, Predicates),
     
     list_to_set(FoundCalls, Calls),
     forall(
