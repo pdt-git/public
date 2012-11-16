@@ -222,7 +222,7 @@ public class PDTGraphView extends  JPanel {
 	protected void initializeBoxSize(Node node, int maximumValue, int medianValue, Graphics gfx, FontMetrics fontmtx) {
 		
 		int width = 0;
-		int height = PredicateLayoutPreferences.getNumberOfLines() * 16 + 20;
+		int height = PredicateLayoutPreferences.getNumberOfLines() * fontmtx.getHeight() + 20;
 		
 		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
 		
