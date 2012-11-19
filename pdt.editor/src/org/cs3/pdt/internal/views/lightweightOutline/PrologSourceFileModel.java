@@ -22,7 +22,7 @@ import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 public class PrologSourceFileModel {
 
 	private Map<String, OutlineModuleElement> modules;
-	private static final String FILE_NOT_LOADED_MESSAGE = "File is not loaded in the current process";
+	private static final String FILE_NOT_LOADED_MESSAGE = "Consult the current file to see its outline";
 	private String message = null;
 	
 	public PrologSourceFileModel(Map<String, OutlineModuleElement> modules) {
