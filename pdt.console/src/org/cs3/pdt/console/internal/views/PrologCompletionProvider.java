@@ -33,21 +33,35 @@ public class PrologCompletionProvider {
 	private PrologInterface pif;
 
 	public CompletionProposal[] getCompletionProposals(String line, int pos) {
-		String head = line.substring(0, pos);
-
-		String[] split = head.split("[^\\w^$]");
-		if (split.length == 0) {
+//		String head = line.substring(0, pos);
+//
+//		String[] split = head.split("[^\\w^$]");
+//		if (split.length == 0) {
+//			return EMPTY_COMPLETION_PROPOSAL;
+//		}
+//		String prefix = split[split.length - 1];
+		if (line.isEmpty()) {
 			return EMPTY_COMPLETION_PROPOSAL;
 		}
-		String prefix = split[split.length - 1];
-		int prefixLength = prefix.length();
 		
-		if (prefixLength <= 0) {
+		Prefix prefix = calculatePrefix(line, pos - 1);
+		String splittingOperator = findSplittingOperator(line, prefix.begin - 1);
+		String module = null;
+		if (splittingOperator != null) {
+			module = retrievePrefixedModule(line, prefix.begin - splittingOperator.length());
+		}
+		if (module == null || module.isEmpty()) {
+			module = "_";
+		} else {
+			module = Util.quoteAtomIfNeeded(module);
+		}
+		
+		if (prefix.length <= 0) {
 			return EMPTY_COMPLETION_PROPOSAL;
 		}
 		
 		ArrayList<CompletionProposal> proposals = new ArrayList<CompletionProposal>();
-		String query = bT(PDTCommonPredicates.FIND_PRED, "'_'", Util.quoteAtom(prefix), "_", "Name", "Arity", "Public", "_" , "Doc");
+		String query = bT(PDTCommonPredicates.FIND_PRED, "'_'", Util.quoteAtomIfNeeded(prefix.prefix), module, "Name", "Arity", "Public", "_" , "Doc");
 		List<Map<String, Object>> results;
 		try {
 			results = pif.queryAll(query);
@@ -55,7 +69,7 @@ public class PrologCompletionProvider {
 				int arity = Integer.parseInt(result.get("Arity").toString());
 				String name = result.get("Name").toString();
 				String doc = result.get("Doc").toString();
-				proposals.add(new CompletionProposal(name, arity, prefixLength, doc));
+				proposals.add(new CompletionProposal(name, arity, prefix.length, doc, prefix.startsWithSingleQuote));
 			}
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
@@ -63,6 +77,83 @@ public class PrologCompletionProvider {
 		return proposals.toArray(new CompletionProposal[proposals.size()]);
 	}
 	
+	private class Prefix {
+		int begin;
+		int length;
+		String prefix;
+		boolean startsWithSingleQuote;
+				
+		Prefix(int begin, String prefix, boolean startsWithSingleQuote) {
+			this.begin = begin;
+			this.prefix = prefix;
+			this.length = prefix.length();
+			this.startsWithSingleQuote = startsWithSingleQuote;
+		}
+	}
+		
+	private Prefix calculatePrefix(String line, int offset) {
+		int begin=offset;
+		int length=0;
+		char c = line.charAt(begin);
+		if (c == '\'') {
+			return new Prefix(offset, "", false);
+		}
+		boolean isPredChar = Util.isNonQualifiedPredicateNameChar(c);
+		
+		while (isPredChar){
+			length++;
+			int test = begin-1;
+			if(test >=0){
+				c = line.charAt(test);
+				if (c == '\'') {
+					return new Prefix(begin - 1, line.substring(begin, begin + length), true);
+				}
+				isPredChar = Util.isNonQualifiedPredicateNameChar(c);
+				if(!isPredChar){
+					break;
+				}
+			} else {
+				break;
+			}
+			begin=test;
+		}
+		return new Prefix(begin, line.substring(begin, begin + length), false);
+	}
+	
+	private String findSplittingOperator(String line, int begin) {
+		if (begin <= 0) {
+			return null;
+		}
+		char c = line.charAt(begin);
+		char c2 = line.charAt(begin - 1);
+		switch (c) {
+		case ':':
+			switch (c2) {
+			case ':':
+				return "::";
+			default:
+				return ":";
+			}
+		case '<':
+			if (c2 == '<') {
+				return "<<";
+			}
+		}
+		return null;
+	}
+	
+	private String retrievePrefixedModule(String line, int begin) {
+		int moduleEnd = begin;
+		int moduleBegin = begin - 1;
+		while (Util.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)) && moduleBegin > 0)
+			moduleBegin--;
+		String moduleName = line.substring(moduleBegin, moduleEnd);
+		if(!Util.isVarPrefix(moduleName)){
+			return moduleName;
+		} else {
+			return null;
+		}
+	}
 	public void setPrologInterface(PrologInterface pif) {
 		this.pif = pif;
 	}

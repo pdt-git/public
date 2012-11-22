@@ -24,19 +24,21 @@ public class CompletionProposal implements IContentProposal{
 	private String label;
 	private String doc;
 	private String content;
+	private boolean addSingleQuote;
 	
-	public CompletionProposal(String functor, int arity, int prefixLength, String doc) {
+	public CompletionProposal(String functor, int arity, int prefixLength, String doc, boolean addSingleQuote) {
 		this.functor = functor;
 		this.arity = arity;
 		this.prefixLength = prefixLength;
 		this.doc = doc;
+		this.addSingleQuote = addSingleQuote;
 		label = functor + "/" + arity;
 	}
 	
 	@Override
 	public String getContent() {
 		if (content == null) {
-			content = (functor + getArglist()).substring(prefixLength);
+			content = (functor + (addSingleQuote ? "'" : "") + getArglist()).substring(prefixLength);
 		}
 		return content;
 	}
