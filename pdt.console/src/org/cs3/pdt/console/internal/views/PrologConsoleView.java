@@ -1338,12 +1338,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
-		Object configuration = pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
-		if (configuration == null) {
-			title.setText(key);
-		} else {
-			title.setText(key + " (" + configuration.toString().replaceAll("&", "&&") + ")");
-		}
+		title.setText(SelectContextPIFAutomatedAction.getLabelForPif(key, reg));
+//		Object configuration = pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
+//		if (configuration == null) {
+//			title.setText(key);
+//		} else {
+//			title.setText(key + " (" + configuration.toString().replaceAll("&", "&&") + ")");
+//		}
 
 		viewer.setEnterSendsSemicolon(false);
 
