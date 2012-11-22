@@ -555,24 +555,23 @@ find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Vi
 find_completion_(_EnclosingFile, _LineInFile, SpecifiedModule:PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	!,
 	PredicatePrefix \== '',
-	setof(Name-Arity, SpecifiedModule^(
-		SpecifiedModule:current_predicate(Name/Arity),
+	setof(Module-Name-Arity, SpecifiedModule^(
+		declared_in_module(SpecifiedModule, Name, Arity, Module),
 		atom_concat(PredicatePrefix, _, Name)
 	), Predicates),
-	member(Name-Arity, Predicates),
-	predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+	member(Module-Name-Arity, Predicates),
+	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 
 find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
-	setof(Name-Arity, EnclosingFile^FileModule^(
+	setof(Module-Name-Arity, EnclosingFile^FileModule^(
 		module_of_file(EnclosingFile, FileModule),
-		FileModule:current_predicate(Name/Arity),
+		declared_in_module(FileModule, Name, Arity, Module),
 		atom_concat(PredicatePrefix, _, Name)
 	), Predicates),
-	member(Name-Arity, Predicates),
-	predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+	member(Module-Name-Arity, Predicates),
+	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 
-predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocKind, Doc) :-
-	declared_in_module(Module, Name, Arity, Module),
+predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc) :-
 	functor(Head, Name, Arity),
 	(	predicate_property(Module:Head, built_in)
 	->	IsBuiltin = true
@@ -584,16 +583,21 @@ predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocK
 	->	Visibility = (public)
 	;	Visibility = protected
 	),
-	predicate_manual_entry(Module, Name, Arity, Content),
-	(	Content == nodoc
-	->	DocKind = nodoc
-	;	DocKind = html,
-		Doc = Content,
-		(	Arity == 0
-		->	ArgNames = []
-		;	ignore(predicate_arg_list(Content, ArgNames))
+	(	predicate_completion_documentation_hook(Module, Name, Arity, ArgNames, DocKind, Doc)
+	->	true
+	;	predicate_manual_entry(Module, Name, Arity, Content),
+		(	Content == nodoc
+		->	DocKind = nodoc
+		;	DocKind = html,
+			Doc = Content,
+			(	Arity == 0
+			->	ArgNames = []
+			;	ignore(predicate_arg_list(Content, ArgNames))
+			)
 		)
 	).
+
+:- multifile(predicate_completion_documentation_hook/6).
 
 predicate_arg_list(Comment, ArgList) :-
 	sub_atom(Comment, End, _, _, '</var>'),
