@@ -799,7 +799,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		traceAction = new PifQueryAction(
 				"Interrupt running query and start tracing",
 				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
-				bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + "catch(thread_signal(ID, trace),_,fail)");
+				bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + ", catch(thread_signal(ID, trace),_,fail)");
 		
 		pasteFileNameAction = new PasteAction("Paste filename",
 				"Paste the name of the current editor file", ImageRepository
