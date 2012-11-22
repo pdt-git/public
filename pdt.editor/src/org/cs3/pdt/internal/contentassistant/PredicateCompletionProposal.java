@@ -22,7 +22,10 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.cterm.CTerm;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -245,7 +248,16 @@ public PredicateCompletionProposal(IDocument document, int offset, int length,
 
 	@Override
 	public IInformationControl createInformationControl(Shell parent) {
-		return new BrowserInformationControl(parent);
+		if (BrowserInformationControl.isAvailable(parent)) {
+			return new BrowserInformationControl(parent, JFaceResources.DIALOG_FONT, true) {
+				@Override
+				public IInformationControlCreator getInformationPresenterControlCreator() {
+					return PredicateCompletionProposal.this;
+				}
+			};
+		} else {
+			return new DefaultInformationControl(parent);
+		}
 	}
 	
 	/**
