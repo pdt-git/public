@@ -991,7 +991,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey, String configuration) {
-		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " (Prolog)");
+		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", "Prolog");
 		registry.addSubscription(subscription);
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription, configuration);
 
