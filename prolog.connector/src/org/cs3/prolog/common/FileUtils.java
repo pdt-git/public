@@ -79,14 +79,17 @@ public class FileUtils {
 			}
 			for (IResource child : children) {
 				if (child.isLinked()) {
-					testLocation = normalize(child.getLocation());
-					if ((testLocation != null)
-							&& testLocation.isPrefixOf(location)) {
-						// add the full workspace path of the corresponding
-						// child of the linked resource
-						suffix = location.removeFirstSegments(testLocation
-								.segmentCount());
-						results.add(child.getFullPath().append(suffix));
+					IPath childLocation = child.getLocation();
+					if (childLocation != null){
+						testLocation = normalize(childLocation);
+						if ((testLocation != null)
+								&& testLocation.isPrefixOf(location)) {
+							// add the full workspace path of the corresponding
+							// child of the linked resource
+							suffix = location.removeFirstSegments(testLocation
+									.segmentCount());
+							results.add(child.getFullPath().append(suffix));
+						}
 					}
 				}
 			}

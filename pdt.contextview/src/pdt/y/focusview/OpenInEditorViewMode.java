@@ -29,9 +29,9 @@ import y.view.ViewMode;
 public class OpenInEditorViewMode extends ViewMode {
 
 	private PDTGraphView view;
-	private GraphPIFLoader pifLoader;
+	private GraphPIFLoaderBase pifLoader;
 
-	public OpenInEditorViewMode(PDTGraphView view, GraphPIFLoader pifLoader) {
+	public OpenInEditorViewMode(PDTGraphView view, GraphPIFLoaderBase pifLoader) {
 		this.view = view;
 		this.pifLoader = pifLoader;
 	}

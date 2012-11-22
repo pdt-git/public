@@ -28,8 +28,8 @@ ensure_generated_factbase_for_source_file(File) :-
 
 generate_factbase:-
     with_mutex(prolog_factbase,
-    	(	find_all_loaded_files(Project),
-    		parse_util:generate_facts(Project)
+    	(	find_all_loaded_files(ProjectFiles),
+    		parse_util:generate_facts(ProjectFiles)
     	)
     ).       
 
