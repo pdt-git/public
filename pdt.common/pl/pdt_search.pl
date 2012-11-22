@@ -687,9 +687,9 @@ find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line)
 		once(sub_atom(Module, _, _, _, ModuleOrPart))
 	),
 	module_property(Module, file(ModuleFile)),
-	source_file_property(ModuleFile, load_context(LoadingModule, File:Line, OptionList)),
+	source_file_property(ModuleFile, load_context(LoadingModule, File:Line, _OptionList)).
 %	member(if(not_loaded), OptionList),
-	member(must_be_module(true), OptionList).
+%	member(must_be_module(true), OptionList).
 	
 module_imports_predicate_from(Module, Name, Arity, SuperModule, Case) :-
 	has_super_module(Module, SuperModule),
