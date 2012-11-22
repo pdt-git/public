@@ -17,6 +17,7 @@
          , find_definitions_categorized/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
+         , find_completion/12
          , find_pred/8
          , find_pred_for_editor_completion/9
          , find_entity_definition/5
@@ -526,6 +527,121 @@ find_blacklist('$pldoc',4,_).
                /***********************************************
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
+
+%% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
+% 
+find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	var(Prefix),
+	!,
+	throw(prefix_not_bound(find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc))).
+
+find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	nonvar(EnclosingFile),
+	!,
+	(	split_file_path(EnclosingFile, _, _, _, lgt)
+	->	current_predicate(logtalk_load/1),
+		logtalk_adapter::find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	;	find_completion_(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	).
+
+find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	(	find_completion_(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	;	current_predicate(logtalk_load/1),
+		logtalk_adapter::find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	).
+
+:- discontiguous(find_completion_/12).
+
+find_completion_(_EnclosingFile, _LineInFile, SpecifiedModule:PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	!,
+	PredicatePrefix \== '',
+	setof(Name-Arity, SpecifiedModule^(
+		SpecifiedModule:current_predicate(Name/Arity),
+		atom_concat(PredicatePrefix, _, Name)
+	), Predicates),
+	member(Name-Arity, Predicates),
+	predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+
+find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	setof(Name-Arity, EnclosingFile^FileModule^(
+		module_of_file(EnclosingFile, FileModule),
+		FileModule:current_predicate(Name/Arity),
+		atom_concat(PredicatePrefix, _, Name)
+	), Predicates),
+	member(Name-Arity, Predicates),
+	predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+
+predicate_information(Name, Arity, Module, IsBuiltin, Visibility, ArgNames, DocKind, Doc) :-
+	declared_in_module(Module, Name, Arity, Module),
+	functor(Head, Name, Arity),
+	(	predicate_property(Module:Head, built_in)
+	->	IsBuiltin = true
+	;	IsBuiltin = false
+	),
+	(	(	Module == user
+		;	predicate_property(Module:Head, exported)
+		)
+	->	Visibility = (public)
+	;	Visibility = protected
+	),
+	predicate_manual_entry(Module, Name, Arity, Content),
+	(	Content == nodoc
+	->	DocKind = nodoc
+	;	DocKind = html,
+		Doc = Content,
+		(	Arity == 0
+		->	ArgNames = []
+		;	ignore(predicate_arg_list(Content, ArgNames))
+		)
+	).
+
+predicate_arg_list(Comment, ArgList) :-
+	sub_atom(Comment, End, _, _, '</var>'),
+	sub_atom(Comment, BeforeBegin, BeforeBeginLength, _, '"arglist">'),
+	!,
+	Begin is BeforeBegin + BeforeBeginLength,
+	Length is End - Begin,
+	sub_atom(Comment, Begin, Length, _, Args),
+	format(atom(ArgsWithDot), '~w.', [Args]),
+	open_chars_stream(ArgsWithDot, Stream),
+	call_cleanup(read_term(Stream, Term, [variable_names(Vars), module(pldoc_modes)]), close(Stream)),
+	args_from_mode_term(Term, ArgList, Vars).
+
+args_from_mode_term(Arg, [ArgName], Vars) :-
+	var(Arg),
+	!,
+	var_to_arg(Arg, ArgName, Vars).
+
+args_from_mode_term((Arg, Args), [ArgName|ArgNames], Vars) :-
+	!,
+	var_to_arg(Arg, ArgName, Vars),
+	args_from_mode_term(Args, ArgNames, Vars).
+
+args_from_mode_term(Arg, [ArgName], Vars) :-
+	var_to_arg(Arg, ArgName, Vars).
+
+var_to_arg(Arg, ArgName, Vars) :-
+	(	var(Arg)
+	->	Arg = Var
+	;	Arg =.. [_Mode|Other],
+		(	Other = [Var:_]
+		;	Other = [Var]
+		)
+	),
+	member(ArgName=V, Vars),
+	V == Var,
+	!.
+
+find_completion_(_EnclosingFile, _LineInFile, ModulePrefix, module, _, Name, _, _, _, _, _, _) :- 
+	current_module(Name),
+	atom_concat(ModulePrefix,_,Name).
+
+find_completion_(_EnclosingFile, _LineInFile, AtomPrefix, atom, _, Atom, _, _, _, _, _, _) :- 
+	'$atom_completions'(AtomPrefix, Atoms),
+	member(Atom,Atoms), 
+	Atom \= AtomPrefix,
+	garbage_collect_atoms,
+	\+ current_predicate(Atom/_Arity).
 
 %% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
 %
