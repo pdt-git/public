@@ -21,18 +21,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
+import org.eclipse.jface.fieldassist.IContentProposal;
 
 public class PrologCompletionProvider {
 
-	private static final CompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new CompletionProposal[0];
+	private static final PredicateCompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new PredicateCompletionProposal[0];
 
 	private PrologInterface pif;
 
-	public CompletionProposal[] getCompletionProposals(String line, int pos) {
+	public IContentProposal[] getCompletionProposals(String line, int pos) {
 //		String head = line.substring(0, pos);
 //
 //		String[] split = head.split("[^\\w^$]");
@@ -60,21 +62,34 @@ public class PrologCompletionProvider {
 			return EMPTY_COMPLETION_PROPOSAL;
 		}
 		
-		ArrayList<CompletionProposal> proposals = new ArrayList<CompletionProposal>();
-		String query = bT(PDTCommonPredicates.FIND_PRED, "'_'", Util.quoteAtomIfNeeded(prefix.prefix), module, "Name", "Arity", "Public", "_" , "Doc");
+		ArrayList<IContentProposal> proposals = new ArrayList<IContentProposal>();
+		String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION, "'_'", Util.quoteAtomIfNeeded(prefix.prefix), module, "Name", "Arity", "Public", "Builtin", "Doc", "Kind");
 		List<Map<String, Object>> results;
 		try {
 			results = pif.queryAll(query);
 			for (Map<String,Object> result : results) {
-				int arity = Integer.parseInt(result.get("Arity").toString());
+				String kind = result.get("Kind").toString();
 				String name = result.get("Name").toString();
-				String doc = result.get("Doc").toString();
-				proposals.add(new CompletionProposal(name, arity, prefix.length, doc, prefix.startsWithSingleQuote));
+				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
+					int arity = Integer.parseInt(result.get("Arity").toString());
+					String doc = result.get("Doc").toString();
+					String visibility = result.get("Public").toString();
+					boolean isBuiltin = Boolean.parseBoolean(result.get("Builtin").toString());
+					if ("true".equals(visibility)) {
+						proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, SearchConstants.VISIBILITY_PUBLIC, prefix.startsWithSingleQuote, doc, isBuiltin));
+					} else {
+						proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, SearchConstants.VISIBILITY_PROTECTED, prefix.startsWithSingleQuote, doc, isBuiltin));
+					}
+				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)){
+					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
+				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)){
+					proposals.add(new AtomCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
+				}
 			}
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
 		}
-		return proposals.toArray(new CompletionProposal[proposals.size()]);
+		return proposals.toArray(new IContentProposal[proposals.size()]);
 	}
 	
 	private class Prefix {

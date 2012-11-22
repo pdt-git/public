@@ -6,6 +6,15 @@ public final class SearchConstants {
 	public static final String RESULT_KIND_MULTIFILE = "multifile";
 	public static final String RESULT_KIND_FOREIGN = "foreign";
 	public static final String RESULT_KIND_DYNAMIC = "dynamic";
+	
+	public static final String VISIBILITY_PUBLIC = "public";
+	public static final String VISIBILITY_PROTECTED = "protected";
+	public static final String VISIBILITY_PRIVATE = "private";
+	public static final String VISIBILITY_LOCAL = "local";
+	
+	public static final String COMPLETION_KIND_PREDICATE = "predicate";
+	public static final String COMPLETION_KIND_MODULE = "module";
+	public static final String COMPLETION_KIND_ATOM = "atom";
 
 	private SearchConstants() {}
 }

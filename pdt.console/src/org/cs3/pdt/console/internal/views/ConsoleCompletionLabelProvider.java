@@ -13,7 +13,6 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import org.cs3.pdt.console.internal.ImageRepository;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -22,18 +21,20 @@ public class ConsoleCompletionLabelProvider extends LabelProvider implements ILa
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof CompletionProposal) {
-			return ImageRepository.getImage(ImageRepository.PREDICATE_PUBLIC);
+		if (element instanceof AbstractCompletionProposal) {
+			return ((AbstractCompletionProposal) element).getImage();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof CompletionProposal) {
-			return ((CompletionProposal) element).getLabel();
+		if (element instanceof AbstractCompletionProposal) {
+			return ((AbstractCompletionProposal) element).getLabel();
+		} else {
+			return super.getText(element);
 		}
-		return super.getText(element);
 	}
 
 }

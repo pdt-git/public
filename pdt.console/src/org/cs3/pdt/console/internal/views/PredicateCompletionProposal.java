@@ -14,24 +14,27 @@
 package org.cs3.pdt.console.internal.views;
 
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.eclipse.jface.fieldassist.IContentProposal;
+import org.cs3.pdt.common.search.SearchConstants;
+import org.cs3.pdt.console.internal.ImageRepository;
+import org.eclipse.swt.graphics.Image;
 
-public class CompletionProposal implements IContentProposal{
+public class PredicateCompletionProposal extends AbstractCompletionProposal {
 
 	private String functor;
 	private int arity;
-	private int prefixLength;
 	private String label;
 	private String doc;
 	private String content;
-	private boolean addSingleQuote;
+	private String visibility;
+	private boolean isBuiltin;
 	
-	public CompletionProposal(String functor, int arity, int prefixLength, String doc, boolean addSingleQuote) {
+	public PredicateCompletionProposal(String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, String doc, boolean addSingleQuote) {
+		super(prefixLength, isBuiltin);
 		this.functor = functor;
 		this.arity = arity;
-		this.prefixLength = prefixLength;
 		this.doc = doc;
-		this.addSingleQuote = addSingleQuote;
+		this.visibility = visibility;
+		this.isBuiltin = isBuiltin;
 		label = functor + "/" + arity;
 	}
 	
@@ -83,6 +86,22 @@ public class CompletionProposal implements IContentProposal{
 
 	@Override
 	public String getDescription() {
+		return null;
+	}
+	
+	@Override
+	public Image getImage() {
+		if (isBuiltin) {
+			return ImageRepository.getImage(ImageRepository.PREDICATE_BUILTIN);
+		} else {
+			if (SearchConstants.VISIBILITY_PUBLIC.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PREDICATE_PUBLIC);
+			} else if (SearchConstants.VISIBILITY_PROTECTED.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PREDICATE_PROTECTED);
+			} else if (SearchConstants.VISIBILITY_PRIVATE.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PREDICATE_PRIVATE);
+			}
+		}
 		return null;
 	}
 
