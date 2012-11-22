@@ -16,3 +16,6 @@
  :- use_module(pdt_reload).          % pdt_reload/1 & friends
  
  :- ['lgt/loader'].
+
+ :- use_module('../library/pif/pif_observe').
+ 
