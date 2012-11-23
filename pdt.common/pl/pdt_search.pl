@@ -680,6 +680,11 @@ search_module_name(ModulePart, false, Module) :-
 	current_module(Module),
 	once(sub_atom(Module, _, _, _, ModulePart)).
 
+/* For Load File Dependency Graph: */
+loaded_by(LoadedFile, LoadingFile, Line) :-
+	source_file(LoadedFile),
+	source_file_property(LoadedFile, load_context(_LoadingModule, LoadingFile:Line, _OptionList)).
+	
 find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line) :-
 	(	ExactMatch == true
 	->	ModuleOrPart = Module
