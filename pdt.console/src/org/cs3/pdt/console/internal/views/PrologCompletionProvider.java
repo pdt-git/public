@@ -34,6 +34,7 @@ public class PrologCompletionProvider {
 
 	private PrologInterface pif;
 
+	@SuppressWarnings("unchecked")
 	public IContentProposal[] getCompletionProposals(String line, int pos) {
 //		String head = line.substring(0, pos);
 //
@@ -46,6 +47,7 @@ public class PrologCompletionProvider {
 			return EMPTY_COMPLETION_PROPOSAL;
 		}
 		
+		String searchPrefix;
 		Prefix prefix = calculatePrefix(line, pos - 1);
 		String splittingOperator = findSplittingOperator(line, prefix.begin - 1);
 		String module = null;
@@ -53,9 +55,11 @@ public class PrologCompletionProvider {
 			module = retrievePrefixedModule(line, prefix.begin - splittingOperator.length());
 		}
 		if (module == null || module.isEmpty()) {
+			searchPrefix = Util.quoteAtomIfNeeded(prefix.prefix);
 			module = "_";
 		} else {
 			module = Util.quoteAtomIfNeeded(module);
+			searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(prefix.prefix);
 		}
 		
 		if (prefix.length <= 0) {
@@ -63,7 +67,19 @@ public class PrologCompletionProvider {
 		}
 		
 		ArrayList<IContentProposal> proposals = new ArrayList<IContentProposal>();
-		String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION, "'_'", Util.quoteAtomIfNeeded(prefix.prefix), module, "Name", "Arity", "Public", "Builtin", "Doc", "Kind");
+		String query = bT(PDTCommonPredicates.FIND_COMPLETION,
+				"_",
+				"_",
+				searchPrefix,
+				"Kind",
+				"Module",
+				"Name",
+				"Arity",
+				"Visibility",
+				"Builtin",
+				"ArgNames",
+				"DocKind",
+				"Doc");
 		List<Map<String, Object>> results;
 		try {
 			results = pif.queryAll(query);
@@ -72,14 +88,14 @@ public class PrologCompletionProvider {
 				String name = result.get("Name").toString();
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
 					int arity = Integer.parseInt(result.get("Arity").toString());
-					String doc = result.get("Doc").toString();
-					String visibility = result.get("Public").toString();
+					String visibility = result.get("Visibility").toString();
 					boolean isBuiltin = Boolean.parseBoolean(result.get("Builtin").toString());
-					if ("true".equals(visibility)) {
-						proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, SearchConstants.VISIBILITY_PUBLIC, prefix.startsWithSingleQuote, doc, isBuiltin));
-					} else {
-						proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, SearchConstants.VISIBILITY_PROTECTED, prefix.startsWithSingleQuote, doc, isBuiltin));
+					Object argNamesValue = result.get("ArgNames");
+					List<String> argNames = null;
+					if (argNamesValue instanceof List<?>) {
+						argNames = (List<String>) argNamesValue;
 					}
+					proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, visibility, prefix.startsWithSingleQuote, argNames, isBuiltin));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)){
 					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)){
@@ -160,9 +176,9 @@ public class PrologCompletionProvider {
 	private String retrievePrefixedModule(String line, int begin) {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (Util.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)) && moduleBegin > 0)
+		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
 			moduleBegin--;
-		String moduleName = line.substring(moduleBegin, moduleEnd);
+		String moduleName = line.substring(moduleBegin + 1, moduleEnd);
 		if(!Util.isVarPrefix(moduleName)){
 			return moduleName;
 		} else {

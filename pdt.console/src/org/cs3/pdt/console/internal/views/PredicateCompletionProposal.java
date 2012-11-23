@@ -13,7 +13,8 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import org.cs3.pdt.common.PDTCommonUtil;
+import java.util.List;
+
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.eclipse.swt.graphics.Image;
@@ -23,16 +24,16 @@ public class PredicateCompletionProposal extends AbstractCompletionProposal {
 	private String functor;
 	private int arity;
 	private String label;
-	private String doc;
+	private List<String> argNames;
 	private String content;
 	private String visibility;
 	private boolean isBuiltin;
 	
-	public PredicateCompletionProposal(String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, String doc, boolean addSingleQuote) {
+	public PredicateCompletionProposal(String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, List<String> argNames, boolean addSingleQuote) {
 		super(prefixLength, isBuiltin);
 		this.functor = functor;
 		this.arity = arity;
-		this.doc = doc;
+		this.argNames = argNames;
 		this.visibility = visibility;
 		this.isBuiltin = isBuiltin;
 		label = functor + "/" + arity;
@@ -51,23 +52,30 @@ public class PredicateCompletionProposal extends AbstractCompletionProposal {
 			return "";
 		}
 		
-		String[] argNames = PDTCommonUtil.getPredicateArgNamesFromDocumentation(doc);
-		
 		StringBuffer buf = new StringBuffer("(");
 		char c = 'A';
-		for (int i = 0; i < arity; i++) {
-			if (i > 0) {
-				buf.append(", ");
-			}
-			if (argNames != null) {
-				buf.append(argNames[i]);
-			} else {
+		int i = 0;
+		
+		if (argNames == null) {
+			while (i < arity) {
+				if (i > 0) {
+					buf.append(", ");
+				}
 				buf.append(c);
 				if (c == '_' || c == 'Z') {
 					c = '_';
 				} else {
 					c++;
 				}
+				i++;
+			}
+		} else {
+			for (String argName : argNames) {
+				if (i > 0) {
+					buf.append(", ");
+				}
+				buf.append(argName);
+				i++;
 			}
 		}
 		buf.append(")");
