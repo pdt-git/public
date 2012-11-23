@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.prolog.common.Util;
@@ -118,50 +119,67 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			String enclFile = UIUtils.getFileFromActiveEditor();
 			String moduleArg = module != null ? Util.quoteAtomIfNeeded(module) : "Module";
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
-			String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION,
+//			String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION,
+//					Util.quoteAtom(enclFile),
+//					Util.quoteAtomIfNeeded(prefix),
+//					moduleArg,
+//					"Name",
+//					"Arity",
+//					"Public",
+//					"Builtin",
+//					"Doc",
+//					"Kind");
+			String query = bT(PDTCommonPredicates.FIND_COMPLETION,
 					Util.quoteAtom(enclFile),
-					Util.quoteAtomIfNeeded(prefix),
-					moduleArg,
+					document.getLineOfOffset(begin) + 1,
+					prefix,
+					"Kind",
+					"Module",
 					"Name",
 					"Arity",
-					"Public",
+					"Visibility",
 					"Builtin",
-					"Doc",
-					"Kind");
+					"ArgNames",
+					"DocKind",
+					"Doc");
 			List<Map<String, Object>> predicates = session.queryAll(query);
 			Debug.info("find predicates with prefix: " + query);
 			for (Map<String, Object> predicate : predicates) {
-				String name = (String) predicate.get("Name");
-				String strArity = (String) predicate.get("Arity");
 				String kind = predicate.get("Kind").toString();
-				if (predicate.get("Module") != null) {
-					module = (String) predicate.get("Module");
-					if (module.equals("_")) {
-						module = null;
+				String name = (String) predicate.get("Name");
+				
+				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
+					
+					String strArity = (String) predicate.get("Arity");
+					if (predicate.get("Module") != null) {
+						module = (String) predicate.get("Module");
+						if (module.equals("_")) {
+							module = null;
+						}
 					}
-				}
-
-				int arity = Integer.parseInt(strArity);
-				String doc = (String) predicate.get("Doc");
-				Map<String, String> tags = new HashMap<String, String>();
-				if (Boolean.parseBoolean((String) predicate.get("Public"))) {
-					tags.put("public", "true");
-				}
-				if (Boolean.parseBoolean((String) predicate.get("Builtin"))) {
-					tags.put("built_in", "true");
-				}
-
-				if (!doc.equals("nodoc")) {
-					if (doc.startsWith("%%")) {
-
-						doc = doc.replaceAll("%", "").trim();
+					
+					int arity = Integer.parseInt(strArity);
+					String doc = (String) predicate.get("Doc");
+					Map<String, String> tags = new HashMap<String, String>();
+					tags.put("visibilty", predicate.get("Visibility").toString());
+					if (Boolean.parseBoolean((String) predicate.get("Builtin"))) {
+						tags.put("built_in", "true");
 					}
-
-					tags.put("documentation", doc);
+					
+					if (!doc.equals("nodoc")) {
+						if (doc.startsWith("%%")) {
+							
+							doc = doc.replaceAll("%", "").trim();
+						}
+						
+						tags.put("documentation", doc);
+					}
+					
+					ComparableCompletionProposal p = new PredicateCompletionProposal(document, begin, len, name, arity, tags, module, kind);
+					proposals.add(p);
+				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind) || SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {
+					proposals.add(new PredicateCompletionProposal(document, begin, len, name, 0, new HashMap<String, String>(), null, kind));
 				}
-
-				ComparableCompletionProposal p = new PredicateCompletionProposal(document, begin, len, name, arity, tags, module, kind);
-				proposals.add(p);
 			}
 			return;
 		} catch (Exception e) {

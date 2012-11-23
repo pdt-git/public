@@ -135,6 +135,7 @@ public abstract class PrologContentAssistProcessor {
 			if (splittingOperator != null) {
 				module = retrievePrefixedModule(document, pre.begin - splittingOperator.length());
 			}
+			String searchPrefix; 
 			
 			List<ComparableCompletionProposal> proposals = 
 					new ArrayList<ComparableCompletionProposal>();
@@ -143,8 +144,11 @@ public abstract class PrologContentAssistProcessor {
 					return null;
 				}
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
+				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
+			} else {
+				searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
 			}
-			addPredicateProposals(document, pre.begin, pre.length, pre.prefix, proposals,
+			addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals,
 					module);
 	
 			if (proposals.size() == 0)
