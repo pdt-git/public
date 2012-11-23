@@ -563,9 +563,21 @@ find_completion_(_EnclosingFile, _LineInFile, SpecifiedModule:PredicatePrefix, p
 	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 
 find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	nonvar(EnclosingFile),
+	atomic(PredicatePrefix),
 	setof(Module-Name-Arity, EnclosingFile^FileModule^(
 		module_of_file(EnclosingFile, FileModule),
 		declared_in_module(FileModule, Name, Arity, Module),
+		atom_concat(PredicatePrefix, _, Name)
+	), Predicates),
+	member(Module-Name-Arity, Predicates),
+	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+
+find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	var(EnclosingFile),
+	atomic(PredicatePrefix),
+	setof(Module-Name-Arity, (
+		declared_in_module(user, Name, Arity, Module),
 		atom_concat(PredicatePrefix, _, Name)
 	), Predicates),
 	member(Module-Name-Arity, Predicates),
@@ -637,10 +649,12 @@ var_to_arg(Arg, ArgName, Vars) :-
 	!.
 
 find_completion_(_EnclosingFile, _LineInFile, ModulePrefix, module, _, Name, _, _, _, _, _, _) :- 
+	atomic(ModulePrefix),
 	current_module(Name),
 	atom_concat(ModulePrefix,_,Name).
 
 find_completion_(_EnclosingFile, _LineInFile, AtomPrefix, atom, _, Atom, _, _, _, _, _, _) :- 
+	atomic(AtomPrefix),
 	'$atom_completions'(AtomPrefix, Atoms),
 	member(Atom,Atoms), 
 	Atom \= AtomPrefix,
