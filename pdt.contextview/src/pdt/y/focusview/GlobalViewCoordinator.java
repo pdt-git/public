@@ -37,7 +37,7 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase {
 		currentFocusView = views.get(project.getName());
 		
 		if (currentFocusView == null) {
-			PDTGraphView pdtGraphView = new PDTGraphView();
+			PDTGraphView pdtGraphView = new PDTGraphView(focusView);
 			GlobalGraphPIFLoader loader = new GlobalGraphPIFLoader(pdtGraphView);
 			
 			currentFocusView = focusView.new FocusViewControl(pdtGraphView, loader);
@@ -48,7 +48,8 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase {
 			
 			views.put(project.getName(), currentFocusView);
 		}
-		
+
+		currentFocusView.recalculateMode();
 		focusView.setCurrentFocusView(currentFocusView);
 	}
 

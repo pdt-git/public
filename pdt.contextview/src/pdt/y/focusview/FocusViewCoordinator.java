@@ -15,7 +15,7 @@ public class FocusViewCoordinator extends ViewCoordinatorBase {
 	public void swichFocusView(String path) {
 		currentFocusView = views.get(path);
 		if (currentFocusView == null) {
-			PDTGraphView pdtGraphView = new PDTGraphView();
+			PDTGraphView pdtGraphView = new PDTGraphView(focusView);
 			FocusGraphPIFLoader loader = new FocusGraphPIFLoader(pdtGraphView);
 			loader.setFocusFile(path);
 			
@@ -26,6 +26,7 @@ public class FocusViewCoordinator extends ViewCoordinatorBase {
 			views.put(path, currentFocusView);
 		}
 		
+		currentFocusView.recalculateMode();
 		focusView.setCurrentFocusView(currentFocusView);
 	}
 
