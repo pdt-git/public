@@ -681,9 +681,16 @@ search_module_name(ModulePart, false, Module) :-
 	once(sub_atom(Module, _, _, _, ModulePart)).
 
 /* For Load File Dependency Graph: */
-loaded_by(LoadedFile, LoadingFile, Line) :-
+loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
 	source_file(LoadedFile),
-	source_file_property(LoadedFile, load_context(_LoadingModule, LoadingFile:Line, _OptionList)).
+	source_file_property(LoadedFile, load_context(_LoadingModule, LoadingFile:Line, _OptionList)),
+	% If the loaded file is a module conclude that the
+	% loading directive should have been 'use_module'.
+	% Otherwise, treat it as a 'consult': 
+	( module_property(_Module, file(LoadedFile))
+	-> Directive = use_module
+	;  Directive = consult
+	).
 	
 find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line) :-
 	(	ExactMatch == true
