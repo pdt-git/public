@@ -56,9 +56,12 @@ public class PrologCompletionProvider {
 		}
 		if (module == null || module.isEmpty()) {
 			searchPrefix = Util.quoteAtomIfNeeded(prefix.prefix);
-			module = "_";
 		} else {
-			module = Util.quoteAtomIfNeeded(module);
+			if (Util.isVarPrefix(module)){
+				module = "_";
+			} else {
+				module = Util.quoteAtomIfNeeded(module);
+			}
 			searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(prefix.prefix);
 		}
 		
@@ -181,11 +184,11 @@ public class PrologCompletionProvider {
 		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
 			moduleBegin--;
 		String moduleName = line.substring(moduleBegin + 1, moduleEnd);
-		if(!Util.isVarPrefix(moduleName)){
+//		if(!Util.isVarPrefix(moduleName)){
 			return moduleName;
-		} else {
-			return "_";
-		}
+//		} else {
+//			return "_";
+//		}
 	}
 	public void setPrologInterface(PrologInterface pif) {
 		this.pif = pif;

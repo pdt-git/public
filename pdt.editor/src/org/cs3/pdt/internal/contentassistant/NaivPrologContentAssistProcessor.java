@@ -100,9 +100,6 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws PrologInterfaceException,
 			CoreException {
 
-		if (Util.isVarPrefix(prefix)) {
-			return;
-		}
 		PrologSession session = null;
 		try {
 			String enclFile = UIUtils.getFileFromActiveEditor();

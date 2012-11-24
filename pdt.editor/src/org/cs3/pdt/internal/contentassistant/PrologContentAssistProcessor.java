@@ -118,11 +118,7 @@ public abstract class PrologContentAssistProcessor {
 		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(document.getChar(moduleBegin)))
 			moduleBegin--;
 		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
-		if(!Util.isVarPrefix(moduleName)){
-			return moduleName;
-		} else {
-			return "_";
-		}
+		return moduleName;
 	}
 
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
@@ -151,9 +147,16 @@ public abstract class PrologContentAssistProcessor {
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
 				searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
 			} else {
+				if (Util.isVarPrefix(module)){
+					module = "_";
+				} else {
+					module = Util.quoteAtomIfNeeded(module);
+				}
 				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
 			}
-			addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals);
+			if (!Util.isVarPrefix(pre.prefix)) {
+				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals);
+			}
 	
 			if (proposals.size() == 0)
 				return null;
