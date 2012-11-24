@@ -95,7 +95,7 @@ public class PrologCompletionProvider {
 					if (argNamesValue instanceof List<?>) {
 						argNames = (List<String>) argNamesValue;
 					}
-					proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, visibility, prefix.startsWithSingleQuote, argNames, isBuiltin));
+					proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, visibility, isBuiltin, argNames, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)){
 					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)){
@@ -170,10 +170,6 @@ public class PrologCompletionProvider {
 				return "<<";
 			} else {
 				return null;
-			}
-		case '^':
-			if (c2 == '^') {
-				return "^^";
 			}
 		}
 		return null;

@@ -100,6 +100,12 @@ public abstract class PrologContentAssistProcessor {
 		case '<':
 			if (c2 == '<') {
 				return "<<";
+			} else {
+				return null;
+			}
+		case '^':
+			if (c2 == '^') {
+				return "^^";
 			}
 		}
 		return null;
@@ -115,7 +121,7 @@ public abstract class PrologContentAssistProcessor {
 		if(!Util.isVarPrefix(moduleName)){
 			return moduleName;
 		} else {
-			return null;
+			return "_";
 		}
 	}
 
