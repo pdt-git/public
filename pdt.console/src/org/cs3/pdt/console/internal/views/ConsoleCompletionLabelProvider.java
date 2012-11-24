@@ -21,8 +21,8 @@ public class ConsoleCompletionLabelProvider extends LabelProvider implements ILa
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof AbstractCompletionProposal) {
-			return ((AbstractCompletionProposal) element).getImage();
+		if (element instanceof ComparableCompletionProposal) {
+			return ((ComparableCompletionProposal) element).getImage();
 		} else {
 			return null;
 		}
@@ -30,8 +30,8 @@ public class ConsoleCompletionLabelProvider extends LabelProvider implements ILa
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof AbstractCompletionProposal) {
-			return ((AbstractCompletionProposal) element).getLabel();
+		if (element instanceof ComparableCompletionProposal) {
+			return ((ComparableCompletionProposal) element).getLabel();
 		} else {
 			return super.getText(element);
 		}

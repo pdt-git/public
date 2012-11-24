@@ -17,6 +17,7 @@ package org.cs3.pdt.console.internal.views;
 import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +70,7 @@ public class PrologCompletionProvider {
 			return EMPTY_COMPLETION_PROPOSAL;
 		}
 		
-		ArrayList<IContentProposal> proposals = new ArrayList<IContentProposal>();
+		ArrayList<ComparableCompletionProposal> proposals = new ArrayList<ComparableCompletionProposal>();
 		String query = bT(PDTCommonPredicates.FIND_COMPLETION,
 				"_",
 				"_",
@@ -90,6 +91,7 @@ public class PrologCompletionProvider {
 				String kind = result.get("Kind").toString();
 				String name = result.get("Name").toString();
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
+					String resultModule = result.get("Module").toString();
 					int arity = Integer.parseInt(result.get("Arity").toString());
 					String visibility = result.get("Visibility").toString();
 					boolean isBuiltin = Boolean.parseBoolean(result.get("Builtin").toString());
@@ -98,7 +100,7 @@ public class PrologCompletionProvider {
 					if (argNamesValue instanceof List<?>) {
 						argNames = (List<String>) argNamesValue;
 					}
-					proposals.add(new PredicateCompletionProposal(name, arity, prefix.length, visibility, isBuiltin, argNames, prefix.startsWithSingleQuote));
+					proposals.add(new PredicateCompletionProposal(resultModule, name, arity, prefix.length, visibility, isBuiltin, argNames, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)){
 					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)){
@@ -108,7 +110,8 @@ public class PrologCompletionProvider {
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
 		}
-		return proposals.toArray(new IContentProposal[proposals.size()]);
+		Collections.sort(proposals);
+		return proposals.toArray(new ComparableCompletionProposal[proposals.size()]);
 	}
 	
 	private class Prefix {

@@ -3,7 +3,7 @@ package org.cs3.pdt.console.internal.views;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.eclipse.swt.graphics.Image;
 
-public class ModuleCompletionProposal extends AbstractCompletionProposal {
+public class ModuleCompletionProposal extends ComparableCompletionProposal {
 	
 	private String module;
 	private String content;
@@ -39,6 +39,17 @@ public class ModuleCompletionProposal extends AbstractCompletionProposal {
 	@Override
 	public Image getImage() {
 		return ImageRepository.getImage(ImageRepository.ENTITY);
+	}
+
+	@Override
+	public int compareTo(ComparableCompletionProposal o) {
+		if (o instanceof ModuleCompletionProposal) {
+			return module.compareTo(((ModuleCompletionProposal) o).module);
+		} else if (o instanceof PredicateCompletionProposal) {
+			return module.compareTo(((PredicateCompletionProposal) o).getSignature());
+		} else {
+			return -1;
+		}
 	}
 	
 }

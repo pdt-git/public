@@ -19,7 +19,7 @@ import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.eclipse.swt.graphics.Image;
 
-public class PredicateCompletionProposal extends AbstractCompletionProposal {
+public class PredicateCompletionProposal extends ComparableCompletionProposal {
 
 	private String functor;
 	private int arity;
@@ -29,14 +29,18 @@ public class PredicateCompletionProposal extends AbstractCompletionProposal {
 	private String visibility;
 	private boolean isBuiltin;
 	
-	public PredicateCompletionProposal(String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, List<String> argNames, boolean addSingleQuote) {
-		super(prefixLength, isBuiltin);
+	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, List<String> argNames, boolean addSingleQuote) {
+		super(prefixLength, addSingleQuote);
 		this.functor = functor;
 		this.arity = arity;
 		this.argNames = argNames;
 		this.visibility = visibility;
 		this.isBuiltin = isBuiltin;
-		label = functor + "/" + arity;
+		if (module == null) {
+			label = functor + "/" + arity;
+		} else {
+			label = module + ":" + functor + "/" + arity;
+		}
 	}
 	
 	@Override
@@ -111,6 +115,21 @@ public class PredicateCompletionProposal extends AbstractCompletionProposal {
 			}
 		}
 		return null;
+	}
+	
+	String getSignature() {
+		return functor + "/" + arity;
+	}
+
+	@Override
+	public int compareTo(ComparableCompletionProposal o) {
+		if (o instanceof PredicateCompletionProposal) {
+			return getSignature().compareTo(((PredicateCompletionProposal) o).getSignature());
+		} else if (o instanceof ModuleCompletionProposal) {
+			return getSignature().compareTo(o.getLabel());
+		} else {
+			return -1;
+		}
 	}
 
 }
