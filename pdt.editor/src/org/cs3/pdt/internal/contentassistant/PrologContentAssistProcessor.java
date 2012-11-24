@@ -145,7 +145,11 @@ public abstract class PrologContentAssistProcessor {
 					return null;
 				}
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
-				searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
+				if (splittingOperator != null) {
+					searchPrefix = splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
+				} else {
+					searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
+				}
 			} else {
 				if (Util.isVarPrefix(module)){
 					module = "_";
