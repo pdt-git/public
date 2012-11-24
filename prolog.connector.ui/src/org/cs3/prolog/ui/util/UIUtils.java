@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
@@ -450,6 +451,7 @@ public final class UIUtils {
 	}
 	
 	public static IDocument getDocument(IFile file) throws CoreException{
+		file.refreshLocal(0, new NullProgressMonitor());
 		IPath path = file.getFullPath();
 		return getDocument(path,LocationKind.IFILE);
 	}
