@@ -168,6 +168,12 @@ public class PrologCompletionProvider {
 		case '<':
 			if (c2 == '<') {
 				return "<<";
+			} else {
+				return null;
+			}
+		case '^':
+			if (c2 == '^') {
+				return "^^";
 			}
 		}
 		return null;
@@ -182,7 +188,7 @@ public class PrologCompletionProvider {
 		if(!Util.isVarPrefix(moduleName)){
 			return moduleName;
 		} else {
-			return null;
+			return "_";
 		}
 	}
 	public void setPrologInterface(PrologInterface pif) {
