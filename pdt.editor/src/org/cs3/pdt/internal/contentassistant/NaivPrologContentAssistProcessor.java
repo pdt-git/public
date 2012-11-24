@@ -15,7 +15,6 @@ package org.cs3.pdt.internal.contentassistant;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import java.util.Set;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.search.SearchConstants;
-import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -36,15 +34,14 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.swt.graphics.Image;
 
 public abstract class NaivPrologContentAssistProcessor extends PrologContentAssistProcessor implements IContentAssistProcessor {
 
 	@Override
-	protected void addVariableProposals(IDocument document, int begin, int len, String prefix, List<ComparableCompletionProposal> proposals) throws BadLocationException {
+	protected void addVariableProposals(IDocument document, int begin, int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws BadLocationException {
 
 		Set<String> unique = new HashSet<String>();
-		Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+//		Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 
 		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == 0 ? begin : begin - 1;
@@ -60,19 +57,10 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 							proposal = "";
 						proposal = c + proposal;
 					} else if (proposal != null) {
-						if (Util.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /*
-																																							 * &&
-																																							 * !
-																																							 * proposal
-																																							 * .
-																																							 * equals
-																																							 * (
-																																							 * "_"
-																																							 * )
-																																							 */) {
+						if (Util.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /* && !proposal.equals("_")*/) {
 							unique.add(proposal);
-							int cursorPos = proposal.length();
-							proposals.add(new VariableCompletionProposal(proposal, begin, len, cursorPos, image, proposal, null, null));
+//							int cursorPos = proposal.length();
+							proposals.add(new VariableCompletionProposal(document, proposal, begin, len));
 						}
 						proposal = null;
 					}
@@ -96,8 +84,8 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					} else if (proposal != null) {
 						if (Util.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /*&& !proposal.equals("_")*/) {
 							unique.add(proposal);
-							int cursorPos = proposal.length();
-							proposals.add(new VariableCompletionProposal(proposal, begin, len, cursorPos, image, proposal, null, null));
+//							int cursorPos = proposal.length();
+							proposals.add(new VariableCompletionProposal(document, proposal, begin, len));
 						}
 						proposal = null;
 					}
@@ -107,8 +95,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, List<ComparableCompletionProposal> proposals, String module) throws PrologInterfaceException,
+	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws PrologInterfaceException,
 			CoreException {
 
 		if (Util.isVarPrefix(prefix)) {
@@ -117,7 +106,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		PrologSession session = null;
 		try {
 			String enclFile = UIUtils.getFileFromActiveEditor();
-			String moduleArg = module != null ? Util.quoteAtomIfNeeded(module) : "Module";
+//			String moduleArg = module != null ? Util.quoteAtomIfNeeded(module) : "Module";
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 //			String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION,
 //					Util.quoteAtom(enclFile),
@@ -142,43 +131,41 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					"ArgNames",
 					"DocKind",
 					"Doc");
-			List<Map<String, Object>> predicates = session.queryAll(query);
+			List<Map<String, Object>> results = session.queryAll(query);
 			Debug.info("find predicates with prefix: " + query);
-			for (Map<String, Object> predicate : predicates) {
-				String kind = predicate.get("Kind").toString();
-				String name = (String) predicate.get("Name");
+			for (Map<String, Object> result : results) {
+				String kind = result.get("Kind").toString();
+				String name = (String) result.get("Name");
 				
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
 					
-					String strArity = (String) predicate.get("Arity");
-					if (predicate.get("Module") != null) {
-						module = (String) predicate.get("Module");
-						if (module.equals("_")) {
-							module = null;
-						}
-					}
+					String module = result.get("Module").toString();
 					
+					String strArity = (String) result.get("Arity");
 					int arity = Integer.parseInt(strArity);
-					String doc = (String) predicate.get("Doc");
-					Map<String, String> tags = new HashMap<String, String>();
-					tags.put("visibilty", predicate.get("Visibility").toString());
-					if (Boolean.parseBoolean((String) predicate.get("Builtin"))) {
-						tags.put("built_in", "true");
+					
+					List<String> argNames = null;
+					
+					if (result.get("ArgNames") instanceof List<?>) {
+						argNames = (List<String>) result.get("ArgNames");
 					}
 					
-					if (!doc.equals("nodoc")) {
-						if (doc.startsWith("%%")) {
-							
-							doc = doc.replaceAll("%", "").trim();
-						}
-						
-						tags.put("documentation", doc);
+					String visibility = result.get("Visibility").toString();
+					
+					boolean isBuiltin = Boolean.parseBoolean(result.get("Builtin").toString());
+					
+					String docKind = result.get("DocKind").toString();
+					
+					String doc = null;
+					if (result.get("Doc") != null) {
+						doc = result.get("Doc").toString();
 					}
 					
-					ComparableCompletionProposal p = new PredicateCompletionProposal(document, begin, len, name, arity, tags, module, kind);
-					proposals.add(p);
-				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind) || SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {
-					proposals.add(new PredicateCompletionProposal(document, begin, len, name, 0, new HashMap<String, String>(), null, kind));
+					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, docKind, doc));
+				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)) {
+					proposals.add(new ModuleCompletionProposal(document, name, begin, len));
+				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {
+					proposals.add(new AtomCompletionProposal(document, name, begin, len));
 				}
 			}
 			return;

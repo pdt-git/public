@@ -52,11 +52,11 @@ public abstract class PrologContentAssistProcessor {
 	}
 		
 	protected abstract void addPredicateProposals(IDocument document, int begin,
-			int len, String prefix, List<ComparableCompletionProposal> proposals, String module)
+			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals)
 			throws PrologInterfaceException, CoreException;
 
 	protected abstract void addVariableProposals(IDocument document, int begin,
-			int len, String prefix, List<ComparableCompletionProposal> proposals) throws BadLocationException, PrologInterfaceException, CoreException;
+			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws BadLocationException, PrologInterfaceException, CoreException;
 
 	private Prefix calculatePrefix(IDocument document, int offset)
 			throws BadLocationException {
@@ -137,19 +137,17 @@ public abstract class PrologContentAssistProcessor {
 			}
 			String searchPrefix; 
 			
-			List<ComparableCompletionProposal> proposals = 
-					new ArrayList<ComparableCompletionProposal>();
+			ArrayList<ComparableTemplateCompletionProposal> proposals = new ArrayList<ComparableTemplateCompletionProposal>();
 			if (module == null || module.equals("")) {
 				if (pre.prefix.equals("")) {
 					return null;
 				}
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
-				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
-			} else {
 				searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
+			} else {
+				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
 			}
-			addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals,
-					module);
+			addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals);
 	
 			if (proposals.size() == 0)
 				return null;

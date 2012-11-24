@@ -15,6 +15,10 @@ public final class SearchConstants {
 	public static final String COMPLETION_KIND_PREDICATE = "predicate";
 	public static final String COMPLETION_KIND_MODULE = "module";
 	public static final String COMPLETION_KIND_ATOM = "atom";
+	
+	public static final String COMPLETION_DOC_KIND_NODOC = "nodoc";
+	public static final String COMPLETION_DOC_KIND_TEXT = "text";
+	public static final String COMPLETION_DOC_KIND_HTML = "html";
 
 	private SearchConstants() {}
 }
