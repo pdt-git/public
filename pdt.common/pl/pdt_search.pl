@@ -652,11 +652,11 @@ find_completion_(_EnclosingFile, _LineInFile, ModulePrefix, module, _, Name, _, 
 	atom_concat(ModulePrefix,_,Name).
 
 find_completion_(_EnclosingFile, _LineInFile, AtomPrefix, atom, _, Atom, _, _, _, _, _, _) :- 
+	garbage_collect_atoms,
 	atomic(AtomPrefix),
 	'$atom_completions'(AtomPrefix, Atoms),
 	member(Atom,Atoms), 
 	Atom \= AtomPrefix,
-	garbage_collect_atoms,
 	\+ current_predicate(Atom/_Arity).
 
 
