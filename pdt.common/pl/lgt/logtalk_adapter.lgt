@@ -338,6 +338,43 @@ find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity,
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
 
+%% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
+% 
+:- public(find_completion/12).
+find_completion(_, _, Prefix, module, _, Entity, _, _, _, _, _, _) :-
+	atomic(Prefix),
+	entity(Entity),
+	(	atomic(Entity)
+	->	Name = Entity
+	;	functor(Entity, Name, _)
+	),
+	atom_concat(Prefix, _, Name).
+
+find_completion(EnclosingFile, _, Prefix, predicate, DeclaringEntity, Name, Arity, Visibility, false, _, nodoc, _) :-
+	var(EnclosingFile),
+	!,
+	(	Prefix = Entity::PredicatePrefix,
+		entity(Entity),
+		Entity::current_predicate(Name/Arity),
+		atom_concat(PredicatePrefix, _, Name),
+		functor(Head, Name, Arity),
+		Entity::predicate_property(Head, scope(Visibility)),
+		(	Entity::predicate_property(Head, declared_in(DeclaringEntity))
+		->	true
+		;	Entity = DeclaringEntity
+		)
+	;	Prefix = Entity<<PredicatePrefix,
+		entity(Entity),
+		Entity<<current_predicate(Name/Arity),
+		atom_concat(PredicatePrefix, _, Name),
+		functor(Head, Name, Arity),
+		Entity<<predicate_property(Head, scope(Visibility)),
+		(	Entity<<predicate_property(Head, declared_in(DeclaringEntity))
+		->	true
+		;	Entity = DeclaringEntity
+		)
+	).
+
 %% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
 %
 % Looks up all predicates with prefix Prefix defined or imported in file EnclFile.
