@@ -30,7 +30,7 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		if (module == null) {
 			return name + "/" + arity;
 		} else {
-			return module + ":" + name + "/" + arity;
+			return name + "/" + arity + " - " + module;
 		}
 	}
 	

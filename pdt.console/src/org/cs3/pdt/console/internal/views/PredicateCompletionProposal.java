@@ -39,7 +39,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		if (module == null) {
 			label = functor + "/" + arity;
 		} else {
-			label = module + ":" + functor + "/" + arity;
+			label = functor + "/" + arity + " - " + module;
 		}
 	}
 	
