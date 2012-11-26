@@ -72,9 +72,9 @@ public class PrologCompletionProvider {
 		
 		ArrayList<ComparableCompletionProposal> proposals = new ArrayList<ComparableCompletionProposal>();
 		String query = bT(PDTCommonPredicates.FIND_COMPLETION,
-				"_",
-				"_",
 				searchPrefix,
+				"_",
+				"_",
 				"Kind",
 				"Module",
 				"Name",

@@ -116,9 +116,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 //					"Doc",
 //					"Kind");
 			String query = bT(PDTCommonPredicates.FIND_COMPLETION,
+					prefix,
 					Util.quoteAtom(enclFile),
 					document.getLineOfOffset(begin) + 1,
-					prefix,
 					"Kind",
 					"Module",
 					"Name",

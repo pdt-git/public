@@ -528,29 +528,29 @@ find_blacklist('$pldoc',4,_).
 
 %% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
 % 
-find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	var(Prefix),
 	!,
-	throw(prefix_not_bound(find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc))).
+	throw(prefix_not_bound(find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc))).
 
-find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	nonvar(EnclosingFile),
 	!,
 	(	split_file_path(EnclosingFile, _, _, _, lgt)
 	->	current_predicate(logtalk_load/1),
-		logtalk_adapter::find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
-	;	find_completion_(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	;	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
 	).
 
-find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
-	(	find_completion_(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	(	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
 	;	current_predicate(logtalk_load/1),
-		logtalk_adapter::find_completion(EnclosingFile, LineInFile, Prefix, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
 	).
 
 :- discontiguous(find_completion_/12).
 
-find_completion_(_EnclosingFile, _LineInFile, SpecifiedModule:PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	!,
 	PredicatePrefix \== '',
 	setof(Module-Name-Arity, SpecifiedModule^(
@@ -560,9 +560,9 @@ find_completion_(_EnclosingFile, _LineInFile, SpecifiedModule:PredicatePrefix, p
 	member(Module-Name-Arity, Predicates),
 	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 
-find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
-	nonvar(EnclosingFile),
+find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	atomic(PredicatePrefix),
+	nonvar(EnclosingFile),
 	setof(Module-Name-Arity, EnclosingFile^FileModule^(
 		module_of_file(EnclosingFile, FileModule),
 		declared_in_module(FileModule, Name, Arity, Module),
@@ -571,9 +571,9 @@ find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module,
 	member(Module-Name-Arity, Predicates),
 	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 
-find_completion_(EnclosingFile, _LineInFile, PredicatePrefix, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
-	var(EnclosingFile),
+find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	atomic(PredicatePrefix),
+	var(EnclosingFile),
 	setof(Module-Name-Arity, (
 		declared_in_module(user, Name, Arity, Module),
 		atom_concat(PredicatePrefix, _, Name)
@@ -646,14 +646,14 @@ var_to_arg(Arg, ArgName, Vars) :-
 	V == Var,
 	!.
 
-find_completion_(_EnclosingFile, _LineInFile, ModulePrefix, module, _, Name, _, _, _, _, _, _) :- 
+find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, _, _, _, _, _) :- 
 	atomic(ModulePrefix),
 	current_module(Name),
 	atom_concat(ModulePrefix,_,Name).
 
-find_completion_(_EnclosingFile, _LineInFile, AtomPrefix, atom, _, Atom, _, _, _, _, _, _) :- 
-	garbage_collect_atoms,
+find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _) :- 
 	atomic(AtomPrefix),
+	garbage_collect_atoms,
 	'$atom_completions'(AtomPrefix, Atoms),
 	member(Atom,Atoms), 
 	Atom \= AtomPrefix,
