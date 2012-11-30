@@ -16,12 +16,13 @@
 						write_file/6,
 						write_call_edge/3,
 						write_load_edge/3,
-						write_predicates/3]).
+						write_predicates/3,
+						write_file_as_element/2]).
 
-:- ensure_loaded('../pdt_factbase.pl').
-:- use_module('../analyzer/edge_counter').
-:- use_module('../analyzer/dead_predicate_finder').
-:- use_module('../modules_and_visibility').
+:- ensure_loaded(pdt_builder_analyzer('../pdt_factbase')).
+:- use_module(pdt_builder_analyzer(edge_counter)).
+:- use_module(pdt_builder_analyzer(dead_predicate_finder)).
+:- use_module(pdt_builder_analyzer('../modules_and_visibility')).
 
 prepare_for_writing(File,OutStream):-
     open(File,write,OutStream,[type(text)]),
@@ -87,7 +88,12 @@ write_load_edges(Stream):-
 	    )
 	).
     
-    
+write_file_as_element(Stream,FilePath):-
+    open_node(Stream,FilePath),
+    write_data(Stream,'kind','predicate'),
+    write_data(Stream,'id',FilePath),
+    write_data(Stream,'functor',FilePath),
+    close_node(Stream).	
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
     open_node(Stream,Id),
@@ -127,9 +133,10 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 */	close_node(Stream).	
 
     
-write_load_edge(Stream,LoadingFileId,FileId):-
-    open_edge(Stream,LoadingFileId,FileId),
-    write_data(Stream,'kind','loading'),
+write_load_edge(Stream, LoadingFileId, FileId):-
+    open_edge(Stream, LoadingFileId, FileId),
+    %write_data(Stream, 'kind', 'loading'),
+    write_data(Stream, 'kind', 'call'),
 	close_edge(Stream).
     
 write_call_edge(Stream,SourceId,TargetId):-

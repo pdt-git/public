@@ -14,12 +14,14 @@
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
+								write_dependencies_to_graphML/2,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
-:- use_module('../parse_util.pl').
+:- use_module(pdt_builder_analyzer('../parse_util.pl')).
 :- use_module(graphML_api).
-:- use_module('../analyzer/edge_counter').
+:- use_module(pdt_builder_analyzer(edge_counter)).
+:- use_module(pdt_common_pl(pdt_search)).
 
 write_project_graph_to_file(Project, OutputFile):-
 	parse_util:generate_facts(Project),
@@ -49,11 +51,13 @@ write_focus_to_graphML(FocusFile, GraphFile, Dependencies):-
     file_paths(DependentFiles, Dependencies).  
 
 write_global_to_graphML(ProjectFilePaths, GraphFile):-
-    findall(Path, (
-    		source_file(Path), member(Path, ProjectFilePaths)
-    	), ConsultedFilePaths),
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     file_paths(ProjectFiles, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_global_facts_to_graphML(ProjectFiles)).
+
+write_dependencies_to_graphML(ProjectFilePaths, GraphFile):-
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ConsultedFilePaths)).
 
 write_to_graphML(GraphFile, CALL) :-
     with_mutex(prolog_factbase,
@@ -68,48 +72,17 @@ write_to_graphML(GraphFile, CALL) :-
   	  		)
   	 	)
   	 ).
+  	 
+filter_consulted(ProjectFilePaths, ConsultedFilePaths) :-
+    findall(Path, (
+    		member(Path, ProjectFilePaths), source_file(Path)
+    	), ConsultedFilePaths).
 
 add_output_stream_to_call(CALL, OutStream, CALL2) :-
     CALL =.. L1,
     append(L1, [OutStream], L2),
     CALL2 =.. L2.
 
-write_global_facts_to_graphML(ProjectFiles, OutStream) :-
-    
-    count_call_edges_between_predicates,
-    
-    forall(	
-		member(FileId, ProjectFiles),
-		(	
-			fileT(FileId,FileName, Module),
-			write_file(OutStream, FileName, all_preds, FileId, FileName, Module),
-    		flush_output(OutStream)
-    	)
-    ),
-    
-    findall(
-    	PredId,
-    	(
-			member(FileId, ProjectFiles),
-    		predicateT(PredId,FileId,_,_,_)
-    	),
-    	Predicates
-    ),
-	findall([SourcePredicate, TargetPredicate],
-		(
-    		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
-			member(SourcePredicate, Predicates),
-			member(TargetPredicate, Predicates)
-    	),
-    	FoundCalls
-    ),
-    
-    list_to_set(FoundCalls, Calls),
-    forall(
-    	member([S, T], Calls), 
-    	write_call_edge(OutStream, S, T)
-    ).
-    
 write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
     fileT_ri(FocusFile,FocusId), !,
 	
@@ -120,6 +93,61 @@ write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
     forall(
     	member((SourceId,TargetId),Calls),
     	write_call_edge(OutStream,SourceId,TargetId)
+    ).
+    
+write_global_facts_to_graphML(ProjectFiles, OutStream) :-
+    
+    count_call_edges_between_predicates,
+    
+    forall(member(FileId, ProjectFiles),
+		(	
+			fileT(FileId,FileName, Module),
+			write_file(OutStream, FileName, all_preds, FileId, FileName, Module),
+    		flush_output(OutStream)
+    	)
+    ),
+    
+    findall(PredId,
+    	(
+			member(FileId, ProjectFiles),
+    		predicateT(PredId,FileId,_,_,_)
+    	),
+    	Predicates
+    ),
+	findall((SourcePredicate, TargetPredicate),
+		(
+    		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
+			member(SourcePredicate, Predicates),
+			member(TargetPredicate, Predicates)
+    	),
+    	FoundCalls
+    ),
+    
+    list_to_set(FoundCalls, Calls),
+    forall(member((S, T), Calls), 
+    	write_call_edge(OutStream, S, T)
+    ).
+    
+write_dependencies_facts_to_graphML(ProjectFilePaths, OutStream) :-
+    
+    forall(member(FilePath, ProjectFilePaths),
+    	(
+    		write_file_as_element(OutStream, FilePath)
+    	)
+    ),
+    
+	findall((SourceFile, TargetFile),
+		(
+    		loaded_by(SourceFile, TargetFile, _, _),
+			member(SourceFile, ProjectFilePaths),
+			member(TargetFile, ProjectFilePaths)
+    	),
+    	FoundDependencies
+    ),
+
+    forall(
+    	member((S, T), FoundDependencies), 
+    	write_load_edge(OutStream, T, S)
     ).
     
 file_paths([], []).

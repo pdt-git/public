@@ -6,33 +6,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.Util;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 
 import pdt.y.main.PDTGraphView;
 
 public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
-	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
+	private static final String NAME_OF_FOCUS_HELPING_FILE = "pdt-focus-help.graphml";
 
 	private String focusFile;
 	private List<String> dependencies = new ArrayList<String>();
 
 	public FocusGraphPIFLoader(PDTGraphView view) {
-		super(view);
-
-		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
-		ResourceFileLocator locator = plugin.getResourceLocator();
-		helpFile = locator.resolve(NAME_OF_HELPING_FILE);
+		super(view, NAME_OF_FOCUS_HELPING_FILE);
 	}
 
-	public String getFocusFile() {
+	@Override
+	public String getCurrentPath() {
 		return focusFile;
 	}
 
-	public void setFocusFile(String focusFile) {
-		this.focusFile = focusFile;
+	@Override
+	public void setCurrentPath(String currentPath) {
+		this.focusFile = currentPath;
 	}
 
 	public List<String> getDependencies() {
@@ -60,5 +56,15 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 			dependencies.addAll(deps);
 		}
 		return output;
+	}
+
+	@Override
+	public List<String> getPaths() {
+		throw new Error("Method getPaths not supported!");
+	}
+
+	@Override
+	public void setPaths(List<String> paths) {
+		throw new Error("Method getPaths not supported!");
 	}
 }

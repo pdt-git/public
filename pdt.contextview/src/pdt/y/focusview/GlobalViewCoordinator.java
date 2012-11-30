@@ -18,9 +18,9 @@ import pdt.y.main.PDTGraphView;
 
 public class GlobalViewCoordinator extends ViewCoordinatorBase {
 	
-	final HashMap<String, FocusView.FocusViewControl> views = new HashMap<String, FocusView.FocusViewControl>();
+	final HashMap<String, ViewBase.FocusViewControl> views = new HashMap<String, ViewBase.FocusViewControl>();
 	
-	public GlobalViewCoordinator(FocusView focusView)
+	public GlobalViewCoordinator(ViewBase focusView)
 	{
 		super(focusView);
 		
@@ -38,12 +38,12 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase {
 		
 		if (currentFocusView == null) {
 			PDTGraphView pdtGraphView = new PDTGraphView(focusView);
-			GlobalGraphPIFLoader loader = new GlobalGraphPIFLoader(pdtGraphView);
+			GraphPIFLoaderBase loader = focusView.createGraphPIFLoader(pdtGraphView);
+			loader.setCurrentPath(path);
+			loader.setPaths(paths);
 			
 			currentFocusView = focusView.new FocusViewControl(pdtGraphView, loader);
 
-			loader.setCurrentPath(path);
-			loader.setPaths(paths);
 			refreshCurrentView();
 			
 			views.put(project.getName(), currentFocusView);
@@ -97,6 +97,6 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase {
 	@Override
 	protected boolean isCurrentFocusViewActualFor(String path) {
 		return currentFocusView != null 
-				&& ((GlobalGraphPIFLoader)currentFocusView.getPifLoader()).getPaths().contains(path);
+				&& ((GraphPIFLoaderBase)currentFocusView.getPifLoader()).getPaths().contains(path);
 	}
 }

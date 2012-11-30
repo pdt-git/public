@@ -15,12 +15,14 @@ package pdt.y.focusview;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
@@ -31,6 +33,7 @@ import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 
+import pdt.y.internal.FocusViewSubscription;
 import pdt.y.main.PDTGraphView;
 
 public abstract class GraphPIFLoaderBase {
@@ -40,8 +43,12 @@ public abstract class GraphPIFLoaderBase {
 	private PrologInterface pif;
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
-	public GraphPIFLoaderBase(PDTGraphView view) {
+	public GraphPIFLoaderBase(PDTGraphView view, String helpFileName) {
 		this.view = view;
+		
+		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
+		ResourceFileLocator locator = plugin.getResourceLocator();
+		helpFile = locator.resolve(helpFileName);
 	}
 
 	protected abstract String generateQuery(File helpFile);
@@ -118,4 +125,12 @@ public abstract class GraphPIFLoaderBase {
 		}
 		return true;
 	}
+
+	public abstract List<String> getPaths();
+
+	public abstract void setCurrentPath(String currentPath);
+
+	public abstract void setPaths(List<String> paths);
+
+	public abstract String getCurrentPath();
 }

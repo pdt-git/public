@@ -21,10 +21,10 @@ import pdt.y.preferences.MainPreferencePage;
 
 public abstract class ViewCoordinatorBase implements IPartListener, ConsultListener  {
 	
-	protected FocusView focusView;
-	protected FocusView.FocusViewControl currentFocusView;
+	protected ViewBase focusView;
+	protected ViewBase.FocusViewControl currentFocusView;
 
-	public ViewCoordinatorBase(FocusView focusView) {
+	public ViewCoordinatorBase(ViewBase focusView) {
 		this.focusView = focusView;
 
 		

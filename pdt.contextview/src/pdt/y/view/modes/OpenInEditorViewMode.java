@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-package pdt.y.focusview;
+package pdt.y.view.modes;
 
 import java.awt.event.MouseEvent;
 import java.util.Map;
@@ -21,6 +21,7 @@ import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
+import pdt.y.focusview.GraphPIFLoaderBase;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.GraphDataHolder;
 import y.base.Node;

@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import pdt.y.focusview.FocusView;
+import pdt.y.focusview.ViewBase;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
@@ -52,7 +52,7 @@ import y.view.NavigationMode;
 import y.view.ViewMode;
 
 public class PDTGraphView extends  JPanel {
-	final FocusView focusView;
+	final ViewBase focusView;
 	final Graph2DView view;
 	GraphModel model;
 	Graph2D graph;
@@ -69,7 +69,7 @@ public class PDTGraphView extends  JPanel {
 
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public PDTGraphView(FocusView focusView)
+	public PDTGraphView(ViewBase focusView)
 	{
 		setLayout(new BorderLayout());
 		
