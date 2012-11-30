@@ -18,13 +18,13 @@ public class ModuleCompletionProposal extends ComparableTemplateCompletionPropos
 	@Override
 	public int compareTo(ComparableTemplateCompletionProposal o) {
 		if (o instanceof VariableCompletionProposal) {
-			return -1;
+			return 1;
 		} else if (o instanceof ModuleCompletionProposal) {
 			return getDisplayString().compareTo(o.getDisplayString());
 		} else if (o instanceof PredicateCompletionProposal) {
 			return getDisplayString().compareTo(((PredicateCompletionProposal) o).getSignature());
 		} else {
-			return 1;
+			return -1;
 		}
 	}
 
