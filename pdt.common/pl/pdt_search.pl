@@ -655,8 +655,10 @@ find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _
 	atomic(AtomPrefix),
 	garbage_collect_atoms,
 	'$atom_completions'(AtomPrefix, Atoms),
-	member(Atom,Atoms), 
-	Atom \= AtomPrefix,
+	member(Atom,Atoms),
+	'$atom_references'(Atom, ReferenceCount),
+	ReferenceCount > 0, 
+%	Atom \= AtomPrefix,
 	\+ current_predicate(Atom/_Arity).
 
 
