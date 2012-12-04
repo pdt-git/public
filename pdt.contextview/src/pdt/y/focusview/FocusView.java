@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
@@ -72,6 +73,7 @@ public class FocusView extends ViewPart {
 	private Label info;
 	private String infoText = "", statusText = "";
 	private ViewCoordinatorBase focusViewCoordinator;
+	private boolean navigationEnabled = false;
 	
 	public FocusView() {
 		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
@@ -156,6 +158,21 @@ public class FocusView extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 		
+		toolBarManager.add(new ToolBarAction("Navigation", 
+				ImageRepository.getImageDescriptor(ImageRepository.MOVE)) {
+
+				@Override
+					public int getStyle() {
+						return IAction.AS_CHECK_BOX;
+					}
+			
+				@Override
+				public void performAction() {
+					navigationEnabled = !navigationEnabled;
+					setChecked(navigationEnabled);
+					focusViewCoordinator.currentFocusView.recalculateMode();
+				}
+			});
 		
 		toolBarManager.add(new ToolBarAction("Update", "WARNING: Current layout will be rearranged!", 
 				ImageRepository.getImageDescriptor(ImageRepository.REFRESH)) {
@@ -295,6 +312,10 @@ public class FocusView extends ViewPart {
 		    }
 		}.schedule();
 	}
+
+	public boolean isNavigationModeEnabled() {
+		return navigationEnabled;
+	}
 	
 	@Override
 	public void dispose() {
@@ -322,6 +343,10 @@ public class FocusView extends ViewPart {
 			pdtGraphView.addViewMode(new HoverTrigger(getShell()));
 		}
 		
+		public void recalculateMode() {
+			this.pdtGraphView.recalculateMode();
+		}
+
 		public boolean isEmpty() {
 			return pdtGraphView.isEmpty();
 		}

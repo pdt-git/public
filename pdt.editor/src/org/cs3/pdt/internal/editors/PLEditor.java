@@ -50,6 +50,8 @@ import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.pif.service.ConsultListener;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -92,8 +94,10 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
@@ -119,6 +123,8 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 
 	protected final static char[] BRACKETS = { '(', ')', '[', ']' };
 
+	private static final boolean EXPERIMENTAL_ADD_TASKS = true;
+
 	private PLConfiguration configuration;
 
 	private IContentAssistant assistant;
@@ -139,12 +145,63 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		
 		if (shouldConsult) {
 			Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
+			if(EXPERIMENTAL_ADD_TASKS){
+				addTasks(((FileEditorInput)getEditorInput()).getFile(),document);
+			}
 			breakpointHandler.backupMarkers(getCurrentIFile(), document);
 			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
 		}
 		
 		PDTCommonPlugin.getDefault().notifyDecorators();
 		setFocus();
+	}
+
+	private void addTasks(IFile file, Document document) {
+			try {
+				int offset = 0;
+				file.deleteMarkers(IMarker.TASK, true, IResource.DEPTH_ONE);
+				while(offset<document.getLength()){
+					ITypedRegion region = document.getPartition(offset);
+					if(isComment(region)){
+						String content=document.get(offset, region.getLength());
+						addTaskMarker(file, document, offset, content, "TODO");
+						addTaskMarker(file, document, offset, content, "FIXME");
+					}
+					offset = region.getOffset() + region.getLength();
+				}
+			} catch (BadLocationException e) {
+				Debug.report(e);
+			} catch (CoreException e1) {
+				Debug.report(e1);
+			}
+
+	}
+
+	private void addTaskMarker(IFile file, Document document, int offset,
+			String content, String text) throws BadLocationException {
+		if(content.contains(text)){
+			int todoOffset = content.indexOf(text);
+			int linebreakOffset = content.indexOf("\n",todoOffset);
+			if(linebreakOffset<0){
+				linebreakOffset = content.length()-1;
+			}
+			String lineString = content.substring(todoOffset, linebreakOffset);
+			HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
+			attributes.put(IMarker.LINE_NUMBER, document.getLineOfOffset(offset+todoOffset));
+			attributes.put(IMarker.CHAR_START, offset+todoOffset);
+			attributes.put(IMarker.CHAR_END, offset+linebreakOffset);
+			attributes.put(IMarker.MESSAGE, lineString);
+			if(text.equals("TODO")){
+				attributes.put(IMarker.PRIORITY, new Integer(IMarker.PRIORITY_NORMAL));
+			} else {
+				attributes.put(IMarker.PRIORITY, new Integer(IMarker.PRIORITY_HIGH));
+			}
+			try {
+				MarkerUtilities.createMarker(file, attributes, IMarker.TASK);
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+		}
 	}
 
 	/**

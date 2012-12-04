@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import pdt.y.focusview.FocusView;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
@@ -51,6 +52,7 @@ import y.view.NavigationMode;
 import y.view.ViewMode;
 
 public class PDTGraphView extends  JPanel {
+	final FocusView focusView;
 	final Graph2DView view;
 	GraphModel model;
 	Graph2D graph;
@@ -63,11 +65,15 @@ public class PDTGraphView extends  JPanel {
 	Graph2DViewMouseWheelZoomListener wheelZoomListener;
 	WheelScroller wheelScroller;
 
+	boolean navigation = false;
+
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public PDTGraphView()
+	public PDTGraphView(FocusView focusView)
 	{
 		setLayout(new BorderLayout());
+		
+		this.focusView = focusView;
 		
 		layoutModel = new  GraphLayout();
 
@@ -81,6 +87,8 @@ public class PDTGraphView extends  JPanel {
 		initMouseZoomSupport();
 
 		initKeyListener();
+		
+		recalculateMode();
 		
 		add(view);
 	}
@@ -113,27 +121,18 @@ public class PDTGraphView extends  JPanel {
 	private void initKeyListener() {
 		view.getCanvasComponent().addKeyListener(new KeyListener() {
 			
-			Boolean navigation = false;
 			
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (navigation)
-					return;
-				
 				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-					navigationMode();
-					navigation = true;
+					navigation = calculateMode(navigation, true, focusView.isNavigationModeEnabled());
 				}
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (!navigation)
-					return;
-				
 				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-					editMode();
-					navigation = false;
+					navigation = calculateMode(navigation, false, focusView.isNavigationModeEnabled());
 				}
 			}
 
@@ -142,20 +141,43 @@ public class PDTGraphView extends  JPanel {
 		});
 	}
 	
-	public void navigationMode() {
-		view.removeViewMode(editMode);
-		view.addViewMode(navigationMode);
-		
-		view.getCanvasComponent().removeMouseWheelListener(wheelScroller);
-		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
+	public void recalculateMode() {
+		navigation = calculateMode(navigation, false, focusView.isNavigationModeEnabled());
 	}
 	
-	public void editMode() {
-		view.removeViewMode(navigationMode);
-		view.addViewMode(editMode);
+	private boolean calculateMode(boolean isEditorInNavigation, boolean isCtrlPressed, boolean isNavigationModeEnabled) {
+		boolean e = isEditorInNavigation;
+		boolean c = isCtrlPressed;
+		boolean n = isNavigationModeEnabled;
 		
-		view.getCanvasComponent().removeMouseWheelListener(wheelZoomListener);
-		view.getCanvasComponent().addMouseWheelListener(wheelScroller);
+		boolean newModeNavigation = (!e && !c && n)  	// 0 0 1
+				|| (e && c && !n) 						// 1 1 0
+				|| (!e && c && !n) 						// 0 1 0
+				|| (e && !c && n);						// 1 0 1
+		
+		// If mode was not changed
+		if (newModeNavigation == isEditorInNavigation) {
+			return newModeNavigation;
+		}
+		
+		if (newModeNavigation) { 
+			// Navigation mode
+			view.removeViewMode(editMode);
+			view.addViewMode(navigationMode);
+			
+			view.getCanvasComponent().removeMouseWheelListener(wheelScroller);
+			view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
+		}
+		else { 
+			// Edit mode
+			view.removeViewMode(navigationMode);
+			view.addViewMode(editMode);
+			
+			view.getCanvasComponent().removeMouseWheelListener(wheelZoomListener);
+			view.getCanvasComponent().addMouseWheelListener(wheelScroller);
+		}
+		
+		return newModeNavigation;
 	}
 
 	public GraphDataHolder getDataHolder() {
