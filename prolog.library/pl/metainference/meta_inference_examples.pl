@@ -1,0 +1,131 @@
+:- module(meta_inference_examples, []).
+
+% direct meta call
+% simple0(0)
+simple0(Z) :-
+	call(Z).
+
+% nested meta call
+% simple1(0)
+simple1(Z) :-
+	call(call(Z)).
+
+% meta call in disjunction
+% simple2(0, *)
+simple2(C1, C2) :-
+	(	C1 = C2
+	;	call(C1)
+	).
+
+% variable unification
+% unify0(0)
+unify0(Y) :-
+	Y = Z,
+	call(Z).
+
+% term unification
+% unify1(0)
+unify1(X) :-
+	term(X, _Y) = term(Z, funny),
+	call(Z).
+
+% unification chain
+% unify2(0)
+unify2(X) :-
+	X = Y,
+	Y = Z,
+	call(Z).
+
+% unification chain, other order
+% unify3(0)
+unify3(X) :-
+	Y = Z,
+	X = Y,
+	call(Z).
+
+% multiple unification in term
+% unify4(0, 0)
+unify4(X, Y) :-
+	term(X, X) = term(Y, Z),
+	call(Z).
+
+% unification chain via term
+% unify5(0)
+unify5(X) :-
+	Y = term(X),
+	Y = term(Z),
+	call(Z).
+
+% unification after meta call not relevant
+% unify6(0, *)
+unify6(Z, Y) :-
+	call(Z),
+	Z = Y.
+
+% term construction via functor/3
+% construct_term0(functor, arity)
+construct_term0(X, Y) :-
+	functor(Z, X, Y),
+	call(Z).
+
+% term construction via univ/2
+% construct_term1(univ_list)
+construct_term1(Y) :-
+	Z =.. Y,
+	call(Z).
+
+% term construction via univ/2, only functor
+% construct_term2(functor, *)
+construct_term2(X, Y) :-
+	Z =.. [X, 1|Y],
+	call(Z).
+
+% construct functor with atom_concat/3, add a prefix
+% construct_functor0(add_prefix(abc))
+construct_functor0(Y) :-
+	atom_concat(abc, Y, Z),
+	call(Z).
+
+% construct functor with atom_concat/3, add a suffix
+% construct_functor1(add_suffix(abc))
+construct_functor1(Y) :-
+	atom_concat(Y, abc, Z),
+	call(Z).
+
+% construct functor with atom_concat/3, add an unknown prefix and an unknown suffix
+% construct_functor2(is_prefix, is_suffix)
+construct_functor2(X, Y) :-
+	atom_concat(X, Y, Z),
+	call(Z).
+
+% construct functor with atom_concat/3, add a suffix
+% the constructed functor is used to construct a term using functor/3
+% construct_functor3(add_suffix(abc))
+construct_functor3(X) :-
+	atom_concat(X, abc, Y),
+	functor(Z, Y, 1),
+	call(Z).
+
+% the following predicate are not meta predicates
+% infer_meta/2 fails
+non_meta0(Z) :-
+	call(p(Z)).
+
+non_meta1(_Z) :-
+	call(_Y).
+
+non_meta2(Z) :-
+	Z = 4.
+
+non_meta3(Z) :-
+	Y =.. [p, Z],
+	call(Y).
+
+non_meta4(Z) :-
+	Y = p(Z),
+	call(Y).
+
+non_meta5(Z) :-
+	functor(Z, X, Y),
+	assertz(p(Z, X, Y)).
+

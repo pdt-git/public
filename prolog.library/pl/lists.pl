@@ -30,7 +30,8 @@
     pretty_print_list/2,          % (+List,+Indent)!io 
     pretty_print_list_body/2,     % (+List,+Indent)
     list_2_comma_separated_list/2, % (+List,-Atom) is det.
-    list_2_separated_list/3 % (+List,-Atom) is det.
+    list_2_separated_list/3, % (+List,-Atom) is det.
+    finite_length/2
 ] ).
 
 :- use_module(library(backcomp)).
@@ -366,4 +367,6 @@ aformat(Atom,FormatString,List):-
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)]) .  
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)], 8) . 
 
-
+finite_length(List, Length) :-
+	'$skip_list'(Length, List, Tail),
+	Tail == [].
