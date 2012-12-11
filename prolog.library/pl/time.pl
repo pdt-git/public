@@ -56,7 +56,8 @@ demo_time_measurement :-
  *   - reportRuntime(ForWhat,CPUMilisSinceLast)
  */
    
-      
+performance(Goal, Time, CountAll, Inferences) :-
+	time(count(Goal, CountAll), time(Inferences, Time, _, _)).      
 /*
  * Measure milliseconds to find and count all results of a Goal.
  */ 
