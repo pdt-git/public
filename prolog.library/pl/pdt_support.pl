@@ -5,6 +5,8 @@
 	pdt_support(doc_collect).
 	pdt_support(flag).
 	pdt_support(count_inferences).
+	pdt_support(tests).
+	pdt_support(clause_property).
 	
 :- elif(current_prolog_flag(dialect,yap)).
 	pdt_support(reverse_list).
