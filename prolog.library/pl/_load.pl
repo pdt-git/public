@@ -12,6 +12,8 @@
  ****************************************************************************/
 
 
+ :- consult(pdt_support).  % <- NO! THIS BE FIRST!
+
 
  :- consult(logging).       % <- THIS BE FIRST!
   

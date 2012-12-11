@@ -39,12 +39,23 @@ count_success(Goal, Times) :-
 :- module_transparent count/2.
 
 count(Goal, _) :-
-  flag(successcounter,_,0),
-  catch(Goal,_Any,fail),     % turn exceptions into failures
-    flag(successcounter,N,N+1),
-  fail.
+	nb_setval(successcounter, 0),
+    catch(Goal,_Any,fail),     % turn exceptions into failures
+    nb_getval(successcounter, N),
+    N2 is N + 1,
+    nb_setval(successcounter,N2),
+    fail.
+    
 count(_, N) :-
-  flag(successcounter,N,N).
+	nb_getval(successcounter, N).
+  
+%count(Goal, _) :-
+%  flag(successcounter,_,0),
+%  catch(Goal,_Any,fail),     % turn exceptions into failures
+%    flag(successcounter,N,N+1),
+%  fail.
+%count(_, N) :-
+%  flag(successcounter,N,N).
 
 
 :- module_transparent count_and_print/2.

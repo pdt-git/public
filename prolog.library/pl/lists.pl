@@ -14,6 +14,7 @@
 
 % Date: 21.11.2005
 
+:- if(current_prolog_flag(dialect,swi)).
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
@@ -32,6 +33,25 @@
     list_2_comma_separated_list/2, % (+List,-Atom) is det.
     list_2_separated_list/3 % (+List,-Atom) is det.
 ] ).
+:- else.
+:- module( ctc_lists, [
+    nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
+    union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
+    ctc_intersection/3,           % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
+    union_sorted/3,           % (+Set1,+Set2,?Union)! 
+    union_order_preserving/3, % (+Set1,+Set2,?Union)!
+    remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
+    list_sum/2,               % (+Numbers,?Total)!
+    traverseList/3,           % (+List,+Stop,+Pred) is nondet
+    list_to_disjunction/2,    % (+List,?Disjunction) is det.
+    list_to_conjunction/2,    % (+List,?Conjunction) is det.
+    pretty_print_list/1,      % (+List)!io 
+    pretty_print_list/2,          % (+List,+Indent)!io 
+    pretty_print_list_body/2,     % (+List,+Indent)
+    list_2_comma_separated_list/2, % (+List,-Atom) is det.
+    list_2_separated_list/3 % (+List,-Atom) is det.
+] ).
+:- endif.
 
 :- use_module(library(backcomp)).
 :- use_module(library(lists)).
@@ -200,6 +220,7 @@ remove_duplicates_sorted__([First|Rest], Previous, Result ) :-
    ).
 
 
+:- if(current_prolog_flag(dialect,swi)).
 /*
  * remove_duplicates(+List, ?DuplicateFree) is det
  *
@@ -214,6 +235,7 @@ remove_duplicates([First|Rest],[First|NoDup]) :-
 remove_duplicates([First|Rest],[First|NoDup]) :-
    remove_duplicates(Rest,NoDup).
 remove_duplicates([],[]).
+:- endif.
 
 /*
  * split_unique(+List,+Elem,?BeforeNoDups,?AfterNoDups)

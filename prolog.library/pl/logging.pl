@@ -40,16 +40,25 @@ log_once_to_file(File,Goal) :-
  * ======================================================================== */
 :- dynamic loggingEnabled/0.
 
+:- if(current_prolog_flag(dialect,swi)).
 enable_logging :- 
    retractall(loggingEnabled),      % prevent accidental backtracking(!)
    set_prolog_flag(last_call_optimisation,false), % important for retrieval of parentmodule
    assert(loggingEnabled).
 
-:- enable_logging.                  % default: logging
-   
 disable_logging :- 
    set_prolog_flag(last_call_optimisation,true),
    retractall(loggingEnabled).
+:- else.
+enable_logging :- 
+   retractall(loggingEnabled),      % prevent accidental backtracking(!)
+   assert(loggingEnabled).
+
+disable_logging :- 
+   retractall(loggingEnabled).
+   
+:- endif.   
+:- enable_logging.                  % default: logging
 
 /*
  * Only call a goal (that produces console output) if logging is enabled.

@@ -35,6 +35,26 @@ table(X) :-
 	write('WARNING: tabling not supported in SWI ('),
 	write(X),
 	write(')\n').
+:- elif(current_prolog_flag(dialect,yap)).
+doc_collect(_) :-
+	writeln('WARNING: doc_collect not supported in YAP').
+:- endif.
+
+
+:- if(\+ pdt_support(flag)).
+flag(Name, _, _) :-
+	var(Name),
+	throw(instantiation_error(Name)), !.
+
+flag(Name, OldValue, NewValue) :-
+	nb_current(Name, OldValue),
+	nonvar(NewValue),
+	nb_setval(Name, NewValue), !.
+	
+flag(Name, OldValue, NewValue) :-
+	OldValue = 0,
+	nonvar(NewValue),
+	nb_setval(Name, NewValue), !.
 :- endif.
 
 index_information(Predicate, I) :-
@@ -397,12 +417,13 @@ get_single_char(A) :-
  *
  * Disables tty control char-wise read on the windows platform.
  */
-
+:- if(current_prolog_flag(dialect,swi)).
 disable_tty_control :- 
   current_prolog_flag(windows,_T) -> 
   set_prolog_flag(tty_control,false). 
 
 :- disable_tty_control.
+:- endif.
 
 
 read_term_atom(Atom,Term,Options):-

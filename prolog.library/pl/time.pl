@@ -56,8 +56,10 @@ demo_time_measurement :-
  *   - reportRuntime(ForWhat,CPUMilisSinceLast)
  */
    
+
 performance(Goal, Time, CountAll, Inferences) :-
-	time(count(Goal, CountAll), time(Inferences, Time, _, _)).      
+	ctc_time(count(Goal, CountAll), Time, Inferences).
+	
 /*
  * Measure milliseconds to find and count all results of a Goal.
  */ 
@@ -71,17 +73,37 @@ performance(Goal, Time, CountAll) :-
 performanceUnique(Goal, Time, CountAll,CountUnique) :- 
   ctc_time(count_all_and_unique(Goal,CountAll,CountUnique), Time).
 
+:- if(pdt_support(count_inferences)).
 
+ctc_time(Call, Time, Inferences) :- 
+   startStopwatchWithInfer(InferencesOld), 
+     call(Call),
+   measureRuntimeWithInfer(InferencesOld, Time, Inferences).
 
+startStopwatchWithInfer(InferencesOld) :-
+    statistics(runtime, _CPU),    % Start new CPU timer
+	statistics(inferences, InferencesOld).
+
+measureRuntimeWithInfer(InferencesOld, CPUMilisSinceLast, Inferences) :-
+	statistics(inferences, InferencesNew),
+	Inferences is InferencesNew - InferencesOld - 3,
+	statistics(runtime, [_CPUMilisSinceStart, CPUMilisSinceLast]). 
+
+:- else.
+
+ctc_time(Call, Time, unknown) :-
+	ctc_time(Call, Time).
+   
+:- endif.
+    
 ctc_time(Call, Time) :- 
    startStopwatch, 
      call(Call),
    measureRuntime(Time).
-    
 
 startStopwatch :-
-    statistics(runtime, _CPU),    % Start new CPU timer
-    statistics(real_time, _Real). % Start new real timer
+    statistics(runtime, _CPU).    % Start new CPU timer
+%    statistics(real_time, _Real). % Start new real timer
  
  
 measureRuntime(CPUMilisSinceLast) :- 
@@ -90,9 +112,10 @@ measureRuntime(CPUMilisSinceLast) :-
     
 reportRuntime(ForWhat) :- 
     statistics(runtime,    [_CPUMilisSinceStart, CPUMilisSinceLast]),   
-    statistics(real_time,  [_RealSecsSinceStart, RealSecsSinceLast]), 
-    log_on_stdout('~a: CPU = ~a milliseconds, real time ca. ~a seconds~n', 
-           [ForWhat,CPUMilisSinceLast,RealSecsSinceLast]).
+%    statistics(real_time,  [_RealSecsSinceStart, RealSecsSinceLast]), 
+%    log_on_stdout('~a: CPU = ~a milliseconds, real time ca. ~a seconds~n',
+	 log_on_stdout('~a: CPU = ~a milliseconds~n', 
+           [ForWhat,CPUMilisSinceLast]).
            
     
 reportRuntime(ForWhat,CPUMilisSinceLast) :- 

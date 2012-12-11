@@ -46,7 +46,11 @@
            ]
  ).
  
+ :- use_module(pdt_support).
+ 
+:- if(pdt_support(doc_collect)).
 :- doc_collect(true).
+:- endif.
 
 %% hidden_module(M)
 %
