@@ -116,7 +116,7 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		} else if (SearchConstants.COMPLETION_DOC_KIND_HTML.equals(docKind)) {
 			if (doc != null) {
 				if(doc.indexOf("\n") > -1){
-					doc="<b>"+doc.replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
+					doc="<b>"+doc.trim().replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
 				}
 				return doc;
 			} else {
