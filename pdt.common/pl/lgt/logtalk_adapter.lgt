@@ -341,7 +341,7 @@ find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity,
 %% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
 % 
 :- public(find_completion/12).
-find_completion(SearchEntity::PredicatePrefix, EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, _, nodoc, _) :-
+find_completion(SearchEntity::PredicatePrefix, EnclosingFile, _, predicate, DefiningOrDeclaringEntity, Name, Arity, Visibility, false, _, nodoc, _) :-
 	var(EnclosingFile),
 	!,
 	(	var(SearchEntity)
@@ -354,30 +354,10 @@ find_completion(SearchEntity::PredicatePrefix, EnclosingFile, _, predicate, Decl
 	functor(Head, Name, Arity),
 	Entity::predicate_property(Head, scope(Visibility)),
 	(	var(SearchEntity)
-	->	DeclaringEntity = Entity
-	;		(	Entity::predicate_property(Head, defined_in(DeclaringEntity))
+	->	DefiningOrDeclaringEntity = Entity
+	;	(	Entity::predicate_property(Head, defined_in(DefiningOrDeclaringEntity))
 		->	true
-		;	Entity = DeclaringEntity
-		)
-	).
-
-find_completion(SearchEntity<<PredicatePrefix, EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, _, nodoc, _) :-
-	var(EnclosingFile),
-	!,
-	(	var(SearchEntity)
-	->	true
-	;	Entity = SearchEntity
-	),
-	current_object(Entity),
-	Entity<<current_predicate(Name/Arity),
-	atom_concat(PredicatePrefix, _, Name),
-	functor(Head, Name, Arity),
-	Entity<<predicate_property(Head, scope(Visibility)),
-	(	var(SearchEntity)
-	->	DeclaringEntity = Entity
-	;	(	Entity<<predicate_property(Head, defined_in(DeclaringEntity))
-		->	true
-		;	Entity = DeclaringEntity
+		;	Entity = DefiningOrDeclaringEntity
 		)
 	).
 
