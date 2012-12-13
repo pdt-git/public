@@ -447,7 +447,7 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	
 print_solution(OutStream,Vars):-
 	forall(
-		member(Key=Val,Vars),
+		(member(Key=Val,Vars), nonvar(Val)),
 		print_binding(OutStream,Key,Val)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).

@@ -75,6 +75,16 @@ public class ImageRepository {
 
 	public static final String PREDICATE_PUBLIC = "public_co.gif";
 
+	public static final String PREDICATE_PROTECTED = "protected_co.gif";
+	
+	public static final String PREDICATE_PRIVATE = "private_co.gif";
+	
+	public static final String PREDICATE_BUILTIN = "built_in.gif";
+	
+	public static final String ENTITY = "package_obj.gif";
+	
+	public static final String ATOM = "atom.png";
+	
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
         return ImageDescriptor.createFromURL(url);
