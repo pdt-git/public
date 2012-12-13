@@ -78,7 +78,9 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
 				try {
-					PDTCommonPlugin.this.reconfigureDebugOutput();
+					if (!"console.no.focus".equals(e.getProperty())) {
+						PDTCommonPlugin.this.reconfigureDebugOutput();
+					}
 				} catch (FileNotFoundException e1) {
 					Debug.report(e1);
 				}

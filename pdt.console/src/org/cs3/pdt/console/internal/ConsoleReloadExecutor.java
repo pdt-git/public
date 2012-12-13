@@ -18,6 +18,7 @@ import static org.cs3.prolog.common.QueryUtils.bT;
 import java.io.IOException;
 import java.util.List;
 
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
@@ -76,7 +77,13 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 				IWorkbenchPage activePage = UIUtils.getActivePage();
 				if (activePage != null) {
 					try {
-						activePage.showView(PDTConsole.CONSOLE_VIEW_ID);
+						boolean focusToConsole = !PDTCommonPlugin.getDefault().getPreferenceStore().getBoolean("console.no.focus");
+						if (focusToConsole) {
+							activePage.showView(PDTConsole.CONSOLE_VIEW_ID);
+						} else {
+							activePage.showView(PDTConsole.CONSOLE_VIEW_ID, null, IWorkbenchPage.VIEW_VISIBLE);
+							PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", false);
+						}
 					} catch (PartInitException e) {
 						Debug.report(e);
 					}

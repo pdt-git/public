@@ -95,7 +95,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -150,24 +149,18 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				addTasks(((FileEditorInput)getEditorInput()).getFile(),document);
 			}
 			breakpointHandler.backupMarkers(getCurrentIFile(), document);
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+			
+			PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", true);
+			
+			IFile currentIFile = getCurrentIFile();
+			if (currentIFile != null) {
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
+			} else {
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
+			}
 		}
 		
 		PDTCommonPlugin.getDefault().notifyDecorators();
-		setFocus();
-		// TRHO: TODO: Instead of scheduling focus job avoid focus of Prolog console.
-		WorkbenchJob job = new WorkbenchJob("Set Prolog Editor Focus"){
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				PLEditor.super.setFocus();
-				return Status.OK_STATUS;
-				
-			}
-		};
-		IFile rule = ((IFileEditorInput) getEditorInput()).getFile();
-
-		job.setRule(rule);
-		job.schedule();
-
 	}
 
 	private void addTasks(IFile file, Document document) {
