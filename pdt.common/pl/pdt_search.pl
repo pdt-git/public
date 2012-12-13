@@ -526,7 +526,7 @@ find_blacklist('$pldoc',4,_).
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
 
-%% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
+%% find_completion(+Prefix, ?EnclosingFile, ?LineInFile, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
 % 
 find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	var(Prefix),

@@ -149,11 +149,18 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				addTasks(((FileEditorInput)getEditorInput()).getFile(),document);
 			}
 			breakpointHandler.backupMarkers(getCurrentIFile(), document);
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+			
+			PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", true);
+			
+			IFile currentIFile = getCurrentIFile();
+			if (currentIFile != null) {
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
+			} else {
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
+			}
 		}
 		
 		PDTCommonPlugin.getDefault().notifyDecorators();
-		setFocus();
 	}
 
 	private void addTasks(IFile file, Document document) {

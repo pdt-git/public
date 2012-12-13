@@ -267,26 +267,29 @@ test(primary_definition_loading_directive_only_alias) :-
 
 test(completion_predicate_with_doc) :-
 	module_property(completion_demo, file(TestFile)),
-	pdt_search:find_pred(TestFile,'my_pre',_,Name,Arity,_Exported,_Builtin,Help),
+	pdt_search:find_completion('my_pre', TestFile, _, Kind, _, Name, Arity, _, _, _, DocKind, Doc),
+	Kind == predicate,
 	Name == my_predicate_with_documentation,
 	Arity == 1,
-	sub_atom(Help, _, _, _, 'True if'),
-	sub_atom(Help, _, _, _, 'can is an atom'),
+	DocKind == html,
+	sub_atom(Doc, _, _, _, 'True if'),
+	sub_atom(Doc, _, _, _, 'can is an atom'),
 	!.
 
 test(completion_predicate_without_doc) :-
 	module_property(completion_demo, file(TestFile)),
-	pdt_search:find_pred(TestFile,'my_pre',_,Name,Arity,_Exported,_Builtin,Help),
+	pdt_search:find_completion('my_pre', TestFile, _, Kind, _, Name, Arity, _, _, _, DocKind, _),
+	Kind == predicate,
 	Name == my_predicate_without_documentation,
 	Arity == 1,
-	Help == nodoc,
+	DocKind == nodoc,
 	!.
 
 test(completion_predicate_with_module) :-
 	module_property(completion_demo, file(TestFile)),
 	findall(
 		[Name, Arity],
-		pdt_search:find_pred(TestFile,'s','not_exact_search',Name,Arity,_Exported,_Builtin,_Help),
+		pdt_search:find_completion('not_exact_search':'s', TestFile, _, _, _, Name, Arity, _, _, _, _, _),
 		ResultList
 	),
 	member([search_string, 3], ResultList),
@@ -297,7 +300,7 @@ test(completion_module) :-
 	module_property(completion_demo, file(TestFile)),
 	findall(
 		[Name, Kind],
-		pdt_search:find_pred_for_editor_completion(TestFile,'search_d',_,Name,_Arity,_Exported,_Builtin,_Help,Kind),
+		pdt_search:find_completion('search_d', TestFile, _, Kind, _, Name, _, _, _, _, _, _),
 		ResultList
 	),
 	member([search_demo, module], ResultList),
