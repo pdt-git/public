@@ -263,10 +263,7 @@ var_is_meta_called(Var, MetaAnnotations) :-
 		member(Annotation-Pos, Annotations),
 		is_meta(Annotation)
 	), MetaAnnotations0),
-	(	MetaAnnotations0 = [MetaAnnotations]
-	;	MetaAnnotations0 = [_, _|_],
-		MetaAnnotations0 = MetaAnnotations
-	),
+	remove_list_if_possible(MetaAnnotations0, MetaAnnotations),
 	!.
 
 annotate_meta_vars_in_body(atom_concat(A, B, C), _Module) :-
@@ -288,10 +285,7 @@ var_is_functor_or_meta_called(Var, MetaAnnotations) :-
 		;	is_meta(Annotation)
 		)
 	), MetaAnnotations0),
-	(	MetaAnnotations0 = [MetaAnnotations]
-	;	MetaAnnotations0 = [_, _|_],
-		MetaAnnotations0 = MetaAnnotations
-	),
+	remove_list_if_possible(MetaAnnotations0, MetaAnnotations),
 	!.
 
 annotate_atom_concat(A, B, CallCount, Annotation) :-
@@ -451,21 +445,6 @@ set_meta_annotations(Var, Annotations) :-
 attr_unify_hook(A0, Other) :-
 	writeln(attr_unify_hook(A0, Other)).
 
-join_annotation(A, A, A) :- !.
-join_annotation([A|As], [B|Bs], C) :- !,
-	append([A|As], [B|Bs], C0),
-	sort(C0, C).
-join_annotation([A|As], B, C) :- !,
-	(	member(B, [A|As])
-	->	C = [A|As]
-	;	C = [B, A|As]
-	).
-join_annotation(A, [B|Bs], C) :- !,
-	(	member(A, [B|Bs])
-	->	C = [B|Bs]
-	;	C = [A, B|Bs]
-	).
-join_annotation(A, B, [A, B]).
 %%	meta_annotation(+Head, -Annotation) is semidet.
 %
 %	True when Annotation is an   appropriate  meta-specification for
@@ -481,12 +460,8 @@ meta_args(I, Arity, Head, Meta, HasMeta) :-
 	I =< Arity, !,
 	arg(I, Head, HeadArg),
 	arg(I, Meta, MetaArg),
-	meta_arg(HeadArg, MetaArg),
-	(	(	is_list(MetaArg),
-			member(E, MetaArg),
-			is_meta2(E)
-		;	is_meta2(MetaArg)
-		)
+	meta_arg(HeadArg, MetaArg, IsMetaArg),
+	(	IsMetaArg == true
 	->  HasMeta = true
 	;   true
 	),
@@ -501,14 +476,33 @@ is_meta(database).
 is_meta(^).
 is_meta(//).
 
-is_meta2(S) :- is_meta(S), !.
-is_meta2(functor(_)).
-is_meta2(arity(_)).
-is_meta2(add_prefix(_, _)).
-is_meta2(add_suffix(_, _)).
-is_meta2(is_prefix(_)).
-is_meta2(is_suffix(_)).
-is_meta2(univ_list(_)).
+%is_meta2(S) :- is_meta(S), !.
+%is_meta2(functor(_)).
+%is_meta2(arity(_)).
+%is_meta2(add_prefix(_, _)).
+%is_meta2(add_suffix(_, _)).
+%is_meta2(is_prefix(_)).
+%is_meta2(is_suffix(_)).
+%is_meta2(univ_list(_)).
+
+meta_specifier0(I) :- integer(I), !.
+meta_specifier0(^).
+meta_specifier0(//).
+
+meta_specifier1(S) :- meta_specifier0(S), !.
+meta_specifier1(:).
+meta_specifier1(database).
+meta_specifier1(add_argument(_,_)).
+
+meta_specifier2(S) :- meta_specifier1(S), !.
+meta_specifier2(functor(_)).
+meta_specifier2(arity(_)).
+meta_specifier2(add_prefix(_, _)).
+meta_specifier2(add_suffix(_, _)).
+meta_specifier2(is_prefix(_)).
+meta_specifier2(is_suffix(_)).
+meta_specifier2(univ_list(_)).
+
 
 %%	meta_arg(+AnnotatedArg, -MetaSpec) is det.
 %
@@ -519,19 +513,29 @@ is_meta2(univ_list(_)).
 %	argument. If the  module  part  is   then  passed  to  a  module
 %	sensitive predicate, we assume it is a meta-predicate.
 
-meta_arg(HeadArg, MetaArg) :-
+meta_arg(HeadArg, MetaArg, IsMetaArg) :-
 	get_meta_annotations(HeadArg, Annotations),
-	(	setof(A, Pos^(member(A-Pos, Annotations), is_meta2(A)), MetaAnnotations)
-	->	Es = MetaAnnotations
-	;	setof(E, Pos^member(E-Pos, Annotations), Es)
-	),
+	findall(A, member(A-_, Annotations), As),
+	meta_specifiers(As, Specifiers, IsMetaArg),
 	!,
-	(	Es = [MetaArg]
-	;	Es = [_, _|_],
-		MetaArg = Es
-	),
+	remove_list_if_possible(Specifiers, MetaArg).
+meta_arg(_, *, false).
+
+meta_specifiers(Annotations, Specifiers, true) :-
+	setof(A, (member(A, Annotations), meta_specifier0(A)), Specifiers),
 	!.
-meta_arg(_, *).
+meta_specifiers(Annotations, Specifiers, true) :-
+	setof(A, (member(A, Annotations), meta_specifier1(A)), Specifiers),
+	!.
+meta_specifiers(Annotations, Specifiers, true) :-
+	setof(A, (member(A, Annotations), meta_specifier2(A)), Specifiers),
+	!.
+meta_specifiers(Annotations, Specifiers, false) :-
+	setof(A, (member(A, Annotations), A \== *), Specifiers).
+
+remove_list_if_possible([], _) :- !, fail.
+remove_list_if_possible([X], X) :- !.
+remove_list_if_possible(List, List).
 
 %%	combine_meta_args(+Heads, -Head) is det.
 %
@@ -547,3 +551,26 @@ combine_meta_args([Spec1,Spec2|Specs], CombinedArgs) :-
 	maplist(join_annotation, Args1, Args2, Args),
 	Spec =.. [Name|Args],
 	combine_meta_args([Spec|Specs], CombinedArgs).
+
+join_annotation(A, A, A) :- !.
+join_annotation(*, B, B) :- !.
+join_annotation(A, *, A) :- !.
+join_annotation([A|As], [B|Bs], C) :- !,
+	append([A|As], [B|Bs], C0),
+	meta_specifiers(C0, C1, _),
+	remove_list_if_possible(C1, C).
+join_annotation([A|As], B, C) :- !,
+	(	member(B, [A|As])
+	->	C = [A|As]
+	;	meta_specifiers([B, A|As], C1, _),
+		remove_list_if_possible(C1, C)
+	).
+join_annotation(A, [B|Bs], C) :- !,
+	(	member(A, [B|Bs])
+	->	C = [B|Bs]
+	;	meta_specifiers([A, B|Bs], C1, _),
+		remove_list_if_possible(C1, C)
+	).
+join_annotation(A, B, C) :-
+	meta_specifiers([A, B], C1, _),
+	remove_list_if_possible(C1, C).
