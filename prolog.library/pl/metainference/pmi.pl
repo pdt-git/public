@@ -24,7 +24,7 @@
 :- use_module(pdt_prolog_library(lists)).
 
 reset :-
-	retractall(inferred_meta_pred2(_, _, _)).
+	retractall(inferred_meta_pred(_, _, _)).
 
 run :-
 	run(1).
@@ -39,13 +39,13 @@ run(Run) :-
 		\+ predicate_property(Module:Head, foreign),
 		\+ predicate_property(Module:Head, number_of_clauses(0)),
 		do_infer_meta(Module:Head, MetaSpec),
-		(	inferred_meta_pred2(Head, Module, ExistingMetaSpec)
+		(	inferred_meta_pred(Head, Module, ExistingMetaSpec)
 		->	(	MetaSpec == ExistingMetaSpec
 			->	fail
-			;	retract(inferred_meta_pred2(Head, Module, ExistingMetaSpec)),
-				assertz(inferred_meta_pred2(Head, Module, MetaSpec))
+			;	retract(inferred_meta_pred(Head, Module, ExistingMetaSpec)),
+				assertz(inferred_meta_pred(Head, Module, MetaSpec))
 			)
-		;	assertz(inferred_meta_pred2(Head, Module, MetaSpec))
+		;	assertz(inferred_meta_pred(Head, Module, MetaSpec))
 		)
 	), NewOrModifiedMetaSpecs),
 	statistics(cputime, CPU1),
@@ -63,7 +63,7 @@ run(Run) :-
 	infer_meta(:, -).
 
 :- dynamic
-	inferred_meta_pred2/3.			% Head, Module, Meta
+	inferred_meta_pred/3.			% Head, Module, Meta
 
 /** <module> Infer meta-predicate properties
 
@@ -87,13 +87,13 @@ have incomplete or incorrect meta-predicate information.
 %	for Head.
 
 inferred_meta(M:Head, MetaSpec) :-
-	inferred_meta_pred2(Head, M, MetaSpec).
+	inferred_meta_pred(Head, M, MetaSpec).
 inferred_meta(M:Head, MetaSpec) :-
 	predicate_property(M:Head, imported_from(From)),
-	inferred_meta_pred2(Head, From, MetaSpec).
+	inferred_meta_pred(Head, From, MetaSpec).
 
 
-%%	infer_meta_predicate(:Head, -MetaSpec) is semidet
+%%	infer_meta_predicate(:Head, -MetaSpec) is semidet.
 %
 %	True  when  MetaSpec  is  a  meta-predicate  specifier  for  the
 %	predicate Head. Derived meta-predicates are   collected and made
@@ -104,10 +104,10 @@ infer_meta(Head, MetaSpec) :-
 infer_meta(M:Head, MetaSpec) :-
 	predicate_property(M:Head, imported_from(From)), !,
 	do_infer_meta(From:Head, MetaSpec),
-	assertz(inferred_meta_pred2(Head, From, MetaSpec)).
+	assertz(inferred_meta_pred(Head, From, MetaSpec)).
 infer_meta(M:Head, MetaSpec) :-
 	do_infer_meta(M:Head, MetaSpec),
-	assertz(inferred_meta_pred2(Head, M, MetaSpec)).
+	assertz(inferred_meta_pred(Head, M, MetaSpec)).
 
 :- meta_predicate
 	do_infer_meta(:, -).
@@ -115,26 +115,20 @@ infer_meta(M:Head, MetaSpec) :-
 do_infer_meta(Module:AHead, MetaSpec):-
 	functor(AHead, Functor, Arity),
 	functor(Head, Functor, Arity),	% Generalise the head
-	findall(MetaSpec,
-		meta_pred_args_in_clause(Module, Head, MetaSpec),
-		MetaSpecs),
-	MetaSpecs \== [],
-	combine_meta_args(MetaSpecs, MetaSpec).
+	findall(MetaTerm,
+		meta_pred_args_in_clause(Module, Head, MetaTerm),
+		MetaTerms),
+	MetaTerms \== [],
+	combine_meta_args(MetaTerms, MetaTerm),
+	meta_terms_to_arg_specs_in_head(MetaTerm, MetaSpec).
 
 
-%%	meta_pred_args_in_clause(+Module, +Head, -MetaSpec) is nondet.
+%%	meta_pred_args_in_clause(+Module, +Head, -MetaTermHead) is nondet.
 
-meta_pred_args_in_clause(Module, Head, MetaArgs) :-
+meta_pred_args_in_clause(Module, Head, MetaTermHead) :-
 	catch(clause(Module:Head, Body), _, fail),
-	reset_call_count,
 	annotate_meta_vars_in_body(Body, Module),
-	meta_annotation(Head, MetaArgs).
-
-reset_call_count :-
-	flag(call_count, _, 1).
-
-next_call_count(CallCount) :-
-	flag(call_count, CallCount, CallCount + 1).
+	meta_term_head(Head, MetaTermHead).
 
 %%	annotate_meta_vars_in_body(+Term, +Module) is det
 %
@@ -154,14 +148,12 @@ annotate_meta_vars_in_body(A, _) :-
 	atomic(A), !.
 annotate_meta_vars_in_body(Var, _) :-
 	var(Var), !,
-	next_call_count(CallCount),
-	annotate(0, CallCount, Var).
+	annotate(0, Var).
 annotate_meta_vars_in_body(Module:Term, _) :- !,
 	(   atom(Module)
 	->  annotate_meta_vars_in_body(Term, Module)
 	;   var(Module)
-	->  next_call_count(CallCount),
-		annotate(m, CallCount, Module)
+	->  annotate(m, Module)
 	;   true			% may continue if Term is a system
 	).				% predicate?
 annotate_meta_vars_in_body((TermA, TermB), Module) :- !,
@@ -179,90 +171,121 @@ annotate_meta_vars_in_body((TermA*->TermB), Module) :- !,
 	annotate_meta_vars_in_body(TermA, Module).
 annotate_meta_vars_in_body(A=B, _) :-
 	!,
-	next_call_count(CallCount),
 	unifiable(A, B, Unifiers),
-	new_aliases(Unifiers, CallCount).
+	new_aliases(Unifiers).
 
-new_aliases([], _).
-new_aliases([A = B|Unifiers], CallCount) :-
+%% new_aliases(+Aliases) is det.
+%
+%  Add the alias information to the
+%  variable annotations. If two variables
+%  are aliased their annotations are
+%  merged.
+new_aliases([]).
+new_aliases([A = B|Aliases]) :-
 	(	var(B)
-	->	merge_annotations(A, B, CallCount),
-		new_alias(A, B, CallCount),
-		new_alias(B, A, CallCount)
-	;	new_alias(A, B, CallCount)
+	->	merge_variable_annotations(A, B),
+		new_alias(A, B),
+		new_alias(B, A)
+	;	new_alias(A, B)
 	),
-	new_aliases(Unifiers, CallCount).
+	new_aliases(Aliases).
 
-merge_annotations(A, B, CallCount) :-
-	(	get_meta_annotations_filtered(A, CallCount, MetaAnnotationsA)
-	->	(	get_meta_annotations_filtered(B, CallCount, MetaAnnotationsB)
-		->	get_meta_annotations(A, AllMetaAnnotationsA),
-			get_meta_annotations(B, AllMetaAnnotationsB),
-			merge_lists(AllMetaAnnotationsA, MetaAnnotationsB, MetaAnnotationsMergedA),
-			merge_lists(MetaAnnotationsA, AllMetaAnnotationsB, MetaAnnotationsMergedB),
-			set_meta_annotations(A, MetaAnnotationsMergedA),
-			set_meta_annotations(B, MetaAnnotationsMergedB)
-		;	set_meta_annotations(B, MetaAnnotationsA)
+%% merge_variable_annotations(+V1, +V2) is det.
+%
+%  Merge the annotations of the variables V1 and
+%  V2 (without aliases).
+merge_variable_annotations(V1, V2) :-
+	(	get_attr(V1, pmi, Meta1)
+	->	(	get_attr(V2, pmi, Meta2)
+		->	% V1 and V2 are both annotated
+			get_aliased(Meta1, Aliased1),	             % remember their aliases
+			get_aliased(Meta2, Aliased2),                
+			merge_annotations(Meta1, Meta2, MetaMerged), % merge annotations (without aliases) into MetaMerged
+			duplicate_term(MetaMerged, MetaMergedCopy),  % make a "real" copy of MetaMerged (necessary because of the use of setarg/3)
+			set_aliased(MetaMerged, Aliased1),           % fill the remembered aliases into the merged term
+			put_attr(V1, pmi, MetaMerged),
+			set_aliased(MetaMergedCopy, Aliased2),
+			put_attr(V2, pmi, MetaMergedCopy)
+		;	% only V1 is annotated
+			duplicate_term(Meta1, MetaCopy),             % V2 gets a copy of the annotatinos 
+			set_aliased(MetaCopy, []),                   % of V1 (except for aliases)
+			put_attr(V2, pmi, MetaCopy)
 		)
-	;	(	get_meta_annotations_filtered(B, CallCount, MetaAnnotationsB)
-		->	set_meta_annotations(A, MetaAnnotationsB)
-		;	true
+	;	(	get_attr(V2, pmi, Meta2)
+		->	% only V2 is annotated
+			duplicate_term(Meta2, MetaCopy),             % V1 gets a copy of the annotatinos
+			set_aliased(MetaCopy, []),                   % of V2(except for aliases)
+			put_attr(V1, pmi, MetaCopy)
+		;	% V1 and V2 are not annotated -> nothing to merge
+			true
 		)
 	).
 
-merge_lists([], L2, L2) :- !.
-merge_lists(L1, [], L1) :- !.
-merge_lists(L1, L2, L3) :-
-	append(L1, L2, L12),
-	sort(L12, L3).
-
-new_alias(A, B, CallCount) :-
-	(	get_aliases(A, Aliases)
-	->	true
-	;	Aliases = []
-	),
-	(	alias_member(Aliases, CallCount, B)
-	->	true
-	;	annotate(aliased(B), CallCount, A),
-		check_for_unifiers(Aliases, B, CallCount)
+%% new_alias(+A, +B) is det.
+%
+%  Add the alias B to the annotations
+%  of the variable A.
+%  If B is a variable and not yet
+%  contained in the annotated aliases
+%  of A, B is also unified to all
+%  aliases of A. This is checked
+%  in check_for_unifiers/2.
+new_alias(A, B) :-
+	(	get_attr(A, pmi, Meta)
+	->	get_aliased(Meta, Aliases),
+		(	eq_member(B, Aliases)
+		->	true
+		;	annotate(aliased(B), A),
+			check_for_unifiers(Aliases, B)
+		)
+	;	annotate(aliased(B), A)
 	).
 
-alias_member([Alias-AliasCallCount|Aliases], CallCount, Var) :-
-	(	AliasCallCount == CallCount,
-		Alias == Var
-	->	true
-	;	alias_member(Aliases, CallCount, Var)
-	).
-
-check_for_unifiers([], _, _).
-check_for_unifiers([Alias-AliasCallCount|Aliases], B, CallCount) :-
-	unifiable(Alias, B, Unifiers),
-	NewCallCount is min(AliasCallCount, CallCount),
-	new_aliases(Unifiers, NewCallCount),
-	check_for_unifiers(Aliases, B, CallCount).
+%% check_for_unifiers(+Aliases, +Var) is det.
+%
+%  Compute the unifiers of Var and each alias
+%  in Aliases. The resulting unifiers are
+%  aliases which are added to the variable
+%  annotations using new_aliases/1.
+check_for_unifiers([], _).
+check_for_unifiers([Alias|Aliases], Var) :-
+	unifiable(Alias, Var, Unifiers),
+	new_aliases(Unifiers),
+	check_for_unifiers(Aliases, Var).
 
 annotate_meta_vars_in_body(functor(Term, Functor, Arity), _Module) :-
 	!,
 	(	var(Term),
-		var_is_meta_called(Term, Annotation)
-	->	next_call_count(CallCount),
-		(	var(Functor)
-		->	annotate(functor(Annotation), CallCount, Functor)
+		var_is_meta_called(Term, Annotation)       % Term is metacalled
+	->	(	var(Functor)
+		->	(	integer(Arity)
+			->	annotate(has_arity(Arity, Annotation), Functor) % Arity is given
+			;	annotate(functor(Annotation), Functor)          % Arity is unknown
+			)
 		;	true
 		),
 		(	var(Arity)
-		->	annotate(arity(Annotation), CallCount, Arity)
+		->	annotate(arity(Annotation), Arity)
 		;	true
 		)
 	;	true
 	).
 
+%% var_is_meta_called(+Var, -MetaAnnotations) is semidet.
+% 
+%  True when Var is metacalled, i.e. Var has at least one
+%  corresponding annotation (0..9, ^, // or database). 
+%  MetaAnnotations is bound to this annotation (in case of 
+%  one) or to a list of these annotations.
 var_is_meta_called(Var, MetaAnnotations) :-
-	get_meta_annotations(Var, Annotations),
-	setof(Annotation, Pos^(
-		member(Annotation-Pos, Annotations),
-		is_meta(Annotation)
-	), MetaAnnotations0),
+	get_attr(Var, pmi, Meta),
+	setof(Annotation,
+		(	get_metacalled(Meta, Metacalled),
+			member(Annotation, Metacalled)
+		;	get_existential(Meta, ^),
+			Annotation = ^
+		),
+	MetaAnnotations0),
 	remove_list_if_possible(MetaAnnotations0, MetaAnnotations),
 	!.
 
@@ -270,34 +293,46 @@ annotate_meta_vars_in_body(atom_concat(A, B, C), _Module) :-
 	!,
 	(	var(C)
 	->	(	var_is_functor_or_meta_called(C, Annotation)
-		->	next_call_count(CallCount),
-			annotate_atom_concat(A, B, CallCount, Annotation)
+		->	annotate_atom_concat(A, B, Annotation)
 		;	true
 		)
 	;	true
 	).
 
+%% var_is_functor_or_meta_called(+Var, -MetaAnnotations) is semidet.
+% 
+%  True when Var is metacalled or the functor of a metacalled term, 
+%  i.e. Var has at least one corresponding annotation (0..9, ^, //,
+%  database, functor/1 or has_arity/2). 
+%  MetaAnnotations is bound to this annotation (in case of 
+%  one) or to a list of these annotations.
 var_is_functor_or_meta_called(Var, MetaAnnotations) :-
-	get_meta_annotations(Var, Annotations),
-	setof(Annotation, Pos^(
-		member(Annotation-Pos, Annotations),
-		(	Annotation = functor(_)
-		;	is_meta(Annotation)
-		)
-	), MetaAnnotations0),
+	get_attr(Var, pmi, Meta),
+	setof(Annotation,
+		(	get_metacalled(Meta, Metacalled),
+			member(Annotation, Metacalled)
+		;	get_existential(Meta, ^),
+			Annotation = ^
+		;	get_components(Meta, Components),
+			member(Annotation, Components),
+			(	Annotation = functor(_)
+			;	Annotation = has_arity(_, _)
+			)
+		),
+	MetaAnnotations0),
 	remove_list_if_possible(MetaAnnotations0, MetaAnnotations),
 	!.
 
-annotate_atom_concat(A, B, CallCount, Annotation) :-
+annotate_atom_concat(A, B, Annotation) :-
 	var(A), var(B), !,
-	annotate(is_prefix(Annotation), CallCount, A),
-	annotate(is_suffix(Annotation), CallCount, B).
-annotate_atom_concat(A, B, CallCount, Annotation) :-
+	annotate(is_prefix(Annotation), A),
+	annotate(is_suffix(Annotation), B).
+annotate_atom_concat(A, B, Annotation) :-
 	atomic(A), var(B), !,
-	annotate(add_prefix(A, Annotation), CallCount, B).
-annotate_atom_concat(A, B, CallCount, Annotation) :-
+	annotate(add_prefix(A, Annotation), B).
+annotate_atom_concat(A, B, Annotation) :-
 	var(A), atomic(B), !,
-	annotate(add_suffix(B, Annotation), CallCount, A).
+	annotate(add_suffix(B, Annotation), A).
 annotate_atom_concat(_, _, _, _).
 
 annotate_meta_vars_in_body(Term =.. List, _Module) :-
@@ -305,14 +340,12 @@ annotate_meta_vars_in_body(Term =.. List, _Module) :-
 	(	var(Term),
 		var_is_meta_called(Term, Annotation)
 	->	(	var(List)
-		->	next_call_count(CallCount),
-			annotate(univ_list(Annotation), CallCount, List)
+		->	annotate(univ_list(Annotation), List)
 		;	(	List = [Functor|Args],
 				var(Functor)
-			->	next_call_count(CallCount),
-				(	finite_length(Args, ArgsLength)
-				->	annotate(has_arity(ArgsLength, Annotation), CallCount, Functor)
-				;	annotate(functor(Annotation), CallCount, Functor)
+			->	(	finite_length(Args, ArgsLength)
+				->	annotate(has_arity(ArgsLength, Annotation), Functor)
+				;	annotate(functor(Annotation), Functor)
 				)
 			;	true
 			)
@@ -339,17 +372,15 @@ annotate_meta_vars_in_body(retractall(Clause), _Module) :-
 annotate_database_argument(Clause) :-
 	var(Clause),
 	!,
-	next_call_count(CallCount),
-	annotate(database, CallCount, Clause).
+	annotate(database, Clause).
 annotate_database_argument(Module:Clause) :-
 	!,
-	next_call_count(CallCount),
 	(	var(Module)
-	->	annotate(m, CallCount, Module)
+	->	annotate(m, Module)
 	;	true
 	),
 	(	var(Clause)
-	->	annotate(database, CallCount, Clause)
+	->	annotate(database, Clause)
 	;	true
 	).
 annotate_database_argument(_Clause).
@@ -358,33 +389,31 @@ annotate_meta_vars_in_body(Goal, Module) :- % TBD: do we trust this?
 	predicate_property(Module:Goal, meta_predicate(Head)),
 	!,
 	functor(Goal, _, Arity),
-	next_call_count(CallCount),
-	annotate_meta_args(1, Arity, Goal, Head, Module, CallCount).
+	annotate_meta_args(1, Arity, Goal, Head, Module).
 annotate_meta_vars_in_body(Goal, Module) :-
 	inferred_meta(Module:Goal, Head), !,
 	functor(Goal, _, Arity),
-	next_call_count(CallCount),
-	annotate_meta_args(1, Arity, Goal, Head, Module, CallCount).
+	annotate_meta_args(1, Arity, Goal, Head, Module).
 annotate_meta_vars_in_body(_, _).
 
 
 %%	annotate_meta_args(+Arg, +Arity, +Goal, +MetaSpec, +Module)
 
-annotate_meta_args(I, Arity, Goal, MetaSpec, Module, CallCount) :-
+annotate_meta_args(I, Arity, Goal, MetaSpec, Module) :-
 	I =< Arity, !,
 	arg(I, MetaSpec, MetaArg),
 	arg(I, Goal, Arg),
-	annotate_meta_arg(MetaArg, Arg, Module, CallCount),
+	annotate_meta_arg(MetaArg, Arg, Module),
 	I2 is I + 1,
-	annotate_meta_args(I2, Arity, Goal, MetaSpec, Module, CallCount).
-annotate_meta_args(_, _, _, _, _, _).
+	annotate_meta_args(I2, Arity, Goal, MetaSpec, Module).
+annotate_meta_args(_, _, _, _, _).
 
-annotate_meta_arg(Spec, Arg, _, CallCount) :-
+annotate_meta_arg(Spec, Arg, _) :-
 	var(Arg), !,
-	annotate(Spec, CallCount, Arg).
-annotate_meta_arg(0, Arg, Module, _CallCount) :- !,
+	annotate(Spec, Arg).
+annotate_meta_arg(0, Arg, Module) :- !,
 	annotate_meta_vars_in_body(Arg, Module).
-annotate_meta_arg(N, Arg, Module, _CallCount) :-
+annotate_meta_arg(N, Arg, Module) :-
 	integer(N),
 	callable(Arg), !,
 	Arg =.. List,
@@ -392,16 +421,18 @@ annotate_meta_arg(N, Arg, Module, _CallCount) :-
 	append(List, Extra, ListX),
 	ArgX =.. ListX,
 	annotate_meta_vars_in_body(ArgX, Module).
-annotate_meta_arg(Spec, Arg, _, CallCount) :-
-	is_meta(Spec),
+annotate_meta_arg(Spec, Arg, _) :-
+	(	Spec == :
+	;	meta_calling_specifier(Spec)
+	),
 	compound(Arg),
 	Arg = Module:_,
 	var(Module), !,
-	annotate(m, CallCount, Module).
-annotate_meta_arg(_,_,_,_).
+	annotate(m, Module).
+annotate_meta_arg(_,_,_).
 
 
-%% annotate(+Annotation(s), +Position, +Var)
+%% annotate(+Annotation, +Position, +Var) is det.
 % 
 % Add Annotation(s) 
 %   meta( Aliased,          a list of aliases (variables and terms)
@@ -414,48 +445,83 @@ annotate_meta_arg(_,_,_,_).
 %   )      
 % to the attributes of Var for this module
 
-annotate([], _, _) :- !.
-annotate([Annotation|Annotations], CallCount, Var) :-
+annotate([], _) :- !.
+annotate([Annotation|Annotations], Var) :-
 	!,
-	annotate(Annotation, CallCount, Var),
-	annotate(Annotations, CallCount, Var).
-annotate(aliased(Alias), Position, Var) :-
+	annotate(Annotation, Var),
+	annotate(Annotations, Var).
+annotate(aliased(Alias), Var) :-
 	!,
-	(	get_attr(Var, pmi, meta(Aliases,                  Metacalled, Components, Existential, ModuleSensitive, Mode, Nothing))
-	->	put_attr(Var, pmi, meta([Alias-Position|Aliases], Metacalled, Components, Existential, ModuleSensitive, Mode, Nothing))
-	;	put_attr(Var, pmi, meta([Alias-Position], [], [], [], [], [], []))
-	).
-%annotate(^, Position, Var) :-
-%	!,
-%	(	get_attr(Var, pmi, meta(Aliases, Metacalled, Components, Existential, ModuleSensitive, Mode, Nothing))
-%	->	put_attr(Var, pmi, meta(Aliases, Metacalled, Components, Existential, ModuleSensitive, Mode, Nothing))
-%	;	put_attr(Var, pmi, meta([], [], [], ^-Position, [], [], []))
-%	).
-annotate(MetaCall, Position, Var) :-   ----------------------
-	meta_specifier0(MetaCall),
+	get_or_create_meta(Var, Meta),
+	add_aliased(Meta, Alias),
+	put_attr(Var, pmi, Meta).
+annotate(^, Var) :-
 	!,
+	get_or_create_meta(Var, Meta),
+	add_existential(Meta, ^),
+	put_attr(Var, pmi, Meta).
+annotate(:, Var) :-
+	!,
+	get_or_create_meta(Var, Meta),
+	add_msensitive(Meta, :),
+	put_attr(Var, pmi, Meta).
+annotate(*, Var) :-
+	!,
+	get_or_create_meta(Var, Meta),
+	add_bottom(Meta, *),
+	put_attr(Var, pmi, Meta).
+annotate(MetaCall, Var) :-
+	meta_calling_specifier(MetaCall),
+	!,
+	get_or_create_meta(Var, Meta),
+	add_metacalled(Meta, MetaCall),
+	put_attr(Var, pmi, Meta).
+annotate(Component, Var) :-
+	component_specifier(Component),
+	!,
+	get_or_create_meta(Var, Meta),
+	add_components(Meta, Component),
+	put_attr(Var, pmi, Meta).
+annotate(Mode, Var) :-
+	mode_specifier(Mode),
+	!,
+	get_or_create_meta(Var, Meta),
+	add_mode(Meta, Mode),
+	put_attr(Var, pmi, Meta).
+annotate(_, _).
+
+% annotations of variables that are metacalled
+meta_calling_specifier(I) :- integer(I), !.  % metacalled with I additional arguments
+meta_calling_specifier(^).                   % metacalled 0 and can contain existential variables (called via setof/bagof/aggregate)
+meta_calling_specifier(//).                  % DCG rule body
+meta_calling_specifier(database).            % asserted or retracted
+
+% annotated var represents the ... 
+% of a term metacalled according to _M 
+component_specifier(functor(_M)).          % ... =               functor        
+component_specifier(add_prefix(_P, _M)).   % ... = suffix of the functor with prefix _P 
+component_specifier(add_suffix(_S, _M)).   % ... = prefix of the functor with suffix _S
+component_specifier(is_prefix(_M)).        % ... = prefix of the functor (with unknown suffix)
+component_specifier(is_suffix(_M)).        % ... = suffix of the functor (with unknown prefix)
+
+component_specifier(has_arity(_,_)).       % annotated var is the functor of a term with a fixed number of params
+
+component_specifier(arity(_)).             % annotated var represents the arity of another term     
+
+component_specifier(univ_list(_Meta)).     % The annotated var is a list from which a term is constructed via =.. 
+                                       % The constructed term is metacalled according to _Meta
+
+mode_specifier(+).
+mode_specifier(-).
+mode_specifier(?).
+
+
+get_or_create_meta(Var, Meta) :-
 	(	get_attr(Var, pmi, Meta)
-	->	get_metacalled(Meta,Metacalled),
-	    set_metacalled(Meta,[MetaCall|Metacalled]),
-	    put_attr(Var, pmi, Meta)
-	;	new_meta(Meta),
-	    set_metacalled(Meta,[MetaCall]),
-	    put_attr(Var, pmi, Meta)
+	->	true
+	;	new_meta(Meta)
 	).
-annotate(Component, Position, Var) :-
-	meta_specifier2(Component),
-	!,
-	(	get_attr(Var, pmi, meta(Aliases, Metacalled, Components, Existential, ModuleSensitive, Mode, Nothing))
-	->	put_attr(Var, pmi, meta(Aliases, Metacalled, [Component-Position|Components], Existential, ModuleSensitive, Mode, Nothing))
-	;	put_attr(Var, pmi, meta([], [], [Component-Position], [], [], [], []))
-	).
-annotate(Annotation, CallCount, Var) :-
-	(	get_attr(Var, pmi, meta(Aliases, Metas))
-	->	put_attr(Var, pmi, meta(Aliases, [Annotation-CallCount|Metas]))
-	;	put_attr(Var, pmi, meta([], [Annotation-CallCount]))
-	).
-
-
+	
 new_meta( meta([],[],[],[],[],[],[]) ).
 
 get_aliased(Meta,Value)    :- arg(1,Meta,Value).
@@ -474,126 +540,119 @@ set_msensitive(Meta,Value) :- setarg(5,Meta,Value).
 set_mode(Meta,Value)       :- setarg(6,Meta,Value).
 set_bottom(Meta,Value)     :- setarg(7,Meta,Value).
 
+add_aliased(Meta,Value)    :- get_aliased(Meta, OldValue), merge_aliased([Value], OldValue, NewValue), set_aliased(Meta, NewValue).
+add_metacalled(Meta,Value) :- get_metacalled(Meta, OldValue), merge_metacalled([Value], OldValue, NewValue), set_metacalled(Meta, NewValue).
+add_components(Meta,Value) :- get_components(Meta, OldValue), merge_components([Value], OldValue, NewValue), set_components(Meta, NewValue).
+add_existential(Meta,Value):- set_existential(Meta, Value).
+add_msensitive(Meta,Value) :- set_msensitive(Meta, Value).
+add_mode(Meta,Value)       :- get_mode(Meta, OldValue), merge_mode(OldValue, Value, NewValue), set_mode(Meta, NewValue).
+add_bottom(Meta,Value)     :- set_bottom(Meta, Value).
 
-get_aliases(Var, Aliases) :-
-	get_attr(Var, pmi, meta(Aliases, _)).
+merge_aliased(Value1, Value2, Value3)     :- eq_union(Value1, Value2, Value3).
 
-get_meta_annotations(Var, Annotations) :-
-	get_attr(Var, pmi, meta(_, Annotations)).
+merge_metacalled(Value1, Value2, Value3)  :- union(Value1, Value2, Value3).
 
-get_meta_annotations_filtered(Var, CallCount, FilteredAnnotations) :-
-	get_meta_annotations(Var, AllAnnotations),
-	filter_annotations(AllAnnotations, CallCount, FilteredAnnotations).
+merge_components(Value1, Value2, Value3)  :- union(Value1, Value2, Value3).
 
-filter_annotations([], _, []).
-filter_annotations([Annotation-AnnotationCallCount|AllAnnotations], CallCount, FilteredAnnotations) :-
-	(	AnnotationCallCount < CallCount
-	->	FilteredAnnotations = [Annotation-AnnotationCallCount|OtherFilteredAnnotations]
-	;	FilteredAnnotations = OtherFilteredAnnotations
-	),
-	filter_annotations(AllAnnotations, CallCount, OtherFilteredAnnotations).
+merge_existential(Value, Value, Value) :- !.
+merge_existential(_,     _,     ^    ).
 
-set_meta_annotations(Var, Annotations) :-
-	get_attr(Var, pmi, meta(Aliases, _)),
-	!,
-	put_attr(Var, pmi, meta(Aliases, Annotations)).
-set_meta_annotations(Var, Annotations) :-
-	put_attr(Var, pmi, meta([], Annotations)).
+merge_msensitive(Value, Value, Value) :- !.
+merge_msensitive(_,     _,     :    ).
+merge_mode(Value, Value, Value) :- !.
 
-attr_unify_hook(A0, Other) :-
-	writeln(attr_unify_hook(A0, Other)).
+merge_mode([],    Value, Value) :- !.
+merge_mode(Value, [],    Value) :- !.
+merge_mode(_,     _,     ?    ).
 
-%%	meta_annotation(+Head, -Annotation) is semidet.
+merge_bottom(Value, Value, Value) :- !.
+merge_bottom(_,     _,     *    ).
+
+%% eq_union(+Set1, +Set2, ?Set3) is det
 %
-%	True when Annotation is the meta-specification that reflects
-%	the information carried by the attributed variables in Head
-%   and contains "real" meta-elements, not just mode information.
+%  Same as lists:union(Set1, Set2, Set3)
+%  but uses eq_member/2 instead of 
+%  lists:member/2.
+eq_union([], L, L) :- !.
+eq_union([H|T], L, R) :-
+	eq_member(H, L),
+	!,
+	eq_union(T, L, R).
+eq_union([H|T], L, [H|R]) :-
+	eq_union(T, L, R).
+%% eq_member(+E, +L) is nondet.
+%
+%  Same as lists:member(E, L) but uses
+%  ==/2 as check for membership. 
+eq_member(E, L) :-
+	member(E2, L),
+	E == E2.
 
-meta_annotation(Head, Meta) :-
+%% merge_annotations(+Meta1, +Meta2, -Meta) is det.
+%
+%  Merge the annotations in the meta/N terms Meta1
+%  and Meta2 into the new meta/N term Meta. Aliases
+%  are not considered.
+merge_annotations(Meta1, Meta2, Meta) :-
+	new_meta(Meta),
+	get_metacalled( Meta1, Metacalled1) , get_metacalled( Meta2, Metacalled2) , merge_metacalled( Metacalled1,  Metacalled2,  Metacalled) , set_metacalled( Meta, Metacalled),
+	get_components( Meta1, Components1) , get_components( Meta2, Components2) , merge_components( Components1,  Components2,  Components) , set_components( Meta, Components),
+	get_existential(Meta1, Existential1), get_existential(Meta2, Existential2), merge_existential(Existential1, Existential2, Existential), set_existential(Meta, Existential),
+	get_msensitive( Meta1, MSensitive1) , get_msensitive( Meta2, MSensitive2) , merge_msensitive( MSensitive1,  MSensitive2,  MSensitive) , set_msensitive( Meta, MSensitive),
+	get_mode(       Meta1, Mode1)       , get_mode(       Meta2, Mode2)       , merge_mode(       Mode1,        Mode2,        Mode)       , set_mode(       Meta, Mode),
+	get_bottom(     Meta1, Bottom1)     , get_bottom(     Meta2, Bottom2)     , merge_bottom(     Bottom1,      Bottom2,      Bottom)     , set_bottom(     Meta, Bottom).
+
+%% meta_term_head(+Head, -MetaTermHead) is semidet.
+%
+%  True when MetaTermHead is the same term as Head,
+%  but the variables of Head are replaced by their
+%  annotated meta/N term and the information carried
+%  by the attributed variables in Head contains "real"
+%  meta-elements, not just mode information.
+meta_term_head(Head, MetaTermHead) :-
 	functor(Head, Name, Arity),
-	functor(Meta, Name, Arity),
-	meta_args(1, Arity, Head, Meta, HasMeta),
-	HasMeta == true.   % fail if Meta contains just mode info
+	functor(MetaTermHead, Name, Arity),
+	meta_args(1, Arity, Head, MetaTermHead, HasMeta),
+	HasMeta == true.   % fail if MetaTermHead contains just mode info
 
 meta_args(I, Arity, Head, Meta, HasMeta) :-
 	I =< Arity, !,
 	arg(I, Head, HeadArg),
 	arg(I, Meta, MetaArg),
-	meta_arg(HeadArg, MetaArg, HasMeta),
+	meta_term_of_var(HeadArg, MetaArg, HasMeta),
 	I2 is I + 1,
 	meta_args(I2, Arity, Head, Meta, HasMeta).
 meta_args(_, _, _, _, _).
 
-%% annotations of variables that are metacalled
-is_meta(I) :- integer(I), !.          % metacalled with I additional arguments
-is_meta(^).                           % metacalled 0 and can contain existential variables (called via setof/bagof/aggregate)
-is_meta(//).                          % DCG rule body
-is_meta(database).                    % asserted or retracted
-                    
-
-%is_meta2(S) :- is_meta(S), !.
-%is_meta2(functor(_)).
-%is_meta2(arity(_)).
-%is_meta2(add_prefix(_, _)).
-%is_meta2(add_suffix(_, _)).
-%is_meta2(is_prefix(_)).
-%is_meta2(is_suffix(_)).
-%is_meta2(univ_list(_)).
-
-meta_specifier0(I) :- integer(I), !.  % metacalled with I additional arguments
-meta_specifier0(^).                   % metacalled 0 and can contain existential variables (called via setof/bagof/aggregate)
-meta_specifier0(//).                  % DCG rule body
-meta_specifier0(database).            % asserted or retracted
-
-meta_specifier1(:).                   % module sensitive
-
-
-% annotated var represents the ... 
-% of a term metacalled according to _M 
-meta_specifier2(functor(_M)).          % ... =               functor        
-meta_specifier2(add_prefix(_P, _M)).   % ... = suffix of the functor with prefix _P 
-meta_specifier2(add_suffix(_S, _M)).   % ... = prefix of the functor with suffix _S
-meta_specifier2(is_prefix(_M)).        % ... = prefix of the functor (with unknown suffix)
-meta_specifier2(is_suffix(_M)).        % ... = suffix of the functor (with unknown prefix)
-
-meta_specifier2(has_arity(_,_)).       % annotated var is the functor of a term with a fixed number of params
-
-meta_specifier2(arity(_)).             % annotated var represents the arity of another term     
-
-meta_specifier2(univ_list(_Meta)).     % The annotated var is a list from which a term is constructed via =.. 
-                                       % The constructed term is metacalled according to _Meta
-
-
-%%	meta_arg(+AnnotatedArg, -MetaSpec, -IsMetaArg) is det.
+%% meta_term_of_var(+AnnotatedArg, -MetaTerm, -IsMetaArg) is det.
 %
-%	True when MetaSpec is  a  proper   annotation  for  the argument
-%	AnnotatedArg. This is simple if the argument is a plain argument
-%	in the head (first clause). If it   is  a compound term, it must
-%	unify to _:_, otherwise there is no point turning it into a meta
-%	argument. If the  module  part  is   then  passed  to  a  module
-%	sensitive predicate, we assume it is a meta-predicate.
-%   IsMetaArg will be unified to "true" if the MetaSpec is not just
-%   mode information (+, -, ?). Otherwise, it is left unbound. 
-
-meta_arg(HeadArg, MetaArg, IsMetaArg) :-
-	get_meta_annotations(HeadArg, Annotations),
-	findall(A, member(A-_, Annotations), As),    % remove position information
-	meta_specifiers(As, Specifiers, IsMetaArg),
+%  MetaTerm is bound to the annotated meta/N term of the variable
+%  AnnotatedArg. The alias information in the meta/N is removed
+%  to avoid unifying of aliases in combine_meta_args/2.
+%  If the variable AnnotatedArg is not annotated, MetaTerm is
+%  bound to an empty meta/N term.
+%  IsMetaArg will be unified to "true" if the MetaTerm is not just
+%  mode information (+, -, ?). Otherwise, it is left unbound. 
+meta_term_of_var(HeadArg, MetaTerm, IsMetaArg) :-
+	get_attr(HeadArg, pmi, MetaTerm),
 	!,
-	remove_list_if_possible(Specifiers, MetaArg).
-meta_arg(_, *, _____).
+	set_aliased(MetaTerm, []),
+	(	has_meta_calling_or_component_or_msensitive_annotation(MetaTerm)
+	->	IsMetaArg = true
+	;	true
+	).
+meta_term_of_var(_, NewMeta, _) :-
+	new_meta(NewMeta).
 
-meta_specifiers(Annotations, Specifiers, true) :-
-	setof(A, (member(A, Annotations), meta_specifier0(A)), Specifiers),
+has_meta_calling_or_component_or_msensitive_annotation(Meta) :-
+	(	get_metacalled(Meta, Metacalled),
+		member(_, Metacalled)
+	;	get_existential(Meta, ^)
+	;	get_components(Meta, Components),
+		member(_, Components)
+	;	get_msensitive(Meta, :)
+	),
 	!.
-meta_specifiers(Annotations, Specifiers, true) :-
-	setof(A, (member(A, Annotations), meta_specifier1(A)), Specifiers),
-	!.
-meta_specifiers(Annotations, Specifiers, true) :-
-	setof(A, (member(A, Annotations), meta_specifier2(A)), Specifiers),
-	!.
-meta_specifiers(Annotations, Specifiers, ____) :-
-	setof(A, (member(A, Annotations), A \== *), Specifiers).
 
 remove_list_if_possible([], _) :- !, fail.
 remove_list_if_possible([X], X) :- !.
@@ -601,9 +660,8 @@ remove_list_if_possible(List, List).
 
 %%	combine_meta_args(+Heads, -Head) is det.
 %
-%	Combine multiple meta-specifications 
+%	Combine multiple heads with meta/N terms 
 %   from disjunctive branches
-
 combine_meta_args([], []) :- !.
 combine_meta_args([List], List) :- !.
 combine_meta_args([Spec,Spec|Specs], CombinedArgs) :- !,
@@ -611,29 +669,62 @@ combine_meta_args([Spec,Spec|Specs], CombinedArgs) :- !,
 combine_meta_args([Spec1,Spec2|Specs], CombinedArgs) :-
 	Spec1 =.. [Name|Args1],
 	Spec2 =.. [Name|Args2],
-	maplist(join_annotation, Args1, Args2, Args),
+	maplist(merge_annotations, Args1, Args2, Args),
 	Spec =.. [Name|Args],
 	combine_meta_args([Spec|Specs], CombinedArgs).
 
-join_annotation(A, A, A) :- !.
-join_annotation(*, B, B) :- !.
-join_annotation(A, *, A) :- !.
-join_annotation([A|As], [B|Bs], C) :- !,
-	append([A|As], [B|Bs], C0),
-	meta_specifiers(C0, C1, _),
-	remove_list_if_possible(C1, C).
-join_annotation([A|As], B, C) :- !,
-	(	member(B, [A|As])
-	->	C = [A|As]
-	;	meta_specifiers([B, A|As], C1, _),
-		remove_list_if_possible(C1, C)
-	).
-join_annotation(A, [B|Bs], C) :- !,
-	(	member(A, [B|Bs])
-	->	C = [B|Bs]
-	;	meta_specifiers([A, B|Bs], C1, _),
-		remove_list_if_possible(C1, C)
-	).
-join_annotation(A, B, C) :-
-	meta_specifiers([A, B], C1, _),
-	remove_list_if_possible(C1, C).
+%% meta_terms_to_arg_specs_in_head(+HeadWithMetaTerms, -MetaSpec) is det.
+%
+%  Translate the head HeadWithMetaTerms with meta/N terms to the 
+%  corresponding meta-specification MetaSpec.
+meta_terms_to_arg_specs_in_head(HeadWithMetaTerms, MetaSpec) :-
+	HeadWithMetaTerms =.. [Name|MetaTerms],
+	maplist(meta_term_to_arg_spec, MetaTerms, ArgSpecs),
+	MetaSpec =.. [Name|ArgSpecs].
+
+%% meta_term_to_arg_spec(+MetaTerm, -ArgSpec) is det.
+%
+%  Translate the meta/N term MetaTerm to the corresponding
+%  meta argument specifier ArgSpec. ArgSpec is either one
+%  specifier or a list of multiple specifiers. The specifier
+%  is determined using the following partial order:
+%
+%  (0..9,database,//)   components
+%           |           /
+%           ^          /
+%            \        /
+%             :      /
+%              \    /
+%               mode
+%                 |
+%                 *
+meta_term_to_arg_spec(MetaTerm, ArgSpec) :-
+	get_metacalled_or_existential_or_msensitive(MetaTerm, MetacalledOrExistential),
+	get_components(MetaTerm, Components),
+	append(MetacalledOrExistential, Components, ArgSpec0),
+	sort(ArgSpec0, ArgSpec1),
+	remove_list_if_possible(ArgSpec1, ArgSpec),
+	!.
+
+meta_term_to_arg_spec(MetaTerm, ArgSpec) :-
+	get_mode(MetaTerm, ArgSpec),
+	ArgSpec \== [],
+	!.
+
+meta_term_to_arg_spec(_, *).
+
+get_metacalled_or_existential_or_msensitive(MetaTerm, Metacalled) :-
+	get_metacalled(MetaTerm, Metacalled),
+	Metacalled \== [],
+	!.
+get_metacalled_or_existential_or_msensitive(MetaTerm, [^]) :-
+	get_existential(MetaTerm, ^),
+	!.
+get_metacalled_or_existential_or_msensitive(MetaTerm, [:]) :-
+	get_msensitive(MetaTerm, :),
+	!.
+get_metacalled_or_existential_or_msensitive(_MetaTerm, []).
+
+
+attr_unify_hook(A0, Other) :-
+	writeln(attr_unify_hook(A0, Other)).
