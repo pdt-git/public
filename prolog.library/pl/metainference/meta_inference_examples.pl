@@ -63,44 +63,44 @@ unify6(Z, Y) :-
 	Z = Y.
 
 % term construction via functor/3
-% construct_term0(functor, arity)
+% construct_term0(functor(0), arity(0))
 construct_term0(X, Y) :-
 	functor(Z, X, Y),
 	call(Z).
 
 % term construction via univ/2
-% construct_term1(univ_list)
+% construct_term1(univ_list(0))
 construct_term1(Y) :-
 	Z =.. Y,
 	call(Z).
 
 % term construction via univ/2, only functor
-% construct_term2(functor, *)
+% construct_term2(functor(0), *)
 construct_term2(X, Y) :-
 	Z =.. [X, 1|Y],
 	call(Z).
 
 % construct functor with atom_concat/3, add a prefix
-% construct_functor0(add_prefix(abc))
+% construct_functor0(add_prefix(abc, 0))
 construct_functor0(Y) :-
 	atom_concat(abc, Y, Z),
 	call(Z).
 
 % construct functor with atom_concat/3, add a suffix
-% construct_functor1(add_suffix(abc))
+% construct_functor1(add_suffix(abc, 0))
 construct_functor1(Y) :-
 	atom_concat(Y, abc, Z),
 	call(Z).
 
 % construct functor with atom_concat/3, add an unknown prefix and an unknown suffix
-% construct_functor2(is_prefix, is_suffix)
+% construct_functor2(is_prefix(0), is_suffix(0))
 construct_functor2(X, Y) :-
 	atom_concat(X, Y, Z),
 	call(Z).
 
 % construct functor with atom_concat/3, add a suffix
 % the constructed functor is used to construct a term using functor/3
-% construct_functor3(add_suffix(abc))
+% construct_functor3(add_suffix(abc, has_arity(1, 0))
 construct_functor3(X) :-
 	atom_concat(X, abc, Y),
 	functor(Z, Y, 1),

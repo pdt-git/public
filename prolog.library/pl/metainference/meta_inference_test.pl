@@ -57,15 +57,15 @@ test(after_meta_call_not_relevant) :-
 
 test(functor_3) :-
 	infer_meta(meta_inference_examples:construct_term0(_,_), MetaSpec),
-	MetaSpec == construct_term0(functor, arity).
+	MetaSpec == construct_term0(functor(0), arity(0)).
 
 test(univ_2) :-
 	infer_meta(meta_inference_examples:construct_term1(_), MetaSpec),
-	MetaSpec == construct_term1(univ_list).
+	MetaSpec == construct_term1(univ_list(0)).
 
 test(univ_2_only_functor) :-
 	infer_meta(meta_inference_examples:construct_term2(_,_), MetaSpec),
-	MetaSpec == construct_term2(functor, *).
+	MetaSpec == construct_term2(functor(0), *).
 
 :- end_tests(term_construction).
 
@@ -74,19 +74,19 @@ test(univ_2_only_functor) :-
 
 test(atom_concat_3_add_prefix) :-
 	infer_meta(meta_inference_examples:construct_functor0(_), MetaSpec),
-	MetaSpec == construct_functor0(add_prefix(abc)).
+	MetaSpec == construct_functor0(add_prefix(abc, 0)).
 
 test(atom_concat_3_add_suffix) :-
 	infer_meta(meta_inference_examples:construct_functor1(_), MetaSpec),
-	MetaSpec == construct_functor1(add_suffix(abc)).
+	MetaSpec == construct_functor1(add_suffix(abc, 0)).
 
 test(atom_concat_3_prefix_and_suffix) :-
 	infer_meta(meta_inference_examples:construct_functor2(_,_), MetaSpec),
-	MetaSpec == construct_functor2(is_prefix, is_suffix).
+	MetaSpec == construct_functor2(is_prefix(0), is_suffix(0)).
 
 test(atom_concat_3_add_suffix_construct_term_with_functor_3) :-
 	infer_meta(meta_inference_examples:construct_functor3(_), MetaSpec),
-	MetaSpec == construct_functor3(add_suffix(abc)).
+	MetaSpec == construct_functor3(add_suffix(abc, has_arity(1, 0))).
 
 :- end_tests(functor_construction).
 
