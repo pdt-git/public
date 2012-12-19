@@ -15,6 +15,7 @@
 
 :- module(pmi,
 	  [ infer_meta/2,		% :Head, -MetaSpec
+	    infer_meta/3,		% :Head, -MetaSpec, -NewOrUpdated
 	    inferred_meta/2		% :Head, ?MetaSpec
 	  ]).
 
@@ -32,7 +33,7 @@ run :-
 run(Run) :-
 	statistics(cputime, CPU0),
 	format('Starting meta inference iteration ~w~n', [Run]),
-	findall(MetaSpec, (
+	findall(Module:MetaSpec, (
 		declared_in_module(Module, Name, Arity, Module),
 		functor(Head, Name, Arity),
 		\+ predicate_property(Module:Head, built_in),
@@ -48,6 +49,7 @@ run(Run) :-
 		;	assertz(inferred_meta_pred(Head, Module, MetaSpec))
 		)
 	), NewOrModifiedMetaSpecs),
+	forall(member(Module:MetaSpec, NewOrModifiedMetaSpecs), format('% :- meta_predicate ~w:~w.~n', [Module, MetaSpec])),
 	statistics(cputime, CPU1),
 	CPU is CPU1 - CPU0,
 	length(NewOrModifiedMetaSpecs, NewOrModified),
@@ -60,7 +62,8 @@ run(Run) :-
 
 :- meta_predicate
 	inferred_meta(:, ?),
-	infer_meta(:, -).
+	infer_meta(:, -),
+	infer_meta(:, -, -).
 
 :- dynamic
 	inferred_meta_pred/3.			% Head, Module, Meta
@@ -99,15 +102,35 @@ inferred_meta(M:Head, MetaSpec) :-
 %	predicate Head. Derived meta-predicates are   collected and made
 %	available through inferred_meta_predicate/2.
 
-infer_meta(Head, MetaSpec) :-
-	inferred_meta(Head, MetaSpec), !.
+%infer_meta(Head, MetaSpec) :-
+%	inferred_meta(Head, MetaSpec), !.
 infer_meta(M:Head, MetaSpec) :-
+	infer_meta(M:Head, MetaSpec, _).
+infer_meta(_:Head, _, _) :-
+  	(	functor(Head, aformat,_)
+	->	fail
+	;	fail
+	).
+
+infer_meta(M:Head, MetaSpec, NewOrUpdated) :-
 	predicate_property(M:Head, imported_from(From)), !,
 	do_infer_meta(From:Head, MetaSpec),
-	assertz(inferred_meta_pred(Head, From, MetaSpec)).
-infer_meta(M:Head, MetaSpec) :-
+	update_inferred_metaspec(Head, From, MetaSpec, NewOrUpdated).
+infer_meta(M:Head, MetaSpec, NewOrUpdated) :-
 	do_infer_meta(M:Head, MetaSpec),
-	assertz(inferred_meta_pred(Head, M, MetaSpec)).
+	update_inferred_metaspec(Head, M, MetaSpec, NewOrUpdated).
+
+update_inferred_metaspec(Head, M, NewMetaSpec, NewOrUpdated) :-
+	inferred_meta_pred(Head, M, OldMetaSpec),
+	!,
+	(	OldMetaSpec == NewMetaSpec
+	->	NewOrUpdated = false
+	;	retract(inferred_meta_pred(Head, M, OldMetaSpec)),
+		assertz(inferred_meta_pred(Head, M, NewMetaSpec)),
+		NewOrUpdated = true
+	).
+update_inferred_metaspec(Head, M, NewMetaSpec, true) :-
+	assertz(inferred_meta_pred(Head, M, NewMetaSpec)).
 
 :- meta_predicate
 	do_infer_meta(:, -).
@@ -641,6 +664,10 @@ meta_term_of_var(HeadArg, MetaTerm, IsMetaArg) :-
 	->	IsMetaArg = true
 	;	true
 	).
+%meta_term_of_var(HeadArg, MetaTerm, IsMetaArg) :-
+%	compound(HeadArg),
+%	HeadArg = M:_,
+%	get_attr(M, prolog_metainference, m), !.
 meta_term_of_var(_, NewMeta, _) :-
 	new_meta(NewMeta).
 
