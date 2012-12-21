@@ -54,7 +54,7 @@ import y.view.ViewMode;
 public class PDTGraphView extends  JPanel {
 	final ViewBase focusView;
 	final Graph2DView view;
-	GraphModel model;
+	GraphModel graphModel;
 	Graph2D graph;
 	GraphMLReader reader;
 
@@ -141,6 +141,10 @@ public class PDTGraphView extends  JPanel {
 		});
 	}
 	
+	public GraphModel getGraphModel() {
+		return graphModel;
+	}
+	
 	public void recalculateMode() {
 		navigation = calculateMode(navigation, false, focusView.isNavigationModeEnabled());
 	}
@@ -149,7 +153,7 @@ public class PDTGraphView extends  JPanel {
 		boolean e = isEditorInNavigation;
 		boolean c = isCtrlPressed;
 		boolean n = isNavigationModeEnabled;
-		
+		                                                // e c n
 		boolean newModeNavigation = (!e && !c && n)  	// 0 0 1
 				|| (e && c && !n) 						// 1 1 0
 				|| (!e && c && !n) 						// 0 1 0
@@ -181,7 +185,7 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	public GraphDataHolder getDataHolder() {
-		return model.getDataHolder();
+		return graphModel.getDataHolder();
 	}
 	
 	public Graph2D getGraph2D() {
@@ -193,14 +197,22 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	public void setModel(GraphModel model){
-		this.model = model;
+		this.graphModel = model;
 	}
 
 	public void loadGraph(URL resource) {
-		model = reader.readFile(resource);
-		model.categorizeData();
-		model.assignPortsToEdges();
-		graph = model.getGraph();
+		graphModel = reader.readFile(resource);
+		graphModel.categorizeData();
+		graphModel.assignPortsToEdges();
+		graph = graphModel.getGraph();
+		view.setGraph2D(graph);
+
+		updateView();
+	}
+	
+	public void loadGraph(GraphModel model) {
+		graphModel = model;
+		graph = graphModel.getGraph();
 		view.setGraph2D(graph);
 
 		updateView();
@@ -236,7 +248,7 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	private String createFirstLabel(Node node) {
-		String labelText = model.getLabelTextForNode(node);
+		String labelText = graphModel.getLabelTextForNode(node);
 		graph.setLabelText(node,labelText);
 		return labelText;
 	}
@@ -259,7 +271,7 @@ public class PDTGraphView extends  JPanel {
 			width = medianValue;
 		}
 		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
-			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(node), gfx).getWidth() + 14;
+			width = (int)fontmtx.getStringBounds(graphModel.getLabelTextForNode(node), gfx).getWidth() + 14;
 		}
 		
 		graph.setSize(node, width, height);

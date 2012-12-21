@@ -88,10 +88,11 @@ write_load_edges(Stream):-
 	    )
 	).
     
-write_file_as_element(Stream,FilePath):-
+write_file_as_element(Stream, FilePath):-
     open_node(Stream,FilePath),
-    write_data(Stream,'kind','predicate'),
+    write_data(Stream,'kind','file_node'),
     write_data(Stream,'id',FilePath),
+    write_data(Stream, 'file_type', 'entry_point'),
     write_data(Stream,'functor',FilePath),
     close_node(Stream).	
     

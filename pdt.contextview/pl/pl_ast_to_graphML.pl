@@ -14,7 +14,7 @@
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
-								write_dependencies_to_graphML/2,
+								write_dependencies_to_graphML/3,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
@@ -55,9 +55,22 @@ write_global_to_graphML(ProjectFilePaths, GraphFile):-
     file_paths(ProjectFiles, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_global_facts_to_graphML(ProjectFiles)).
 
-write_dependencies_to_graphML(ProjectFilePaths, GraphFile):-
+write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
-    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ConsultedFilePaths)).
+    relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
+    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(FormattedPaths)).
+
+relative_paths(_, [], []).
+relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-
+    atom_chars(BasePath, BasePathChars),
+    atom_chars(H, HChars),
+    relative_path(BasePathChars, HChars, FormattedHChars),
+    atom_chars(FormattedH, FormattedHChars),
+    relative_paths(BasePath, T, FormattedT).
+    
+relative_path([], Head, Head).
+relative_path([H|T], [H|T2], Result) :-
+    relative_path(T, T2, Result).
 
 write_to_graphML(GraphFile, CALL) :-
     with_mutex(prolog_factbase,

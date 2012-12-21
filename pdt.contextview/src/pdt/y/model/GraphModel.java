@@ -53,8 +53,12 @@ public class GraphModel {
 	private void initNodeRealizers() {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
-		predicateNodeRealizer = new PredicateNodeRealizer(this);    
-		graph.setDefaultNodeRealizer(predicateNodeRealizer);
+		predicateNodeRealizer = new PredicateNodeRealizer(this);
+		setDefaultNodeRealizer(predicateNodeRealizer);
+	}
+	
+	public void setDefaultNodeRealizer(NodeRealizer realzier) {
+		graph.setDefaultNodeRealizer(realzier);
 	}
 
 	private void initEdgeRealizers() {
@@ -131,9 +135,6 @@ public class GraphModel {
 		return dataHolder.getLabelTextForNode(node);
 	}
 	
-	
-
-
 	public void assignPortsToEdges() {
 		EdgeMap sourceMap = graph.createEdgeMap();
 		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);

@@ -62,6 +62,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isExported", dataHolder.getExportedMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isUnusedLocal", dataHolder.getUnusedLocalMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("file_type", dataHolder.getFileTypeMap(), KeyScope.NODE, KeyType.STRING);
 	}
 
 	private boolean loadFile(URL resource){
