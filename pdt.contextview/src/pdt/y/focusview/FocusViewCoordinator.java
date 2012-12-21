@@ -19,7 +19,7 @@ public class FocusViewCoordinator extends ViewCoordinatorBase {
 			GraphPIFLoaderBase loader = focusView.createGraphPIFLoader(pdtGraphView);
 			loader.setCurrentPath(path);
 			
-			currentFocusView = focusView.new FocusViewControl(pdtGraphView, loader);
+			currentFocusView = focusView.createFocusViewControl(pdtGraphView, loader);
 
 			refreshCurrentView();
 			

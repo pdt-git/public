@@ -1,10 +1,17 @@
 package pdt.y.focusview;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
+import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
+import org.eclipse.core.resources.IProject;
 
+import pdt.y.graphml.GraphMLReader;
 import pdt.y.main.PDTGraphView;
+import pdt.y.model.GraphModel;
+import pdt.y.model.realizer.nodes.FileNodeRealizer;
 
 public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 	
@@ -15,10 +22,31 @@ public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 	}
 	
 	@Override
+	protected void doLoadFile() throws MalformedURLException {
+		GraphModel graphModel = new GraphMLReader().readFile(helpFile.toURI().toURL());
+		graphModel.setDefaultNodeRealizer(new FileNodeRealizer(graphModel));
+		graphModel.categorizeData();
+		graphModel.assignPortsToEdges();
+		
+		view.loadGraph(graphModel);
+	}
+	
+	@Override
 	protected String generateQuery(File helpFile) {
-		String query;
-		query = "ensure_generated_factbase_for_source_file('" + currentPath + "'), "
-				+ "write_dependencies_to_graphML(" + paths.toString() + ",'" + Util.prologFileName(helpFile) + "').";
-		return query;
+		try {
+			loadPaths(currentPath);
+
+			IProject project = FileUtils.findFileForLocation(currentPath).getProject();
+			String projectPath = Util.normalizeOnWindows(project.getLocation().toString());
+			
+			String query;
+			query = "ensure_generated_factbase_for_source_file('" + currentPath + "'), "
+					+ "write_dependencies_to_graphML(" + paths.toString() + ", '" + projectPath + "', '" + Util.prologFileName(helpFile) + "').";
+			return query;
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

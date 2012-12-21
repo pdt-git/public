@@ -273,6 +273,10 @@ public abstract class ViewBase extends ViewPart {
 		if (f != null)
 			f.updateLayout();
 	}
+
+	public FocusViewControl createFocusViewControl(PDTGraphView pdtGraphView, GraphPIFLoaderBase loader) {
+		return new FocusViewControl(pdtGraphView, loader);
+	}
 	
 	private FocusViewControl getCurrentFocusView() {
 		Control f = ((StackLayout)viewContainer.getLayout()).topControl;
@@ -341,6 +345,10 @@ public abstract class ViewBase extends ViewPart {
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
 			pdtGraphView.addViewMode(new HoverTrigger(getShell()));
+		}
+		
+		public PDTGraphView getPdtGraphView() {
+			return pdtGraphView;
 		}
 		
 		public void recalculateMode() {

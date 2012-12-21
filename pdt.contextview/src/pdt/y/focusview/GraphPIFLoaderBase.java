@@ -15,7 +15,6 @@ package pdt.y.focusview;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +38,7 @@ import pdt.y.main.PDTGraphView;
 public abstract class GraphPIFLoaderBase {
 
 	protected File helpFile;
-	private PDTGraphView view;
+	protected PDTGraphView view;
 	private PrologInterface pif;
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -72,11 +71,11 @@ public abstract class GraphPIFLoaderBase {
 							@Override
 							public void run() {
 								try {
-									view.loadGraph(helpFile.toURI().toURL());
+									doLoadFile();
 								} catch (MalformedURLException e) {
 									Debug.rethrow(e);
 								}
-							};
+							}
 						}, null);
 				executor.execute(futureTask);
 				
@@ -89,6 +88,10 @@ public abstract class GraphPIFLoaderBase {
 		}
 		return null;
 	}
+
+	protected void doLoadFile() throws MalformedURLException {
+		view.loadGraph(helpFile.toURI().toURL());
+	};
 	
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
 		throws PrologInterfaceException {
@@ -126,11 +129,7 @@ public abstract class GraphPIFLoaderBase {
 		return true;
 	}
 
-	public abstract List<String> getPaths();
-
 	public abstract void setCurrentPath(String currentPath);
-
-	public abstract void setPaths(List<String> paths);
 
 	public abstract String getCurrentPath();
 }

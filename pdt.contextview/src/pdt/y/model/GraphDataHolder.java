@@ -22,11 +22,11 @@ public class GraphDataHolder {
 
 	private static final String MODULE = "module";
 	private static final String FILE = "file";
+	private static final String FILE_NODE = "file_node";
 	private static final String PREDICATE = "predicate";
 	private static final String CALL = "call";
 	private static final String LOADING = "loading";
-
-
+	private static final String FILE_ENTRY_POINT = "entry_point";
 
 	// Addition data:
 	private DataMap nodeMap = Maps.createHashedDataMap();
@@ -42,6 +42,7 @@ public class GraphDataHolder {
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
 	private DataMap unusedLocal = Maps.createHashedDataMap();
+	private DataMap fileTypeMap = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -97,6 +98,10 @@ public class GraphDataHolder {
 	public DataMap getUnusedLocalMap() {
 		return unusedLocal;
 	}
+	
+	public DataMap getFileTypeMap() {
+		return fileTypeMap;
+	}
 
 	public boolean isPredicate(Node node) {
 		DataMap kindMap = getKindMap();
@@ -114,6 +119,12 @@ public class GraphDataHolder {
 		DataMap kindMap = getKindMap();
 		String kind = kindMap.get(node).toString();
 		return kind.equals(FILE);
+	}
+	
+	public boolean isFileNode(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(FILE_NODE);
 	}
 
 	public boolean isCallEdge(Edge edge) {
@@ -170,16 +181,24 @@ public class GraphDataHolder {
 		return (Boolean)returnNode;
 	}
 
+	public boolean isEntryPointFile(Node node) {
+		DataMap typeMap = getFileTypeMap();
+		String type = typeMap.get(node).toString();
+		return type.equals(FILE_ENTRY_POINT);
+	}
+
 	public String getLabelTextForNode(Node node) {
 		String labelText;
 		if (isModule(node)) {
 			labelText = getModuleName(node);
 		} else if (isFile(node))  {
 			labelText = getFileName(node);
+		} else if (isFileNode(node)) {
+			labelText = getFileNodeText(node);
 		} else if (isPredicate(node))  {
 			labelText = getPredicateText(node);
 		} else {
-			labelText=getNodeText(node);
+			labelText = getNodeText(node);
 		}
 		return labelText;
 	}
@@ -190,6 +209,10 @@ public class GraphDataHolder {
 
 	private String getModuleName(Node node) {
 		return moduleMap.get(node).toString();
+	}
+	
+	private String getFileNodeText(Node node) {
+		return functorMap.get(node).toString();
 	}
 
 	private String getPredicateText(Node node) {

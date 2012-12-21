@@ -57,14 +57,4 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 		}
 		return output;
 	}
-
-	@Override
-	public List<String> getPaths() {
-		throw new Error("Method getPaths not supported!");
-	}
-
-	@Override
-	public void setPaths(List<String> paths) {
-		throw new Error("Method getPaths not supported!");
-	}
 }

@@ -1,9 +1,17 @@
 package pdt.y.focusview;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.runtime.CoreException;
 
 import pdt.y.main.PDTGraphView;
 
@@ -11,7 +19,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	
 	private static final String NAME_OF_GLOBAL_HELPING_FILE = "pdt-global-help.graphml";
 	
-	protected List<String> paths;
+	protected List<String> paths = new ArrayList<String>();
 	protected String currentPath;
 
 	public GlobalGraphPIFLoader(PDTGraphView view) {
@@ -33,21 +41,49 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	}
 	
 	@Override
-	public List<String> getPaths() {
-		return paths;
-	}
-	
-	@Override
-	public void setPaths(List<String> paths) {
-		this.paths = paths;
-	}
-	
-	@Override
 	protected String generateQuery(File helpFile) {
+		loadPaths(currentPath);
+		
 		String query;
 		query = "ensure_generated_factbase_for_source_file('" + currentPath + "'), "
 				+ "write_global_to_graphML(" + paths.toString() + ",'" + Util.prologFileName(helpFile) + "').";
 		return query;
 	}
 
+	protected void loadPaths(String path) {
+		paths = getFilePaths(path);
+	}
+
+	public List<String> getFilePaths(String path) {
+		final List<String> paths = new ArrayList<String>();
+		try {			
+			IProject project = FileUtils.findFileForLocation(path).getProject();
+			
+			project.accept(new IResourceVisitor() {
+
+				@Override
+				public boolean visit(IResource resource) throws CoreException {
+					if (!(resource instanceof IFile)) 
+						return true;
+					IFile file = (IFile)resource;
+					if (file.getFileExtension().equals("pl")) {
+						try {
+							paths.add(Util.quoteAtom(Util.prologFileName(file)));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					return false;
+				}
+				
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return paths;
+	}
+	
+	public boolean containsFilePath(String path) {
+		return paths.contains(path);
+	}
 }
