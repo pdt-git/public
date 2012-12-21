@@ -66,7 +66,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 					if (!(resource instanceof IFile)) 
 						return true;
 					IFile file = (IFile)resource;
-					if (file.getFileExtension().equals("pl")) {
+					if (file.getFileExtension() != null && file.getFileExtension().equals("pl")) {
 						try {
 							paths.add(Util.quoteAtom(Util.prologFileName(file)));
 						} catch (IOException e) {
