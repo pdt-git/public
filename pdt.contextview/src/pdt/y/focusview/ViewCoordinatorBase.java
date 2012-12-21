@@ -16,8 +16,6 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.progress.UIJob;
 
-import pdt.y.preferences.MainPreferencePage;
-
 
 public abstract class ViewCoordinatorBase implements IPartListener, ConsultListener  {
 	
@@ -95,8 +93,6 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	protected void refreshCurrentView() {
-		if (MainPreferencePage.isAutomaticUpdate() && currentFocusView != null) {
-			currentFocusView.reload();
-		}
+		currentFocusView.reload();
 	}
 }

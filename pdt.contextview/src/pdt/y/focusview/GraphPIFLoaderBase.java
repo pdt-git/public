@@ -31,6 +31,11 @@ import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.FocusViewSubscription;
 import pdt.y.main.PDTGraphView;
@@ -66,18 +71,17 @@ public abstract class GraphPIFLoaderBase {
 				// Map<String, Object> result = sendQueryToCurrentPiF(query);
 				// result.get("FocusId");
 
-				FutureTask<?> futureTask = new FutureTask<Object>(
-						new Runnable() {
-							@Override
-							public void run() {
-								try {
-									doLoadFile();
-								} catch (MalformedURLException e) {
-									Debug.rethrow(e);
-								}
-							}
-						}, null);
-				executor.execute(futureTask);
+				new UIJob("Layouting") {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						try {
+							doLoadFile();
+						} catch (MalformedURLException e) {
+							Debug.rethrow(e);
+						}
+						return Status.OK_STATUS;
+					}
+				}.schedule();
 				
 				return output;
 			}
