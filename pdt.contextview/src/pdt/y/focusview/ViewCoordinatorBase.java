@@ -96,7 +96,13 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	
 	protected void refreshCurrentView() {
 		if (MainPreferencePage.isAutomaticUpdate() && currentFocusView != null) {
-			currentFocusView.reload();
+			new UIJob("Update View") {
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					currentFocusView.reload();
+					return Status.OK_STATUS;
+				}
+			}.schedule();
 		}
 	}
 }
