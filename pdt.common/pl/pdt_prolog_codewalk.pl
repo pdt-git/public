@@ -27,15 +27,15 @@
     the GNU General Public License.
 */
 
-:- module(prolog_codewalk,
-	  [ prolog_walk_code/1		% +Options
+:- module(pdt_prolog_codewalk,
+	  [ pdt_prolog_walk_code/1		% +Options
 	  ]).
 :- use_module(library(option)).
 :- use_module(library(record)).
 :- use_module(library(debug)).
 :- use_module(library(apply)).
 :- use_module(library(lists)).
-:- use_module(library(prolog_metainference)).
+:- use_module('metainference/pmi').
 
 /** <module> Prolog code walker
 
@@ -72,7 +72,7 @@ source file is passed into _Where.
 :- meta_predicate
 	prolog_walk_code(:).
 
-:- predicate_options(prolog_walk_code/1, 1,
+:- predicate_options(pdt_prolog_walk_code/1, 1,
 		     [ undefined(oneof([ignore,error,trace])),
 		       autoload(boolean),
 		       module(atom),
@@ -99,12 +99,13 @@ source file is passed into _Where.
 		    caller,			% Head of the caller
 		    initialization,		% Initialization source
 		    undecided,			% Error to throw error
-		    evaluate:boolean).		% Do partial evaluation
+		    evaluate:boolean, 		% Do partial evaluation
+		    call_kind).
 
 :- thread_local
 	multifile_predicate/3.		% Name, Arity, Module
 
-%%	prolog_walk_code(+Options) is det.
+%%	pdt_prolog_walk_code(+Options) is det.
 %
 %	Walk over all loaded (user) Prolog code. The following code is
 %	processed:
@@ -169,13 +170,14 @@ source file is passed into _Where.
 %	  @compat OnTrace was called using Caller-Location in older
 %		  versions.
 
-prolog_walk_code(Options) :-
+pdt_prolog_walk_code(Options) :-
 	meta_options(is_meta, Options, QOptions),
-	prolog_walk_code(1, QOptions).
+	pdt_prolog_walk_code(1, QOptions).
 
-prolog_walk_code(Iteration, Options) :-
+pdt_prolog_walk_code(Iteration, Options) :-
 	statistics(cputime, CPU0),
 	make_walk_option(Options, OTerm, _),
+	walk_option_call_kind(OTerm, kind(call)),
 	forall(( walk_option_module(OTerm, M),
 		 current_module(M),
 		 scan_module(M, OTerm)
@@ -190,7 +192,7 @@ prolog_walk_code(Iteration, Options) :-
 	    print_message(informational,
 			  codewalk(reiterate(New, Iteration, CPU))),
 	    succ(Iteration, Iteration2),
-	    prolog_walk_code(Iteration2, Options)
+	    pdt_prolog_walk_code(Iteration2, Options)
 	;   true
 	).
 
@@ -424,7 +426,7 @@ walk_called(Meta, M, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	;   true
 	),
 	(   predicate_property(M:Meta, meta_predicate(Head))
-	;   inferred_meta_predicate(M:Meta, Head)
+	;   inferred_meta(M:Meta, Head)
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
 	register_possible_meta_clause(ClauseRef),
@@ -475,7 +477,10 @@ undefined(Goal, TermPos, OTerm) :-
 	->  Why = trace
 	;   Why = undefined
 	),
-	print_reference(Goal, TermPos, Why, OTerm).
+	\+ \+ (
+		walk_option_call_kind(OTerm, Kind), setarg(1, Kind, undefined),
+		print_reference(Goal, TermPos, Why, OTerm)
+	).
 
 %%	not_callable(+Goal, +TermPos, +OTerm)
 %
@@ -520,8 +525,10 @@ print_reference(Goal, _, Why, OTerm) :-
 print_reference2(Goal, From, trace, OTerm) :-
 	walk_option_on_trace(OTerm, Closure),
 	walk_option_caller(OTerm, Caller),
+	walk_option_call_kind(OTerm, CallKindTerm),
+	arg(1, CallKindTerm, CallKind),
 	nonvar(Closure),
-	call(Closure, Goal, Caller, From), !.
+	call(Closure, Goal, Caller, From, CallKind), !.
 print_reference2(Goal, From, Why, _OTerm) :-
 	make_message(Why, Goal, From, Message, Level),
 	print_message(Level, Message).
@@ -559,7 +566,7 @@ register_possible_meta_clause(ClausesRef) :-
 	pi_head(PI, Head, Module),
 	module_property(Module, class(user)),
 	\+ predicate_property(Module:Head, meta_predicate(_)),
-	\+ inferred_meta_predicate(Module:Head, _),
+%	\+ inferred_meta(Module:Head, _),
 	\+ possible_meta_predicate(Head, Module), !,
 	assertz(possible_meta_predicate(Head, Module)).
 register_possible_meta_clause(_).
@@ -576,7 +583,8 @@ infer_new_meta_predicates([], OTerm) :-
 infer_new_meta_predicates(MetaSpecs, OTerm) :-
 	findall(Module:MetaSpec,
 		( retract(possible_meta_predicate(Head, Module)),
-		  infer_meta_predicate(Module:Head, MetaSpec),
+		  infer_meta(Module:Head, MetaSpec, NewOrUpdated),
+		  NewOrUpdated == true,
 		  (   walk_option_infer_meta_predicates(OTerm, all)
 		  ->  true
 		  ;   calling_metaspec(MetaSpec)
@@ -596,6 +604,7 @@ calling_metaspec(Head) :-
 calling_metaarg(I) :- integer(I), !.
 calling_metaarg(^).
 calling_metaarg(//).
+calling_metaarg(database).
 
 
 %%	walk_meta_call(+Index, +GoalHead, +MetaHead, +Module,
@@ -606,22 +615,75 @@ calling_metaarg(//).
 
 walk_meta_call(I, Head, Meta, M, [ArgPos|ArgPosList], OTerm) :-
 	arg(I, Head, AS), !,
-	(   integer(AS)
-	->  arg(I, Meta, MA),
-	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
-	    walk_called(Goal, M, ArgPosEx, OTerm)
-	;   AS == (^)
-	->  arg(I, Meta, MA),
-	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
-	    walk_called(Goal, MG, ArgPosEx, OTerm)
-	;   AS == (//)
-	->  arg(I, Meta, DCG),
-	    walk_dcg_body(DCG, M, ArgPos, OTerm)
-	;   true
-	),
+	walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm),
 	succ(I, I2),
 	walk_meta_call(I2, Head, Meta, M, ArgPosList, OTerm).
 walk_meta_call(_, _, _, _, _, _).
+
+walk_meta_call_arg([], _I, _Meta, _M, _ArgPos, _OTerm) :-
+	!.
+walk_meta_call_arg([ArgSpec|ArgSpecs], I, Meta, M, ArgPos, OTerm) :-
+	!,
+	walk_meta_call_arg(ArgSpec, I, Meta, M, ArgPos, OTerm),
+	walk_meta_call_arg(ArgSpecs, I, Meta, M, ArgPos, OTerm).
+walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
+	(   integer(AS)
+	->  arg(I, Meta, MA),
+	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
+	    \+ \+ (
+	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, metacall),
+	    	walk_called(Goal, M, ArgPosEx, OTerm)
+	    )
+	;   AS == (^)
+	->  arg(I, Meta, MA),
+	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
+	    \+ \+ (
+	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, metacall),
+	    	walk_called(Goal, MG, ArgPosEx, OTerm)
+	    )
+	;   AS == (//)
+	->  arg(I, Meta, DCG),
+	    \+ \+ (
+	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, metacall),
+		    walk_dcg_body(DCG, M, ArgPos, OTerm)
+		)
+	;   AS == database
+	->	arg(I, Meta, MA),
+	    \+ \+ (
+	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, database),
+			walk_called(MA, M, ArgPos, OTerm)
+		)
+	;	arg(I, Meta, Arg),
+		atomic(Arg),
+		(   AS = has_arity(_,_)
+		;   AS = add_prefix(_,_)
+		;   AS = add_suffix(_,_)
+		)
+	->	(	functor_arity_for(AS, Arg, Functor, Arity)
+		->	extend(Functor, Arity, Goal, ArgPos, ArgPosEx, OTerm),
+		    \+ \+ (
+		    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, AS),
+				walk_called(Goal, M, ArgPosEx, OTerm)
+			)
+		;	true
+		)
+	;	true
+	).
+
+functor_arity_for(I, _, _, I) :-
+	integer(I),
+	!.
+functor_arity_for(^, _, _, 0).
+functor_arity_for(database, _, _, 0).
+functor_arity_for(has_arity(N, Spec), Arg, Arg, Arity) :-
+	functor_arity_for(Spec, _, _, Arity0),
+	Arity is N + Arity0.
+functor_arity_for(add_prefix(Prefix, Spec), Arg, Functor, Arity) :-
+	functor_arity_for(Spec, _, _, Arity),
+	atom_concat(Prefix, Arg, Functor).
+functor_arity_for(add_suffix(Suffix, Spec), Arg, Functor, Arity) :-
+	functor_arity_for(Spec, _, _, Arity),
+	atom_concat(Arg, Suffix, Functor). 
 
 remove_quantifier(Goal, _, TermPos, TermPos, M, M, OTerm) :-
 	var(Goal), !,
