@@ -451,7 +451,11 @@ public final class UIUtils {
 	}
 	
 	public static IDocument getDocument(IFile file) throws CoreException{
-		file.refreshLocal(0, new NullProgressMonitor());
+		try {
+			file.refreshLocal(0, new NullProgressMonitor());
+		} catch (CoreException e) {
+			Debug.report(e);
+		}
 		IPath path = file.getFullPath();
 		return getDocument(path,LocationKind.IFILE);
 	}
