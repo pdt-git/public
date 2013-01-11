@@ -22,7 +22,7 @@
 :- use_module( pdt_common_pl(properties), [properties_for_predicate/4] ).
 :- use_module(library(lists)).
 
-:- use_module(library(prolog_codewalk)).
+:- use_module(pdt_common_pl(pdt_prolog_codewalk)).
 
 %:- ensure_loaded('../pdt_factbase.pl').
 %:- use_module('../modules_and_visibility').
@@ -33,29 +33,31 @@ find_unique( Goal ) :-
     setof( Goal, Goal, Set),
     member(Goal, Set).
     
-:- dynamic(result/3).
+:- dynamic(result/4).
 
-assert_result(QGoal, _, clause_term_position(Ref, TermPosition)) :-
+assert_result(QGoal, Caller, Location) :-
+	assert_result(QGoal, Caller, Location, _).
+assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
     QGoal = _:Goal,
-    assertz(result(Goal, Ref, TermPosition)),
+    assertz(result(Goal, Ref, TermPosition, Kind)),
     !.
 
-assert_result(_,_,_).
+assert_result(_,_,_,_).
 
 assert_result(QGoal-clause_term_position(Ref, TermPosition)) :-
 	QGoal = _:Goal,
-	assertz(result(Goal, Ref, TermPosition)),
+	assertz(result(Goal, Ref, TermPosition, [])),
 	!.
 
 assert_result(_). 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,?PropertyList)
 find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList]) :-
-	retractall(result(_, _, _)),
+	retractall(result(_, _, _, _)),
 	(	var(Functor), var(SearchMod) -> !, fail ; true),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
-	result(ReferencingGoal, ClauseRef, Termposition),
+	result(ReferencingGoal, ClauseRef, Termposition, _),
 	clause_property(ClauseRef, file(RefFile)),
 	clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
 	clause_property(ClauseRef, line_count(Line)),
@@ -71,7 +73,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 	),
 	format(atom(Position), '~w-~w', [Start, End]),
 	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
-	retract(result(ReferencingGoal, ClauseRef, Termposition)).
+	retract(result(ReferencingGoal, ClauseRef, Termposition, _)).
 
 perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	(	nonvar(Functor)
@@ -83,7 +85,7 @@ perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	->	functor(Goal, SearchFunctor, SearchArity)
 	;	true
 	),
-	prolog_walk_code([trace_reference(SearchMod:Goal), on_trace(pdt_xref:assert_result)]),
+	pdt_prolog_walk_code([trace_reference(SearchMod:Goal), on_trace(pdt_xref:assert_result)]),
 	fail.
 
 perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
