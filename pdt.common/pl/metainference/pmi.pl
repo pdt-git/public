@@ -488,6 +488,11 @@ annotate(:, Var) :-
 	get_or_create_meta(Var, Meta),
 	add_msensitive(Meta, :),
 	put_attr(Var, pmi, Meta).
+annotate(m, Var) :-
+	!,
+	get_or_create_meta(Var, Meta),
+	add_module(Meta, m),
+	put_attr(Var, pmi, Meta).
 annotate(*, Var) :-
 	!,
 	get_or_create_meta(Var, Meta),
@@ -545,29 +550,32 @@ get_or_create_meta(Var, Meta) :-
 	;	new_meta(Meta)
 	).
 	
-new_meta( meta([],[],[],[],[],[],[]) ).
+new_meta( meta([],[],[],[],[],[],[],[]) ).
 
 get_aliased(Meta,Value)    :- arg(1,Meta,Value).
 get_metacalled(Meta,Value) :- arg(2,Meta,Value).
 get_components(Meta,Value) :- arg(3,Meta,Value).
 get_existential(Meta,Value):- arg(4,Meta,Value).
 get_msensitive(Meta,Value) :- arg(5,Meta,Value).
-get_mode(Meta,Value)       :- arg(6,Meta,Value).
-get_bottom(Meta,Value)     :- arg(7,Meta,Value).
+get_module(Meta,Value)     :- arg(6,Meta,Value).
+get_mode(Meta,Value)       :- arg(7,Meta,Value).
+get_bottom(Meta,Value)     :- arg(8,Meta,Value).
 
 set_aliased(Meta,Value)    :- setarg(1,Meta,Value).
 set_metacalled(Meta,Value) :- setarg(2,Meta,Value).
 set_components(Meta,Value) :- setarg(3,Meta,Value).
 set_existential(Meta,Value):- setarg(4,Meta,Value).
 set_msensitive(Meta,Value) :- setarg(5,Meta,Value).
-set_mode(Meta,Value)       :- setarg(6,Meta,Value).
-set_bottom(Meta,Value)     :- setarg(7,Meta,Value).
+set_module_(Meta,Value)    :- setarg(6,Meta,Value).
+set_mode(Meta,Value)       :- setarg(7,Meta,Value).
+set_bottom(Meta,Value)     :- setarg(8,Meta,Value).
 
 add_aliased(Meta,Value)    :- get_aliased(Meta, OldValue), merge_aliased([Value], OldValue, NewValue), set_aliased(Meta, NewValue).
 add_metacalled(Meta,Value) :- get_metacalled(Meta, OldValue), merge_metacalled([Value], OldValue, NewValue), set_metacalled(Meta, NewValue).
 add_components(Meta,Value) :- get_components(Meta, OldValue), merge_components([Value], OldValue, NewValue), set_components(Meta, NewValue).
 add_existential(Meta,Value):- set_existential(Meta, Value).
 add_msensitive(Meta,Value) :- set_msensitive(Meta, Value).
+add_module(Meta,Value)     :- set_module_(Meta, Value).
 add_mode(Meta,Value)       :- get_mode(Meta, OldValue), merge_mode(OldValue, Value, NewValue), set_mode(Meta, NewValue).
 add_bottom(Meta,Value)     :- set_bottom(Meta, Value).
 
@@ -582,8 +590,11 @@ merge_existential(_,     _,     ^    ).
 
 merge_msensitive(Value, Value, Value) :- !.
 merge_msensitive(_,     _,     :    ).
-merge_mode(Value, Value, Value) :- !.
 
+merge_module(Value, Value, Value) :- !.
+merge_module(_,     _,     m    ).
+
+merge_mode(Value, Value, Value) :- !.
 merge_mode([],    Value, Value) :- !.
 merge_mode(Value, [],    Value) :- !.
 merge_mode(_,     _,     ?    ).
@@ -622,6 +633,7 @@ merge_annotations(Meta1, Meta2, Meta) :-
 	get_components( Meta1, Components1) , get_components( Meta2, Components2) , merge_components( Components1,  Components2,  Components) , set_components( Meta, Components),
 	get_existential(Meta1, Existential1), get_existential(Meta2, Existential2), merge_existential(Existential1, Existential2, Existential), set_existential(Meta, Existential),
 	get_msensitive( Meta1, MSensitive1) , get_msensitive( Meta2, MSensitive2) , merge_msensitive( MSensitive1,  MSensitive2,  MSensitive) , set_msensitive( Meta, MSensitive),
+	get_module(     Meta1, Module1)     , get_module(     Meta2, Module2)     , merge_module(     Module1,      Module2,      Module)     , set_module_(    Meta, Module),
 	get_mode(       Meta1, Mode1)       , get_mode(       Meta2, Mode2)       , merge_mode(       Mode1,        Mode2,        Mode)       , set_mode(       Meta, Mode),
 	get_bottom(     Meta1, Bottom1)     , get_bottom(     Meta2, Bottom2)     , merge_bottom(     Bottom1,      Bottom2,      Bottom)     , set_bottom(     Meta, Bottom).
 
@@ -664,10 +676,15 @@ meta_term_of_var(HeadArg, MetaTerm, IsMetaArg) :-
 	->	IsMetaArg = true
 	;	true
 	).
-%meta_term_of_var(HeadArg, MetaTerm, IsMetaArg) :-
-%	compound(HeadArg),
-%	HeadArg = M:_,
-%	get_attr(M, prolog_metainference, m), !.
+meta_term_of_var(HeadArg, MetaTerm, IsMetaArg) :-
+	compound(HeadArg),
+	HeadArg = M:_,
+	get_attr(M, pmi, MMeta),
+	get_module(MMeta, m),
+	!,
+	new_meta(MetaTerm),
+	set_msensitive(MetaTerm, :),
+	IsMetaArg = true.
 meta_term_of_var(_, NewMeta, _) :-
 	new_meta(NewMeta).
 
