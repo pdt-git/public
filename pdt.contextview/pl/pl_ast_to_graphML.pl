@@ -57,20 +57,24 @@ write_global_to_graphML(ProjectFilePaths, GraphFile):-
 
 write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
-    relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
-    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(FormattedPaths)).
+    %relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
+    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
 
 relative_paths(_, [], []).
 relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-
-    atom_chars(BasePath, BasePathChars),
-    atom_chars(H, HChars),
-    relative_path(BasePathChars, HChars, FormattedHChars),
-    atom_chars(FormattedH, FormattedHChars),
+    relative_path(BasePath, H, FormattedH),
     relative_paths(BasePath, T, FormattedT).
     
-relative_path([], Head, Head).
-relative_path([H|T], [H|T2], Result) :-
-    relative_path(T, T2, Result).
+relative_path(BasePath, Path, RelativePath) :-
+	atom_chars(BasePath, BasePathChars),
+    atom_chars(Path, PathChars),
+    relative_path_(BasePathChars, PathChars, RelativePathChars),
+    atom_chars(RelativePath, RelativePathChars).
+        
+
+relative_path_([], Head, Head).
+relative_path_([H|T], [H|T2], Result) :-
+    relative_path_(T, T2, Result).
 
 write_to_graphML(GraphFile, CALL) :-
     with_mutex(prolog_factbase,
@@ -141,26 +145,32 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
     	write_call_edge(OutStream, S, T)
     ).
     
-write_dependencies_facts_to_graphML(ProjectFilePaths, OutStream) :-
+write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     
-    forall(member(FilePath, ProjectFilePaths),
+    forall(
     	(
-    		write_file_as_element(OutStream, FilePath)
-    	)
+    		nth1(Id, ProjectFilePaths, FilePath),
+    		relative_path(ProjectPath, FilePath, RelativePath)
+    	),	
+		write_file_as_element(OutStream, Id, RelativePath)
     ),
     
 	findall((SourceFile, TargetFile),
 		(
-    		loaded_by(SourceFile, TargetFile, _, _),
 			member(SourceFile, ProjectFilePaths),
-			member(TargetFile, ProjectFilePaths)
+			member(TargetFile, ProjectFilePaths),
+    		loaded_by(TargetFile, SourceFile, _, _)
     	),
     	FoundDependencies
     ),
 
     forall(
-    	member((S, T), FoundDependencies), 
-    	write_load_edge(OutStream, T, S)
+    	(
+    		member((S, T), FoundDependencies),
+    		nth1(SId, ProjectFilePaths, S),
+    		nth1(TId, ProjectFilePaths, T)
+    	),
+		write_load_edge(OutStream, SId, TId)
     ).
     
 file_paths([], []).

@@ -17,7 +17,7 @@
 						write_call_edge/3,
 						write_load_edge/3,
 						write_predicates/3,
-						write_file_as_element/2]).
+						write_file_as_element/3]).
 
 :- ensure_loaded(pdt_builder_analyzer('../pdt_factbase')).
 :- use_module(pdt_builder_analyzer(edge_counter)).
@@ -88,12 +88,12 @@ write_load_edges(Stream):-
 	    )
 	).
     
-write_file_as_element(Stream, FilePath):-
-    open_node(Stream,FilePath),
+write_file_as_element(Stream, FileId, FileName):-
+    open_node(Stream,FileId),
     write_data(Stream,'kind','file_node'),
-    write_data(Stream,'id',FilePath),
+    write_data(Stream,'id',FileId),
     write_data(Stream, 'file_type', 'entry_point'),
-    write_data(Stream,'functor',FilePath),
+    write_data(Stream,'functor',FileName),
     close_node(Stream).	
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
