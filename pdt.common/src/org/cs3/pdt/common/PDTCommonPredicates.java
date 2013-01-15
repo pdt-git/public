@@ -35,6 +35,9 @@ public class PDTCommonPredicates {
 	// source files
 	public static final String PDT_SOURCE_FILES = "source_files:pdt_source_files";
 	public static final String PDT_SOURCE_FILE = "source_files:pdt_source_file";
+	
+	// call analysis
+	public static final String FIND_UNDEFINED_CALL = "pdt_call_analysis:find_undefined_call";
 
 }
 

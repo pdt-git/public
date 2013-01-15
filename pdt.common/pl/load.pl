@@ -19,5 +19,7 @@
 
 :- use_module(source_files).
 
+:- use_module(pdt_call_analysis).
+
 :- ['lgt/loader'].
 
