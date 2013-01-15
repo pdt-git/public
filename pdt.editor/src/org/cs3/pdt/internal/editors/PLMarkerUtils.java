@@ -20,7 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTPredicates;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.quickfix.PDTMarker;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
@@ -58,16 +61,17 @@ public class PLMarkerUtils {
 	}
 
 	public static void addMarkers(PrologInterface pif, List<String> allConsultedFiles, IProgressMonitor monitor) {
-		monitor.beginTask("Update markers", 2);
+		monitor.beginTask("Update markers", 3);
 		PrologSession session =null;
 		try {
 			session = pif.getSession();
-			Map<String, IFile> reloadedFiles = new HashMap<String, IFile>();
+			Map<String, IFile> fileNameToIFiles = new HashMap<String, IFile>();
 			monitor.subTask("add markers for errors and warnings");
-			collectIFilesForFileNames(allConsultedFiles, reloadedFiles);
-			addMarkersForErrorsAndWarnings(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), reloadedFiles);
+			collectIFilesForFileNames(allConsultedFiles, fileNameToIFiles);
+			addMarkersForErrorsAndWarnings(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
 			monitor.subTask("Update Prolog Smells Detectors");
-			addMarkersForSmellDetectors(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), reloadedFiles);
+			addMarkersForSmellDetectors(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
+			addMarkersUndefinedCalls(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
 //			session.queryOnce("deactivate_warning_and_error_tracing");
 		} catch (PrologException e) {
 			// this may be a reload_timeout_reached exception
@@ -90,14 +94,9 @@ public class PLMarkerUtils {
 		}
 	}
 	
-	private static void addMarkersForErrorsAndWarnings(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> reloadedFiles) throws PrologInterfaceException, CoreException {
+	private static void addMarkersForErrorsAndWarnings(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologInterfaceException, CoreException {
 		List<Map<String, Object>> msgs = session.queryAll(bT(PrologConnectorPredicates.ERRORS_AND_WARNINGS, "Kind", "Line", "Length", "Message", "File"));
-		monitor.beginTask("add markers for errors and warnings", reloadedFiles.size() + msgs.size());
-		
-		for (IFile file : reloadedFiles.values()) {
-			file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-			monitor.worked(1);
-		}
+		monitor.beginTask("Add markers for errors and warnings", msgs.size());
 		
 		for (Map<String, Object> msg : msgs) {
 			int severity=0;
@@ -109,7 +108,7 @@ public class PLMarkerUtils {
 			}
 			
 			String fileName = msg.get("File").toString();
-			IFile file = reloadedFiles.get(fileName);
+			IFile file = getFile(fileName, fileNameToIFiles);
 			if (file == null) {
 				monitor.worked(1);
 				continue;
@@ -133,15 +132,15 @@ public class PLMarkerUtils {
 		monitor.done();
 	}
 	
-	private static void addMarkersForSmellDetectors(PrologSession session, IProgressMonitor monitor, Map<String, IFile> reloadedFiles) throws PrologInterfaceException, CoreException {
-		monitor.beginTask("Update Prolog Smells Detectors", reloadedFiles.size());
+	private static void addMarkersForSmellDetectors(PrologSession session, IProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologInterfaceException, CoreException {
+		monitor.beginTask("Update Prolog Smells Detectors", fileNameToIFiles.size());
 
-		for (String fileName : reloadedFiles.keySet()) {
+		for (String fileName : fileNameToIFiles.keySet()) {
 			String query = bT(PDTPredicates.SMELL_MARKER_PDT, "Name", "Description", "QuickfixDescription", "QuickfixAction", Util.quoteAtom(fileName), "Start", "Length");
 			List<Map<String, Object>> msgsSmells = session.queryAll(query);
 			
 			if(msgsSmells!=null) {
-				IFile file = reloadedFiles.get(fileName);
+				IFile file = getFile(fileName, fileNameToIFiles);
 				IDocument doc = UIUtils.getDocument(file);
 				for (Map<String, Object> msg : msgsSmells) {
 					IMarker marker = file.createMarker(IMarker.PROBLEM);
@@ -166,20 +165,62 @@ public class PLMarkerUtils {
 		monitor.done();
 	}
 	
+	private static void addMarkersUndefinedCalls(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologException, PrologInterfaceException {
+		monitor.beginTask("Add markers for undefined calls", 1);
+		boolean doUndefinedCallAnalysis = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_UNDEFINED_CALL_ANALYSIS);
+		if (doUndefinedCallAnalysis) {
+			List<Map<String, Object>> results = session.queryAll(bT(PDTCommonPredicates.FIND_UNDEFINED_CALL, "Goal", "File", "Start", "End"));
+			for (Map<String, Object> result : results) {
+				try {
+					IFile file = getFile(result.get("File").toString(), fileNameToIFiles);
+					if (file == null) {
+						continue;
+					}
+					IDocument doc = UIUtils.getDocument(file);
+					int start = UIUtils.logicalToPhysicalOffset(doc, Integer.parseInt(result.get("Start").toString()));
+					int end = UIUtils.logicalToPhysicalOffset(doc, Integer.parseInt(result.get("End").toString()));
+					IMarker marker = file.createMarker(IMarker.PROBLEM);
+					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+					MarkerUtilities.setCharStart(marker, start);
+					MarkerUtilities.setCharEnd(marker, end);
+					marker.setAttribute(IMarker.MESSAGE, "Undefined call: " + result.get("Goal").toString());
+				} catch (Exception e) {
+					Debug.report(e);
+					continue;
+				}
+			}
+		}
+		monitor.done();
+	}
+
 	private static void collectIFilesForFileNames(List<String> fileNames, Map<String, IFile> fileNameToIFiles) {
 		for (String fileName : fileNames) {
-			IFile file = null;
+			try {
+				getFile(fileName, fileNameToIFiles);
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+		}
+	}
+	
+	private static IFile getFile(String fileName, Map<String, IFile> fileNameToIFiles) throws CoreException {
+		IFile file = fileNameToIFiles.get(fileName);
+		if (file != null) {
+			return file;
+		} else {
 			try {
 				file = FileUtils.findFileForLocation(fileName);
 			} catch (IOException e1) {
-				continue;
+				return null;
 			} catch (IllegalArgumentException e2){
-				continue;
+				return null;
 			}
 			if (file == null || !file.exists()){
-				continue;
+				return null;
 			}
+			file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 			fileNameToIFiles.put(fileName, file);
+			return file;
 		}
 	}
 
