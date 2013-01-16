@@ -15,6 +15,7 @@
 										find_meta_pred_args_in_clause/3]).
 :- use_module(pdt_prolog_library(utils4modules)).
 :- use_module(library(lists)).
+:- use_module(metafile_referencer).
 
 /**
  * infer_meta_arguments_for(?Module,?AHead,?MetaSpec) is det

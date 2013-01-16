@@ -15,16 +15,14 @@ package org.cs3.pdt.navigator.internal.decorators;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.navigator.PDTNavigatorPredicates;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.navigator.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
@@ -38,46 +36,15 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class PDTConsultDecoratorContributor implements ILightweightLabelDecorator, OptionProviderListener {
+public class PDTConsultDecoratorContributor extends BaseLabelProvider implements ILightweightLabelDecorator, OptionProviderListener {
 
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
-
-	@Override
-	public void addListener(ILabelProviderListener l) {
-
-		synchronized (listeners) {
-			if(!listeners.contains(l)){
-				listeners.add(l);
-			}
-		}
-		
-	}
-
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener l) {
-		synchronized (listeners) {
-			if(listeners.contains(l)){
-				listeners.remove(l);
-			}
-		}
-		
-	}
-	
-	HashMap<Object, Long> elementDecorated = new HashMap<Object, Long>();
 
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
@@ -85,64 +52,63 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 			return;
 		}
 		
-		Long lastElementUpdate = elementDecorated.get(element);
-		
-		if (lastElementUpdate != null && lastElementUpdate > lastUpdate) {
-			fireLabelProviderChanged();
-		}
-		elementDecorated.put(element, System.currentTimeMillis());
-
 		PDTCommonPlugin.getDefault().addDecorator(this);
 
-		// get active pif from console
-		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
-
-		if (currentPif == null) {
-			if (element instanceof IFile) {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
-			}
-			return;
-		}
-		
-		if (element instanceof IFile) {
-			IFile file = (IFile) element;
+		try {
+			// get active pif from console
+			PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 			
+			if (currentPif == null) {
+				if (element instanceof IFile) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+				}
+				return;
+			}
+			
+			if (element instanceof IFile) {
+				IFile file = (IFile) element;
+				
 //			final DecorationContext decorationContext = (DecorationContext) decoration.getDecorationContext();
 //			decorationContext.putProperty(IDecoration.ENABLE_REPLACE, Boolean.TRUE);
-
-			// check if file is in consulted files list (important for qlf files)
-			String prologFileName = getPrologFileName(file);
-			
-			// XXX: don't mark qlf file if only the pl file is consulted 
-			if(prologFileName.endsWith(".qlf")){
-				prologFileName = prologFileName.substring(0, prologFileName.length()-3)+"pl";
-			}
-			// check if file is source_file
-			if (sourceFiles.contains(prologFileName)) {
-				decoration.addSuffix(" [consulted]");
-				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
-				} else {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
+				
+				// check if file is in consulted files list (important for qlf files)
+				String prologFileName = getPrologFileName(file);
+				
+				// XXX: don't mark qlf file if only the pl file is consulted 
+				if(prologFileName.endsWith(".qlf")){
+					prologFileName = prologFileName.substring(0, prologFileName.length()-3)+"pl";
 				}
-			} else if (modifiedSourceFiles.contains(prologFileName)) {
-				decoration.addSuffix(" [consulted]");
-				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED_OLD), IDecoration.BOTTOM_LEFT);
+				// check if file is source_file
+				if (isCurrent(prologFileName)) {
+					decoration.addSuffix(" [consulted]");
+					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
+					} else {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
+					}
+				} else if (isOld(prologFileName)) {
+					decoration.addSuffix(" [consulted]");
+					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED_OLD), IDecoration.BOTTOM_LEFT);
+					} else {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED_OLD), IDecoration.UNDERLAY);
+					}
 				} else {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED_OLD), IDecoration.UNDERLAY);
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
 				}
 			} else {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+				IFolder folder = (IFolder) element;
+				String dirName = Util.prologFileName(folder.getRawLocation().toFile());
+				
+				if (isContainingFolder(dirName)) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
+				}
 			}
-		} else {
-			IFolder folder = (IFolder) element;
-			String dirName = Util.prologFileName(folder.getRawLocation().toFile());
-			
-			if (dirs.contains(dirName)) {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
-			}
+		} catch (Exception e) {
+			Debug.error("Error during decoration of " + (element == null ? null : element.toString()));
+			Debug.report(e);
 		}
+		
 	}
 	
 	private String getPrologFileName(IFile file) {
@@ -160,46 +126,7 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 		fireLabelProviderChanged();
 	}
 
-	Set<String> sourceFiles = new HashSet<String>();
-	Set<String> modifiedSourceFiles = new HashSet<String>();
-	Set<String> dirs= new HashSet<String>();
-	private long lastUpdate = 0;
-
 	private void fireLabelProviderChanged() {
-		
-
-		sourceFiles.clear();
-		modifiedSourceFiles.clear();
-		dirs.clear();
-		
-		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
-		if (currentPif == null) {
-			return;
-		}
-		try {
-			List<Map<String, Object>> results = currentPif.queryAll(bT(PDTNavigatorPredicates.PDT_SOURCE_FILE, "File", "State"));
-			lastUpdate = System.currentTimeMillis();
-			for (Map<String, Object> result: results) {
-				String fileName = result.get("File").toString();
-				String fileState = result.get("State").toString();
-				if ("current".equals(fileState)) {
-					sourceFiles.add(fileName);
-				} else {
-					modifiedSourceFiles.add(fileName);
-				}
-				String parentDir = fileName.substring(0, fileName.lastIndexOf('/'));
-				while (dirs.add(parentDir)) {
-					int parentDirEndPos = parentDir.lastIndexOf('/');
-					if (parentDirEndPos < 0) {
-						break;
-					}
-					parentDir = parentDir.substring(0, parentDirEndPos);
-				}
-			}
-		} catch (PrologInterfaceException e) {
-			Debug.report(e);
-		}
-
 		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
 		Vector<ILabelProviderListener> clone=new Vector<ILabelProviderListener>();
 		synchronized(listeners){
@@ -213,6 +140,62 @@ public class PDTConsultDecoratorContributor implements ILightweightLabelDecorato
 					l.labelProviderChanged(e);
 				}
 			});
+		}
+	}
+
+	private HashSet<String> filesInCurrentState;
+	private HashSet<String> filesInOldState;
+	private HashSet<String> directories;
+	private long lastFill = 0;
+	
+	private static final int MILLIS_BETWEEN_FILE_STATE_CHECK = 1000;
+
+	private boolean isCurrent(String fileName) {
+		fillSetsIfNeeded();
+		return filesInCurrentState.contains(fileName);
+	}
+	
+	private boolean isOld(String fileName) {
+		fillSetsIfNeeded();
+		return filesInOldState.contains(fileName);
+	}
+	
+	private boolean isContainingFolder(String folderName) {
+		fillSetsIfNeeded();
+		return directories.contains(folderName);
+	}
+	
+	private void fillSetsIfNeeded() {
+		long now = System.currentTimeMillis();
+		if (filesInCurrentState == null || filesInOldState == null || now - MILLIS_BETWEEN_FILE_STATE_CHECK > lastFill) {
+			filesInCurrentState = new HashSet<String>();
+			filesInOldState = new HashSet<String>();
+			directories = new HashSet<String>();
+			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			List<Map<String, Object>> results;
+			try {
+				results = pif.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State"));
+				for (Map<String, Object> result: results) {
+					String fileName = result.get("File").toString();
+					String fileState = result.get("State").toString();
+					if ("current".equals(fileState)) {
+						filesInCurrentState.add(fileName);
+					} else {
+						filesInOldState.add(fileName);
+					}
+					String parentDir = fileName.substring(0, fileName.lastIndexOf('/'));
+					while (directories.add(parentDir)) {
+						int parentDirEndPos = parentDir.lastIndexOf('/');
+						if (parentDirEndPos < 0) {
+							break;
+						}
+						parentDir = parentDir.substring(0, parentDirEndPos);
+					}
+				}
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+			}
+			lastFill = System.currentTimeMillis();
 		}
 	}
 

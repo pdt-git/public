@@ -116,8 +116,8 @@ visible_in_module(Module,Name,Arity) :-
 % The above was created by Jan Wielemaker during his visit to our group 
 % in Nov. 2011. It is intended as a better behaved alternative to the
 % strangely inconsistent versions of current_predicate/1 and /2.
-    
-    current_predicate(Module:Name/Arity).
+    current_module(Module),
+    Module:current_predicate(Name/Arity).
 %  
 % <-- Beware of current_predicate/2: It hides system modules! 
 % Only current_predicate/1 returns ALL modules that see Name/Arity,

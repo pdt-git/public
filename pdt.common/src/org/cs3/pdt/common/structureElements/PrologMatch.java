@@ -84,18 +84,22 @@ public class PrologMatch extends Match{
 			} else {
 				IDocument document;
 				document = UIUtils.getDocument(file);
-				int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
-				setOffset(convertedOffset);
-				int convertedEnd = UIUtils.logicalToPhysicalOffset(document, end);
-				int length = convertedEnd - convertedOffset;
-				setLength(length);
-				String text = document.get(convertedOffset, length);
-				if (text != null) {
-					String line = PDTCommonUtil.getProperty("line", properties);
-					if (line != null) {
-						label = line + ": " + text.replaceAll("\n|\r", "");
-					} else {
-						label = text.replaceAll("\n|\r", "");
+				if (document.getLength() <= 0) {
+					Debug.warning("Empty document for file: " + file.getFullPath());
+				} else {
+					int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
+					setOffset(convertedOffset);
+					int convertedEnd = UIUtils.logicalToPhysicalOffset(document, end);
+					int length = convertedEnd - convertedOffset;
+					setLength(length);
+					String text = document.get(convertedOffset, length);
+					if (text != null) {
+						String line = PDTCommonUtil.getProperty("line", properties);
+						if (line != null) {
+							label = line + ": " + text.replaceAll("\n|\r", "");
+						} else {
+							label = text.replaceAll("\n|\r", "");
+						}
 					}
 				}
 			}

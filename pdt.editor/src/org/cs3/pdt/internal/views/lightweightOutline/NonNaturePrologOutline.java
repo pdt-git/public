@@ -198,7 +198,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			Object[] expandedElements = null;
 			try {			
 				modules = PDTOutlineQuery.getProgramElementsForFile(fileName);
-				model.update(modules);
+				model.update(modules, fileName);
 
 				expandedElements = treeViewer.getExpandedElements();
 				treeViewer.setInput(model);
@@ -319,9 +319,9 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				if (model != null && !model.hasChildren()) {
+//				if (model != null && !model.hasChildren()) {
 					setInput(null);
-				}
+//				}
 			}
 		});
 	}

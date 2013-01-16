@@ -799,7 +799,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		traceAction = new PifQueryAction(
 				"Interrupt running query and start tracing",
 				ImageRepository.getImageDescriptor(ImageRepository.TRACE),
-				bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + "catch(thread_signal(ID, trace),_,fail)");
+				bT(PDTConsolePredicates.CONSOLE_THREAD_NAME, "ID") + ", catch(thread_signal(ID, trace),_,fail)");
 		
 		pasteFileNameAction = new PasteAction("Paste filename",
 				"Paste the name of the current editor file", ImageRepository
@@ -991,7 +991,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey, String configuration) {
-		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " (Prolog)");
+		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", "Prolog");
 		registry.addSubscription(subscription);
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription, configuration);
 
@@ -1338,12 +1338,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
-		Object configuration = pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
-		if (configuration == null) {
-			title.setText(key);
-		} else {
-			title.setText(key + " (" + configuration.toString().replaceAll("&", "&&") + ")");
-		}
+		title.setText(SelectContextPIFAutomatedAction.getLabelForPif(key, reg));
+//		Object configuration = pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
+//		if (configuration == null) {
+//			title.setText(key);
+//		} else {
+//			title.setText(key + " (" + configuration.toString().replaceAll("&", "&&") + ")");
+//		}
 
 		viewer.setEnterSendsSemicolon(false);
 

@@ -29,6 +29,7 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologException;
+import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 
@@ -167,6 +168,16 @@ public class PDTOutlineQuery {
 //		return selectedFile;
 //	}
 	
+	public static boolean isFileLoaded(String fileName) {
+		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		Map<String, Object> result = null;
+		try {
+			result = pif.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, Util.quoteAtom(fileName)));
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+		}
+		return result != null;
+	}
 }
 
 

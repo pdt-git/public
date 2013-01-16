@@ -23,9 +23,9 @@
 :- use_module(literal_parser).
 :- use_module(cross_reference_builder).
 
-generate_facts(Project):-
+generate_facts(ProjectFiles):-
     cleanup_nodes,
-    walking_file_list(Project,parse,1),
+    walking_file_list(ProjectFiles,parse,1),
 	build_load_graph,
     derive_all_predicates,
 	derive_onloads,

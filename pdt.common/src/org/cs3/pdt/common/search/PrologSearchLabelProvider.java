@@ -20,7 +20,6 @@ import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
-import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -51,12 +50,7 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 		} else if(element instanceof SearchPredicateElement){
 			return setPredicateImage(element);
 		} else if(element instanceof SearchFileTreeElement){
-			SearchFileTreeElement fileTreeElement = (SearchFileTreeElement) element;
-			if (ExternalPrologFilesProjectUtils.isExternalFile(fileTreeElement.getFile())) {
-				return ImageRepository.getImage(ImageRepository.PROLOG_FILE_EXTERNAL);
-			} else {
-				return ImageRepository.getImage(ImageRepository.PROLOG_FILE_CONSULTED);
-			}
+			return ImageRepository.getImage(ImageRepository.PROLOG_FILE_TRANSPARENT);
 		} 
 		return null;
 	}

@@ -143,6 +143,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 
 	private TextStyle fBoldStyle;
 
+	private IInformationControlCreator creator;
+
 	/**
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
@@ -294,8 +296,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 *
 	 * @param parent the parent shell
 	 */
-	public BrowserInformationControl(Shell parent) {
+	public BrowserInformationControl(Shell parent, IInformationControlCreator creator) {
 		this(parent, SWT.NONE);
+		this.creator = creator;
 	}
 
 
@@ -642,7 +645,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return null;
+		return creator;
 	}
 }
 

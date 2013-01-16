@@ -17,5 +17,7 @@
 :- use_module('xref/pdt_xref').
 :- use_module(pdt_search).
 
+:- use_module(source_files).
+
 :- ['lgt/loader'].
 

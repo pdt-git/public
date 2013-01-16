@@ -13,21 +13,14 @@
 
 package pdt.y.focusview;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
-
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import org.cs3.prolog.common.ResourceFileLocator;
-import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
@@ -40,45 +33,28 @@ import org.cs3.prolog.session.PrologSession;
 
 import pdt.y.main.PDTGraphView;
 
-public class GraphPIFLoader {
-	private static final String NAME_OF_HELPING_FILE = "pdt-focus-help.graphml";
+public abstract class GraphPIFLoaderBase {
 
 	protected File helpFile;
 	private PDTGraphView view;
 	private PrologInterface pif;
 	private ExecutorService executor = Executors.newCachedThreadPool();
-	private List<String> dependencies = new ArrayList<String>();
 
-	public GraphPIFLoader(PDTGraphView view) {
+	public GraphPIFLoaderBase(PDTGraphView view) {
 		this.view = view;
-		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
-		ResourceFileLocator locator = plugin.getResourceLocator();
-		helpFile = locator.resolve(NAME_OF_HELPING_FILE);
 	}
 
-	public List<String> getDependencies() {
-		return dependencies;
-	}
-
-	public void queryPrologForGraphFacts(String focusFileForParsing) {
+	protected abstract String generateQuery(File helpFile);
+	
+	public Map<String, Object> loadGraph() {
 
 		try {
+			helpFile.delete();
 			pif = getActivePifEnsuringFocusViewSubscription();
 			if (pif != null) {
-
-				sendQueryToCurrentPiF(bT("ensure_generated_factbase_for_source_file", Util.quoteAtom(focusFileForParsing)));
-					
-				String query = generateQuery(focusFileForParsing, helpFile);
+				String query = generateQuery(helpFile);
 				Map<String, Object> output = sendQueryToCurrentPiF(query);
-
-				dependencies.clear();
 					
-				if (output != null && output.containsKey("Dependencies")) {
-					@SuppressWarnings("unchecked")
-					Vector<String> deps = (Vector<String>) output.get("Dependencies");
-					dependencies.addAll(deps);
-				}
-
 				// query =
 				// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
 				// Map<String, Object> result = sendQueryToCurrentPiF(query);
@@ -96,20 +72,15 @@ public class GraphPIFLoader {
 							};
 						}, null);
 				executor.execute(futureTask);
+				
+				return output;
 			}
 		} catch (PrologException e1) {
 			e1.printStackTrace();
 		} catch (PrologInterfaceException e) {
 			e.printStackTrace();
 		}
-	}
-
-	protected String generateQuery(String focusFileForParsing, File helpFile) {
-		String query;
-		query = "write_focus_to_graphML('" + focusFileForParsing
-				+ "','" + Util.prologFileName(helpFile)
-				+ "', Dependencies).";
-		return query;
+		return null;
 	}
 	
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
