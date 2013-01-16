@@ -59,7 +59,7 @@ public abstract class CroppingLabelBase extends AbstractCustomLabelPainter {
 		}
 		
 		int maxLineWidth = (int) (width - 2 * BORDER_PADDING) - 24;
-		int maxLinesCnt = (int) (height / lineHeight);
+		int maxLinesCnt = (int) ((height - 2 * BORDER_PADDING) / lineHeight);
 		int linesCnt = (int) Math.ceil(bounds.getWidth() / maxLineWidth);
 		int avgLineWidth = (int) (bounds.getWidth() / linesCnt);
 

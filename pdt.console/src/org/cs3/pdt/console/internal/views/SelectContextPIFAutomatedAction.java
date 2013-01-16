@@ -15,6 +15,7 @@ package org.cs3.pdt.console.internal.views;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.ui.PrologContextTracker;
 import org.cs3.prolog.connector.ui.PrologContextTrackerListener;
 import org.cs3.prolog.connector.ui.PrologContextTrackerService;
+import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.eclipse.jface.action.Action;
@@ -182,10 +184,17 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			}
 		}
 		
-		Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
-		
+		ArrayList<ActionContributionItem> actionItems = new ArrayList<ActionContributionItem>();
 		for (String key : sortedKeys) {
-			createPIFAction(getCreatedMenu(), reg, key);
+			ActionContributionItem actionItem = createPIFAction(reg, key);
+			if (actionItem != null) {
+				actionItems.add(actionItem);
+			}
+		}
+		Collections.<ActionContributionItem>sort(actionItems, new ActionItemComparator());
+		Menu menu = getCreatedMenu();
+		for (ActionContributionItem actionItem : actionItems) {
+			actionItem.fill(menu, -1);
 		}
 	}
 
@@ -249,11 +258,10 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 
-	private void createPIFAction(Menu menu, PrologInterfaceRegistry reg,
-			final String key) {
+	private ActionContributionItem createPIFAction(PrologInterfaceRegistry reg, final String key) {
 		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
 		if (subs.size() == 0) {
-			return;
+			return null;
 		}
 		// remove hidden subscriptions from the set
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
@@ -268,29 +276,10 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 		};
 		action.setChecked(key.equals(reg.getKey(getPrologInterface())));
-		StringBuffer buf = new StringBuffer();
-
-		buf.append(key);
-		// TODO: write project names to the tooltip, in the label, only: ProjectName (JTransformer)
-		buf.append(": ");
-		
-		StringBuffer descBuf = new StringBuffer();
-		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
-			Subscription sub = it.next();
-			buf.append(sub.getName());
-			descBuf.append(sub.getDescritpion());
-			if (it.hasNext()) {
-				buf.append(", ");
-				descBuf.append(", ");
-			}
-		}
-		
-		action.setToolTipText(descBuf.toString());
-		action.setText(buf.toString());
+		action.setText(getLabelForPif(key, reg));
 		action.setEnabled(!unifiedTrackerEnabled);
 		ActionContributionItem item = new ActionContributionItem(action);
-		item.fill(menu, -1);
-
+		return item;
 	}
 
 	private void setCreatedMenu(Menu menu) {
@@ -419,6 +408,41 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.FOLLOW_MODE));
 		}
 
+	}
+	
+	public static String getLabelForPif(String key, PrologInterfaceRegistry reg) {
+		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
+		
+		StringBuffer buf = new StringBuffer();
+
+		Object configuration = reg.getPrologInterface(key).getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
+		if (configuration != null) {
+			buf.append(configuration.toString().replaceAll("&", "&&"));
+			buf.append(": ");
+		}
+		
+		buf.append(key);
+		
+		if (!subs.isEmpty()) {
+			buf.append(" (");
+			
+			for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
+				Subscription sub = it.next();
+				buf.append(sub.getName());
+				if (it.hasNext()) {
+					buf.append(", ");
+				}
+			}
+			buf.append(")");
+		}
+		return buf.toString();
+	}
+	
+	private static class ActionItemComparator implements Comparator<ActionContributionItem> {
+		@Override
+		public int compare(ActionContributionItem paramT1, ActionContributionItem paramT2) {
+			return paramT1.getAction().getText().compareTo(paramT2.getAction().getText());
+		}
 	}
 }
 

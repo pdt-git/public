@@ -135,7 +135,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Subscription subscription = registry.getSubscription(DEFAULT_PROCESS);
 		if (subscription == null) {
-			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", DEFAULT_PROCESS + " (Prolog)");
+			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", "Prolog");
 			registry.addSubscription(subscription);
 		}
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);

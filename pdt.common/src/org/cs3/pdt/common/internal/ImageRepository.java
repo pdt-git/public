@@ -32,6 +32,7 @@ public class ImageRepository {
     public static final String PE_INVISIBLE = "invisible.gif";
 
     public static final String FILE = "prolog_file.gif";
+    public static final String PROLOG_FILE_TRANSPARENT = "prolog_file_transparent.png";
     public static final String PROLOG_FILE_CONSULTED = "prolog_file_consulted.png";
     public static final String PROLOG_FILE_EXTERNAL = "prolog_file_external.gif";
     

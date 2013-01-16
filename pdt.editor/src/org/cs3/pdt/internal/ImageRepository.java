@@ -83,7 +83,10 @@ public class ImageRepository {
     
     public static final String PROLOG_FOLDER_CONSULTED = "prolog_folder_consulted.png";
     
-    public final static String PROLOG_FILE_EXTERNAL = "prolog_file_external.gif";
+    public final static String PROLOG_FILE_EXTERNAL_NOT_LINKED = "prolog_file_external.gif";
+    public final static String PROLOG_FILE_EXTERNAL = "prolog_file_external.png";
+    public final static String PROLOG_FILE_EXTERNAL_CONSULTED = "prolog_file_external_consulted.png";
+    public final static String PROLOG_FILE_EXTERNAL_CONSULTED_OLD = "prolog_file_external_consulted_old.png";
 
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
 	

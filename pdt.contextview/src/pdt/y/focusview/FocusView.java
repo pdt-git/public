@@ -13,8 +13,6 @@
 
 package pdt.y.focusview;
 
-import java.util.List;
-
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -23,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
@@ -73,7 +72,8 @@ public class FocusView extends ViewPart {
 	private Composite viewContainer;
 	private Label info;
 	private String infoText = "", statusText = "";
-	private FocusViewCoordinator focusViewCoordinator;
+	private ViewCoordinatorBase focusViewCoordinator;
+	private boolean navigationEnabled = false;
 	
 	public FocusView() {
 		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
@@ -82,10 +82,6 @@ public class FocusView extends ViewPart {
 				updateCurrentFocusView();	
 			}
 		});
-	}
-	
-	public GraphPIFLoader createGraphPIFLoader(PDTGraphView pdtGraphView) {
-		return  new GraphPIFLoader(pdtGraphView);
 	}
 	
 	@Override
@@ -111,11 +107,15 @@ public class FocusView extends ViewPart {
 		
 		initButtons(parent);
 		
-		focusViewCoordinator = new FocusViewCoordinator(this);
+		focusViewCoordinator = createViewCoordinator();
 		String currentPath = getCurrentFilePath();
 		if (currentPath != null) {
 			focusViewCoordinator.swichFocusView(currentPath);
 		}
+	}
+
+	protected ViewCoordinatorBase createViewCoordinator() {
+		return new FocusViewCoordinator(this);
 	}
 
 	private String getCurrentFilePath() {
@@ -158,6 +158,21 @@ public class FocusView extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 		
+		toolBarManager.add(new ToolBarAction("Navigation", 
+				ImageRepository.getImageDescriptor(ImageRepository.MOVE)) {
+
+				@Override
+					public int getStyle() {
+						return IAction.AS_CHECK_BOX;
+					}
+			
+				@Override
+				public void performAction() {
+					navigationEnabled = !navigationEnabled;
+					setChecked(navigationEnabled);
+					focusViewCoordinator.currentFocusView.recalculateMode();
+				}
+			});
 		
 		toolBarManager.add(new ToolBarAction("Update", "WARNING: Current layout will be rearranged!", 
 				ImageRepository.getImageDescriptor(ImageRepository.REFRESH)) {
@@ -297,12 +312,16 @@ public class FocusView extends ViewPart {
 		    }
 		}.schedule();
 	}
+
+	public boolean isNavigationModeEnabled() {
+		return navigationEnabled;
+	}
 	
 	@Override
 	public void dispose() {
 		super.dispose();
 //		PDTPlugin.getDefault().removeSelectionChangedListener(focusViewCoordinator);
-		getSite().getWorkbenchWindow().getPartService().removePartListener(focusViewCoordinator);
+//		getSite().getWorkbenchWindow().getPartService().removePartListener(focusViewCoordinator);
 	}
 	
 	public class FocusViewControl extends SwingControl {
@@ -310,28 +329,24 @@ public class FocusView extends ViewPart {
 		private final String FOCUS_VIEW_IS_OUTDATED = "[FocusView is outdated]";
 		
 		private final PDTGraphView pdtGraphView;
-		private final GraphPIFLoader pifLoader;
-		private final String filePath;
+		private final GraphPIFLoaderBase pifLoader;
 		
 		private boolean isDirty = false;
 		
-		public FocusViewControl(String filePath) {
-			super(getViewContainer(), SWT.NONE); 
+		public FocusViewControl(PDTGraphView pdtGraphView, GraphPIFLoaderBase pifLoader) {
+			super(getViewContainer(), SWT.NONE);
 			
-			this.filePath = filePath;
-			
-			this.pdtGraphView = new PDTGraphView();
-			
-			this.pifLoader = createGraphPIFLoader(pdtGraphView);
+			this.pdtGraphView = pdtGraphView;
+			this.pifLoader = pifLoader;
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
 			pdtGraphView.addViewMode(new HoverTrigger(getShell()));
-		}	
-		
-		public String getFilePath() {
-			return filePath;
 		}
 		
+		public void recalculateMode() {
+			this.pdtGraphView.recalculateMode();
+		}
+
 		public boolean isEmpty() {
 			return pdtGraphView.isEmpty();
 		}
@@ -345,15 +360,15 @@ public class FocusView extends ViewPart {
 			return isDirty;
 		}
 		
-		public List<String> getDependencies() {
-			return pifLoader.getDependencies();
+		public GraphPIFLoaderBase getPifLoader() {
+			return pifLoader;
 		}
 
 		public void reload() {
-			Job j = new Job("PDT Context View: Reloading Graph") {
+			Job j = new Job("Reloading Graph") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					pifLoader.queryPrologForGraphFacts(filePath);
+					pifLoader.loadGraph();
 					setStatusText("");
 					
 					isDirty = false;

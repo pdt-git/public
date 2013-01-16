@@ -264,10 +264,10 @@ public class PDTCommonUtil {
 		}
 		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
 		if (adjustOffset) {
+			int end = UIUtils.logicalToPhysicalOffset(document, start + length);
 			start = UIUtils.logicalToPhysicalOffset(document, start);
+			length = end - start;
 		}
-		int end = start + length;
-		length = end - start;
 		ISelection selection = new TextSelection(document, start, length);
 		editor.getEditorSite().getSelectionProvider().setSelection(selection);
 	}

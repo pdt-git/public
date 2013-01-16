@@ -24,12 +24,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -77,34 +73,14 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 	@Override
 	public void start(BundleContext bundleContext) throws Exception{
 		super.start(bundleContext);
-		Job collectEntryPoints = new Job("Collect entry points") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
-						@Override
-						public boolean visit(IResource resource) throws CoreException {
-							if (resource instanceof IFile) {
-								IFile file = (IFile) resource;
-								if ("true".equalsIgnoreCase(file.getPersistentProperty(ENTRY_POINT_KEY))) {
-									addEntryPoint(file);
-								}
-							}
-							return true;
-						}
-					});
-				} catch (CoreException e) {
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		collectEntryPoints.schedule();
 		reconfigureDebugOutput();
 		IPropertyChangeListener debugPropertyChangeListener = new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
 				try {
-					PDTCommonPlugin.this.reconfigureDebugOutput();
+					if (!"console.no.focus".equals(e.getProperty())) {
+						PDTCommonPlugin.this.reconfigureDebugOutput();
+					}
 				} catch (FileNotFoundException e1) {
 					Debug.report(e1);
 				}
@@ -161,18 +137,43 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 	/* 
 	 * entry point handling
 	 */
-	private Set<IFile> entryPoints = new HashSet<IFile>();
+	private Set<IFile> entryPoints;
 
 	public void addEntryPoint(IFile f) {
+		collectEntryPointsIfNeeded();
 		entryPoints.add(f);
 	}
 
 	public void removeEntryPoint(IFile f) {
+		collectEntryPointsIfNeeded();
 		entryPoints.remove(f);
 	}
 
 	public Set<IFile> getEntryPoints() {
+		collectEntryPointsIfNeeded();
 		return entryPoints;
+	}
+
+	private void collectEntryPointsIfNeeded() {
+		if (entryPoints == null) {
+			entryPoints = new HashSet<IFile>();
+			try {
+				ResourcesPlugin.getWorkspace().getRoot().accept(new IResourceVisitor() {
+					@Override
+					public boolean visit(IResource resource) throws CoreException {
+						if (resource instanceof IFile) {
+							IFile file = (IFile) resource;
+							if ("true".equalsIgnoreCase(file.getPersistentProperty(ENTRY_POINT_KEY))) {
+								entryPoints.add(file);
+							}
+						}
+						return true;
+					}
+				});
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+		}
 	}
 
 	private Set<OptionProviderListener> decorators = new HashSet<OptionProviderListener>();

@@ -145,6 +145,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private Color COLOR_WARNING;
 	private Color COLOR_INFO;
 	private Color COLOR_DEBUG;
+	
+	private static final String[] extensions = {".pl", ".plt", ".pro"};
 
 	private KeyListener keyListener = new KeyListener() {
 		@Override
@@ -305,13 +307,20 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 							return;
 						}
 						String link = control.getTextRange(selectedStyle.start, selectedStyle.length);
-						if (link.contains("pl:")) {
-							String[] fileAndLine = link.split("pl:");
+						String containedExtension = null;
+						for (String extension : extensions) {
+							if (link.contains(extension + ":")) {
+								containedExtension = extension;
+								break;
+							}
+						}
+						if (containedExtension != null) {
+							String[] fileAndLine = link.split(containedExtension + ":");
 							if (fileAndLine.length >= 2) {
-								if (new File(fileAndLine[0] + "pl").exists()) {
+								if (new File(fileAndLine[0] + containedExtension).exists()) {
 									try {
 										int line = Integer.parseInt(fileAndLine[1]);
-										PDTCommonUtil.selectInEditor(line, fileAndLine[0] + "pl", true);
+										PDTCommonUtil.selectInEditor(line, fileAndLine[0] + containedExtension, true);
 									} catch(Exception ex){
 									}
 								}
@@ -1119,7 +1128,15 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	
 	private Position getLocation(String line) {
 		try {
-			int end = line.indexOf(".pl:");
+			int end = -1;
+			String containedExtension = null;
+			for (String extension : extensions) {
+				end = line.indexOf(extension + ":");
+				if (end > -1) {
+					containedExtension = extension;
+					break;
+				}
+			}
 			if (end == -1) {
 				int lgtFileStart = line.indexOf("in file ");
 				if (lgtFileStart == -1) {
@@ -1128,7 +1145,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					return new Position(lgtFileStart, line.length() - lgtFileStart);
 				}
 			} else {
-				end += 4;
+				end += containedExtension.length() + 1;
 			}
 			int start = getReferencedFilename(line);
 			while(line.charAt(end) >= '0' && line.charAt(end) <= '9')
