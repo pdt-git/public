@@ -80,9 +80,9 @@ public class GraphModel {
 			if (dataHolder.isModule(node)) {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleGroupNodeRealizer));
 			} else if (dataHolder.isFile(node)) {
-				graph.setRealizer(node, filegroupNodeRealizer);
-			} else if (dataHolder.isFileNode(node)) {
 				graph.setRealizer(node, new FileGroupNodeRealizer(filegroupNodeRealizer));
+			} else if (dataHolder.isFileNode(node)) {
+				graph.setRealizer(node, new FileNodeRealizer(fileNodeRealizer));
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}

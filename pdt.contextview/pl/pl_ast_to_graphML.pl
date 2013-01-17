@@ -147,14 +147,6 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
     
 write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     
-    forall(
-    	(
-    		nth1(Id, ProjectFilePaths, FilePath),
-    		relative_path(ProjectPath, FilePath, RelativePath)
-    	),	
-		write_file_as_element(OutStream, Id, RelativePath)
-    ),
-    
 	findall((SourceFile, TargetFile),
 		(
 			member(SourceFile, ProjectFilePaths),
@@ -162,6 +154,16 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     		loaded_by(TargetFile, SourceFile, _, _)
     	),
     	FoundDependencies
+    ),
+    
+    forall(
+    	(
+    		nth1(Id, ProjectFilePaths, FilePath),
+    		relative_path(ProjectPath, FilePath, RelativePath),
+    		module_property(ModuleName, file(FilePath)),
+    		file_node_type(FilePath, FoundDependencies, FileType)
+    	),	
+		write_file_as_element(OutStream, Id, RelativePath, ModuleName, FileType)
     ),
 
     forall(
@@ -172,6 +174,14 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     	),
 		write_load_edge(OutStream, SId, TId)
     ).
+    
+file_node_type(FilePath, Dependencies, 'top') :-
+    not(member((_, FilePath), Dependencies)), !.
+    
+file_node_type(FilePath, Dependencies, 'bottom') :-
+    not(member((FilePath, _), Dependencies)), !.
+    
+file_node_type(_, _, 'intermediate') :- !.
     
 file_paths([], []).
 file_paths([Id|IdTail], [Path|PathTail]) :-

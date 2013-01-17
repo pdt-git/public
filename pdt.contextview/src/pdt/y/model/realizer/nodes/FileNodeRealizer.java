@@ -73,8 +73,10 @@ public class FileNodeRealizer extends ShapeNodeRealizer{
 	@Override
 	protected void paintNode(Graphics2D gfx) {
 
-		if (model.getDataHolder().isEntryPointFile(getNode())) {
+		if (model.getDataHolder().isTopFile(getNode())) {
 			setFillColor(Color.GREEN);
+		} else if(model.getDataHolder().isBottomFile(getNode())) {
+			setFillColor(Color.ORANGE);
 		} else {
 			setFillColor(Color.YELLOW);
 		}
