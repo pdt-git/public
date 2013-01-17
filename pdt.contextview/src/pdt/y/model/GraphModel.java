@@ -17,6 +17,7 @@ import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
 import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
+import pdt.y.model.realizer.nodes.FileNodeRealizer;
 import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
 import y.base.Edge;
 import y.base.EdgeMap;
@@ -38,6 +39,7 @@ public class GraphModel {
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer predicateNodeRealizer;
+	private FileNodeRealizer fileNodeRealizer;
 	private GroupNodeRealizer filegroupNodeRealizer;
 	private GroupNodeRealizer moduleGroupNodeRealizer;
 	
@@ -54,6 +56,7 @@ public class GraphModel {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
 		predicateNodeRealizer = new PredicateNodeRealizer(this);
+		fileNodeRealizer = new FileNodeRealizer(this);
 		setDefaultNodeRealizer(predicateNodeRealizer);
 	}
 	
@@ -77,6 +80,8 @@ public class GraphModel {
 			if (dataHolder.isModule(node)) {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleGroupNodeRealizer));
 			} else if (dataHolder.isFile(node)) {
+				graph.setRealizer(node, filegroupNodeRealizer);
+			} else if (dataHolder.isFileNode(node)) {
 				graph.setRealizer(node, new FileGroupNodeRealizer(filegroupNodeRealizer));
 			} else {
 				// no realizer to set because it is already bound to default realizer

@@ -32,6 +32,7 @@ public class GraphDataHolder {
 	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
+	private DataMap fileTypeMap = Maps.createHashedDataMap();
 	private DataMap kindMap = Maps.createHashedDataMap();
 	private DataMap functorMap = Maps.createHashedDataMap();
 	private DataMap arityMap = Maps.createHashedDataMap();
@@ -42,7 +43,6 @@ public class GraphDataHolder {
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
 	private DataMap unusedLocal = Maps.createHashedDataMap();
-	private DataMap fileTypeMap = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -212,7 +212,7 @@ public class GraphDataHolder {
 	}
 	
 	private String getFileNodeText(Node node) {
-		return functorMap.get(node).toString();
+		return fileNameMap.get(node).toString();
 	}
 
 	private String getPredicateText(Node node) {

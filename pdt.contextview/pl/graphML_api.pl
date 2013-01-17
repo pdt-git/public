@@ -92,8 +92,8 @@ write_file_as_element(Stream, FileId, FileName):-
     open_node(Stream,FileId),
     write_data(Stream,'kind','file_node'),
     write_data(Stream,'id',FileId),
-    write_data(Stream, 'file_type', 'entry_point'),
-    write_data(Stream,'functor',FileName),
+    write_data(Stream,'fileNodeName',FileName),
+    write_data(Stream, 'fileNodeType', 'entry_point'),
     close_node(Stream).	
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
@@ -163,6 +163,7 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
     nl(OutStream),
+    
     write(OutStream, '<key id="module" for="node" attr.name="module" attr.type="string">'),
     nl(OutStream),
   	write(OutStream, '    <default>user</default>'),
