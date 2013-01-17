@@ -37,11 +37,8 @@
  ).
  
 :- use_module(library(lists)).
-:- use_module(pdt_support).
 
-:- if(pdt_support(doc_collect)).
 :- doc_collect(true).
-:- endif.
 
 :- module_transparent(call_and_report_contex_module/1).
 call_and_report_contex_module(Goal) :- 

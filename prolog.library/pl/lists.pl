@@ -14,7 +14,7 @@
 
 % Date: 21.11.2005
 
-:- if(current_prolog_flag(dialect,swi)).
+:- if(pdt_support(remove_duplicates)).
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
@@ -22,7 +22,6 @@
     union_sorted/3,           % (+Set1,+Set2,?Union)! 
     union_order_preserving/3, % (+Set1,+Set2,?Union)!
     remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
-    remove_duplicates/2,      % (+List,?DuplicateFree)!
     list_sum/2,               % (+Numbers,?Total)!
     traverseList/3,           % (+List,+Stop,+Pred) is nondet
     list_to_disjunction/2,    % (+List,?Disjunction) is det.
@@ -41,6 +40,7 @@
     union_sorted/3,           % (+Set1,+Set2,?Union)! 
     union_order_preserving/3, % (+Set1,+Set2,?Union)!
     remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
+    remove_duplicates/2,      % (+List,?DuplicateFree)!
     list_sum/2,               % (+Numbers,?Total)!
     traverseList/3,           % (+List,+Stop,+Pred) is nondet
     list_to_disjunction/2,    % (+List,?Disjunction) is det.
@@ -220,7 +220,7 @@ remove_duplicates_sorted__([First|Rest], Previous, Result ) :-
    ).
 
 
-:- if(current_prolog_flag(dialect,swi)).
+:- if(\+ pdt_support(remove_duplicates)).
 /*
  * remove_duplicates(+List, ?DuplicateFree) is det
  *

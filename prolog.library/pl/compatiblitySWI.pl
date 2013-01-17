@@ -30,16 +30,17 @@
 :- dynamic output_to_memory/3.
 :- dynamic output_to_memory_key/1.
 
-:- if(current_prolog_flag(dialect,swi)).
+:- if( \+ pdt_support(table)).
 table(X) :-
-	write('WARNING: tabling not supported in SWI ('),
+	write('WARNING: tabling not supported in current prolog version (predicate: '),
 	write(X),
 	write(')\n').
-:- elif(current_prolog_flag(dialect,yap)).
-doc_collect(_) :-
-	writeln('WARNING: doc_collect not supported in YAP').
 :- endif.
 
+:- if(\+ pdt_support(doc_collect)).
+doc_collect(_) :-
+	writeln('WARNING: doc_collect not supported in current prolog version').
+:- endif.
 
 :- if(\+ pdt_support(flag)).
 flag(Name, _, _) :-
@@ -417,7 +418,7 @@ get_single_char(A) :-
  *
  * Disables tty control char-wise read on the windows platform.
  */
-:- if(current_prolog_flag(dialect,swi)).
+:- if(pdt_support(tty_control)).
 disable_tty_control :- 
   current_prolog_flag(windows,_T) -> 
   set_prolog_flag(tty_control,false). 
