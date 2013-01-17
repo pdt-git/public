@@ -619,6 +619,21 @@ calling_metaarg(database).
 %	Walk a call to a meta-predicate.   This walks all meta-arguments
 %	labeled with an integer, ^ or //.
 
+walk_meta_call(I, assert(_), Meta, M, [ArgPos|_], OTerm) :-
+	!,
+	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+walk_meta_call(I, asserta(_), Meta, M, [ArgPos|_], OTerm) :-
+	!,
+	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+walk_meta_call(I, assertz(_), Meta, M, [ArgPos|_], OTerm) :-
+	!,
+	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+walk_meta_call(I, retract(_), Meta, M, [ArgPos|_], OTerm) :-
+	!,
+	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+walk_meta_call(I, retractall(_), Meta, M, [ArgPos|_], OTerm) :-
+	!,
+	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
 walk_meta_call(I, Head, Meta, M, [ArgPos|ArgPosList], OTerm) :-
 	arg(I, Head, AS), !,
 	walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm),
