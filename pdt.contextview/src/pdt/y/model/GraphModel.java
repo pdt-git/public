@@ -17,8 +17,8 @@ import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
 import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.nodes.FileNodeRealizer;
 import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
+import pdt.y.model.realizer.nodes.UMLClassNodeRealizer;
 import y.base.Edge;
 import y.base.EdgeMap;
 import y.base.Node;
@@ -39,15 +39,18 @@ public class GraphModel {
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer predicateNodeRealizer;
-	private FileNodeRealizer fileNodeRealizer;
+	private UMLClassNodeRealizer fileNodeRealizer;
 	private GroupNodeRealizer filegroupNodeRealizer;
 	private GroupNodeRealizer moduleGroupNodeRealizer;
 	
 	private EdgeRealizer callEdgeRealizer;
 	private EdgeRealizer loadEdgeRealizer;
+	
+	private int nodesMaxWidth;
+	private int nodesMedianWidth;
+	private int nodesHeight;
 
 	public GraphModel(){
-		  
 		initNodeRealizers();
 		initEdgeRealizers();
 	}
@@ -56,7 +59,7 @@ public class GraphModel {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
 		predicateNodeRealizer = new PredicateNodeRealizer(this);
-		fileNodeRealizer = new FileNodeRealizer(this);
+		fileNodeRealizer = new UMLClassNodeRealizer(this);
 		setDefaultNodeRealizer(predicateNodeRealizer);
 	}
 	
@@ -80,9 +83,11 @@ public class GraphModel {
 			if (dataHolder.isModule(node)) {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleGroupNodeRealizer));
 			} else if (dataHolder.isFile(node)) {
-				graph.setRealizer(node, filegroupNodeRealizer);
-			} else if (dataHolder.isFileNode(node)) {
 				graph.setRealizer(node, new FileGroupNodeRealizer(filegroupNodeRealizer));
+			} else if (dataHolder.isFileNode(node)) {
+				UMLClassNodeRealizer newNodeRealizer = new UMLClassNodeRealizer(fileNodeRealizer);
+				graph.setRealizer(node, newNodeRealizer);
+				newNodeRealizer.initialize();
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}
@@ -92,7 +97,14 @@ public class GraphModel {
 	private void categorizeEdges() {
 		for (Edge edge: graph.getEdgeArray()) {
 			if (dataHolder.isLoadingEdge(edge)) {
-				graph.setRealizer(edge, new LoadEdgeRealizer(loadEdgeRealizer));
+				LoadEdgeRealizer newLoadEdgeRealizer = new LoadEdgeRealizer(loadEdgeRealizer);
+				graph.setRealizer(edge, newLoadEdgeRealizer);
+				
+				String exports = dataHolder.getExports(edge);
+				if (!exports.equals("[]")) {
+					newLoadEdgeRealizer.setLabelText(exports.split(",").length + "");
+				}
+				
 			} else if (dataHolder.isCallEdge(edge)) {
 				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
 				graph.setRealizer(edge, newCallEdgeRealizer);
@@ -140,6 +152,30 @@ public class GraphModel {
 		return dataHolder.getLabelTextForNode(node);
 	}
 	
+	public int getNodesMaxWidth() {
+		return nodesMaxWidth;
+	}
+
+	public void setNodesMaxWidth(int nodesMaxWidth) {
+		this.nodesMaxWidth = nodesMaxWidth;
+	}
+
+	public int getNodesMedianWidth() {
+		return nodesMedianWidth;
+	}
+
+	public void setNodesMedianWidth(int nodesMedianWidth) {
+		this.nodesMedianWidth = nodesMedianWidth;
+	}
+
+	public int getNodesHeight() {
+		return nodesHeight;
+	}
+
+	public void setNodesHeight(int nodesHeight) {
+		this.nodesHeight = nodesHeight;
+	}
+
 	public void assignPortsToEdges() {
 		EdgeMap sourceMap = graph.createEdgeMap();
 		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
@@ -150,7 +186,6 @@ public class GraphModel {
 		}
 		graph.addDataProvider(PortConstraintKeys.SOURCE_PORT_CONSTRAINT_KEY, sourceMap);
 	}
-
 
 	public int getFrequency(Edge edge) {
 		return dataHolder.getFrequency(edge);

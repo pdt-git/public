@@ -26,12 +26,17 @@ public class GraphDataHolder {
 	private static final String PREDICATE = "predicate";
 	private static final String CALL = "call";
 	private static final String LOADING = "loading";
-	private static final String FILE_ENTRY_POINT = "entry_point";
+	private static final String TOP_FILE = "top";
+	@SuppressWarnings("unused")
+	private static final String INTERMEDIATE_FILE = "intermediate";
+	private static final String BOTTOM_FILE = "bottom";
 
 	// Addition data:
 	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
+	private DataMap fileNodeNameMap = Maps.createHashedDataMap();
+	private DataMap fileNodePathMap = Maps.createHashedDataMap();
 	private DataMap fileTypeMap = Maps.createHashedDataMap();
 	private DataMap kindMap = Maps.createHashedDataMap();
 	private DataMap functorMap = Maps.createHashedDataMap();
@@ -43,6 +48,7 @@ public class GraphDataHolder {
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
 	private DataMap unusedLocal = Maps.createHashedDataMap();
+	private DataMap moduleExportsMap = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -56,6 +62,14 @@ public class GraphDataHolder {
 
 	public DataMap getFileNameMap() {
 		return fileNameMap;
+	}
+	
+	public DataMap getFileNodeNameMap() {
+		return fileNodeNameMap;
+	}
+	
+	public DataMap getFileNodePathMap() {
+		return fileNodePathMap;
 	}
 
 	public DataMap getKindMap() {
@@ -99,6 +113,10 @@ public class GraphDataHolder {
 		return unusedLocal;
 	}
 	
+	public DataMap getModuleExportsMap() {
+		return moduleExportsMap;
+	}
+	
 	public DataMap getFileTypeMap() {
 		return fileTypeMap;
 	}
@@ -131,6 +149,14 @@ public class GraphDataHolder {
 		DataMap kindMap = getKindMap();
 		String kind = kindMap.get(edge).toString();
 		return kind.equals(CALL);
+	}
+	
+	public String getExports(Node node) {
+		return (String)moduleExportsMap.get(node);
+	}
+	
+	public String getExports(Edge edge) {
+		return (String)moduleExportsMap.get(edge);
 	}
 
 	public boolean isLoadingEdge(Edge edge) {
@@ -181,17 +207,21 @@ public class GraphDataHolder {
 		return (Boolean)returnNode;
 	}
 
-	public boolean isEntryPointFile(Node node) {
-		DataMap typeMap = getFileTypeMap();
-		String type = typeMap.get(node).toString();
-		return type.equals(FILE_ENTRY_POINT);
+	public boolean isTopFile(Node node) {
+		String type = fileTypeMap.get(node).toString();
+		return type.equals(TOP_FILE);
+	}
+	
+	public boolean isBottomFile(Node node) {
+		String type = fileTypeMap.get(node).toString();
+		return type.equals(BOTTOM_FILE);
 	}
 
 	public String getLabelTextForNode(Node node) {
 		String labelText;
 		if (isModule(node)) {
 			labelText = getModuleName(node);
-		} else if (isFile(node))  {
+		} else if (isFile(node)) {
 			labelText = getFileName(node);
 		} else if (isFileNode(node)) {
 			labelText = getFileNodeText(node);
@@ -212,7 +242,7 @@ public class GraphDataHolder {
 	}
 	
 	private String getFileNodeText(Node node) {
-		return fileNameMap.get(node).toString();
+		return fileNodeNameMap.get(node).toString();
 	}
 
 	private String getPredicateText(Node node) {

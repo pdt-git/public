@@ -147,14 +147,6 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
     
 write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     
-    forall(
-    	(
-    		nth1(Id, ProjectFilePaths, FilePath),
-    		relative_path(ProjectPath, FilePath, RelativePath)
-    	),	
-		write_file_as_element(OutStream, Id, RelativePath)
-    ),
-    
 	findall((SourceFile, TargetFile),
 		(
 			member(SourceFile, ProjectFilePaths),
@@ -163,15 +155,73 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     	),
     	FoundDependencies
     ),
+    
+    forall(
+    	(
+    		nth1(Id, ProjectFilePaths, FilePath),
+    		file_node_name(FilePath, ProjectPath, FileNodeName),
+    		file_node_type(FilePath, FoundDependencies, FileType),
+    		file_exports(FilePath, Exports)
+    	),	
+		write_file_as_element(OutStream, Id, FilePath, FileNodeName, FileType, Exports)
+    ),
 
     forall(
     	(
     		member((S, T), FoundDependencies),
     		nth1(SId, ProjectFilePaths, S),
-    		nth1(TId, ProjectFilePaths, T)
+    		nth1(TId, ProjectFilePaths, T),
+    		file_exports(T, Exports)
     	),
-		write_load_edge(OutStream, SId, TId)
+		write_load_edge(OutStream, SId, TId, Exports)
     ).
+   
+file_exports(FilePath, Exports) :-
+    module_property(ModuleName, file(FilePath)),
+    module_property(ModuleName, exports(Exports)), !.
+file_exports(_, []).
+
+file_imports(File, Exports) :-
+    module_of_file(File,Module), 
+    module_imports_from(M1,M2,Preds).
+    
+module_imports_from(M1,M2,Preds) :-   
+    setof( Head,
+           predicate_property(M1:Head, imported_from(M2)),
+           Preds).
+
+% Module consults all Preds from File:
+module_consults_from(Module,File,Preds) :-
+    setof( Head,
+           module_consults_from__(Module,File,Head),
+           Preds).
+
+% Module consults Head from File:
+module_consults_from__(Module,File,Head) :-
+    module_of_file(ModuleFile,Module),
+    declared_in_module(Module, Head),
+    predicate_property(Module:Head, file(File)),
+    File \== ModuleFile.
+
+
+file_node_name(FilePath, _, ModuleName) :-
+	module_property(ModuleName, file(FilePath)), !.
+		
+file_node_name(FilePath, ProjectPath, RelativePath)	:-
+	relative_path(ProjectPath, FilePath, RelativePath), !.
+	
+file_node_name(FilePath, _, FilePath).
+    
+    
+file_node_type(FilePath, Dependencies, 'top') :-
+    not(member((_, FilePath), Dependencies)), !.
+        
+    
+file_node_type(FilePath, Dependencies, 'bottom') :-
+    not(member((FilePath, _), Dependencies)), !.
+    
+file_node_type(_, _, 'intermediate') :- !.
+    
     
 file_paths([], []).
 file_paths([Id|IdTail], [Path|PathTail]) :-

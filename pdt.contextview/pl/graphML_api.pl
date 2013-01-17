@@ -15,9 +15,9 @@
 						finish_writing/1,
 						write_file/6,
 						write_call_edge/3,
-						write_load_edge/3,
+						write_load_edge/4,
 						write_predicates/3,
-						write_file_as_element/3]).
+						write_file_as_element/6]).
 
 :- ensure_loaded(pdt_builder_analyzer('../pdt_factbase')).
 :- use_module(pdt_builder_analyzer(edge_counter)).
@@ -88,12 +88,14 @@ write_load_edges(Stream):-
 	    )
 	).
     
-write_file_as_element(Stream, FileId, FileName):-
+write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, Exports):-
     open_node(Stream,FileId),
     write_data(Stream,'kind','file_node'),
     write_data(Stream,'id',FileId),
-    write_data(Stream,'fileNodeName',FileName),
-    write_data(Stream, 'fileNodeType', 'entry_point'),
+    write_data(Stream,'file_node_name', ModuleName),
+    write_data(Stream,'file_node_path', FilePath),
+    write_data(Stream, 'file_node_type', FileType),
+    write_data(Stream, 'exports', Exports),
     close_node(Stream).	
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
@@ -134,10 +136,11 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 */	close_node(Stream).	
 
     
-write_load_edge(Stream, LoadingFileId, FileId):-
-    open_edge(Stream, LoadingFileId, FileId),
-    %write_data(Stream, 'kind', 'loading'),
-    write_data(Stream, 'kind', 'call'),
+write_load_edge(Stream, LoadingFileId, FileId, Exports):-
+    open_edge(Stream, FileId, LoadingFileId),
+    write_data(Stream, 'kind', 'loading'),
+    write_data(Stream, 'exports', Exports),
+    %write_data(Stream, 'kind', 'call'),
 	close_edge(Stream).
     
 write_call_edge(Stream,SourceId,TargetId):-
@@ -163,7 +166,12 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
     nl(OutStream),
-    
+    write(OutStream, '<key id="file_node_name" for="node" attr.name="file_node_name" attr.type="string"/>'),
+    nl(OutStream),
+    write(OutStream, '<key id="file_node_path" for="node" attr.name="file_node_path" attr.type="string"/>'),
+    nl(OutStream),
+    write(OutStream, '<key id="file_node_type" for="node" attr.name="file_node_type" attr.type="string"/>'),
+    nl(OutStream),
     write(OutStream, '<key id="module" for="node" attr.name="module" attr.type="string">'),
     nl(OutStream),
   	write(OutStream, '    <default>user</default>'),
@@ -218,6 +226,9 @@ write_graphML_ast_keys(OutStream):-
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),
+    write(OutStream, '<key id="exports" for="node" attr.name="exports" attr.type="string" />'),
+    nl(OutStream),
+    write(OutStream, '<key id="exports" for="edge" attr.name="exports" attr.type="string" />'),
     nl(OutStream),
     nl(OutStream).
     

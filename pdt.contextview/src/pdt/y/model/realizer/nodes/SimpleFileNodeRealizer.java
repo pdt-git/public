@@ -24,7 +24,7 @@ import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 
 
-public class FileNodeRealizer extends ShapeNodeRealizer{
+public class SimpleFileNodeRealizer extends ShapeNodeRealizer{
 
 	public static final int INITIAL_STATE = 0;
 	public static final int TRANSITION_STATE = 1;
@@ -35,7 +35,7 @@ public class FileNodeRealizer extends ShapeNodeRealizer{
 	private int state;
 	private GraphModel	 model;
 
-	public FileNodeRealizer(GraphModel  model){
+	public SimpleFileNodeRealizer(GraphModel  model){
 		super(ShapeNodeRealizer.ROUND_RECT);
 		state = TRANSITION_STATE;
 		this.model= model;
@@ -43,12 +43,12 @@ public class FileNodeRealizer extends ShapeNodeRealizer{
 		setFillColor(Color.WHITE);
 	}
 
-	public FileNodeRealizer(NodeRealizer r)
+	public SimpleFileNodeRealizer(NodeRealizer r)
 	{
 		super(r);
-		if(r instanceof FileNodeRealizer)
+		if(r instanceof SimpleFileNodeRealizer)
 		{
-			FileNodeRealizer sr = (FileNodeRealizer)r;
+			SimpleFileNodeRealizer sr = (SimpleFileNodeRealizer)r;
 			state = sr.state;
 			model	= sr.model;
 		}
@@ -73,8 +73,10 @@ public class FileNodeRealizer extends ShapeNodeRealizer{
 	@Override
 	protected void paintNode(Graphics2D gfx) {
 
-		if (model.getDataHolder().isEntryPointFile(getNode())) {
+		if (model.getDataHolder().isTopFile(getNode())) {
 			setFillColor(Color.GREEN);
+		} else if(model.getDataHolder().isBottomFile(getNode())) {
+			setFillColor(Color.ORANGE);
 		} else {
 			setFillColor(Color.YELLOW);
 		}
@@ -100,7 +102,7 @@ public class FileNodeRealizer extends ShapeNodeRealizer{
 	@Override
 	public NodeRealizer createCopy(NodeRealizer r)
 	{
-		return new FileNodeRealizer(r);
+		return new SimpleFileNodeRealizer(r);
 	}
 
 }

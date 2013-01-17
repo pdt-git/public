@@ -13,8 +13,18 @@
 
 package pdt.y.model.realizer.nodes;
 
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
+
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import pdt.y.model.GraphModel;
 import pdt.y.preferences.PredicateAppearancePreferences;
@@ -73,7 +83,15 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 	
 	@Override
+	protected void calcUnionRectImpl(Rectangle2D arg0) {
+		
+		super.calcUnionRectImpl(arg0);
+	}
+	
+	@Override
 	protected void paintNode(Graphics2D gfx) {
+		
+		initializeBoxSize(gfx);
 		
 		byte myStyle;
 		if (model.getDataHolder().isDynamicNode(getNode())) {
@@ -105,6 +123,32 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		}
 		
 		super.paintNode(gfx);
+	}
+	
+	private void initializeBoxSize(Graphics2D gfx) {
+
+		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
+		
+		int width = 0;
+		int height = PredicateLayoutPreferences.getNumberOfLines() * fontmtx.getHeight() + 20;
+		
+		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
+		
+		
+		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
+			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
+		}
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
+			width = model.getNodesMaxWidth();
+		}
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
+			width = model.getNodesMedianWidth();
+		}
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
+			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(getNode()), gfx).getWidth() + 14;
+		}
+		
+		setSize(width, height);
 	}
 
 	public int getState() {

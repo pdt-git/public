@@ -13,12 +13,6 @@
 
 package pdt.y.main;
 
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.FontMetrics;
@@ -30,14 +24,11 @@ import java.util.Arrays;
 
 import javax.swing.JPanel;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import pdt.y.focusview.ViewBase;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
-import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
@@ -220,12 +211,14 @@ public class PDTGraphView extends  JPanel {
 
 	private void updateView() {
 		
+		if (graph.getNodeArray().length == 0)
+			return;
+		
 		Graphics gfx = view.getGraphics();
 		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
 		
 		int i = 0;
 		int[] lengths = new int[graph.getNodeArray().length];
-		
 		
 		for (Node node: graph.getNodeArray()) {
 			String text = createFirstLabel(node);
@@ -236,9 +229,11 @@ public class PDTGraphView extends  JPanel {
 		
 		Arrays.sort(lengths);
 		
-		for (Node node: graph.getNodeArray()) {
-			initializeBoxSize(node, lengths[i - 1], lengths[i / 2], gfx, fontmtx);
-		}
+		int maxWidth = lengths[i - 1];
+		int medianWidth = lengths[i / 2];
+		graphModel.setNodesMaxWidth(maxWidth);
+		graphModel.setNodesMedianWidth(medianWidth);
+		
 		calcLayout();
 	}
 
@@ -251,30 +246,6 @@ public class PDTGraphView extends  JPanel {
 		String labelText = graphModel.getLabelTextForNode(node);
 		graph.setLabelText(node,labelText);
 		return labelText;
-	}
-
-	protected void initializeBoxSize(Node node, int maximumValue, int medianValue, Graphics gfx, FontMetrics fontmtx) {
-		
-		int width = 0;
-		int height = PredicateLayoutPreferences.getNumberOfLines() * fontmtx.getHeight() + 20;
-		
-		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
-		
-		
-		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
-			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
-		}
-		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
-			width = maximumValue;
-		}
-		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
-			width = medianValue;
-		}
-		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
-			width = (int)fontmtx.getStringBounds(graphModel.getLabelTextForNode(node), gfx).getWidth() + 14;
-		}
-		
-		graph.setSize(node, width, height);
 	}
 
 	public void calcLayout() {

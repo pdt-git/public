@@ -11,7 +11,7 @@ import org.eclipse.core.resources.IProject;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.GraphModel;
-import pdt.y.model.realizer.nodes.FileNodeRealizer;
+import pdt.y.model.realizer.nodes.SimpleFileNodeRealizer;
 
 public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 	
@@ -24,7 +24,7 @@ public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 	@Override
 	protected void doLoadFile() throws MalformedURLException {
 		GraphModel graphModel = new GraphMLReader().readFile(helpFile.toURI().toURL());
-		graphModel.setDefaultNodeRealizer(new FileNodeRealizer(graphModel));
+		graphModel.setDefaultNodeRealizer(new SimpleFileNodeRealizer(graphModel));
 		graphModel.categorizeData();
 		graphModel.assignPortsToEdges();
 		
