@@ -94,6 +94,7 @@ source file is passed into _Where.
 		    infer_meta_predicates:oneof([false,true,all])=true,
 		    trace_reference:any=(-),
 		    on_trace:callable,		% Call-back on trace hits
+		    on_reiterate:callable,
 						% private stuff
 		    clause,			% Processed clause
 		    caller,			% Head of the caller
@@ -192,6 +193,11 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	    print_message(informational,
 			  codewalk(reiterate(New, Iteration, CPU))),
 	    succ(Iteration, Iteration2),
+	    walk_option_on_reiterate(OTerm, Closure),
+	    (	callable(Closure)
+	    ->	catch(Closure, _, true)
+	    ;	true
+	    ),
 	    pdt_prolog_walk_code(Iteration2, Options)
 	;   true
 	).
