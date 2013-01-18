@@ -57,7 +57,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 	(	var(Functor), var(SearchMod) -> !, fail ; true),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
-	result(ReferencingGoal, ClauseRef, Termposition, _),
+	retract(result(ReferencingGoal, ClauseRef, Termposition, _)),
 	clause_property(ClauseRef, file(RefFile)),
 	clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
 	clause_property(ClauseRef, line_count(Line)),
@@ -72,8 +72,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 	;	Termposition = Start-End
 	),
 	format(atom(Position), '~w-~w', [Start, End]),
-	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
-	retract(result(ReferencingGoal, ClauseRef, Termposition, _)).
+	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]).
 
 perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	(	nonvar(Functor)

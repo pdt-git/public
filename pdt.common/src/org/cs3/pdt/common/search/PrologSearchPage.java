@@ -23,6 +23,7 @@ import org.cs3.pdt.common.queries.ModuleDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.queries.ReferencesSearchQueryDirect;
+import org.cs3.pdt.common.queries.UndefinedCallsSearchQuery;
 import org.cs3.prolog.common.Util;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jface.dialogs.Dialog;
@@ -54,8 +55,13 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\")";
     private static final String ENTITY_DEF_HINT = "Search for entities (e.g. module \"lists\")";
     private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
+    private static final String UNDEFINED_HINT = "Search for undefined calls";
     
-    private static final String[][] hints = new String[][]{{ENTITY_DEF_HINT, ENTITY_REF_HINT}, {PREDICATE_DEF_HINT, PREDICATE_REF_HINT}};
+    private static final String[][] hints = new String[][]{
+    	{ENTITY_DEF_HINT, ENTITY_REF_HINT},
+    	{PREDICATE_DEF_HINT, PREDICATE_REF_HINT},
+    	{UNDEFINED_HINT, UNDEFINED_HINT}
+    };
 
 	private static class SearchPatternData {
         private static final String SEARCH_FOR = "searchFor";
@@ -118,6 +124,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     // search for
     private final static int MODULE = 0;
     private final static int PREDICATE = 1;
+    private final static int UNDEFINED_CALL = 2;
 
     // limit to
     private final static int DECLARATIONS = 0;
@@ -181,7 +188,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             } else {
             	searchQuery = new GlobalDefinitionsSearchQuery(goal);
             }
-        } else {
+        } else if (searchFor == MODULE) {
         	boolean exactMatch = data.isExactMatch();
 			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
             
@@ -190,6 +197,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             } else {
             	searchQuery = new ModuleDefinitionsSearchQuery(goal);
             }
+        } else if (searchFor == UNDEFINED_CALL) {
+        	searchQuery = new UndefinedCallsSearchQuery(new Goal("", "", "", -1, ""));
         }
 
         NewSearchUI.activateSearchResultView();
@@ -258,13 +267,22 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             Button button = searchForRadioButtons[i];
             button.setSelection(searchFor == getIntData(button));
         }
-        updateLabel(searchFor, getLimitTo());
+        updateLabelAndEnablement(searchFor, getLimitTo());
     }
 
-	private void updateLabel(int searchFor, int limitTo) {
-		if (searchFor >= 0 && searchFor < 2 && limitTo >= 0 && limitTo < 2) {
+	private void updateLabelAndEnablement(int searchFor, int limitTo) {
+		if (searchFor >= 0 && searchFor < 3 && limitTo >= 0 && limitTo < 2) {
         	explainingLabel.setText(hints[searchFor][limitTo]);
+    		setSearchFieldsEnablement(searchFor < 2);
         }
+	}
+	
+	private void setSearchFieldsEnablement(boolean enablement) {
+		patternList.setEnabled(enablement);
+		exactMatchCheckBox.setEnabled(enablement);
+		for (Button limitToButton : limitToRadioButtons) {
+			limitToButton.setEnabled(enablement);
+		}
 	}
 
     private void setLimitTo(int limitTo) {
@@ -272,7 +290,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             Button button = limitToRadioButtons[i];
             button.setSelection(limitTo == getIntData(button));
         }
-        updateLabel(getSearchFor(), limitTo);
+        updateLabelAndEnablement(getSearchFor(), limitTo);
     }
 
     private void setExactMatch(boolean exactMatch) {
@@ -429,6 +447,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         searchForRadioButtons = new Button[] {
                 createButton(result, SWT.RADIO, "Entity", MODULE, false),
                 createButton(result, SWT.RADIO, "Predicate", PREDICATE, true),
+                createButton(result, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false)
         };
         
         for (Button button : searchForRadioButtons) {
@@ -436,7 +455,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				@Override
         		public void widgetSelected(SelectionEvent e) {
 					if (e.getSource() instanceof Button) {
-						updateLabel(getIntData((Button) e.getSource()), getLimitTo());
+						updateLabelAndEnablement(getIntData((Button) e.getSource()), getLimitTo());
 						updateOKStatus();
 					}
 				}
@@ -460,7 +479,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				@Override
         		public void widgetSelected(SelectionEvent e) {
 					if (e.getSource() instanceof Button) {
-						updateLabel(getSearchFor(), getIntData((Button) e.getSource()));
+						updateLabelAndEnablement(getSearchFor(), getIntData((Button) e.getSource()));
 						updateOKStatus();
 					}
 				}

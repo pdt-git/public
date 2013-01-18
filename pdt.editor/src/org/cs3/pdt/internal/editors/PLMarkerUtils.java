@@ -20,10 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTPredicates;
-import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.quickfix.PDTMarker;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
@@ -61,7 +58,7 @@ public class PLMarkerUtils {
 	}
 
 	public static void addMarkers(PrologInterface pif, List<String> allConsultedFiles, IProgressMonitor monitor) {
-		monitor.beginTask("Update markers", 3);
+		monitor.beginTask("Update markers", 2);
 		PrologSession session =null;
 		try {
 			session = pif.getSession();
@@ -71,7 +68,7 @@ public class PLMarkerUtils {
 			addMarkersForErrorsAndWarnings(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
 			monitor.subTask("Update Prolog Smells Detectors");
 			addMarkersForSmellDetectors(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
-			addMarkersUndefinedCalls(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
+//			addMarkersUndefinedCalls(session, new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK), fileNameToIFiles);
 //			session.queryOnce("deactivate_warning_and_error_tracing");
 		} catch (PrologException e) {
 			// this may be a reload_timeout_reached exception
@@ -165,33 +162,33 @@ public class PLMarkerUtils {
 		monitor.done();
 	}
 	
-	private static void addMarkersUndefinedCalls(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologException, PrologInterfaceException {
-		monitor.beginTask("Add markers for undefined calls", 1);
-		boolean doUndefinedCallAnalysis = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_UNDEFINED_CALL_ANALYSIS);
-		if (doUndefinedCallAnalysis) {
-			List<Map<String, Object>> results = session.queryAll(bT(PDTCommonPredicates.FIND_UNDEFINED_CALL, "Goal", "File", "Start", "End"));
-			for (Map<String, Object> result : results) {
-				try {
-					IFile file = getFile(result.get("File").toString(), fileNameToIFiles);
-					if (file == null) {
-						continue;
-					}
-					IDocument doc = UIUtils.getDocument(file);
-					int start = UIUtils.logicalToPhysicalOffset(doc, Integer.parseInt(result.get("Start").toString()));
-					int end = UIUtils.logicalToPhysicalOffset(doc, Integer.parseInt(result.get("End").toString()));
-					IMarker marker = file.createMarker(IMarker.PROBLEM);
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-					MarkerUtilities.setCharStart(marker, start);
-					MarkerUtilities.setCharEnd(marker, end);
-					marker.setAttribute(IMarker.MESSAGE, "Undefined call: " + result.get("Goal").toString());
-				} catch (Exception e) {
-					Debug.report(e);
-					continue;
-				}
-			}
-		}
-		monitor.done();
-	}
+//	private static void addMarkersUndefinedCalls(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologException, PrologInterfaceException {
+//		monitor.beginTask("Add markers for undefined calls", 1);
+//		boolean doUndefinedCallAnalysis = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_UNDEFINED_CALL_ANALYSIS);
+//		if (doUndefinedCallAnalysis) {
+//			List<Map<String, Object>> results = session.queryAll(bT(PDTCommonPredicates.FIND_UNDEFINED_CALL, "Goal", "File", "Start", "End"));
+//			for (Map<String, Object> result : results) {
+//				try {
+//					IFile file = getFile(result.get("File").toString(), fileNameToIFiles);
+//					if (file == null) {
+//						continue;
+//					}
+//					IDocument doc = UIUtils.getDocument(file);
+//					int start = UIUtils.logicalToPhysicalOffset(doc, Integer.parseInt(result.get("Start").toString()));
+//					int end = UIUtils.logicalToPhysicalOffset(doc, Integer.parseInt(result.get("End").toString()));
+//					IMarker marker = file.createMarker(IMarker.PROBLEM);
+//					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+//					MarkerUtilities.setCharStart(marker, start);
+//					MarkerUtilities.setCharEnd(marker, end);
+//					marker.setAttribute(IMarker.MESSAGE, "Undefined call: " + result.get("Goal").toString());
+//				} catch (Exception e) {
+//					Debug.report(e);
+//					continue;
+//				}
+//			}
+//		}
+//		monitor.done();
+//	}
 
 	private static void collectIFilesForFileNames(List<String> fileNames, Map<String, IFile> fileNameToIFiles) {
 		for (String fileName : fileNames) {

@@ -178,7 +178,7 @@ pdt_prolog_walk_code(Options) :-
 pdt_prolog_walk_code(Iteration, Options) :-
 	statistics(cputime, CPU0),
 	make_walk_option(Options, OTerm, _),
-	walk_option_call_kind(OTerm, kind(call)),
+	walk_option_call_kind(OTerm, call),
 	forall(( walk_option_module(OTerm, M),
 		 current_module(M),
 		 scan_module(M, OTerm)
@@ -484,7 +484,7 @@ undefined(Goal, TermPos, OTerm) :-
 	;   Why = undefined
 	),
 	\+ \+ (
-		walk_option_call_kind(OTerm, Kind), setarg(1, Kind, undefined),
+		set_call_kind_of_walk_option(undefined, OTerm),
 		print_reference(Goal, TermPos, Why, OTerm)
 	).
 
@@ -531,8 +531,7 @@ print_reference(Goal, _, Why, OTerm) :-
 print_reference2(Goal, From, trace, OTerm) :-
 	walk_option_on_trace(OTerm, Closure),
 	walk_option_caller(OTerm, Caller),
-	walk_option_call_kind(OTerm, CallKindTerm),
-	arg(1, CallKindTerm, CallKind),
+	walk_option_call_kind(OTerm, CallKind),
 	nonvar(Closure),
 	call(Closure, Goal, Caller, From, CallKind), !.
 print_reference2(Goal, From, Why, _OTerm) :-
@@ -652,26 +651,26 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	->  arg(I, Meta, MA),
 	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
 	    \+ \+ (
-	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, metacall),
+	    	set_call_kind_of_walk_option(metacall, OTerm),
 	    	walk_called(Goal, M, ArgPosEx, OTerm)
 	    )
 	;   AS == (^)
 	->  arg(I, Meta, MA),
 	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
 	    \+ \+ (
-	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, metacall),
+	    	set_call_kind_of_walk_option(metacall, OTerm),
 	    	walk_called(Goal, MG, ArgPosEx, OTerm)
 	    )
 	;   AS == (//)
 	->  arg(I, Meta, DCG),
 	    \+ \+ (
-	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, metacall),
+	    	set_call_kind_of_walk_option(metacall, OTerm),
 		    walk_dcg_body(DCG, M, ArgPos, OTerm)
 		)
 	;   AS == database
 	->	arg(I, Meta, MA),
 	    \+ \+ (
-	    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, database),
+	    	set_call_kind_of_walk_option(database, OTerm),
 			walk_called(MA, M, ArgPos, OTerm)
 		)
 	;	arg(I, Meta, Arg),
@@ -683,7 +682,7 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	->	(	functor_arity_for(AS, Arg, Functor, Arity)
 		->	extend(Functor, Arity, Goal, ArgPos, ArgPosEx, OTerm),
 		    \+ \+ (
-		    	walk_option_call_kind(OTerm, Kind), setarg(1, Kind, AS),
+		    	set_call_kind_of_walk_option(AS, OTerm),
 				walk_called(Goal, M, ArgPosEx, OTerm)
 			)
 		;	true

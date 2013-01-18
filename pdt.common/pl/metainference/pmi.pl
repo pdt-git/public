@@ -356,7 +356,7 @@ annotate_atom_concat(A, B, Annotation) :-
 annotate_atom_concat(A, B, Annotation) :-
 	var(A), atomic(B), !,
 	annotate(add_suffix(B, Annotation), A).
-annotate_atom_concat(_, _, _, _).
+annotate_atom_concat(_, _, _).
 
 annotate_meta_vars_in_body(Term =.. List, _Module) :-
 	!,
