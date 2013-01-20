@@ -15,8 +15,8 @@ import org.eclipse.search.ui.text.Match;
 
 public class UndefinedCallsSearchQuery extends PDTSearchQuery {
 	
-	public UndefinedCallsSearchQuery(Goal goal) {
-		super(goal);
+	public UndefinedCallsSearchQuery() {
+		super(new Goal("", "", "", -1, ""));
 	}
 
 	@Override

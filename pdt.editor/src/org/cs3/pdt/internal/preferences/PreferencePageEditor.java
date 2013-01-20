@@ -51,8 +51,6 @@ public class PreferencePageEditor extends FieldEditorPreferencePage implements I
 
 		addField(new BooleanFieldEditor(PDT.PREF_CONSULT_ON_SAVE, "Consult file on save", getFieldEditorParent()));
 
-		addField(new BooleanFieldEditor(PDT.PREF_UNDEFINED_CALL_ANALYSIS, "Search for undefined calls after consulting Prolog files", getFieldEditorParent()));
-		
 //		// A comma separated list of filter ids that should be activated at startup
 //		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline",
 //				getFieldEditorParent());

@@ -58,8 +58,6 @@ public final class PDT {
 
 	public static final String PREF_CONSULT_ON_SAVE = "pdt.consult.on.save";
 	
-	public static final String PREF_UNDEFINED_CALL_ANALYSIS = "pdt.undefined.call.analysis";
-
 }
 
 

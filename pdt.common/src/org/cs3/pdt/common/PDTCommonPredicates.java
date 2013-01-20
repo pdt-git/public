@@ -38,6 +38,7 @@ public class PDTCommonPredicates {
 	
 	// call analysis
 	public static final String FIND_UNDEFINED_CALL = "pdt_call_analysis:find_undefined_call";
+	public static final String FIND_DEAD_PREDICATE = "pdt_call_analysis:find_dead_predicate";
 
 }
 

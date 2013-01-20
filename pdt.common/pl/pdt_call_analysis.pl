@@ -1,4 +1,4 @@
-:- module(pdt_call_analysis, [find_undefined_call/7, ensure_call_graph_generated/0, ensure_dead_predicates_up_to_date/0, dead_predicate/5]).
+:- module(pdt_call_analysis, [find_undefined_call/7, ensure_call_graph_generated/0, find_dead_predicate/6]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(apply)).
@@ -16,6 +16,7 @@ assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
     !.
 assert_result(_,_,_,_).
 
+%% find_undefined_call(Module, Name, Arity, File, Start, End, PropertyList) 
 find_undefined_call(Module, Name, Arity, File, Start, End, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
 	retractall(result(_, _, _, _)),
 	pdt_prolog_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
@@ -86,51 +87,60 @@ assert_edge_(M1,F1,N1, M2,F2,N2) :-
 	assertz(calls(M1,F1,N1, M2,F2,N2, 1)).
 
 :- multifile(pdt_reload:pdt_reload_listener/1).
-
 pdt_reload:pdt_reload_listener(_Files) :-
 	(	first_run
 	->	true
-	;	setof(Module, (
-			pdt_reload:reloaded_file(File),
-			(	module_property(Module, file(File))
-			*->	true
-			;	Module = user
+	;	setof(Module, Head^(
+			(	pdt_reload:reloaded_file(File),
+				source_file(Head, File),
+				module_of_head(Head, Module)
+			;	retract(module_to_clear(Module))
 			)
-		),Modules),
+		), Modules),
+		writeln(Modules),
 		maplist(clear, Modules),
 		maplist(generate_call_graph, Modules)
-	),
-	retractall(dead_predicate_search_up_to_date).
-
-:- dynamic(dead_predicate_search_up_to_date/0).
-
-dead_predicate(Module, Functor, Arity, File, Line) :-
-	is_dead(Module, Functor, Arity),
-	once(accept_possible_dead_predicate(Module:Functor/Arity)),
-	functor(Head, Functor, Arity),
-	(	predicate_property(Module:Head, multifile)
-	->	defined_in_files(Module, Functor, Arity, Locations),
-		member(File-LineAndClauseRefs, Locations),
-		setof(Line, Ref^(member(location(Line, Ref), LineAndClauseRefs)), SortedLines),
-		SortedLines = [Line|_]
-	;	predicate_property(Module:Head, file(File)),
-		predicate_property(Module:Head, line_count(Line))
 	).
 
-:- multifile(entry_point/1).
-%:- dynamic(entry_point/1).
+:- multifile(user:message_hook/3).
+:- dynamic(user:message_hook/3).
+user:message_hook(load_file(start(_, file(_, File))),_,_) :-
+	\+ first_run,
+	source_file(Head, File),
+	module_of_head(Head, Module),
+	\+ module_to_clear(Module),
+	assertz(module_to_clear(Module)),
+	fail.
 
-:- multifile(accept_possible_dead_predicate/1).
-%:- dynamic(accept_possible_dead_predicate/1).
+module_of_head(Module:_Head, Module) :- !.
+module_of_head(_Head, user).
+
+:- dynamic(module_to_clear/1).
+
+%% find_dead_predicate(Module, Functor, Arity, File, Location, PropertyList) 
+%
+find_dead_predicate(Module, Functor, Arity, File, Location, PropertyList) :-
+	find_dead_predicates,
+	!,
+	is_dead(Module, Functor, Arity),
+	once(accept_dead_predicate(Module:Functor/Arity)),
+	defined_in_files(Module, Functor, Arity, Locations),
+	member(File-LineAndClauseRefs, Locations),
+    member(location(Line, Ref), LineAndClauseRefs),
+    properties_for_predicate(Module, Functor, Arity, PropertyList0),
+    (	pdt_search:head_position_of_clause(Ref, Position)
+    ->	Location = Position,
+    	PropertyList = [line(Line)|PropertyList0]
+    ;	Location = Line,
+    	PropertyList = PropertyList0
+    ).
+
+:- multifile(entry_point/1).
+
+:- multifile(accept_dead_predicate/1).
 
 :- dynamic(is_called/3).
 :- dynamic(is_dead/3).
-
-ensure_dead_predicates_up_to_date :-
-	dead_predicate_search_up_to_date,
-	!.
-ensure_dead_predicates_up_to_date :-
-	find_dead_predicates.
 
 find_dead_predicates :-
 	ensure_call_graph_generated,
@@ -141,9 +151,7 @@ find_dead_predicates :-
 		(	atomic(E)
 		->	% module
 			(	E == user
-			->	current_predicate(_, user:H),
-				\+ predicate_property(user:H, imported_from(_)),
-				functor(H, F, A)
+			->	declared_in_module(user, F, A, user)
 			;	module_property(E, exports(ExportList)),
 				member(F/A, ExportList)
 			)
@@ -151,18 +159,24 @@ find_dead_predicates :-
 			E = M:F/A
 		)
 	),(
-		assertz(is_called(M, F, A)),
-		follow_call_edge(M, F, A)
-	)),
-	forall((
-		declared_in_module(M, F, A, M),
-		\+ is_called(M, F, A)
-	),(
-		(	is_dead(M, F, A)
+		(	is_called(M, F, A)
 		->	true
-		;	assertz(is_dead(M, F, A))
+		;	assertz(is_called(M, F, A)),
+			follow_call_edge(M, F, A)
 		)
-	)).
+	)),
+	(	is_called(_, _, _)
+	->	forall((
+			declared_in_module(M, F, A, M),
+			\+ is_called(M, F, A)
+		),(
+			(	is_dead(M, F, A)
+			->	true
+			;	assertz(is_dead(M, F, A))
+			)
+		))
+	;	true
+	).
 
 follow_call_edge(M, F, A) :-
 	calls(M2, F2, A2, M, F, A, _),

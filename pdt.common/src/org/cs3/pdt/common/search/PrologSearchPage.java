@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.pdt.common.queries.DeadPredicatesSearchQuery;
 import org.cs3.pdt.common.queries.GlobalDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.ModuleDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
@@ -56,11 +57,13 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private static final String ENTITY_DEF_HINT = "Search for entities (e.g. module \"lists\")";
     private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
     private static final String UNDEFINED_HINT = "Search for undefined calls";
+    private static final String DEAD_HINT = "Search for dead predicates";
     
     private static final String[][] hints = new String[][]{
     	{ENTITY_DEF_HINT, ENTITY_REF_HINT},
     	{PREDICATE_DEF_HINT, PREDICATE_REF_HINT},
-    	{UNDEFINED_HINT, UNDEFINED_HINT}
+    	{UNDEFINED_HINT, UNDEFINED_HINT},
+    	{DEAD_HINT, DEAD_HINT}
     };
 
 	private static class SearchPatternData {
@@ -125,6 +128,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private final static int MODULE = 0;
     private final static int PREDICATE = 1;
     private final static int UNDEFINED_CALL = 2;
+    private final static int DEAD_PREDICATE = 3;
 
     // limit to
     private final static int DECLARATIONS = 0;
@@ -198,7 +202,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             	searchQuery = new ModuleDefinitionsSearchQuery(goal);
             }
         } else if (searchFor == UNDEFINED_CALL) {
-        	searchQuery = new UndefinedCallsSearchQuery(new Goal("", "", "", -1, ""));
+        	searchQuery = new UndefinedCallsSearchQuery();
+        } else if (searchFor == DEAD_PREDICATE) {
+        	searchQuery = new DeadPredicatesSearchQuery();
         }
 
         NewSearchUI.activateSearchResultView();
@@ -271,7 +277,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
 	private void updateLabelAndEnablement(int searchFor, int limitTo) {
-		if (searchFor >= 0 && searchFor < 3 && limitTo >= 0 && limitTo < 2) {
+		if (searchFor >= 0 && searchFor < 4 && limitTo >= 0 && limitTo < 2) {
         	explainingLabel.setText(hints[searchFor][limitTo]);
     		setSearchFieldsEnablement(searchFor < 2);
         }
@@ -447,7 +453,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         searchForRadioButtons = new Button[] {
                 createButton(result, SWT.RADIO, "Entity", MODULE, false),
                 createButton(result, SWT.RADIO, "Predicate", PREDICATE, true),
-                createButton(result, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false)
+                createButton(result, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false),
+                createButton(result, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false)
         };
         
         for (Button button : searchForRadioButtons) {

@@ -102,15 +102,8 @@ inferred_meta(M:Head, MetaSpec) :-
 %	predicate Head. Derived meta-predicates are   collected and made
 %	available through inferred_meta_predicate/2.
 
-%infer_meta(Head, MetaSpec) :-
-%	inferred_meta(Head, MetaSpec), !.
 infer_meta(M:Head, MetaSpec) :-
 	infer_meta(M:Head, MetaSpec, _).
-infer_meta(_:Head, _, _) :-
-  	(	functor(Head, aformat,_)
-	->	fail
-	;	fail
-	).
 
 infer_meta(M:Head, MetaSpec, NewOrUpdated) :-
 	predicate_property(M:Head, imported_from(From)), !,

@@ -620,19 +620,19 @@ calling_metaarg(database).
 
 walk_meta_call(I, assert(_), Meta, M, [ArgPos|_], OTerm) :-
 	!,
-	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+	walk_database_arg(I, Meta, M, ArgPos, OTerm).
 walk_meta_call(I, asserta(_), Meta, M, [ArgPos|_], OTerm) :-
 	!,
-	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+	walk_database_arg(I, Meta, M, ArgPos, OTerm).
 walk_meta_call(I, assertz(_), Meta, M, [ArgPos|_], OTerm) :-
 	!,
-	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+	walk_database_arg(I, Meta, M, ArgPos, OTerm).
 walk_meta_call(I, retract(_), Meta, M, [ArgPos|_], OTerm) :-
 	!,
-	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+	walk_database_arg(I, Meta, M, ArgPos, OTerm).
 walk_meta_call(I, retractall(_), Meta, M, [ArgPos|_], OTerm) :-
 	!,
-	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
+	walk_database_arg(I, Meta, M, ArgPos, OTerm).
 walk_meta_call(I, Head, Meta, M, [ArgPos|ArgPosList], OTerm) :-
 	arg(I, Head, AS), !,
 	walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm),
@@ -640,6 +640,13 @@ walk_meta_call(I, Head, Meta, M, [ArgPos|ArgPosList], OTerm) :-
 	walk_meta_call(I2, Head, Meta, M, ArgPosList, OTerm).
 walk_meta_call(_, _, _, _, _, _).
 
+walk_database_arg(I, Meta, _M, _ArgPos, _OTerm) :-
+	arg(I, Meta, Arg),
+	nonvar(Arg),
+	Arg = (_ :- _),
+	!.
+walk_database_arg(I, Meta, M, ArgPos, OTerm) :-
+	walk_meta_call_arg(database, I, Meta, M, ArgPos, OTerm).
 walk_meta_call_arg([], _I, _Meta, _M, _ArgPos, _OTerm) :-
 	!.
 walk_meta_call_arg([ArgSpec|ArgSpecs], I, Meta, M, ArgPos, OTerm) :-
