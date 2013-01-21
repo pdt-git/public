@@ -106,6 +106,9 @@ source file is passed into _Where.
 :- thread_local
 	multifile_predicate/3.		% Name, Arity, Module
 
+:- dynamic(first_run/0).
+first_run.
+
 %%	pdt_prolog_walk_code(+Options) is det.
 %
 %	Walk over all loaded (user) Prolog code. The following code is
@@ -170,6 +173,13 @@ source file is passed into _Where.
 %
 %	  @compat OnTrace was called using Caller-Location in older
 %		  versions.
+
+pdt_prolog_walk_code(Options) :-
+	first_run,
+	!,
+	retractall(first_run),
+	pdt_prolog_walk_code(1, []),
+	pdt_prolog_walk_code(Options).
 
 pdt_prolog_walk_code(Options) :-
 	meta_options(is_meta, Options, QOptions),

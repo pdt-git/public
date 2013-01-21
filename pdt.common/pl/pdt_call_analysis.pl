@@ -1,9 +1,11 @@
-:- module(pdt_call_analysis, [find_undefined_call/7, ensure_call_graph_generated/0, find_dead_predicate/6]).
+:- module(pdt_call_analysis, [find_undefined_call/7, ensure_call_graph_generated/0, find_dead_predicate/6, find_undeclared_meta_predicate/7]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(apply)).
 :- use_module(library(lists)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
+:- use_module('metainference/pmi').
+:- use_module(pdt_entry_points).
 
 :- dynamic(result/4).
 
@@ -97,7 +99,6 @@ pdt_reload:pdt_reload_listener(_Files) :-
 			;	retract(module_to_clear(Module))
 			)
 		), Modules),
-		writeln(Modules),
 		maplist(clear, Modules),
 		maplist(generate_call_graph, Modules)
 	).
@@ -147,17 +148,7 @@ find_dead_predicates :-
 	retractall(is_called(_, _, _)),
 	retractall(is_dead(_, _, _)),
 	forall((
-		entry_point(E),
-		(	atomic(E)
-		->	% module
-			(	E == user
-			->	declared_in_module(user, F, A, user)
-			;	module_property(E, exports(ExportList)),
-				member(F/A, ExportList)
-			)
-		;	% predicate
-			E = M:F/A
-		)
+		entry_point_predicate(M, F, A)
 	),(
 		(	is_called(M, F, A)
 		->	true
@@ -178,6 +169,25 @@ find_dead_predicates :-
 	;	true
 	).
 
+entry_point_predicate(M, F, A) :-
+	entry_point(M), % module
+	atomic(M),
+	(	M == user
+	->	declared_in_module(user, F, A, user)
+	;	module_property(M, exports(ExportList)),
+		member(F/A, ExportList)
+	).
+entry_point_predicate(M, F, A) :-
+	entry_point(M:F/A). % predicate
+entry_point_predicate(M, F, A) :-
+	pdt_entry_point(File),
+	(	module_property(M, file(File))
+	*->	module_property(M, exports(ExportList)),
+		member(F/A, ExportList)
+	;	source_file(Head, File),
+		functor(Head, F, A)
+	).
+
 follow_call_edge(M, F, A) :-
 	calls(M2, F2, A2, M, F, A, _),
 	\+ is_called(M2, F2, A2),
@@ -185,3 +195,22 @@ follow_call_edge(M, F, A) :-
 	follow_call_edge(M2, F2, A2),
 	fail.
 follow_call_edge(_, _, _).
+
+%% find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, File, Line, PropertyList)
+find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, File, Line, [label(MetaSpec)|PropertyList]) :-
+	pdt_prolog_walk_code([]),
+	!,
+	declared_in_module(Module, Name, Arity, Module),
+	functor(Head, Name, Arity),
+	\+ predicate_property(Module:Head, built_in),
+%	\+ predicate_property(Module:Head, multifile),
+	inferred_meta(Module:Head, MetaSpec),
+	predicate_property(Module:Head, line_count(Line)),
+	(	predicate_property(Module:Head, meta_predicate(DeclaredMetaSpec))
+	->	DeclaredMetaSpec \== MetaSpec
+	;	true
+	),
+	properties_for_predicate(Module, Name, Arity, PropertyList),
+	member(file(File), PropertyList).
+
+

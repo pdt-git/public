@@ -7,23 +7,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
-public class DeadPredicatesSearchQuery extends PDTSearchQuery {
-
-	public DeadPredicatesSearchQuery() {
+public class MetaPredicatesSearchQuery extends PDTSearchQuery {
+	
+	public MetaPredicatesSearchQuery() {
 		super(new Goal("", "", "", -1, ""));
-		setSearchType("Dead predicates");
+		setSearchType("Undeclared or wrongly declared meta predicates");
 	}
-
+	
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		return bT(PDTCommonPredicates.FIND_DEAD_PREDICATE, "Module", "Name", "Arity", "File", "Location", "PropertyList");
+		return bT("find_undeclared_meta_predicate", "Module", "Name", "Arity", "MetaSpec", "File", "Line", "PropertyList");
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Match constructPrologMatchForAResult(Map<String, Object> m) throws IOException {
@@ -35,25 +34,16 @@ public class DeadPredicatesSearchQuery extends PDTSearchQuery {
 		} catch (NumberFormatException e) {}
 		
 		IFile file = findFile(m.get("File").toString());
-		String offsetOrLine = m.get("Location").toString();
+		int line = Integer.parseInt(m.get("Line").toString());
 
 		Object prop = m.get("PropertyList");
 		List<String> properties = null;
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}	
-		Match match = null;
-		if (offsetOrLine.indexOf("-") >= 0) {
-			String[] positions = offsetOrLine.split("-");
-			int offset = Integer.parseInt(positions[0]);
-			int length = Integer.parseInt(positions[1]) - offset;
-			match = createUniqueMatch(definingModule, functor, arity, file, offset, length, properties, "", "definition");
-		} else {
-			int line = Integer.parseInt(offsetOrLine);
-			match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", "definition");
-		}
+		Match match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", "definition");
 		
 		return match;
 	}
-
+	
 }

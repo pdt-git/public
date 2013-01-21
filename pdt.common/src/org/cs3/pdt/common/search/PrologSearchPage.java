@@ -20,6 +20,7 @@ import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.DeadPredicatesSearchQuery;
 import org.cs3.pdt.common.queries.GlobalDefinitionsSearchQuery;
+import org.cs3.pdt.common.queries.MetaPredicatesSearchQuery;
 import org.cs3.pdt.common.queries.ModuleDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
@@ -58,12 +59,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
     private static final String UNDEFINED_HINT = "Search for undefined calls";
     private static final String DEAD_HINT = "Search for dead predicates";
+    private static final String META_HINT = "Search for undeclared or wrongly declared meta predicates";
     
     private static final String[][] hints = new String[][]{
     	{ENTITY_DEF_HINT, ENTITY_REF_HINT},
     	{PREDICATE_DEF_HINT, PREDICATE_REF_HINT},
     	{UNDEFINED_HINT, UNDEFINED_HINT},
-    	{DEAD_HINT, DEAD_HINT}
+    	{DEAD_HINT, DEAD_HINT},
+    	{META_HINT, META_HINT}
     };
 
 	private static class SearchPatternData {
@@ -129,6 +132,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private final static int PREDICATE = 1;
     private final static int UNDEFINED_CALL = 2;
     private final static int DEAD_PREDICATE = 3;
+    private final static int META_PREDICATE = 4;
 
     // limit to
     private final static int DECLARATIONS = 0;
@@ -142,6 +146,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private final static String PAGE_NAME = "PrologSearchPage";
     private final static String STORE_HISTORY = "HISTORY";
     private final static String STORE_HISTORY_SIZE = "HISTORY_SIZE";
+	private static final int NUMBER_OF_SEARCH_FOR = 5;
+	private static final int NUMBER_OF_LIMIT_TO = 2;
 
     private final List<SearchPatternData> previousSearchPatterns = new ArrayList<SearchPatternData>();
 
@@ -205,10 +211,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         	searchQuery = new UndefinedCallsSearchQuery();
         } else if (searchFor == DEAD_PREDICATE) {
         	searchQuery = new DeadPredicatesSearchQuery();
+        } else if (searchFor == META_PREDICATE) {
+        	searchQuery = new MetaPredicatesSearchQuery();
         }
-
-        NewSearchUI.activateSearchResultView();
-        NewSearchUI.runQueryInForeground(null,searchQuery);
+        
+        if (searchQuery != null) {
+        	NewSearchUI.activateSearchResultView();
+        	NewSearchUI.runQueryInForeground(null,searchQuery);
+        }
         return true;
     }
 
@@ -277,7 +287,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
 	private void updateLabelAndEnablement(int searchFor, int limitTo) {
-		if (searchFor >= 0 && searchFor < 4 && limitTo >= 0 && limitTo < 2) {
+		if (searchFor >= 0 && searchFor < NUMBER_OF_SEARCH_FOR && limitTo >= 0 && limitTo < NUMBER_OF_LIMIT_TO) {
         	explainingLabel.setText(hints[searchFor][limitTo]);
     		setSearchFieldsEnablement(searchFor < 2);
         }
@@ -454,7 +464,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 createButton(result, SWT.RADIO, "Entity", MODULE, false),
                 createButton(result, SWT.RADIO, "Predicate", PREDICATE, true),
                 createButton(result, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false),
-                createButton(result, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false)
+                createButton(result, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false),
+                createButton(result, SWT.RADIO, "Meta Predicate", META_PREDICATE, false)
         };
         
         for (Button button : searchForRadioButtons) {
@@ -511,7 +522,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
     private boolean isValidSearchPattern() {
-        String pattern = getPattern();
+        if (getSearchFor() >= 2) {
+        	return true;
+        }
+    	String pattern = getPattern();
         if (pattern.length() == 0) {
             return false;
         } else if (getSearchFor() == MODULE) {

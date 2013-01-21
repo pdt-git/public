@@ -84,7 +84,7 @@ have incomplete or incorrect meta-predicate information.
 */
 
 
-%%	inferred_meta_predicate(:Head, ?MetaSpec) is nodet.
+%%	inferred_meta(:Head, ?MetaSpec) is nondet.
 %
 %	True when MetaSpec is an   inferred meta-predicate specification
 %	for Head.
@@ -96,7 +96,7 @@ inferred_meta(M:Head, MetaSpec) :-
 	inferred_meta_pred(Head, From, MetaSpec).
 
 
-%%	infer_meta_predicate(:Head, -MetaSpec) is semidet.
+%%	infer_meta(:Head, -MetaSpec) is semidet.
 %
 %	True  when  MetaSpec  is  a  meta-predicate  specifier  for  the
 %	predicate Head. Derived meta-predicates are   collected and made

@@ -153,7 +153,11 @@ public class PrologMatch extends Match{
 	
 	public String getLabel() {
 		if (label == null) {
-			if (isLineLocation) {
+			String labelProperty = PDTCommonUtil.getProperty("label", properties);
+			if (labelProperty != null) {
+				label = labelProperty;
+			} else {
+				if (isLineLocation) {
 //				String firstArgument = PDTCommonUtil.getProperty("first_argument", properties);
 //				if (firstArgument != null) {
 //					label = getLine() + ": " + Util.unquoteAtom(firstArgument);
@@ -165,8 +169,9 @@ public class PrologMatch extends Match{
 					buf.append(")");
 					label = buf.toString();
 //				}
-			} else {
-				label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
+				} else {
+					label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
+				}
 			}
 		}
 		return label;

@@ -17,6 +17,7 @@ public class UndefinedCallsSearchQuery extends PDTSearchQuery {
 	
 	public UndefinedCallsSearchQuery() {
 		super(new Goal("", "", "", -1, ""));
+		setSearchType("Undefined calls");
 	}
 
 	@Override
