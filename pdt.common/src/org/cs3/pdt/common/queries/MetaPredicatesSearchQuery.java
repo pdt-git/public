@@ -8,19 +8,27 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.search.ui.text.Match;
 
-public class MetaPredicatesSearchQuery extends PDTSearchQuery {
+public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	
-	public MetaPredicatesSearchQuery() {
-		super(new Goal("", "", "", -1, ""));
-		setSearchType("Undeclared or wrongly declared meta predicates");
+	private static final String ATTRIBUTE = "pdt.meta.predicate";
+	private static final String SMELL_NAME = "PDT_Quickfix";
+	private static final String QUICKFIX_DESCRIPTION = "PDT_QuickfixDescription";
+	private static final String QUICKFIX_ACTION = "PDT_QuickfixAction";
+
+	public MetaPredicatesSearchQuery(boolean createMarkers) {
+		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
+		setSearchType("Undeclared meta predicates");
 	}
 	
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		return bT("find_undeclared_meta_predicate", "Module", "Name", "Arity", "MetaSpec", "File", "Line", "PropertyList");
+		return bT("find_undeclared_meta_predicate", "Module", "Name", "Arity", "MetaSpec", "MetaSpecAtom", "File", "Line", "PropertyList", "Directive");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -43,6 +51,17 @@ public class MetaPredicatesSearchQuery extends PDTSearchQuery {
 		}	
 		Match match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", "definition");
 		
+		if (createMarkers && match != null) {
+			try {
+				String metaSpec = m.get("MetaSpecAtom").toString();
+				IMarker marker = createMarker(file, "Meta predicate: " + metaSpec, line);
+				marker.setAttribute(SMELL_NAME, "Meta Predicate");
+				marker.setAttribute(QUICKFIX_ACTION, m.get("Directive").toString());
+				marker.setAttribute(QUICKFIX_DESCRIPTION, "Declare meta predicate");
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+		}
 		return match;
 	}
 	

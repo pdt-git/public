@@ -57,9 +57,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\")";
     private static final String ENTITY_DEF_HINT = "Search for entities (e.g. module \"lists\")";
     private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
-    private static final String UNDEFINED_HINT = "Search for undefined calls";
-    private static final String DEAD_HINT = "Search for dead predicates";
-    private static final String META_HINT = "Search for undeclared or wrongly declared meta predicates";
+    private static final String UNDEFINED_HINT = "Search for all undefined calls";
+    private static final String DEAD_HINT = "Search for all predicates unreachable from entry points";
+    private static final String META_HINT = "Search for all undeclared meta predicates";
     
     private static final String[][] hints = new String[][]{
     	{ENTITY_DEF_HINT, ENTITY_REF_HINT},
@@ -71,20 +71,23 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
 	private static class SearchPatternData {
         private static final String SEARCH_FOR = "searchFor";
-        private static final String PATTERN2 = "pattern";
+        private static final String PATTERN = "pattern";
         private static final String LIMIT_TO = "limitTo";
         private static final String EXACT_MATCH = "exactMatch";
+        private static final String CREATE_MARKERS = "createMarkers";
 
         private final int searchFor;
         private final int limitTo;
         private final String pattern;
         private final boolean exactMatch;
+        private final boolean createMarkers;
 
-        public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch) {
+        public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch, boolean createMarkers) {
             this.searchFor = searchFor;
             this.limitTo = limitTo;
             this.pattern = pattern;
             this.exactMatch = exactMatch;
+            this.createMarkers = createMarkers;
         }
 
         public int getLimitTo() {
@@ -101,16 +104,21 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         public boolean isExactMatch() {
             return exactMatch;
         }
+        
+        public boolean isCreateMarkers() {
+        	return createMarkers;
+        }
 
         public void store(IDialogSettings settings) {
             settings.put(SEARCH_FOR, searchFor);
-            settings.put(PATTERN2, pattern);
+            settings.put(PATTERN, pattern);
             settings.put(LIMIT_TO, limitTo);
             settings.put(EXACT_MATCH, exactMatch);
+            settings.put(CREATE_MARKERS, createMarkers);
         }
 
         public static SearchPatternData create(IDialogSettings settings) {
-            String pattern = settings.get(PATTERN2);
+            String pattern = settings.get(PATTERN);
             if (pattern.length() == 0) {
                 return null;
             }
@@ -119,8 +127,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 int searchFor = settings.getInt(SEARCH_FOR);
                 int limitTo = settings.getInt(LIMIT_TO);
                 boolean exactMatch = settings.getBoolean(EXACT_MATCH);
+                boolean createMarkers = settings.getBoolean(CREATE_MARKERS);
 
-                return new SearchPatternData(searchFor, limitTo, pattern, exactMatch);
+                return new SearchPatternData(searchFor, limitTo, pattern, exactMatch, createMarkers);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -160,6 +169,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private Button[] searchForRadioButtons;
     private Button[] limitToRadioButtons;
     private Button exactMatchCheckBox;
+    private Button createMarkersCheckBox;
 	private Label explainingLabel;
 
     //---- Action Handling ------------------------------------------------
@@ -208,11 +218,11 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             	searchQuery = new ModuleDefinitionsSearchQuery(goal);
             }
         } else if (searchFor == UNDEFINED_CALL) {
-        	searchQuery = new UndefinedCallsSearchQuery();
+        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
         } else if (searchFor == DEAD_PREDICATE) {
-        	searchQuery = new DeadPredicatesSearchQuery();
+        	searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
         } else if (searchFor == META_PREDICATE) {
-        	searchQuery = new MetaPredicatesSearchQuery();
+        	searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
         }
         
         if (searchQuery != null) {
@@ -250,6 +260,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         return exactMatchCheckBox.getSelection();
     }
 
+    private boolean isCreateMarkers() {
+    	return createMarkersCheckBox.getSelection();
+    }
+    
     private Object[] getFunctorAndArity(String pattern) {
         if (pattern == null || pattern.isEmpty()) {
             return null;
@@ -293,12 +307,13 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         }
 	}
 	
-	private void setSearchFieldsEnablement(boolean enablement) {
-		patternList.setEnabled(enablement);
-		exactMatchCheckBox.setEnabled(enablement);
+	private void setSearchFieldsEnablement(boolean doPatternSearch) {
+		patternList.setEnabled(doPatternSearch);
+		exactMatchCheckBox.setEnabled(doPatternSearch);
 		for (Button limitToButton : limitToRadioButtons) {
-			limitToButton.setEnabled(enablement);
+			limitToButton.setEnabled(doPatternSearch);
 		}
+		createMarkersCheckBox.setEnabled(!doPatternSearch);
 	}
 
     private void setLimitTo(int limitTo) {
@@ -313,6 +328,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         exactMatchCheckBox.setSelection(exactMatch);
     }
 
+    private void setCreateMarkers(boolean createMarkers) {
+    	createMarkersCheckBox.setSelection(createMarkers);
+    }
+    
     private String[] getPreviousSearchPatterns() {
         // Search results are not persistent
         int patternCount = previousSearchPatterns.size();
@@ -341,20 +360,24 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
      * @return the pattern data
      */
     private SearchPatternData getPatternDataAndUpdatePatternHistory() {
-        String pattern = getPattern();
-        SearchPatternData match = findInPrevious(pattern);
-        if (match != null) {
-            previousSearchPatterns.remove(match);
-        }
-        match = new SearchPatternData(
-                getSearchFor(),
-                getLimitTo(),
-                pattern,
-                isExactMatch()
-        );
-
-        previousSearchPatterns.add(0, match); // insert on top
-        return match;
+    	String pattern = getPattern();
+        int searchFor = getSearchFor();
+        SearchPatternData data = new SearchPatternData(
+        		searchFor,
+        		getLimitTo(),
+        		pattern,
+        		isExactMatch(),
+        		isCreateMarkers()
+        		);
+    	if (searchFor < 2) {
+    		// search with pattern
+    		SearchPatternData match = findInPrevious(pattern);
+    		if (match != null) {
+    			previousSearchPatterns.remove(match);
+    		}
+    		previousSearchPatterns.add(0, data); // insert on top
+    	}
+        return data;
     }
 
     /*
@@ -402,15 +425,15 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         Label separator = new Label(result, SWT.NONE);
         separator.setVisible(false);
-        GridData data = new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
+        GridData data = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
         data.heightHint = convertHeightInCharsToPixels(1) / 3;
         separator.setLayoutData(data);
 
         Control searchFor = createSearchFor(result);
-        searchFor.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+        searchFor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         Control limitTo = createLimitTo(result);
-        limitTo.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+        limitTo.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
 
         setControl(result);
 
@@ -456,35 +479,53 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
     private Control createSearchFor(Composite parent) {
-        Group result = new Group(parent, SWT.NONE);
-        result.setText("Search For");
-        result.setLayout(new GridLayout(2, false));
+        Composite container = new Composite(parent, SWT.NONE);
+        container.setLayout(new GridLayout(1, true));
+    	
+        Group patternSearch = new Group(container, SWT.NONE);
+        patternSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        patternSearch.setText("Search For");
+        patternSearch.setLayout(new GridLayout(2, true));
 
+    	Group globalSearch = new Group(container, SWT.NONE);
+    	globalSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	globalSearch.setText("Search Globally For");
+    	globalSearch.setLayout(new GridLayout(2, true));
+        
         searchForRadioButtons = new Button[] {
-                createButton(result, SWT.RADIO, "Entity", MODULE, false),
-                createButton(result, SWT.RADIO, "Predicate", PREDICATE, true),
-                createButton(result, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false),
-                createButton(result, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false),
-                createButton(result, SWT.RADIO, "Meta Predicate", META_PREDICATE, false)
+                createButton(patternSearch, SWT.RADIO, "Entity", MODULE, false),
+                createButton(patternSearch, SWT.RADIO, "Predicate", PREDICATE, true),
+                createButton(globalSearch, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false),
+                createButton(globalSearch, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false),
+                createButton(globalSearch, SWT.RADIO, "Meta Predicate", META_PREDICATE, false)
         };
+        createMarkersCheckBox = createButton(globalSearch, SWT.CHECK, "Create Warnings", -1, true);
         
         for (Button button : searchForRadioButtons) {
         	button.addSelectionListener(new SelectionAdapter() {
 				@Override
         		public void widgetSelected(SelectionEvent e) {
 					if (e.getSource() instanceof Button) {
-						updateLabelAndEnablement(getIntData((Button) e.getSource()), getLimitTo());
+						Button button2 = (Button) e.getSource();
+						for (Button button3 : searchForRadioButtons) {
+							button3.setSelection(false);
+						}
+						button2.setSelection(true);
+						updateLabelAndEnablement(getIntData(button2), getLimitTo());
 						updateOKStatus();
 					}
 				}
 			});
         }
 
-        return result;
+        return container;
     }
 
     private Control createLimitTo(Composite parent) {
-        Group result = new Group(parent, SWT.NONE);
+        Composite container = new Composite(parent, SWT.NONE);
+        container.setLayout(new GridLayout(1, true));
+
+        Group result = new Group(container, SWT.NONE);
         result.setText("Limit To");
         result.setLayout(new GridLayout(2, false));
 
@@ -504,7 +545,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			});
         }
 
-        return result;
+        return container;
     }
 
     private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
@@ -558,6 +599,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         setSearchFor(data.getSearchFor());
         setLimitTo(data.getLimitTo());
         setExactMatch(data.isExactMatch());
+        setCreateMarkers(data.isCreateMarkers());
     }
 
     private void initSelections() {
@@ -585,7 +627,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 i++;
             }
             if (i > 0) {
-                return new SearchPatternData(PREDICATE, DECLARATIONS, selectedText.substring(0, i),true);
+                return new SearchPatternData(PREDICATE, DECLARATIONS, selectedText.substring(0, i), true, true);
             }
         }
         return null;
@@ -595,7 +637,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         if (!previousSearchPatterns.isEmpty()) {
             return (SearchPatternData) previousSearchPatterns.get(0);
         }
-        return new SearchPatternData(PREDICATE, DECLARATIONS, "", true);
+        return new SearchPatternData(PREDICATE, DECLARATIONS, "", true, true);
     }
 
     /*

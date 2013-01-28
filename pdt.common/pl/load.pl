@@ -11,6 +11,7 @@
  * 
  ****************************************************************************/
 
+:- ['metainference/load'].
 :- use_module(pdt_entry_points).
 :- use_module(pdt_manual_entry).   % for quick outline (find_pred/5)
 :- use_module(properties).

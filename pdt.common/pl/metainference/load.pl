@@ -1,6 +1,7 @@
-:- [pmi].
-:- [meta_inference_examples].
-:- [meta_inference_test].
+:- use_module(pdt_meta_specification).
+:- use_module(pmi).
+%:- [meta_inference_examples].
+%:- [meta_inference_test].
 
 /* 
 declared_in_module(Module, Name, Arity, Module), functor(Head, Name, Arity), infer_meta(Module:Head, MetaSpec), infer_meta_predicate(Module:Head, MetaSpec2), MetaSpec \== MetaSpec2.

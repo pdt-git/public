@@ -9,13 +9,19 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.text.Match;
 
-public class DeadPredicatesSearchQuery extends PDTSearchQuery {
+public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 
-	public DeadPredicatesSearchQuery() {
-		super(new Goal("", "", "", -1, ""));
+	private static final String ATTRIBUTE = "pdt.dead.predicate";
+
+	public DeadPredicatesSearchQuery(boolean createMarkers) {
+		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
 		setSearchType("Dead predicates");
 	}
 
@@ -46,11 +52,28 @@ public class DeadPredicatesSearchQuery extends PDTSearchQuery {
 		if (offsetOrLine.indexOf("-") >= 0) {
 			String[] positions = offsetOrLine.split("-");
 			int offset = Integer.parseInt(positions[0]);
-			int length = Integer.parseInt(positions[1]) - offset;
-			match = createUniqueMatch(definingModule, functor, arity, file, offset, length, properties, "", "definition");
+			int end = Integer.parseInt(positions[1]);
+			match = createUniqueMatch(definingModule, functor, arity, file, offset, end - offset, properties, "", "definition");
+			if (createMarkers && match != null) {
+				try {
+					IDocument document = UIUtils.getDocument(file);
+					offset = UIUtils.logicalToPhysicalOffset(document, offset);
+					end = UIUtils.logicalToPhysicalOffset(document, end);
+					createMarker(file, definingModule + ":" + functor + "/" + arity + " is dead", offset, end);
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+			}
 		} else {
 			int line = Integer.parseInt(offsetOrLine);
 			match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", "definition");
+			if (createMarkers && match != null) {
+				try {
+					createMarker(file, "Dead predicate: " + definingModule + ":" + functor + "/" + arity, line);
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+			}
 		}
 		
 		return match;

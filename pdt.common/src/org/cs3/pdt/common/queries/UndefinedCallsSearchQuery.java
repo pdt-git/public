@@ -10,19 +10,25 @@ import java.util.Vector;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
+import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.text.Match;
 
-public class UndefinedCallsSearchQuery extends PDTSearchQuery {
+public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 	
-	public UndefinedCallsSearchQuery() {
-		super(new Goal("", "", "", -1, ""));
+	private static final String ATTRIBUTE = "pdt.undefined.call";
+
+	public UndefinedCallsSearchQuery(boolean createMarkers) {
+		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
 		setSearchType("Undefined calls");
 	}
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		return bT(PDTCommonPredicates.FIND_UNDEFINED_CALL, "Module", "Name", "Arity", "File", "Start", "End", "PropertyList");
+		return bT(PDTCommonPredicates.FIND_UNDEFINED_CALL, "Module", "Name", "Arity", "File", "Start", "End", "UndefName", "UndefArity", "PropertyList");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -39,8 +45,18 @@ public class UndefinedCallsSearchQuery extends PDTSearchQuery {
 		}
 		IFile file = findFile(m.get("File").toString());
 		int offset = Integer.parseInt(m.get("Start").toString());
-		int length = Integer.parseInt(m.get("End").toString()) - offset;
-		PrologMatch match = createUniqueMatch(module, name, arity, file, offset, length, properties, null, "definition");
+		int end = Integer.parseInt(m.get("End").toString());
+		PrologMatch match = createUniqueMatch(module, name, arity, file, offset, end - offset, properties, null, "definition");
+		if (createMarkers && match != null) {
+			try {
+				IDocument document = UIUtils.getDocument(file);
+				offset = UIUtils.logicalToPhysicalOffset(document, offset);
+				end = UIUtils.logicalToPhysicalOffset(document, end);
+				createMarker(file, "Undefined call: " + m.get("UndefName") + "/" + m.get("UndefArity") + " is not defined", offset, end);
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+		}
 		return match;
 	}
 	

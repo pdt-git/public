@@ -23,6 +23,7 @@
 :- use_module(library(apply)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 :- use_module(pdt_prolog_library(lists)).
+:- use_module(pdt_meta_specification).
 
 reset :-
 	retractall(inferred_meta_pred(_, _, _)).
@@ -401,13 +402,19 @@ annotate_database_argument(Module:Clause) :-
 	).
 annotate_database_argument(_Clause).
 
+annotate_meta_vars_in_body(Goal, Module) :-
+	extended_meta_predicate(Module:Goal, Head),
+	!,
+	functor(Goal, _, Arity),
+	annotate_meta_args(1, Arity, Goal, Head, Module).
 annotate_meta_vars_in_body(Goal, Module) :- % TBD: do we trust this?
 	predicate_property(Module:Goal, meta_predicate(Head)),
 	!,
 	functor(Goal, _, Arity),
 	annotate_meta_args(1, Arity, Goal, Head, Module).
 annotate_meta_vars_in_body(Goal, Module) :-
-	inferred_meta(Module:Goal, Head), !,
+	inferred_meta(Module:Goal, Head),
+	!,
 	functor(Goal, _, Arity),
 	annotate_meta_args(1, Arity, Goal, Head, Module).
 annotate_meta_vars_in_body(_, _).
@@ -765,3 +772,4 @@ get_metacalled_or_existential_or_msensitive(_MetaTerm, []).
 
 attr_unify_hook(A0, Other) :-
 	writeln(attr_unify_hook(A0, Other)).
+

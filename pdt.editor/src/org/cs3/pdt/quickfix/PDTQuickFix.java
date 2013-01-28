@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -68,7 +69,14 @@ public class PDTQuickFix implements IMarkerResolution {
 		textFileChange.setEdit( fileChangeRootEdit );
 		int offset;
 		try {
-			offset = Integer.parseInt(marker.getAttribute(IMarker.CHAR_START).toString());
+			offset = marker.getAttribute(IMarker.CHAR_START, -1);
+			if (offset == -1) {
+				int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+				if (line == -1) {
+					return;
+				}
+				offset = UIUtils.getDocument(file).getLineOffset(line - 1);
+			}
 			InsertEdit quickfix = new InsertEdit(offset, marker.getAttribute(PDTMarker.QUICKFIX_ACTION).toString());
 
 			fileChangeRootEdit.addChild(quickfix);
@@ -128,6 +136,8 @@ public class PDTQuickFix implements IMarkerResolution {
 			Debug.report(e1);
 		} catch (CoreException e1) {
 			Debug.report(e1);
+		} catch (BadLocationException e) {
+			Debug.report(e);
 		}
 	}
 

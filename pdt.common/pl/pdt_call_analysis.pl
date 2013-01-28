@@ -1,10 +1,11 @@
-:- module(pdt_call_analysis, [find_undefined_call/7, ensure_call_graph_generated/0, find_dead_predicate/6, find_undeclared_meta_predicate/7]).
+:- module(pdt_call_analysis, [find_undefined_call/9, ensure_call_graph_generated/0, find_dead_predicate/6, find_undeclared_meta_predicate/9]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(apply)).
 :- use_module(library(lists)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 :- use_module('metainference/pmi').
+:- use_module('metainference/pdt_meta_specification').
 :- use_module(pdt_entry_points).
 
 :- dynamic(result/4).
@@ -19,7 +20,7 @@ assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
 assert_result(_,_,_,_).
 
 %% find_undefined_call(Module, Name, Arity, File, Start, End, PropertyList) 
-find_undefined_call(Module, Name, Arity, File, Start, End, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
+find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
 	retractall(result(_, _, _, _)),
 	pdt_prolog_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
 	!,
@@ -32,6 +33,7 @@ find_undefined_call(Module, Name, Arity, File, Start, End, [clause_line(Line),go
 	clause_property(Ref, predicate(Module:Name/Arity)),
 	clause_property(Ref, line_count(Line)),
 	properties_for_predicate(Module,Name,Arity,PropertyList),
+	functor(Goal, UndefName, UndefArity),
 	format(atom(GoalAsAtom), '~w', [Goal]).
 
 :- dynamic(first_run/0).
@@ -197,7 +199,7 @@ follow_call_edge(M, F, A) :-
 follow_call_edge(_, _, _).
 
 %% find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, File, Line, PropertyList)
-find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, File, Line, [label(MetaSpec)|PropertyList]) :-
+find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, [label(MetaSpec)|PropertyList], Directive) :-
 	pdt_prolog_walk_code([]),
 	!,
 	declared_in_module(Module, Name, Arity, Module),
@@ -206,11 +208,35 @@ find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, File, Line, [label
 %	\+ predicate_property(Module:Head, multifile),
 	inferred_meta(Module:Head, MetaSpec),
 	predicate_property(Module:Head, line_count(Line)),
+	\+ extended_meta_predicate(Module:Head, _ExtendedMetaSpec),
 	(	predicate_property(Module:Head, meta_predicate(DeclaredMetaSpec))
 	->	DeclaredMetaSpec \== MetaSpec
 	;	true
 	),
 	properties_for_predicate(Module, Name, Arity, PropertyList),
-	member(file(File), PropertyList).
+	member(file(File), PropertyList),
+	format(atom(MetaSpecAtom), '~w', [MetaSpec]),
+	(	swi_meta_predicate_spec(MetaSpec)
+	->	format(atom(Directive), ':- meta_predicate(~w).~n', [MetaSpec])
+	;	format(atom(Directive), ':- extended_meta_predicate(~w).~n', [MetaSpec])
+	).
 
+swi_meta_predicate_spec(Head) :-
+	swi_meta_predicate_spec(Head, 1).
 
+swi_meta_predicate_spec(Head, N) :-
+	arg(N, Head, Arg),
+	!,
+	swi_meta_spec(Arg),
+	N2 is N + 1,
+	swi_meta_predicate_spec(Head, N2).
+swi_meta_predicate_spec(_, _).
+
+swi_meta_spec(I) :- integer(I), !.
+swi_meta_spec(^).                 
+swi_meta_spec(//).                
+swi_meta_spec(:).                
+swi_meta_spec(?).                
+swi_meta_spec(+).                
+swi_meta_spec(-).                
+swi_meta_spec(*).                

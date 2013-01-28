@@ -64,6 +64,7 @@ unify6(Z, Y) :-
 
 % term construction via functor/3
 % construct_term0(functor(0), arity(0))
+:- extended_meta_predicate(construct_term0(functor(0),arity(0))).
 construct_term0(X, Y) :-
 	functor(Z, X, Y),
 	call(Z).
