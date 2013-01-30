@@ -1,12 +1,11 @@
-:- module(pdt_call_analysis, [find_undefined_call/9, ensure_call_graph_generated/0, find_dead_predicate/6, find_undeclared_meta_predicate/9]).
+:- module(pdt_call_analysis, [find_undefined_call/9, find_dead_predicate/6, find_undeclared_meta_predicate/9]).
 
 :- use_module(pdt_prolog_codewalk).
-:- use_module(library(apply)).
-:- use_module(library(lists)).
+:- use_module(pdt_call_graph).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
-:- use_module('metainference/pmi').
-:- use_module('metainference/pdt_meta_specification').
-:- use_module(pdt_entry_points).
+:- use_module(pdt_common_pl('metainference/pdt_prolog_metainference')).
+:- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
+:- use_module(pdt_common_pl(pdt_entry_points)).
 
 :- dynamic(result/4).
 
@@ -22,7 +21,7 @@ assert_result(_,_,_,_).
 %% find_undefined_call(Module, Name, Arity, File, Start, End, PropertyList) 
 find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
 	retractall(result(_, _, _, _)),
-	pdt_prolog_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
+	pdt_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
 	!,
 	retract(result(Goal, Ref, TermPosition, _Kind)),
 	(	TermPosition = term_position(Start, End, _, _, _)
@@ -35,90 +34,6 @@ find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity
 	properties_for_predicate(Module,Name,Arity,PropertyList),
 	functor(Goal, UndefName, UndefArity),
 	format(atom(GoalAsAtom), '~w', [Goal]).
-
-:- dynamic(first_run/0).
-first_run.
-
-ensure_call_graph_generated :-
-	first_run,
-	!,
-	generate_call_graph,
-	retractall(first_run).
-ensure_call_graph_generated.
-
-:- dynamic(calls/7).
-
-clear :-
-	retractall(calls(_,_,_,_,_,_,_)).
-
-clear(Module) :-
-	retractall(calls(_,_,_,Module,_,_,_)).
-
-generate_call_graph :-
-	pdt_prolog_walk_code([ trace_reference(_),
-			on_trace(pdt_call_analysis:assert_edge),
-			on_reiterate(pdt_call_analysis:clear),
-			source(false)
-			]).
-
-generate_call_graph(Module) :-
-	pdt_prolog_walk_code([ trace_reference(_),
-			on_trace(pdt_call_analysis:assert_edge),
-			on_reiterate(pdt_call_analysis:clear(Module)),
-			source(false),
-			module(Module)
-			]).
-
-assert_edge(M1:Callee, M2:Caller, _, _) :-
-	(	predicate_property(M1:Callee,built_in)
-	->	true
-	;	functor(Callee,F1,N1),
-		(	predicate_property(M1:Callee, imported_from(M0))
-		->	M = M0
-		;	M = M1
-		),
-		functor(Caller,F2,N2), 
-		assert_edge_(M,F1,N1, M2,F2,N2)
-	). 
-assert_edge(_, '<initialization>', _, _) :- !.
-
-assert_edge_(M1,F1,N1, M2,F2,N2) :-
-	retract( calls(M1,F1,N1, M2,F2,N2, Counter) ), 
-	!,
-	Cnt_plus_1 is Counter + 1,
-	assertz(calls(M1,F1,N1, M2,F2,N2, Cnt_plus_1)).
-assert_edge_(M1,F1,N1, M2,F2,N2) :-
-	assertz(calls(M1,F1,N1, M2,F2,N2, 1)).
-
-:- multifile(pdt_reload:pdt_reload_listener/1).
-pdt_reload:pdt_reload_listener(_Files) :-
-	(	first_run
-	->	true
-	;	setof(Module, Head^(
-			(	pdt_reload:reloaded_file(File),
-				source_file(Head, File),
-				module_of_head(Head, Module)
-			;	retract(module_to_clear(Module))
-			)
-		), Modules),
-		maplist(clear, Modules),
-		maplist(generate_call_graph, Modules)
-	).
-
-:- multifile(user:message_hook/3).
-:- dynamic(user:message_hook/3).
-user:message_hook(load_file(start(_, file(_, File))),_,_) :-
-	\+ first_run,
-	source_file(Head, File),
-	module_of_head(Head, Module),
-	\+ module_to_clear(Module),
-	assertz(module_to_clear(Module)),
-	fail.
-
-module_of_head(Module:_Head, Module) :- !.
-module_of_head(_Head, user).
-
-:- dynamic(module_to_clear/1).
 
 %% find_dead_predicate(Module, Functor, Arity, File, Location, PropertyList) 
 %
@@ -198,9 +113,9 @@ follow_call_edge(M, F, A) :-
 	fail.
 follow_call_edge(_, _, _).
 
-%% find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, File, Line, PropertyList)
-find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, [label(MetaSpec)|PropertyList], Directive) :-
-	pdt_prolog_walk_code([]),
+%% find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, PropertyList, Directive)
+find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, [label(MetaSpecAtom)|PropertyList], Directive) :-
+	ensure_call_graph_generated,
 	!,
 	declared_in_module(Module, Name, Arity, Module),
 	functor(Head, Name, Arity),
@@ -218,7 +133,7 @@ find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File
 	format(atom(MetaSpecAtom), '~w', [MetaSpec]),
 	(	swi_meta_predicate_spec(MetaSpec)
 	->	format(atom(Directive), ':- meta_predicate(~w).~n', [MetaSpec])
-	;	format(atom(Directive), ':- extended_meta_predicate(~w).~n', [MetaSpec])
+	;	format(atom(Directive), ':- user:extended_meta_predicate(~w:~w).~n', [Module, MetaSpec])
 	).
 
 swi_meta_predicate_spec(Head) :-

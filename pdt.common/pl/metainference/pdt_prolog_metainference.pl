@@ -13,7 +13,7 @@
  *
  ****************************************************************************/
 
-:- module(pmi,
+:- module(pdt_prolog_metainference,
 	  [ infer_meta/2,		% :Head, -MetaSpec
 	    infer_meta/3,		% :Head, -MetaSpec, -NewOrUpdated
 	    inferred_meta/2		% :Head, ?MetaSpec

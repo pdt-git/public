@@ -155,7 +155,7 @@ public class PrologMatch extends Match{
 		if (label == null) {
 			String labelProperty = PDTCommonUtil.getProperty("label", properties);
 			if (labelProperty != null) {
-				label = labelProperty;
+				label = Util.unquoteAtom(labelProperty);
 			} else {
 				if (isLineLocation) {
 //				String firstArgument = PDTCommonUtil.getProperty("first_argument", properties);

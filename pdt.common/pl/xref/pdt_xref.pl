@@ -22,7 +22,7 @@
 :- use_module( pdt_common_pl(properties), [properties_for_predicate/4] ).
 :- use_module(library(lists)).
 
-:- use_module(pdt_common_pl(pdt_prolog_codewalk)).
+:- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 
 %:- ensure_loaded('../pdt_factbase.pl').
 %:- use_module('../modules_and_visibility').
@@ -84,7 +84,7 @@ perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	->	functor(Goal, SearchFunctor, SearchArity)
 	;	true
 	),
-	pdt_prolog_walk_code([trace_reference(SearchMod:Goal), on_trace(pdt_xref:assert_result)]),
+	pdt_walk_code([trace_reference(SearchMod:Goal), on_trace(pdt_xref:assert_result)]),
 	fail.
 
 perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).

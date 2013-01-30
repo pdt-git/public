@@ -35,7 +35,8 @@
 :- use_module(library(debug)).
 :- use_module(library(apply)).
 :- use_module(library(lists)).
-:- use_module('metainference/pmi').
+:- use_module(pdt_common_pl('metainference/pdt_prolog_metainference')).
+:- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
 
 /** <module> Prolog code walker
 
@@ -81,7 +82,9 @@ source file is passed into _Where.
 		       source(boolean),
 		       trace_reference(any),
 		       on_trace(callable),
-		       infer_meta_predicates(oneof([false,true,all]))
+		       infer_meta_predicates(oneof([false,true,all])),
+		       reiterate(boolean),
+		       predicates(list)
 		     ]).
 
 :- record
@@ -94,7 +97,9 @@ source file is passed into _Where.
 		    infer_meta_predicates:oneof([false,true,all])=true,
 		    trace_reference:any=(-),
 		    on_trace:callable,		% Call-back on trace hits
-		    on_reiterate:callable,
+		    new_meta_specs:callable,
+		    reiterate:boolean=true,
+		    predicates:list,
 						% private stuff
 		    clause,			% Processed clause
 		    caller,			% Head of the caller
@@ -105,9 +110,6 @@ source file is passed into _Where.
 
 :- thread_local
 	multifile_predicate/3.		% Name, Arity, Module
-
-:- dynamic(first_run/0).
-first_run.
 
 %%	pdt_prolog_walk_code(+Options) is det.
 %
@@ -175,13 +177,6 @@ first_run.
 %		  versions.
 
 pdt_prolog_walk_code(Options) :-
-	first_run,
-	!,
-	retractall(first_run),
-	pdt_prolog_walk_code(1, []),
-	pdt_prolog_walk_code(Options).
-
-pdt_prolog_walk_code(Options) :-
 	meta_options(is_meta, Options, QOptions),
 	pdt_prolog_walk_code(1, QOptions).
 
@@ -199,16 +194,20 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	infer_new_meta_predicates(New, OTerm),
 	statistics(cputime, CPU1),
 	(   New \== []
-	->  CPU is CPU1-CPU0,
-	    print_message(informational,
-			  codewalk(reiterate(New, Iteration, CPU))),
-	    succ(Iteration, Iteration2),
-	    walk_option_on_reiterate(OTerm, Closure),
+	->  walk_option_new_meta_specs(OTerm, Closure),
 	    (	callable(Closure)
-	    ->	catch(Closure, _, true)
+	    ->	call(Closure, New)
 	    ;	true
 	    ),
-	    pdt_prolog_walk_code(Iteration2, Options)
+	    CPU is CPU1-CPU0,
+	    print_message(informational,
+			  codewalk(reiterate(New, Iteration, CPU))),
+		walk_option_reiterate(OTerm, Reiterate),
+	    (	Reiterate == true
+	    ->	succ(Iteration, Iteration2),
+	    	pdt_prolog_walk_code(Iteration2, Options)
+	    ;	true
+	    )
 	;   true
 	).
 
@@ -253,7 +252,8 @@ walk_from_initialization(_, _).
 
 find_walk_from_module(M, OTerm) :-
 	debug(autoload, 'Analysing module ~q', [M]),
-	forall(predicate_in_module(M, PI),
+	walk_option_predicates(OTerm, Predicates),
+	forall(predicate_in_module(M, Predicates, PI),
 	       walk_called_by_pred(M:PI, OTerm)).
 
 walk_called_by_pred(Module:Name/Arity, _) :-
@@ -441,7 +441,8 @@ walk_called(Meta, M, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	    '$get_predicate_attribute'(Module:Meta, defined, 1)
 	;   true
 	),
-	(   predicate_property(M:Meta, meta_predicate(Head))
+	(   extended_meta_predicate(M:Meta, Head)
+	;   predicate_property(M:Meta, meta_predicate(Head))
 	;   inferred_meta(M:Meta, Head)
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
@@ -886,7 +887,16 @@ variants([H|T], V, List) :-
 %
 %	True if PI is a predicate locally defined in Module.
 
-predicate_in_module(Module, PI) :-
+predicate_in_module(Module, Predicates, PI) :-
+	is_list(Predicates),
+	!,
+	member(Module:PI, Predicates),
+	current_predicate(Module:PI),
+	PI = Name/Arity,
+	functor(Head, Name, Arity),
+	\+ predicate_property(Module:Head, imported_from(_)).
+
+predicate_in_module(Module, _Predicates, PI) :-
 	current_predicate(Module:PI),
 	PI = Name/Arity,
 	functor(Head, Name, Arity),

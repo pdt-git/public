@@ -1,5 +1,5 @@
 :- use_module(pdt_meta_specification).
-:- use_module(pmi).
+:- use_module(pdt_prolog_metainference).
 %:- [meta_inference_examples].
 %:- [meta_inference_test].
 
