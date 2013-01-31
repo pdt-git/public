@@ -43,6 +43,6 @@ uncalled_local_predicate(Uncalled):-
 
 uncalled_predicate(Uncalled):-
     predicateT(Uncalled,_,_,_,_),
-    \+(call_edge(Uncalled,_)).
+    \+(call_edges_for_predicates(_,Uncalled,_)).
 
 
