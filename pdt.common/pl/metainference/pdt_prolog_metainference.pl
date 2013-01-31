@@ -5,7 +5,7 @@
  * Mail: pdt@lists.iai.uni-bonn.de
  * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
  *
- * Authors: Eva Stoewe, Guenter Kniesel and Jan Wielemaker
+ * Authors: Eva Stoewe, Guenter Kniesel, Jan Wielemaker and Andreas Becker
  *
  * All rights reserved. This program is  made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
