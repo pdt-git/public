@@ -610,15 +610,11 @@ pi_head(_, _, _) :-
 
 infer_new_meta_predicates([], OTerm) :-
 	walk_option_infer_meta_predicates(OTerm, false), !.
-infer_new_meta_predicates(MetaSpecs, OTerm) :-
+infer_new_meta_predicates(MetaSpecs, _OTerm) :-
 	findall(Module:MetaSpec,
 		( retract(possible_meta_predicate(Head, Module)),
 		  infer_meta(Module:Head, MetaSpec, NewOrUpdated),
-		  NewOrUpdated == true,
-		  (   walk_option_infer_meta_predicates(OTerm, all)
-		  ->  true
-		  ;   calling_metaspec(MetaSpec)
-		  )
+		  NewOrUpdated == true
 		),
 		MetaSpecs).
 
