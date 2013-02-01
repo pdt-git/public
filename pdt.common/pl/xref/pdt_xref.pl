@@ -86,7 +86,8 @@ perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	->	functor(Goal, SearchFunctor, SearchArity)
 	;	true
 	),
-	pdt_walk_code([trace_reference(SearchMod:Goal), on_trace(pdt_xref:assert_result)]),
+	collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates),
+	pdt_walk_code([trace_reference(SearchMod:Goal), predicates(Candidates), on_trace(pdt_xref:assert_result)]),
 	fail.
 
 perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
@@ -125,6 +126,10 @@ search_predicate_indicator(Functor, Arity, SearchMod, false, SearchFunctor, Sear
 	),
 	member(SearchFunctor/SearchArity, FAs).
 
+collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates) :-
+	setof(Module:Name/Arity, (
+		calls(SearchMod, SearchFunctor, SearchArity, Module, Name, Arity, _)
+	), Candidates).
 	
 %find_reference_to(Functor,Arity,DefFile, SearchMod, ExactMatch,
 %                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-
