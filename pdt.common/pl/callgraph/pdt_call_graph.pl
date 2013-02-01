@@ -52,7 +52,8 @@ generate_call_graph :-
 			reiterate(false)
 			]),
 	(	predicates_to_walk(NewPredicates)
-	->	clear(NewPredicates),
+	->	retractall(predicates_to_walk(_)),
+		clear(NewPredicates),
 		generate_call_graph(NewPredicates)
 	;	true
 	).
@@ -66,7 +67,8 @@ generate_call_graph(Predicates) :-
 			predicates(Predicates)
 			]),
 	(	predicates_to_walk(NewPredicates)
-	->	clear(NewPredicates),
+	->	retractall(predicates_to_walk(_)),
+		clear(NewPredicates),
 		generate_call_graph(NewPredicates)
 	;	true
 	).
