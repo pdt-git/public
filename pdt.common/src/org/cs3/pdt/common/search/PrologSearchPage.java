@@ -497,7 +497,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 createButton(patternSearch, SWT.RADIO, "Predicate", PREDICATE, true),
                 createButton(globalSearch, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false),
                 createButton(globalSearch, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false),
-                createButton(globalSearch, SWT.RADIO, "Meta Predicate", META_PREDICATE, false)
+                createButton(globalSearch, SWT.RADIO, "Undeclared Meta Predicate", META_PREDICATE, false)
         };
         createMarkersCheckBox = createButton(globalSearch, SWT.CHECK, "Create Warnings", -1, true);
         
