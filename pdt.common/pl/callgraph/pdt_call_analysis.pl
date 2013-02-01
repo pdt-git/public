@@ -147,7 +147,7 @@ find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File
 	format(atom(MetaSpecAtom), '~w', [MetaSpec]),
 	(	swi_meta_predicate_spec(MetaSpec)
 	->	format(atom(Directive), ':- meta_predicate(~w).~n', [MetaSpec])
-	;	format(atom(Directive), ':- user:extended_meta_predicate(~w:~w).~n', [Module, MetaSpec])
+	;	format(atom(Directive), ':- extended_meta_predicate(~w).~n', [MetaSpec])
 	).
 
 swi_meta_predicate_spec(Head) :-
