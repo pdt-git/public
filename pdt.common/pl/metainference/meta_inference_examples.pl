@@ -12,7 +12,25 @@
  * 
  ****************************************************************************/
 
-:- module(meta_inference_examples, []).
+:- module(meta_inference_examples, [
+	simple0/1,
+	simple1/1,
+	simple2/2,
+	unify0/1,
+	unify1/1,
+	unify2/1,
+	unify3/1,
+	unify4/2,
+	unify5/1,
+	unify6/2,
+	construct_term0/2,
+	construct_term1/1,
+	construct_term2/2,
+	construct_functor0/1,
+	construct_functor1/1,
+	construct_functor2/2,
+	construct_functor3/1
+]).
 
 % direct meta call
 % simple0(0)
@@ -78,7 +96,6 @@ unify6(Z, Y) :-
 
 % term construction via functor/3
 % construct_term0(functor(0), arity(0))
-:- extended_meta_predicate(construct_term0(functor(0),arity(0))).
 construct_term0(X, Y) :-
 	functor(Z, X, Y),
 	call(Z).

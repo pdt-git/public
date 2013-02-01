@@ -14,7 +14,7 @@
 
 :- module(meta_inference_test, []).
 
-:- use_module(pmi).
+:- use_module(pdt_prolog_metainference).
 :- use_module(library(lists)).
 
 :- begin_tests(simple_meta).
