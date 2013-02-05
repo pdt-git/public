@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_analysis, [find_undefined_call/9, find_dead_predicate/6, find_undeclared_meta_predicate/9]).
+:- module(pdt_call_analysis, [find_undefined_call/9, find_dead_predicate/8, find_undeclared_meta_predicate/9]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(pdt_call_graph).
@@ -49,9 +49,9 @@ find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity
 	functor(Goal, UndefName, UndefArity),
 	format(atom(GoalAsAtom), '~w', [Goal]).
 
-%% find_dead_predicate(Module, Functor, Arity, File, Location, PropertyList) 
+%% find_dead_predicate(Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) 
 %
-find_dead_predicate(Module, Functor, Arity, File, Location, PropertyList) :-
+find_dead_predicate(Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) :-
 	find_dead_predicates,
 	!,
 	is_dead(Module, Functor, Arity),
@@ -60,12 +60,31 @@ find_dead_predicate(Module, Functor, Arity, File, Location, PropertyList) :-
 	member(File-LineAndClauseRefs, Locations),
     member(location(Line, Ref), LineAndClauseRefs),
     properties_for_predicate(Module, Functor, Arity, PropertyList0),
-    (	pdt_search:head_position_of_clause(Ref, Position)
-    ->	Location = Position,
+    (	positions_of_clause(Ref, Position, ClauseStart, ClauseEnd)
+    ->	HeadLocation = Position,
     	PropertyList = [line(Line)|PropertyList0]
-    ;	Location = Line,
+    ;	HeadLocation = Line,
     	PropertyList = PropertyList0
     ).
+
+positions_of_clause(Ref, Position, ClauseStart, ClauseEnd) :-
+	catch(clause_info(Ref, _, TermPosition, _),_,fail),
+	(	clause_property(Ref, fact)
+	->	% fact
+		TermPosition = HeadPosition,
+		Start = ClauseStart,
+		End = ClauseEnd
+	;	% clause with body
+		TermPosition = term_position(ClauseStart, ClauseEnd, _, _, [HeadPosition|_])
+	),
+	(	HeadPosition = Start-End
+	->	% no arguments
+		true
+	;	% at least one argument
+		HeadPosition = term_position(Start, End, _, _, _)
+	),
+	format(atom(Position), '~w-~w', [Start, End]).
+
 
 :- multifile(entry_point/1).
 

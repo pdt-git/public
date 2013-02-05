@@ -22,26 +22,38 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.text.Match;
 
 public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 
-	private static final String ATTRIBUTE = "pdt.dead.predicate";
+//	private static final String ATTRIBUTE = "pdt.dead.predicate";
+
+	private static final String DEAD_CODE_MARKER = "org.cs3.pdt.common.deadCodeMarker";
 
 	public DeadPredicatesSearchQuery(boolean createMarkers) {
-		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
+		super(new Goal("", "", "", -1, ""), createMarkers, DEAD_CODE_MARKER);
 		setSearchType("Dead predicates");
 	}
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		return bT(PDTCommonPredicates.FIND_DEAD_PREDICATE, "Module", "Name", "Arity", "File", "Location", "PropertyList");
+		return bT(PDTCommonPredicates.FIND_DEAD_PREDICATE,
+				"Module",
+				"Name",
+				"Arity",
+				"File",
+				"Location",
+				"ClauseStart",
+				"ClauseEnd",
+				"PropertyList");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -71,9 +83,11 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 			if (createMarkers && match != null) {
 				try {
 					IDocument document = UIUtils.getDocument(file);
-					offset = UIUtils.logicalToPhysicalOffset(document, offset);
-					end = UIUtils.logicalToPhysicalOffset(document, end);
-					createMarker(file, definingModule + ":" + functor + "/" + arity + " is dead", offset, end);
+					int clauseOffset = UIUtils.logicalToPhysicalOffset(document, Integer.parseInt(m.get("ClauseStart").toString()));
+					int clauseEnd = UIUtils.logicalToPhysicalOffset(document, Integer.parseInt(m.get("ClauseEnd").toString()));
+					IMarker marker = createMarker(file, "Dead predicate: " + definingModule + ":" + functor + "/" + arity, clauseOffset, clauseEnd);
+					int line = Integer.parseInt(PDTCommonUtil.getProperty("line", properties));
+					marker.setAttribute(IMarker.LINE_NUMBER, line);
 				} catch (CoreException e) {
 					Debug.report(e);
 				}
@@ -92,5 +106,5 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 		
 		return match;
 	}
-
+	
 }

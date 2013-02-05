@@ -29,7 +29,14 @@ public abstract class MarkerCreatingSearchQuery extends PDTSearchQuery {
 	protected boolean createMarkers;
 	private String attribute;
 	private String value;
+	private String markerType;
 
+	public MarkerCreatingSearchQuery(Goal goal, boolean createMarkers, String markerType) {
+		super(goal);
+		this.createMarkers = createMarkers;
+		this.markerType = markerType;
+	}
+	
 	public MarkerCreatingSearchQuery(Goal goal, boolean createMarkers, String attribute, String value) {
 		super(goal);
 		this.createMarkers = createMarkers;
@@ -43,12 +50,16 @@ public abstract class MarkerCreatingSearchQuery extends PDTSearchQuery {
 		return super.run(monitor);
 	}
 
-	private void clearMarkers() {
+	protected void clearMarkers() {
 		try {
-			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(IMarker.PROBLEM, false, IResource.DEPTH_INFINITE);
-			for (IMarker marker : markers) {
-				if (marker.getAttribute(attribute) != null) {
-					marker.delete();
+			if (markerType != null) {
+				ResourcesPlugin.getWorkspace().getRoot().deleteMarkers(markerType, false, IResource.DEPTH_INFINITE);
+			} else {
+				IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(IMarker.PROBLEM, false, IResource.DEPTH_INFINITE);
+				for (IMarker marker : markers) {
+					if (marker.getAttribute(attribute) != null) {
+						marker.delete();
+					}
 				}
 			}
 		} catch (CoreException e) {
@@ -74,9 +85,15 @@ public abstract class MarkerCreatingSearchQuery extends PDTSearchQuery {
 	}
 	
 	private IMarker getMarker(IFile file, String message) throws CoreException {
-		IMarker marker = file.createMarker(IMarker.PROBLEM);
-		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-		marker.setAttribute(attribute, value);
+		IMarker marker;
+		if (markerType != null) {
+			marker = file.createMarker(markerType);
+			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+		} else {
+			marker = file.createMarker(IMarker.PROBLEM);
+			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+			marker.setAttribute(attribute, value);
+		}
 		marker.setAttribute(IMarker.MESSAGE, message);
 		return marker;
 	}
