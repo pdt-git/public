@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_analysis, [find_undefined_call/9, find_dead_predicate/8, find_undeclared_meta_predicate/9]).
+:- module(pdt_call_analysis, [find_undefined_call/9, find_dead_predicate/9, find_undeclared_meta_predicate/9]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(pdt_call_graph).
@@ -49,15 +49,20 @@ find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity
 	functor(Goal, UndefName, UndefArity),
 	format(atom(GoalAsAtom), '~w', [Goal]).
 
-%% find_dead_predicate(Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) 
+%% find_dead_predicate(Root, Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) 
 %
-find_dead_predicate(Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) :-
+find_dead_predicate(Root, Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) :-
 	find_dead_predicates,
 	!,
 	is_dead(Module, Functor, Arity),
-	once(accept_dead_predicate(Module:Functor/Arity)),
+	\+ find_blacklist(Functor, Arity, Module),
+%	once(accept_dead_predicate(Module:Functor/Arity)),
 	defined_in_files(Module, Functor, Arity, Locations),
 	member(File-LineAndClauseRefs, Locations),
+	(	nonvar(Root)
+	->	sub_atom(File, 0, _, _, Root)
+	;	true
+	),
     member(location(Line, Ref), LineAndClauseRefs),
     properties_for_predicate(Module, Functor, Arity, PropertyList0),
     (	positions_of_clause(Ref, Position, ClauseStart, ClauseEnd)
@@ -145,6 +150,11 @@ follow_call_edge(M, F, A) :-
 	follow_call_edge(M2, F2, A2),
 	fail.
 follow_call_edge(_, _, _).
+
+find_blacklist('$load_context_module',2,_).
+find_blacklist('$load_context_module',3,_).
+find_blacklist('$mode',2,_).
+find_blacklist('$pldoc',4,_).
 
 %% find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, PropertyList, Directive)
 find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, [label(MetaSpecAtom)|PropertyList], Directive) :-

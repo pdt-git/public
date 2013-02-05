@@ -37,15 +37,23 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 //	private static final String ATTRIBUTE = "pdt.dead.predicate";
 
 	private static final String DEAD_CODE_MARKER = "org.cs3.pdt.common.deadCodeMarker";
+	
+	private String root;
 
 	public DeadPredicatesSearchQuery(boolean createMarkers) {
+		this(createMarkers, null);
+	}
+	
+	public DeadPredicatesSearchQuery(boolean createMarkers, String root) {
 		super(new Goal("", "", "", -1, ""), createMarkers, DEAD_CODE_MARKER);
+		this.root = root;
 		setSearchType("Dead predicates");
 	}
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
 		return bT(PDTCommonPredicates.FIND_DEAD_PREDICATE,
+				root == null ? "_" : root,
 				"Module",
 				"Name",
 				"Arity",
