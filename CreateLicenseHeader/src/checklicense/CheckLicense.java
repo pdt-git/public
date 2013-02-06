@@ -16,6 +16,7 @@ package checklicense;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,9 +51,9 @@ public class CheckLicense {
 		
 		String rest = license.substring(license.lastIndexOf("$$$")+4);
 		licenseWeb = rest.substring(0, rest.indexOf("§§§"));
-		copyrightLine = rest.substring(rest.indexOf("§§§") + 3, rest.lastIndexOf("§§§"));
-		copyrightPattern = Pattern.compile(copyrightLine);
-		licenseBottom = rest.substring(rest.lastIndexOf("§§§")+4);
+		copyrightPattern = Pattern.compile(rest.substring(rest.indexOf("§§§") + 3, rest.lastIndexOf("§§§")));
+		copyrightLine = rest.substring(rest.indexOf("%%%") + 3, rest.lastIndexOf("%%%"));
+		licenseBottom = rest.substring(rest.lastIndexOf("%%%")+4);
 		
 		createAuthorList();
 	}
@@ -142,6 +143,9 @@ public class CheckLicense {
 			newContent.append(createAuthorString(author));
 			newContent.append("\n");
 		}
+		newContent.append(licenseWeb);
+		newContent.append(copyrightLine.replace("%%YEAR%%", Integer.toString(Calendar.getInstance().get(Calendar.YEAR))));
+		newContent.append('\n');
 		newContent.append(licenseBottom);
 		newContent.append("\n");
 
