@@ -54,55 +54,61 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 		
 		PDTCommonPlugin.getDefault().addDecorator(this);
 
-		// get active pif from console
-		PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
-
-		if (currentPif == null) {
-			if (element instanceof IFile) {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
-			}
-			return;
-		}
-		
-		if (element instanceof IFile) {
-			IFile file = (IFile) element;
+		try {
+			// get active pif from console
+			PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 			
+			if (currentPif == null) {
+				if (element instanceof IFile) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+				}
+				return;
+			}
+			
+			if (element instanceof IFile) {
+				IFile file = (IFile) element;
+				
 //			final DecorationContext decorationContext = (DecorationContext) decoration.getDecorationContext();
 //			decorationContext.putProperty(IDecoration.ENABLE_REPLACE, Boolean.TRUE);
-
-			// check if file is in consulted files list (important for qlf files)
-			String prologFileName = getPrologFileName(file);
-			
-			// XXX: don't mark qlf file if only the pl file is consulted 
-			if(prologFileName.endsWith(".qlf")){
-				prologFileName = prologFileName.substring(0, prologFileName.length()-3)+"pl";
-			}
-			// check if file is source_file
-			if (isCurrent(prologFileName)) {
-				decoration.addSuffix(" [consulted]");
-				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
-				} else {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
+				
+				// check if file is in consulted files list (important for qlf files)
+				String prologFileName = getPrologFileName(file);
+				
+				// XXX: don't mark qlf file if only the pl file is consulted 
+				if(prologFileName.endsWith(".qlf")){
+					prologFileName = prologFileName.substring(0, prologFileName.length()-3)+"pl";
 				}
-			} else if (isOld(prologFileName)) {
-				decoration.addSuffix(" [consulted]");
-				if (file.getFileExtension().equalsIgnoreCase("QLF")) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED_OLD), IDecoration.BOTTOM_LEFT);
+				// check if file is source_file
+				if (isCurrent(prologFileName)) {
+					decoration.addSuffix(" [consulted]");
+					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
+					} else {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
+					}
+				} else if (isOld(prologFileName)) {
+					decoration.addSuffix(" [consulted]");
+					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED_OLD), IDecoration.BOTTOM_LEFT);
+					} else {
+						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED_OLD), IDecoration.UNDERLAY);
+					}
 				} else {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED_OLD), IDecoration.UNDERLAY);
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
 				}
 			} else {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
+				IFolder folder = (IFolder) element;
+				String dirName = Util.prologFileName(folder.getRawLocation().toFile());
+				
+				if (isContainingFolder(dirName)) {
+					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
+				}
 			}
-		} else {
-			IFolder folder = (IFolder) element;
-			String dirName = Util.prologFileName(folder.getRawLocation().toFile());
-			
-			if (isContainingFolder(dirName)) {
-				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
-			}
+		} catch (Exception e) {
+			Debug.error("Error during decoration of " + (element == null ? null : element.toString()));
+			Debug.report(e);
 		}
+		
 	}
 	
 	private String getPrologFileName(IFile file) {
