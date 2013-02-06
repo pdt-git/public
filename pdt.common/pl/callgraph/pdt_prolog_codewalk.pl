@@ -12,6 +12,16 @@
  * 
  ****************************************************************************/
 
+/* NOTE: This file contains third-party code!
+
+   Most of this file was borrowed from the swi-prolog library 
+   prolog_codewalk. Many thanks to the original authors for making their 
+   work available to the public. 
+   
+   The copyright header of the original file 
+   follows.
+*/
+
 /*  Part of SWI-Prolog
 
     Author:        Jan Wielemaker
