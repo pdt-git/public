@@ -17,6 +17,8 @@ package checklicense;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import checklicense.utils.Utils;
 
@@ -27,22 +29,30 @@ public class CheckLicense {
 	public static final String HEADER_WITH_AUTHOR = "header with author";
 	
 	private String licenseTop;
-	private String licenseBottom;
-	private String licenseNoAuthor;
 	private String authorLine;
+	private String licenseTopNoAuthor;
+	private String licenseWeb;
+	private String copyrightLine;
+	private String licenseBottom;
+	
+	private Pattern copyrightPattern;
 
 	private final HashMap<String, String> authorShortcuts = new HashMap<>();
 	
 	public CheckLicense() {
 		String license = Utils.readFileToString(new File("data\\license.txt"));
 		
-		licenseNoAuthor = license.replaceAll("\\$\\$\\$.*\\$\\$\\$", "");
-		licenseNoAuthor = licenseNoAuthor.replace("\n\n", "\n");
+		licenseTopNoAuthor = license.substring(0, license.indexOf("§§§")).replaceAll("\\$\\$\\$.*\\$\\$\\$", "");
+		licenseTopNoAuthor = licenseTopNoAuthor.replace("\n\n", "\n");
 		
 		licenseTop = license.substring(0, license.indexOf("$$$"));
-		licenseBottom = license.substring(license.lastIndexOf("$$$")+4);
-		
 		authorLine = license.substring(license.indexOf("$$$") + 3, license.lastIndexOf(" $$$"));
+		
+		String rest = license.substring(license.lastIndexOf("$$$")+4);
+		licenseWeb = rest.substring(0, rest.indexOf("§§§"));
+		copyrightLine = rest.substring(rest.indexOf("§§§") + 3, rest.lastIndexOf("§§§"));
+		copyrightPattern = Pattern.compile(copyrightLine);
+		licenseBottom = rest.substring(rest.lastIndexOf("§§§")+4);
 		
 		createAuthorList();
 	}
@@ -92,7 +102,9 @@ public class CheckLicense {
 	private void checkFile(File f, HashMap<String, ArrayList<String>> list) {
 		String oldCode = Utils.readFileToString(f);
 		
-		if (hasNoHeader(oldCode)) {
+		Matcher m = copyrightPattern.matcher(oldCode);
+		boolean containsCopyright = m.find();
+		if (hasNoHeader(oldCode) || !containsCopyright) {
 			list.get(NO_HEADER).add(f.getPath());
 		} else if (hasHeaderWithoutAuthor(oldCode)) {
 			list.get(NO_AUTHOR).add(f.getPath());
@@ -102,11 +114,11 @@ public class CheckLicense {
 	}
 
 	public boolean hasNoHeader(String code) {
-		return !code.startsWith(licenseTop) || !code.contains(licenseBottom);
+		return !code.startsWith(licenseTop) || !code.contains(licenseBottom) || !code.contains(licenseWeb);
 	}
 	
 	public boolean hasHeaderWithoutAuthor(String code) {
-		return code.startsWith(licenseNoAuthor);
+		return code.startsWith(licenseTopNoAuthor);
 	}
 
 	public boolean hasHeaderWithAuthor(String code) {
