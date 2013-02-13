@@ -127,6 +127,7 @@ search_predicate_indicator(Functor, Arity, SearchMod, false, SearchFunctor, Sear
 	member(SearchFunctor/SearchArity, FAs).
 
 collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates) :-
+	ensure_call_graph_generated,
 	setof(Module:Name/Arity, (
 		calls(SearchMod, SearchFunctor, SearchArity, Module, Name, Arity, _)
 	), Candidates).
