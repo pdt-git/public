@@ -20,7 +20,7 @@
       </view>
       
       <view
-            name="PDT Dependencies View"
+            name="PDT Load Graph"
             category="org.cs3.pdt"
             class="pdt.y.focusview.DependenciesView"
             id="pdt.view.dependencies">

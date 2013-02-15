@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.logging.Debug;
@@ -34,7 +33,6 @@ import org.cs3.prolog.session.PrologSession;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.FocusViewSubscription;
@@ -45,7 +43,7 @@ public abstract class GraphPIFLoaderBase {
 	protected File helpFile;
 	protected PDTGraphView view;
 	private PrologInterface pif;
-	private ExecutorService executor = Executors.newCachedThreadPool();
+	//private ExecutorService executor = Executors.newCachedThreadPool();
 
 	public GraphPIFLoaderBase(PDTGraphView view, String helpFileName) {
 		this.view = view;
