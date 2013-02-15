@@ -52,52 +52,74 @@ public abstract class PrologContentAssistProcessor {
 	}
 		
 	protected abstract void addPredicateProposals(IDocument document, int begin,
-			int len, String prefix, List<ComparableCompletionProposal> proposals, String module)
+			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals)
 			throws PrologInterfaceException, CoreException;
 
 	protected abstract void addVariableProposals(IDocument document, int begin,
-			int len, String prefix, List<ComparableCompletionProposal> proposals) throws BadLocationException, PrologInterfaceException, CoreException;
+			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws BadLocationException, PrologInterfaceException, CoreException;
 
 	private Prefix calculatePrefix(IDocument document, int offset)
 			throws BadLocationException {
-				int begin=offset;
-				int length=0;
-				boolean isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(begin));
-				
-				while (isPredChar){
-					length++;
-					int test = begin-1;
-					if(test >=0){
-						isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(test));
-						if(!isPredChar){
-							break;
-						}
-					} else {
-						break;
-					}
-					begin=test;
+		int begin=offset;
+		int length=0;
+		boolean isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(begin));
+		
+		while (isPredChar){
+			length++;
+			int test = begin-1;
+			if(test >=0){
+				isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(test));
+				if(!isPredChar){
+					break;
 				}
-				String pre = document.get(begin, length);
-				
-				Prefix prefix = new Prefix(document,begin,pre);
-				return prefix;
+			} else {
+				break;
 			}
+			begin=test;
+		}
+		String pre = document.get(begin, length);
+		
+		Prefix prefix = new Prefix(document,begin,pre);
+		return prefix;
+	}
 
-	private String retrievePrefixedModule(int documentOffset, IDocument document, int begin)
-			throws BadLocationException {
-				if (begin>0 && document.getChar(begin - 1) == ':') {
-					int moduleBegin = begin - 2;
-					while (Util.isNonQualifiedPredicateNameChar(document
-							.getChar(moduleBegin))
-							&& moduleBegin > 0)
-						moduleBegin--;
-					String moduleName = document.get(moduleBegin + 1, documentOffset - moduleBegin);
-					if(!Util.isVarPrefix(moduleName)){
-						return moduleName;
-					}
-				}
+	private String findSplittingOperator(IDocument document, int begin) throws BadLocationException {
+		if (begin <= 0) {
+			return null;
+		}
+		char c = document.getChar(begin);
+		char c2 = document.getChar(begin - 1);
+		switch (c) {
+		case ':':
+			switch (c2) {
+			case ':':
+				return "::";
+			default:
+				return ":";
+			}
+		case '<':
+			if (c2 == '<') {
+				return "<<";
+			} else {
 				return null;
 			}
+		case '^':
+			if (c2 == '^') {
+				return "^^";
+			}
+		}
+		return null;
+	}
+	
+	private String retrievePrefixedModule(IDocument document, int begin)
+			throws BadLocationException {
+		int moduleEnd = begin;
+		int moduleBegin = begin - 1;
+		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(document.getChar(moduleBegin)))
+			moduleBegin--;
+		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
+		return moduleName;
+	}
 
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 	
@@ -108,20 +130,37 @@ public abstract class PrologContentAssistProcessor {
 					: documentOffset - 1;
 	
 			Prefix pre = calculatePrefix(document,documentOffset);
-	
-			String module = retrievePrefixedModule(documentOffset - pre.length - 1,
-					document, pre.begin);
 			
-			List<ComparableCompletionProposal> proposals = 
-					new ArrayList<ComparableCompletionProposal>();
+			String splittingOperator = findSplittingOperator(document, pre.begin - 1);
+	
+			String module = null;
+			if (splittingOperator != null) {
+				module = retrievePrefixedModule(document, pre.begin - splittingOperator.length());
+			}
+			String searchPrefix; 
+			
+			ArrayList<ComparableTemplateCompletionProposal> proposals = new ArrayList<ComparableTemplateCompletionProposal>();
 			if (module == null || module.equals("")) {
 				if (pre.prefix.equals("")) {
 					return null;
 				}
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
+				if (splittingOperator != null) {
+					searchPrefix = splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
+				} else {
+					searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
+				}
+			} else {
+				if (Util.isVarPrefix(module)){
+					module = "_";
+				} else {
+					module = Util.quoteAtomIfNeeded(module);
+				}
+				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
 			}
-			addPredicateProposals(document, pre.begin, pre.length, pre.prefix, proposals,
-					module);
+			if (!Util.isVarPrefix(pre.prefix)) {
+				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals);
+			}
 	
 			if (proposals.size() == 0)
 				return null;

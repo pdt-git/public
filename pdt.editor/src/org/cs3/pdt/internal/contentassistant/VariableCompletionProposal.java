@@ -1,9 +1,10 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
+ * Author: Andreas Becker
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * Copyright (C): 2012, CS Dept. III, University of Bonn
  * 
  * All rights reserved. This program is  made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,28 +14,31 @@
 
 package org.cs3.pdt.internal.contentassistant;
 
-import org.eclipse.jface.text.contentassist.CompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.cs3.pdt.internal.ImageRepository;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Image;
 
-public class VariableCompletionProposal extends ComparableCompletionProposal{
-	
-	public VariableCompletionProposal(String proposal, int begin, int len,
-			int cursorPos, Image image, String displayString, IContextInformation contextInfo,
-			String additionalInfo) {
-		super(proposal,begin,len,cursorPos,image,displayString,contextInfo,additionalInfo);
+public class VariableCompletionProposal extends ComparableTemplateCompletionProposal {
+
+	private String variable;
+
+	public VariableCompletionProposal(IDocument document, String variable, int offset, int length) {
+		super(document, variable, variable, offset, length);
+		this.variable = variable;
 	}
 
 	@Override
-	public int compareTo(ComparableCompletionProposal o) {
+	public int compareTo(ComparableTemplateCompletionProposal o) {
 		if (o instanceof VariableCompletionProposal) {
-			String displayString = target.getDisplayString();
-			VariableCompletionProposal variableCompletionProposal = ((VariableCompletionProposal)o);
-			CompletionProposal target2 = variableCompletionProposal.target;
-			return displayString.compareTo(target2.getDisplayString());
+			return variable.compareTo(((VariableCompletionProposal) o).variable);
+		} else {
+			return -1;
 		}
-		return 0;
 	}
+	
+	@Override
+	public Image getImage() {
+		return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+	}
+
 }
-
-

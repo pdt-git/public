@@ -17,8 +17,7 @@
          , find_definitions_categorized/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
-         , find_pred/8
-         , find_pred_for_editor_completion/9
+         , find_completion/12
          , find_entity_definition/5
          , find_module_reference/8
          , find_alternative_predicates/7
@@ -528,125 +527,141 @@ find_blacklist('$pldoc',4,_).
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
 
-%% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
-%
-% Looks up all predicates with prefix Prefix defined or imported in file EnclFile.
-%
-% Used by the PLEditor content assist.
-%
-% The meaning of Arity is overloaded: -2: atom, -1 : module, >= 0 : predicate
+%% find_completion(+Prefix, ?EnclosingFile, ?LineInFile, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
 % 
-% For performance reasons an empty prefix with an unspecified module
-% will only bind predicates if EnclFile is specified.
-%
-% <EnclFile> specifies the file in which this query is triggered
-% <Prefix> specifies the prefix of the predicate
-% <Module> specifies the module associated to the file.
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	var(Prefix),
+	!,
+	throw(prefix_not_bound(find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc))).
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
-    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
-    !,
-    logtalk_adapter::find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help).
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	nonvar(EnclosingFile),
+	!,
+	(	split_file_path(EnclosingFile, _, _, _, lgt)
+	->	current_predicate(logtalk_load/1),
+		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	;	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	).
 
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	(	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	;	current_predicate(logtalk_load/1),
+		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	).
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
-    \+ atom(EnclFile),
-    throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
+:- discontiguous(find_completion_/12).
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
-	setof(
-	   (Name,Arity),
-	   Prefix^Module^
-	   ( my_module_of_file(EnclFile,Module),
-	     find_pred_(Prefix,Module,Name,Arity,true)
-	   ),
-	   All
+find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	!,
+	PredicatePrefix \== '',
+	setof(Module-Name-Arity, SpecifiedModule^(
+		declared_in_module(SpecifiedModule, Name, Arity, Module),
+		atom_concat(PredicatePrefix, _, Name)
+	), Predicates),
+	member(Module-Name-Arity, Predicates),
+	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+
+find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	atomic(PredicatePrefix),
+	nonvar(EnclosingFile),
+	setof(Module-Name-Arity, EnclosingFile^FileModule^(
+		module_of_file(EnclosingFile, FileModule),
+		declared_in_module(FileModule, Name, Arity, Module),
+		atom_concat(PredicatePrefix, _, Name)
+	), Predicates),
+	member(Module-Name-Arity, Predicates),
+	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+
+find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+	atomic(PredicatePrefix),
+	var(EnclosingFile),
+	setof(Module-Name-Arity, (
+		declared_in_module(user, Name, Arity, Module),
+		atom_concat(PredicatePrefix, _, Name)
+	), Predicates),
+	member(Module-Name-Arity, Predicates),
+	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+
+predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc) :-
+	functor(Head, Name, Arity),
+	(	predicate_property(Module:Head, built_in)
+	->	IsBuiltin = true
+	;	IsBuiltin = false
 	),
-	member((Name,Arity),All),
-	
-	% no enclosing module specified in the code via modulename:..
-	get_declaring_module(EnclFile,Module,Name,Arity),
-	functor(Term,Name,Arity),
-	( predicate_property(Module:Term,exported)->
-	  Exported=true
-	; Exported=false
+	(	(	Module == user
+		;	predicate_property(Module:Head, exported)
+		)
+	->	Visibility = (public)
+	;	Visibility = protected
 	),
-	( predicate_property(Module:Term,built_in)->
-	  Builtin=true
-	; Builtin=false
+	(	predicate_completion_documentation_hook(Module, Name, Arity, ArgNames, DocKind, Doc)
+	->	true
+	;	predicate_manual_entry(Module, Name, Arity, Content),
+		(	Content == nodoc
+		->	DocKind = nodoc
+		;	DocKind = html,
+			Doc = Content,
+			(	Arity == 0
+			->	ArgNames = []
+			;	ignore(predicate_arg_list(Content, ArgNames))
+			)
+		)
+	).
+
+:- multifile(predicate_completion_documentation_hook/6).
+
+predicate_arg_list(Comment, ArgList) :-
+	sub_atom(Comment, End, _, _, '</var>'),
+	sub_atom(Comment, BeforeBegin, BeforeBeginLength, _, '"arglist">'),
+	!,
+	Begin is BeforeBegin + BeforeBeginLength,
+	Length is End - Begin,
+	sub_atom(Comment, Begin, Length, _, Args),
+	format(atom(ArgsWithDot), '~w.', [Args]),
+	open_chars_stream(ArgsWithDot, Stream),
+	call_cleanup(read_term(Stream, Term, [variable_names(Vars), module(pldoc_modes)]), close(Stream)),
+	args_from_mode_term(Term, ArgList, Vars).
+
+args_from_mode_term(Arg, [ArgName], Vars) :-
+	var(Arg),
+	!,
+	var_to_arg(Arg, ArgName, Vars).
+
+args_from_mode_term((Arg, Args), [ArgName|ArgNames], Vars) :-
+	!,
+	var_to_arg(Arg, ArgName, Vars),
+	args_from_mode_term(Args, ArgNames, Vars).
+
+args_from_mode_term(Arg, [ArgName], Vars) :-
+	var_to_arg(Arg, ArgName, Vars).
+
+var_to_arg(Arg, ArgName, Vars) :-
+	(	var(Arg)
+	->	Arg = Var
+	;	Arg =.. [_Mode|Other],
+		(	Other = [Var:_]
+		;	Other = [Var]
+		)
 	),
-	predicate_manual_entry(Module,Name,Arity,Help).
-
-find_pred_(Prefix,Module,Name,Arity,true) :-
-    ( var(Module)->
-    	Prefix \== ''
-    ; true
-    ), % performance tweak:
-    current_predicate(Module:Name/Arity),
-    atom_concat(Prefix,_,Name),
-    % rule out used built-ins, like =../2, in case the enclosing module is given (in this case the prefix might be empty):   
-    ( nonvar(Module) ->
-      ( functor(Term,Name,Arity),
-    	(Prefix \== ''; \+ predicate_property(Term, built_in)) )
-      ; true
-    ).
-
-
-get_declaring_module(EnclFile,Module,Name,Arity) :-
-	var(Module),
-     my_module_of_file(EnclFile,ContainingModule),
-     current_predicate(ContainingModule:Name/Arity),
-     functor(Head,Name,Arity),
-     ( predicate_property(ContainingModule:Head,imported_from(Module))
-     ; Module = ContainingModule
-     ),
-     !.
-
-get_declaring_module(_EnclFile,Module,_Name,_Arity) :-
-	nonvar(Module),
+	member(ArgName=V, Vars),
+	V == Var,
 	!.
 
-%% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help, -Kind) is nondet.
-%
-
-find_pred_for_editor_completion(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help,Kind) :-
-    \+ atom(EnclFile),
-    throw( first_argument_free_in_call_to(find_pred_for_editor_completion(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help,Kind))).
-
-find_pred_for_editor_completion(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help,predicate) :-
-	find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help).
-
-find_pred_for_editor_completion(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc', module) :-
-    var(EnclModule),
+find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, _, _, _, _, _) :- 
+	atomic(ModulePrefix),
 	current_module(Name),
-    atom_concat(Prefix,_,Name).
+	atom_concat(ModulePrefix,_,Name).
 
-% TODO: Improvement Idea: use "string" Prefix instead 
-%  of atom to avoid Prefix to be added to the set of atoms
-find_pred_for_editor_completion(_EnclFile,Prefix,'',Atom,-1,fail,true,'nodoc', atom) :-
-	'$atom_completions'(Prefix, Atoms),
-	member(Atom,Atoms), 
-	Atom \= Prefix,
+find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _) :- 
+	atomic(AtomPrefix),
 	garbage_collect_atoms,
+	'$atom_completions'(AtomPrefix, Atoms),
+	member(Atom,Atoms),
+	'$atom_references'(Atom, ReferenceCount),
+	ReferenceCount > 0, 
+%	Atom \= AtomPrefix,
 	\+ current_predicate(Atom/_Arity).
 
-my_module_of_file(_File, Module) :-
-	atom(Module),
-	current_module(Module),
-	!.
-
-my_module_of_file(File,Module):-
-    module_property(Module2,file(File)),
-	(	Module = Module2
-	;	Module = user
-	).
-                                       
-my_module_of_file(File,Module):-
-    atom(File),                           
-    \+ module_property(Module,file(File)),
-    ( Module=user                         
-    ; Module=system                       
-    ).
 
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-

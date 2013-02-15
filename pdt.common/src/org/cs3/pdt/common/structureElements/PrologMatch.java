@@ -84,18 +84,22 @@ public class PrologMatch extends Match{
 			} else {
 				IDocument document;
 				document = UIUtils.getDocument(file);
-				int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
-				setOffset(convertedOffset);
-				int convertedEnd = UIUtils.logicalToPhysicalOffset(document, end);
-				int length = convertedEnd - convertedOffset;
-				setLength(length);
-				String text = document.get(convertedOffset, length);
-				if (text != null) {
-					String line = PDTCommonUtil.getProperty("line", properties);
-					if (line != null) {
-						label = line + ": " + text.replaceAll("\n|\r", "");
-					} else {
-						label = text.replaceAll("\n|\r", "");
+				if (document.getLength() <= 0) {
+					Debug.warning("Empty document for file: " + file.getFullPath());
+				} else {
+					int convertedOffset = UIUtils.logicalToPhysicalOffset(document, offset);
+					setOffset(convertedOffset);
+					int convertedEnd = UIUtils.logicalToPhysicalOffset(document, end);
+					int length = convertedEnd - convertedOffset;
+					setLength(length);
+					String text = document.get(convertedOffset, length);
+					if (text != null) {
+						String line = PDTCommonUtil.getProperty("line", properties);
+						if (line != null) {
+							label = line + ": " + text.replaceAll("\n|\r", "");
+						} else {
+							label = text.replaceAll("\n|\r", "");
+						}
 					}
 				}
 			}
@@ -149,7 +153,11 @@ public class PrologMatch extends Match{
 	
 	public String getLabel() {
 		if (label == null) {
-			if (isLineLocation) {
+			String labelProperty = PDTCommonUtil.getProperty("label", properties);
+			if (labelProperty != null) {
+				label = Util.unquoteAtom(labelProperty);
+			} else {
+				if (isLineLocation) {
 //				String firstArgument = PDTCommonUtil.getProperty("first_argument", properties);
 //				if (firstArgument != null) {
 //					label = getLine() + ": " + Util.unquoteAtom(firstArgument);
@@ -161,8 +169,9 @@ public class PrologMatch extends Match{
 					buf.append(")");
 					label = buf.toString();
 //				}
-			} else {
-				label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
+				} else {
+					label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));
+				}
 			}
 		}
 		return label;

@@ -50,4 +50,43 @@
           name="PDT">
     </page>
  </extension>
+ <extension
+       id="org.cs3.pdt.common.deadCodeMarker"
+       name="PDT Dead Code Marker"
+       point="org.eclipse.core.resources.markers">
+    <persistent
+          value="true">
+    </persistent>
+    <super
+          type="org.eclipse.core.resources.problemmarker">
+    </super>
+ </extension>
+ <extension
+       point="org.eclipse.ui.editors.markerAnnotationSpecification">
+    <specification
+          annotationType="org.cs3.pdt.common.deadCodeMarker"
+          colorPreferenceKey="org.cs3.pdt.common.deadCodeMarker.color"
+          colorPreferenceValue="255,170,170"
+          contributesToHeader="false"
+          highlightPreferenceKey="org.cs3.pdt.common.deadCodeMarker.highlight"
+          highlightPreferenceValue="true"
+          icon="icons/warning.gif"
+          includeOnPreferencePage="true"
+          label="PDT Dead Code Marker"
+          overviewRulerPreferenceKey="org.cs3.pdt.common.deadCodeMarker.overview"
+          overviewRulerPreferenceValue="true"
+          presentationLayer="0"
+          textPreferenceKey="org.cs3.pdt.common.deadCodeMarker.text"
+          verticalRulerPreferenceKey="org.cs3.pdt.common.deadCodeMarker.vertical"
+          verticalRulerPreferenceValue="true">
+    </specification>
+ </extension>
+ <extension
+       point="org.eclipse.ui.editors.annotationTypes">
+    <type
+          markerType="org.cs3.pdt.common.deadCodeMarker"
+          name="org.cs3.pdt.common.deadCodeMarker"
+          super="org.eclipse.ui.workbench.texteditor.warning">
+    </type>
+ </extension>
 </plugin>

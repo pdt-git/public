@@ -338,163 +338,37 @@ find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity,
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
 
-%% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
-%
-% Looks up all predicates with prefix Prefix defined or imported in file EnclFile.
-%
-% Used by the PLEditor content assist.
-%
-% For performance reasons an empty prefix with an unspecified module
-% will only bind predicates if EnclFile is specified.
-%
-% <EnclFile> specifies the file in which this query is triggered
-% <Prefix> specifies the prefix of the predicate
-% <Module> specifies the module associated to the file.
-
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
-	fail.
-%    \+ atom(EnclFile),
-%    throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
-%
-%find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
-%	setof(
-%	   (Name,Arity),
-%	   Prefix^Module^
-%	   ( module_of_file(EnclFile,Module),
-%	     find_pred_(Prefix,Module,Name,Arity,true)
-%	   ),
-%	   All
-%	),
-%	member((Name,Arity),All),
-%
-%	% no enclosing module specified in the code via modulename:..
-%	get_declaring_module(EnclFile,Module,Name,Arity),
-%	functor(Term,Name,Arity),
-%	( user::predicate_property(Module:Term,exported)->
-%	  Exported=true
-%	; Exported=false
-%	),
-%	( user::predicate_property(Module:Term,built_in)->
-%	  Builtin=true
-%	; Builtin=false
-%	),
-%	predicate_manual_entry(Module,Name,Arity,Help).
-%
-%find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc') :-
-%    var(EnclModule),
-%	current_module(Name),
-%    atom_concat(Prefix,_,Name).
-%
-%
-%
-%find_pred_(Prefix,Module,Name,Arity,true) :-
-%    ( var(Module)->
-%    	Prefix \== ''
-%    ; true
-%    ), % performance tweak:
-%    current_predicate(Module:Name/Arity),
-%    atom_concat(Prefix,_,Name),
-%    % rule out used built-ins, like =../2, in case the enclosing module is given (in this case the prefix might be empty):
-%    ( nonvar(Module) ->
-%      ( functor(Term,Name,Arity),
-%    	(Prefix \== ''; \+ built_in(Term)) )
-%      ; true
-%    ).
-
-get_declaring_module(EnclFile,Module,Name,Arity) :-
-	module_of_file(EnclFile,ContainingModule),
-	current_predicate(ContainingModule:Name/Arity),
-	functor(Head,Name,Arity),
-	( user::predicate_property(ContainingModule:Head,imported_from(Module))
-	; Module = ContainingModule
-	),
-	!.
-
-
-               /****************************************
-                * GET THE MANUAL ENTRY FOR A PREDICATE *
-                ****************************************/
-
-%% predicate_manual_entry(+Module, +Pred,+Arity,-Content) is det.
-%
-%
-predicate_manual_entry(_Module,Pred,Arity,Content) :-
-	help_index:predicate(Pred,Arity,_,FromLine,ToLine),
+%% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
+% 
+:- public(find_completion/12).
+find_completion(SearchEntity::PredicatePrefix, EnclosingFile, _, predicate, DefiningOrDeclaringEntity, Name, Arity, Visibility, false, _, nodoc, _) :-
+	var(EnclosingFile),
 	!,
-	online_help:line_start(FromLine, From),
-	online_help:line_start(ToLine, To),
-	online_help:online_manual_stream(Manual),
-	new_memory_file(Handle),
-	open_memory_file(Handle, write, MemStream),
-	seek(Manual,From,bof,_NewOffset),
-	Range is To - From,
-	online_help:copy_chars(Range, Manual, MemStream),
-	close(MemStream),
-	memory_file_to_atom(Handle,Content),
-	free_memory_file(Handle),
-	!.
+	(	var(SearchEntity)
+	->	true
+	;	Entity = SearchEntity
+	),
+	current_object(Entity),
+	Entity::current_predicate(Name/Arity),
+	atom_concat(PredicatePrefix, _, Name),
+	functor(Head, Name, Arity),
+	Entity::predicate_property(Head, scope(Visibility)),
+	(	var(SearchEntity)
+	->	DefiningOrDeclaringEntity = Entity
+	;	(	Entity::predicate_property(Head, defined_in(DefiningOrDeclaringEntity))
+		->	true
+		;	Entity = DefiningOrDeclaringEntity
+		)
+	).
 
-
-predicate_manual_entry(Module, Pred,Arity,Content) :-
-	%pldoc:doc_comment(Module:Pred/Arity,_File:_,,Content),
-	%TODO: The html code is now available:
-	pldoc:doc_comment(Module:Pred/Arity,File:_,_Summary,_Content),
-	gen_html_for_pred_(File,Pred/Arity,Content),
-	!.
-
-predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
-
-gen_html_for_pred_(FileSpec,Functor/Arity,Html) :-
-	online_help:doc_file_objects(FileSpec, _File, Objects, FileOptions, []),
-	member(doc(Signature,FilePos,Doc),Objects),
-	(Functor/Arity=Signature;_Module:Functor/Arity=Signature),
-	phrase(html([
-	     		\objects([doc(Functor/Arity,FilePos,Doc)], FileOptions)
-	     ]),List),
-	maplist(replace_nl_,List,AtomList),
-	atomic_list_concat(AtomList,Html),
-	!.
-
-replace_nl_(nl(_), '') :- !.
-replace_nl_(A, A).
-
-write_ranges_to_file(Ranges, Outfile) :-
-	online_help:online_manual_stream(Manual),
-	online_help:help_tmp_file(Outfile),
-	open(Outfile, write, Output),
-	online_help:show_ranges(Ranges, Manual, Output),
-	close(Manual),
-	close(Output).
-
-%% manual_entry(Pred,Arity,Content) is det.
-%
-% TODO: take over code, or reference predicate_manual_entry
-%
-manual_entry(Pred,Arity,Content) :-
-	predicate_manual_entry(_Module,Pred,Arity,Content).
-
-%    predicate(Pred,Arity,_,From,To),
-%    !,
-%    online_help:online_manual_stream(Manual),
-%    new_memory_file(Handle),
-%    open_memory_file(Handle, write, MemStream),
-%    stream_position(Manual, _, '$stream_position'(From, 0, 0)),
-%    Range is To - From,
-%    online_help:copy_chars(Range, Manual, MemStream),
-%    close(MemStream),
-%    memory_file_to_atom(Handle,Content),
-%    free_memory_file(Handle).
-/*
-manual_entry(Pred,Arity,Content) :-
-    meta_data_help(_,Pred,Arity,ContentString),
-    string_to_atom(ContentString,Content).
-
-manual_entry(Pred,-1,Content) :-
-    meta_data_module(_,Pred,ContentString),
-    string_to_atom(ContentString,Content).
-*/
-
-
+find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
+	atomic(Prefix),
+	entity(Entity),
+	(	atomic(Entity)
+	->	Name = Entity
+	;	functor(Entity, Name, _)
+	),
+	atom_concat(Prefix, _, Name).
 
 
                /*************************************
