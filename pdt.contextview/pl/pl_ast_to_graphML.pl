@@ -223,6 +223,14 @@ file_node_type(FilePath, Dependencies, 'bottom') :-
 file_node_type(_, _, 'intermediate') :- !.
     
     
+file_node_type(FilePath, Dependencies, 'top') :-
+    not(member((_, FilePath), Dependencies)), !.
+    
+file_node_type(FilePath, Dependencies, 'bottom') :-
+    not(member((FilePath, _), Dependencies)), !.
+    
+file_node_type(_, _, 'intermediate') :- !.
+    
 file_paths([], []).
 file_paths([Id|IdTail], [Path|PathTail]) :-
     fileT(Id, Path, _),
