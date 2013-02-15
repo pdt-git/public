@@ -58,6 +58,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
 	retract(result(ReferencingGoal, ClauseRef, Termposition, _)),
+	clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
 	(	nonvar(SearchMod),
 		var(Functor),
 		var(Arity)
@@ -65,7 +66,6 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 	;	true
 	),
 	clause_property(ClauseRef, file(RefFile)),
-	clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
 	clause_property(ClauseRef, line_count(Line)),
 	nth_clause(_, Nth, ClauseRef),
 	properties_for_predicate(RefModule,RefName,RefArity,PropertyList),
