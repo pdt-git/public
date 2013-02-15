@@ -27,10 +27,12 @@ import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.queries.ReferencesSearchQueryDirect;
 import org.cs3.pdt.common.queries.UndefinedCallsSearchQuery;
+import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
@@ -244,12 +246,22 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             	searchQuery = new ModuleDefinitionsSearchQuery(goal);
             }
         } else if (searchFor == UNDEFINED_CALL) {
-        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
+//        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
+        	if (data.isProjectScope()) {
+        		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
+        		if (project.isAccessible()) {
+        			searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers(), project);
+        		} else {
+        			Debug.error(project.getName() + " is not accessable.");
+        		}
+        	} else {
+        		searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
+        	}
         } else if (searchFor == DEAD_PREDICATE) {
         	if (data.isProjectScope()) {
         		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
         		if (project.isAccessible()) {
-        			searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers(), Util.quoteAtom(Util.prologFileName(project.getLocation().toFile())));
+        			searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers(), project);
         		} else {
         			Debug.error(project.getName() + " is not accessable.");
         		}
@@ -257,7 +269,17 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
         	}
         } else if (searchFor == META_PREDICATE) {
-        	searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
+        	if (data.isProjectScope()) {
+        		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
+        		if (project.isAccessible()) {
+        			searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers(), project);
+        		} else {
+        			Debug.error(project.getName() + " is not accessable.");
+        		}
+        	} else {
+        		searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
+        	}
+//        	searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
         }
         
         if (searchQuery != null) {
@@ -371,8 +393,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			limitToButton.setEnabled(doPatternSearch);
 		}
 		createMarkersCheckBox.setEnabled(!doPatternSearch);
-		projectScopeCheckBox.setEnabled(searchFor == DEAD_PREDICATE);
-		projectSelector.setEnabled(searchFor == DEAD_PREDICATE && projectScopeCheckBox.getSelection());
+		projectScopeCheckBox.setEnabled(!doPatternSearch);
+		projectSelector.setEnabled(!doPatternSearch && projectScopeCheckBox.getSelection());
 	}
 
     private void setLimitTo(int limitTo) {
@@ -625,8 +647,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private void fillProjectList(Combo combo) {
     	TreeSet<String> projectNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
     	
+    	IProject externalPrologFiles = null;
+    	try {
+			externalPrologFiles = ExternalPrologFilesProjectUtils.getExternalPrologFilesProject();
+		} catch (CoreException e) {
+			Debug.report(e);
+		}
     	for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-    		if (project.exists() && project.isOpen()) {
+    		if (project.isAccessible() && !project.equals(externalPrologFiles)) {
     			projectNames.add(project.getName());
     		}
     	}

@@ -22,9 +22,11 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.search.ui.text.Match;
 
@@ -34,15 +36,38 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	private static final String SMELL_NAME = "PDT_Quickfix";
 	private static final String QUICKFIX_DESCRIPTION = "PDT_QuickfixDescription";
 	private static final String QUICKFIX_ACTION = "PDT_QuickfixAction";
+	
+	private IProject root;
+	private String rootPath;
 
 	public MetaPredicatesSearchQuery(boolean createMarkers) {
-		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
-		setSearchType("Undeclared meta predicates");
+		this(createMarkers, null);
 	}
 	
+	public MetaPredicatesSearchQuery(boolean createMarkers, IProject root) {
+		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
+		this.root = root;
+		if (root == null) {
+			setSearchType("Undeclared meta predicates");
+		} else {
+			setSearchType("Undeclared meta predicates in project " + root.getName());
+			rootPath = Util.quoteAtom(Util.prologFileName(root.getLocation().toFile()));
+		}
+	}
+
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		return bT("find_undeclared_meta_predicate", "Module", "Name", "Arity", "MetaSpec", "MetaSpecAtom", "File", "Line", "PropertyList", "Directive");
+		return bT("find_undeclared_meta_predicate",
+				rootPath == null ? "_" : rootPath,
+				"Module",
+				"Name",
+				"Arity",
+				"MetaSpec",
+				"MetaSpecAtom",
+				"File",
+				"Line",
+				"PropertyList",
+				"Directive");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -56,6 +81,11 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 		} catch (NumberFormatException e) {}
 		
 		IFile file = findFile(m.get("File").toString());
+		
+		if (root != null && !root.equals(file.getProject())) {
+			return null;
+		}
+
 		int line = Integer.parseInt(m.get("Line").toString());
 
 		Object prop = m.get("PropertyList");

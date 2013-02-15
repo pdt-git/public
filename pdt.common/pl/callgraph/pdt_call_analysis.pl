@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_analysis, [find_undefined_call/9, find_dead_predicate/9, find_undeclared_meta_predicate/9]).
+:- module(pdt_call_analysis, [find_undefined_call/10, find_dead_predicate/9, find_undeclared_meta_predicate/10]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(pdt_call_graph).
@@ -32,8 +32,8 @@ assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
     !.
 assert_result(_,_,_,_).
 
-%% find_undefined_call(Module, Name, Arity, File, Start, End, PropertyList) 
-find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
+%% find_undefined_call(Root, Module, Name, Arity, File, Start, End, PropertyList) 
+find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, UndefArity, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
 	retractall(result(_, _, _, _)),
 	pdt_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
 	!,
@@ -43,6 +43,10 @@ find_undefined_call(Module, Name, Arity, File, Start, End, UndefName, UndefArity
 	;	TermPosition = Start-End
 	),
 	clause_property(Ref, file(File)),
+	(	nonvar(Root)
+	->	sub_atom(File, 0, _, _, Root)
+	;	true
+	),
 	clause_property(Ref, predicate(Module:Name/Arity)),
 	clause_property(Ref, line_count(Line)),
 	properties_for_predicate(Module,Name,Arity,PropertyList),
@@ -156,8 +160,8 @@ find_blacklist('$load_context_module',3,_).
 find_blacklist('$mode',2,_).
 find_blacklist('$pldoc',4,_).
 
-%% find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, PropertyList, Directive)
-find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, [label(MetaSpecAtom)|PropertyList], Directive) :-
+%% find_undeclared_meta_predicate(Root, Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, PropertyList, Directive)
+find_undeclared_meta_predicate(Root, Module, Name, Arity, MetaSpec, MetaSpecAtom, File, Line, [label(MetaSpecAtom)|PropertyList], Directive) :-
 	ensure_call_graph_generated,
 	!,
 	declared_in_module(Module, Name, Arity, Module),
@@ -173,6 +177,10 @@ find_undeclared_meta_predicate(Module, Name, Arity, MetaSpec, MetaSpecAtom, File
 	),
 	properties_for_predicate(Module, Name, Arity, PropertyList),
 	member(file(File), PropertyList),
+	(	nonvar(Root)
+	->	sub_atom(File, 0, _, _, Root)
+	;	true
+	),
 	format(atom(MetaSpecAtom), '~w', [MetaSpec]),
 	(	swi_meta_predicate_spec(MetaSpec)
 	->	format(atom(Directive), ':- meta_predicate(~w).~n', [MetaSpec])

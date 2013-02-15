@@ -24,9 +24,11 @@ import java.util.Vector;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.text.Match;
@@ -34,15 +36,38 @@ import org.eclipse.search.ui.text.Match;
 public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 	
 	private static final String ATTRIBUTE = "pdt.undefined.call";
+	
+	private IProject root;
+	private String rootPath;
 
 	public UndefinedCallsSearchQuery(boolean createMarkers) {
+		this(createMarkers, null);
+	}
+
+	public UndefinedCallsSearchQuery(boolean createMarkers, IProject root) {
 		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
-		setSearchType("Undefined calls");
+		this.root = root;
+		if (root == null) {
+			setSearchType("Undefined calls");
+		} else {
+			setSearchType("Undefined calls in project " + root.getName());
+			rootPath = Util.quoteAtom(Util.prologFileName(root.getLocation().toFile()));
+		}
 	}
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		return bT(PDTCommonPredicates.FIND_UNDEFINED_CALL, "Module", "Name", "Arity", "File", "Start", "End", "UndefName", "UndefArity", "PropertyList");
+		return bT(PDTCommonPredicates.FIND_UNDEFINED_CALL,
+				rootPath == null ? "_" : rootPath,
+				"Module",
+				"Name",
+				"Arity",
+				"File",
+				"Start",
+				"End",
+				"UndefName",
+				"UndefArity",
+				"PropertyList");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -58,6 +83,11 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 			properties = (Vector<String>)prop;
 		}
 		IFile file = findFile(m.get("File").toString());
+		
+		if (root != null && !root.equals(file.getProject())) {
+			return null;
+		}
+
 		int offset = Integer.parseInt(m.get("Start").toString());
 		int end = Integer.parseInt(m.get("End").toString());
 		PrologMatch match = createUniqueMatch(module, name, arity, file, offset, end - offset, properties, null, "definition");
