@@ -87,16 +87,13 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	).
 
 assert_edge(M1:Callee, M2:Caller, _, _) :-
-	(	predicate_property(M1:Callee,built_in)
-	->	true
-	;	functor(Callee,F1,N1),
-		(	predicate_property(M1:Callee, imported_from(M0))
-		->	M = M0
-		;	M = M1
-		),
-		functor(Caller,F2,N2), 
-		assert_edge_(M,F1,N1, M2,F2,N2)
-	). 
+	functor(Callee,F1,N1),
+	(	predicate_property(M1:Callee, imported_from(M0))
+	->	M = M0
+	;	M = M1
+	),
+	functor(Caller,F2,N2), 
+	assert_edge_(M,F1,N1, M2,F2,N2). 
 assert_edge(_, '<initialization>', _, _) :- !.
 
 assert_edge_(M1,F1,N1, M2,F2,N2) :-
