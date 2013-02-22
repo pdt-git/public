@@ -15,8 +15,6 @@ package pdt.y.main;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
@@ -29,6 +27,7 @@ import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
+import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
@@ -144,18 +143,19 @@ public class PDTGraphView extends  JPanel {
 		boolean e = isEditorInNavigation;
 		boolean c = isCtrlPressed;
 		boolean n = isNavigationModeEnabled;
-		                                                // e c n
-		boolean newModeNavigation = (!e && !c && n)  	// 0 0 1
-				|| (e && c && !n) 						// 1 1 0
-				|| (!e && c && !n) 						// 0 1 0
-				|| (e && !c && n);						// 1 0 1
+		                                                // e c n setNavitaionMode
+		boolean setNavitaionMode = (!e && !c && n)  	// 0 0 1 = 1
+				|| (e && c && !n) 						// 1 1 0 = 1
+				|| (!e && c && !n) 						// 0 1 0 = 1
+				|| (e && !c && n);						// 1 0 1 = 1
+														// otherwise = 0
 		
 		// If mode was not changed
-		if (newModeNavigation == isEditorInNavigation) {
-			return newModeNavigation;
+		if (setNavitaionMode == isEditorInNavigation) {
+			return setNavitaionMode;
 		}
 		
-		if (newModeNavigation) { 
+		if (setNavitaionMode) { 
 			// Navigation mode
 			view.removeViewMode(editMode);
 			view.addViewMode(navigationMode);
@@ -172,7 +172,7 @@ public class PDTGraphView extends  JPanel {
 			view.getCanvasComponent().addMouseWheelListener(wheelScroller);
 		}
 		
-		return newModeNavigation;
+		return setNavitaionMode;
 	}
 
 	public GraphDataHolder getDataHolder() {
@@ -214,16 +214,14 @@ public class PDTGraphView extends  JPanel {
 		if (graph.getNodeArray().length == 0)
 			return;
 		
-		Graphics gfx = view.getGraphics();
-		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
-		
+		NodeRealizerBase realizer = (NodeRealizerBase)graph.getDefaultNodeRealizer();
 		int i = 0;
 		int[] lengths = new int[graph.getNodeArray().length];
 		
 		for (Node node: graph.getNodeArray()) {
 			String text = createFirstLabel(node);
 			
-			int v = (int)(fontmtx.getStringBounds(text, gfx).getWidth() + 14);
+			int v = realizer.calcLabelSize(text).getWidth() + 14;
 			lengths[i++] = v;
 		}
 		

@@ -161,9 +161,9 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     		nth1(Id, ProjectFilePaths, FilePath),
     		file_node_name(FilePath, ProjectPath, FileNodeName),
     		file_node_type(FilePath, FoundDependencies, FileType),
-    		file_exports(FilePath, Exports)
+    		file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates)
     	),	
-		write_file_as_element(OutStream, Id, FilePath, FileNodeName, FileType, Exports)
+		write_file_as_element(OutStream, Id, FilePath, FileNodeName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates)
     ),
 
     forall(
@@ -171,19 +171,35 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     		member((S, T), FoundDependencies),
     		nth1(SId, ProjectFilePaths, S),
     		nth1(TId, ProjectFilePaths, T),
-    		file_exports(T, Exports)
+    		file_imports(S, T, Imports)
     	),
-		write_load_edge(OutStream, SId, TId, Exports)
+		write_load_edge(OutStream, SId, TId, Imports)
     ).
    
-file_exports(FilePath, Exports) :-
+file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates) :-
     module_property(ModuleName, file(FilePath)),
-    module_property(ModuleName, exports(Exports)), !.
-file_exports(_, []).
+    module_property(ModuleName, exports(Exports)),
+    exports_classification(Exports, ExportedStaticPredicates, ExportedDynamicPredicates), !.
+file_exports(_, [], []).
 
-file_imports(File, Exports) :-
-    module_of_file(File,Module), 
-    module_imports_from(M1,M2,Preds).
+exports_classification([Name/Arity|Tail], S, [Name/Arity|DTail]) :-
+    functor(H, Name, Arity),
+    predicate_property(H, dynamic),
+	exports_classification(Tail, S, DTail).
+exports_classification([E|Tail], [E|STail], D) :-
+    exports_classification(Tail, STail, D).
+exports_classification([], [], []) :- !.
+
+file_imports(File1, File2, PredNames) :-
+    module_of_file(File1,M1),
+    module_of_file(File2,M2), 
+    module_imports_from(M1,M2,Preds),
+    findall(Name/Arity,
+    	(
+    		member(P, Preds),
+    		functor(P, Name, Arity)
+    	),
+    	PredNames).
     
 module_imports_from(M1,M2,Preds) :-   
     setof( Head,

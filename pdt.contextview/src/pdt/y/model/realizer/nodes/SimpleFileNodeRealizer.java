@@ -24,7 +24,7 @@ import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 
 
-public class SimpleFileNodeRealizer extends ShapeNodeRealizer{
+public class SimpleFileNodeRealizer extends NodeRealizerBase {
 
 	public static final int INITIAL_STATE = 0;
 	public static final int TRANSITION_STATE = 1;

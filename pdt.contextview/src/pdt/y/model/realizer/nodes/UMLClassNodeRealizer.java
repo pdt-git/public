@@ -23,13 +23,12 @@ import java.io.ObjectOutputStream;
 
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphModel;
-
+import pdt.y.utils.Size;
 import y.base.Node;
 import y.util.D;
 import y.util.YVersion;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
-import y.view.ShapeNodeRealizer;
 import y.view.YLabel;
 
 /**
@@ -44,7 +43,7 @@ import y.view.YLabel;
  * </ul>
  * Executing this class will display a sample instance of this realizer.
  */
-public class UMLClassNodeRealizer extends ShapeNodeRealizer {
+public class UMLClassNodeRealizer extends NodeRealizerBase {
 	private GraphModel model;
 	private NodeLabel aLabel; // attributeLabel
 	private NodeLabel mLabel; // methodLabel
@@ -57,6 +56,7 @@ public class UMLClassNodeRealizer extends ShapeNodeRealizer {
 	 * Instantiates a new UMLNodeRealizer.
 	 */
 	public UMLClassNodeRealizer(GraphModel model) {
+		super();
 		this.model = model;
 		init();
 	}
@@ -237,10 +237,7 @@ public class UMLClassNodeRealizer extends ShapeNodeRealizer {
 		double width = getLabel().getWidth() + 10.0;
 
 		if (stereotype.length() > 0) {
-			NodeLabel l = new NodeLabel();
-			l.setText("<<" + getStereotype() + ">>");
-			l.setModel(NodeLabel.FREE);
-			l.bindRealizer(this);
+			Size l = calcLabelSize("<<" + getStereotype() + ">>");
 			height += l.getHeight() + 5.0;
 			width = Math.max(l.getWidth() + 10.0, width);
 		}
@@ -248,9 +245,7 @@ public class UMLClassNodeRealizer extends ShapeNodeRealizer {
 		height += getLabel().getHeight() + 3.0;
 
 		if (constraint.length() > 0) {
-			NodeLabel l = new NodeLabel();
-			l.setText("{" + getConstraint() + "}");
-			l.setModel(NodeLabel.FREE);
+			Size l = calcLabelSize("{" + getConstraint() + "}");
 			height += l.getHeight() + 5.0;
 			width = Math.max(l.getWidth() + 10.0, width);
 		}
@@ -267,7 +262,7 @@ public class UMLClassNodeRealizer extends ShapeNodeRealizer {
 		}
 
 		setSize(width, height);
-	}
+	}	
 
 	// ////////////////////////////////////////////////////////////////////////////
 	// GRAPHICS
@@ -402,13 +397,22 @@ public class UMLClassNodeRealizer extends ShapeNodeRealizer {
 	public void initialize() {
 		Node node = getNode();
 		GraphDataHolder dataHolder = model.getDataHolder();
-		setClassName(dataHolder.getNodeText(node));
-		
-		String predicates = dataHolder.getExports(node);
-		for (String i: predicates.split("[\\[,\\]]")) {
+		setClassName(dataHolder.getLabelTextForNode(node));
+
+		String staticPredicates = dataHolder.getModulePublicStaticPredicates(node);
+		for (String i : staticPredicates.split("[\\[,\\]]")) {
 			if (i.length() > 0) {
-			addMethod(i);
+				addMethod(i);
 			}
 		}
+		
+		String dynamicPredicates = dataHolder.getModulePublicDynamicPredicates(node);
+		for (String i : dynamicPredicates.split("[\\[,\\]]")) {
+			if (i.length() > 0) {
+				addAttribute(i);
+			}
+		}
+
+		fitContent();
 	}
 }

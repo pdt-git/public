@@ -17,7 +17,7 @@
 						write_call_edge/3,
 						write_load_edge/4,
 						write_predicates/3,
-						write_file_as_element/6]).
+						write_file_as_element/7]).
 
 :- ensure_loaded(pdt_builder_analyzer('../pdt_factbase')).
 :- use_module(pdt_builder_analyzer(edge_counter)).
@@ -88,14 +88,15 @@ write_load_edges(Stream):-
 	    )
 	).
     
-write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, Exports):-
+write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates) :-
     open_node(Stream,FileId),
     write_data(Stream,'kind','file_node'),
     write_data(Stream,'id',FileId),
     write_data(Stream,'file_node_name', ModuleName),
     write_data(Stream,'file_node_path', FilePath),
     write_data(Stream, 'file_node_type', FileType),
-    write_data(Stream, 'exports', Exports),
+    write_data(Stream, 'exported_static_predicates', ExportedStaticPredicates),
+    write_data(Stream, 'exported_dynamic_predicates', ExportedDynamicPredicates),
     close_node(Stream).	
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
@@ -136,10 +137,10 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 */	close_node(Stream).	
 
     
-write_load_edge(Stream, LoadingFileId, FileId, Exports):-
+write_load_edge(Stream, LoadingFileId, FileId, Imported):-
     open_edge(Stream, FileId, LoadingFileId),
     write_data(Stream, 'kind', 'loading'),
-    write_data(Stream, 'exports', Exports),
+    write_data(Stream, 'imported_predicates', Imported),
     %write_data(Stream, 'kind', 'call'),
 	close_edge(Stream).
     
@@ -226,9 +227,11 @@ write_graphML_ast_keys(OutStream):-
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),
-    write(OutStream, '<key id="exports" for="node" attr.name="exports" attr.type="string" />'),
+    write(OutStream, '<key id="exported_static_predicates" for="node" attr.name="exported_static_predicates" attr.type="string" />'),
     nl(OutStream),
-    write(OutStream, '<key id="exports" for="edge" attr.name="exports" attr.type="string" />'),
+    write(OutStream, '<key id="exported_dynamic_predicates" for="node" attr.name="exported_dynamic_predicates" attr.type="string" />'),
+    nl(OutStream),
+    write(OutStream, '<key id="imported_predicates" for="edge" attr.name="imported_predicates" attr.type="string" />'),
     nl(OutStream),
     nl(OutStream).
     

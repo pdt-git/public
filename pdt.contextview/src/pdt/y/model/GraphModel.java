@@ -17,6 +17,7 @@ import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
 import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
+import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
 import pdt.y.model.realizer.nodes.UMLClassNodeRealizer;
 import y.base.Edge;
@@ -39,7 +40,7 @@ public class GraphModel {
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer predicateNodeRealizer;
-	private UMLClassNodeRealizer fileNodeRealizer;
+	private NodeRealizerBase fileNodeRealizer;
 	private GroupNodeRealizer filegroupNodeRealizer;
 	private GroupNodeRealizer moduleGroupNodeRealizer;
 	
@@ -60,15 +61,11 @@ public class GraphModel {
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
 		predicateNodeRealizer = new PredicateNodeRealizer(this);
 		fileNodeRealizer = new UMLClassNodeRealizer(this);
-		setDefaultNodeRealizer(predicateNodeRealizer);
-	}
-	
-	public void setDefaultNodeRealizer(NodeRealizer realzier) {
-		graph.setDefaultNodeRealizer(realzier);
+		graph.setDefaultNodeRealizer(predicateNodeRealizer);
 	}
 
 	private void initEdgeRealizers() {
-		loadEdgeRealizer = new LoadEdgeRealizer();
+		loadEdgeRealizer = new LoadEdgeRealizer(this);
 		callEdgeRealizer = new CallEdgeRealizer();
 		graph.setDefaultEdgeRealizer(callEdgeRealizer);
 	}
@@ -89,7 +86,9 @@ public class GraphModel {
 				graph.setRealizer(node, newNodeRealizer);
 				newNodeRealizer.initialize();
 			} else {
-				// no realizer to set because it is already bound to default realizer
+				PredicateNodeRealizer newNodeRealizer = new PredicateNodeRealizer(predicateNodeRealizer);
+				graph.setRealizer(node, newNodeRealizer);
+				newNodeRealizer.fitContent();
 			}
 		}
 	}
@@ -100,9 +99,9 @@ public class GraphModel {
 				LoadEdgeRealizer newLoadEdgeRealizer = new LoadEdgeRealizer(loadEdgeRealizer);
 				graph.setRealizer(edge, newLoadEdgeRealizer);
 				
-				String exports = dataHolder.getExports(edge);
-				if (!exports.equals("[]")) {
-					newLoadEdgeRealizer.setLabelText(exports.split(",").length + "");
+				String imports = dataHolder.getModuleImportedPredicates(edge);
+				if (!imports.equals("[]")) {
+					newLoadEdgeRealizer.setLabelText(imports.split(",").length + "");
 				}
 				
 			} else if (dataHolder.isCallEdge(edge)) {

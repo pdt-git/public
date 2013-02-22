@@ -20,15 +20,16 @@ import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
 
 import java.awt.Color;
-import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphModel;
 import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.utils.Size;
+import y.base.Node;
 import y.geom.YDimension;
 import y.view.LineType;
 import y.view.NodeLabel;
@@ -36,7 +37,7 @@ import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 
 
-public class PredicateNodeRealizer extends ShapeNodeRealizer{
+public class PredicateNodeRealizer extends NodeRealizerBase {
 
 	public static final int INITIAL_STATE = 0;
 	public static final int TRANSITION_STATE = 1;
@@ -83,15 +84,7 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 	
 	@Override
-	protected void calcUnionRectImpl(Rectangle2D arg0) {
-		
-		super.calcUnionRectImpl(arg0);
-	}
-	
-	@Override
 	protected void paintNode(Graphics2D gfx) {
-		
-		initializeBoxSize(gfx);
 		
 		byte myStyle;
 		if (model.getDataHolder().isDynamicNode(getNode())) {
@@ -125,15 +118,14 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		super.paintNode(gfx);
 	}
 	
-	private void initializeBoxSize(Graphics2D gfx) {
-
-		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
+	public void fitContent() {
+		
+		Size s = calcLabelSize(model.getLabelTextForNode(getNode()));
 		
 		int width = 0;
-		int height = PredicateLayoutPreferences.getNumberOfLines() * fontmtx.getHeight() + 20;
+		int height = PredicateLayoutPreferences.getNumberOfLines() * s.getHeight() + 20;
 		
 		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
-		
 		
 		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
 			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
@@ -145,10 +137,42 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 			width = model.getNodesMedianWidth();
 		}
 		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
-			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(getNode()), gfx).getWidth() + 14;
+			width = (int)s.getWidth() + 14;
 		}
 		
 		setSize(width, height);
+	}
+	
+	@Override
+	public String getInfoText() {
+		StringBuilder sb = new StringBuilder(); 
+		Node node = getNode();
+
+		GraphDataHolder data = model.getDataHolder();
+
+		if (data.isModule(node)) {
+			sb.append("Module: ");
+		} else if (data.isFile(node)) {
+			sb.append("File: ");
+		} else if (data.isPredicate(node)) {
+			sb.append("Predicate: ");
+		}
+
+		sb.append(getLabelText());
+		
+		if (data.isExported(node)) {
+			sb.append(" [Exported]");
+		}
+
+		if (data.isDynamicNode(node)) {
+			sb.append(" [Dynamic]");
+		}
+
+		if (data.isUnusedLocal(node)) {
+			sb.append(" [Unused]");
+		}
+		
+		return sb.toString();
 	}
 
 	public int getState() {

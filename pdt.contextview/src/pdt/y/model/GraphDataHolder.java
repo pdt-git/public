@@ -48,7 +48,9 @@ public class GraphDataHolder {
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
 	private DataMap unusedLocal = Maps.createHashedDataMap();
-	private DataMap moduleExportsMap = Maps.createHashedDataMap();
+	private DataMap modulePublicStaticPredicatesMap = Maps.createHashedDataMap();
+	private DataMap modulePublicDynamicPredicatesMap = Maps.createHashedDataMap();
+	private DataMap moduleImportedPredicatesMap = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -113,8 +115,16 @@ public class GraphDataHolder {
 		return unusedLocal;
 	}
 	
-	public DataMap getModuleExportsMap() {
-		return moduleExportsMap;
+	public DataMap getModulePublicStaticPredicatesMap() {
+		return modulePublicStaticPredicatesMap;
+	}
+	
+	public DataMap getModulePublicDynamicPredicatesMap() {
+		return modulePublicDynamicPredicatesMap;
+	}
+	
+	public DataMap getModuleImportedPredicatesMap() {
+		return moduleImportedPredicatesMap;
 	}
 	
 	public DataMap getFileTypeMap() {
@@ -151,12 +161,16 @@ public class GraphDataHolder {
 		return kind.equals(CALL);
 	}
 	
-	public String getExports(Node node) {
-		return (String)moduleExportsMap.get(node);
+	public String getModulePublicStaticPredicates(Node node) {
+		return (String)modulePublicStaticPredicatesMap.get(node);
 	}
 	
-	public String getExports(Edge edge) {
-		return (String)moduleExportsMap.get(edge);
+	public String getModulePublicDynamicPredicates(Node node) {
+		return (String)modulePublicDynamicPredicatesMap.get(node);
+	}
+	
+	public String getModuleImportedPredicates(Edge edge) {
+		return (String)moduleImportedPredicatesMap.get(edge);
 	}
 
 	public boolean isLoadingEdge(Edge edge) {

@@ -13,6 +13,8 @@
 
 package pdt.y.focusview;
 
+import java.awt.event.MouseEvent;
+
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -52,7 +54,9 @@ import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.main.PluginActivator;
 import pdt.y.main.PreferencesUpdateListener;
-import pdt.y.model.GraphDataHolder;
+import pdt.y.model.realizer.edges.EdgeRealizerBase;
+import pdt.y.model.realizer.edges.LoadEdgeRealizer;
+import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
 import pdt.y.preferences.MainPreferencePage;
@@ -61,9 +65,11 @@ import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PreferenceConstants;
 import pdt.y.preferences.SkinsPreferencePage;
 import pdt.y.view.modes.OpenInEditorViewMode;
+import y.base.Edge;
 import y.base.Node;
+import y.view.EdgeLabel;
 import y.view.HitInfo;
-import y.view.NodeLabel;
+import y.view.NodeRealizer;
 import y.view.ViewMode;
 
 
@@ -264,8 +270,9 @@ public abstract class ViewBase extends ViewPart {
 	
 	public void updateCurrentFocusView() {
 		FocusViewControl f = getCurrentFocusView();
-		if (f != null)
+		if (f != null) {
 			f.reload();
+		}
 	}
 	
 	public void updateCurrentFocusViewLayout() {
@@ -344,7 +351,7 @@ public abstract class ViewBase extends ViewPart {
 			this.pifLoader = pifLoader;
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
-			pdtGraphView.addViewMode(new HoverTrigger(getShell()));
+			pdtGraphView.addViewMode(new MouseHandler(getShell()));
 		}
 		
 		public PDTGraphView getPdtGraphView() {
@@ -401,81 +408,76 @@ public abstract class ViewBase extends ViewPart {
 			return getViewContainer();
 		}
 
-		private final class HoverTrigger extends ViewMode {
+		private final class MouseHandler extends ViewMode {
 
 			private final ToolTip t;
 			
-			public HoverTrigger(Shell parent) {
+			public MouseHandler(Shell parent) {
 				t = new ToolTip(parent, SWT.NONE);
 				t.setVisible(false);
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				super.mouseClicked(e);
+				
+//				HitInfo hitInfo = getHitInfo(e.getX(), e.getY());
+//				if (hitInfo.hasHitEdgeLabels()) {
+//					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
+//					LoadEdgeRealizer realizer = (LoadEdgeRealizer)pdtGraphView.getGraph2D().getRealizer(edge);
+//					realizer.sh
+//				}
 			}
 			
 			@Override
 			public void mouseMoved(final double x, final double y) {
 				super.mouseMoved(x, y);
 				
-				new UIJob("Updating status") {
-					
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						updateStatus(x, y);
-						return Status.OK_STATUS;
-					}
-				
-				}.schedule();
+				updateStatus(x, y);
 			}
 
 			protected void updateStatus(double x, double y) {
 				HitInfo hitInfo = getHitInfo(x, y);
 				
+				String text = "";
+				
 				if (hitInfo.hasHitNodes()) {
 					Node node = hitInfo.getHitNode();
-					NodeLabel label = pdtGraphView.getGraph2D().getRealizer(node).getLabel();
 					
-					StringBuilder sb = new StringBuilder(); 
-
-					GraphDataHolder data = pdtGraphView.getDataHolder();
-
-					if (data.isModule(node)) {
-						sb.append("Module: ");
-					} else if (data.isFile(node)) {
-						sb.append("File: ");
-					} else if (data.isPredicate(node)) {
-						sb.append("Predicate: ");
+					NodeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(node);
+					if (realizer instanceof NodeRealizerBase) {
+						text = ((NodeRealizerBase)realizer).getInfoText();
 					}
+				}
+				else if (hitInfo.hasHitEdgeLabels()) {
+					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
+					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
+					text = realizer.getInfoText();
+				}
 
-					sb.append(label.getText());
-					
-					if (data.isExported(node)) {
-						sb.append(" [Exported]");
-					}
-
-					if (data.isDynamicNode(node)) {
-						sb.append(" [Dynamic]");
-					}
-
-					if (data.isUnusedLocal(node)) {
-						sb.append(" [Unused]");
-					}
-					
-					String text = sb.toString();
-
-					setInfoText(text);
-					
-					if (PredicateLayoutPreferences.isShowToolTip() && text.startsWith("Predicate")) {
-						Point location = Display.getCurrent().getCursorLocation();
-						location.x += 10;
-						location.y += 10;
-						t.setLocation(location);
-						t.setMessage(text.substring(11));
-						t.setVisible(true);
-					}
-					else {
-						t.setVisible(false);
-					}
-				} else {
-					setInfoText("");
-					t.setVisible(false);
+				if (!infoText.equals(text))
+				{
+					final String finalText = text;
+					new UIJob("Updating status") {
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							setInfoText(finalText);
+							
+							if (PredicateLayoutPreferences.isShowToolTip() && finalText.startsWith("Predicate")) {
+								Point location = Display.getCurrent().getCursorLocation();
+								location.x += 10;
+								location.y += 10;
+								t.setLocation(location);
+								t.setMessage(finalText.substring(11));
+								t.setVisible(true);
+							}
+							else {
+								t.setVisible(false);
+							}
+							
+							return Status.OK_STATUS;
+						}
+					}.schedule();
 				}
 			}
 		}
