@@ -23,6 +23,7 @@ import org.eclipse.ui.IPerspectiveFactory;
 public class PrologPerspective implements IPerspectiveFactory {
 	
 	public static final String CONSOLE_FOLDER = "prolog.perspective.console.folder";
+	public static final String VIEWS_FOLDER = "prolog.perspective.views.folder";
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
@@ -48,7 +49,11 @@ public class PrologPerspective implements IPerspectiveFactory {
 		bottomFolder.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottomFolder.addView(NewSearchUI.SEARCH_VIEW_ID);
 //		layout.addView(NewSearchUI.SEARCH_VIEW_ID, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
-		layout.addView("pdt.view.focus", IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
+		IFolderLayout viewsFolder = layout.createFolder(VIEWS_FOLDER, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
+		viewsFolder.addView("pdt.view.focus");
+		viewsFolder.addView("pdt.view.global");
+		viewsFolder.addView("pdt.view.dependencies");
+		
 		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, 0.2f, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, 0.8f, editorArea);
 	}

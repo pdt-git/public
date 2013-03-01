@@ -13,16 +13,8 @@
 
 package pdt.y.main;
 
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
-import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
@@ -30,14 +22,12 @@ import java.util.Arrays;
 
 import javax.swing.JPanel;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import pdt.y.focusview.FocusView;
+import pdt.y.focusview.ViewBase;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
-import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
@@ -52,9 +42,9 @@ import y.view.NavigationMode;
 import y.view.ViewMode;
 
 public class PDTGraphView extends  JPanel {
-	final FocusView focusView;
+	final ViewBase focusView;
 	final Graph2DView view;
-	GraphModel model;
+	GraphModel graphModel;
 	Graph2D graph;
 	GraphMLReader reader;
 
@@ -69,7 +59,7 @@ public class PDTGraphView extends  JPanel {
 
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public PDTGraphView(FocusView focusView)
+	public PDTGraphView(ViewBase focusView)
 	{
 		setLayout(new BorderLayout());
 		
@@ -141,6 +131,10 @@ public class PDTGraphView extends  JPanel {
 		});
 	}
 	
+	public GraphModel getGraphModel() {
+		return graphModel;
+	}
+	
 	public void recalculateMode() {
 		navigation = calculateMode(navigation, false, focusView.isNavigationModeEnabled());
 	}
@@ -149,18 +143,19 @@ public class PDTGraphView extends  JPanel {
 		boolean e = isEditorInNavigation;
 		boolean c = isCtrlPressed;
 		boolean n = isNavigationModeEnabled;
-		
-		boolean newModeNavigation = (!e && !c && n)  	// 0 0 1
-				|| (e && c && !n) 						// 1 1 0
-				|| (!e && c && !n) 						// 0 1 0
-				|| (e && !c && n);						// 1 0 1
+		                                                // e c n setNavitaionMode
+		boolean setNavitaionMode = (!e && !c && n)  	// 0 0 1 = 1
+				|| (e && c && !n) 						// 1 1 0 = 1
+				|| (!e && c && !n) 						// 0 1 0 = 1
+				|| (e && !c && n);						// 1 0 1 = 1
+														// otherwise = 0
 		
 		// If mode was not changed
-		if (newModeNavigation == isEditorInNavigation) {
-			return newModeNavigation;
+		if (setNavitaionMode == isEditorInNavigation) {
+			return setNavitaionMode;
 		}
 		
-		if (newModeNavigation) { 
+		if (setNavitaionMode) { 
 			// Navigation mode
 			view.removeViewMode(editMode);
 			view.addViewMode(navigationMode);
@@ -177,11 +172,11 @@ public class PDTGraphView extends  JPanel {
 			view.getCanvasComponent().addMouseWheelListener(wheelScroller);
 		}
 		
-		return newModeNavigation;
+		return setNavitaionMode;
 	}
 
 	public GraphDataHolder getDataHolder() {
-		return model.getDataHolder();
+		return graphModel.getDataHolder();
 	}
 	
 	public Graph2D getGraph2D() {
@@ -193,14 +188,22 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	public void setModel(GraphModel model){
-		this.model = model;
+		this.graphModel = model;
 	}
 
 	public void loadGraph(URL resource) {
-		model = reader.readFile(resource);
-		model.categorizeData();
-		model.assignPortsToEdges();
-		graph = model.getGraph();
+		graphModel = reader.readFile(resource);
+		graphModel.categorizeData();
+		graphModel.assignPortsToEdges();
+		graph = graphModel.getGraph();
+		view.setGraph2D(graph);
+
+		updateView();
+	}
+	
+	public void loadGraph(GraphModel model) {
+		graphModel = model;
+		graph = graphModel.getGraph();
 		view.setGraph2D(graph);
 
 		updateView();
@@ -208,25 +211,27 @@ public class PDTGraphView extends  JPanel {
 
 	private void updateView() {
 		
-		Graphics gfx = view.getGraphics();
-		FontMetrics fontmtx = gfx.getFontMetrics(gfx.getFont());
+		if (graph.getNodeArray().length == 0)
+			return;
 		
+		NodeRealizerBase realizer = (NodeRealizerBase)graph.getDefaultNodeRealizer();
 		int i = 0;
 		int[] lengths = new int[graph.getNodeArray().length];
-		
 		
 		for (Node node: graph.getNodeArray()) {
 			String text = createFirstLabel(node);
 			
-			int v = (int)(fontmtx.getStringBounds(text, gfx).getWidth() + 14);
+			int v = realizer.calcLabelSize(text).getWidth() + 14;
 			lengths[i++] = v;
 		}
 		
 		Arrays.sort(lengths);
 		
-		for (Node node: graph.getNodeArray()) {
-			initializeBoxSize(node, lengths[i - 1], lengths[i / 2], gfx, fontmtx);
-		}
+		int maxWidth = lengths[i - 1];
+		int medianWidth = lengths[i / 2];
+		graphModel.setNodesMaxWidth(maxWidth);
+		graphModel.setNodesMedianWidth(medianWidth);
+		
 		calcLayout();
 	}
 
@@ -236,33 +241,9 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	private String createFirstLabel(Node node) {
-		String labelText = model.getLabelTextForNode(node);
+		String labelText = graphModel.getLabelTextForNode(node);
 		graph.setLabelText(node,labelText);
 		return labelText;
-	}
-
-	protected void initializeBoxSize(Node node, int maximumValue, int medianValue, Graphics gfx, FontMetrics fontmtx) {
-		
-		int width = 0;
-		int height = PredicateLayoutPreferences.getNumberOfLines() * fontmtx.getHeight() + 20;
-		
-		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
-		
-		
-		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
-			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
-		}
-		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
-			width = maximumValue;
-		}
-		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
-			width = medianValue;
-		}
-		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
-			width = (int)fontmtx.getStringBounds(model.getLabelTextForNode(node), gfx).getWidth() + 14;
-		}
-		
-		graph.setSize(node, width, height);
 	}
 
 	public void calcLayout() {

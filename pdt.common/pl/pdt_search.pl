@@ -22,6 +22,7 @@
          , find_module_reference/8
          , find_alternative_predicates/7
          , loaded_file/1
+         , loaded_by/4
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),

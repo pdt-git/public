@@ -15,13 +15,14 @@
 						finish_writing/1,
 						write_file/6,
 						write_call_edge/3,
-						write_load_edge/3,
-						write_predicates/3]).
+						write_load_edge/4,
+						write_predicates/3,
+						write_file_as_element/7]).
 
-:- ensure_loaded('../pdt_factbase.pl').
-:- use_module('../analyzer/edge_counter').
-:- use_module('../analyzer/dead_predicate_finder').
-:- use_module('../modules_and_visibility').
+:- ensure_loaded(pdt_builder_analyzer('../pdt_factbase')).
+:- use_module(pdt_builder_analyzer(edge_counter)).
+:- use_module(pdt_builder_analyzer(dead_predicate_finder)).
+:- use_module(pdt_builder_analyzer('../modules_and_visibility')).
 
 prepare_for_writing(File,OutStream):-
     open(File,write,OutStream,[type(text)]),
@@ -87,7 +88,16 @@ write_load_edges(Stream):-
 	    )
 	).
     
-    
+write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates) :-
+    open_node(Stream,FileId),
+    write_data(Stream,'kind','file_node'),
+    write_data(Stream,'id',FileId),
+    write_data(Stream,'file_node_name', ModuleName),
+    write_data(Stream,'file_node_path', FilePath),
+    write_data(Stream, 'file_node_type', FileType),
+    write_data(Stream, 'exported_static_predicates', ExportedStaticPredicates),
+    write_data(Stream, 'exported_dynamic_predicates', ExportedDynamicPredicates),
+    close_node(Stream).	
     
 write_predicate(Stream,Id,Functor,Arity,Module):-
     open_node(Stream,Id),
@@ -127,9 +137,11 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 */	close_node(Stream).	
 
     
-write_load_edge(Stream,LoadingFileId,FileId):-
-    open_edge(Stream,LoadingFileId,FileId),
-    write_data(Stream,'kind','loading'),
+write_load_edge(Stream, LoadingFileId, FileId, Imported):-
+    open_edge(Stream, FileId, LoadingFileId),
+    write_data(Stream, 'kind', 'loading'),
+    write_data(Stream, 'imported_predicates', Imported),
+    %write_data(Stream, 'kind', 'call'),
 	close_edge(Stream).
     
 write_call_edge(Stream,SourceId,TargetId):-
@@ -154,6 +166,12 @@ write_graphML_ast_keys(OutStream):-
     write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
+    nl(OutStream),
+    write(OutStream, '<key id="file_node_name" for="node" attr.name="file_node_name" attr.type="string"/>'),
+    nl(OutStream),
+    write(OutStream, '<key id="file_node_path" for="node" attr.name="file_node_path" attr.type="string"/>'),
+    nl(OutStream),
+    write(OutStream, '<key id="file_node_type" for="node" attr.name="file_node_type" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="module" for="node" attr.name="module" attr.type="string">'),
     nl(OutStream),
@@ -209,6 +227,11 @@ write_graphML_ast_keys(OutStream):-
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),
+    write(OutStream, '<key id="exported_static_predicates" for="node" attr.name="exported_static_predicates" attr.type="string" />'),
+    nl(OutStream),
+    write(OutStream, '<key id="exported_dynamic_predicates" for="node" attr.name="exported_dynamic_predicates" attr.type="string" />'),
+    nl(OutStream),
+    write(OutStream, '<key id="imported_predicates" for="edge" attr.name="imported_predicates" attr.type="string" />'),
     nl(OutStream),
     nl(OutStream).
     
