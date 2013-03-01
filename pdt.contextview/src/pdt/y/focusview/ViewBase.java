@@ -55,7 +55,6 @@ import pdt.y.main.PDTGraphView;
 import pdt.y.main.PluginActivator;
 import pdt.y.main.PreferencesUpdateListener;
 import pdt.y.model.realizer.edges.EdgeRealizerBase;
-import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
@@ -67,7 +66,6 @@ import pdt.y.preferences.SkinsPreferencePage;
 import pdt.y.view.modes.OpenInEditorViewMode;
 import y.base.Edge;
 import y.base.Node;
-import y.view.EdgeLabel;
 import y.view.HitInfo;
 import y.view.NodeRealizer;
 import y.view.ViewMode;
@@ -331,6 +329,7 @@ public abstract class ViewBase extends ViewPart {
 	
 	@Override
 	public void dispose() {
+		focusViewCoordinator.dispose();
 		super.dispose();
 	}
 	

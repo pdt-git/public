@@ -38,6 +38,9 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	
 	@Override
 	public void partActivated(IWorkbenchPart part) {
+		if (focusView.getViewContainer().isDisposed()) {
+			return;
+		}
 		if (part instanceof IEditorPart) {
 			IEditorPart editorPart = (IEditorPart) part;
 			final String fileName = PDTCommonUtil.prologFileName(editorPart.getEditorInput());
@@ -94,5 +97,11 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	
 	protected void refreshCurrentView() {
 		currentFocusView.reload();
+	}
+	
+	public void dispose() {
+		focusView.getSite().getWorkbenchWindow().getPartService().removePartListener(this);
+		
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
 	}
 }
