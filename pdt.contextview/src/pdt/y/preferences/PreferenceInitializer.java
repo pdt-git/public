@@ -54,10 +54,9 @@ import java.util.Hashtable;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.StringConverter;
-import org.eclipse.swt.graphics.RGB;
 
 import pdt.y.main.PluginActivator;
+import pdt.y.utils.ColorUtils;
 
 /**
  * Class used to initialize default preference values.
@@ -73,22 +72,17 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 			{ NODE_SIZE_NUMBER_OF_LINES, "2" },
 			{ NODE_SIZE_FIXED_WIDTH, "100" },
 			{ LAYOUT, LAYOUT_HIERARCHY },
-			{ APPEARANCE_NONMODULE_HEADER_COLOR, getColorString(Color.WHITE) },
-			{ APPEARANCE_MODULE_HEADER_COLOR, getColorString(new Color(203, 215, 226)) },
-			{ APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, getColorString(new Color(240, 240, 240)) },
-			{ APPEARANCE_PREDICATE_COLOR, getColorString(Color.YELLOW) },
-			{ APPEARANCE_EXPORTED_PREDICATE_COLOR, getColorString(Color.GREEN) },
-			{ APPEARANCE_BORDER_COLOR, getColorString(Color.BLACK) },
-			{ APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR, getColorString(Color.RED) },
+			{ APPEARANCE_NONMODULE_HEADER_COLOR, ColorUtils.getColorString(Color.WHITE) },
+			{ APPEARANCE_MODULE_HEADER_COLOR, ColorUtils.getColorString(new Color(203, 215, 226)) },
+			{ APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, ColorUtils.getColorString(new Color(240, 240, 240)) },
+			{ APPEARANCE_PREDICATE_COLOR, ColorUtils.getColorString(Color.YELLOW) },
+			{ APPEARANCE_EXPORTED_PREDICATE_COLOR, ColorUtils.getColorString(Color.GREEN) },
+			{ APPEARANCE_BORDER_COLOR, ColorUtils.getColorString(Color.BLACK) },
+			{ APPEARANCE_UNUSED_PREDICATE_BORDER_COLOR, ColorUtils.getColorString(Color.RED) },
 			{ APPEARANCE_BORDER_STYLE, Integer.toString(APPEARANCE_BORDER_STYLE_SOLID) },
 			{ APPEARANCE_DYNAMIC_PREDICATE_BORDER_STYLE, Integer.toString(APPEARANCE_BORDER_STYLE_DASHED_DOTTED) },
-			{ APPEARANCE_LINE_COLOR, getColorString(Color.DARK_GRAY) }
+			{ APPEARANCE_LINE_COLOR, ColorUtils.getColorString(Color.DARK_GRAY) }
 	};
-	
-	private static String getColorString(Color color) {
-		RGB rgb = new RGB(color.getRed(), color.getGreen(), color.getBlue());
-		return StringConverter.asString(rgb);
-	}
 	
 	@SuppressWarnings("unchecked")
 	public static Hashtable<String, String[][]> getTemplates(IPreferenceStore store) {

@@ -15,7 +15,7 @@
 							pl_test/0,
 							pl_test/2]).
 								
-:- ensure_loaded('../parse_util').
+:- ensure_loaded(pdt_builder_analyzer('../parse_util')).
 
 /**
  * write_facts_to_abba(+File)

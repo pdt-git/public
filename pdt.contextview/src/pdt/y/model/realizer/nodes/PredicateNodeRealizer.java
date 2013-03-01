@@ -13,12 +13,23 @@
 
 package pdt.y.model.realizer.nodes;
 
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_FIXED_WIDTH;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_INDIVIDUAL;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MAXIMUM;
+import static pdt.y.preferences.PreferenceConstants.NODE_SIZE_MEDIAN;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphModel;
 import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.utils.Size;
+import y.base.Node;
 import y.geom.YDimension;
 import y.view.LineType;
 import y.view.NodeLabel;
@@ -26,7 +37,7 @@ import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 
 
-public class PredicateNodeRealizer extends ShapeNodeRealizer{
+public class PredicateNodeRealizer extends NodeRealizerBase {
 
 	public static final int INITIAL_STATE = 0;
 	public static final int TRANSITION_STATE = 1;
@@ -105,6 +116,63 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 		}
 		
 		super.paintNode(gfx);
+	}
+	
+	public void fitContent() {
+		
+		Size s = calcLabelSize(model.getLabelTextForNode(getNode()));
+		
+		int width = 0;
+		int height = PredicateLayoutPreferences.getNumberOfLines() * s.getHeight() + 20;
+		
+		IPreferenceStore prefs = PredicateLayoutPreferences.getCurrentPreferences();
+		
+		if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_FIXED)) {
+			width = prefs.getInt(NODE_SIZE_FIXED_WIDTH);
+		}
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MAXIMUM)) {
+			width = model.getNodesMaxWidth();
+		}
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_MEDIAN)) {
+			width = model.getNodesMedianWidth();
+		}
+		else if (PredicateLayoutPreferences.getNodeSizePreference().equals(NODE_SIZE_INDIVIDUAL)) {
+			width = (int)s.getWidth() + 14;
+		}
+		
+		setSize(width, height);
+	}
+	
+	@Override
+	public String getInfoText() {
+		StringBuilder sb = new StringBuilder(); 
+		Node node = getNode();
+
+		GraphDataHolder data = model.getDataHolder();
+
+		if (data.isModule(node)) {
+			sb.append("Module: ");
+		} else if (data.isFile(node)) {
+			sb.append("File: ");
+		} else if (data.isPredicate(node)) {
+			sb.append("Predicate: ");
+		}
+
+		sb.append(getLabelText());
+		
+		if (data.isExported(node)) {
+			sb.append(" [Exported]");
+		}
+
+		if (data.isDynamicNode(node)) {
+			sb.append(" [Dynamic]");
+		}
+
+		if (data.isUnusedLocal(node)) {
+			sb.append(" [Unused]");
+		}
+		
+		return sb.toString();
 	}
 
 	public int getState() {

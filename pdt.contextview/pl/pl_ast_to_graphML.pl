@@ -14,12 +14,14 @@
 :- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
+								write_dependencies_to_graphML/3,
 								pl_test_graph/0,
 								pl_test_graph/2]).
 
-:- use_module('../parse_util.pl').
+:- use_module(pdt_builder_analyzer('../parse_util.pl')).
 :- use_module(graphML_api).
-:- use_module('../analyzer/edge_counter').
+:- use_module(pdt_builder_analyzer(edge_counter)).
+:- use_module(pdt_common_pl(pdt_search)).
 
 write_project_graph_to_file(Project, OutputFile):-
 	parse_util:generate_facts(Project),
@@ -49,11 +51,30 @@ write_focus_to_graphML(FocusFile, GraphFile, Dependencies):-
     file_paths(DependentFiles, Dependencies).  
 
 write_global_to_graphML(ProjectFilePaths, GraphFile):-
-    findall(Path, (
-    		source_file(Path), member(Path, ProjectFilePaths)
-    	), ConsultedFilePaths),
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     file_paths(ProjectFiles, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_global_facts_to_graphML(ProjectFiles)).
+
+write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+    %relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
+    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
+
+relative_paths(_, [], []).
+relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-
+    relative_path(BasePath, H, FormattedH),
+    relative_paths(BasePath, T, FormattedT).
+    
+relative_path(BasePath, Path, RelativePath) :-
+	atom_chars(BasePath, BasePathChars),
+    atom_chars(Path, PathChars),
+    relative_path_(BasePathChars, PathChars, RelativePathChars),
+    atom_chars(RelativePath, RelativePathChars).
+        
+
+relative_path_([], Head, Head).
+relative_path_([H|T], [H|T2], Result) :-
+    relative_path_(T, T2, Result).
 
 write_to_graphML(GraphFile, CALL) :-
     with_mutex(prolog_factbase,
@@ -68,48 +89,17 @@ write_to_graphML(GraphFile, CALL) :-
   	  		)
   	 	)
   	 ).
+  	 
+filter_consulted(ProjectFilePaths, ConsultedFilePaths) :-
+    findall(Path, (
+    		member(Path, ProjectFilePaths), source_file(Path)
+    	), ConsultedFilePaths).
 
 add_output_stream_to_call(CALL, OutStream, CALL2) :-
     CALL =.. L1,
     append(L1, [OutStream], L2),
     CALL2 =.. L2.
 
-write_global_facts_to_graphML(ProjectFiles, OutStream) :-
-    
-    count_call_edges_between_predicates,
-    
-    forall(	
-		member(FileId, ProjectFiles),
-		(	
-			fileT(FileId,FileName, Module),
-			write_file(OutStream, FileName, all_preds, FileId, FileName, Module),
-    		flush_output(OutStream)
-    	)
-    ),
-    
-    findall(
-    	PredId,
-    	(
-			member(FileId, ProjectFiles),
-    		predicateT(PredId,FileId,_,_,_)
-    	),
-    	Predicates
-    ),
-	findall([SourcePredicate, TargetPredicate],
-		(
-    		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
-			member(SourcePredicate, Predicates),
-			member(TargetPredicate, Predicates)
-    	),
-    	FoundCalls
-    ),
-    
-    list_to_set(FoundCalls, Calls),
-    forall(
-    	member([S, T], Calls), 
-    	write_call_edge(OutStream, S, T)
-    ).
-    
 write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
     fileT_ri(FocusFile,FocusId), !,
 	
@@ -121,6 +111,141 @@ write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
     	member((SourceId,TargetId),Calls),
     	write_call_edge(OutStream,SourceId,TargetId)
     ).
+    
+write_global_facts_to_graphML(ProjectFiles, OutStream) :-
+    
+    count_call_edges_between_predicates,
+    
+    forall(member(FileId, ProjectFiles),
+		(	
+			fileT(FileId,FileName, Module),
+			write_file(OutStream, FileName, all_preds, FileId, FileName, Module),
+    		flush_output(OutStream)
+    	)
+    ),
+    
+    findall(PredId,
+    	(
+			member(FileId, ProjectFiles),
+    		predicateT(PredId,FileId,_,_,_)
+    	),
+    	Predicates
+    ),
+	findall((SourcePredicate, TargetPredicate),
+		(
+    		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
+			member(SourcePredicate, Predicates),
+			member(TargetPredicate, Predicates)
+    	),
+    	FoundCalls
+    ),
+    
+    list_to_set(FoundCalls, Calls),
+    forall(member((S, T), Calls), 
+    	write_call_edge(OutStream, S, T)
+    ).
+    
+write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
+    
+	findall((SourceFile, TargetFile),
+		(
+			member(SourceFile, ProjectFilePaths),
+			member(TargetFile, ProjectFilePaths),
+    		loaded_by(TargetFile, SourceFile, _, _)
+    	),
+    	FoundDependencies
+    ),
+    
+    forall(
+    	(
+    		nth1(Id, ProjectFilePaths, FilePath),
+    		file_node_name(FilePath, ProjectPath, FileNodeName),
+    		file_node_type(FilePath, FoundDependencies, FileType),
+    		file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates)
+    	),	
+		write_file_as_element(OutStream, Id, FilePath, FileNodeName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates)
+    ),
+
+    forall(
+    	(
+    		member((S, T), FoundDependencies),
+    		nth1(SId, ProjectFilePaths, S),
+    		nth1(TId, ProjectFilePaths, T),
+    		file_imports(S, T, Imports)
+    	),
+		write_load_edge(OutStream, SId, TId, Imports)
+    ).
+   
+file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates) :-
+    module_property(ModuleName, file(FilePath)),
+    module_property(ModuleName, exports(Exports)),
+    exports_classification(Exports, ExportedStaticPredicates, ExportedDynamicPredicates), !.
+file_exports(_, [], []).
+
+exports_classification([Name/Arity|Tail], S, [Name/Arity|DTail]) :-
+    functor(H, Name, Arity),
+    predicate_property(H, dynamic),
+	exports_classification(Tail, S, DTail).
+exports_classification([E|Tail], [E|STail], D) :-
+    exports_classification(Tail, STail, D).
+exports_classification([], [], []) :- !.
+
+file_imports(File1, File2, PredNames) :-
+    module_of_file(File1,M1),
+    module_of_file(File2,M2), 
+    module_imports_from(M1,M2,Preds),
+    findall(Name/Arity,
+    	(
+    		member(P, Preds),
+    		functor(P, Name, Arity)
+    	),
+    	PredNames).
+    
+module_imports_from(M1,M2,Preds) :-   
+    setof( Head,
+           predicate_property(M1:Head, imported_from(M2)),
+           Preds).
+
+% Module consults all Preds from File:
+module_consults_from(Module,File,Preds) :-
+    setof( Head,
+           module_consults_from__(Module,File,Head),
+           Preds).
+
+% Module consults Head from File:
+module_consults_from__(Module,File,Head) :-
+    module_of_file(ModuleFile,Module),
+    declared_in_module(Module, Head),
+    predicate_property(Module:Head, file(File)),
+    File \== ModuleFile.
+
+
+file_node_name(FilePath, _, ModuleName) :-
+	module_property(ModuleName, file(FilePath)), !.
+		
+file_node_name(FilePath, ProjectPath, RelativePath)	:-
+	relative_path(ProjectPath, FilePath, RelativePath), !.
+	
+file_node_name(FilePath, _, FilePath).
+    
+    
+file_node_type(FilePath, Dependencies, 'top') :-
+    not(member((_, FilePath), Dependencies)), !.
+        
+    
+file_node_type(FilePath, Dependencies, 'bottom') :-
+    not(member((FilePath, _), Dependencies)), !.
+    
+file_node_type(_, _, 'intermediate') :- !.
+    
+    
+file_node_type(FilePath, Dependencies, 'top') :-
+    not(member((_, FilePath), Dependencies)), !.
+    
+file_node_type(FilePath, Dependencies, 'bottom') :-
+    not(member((FilePath, _), Dependencies)), !.
+    
+file_node_type(_, _, 'intermediate') :- !.
     
 file_paths([], []).
 file_paths([Id|IdTail], [Path|PathTail]) :-
