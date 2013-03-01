@@ -1,5 +1,7 @@
 package pdt.y.focusview;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +39,7 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
 	protected String generateQuery(File helpFile) {
 		String query;
-		query = "ensure_generated_factbase_for_source_file('" + focusFile + "'), " 
-				+ "write_focus_to_graphML('" + focusFile + "', " + "'"
-				+ Util.prologFileName(helpFile) + "', " + "Dependencies).";
+		query = bT("write_focus_to_graphML", Util.quoteAtom(focusFile), Util.quoteAtom(Util.prologFileName(helpFile)), "Dependencies");
 		return query;
 	}
 

@@ -11,49 +11,46 @@
  * 
  ****************************************************************************/
 
-:- module(pl_ast_to_graphML, [	write_project_graph_to_file/2,
+:- module(pl_to_graphML, [	%write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
-								write_dependencies_to_graphML/3,
-								pl_test_graph/0,
-								pl_test_graph/2]).
+								write_dependencies_to_graphML/3]).
 
-:- use_module(pdt_builder_analyzer('../parse_util.pl')).
 :- use_module(graphML_api).
-:- use_module(pdt_builder_analyzer(edge_counter)).
+:- use_module(util_for_graphML).
+:- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 :- use_module(pdt_common_pl(pdt_search)).
 
-write_project_graph_to_file(Project, OutputFile):-
-	parse_util:generate_facts(Project),
-	writeln('generating graphml-file'),
-    time(write_facts_to_graphML(Project,OutputFile)).
+%write_project_graph_to_file(Project, OutputFile):-
+%	parse_util:generate_facts(Project),
+%	writeln('generating graphml-file'),
+%    time(write_facts_to_graphML(Project,OutputFile)).
 
-/**
- * write_facts_to_graphML(+Project,+File)
- *   Arg1 has to be a fully qualified file name. The file must not exist.
- *   The predicated collects the relevant informations about the following 
- *   facts and converts them into abba-sources for Bashaars Tool. This 
- *   sources are written into the file specified by arg1-
- *   The facts that are considered are:
- *   ###### to be completed #########
- **/
-write_facts_to_graphML(Project, File):-
-    prepare_for_writing(File,OutStream),
-    member(FirstProject,Project),
-    write_all_files(FirstProject,OutStream), flush_output(OutStream),
-  	write_load_edges(OutStream), flush_output(OutStream),
-  	write_call_edges(OutStream), flush_output(OutStream),
- 	finish_writing(OutStream).
+%/*
+% * write_facts_to_graphML(+Project,+File)
+% *   Arg1 has to be a fully qualified file name. The file must not exist.
+% *   The predicated collects the relevant informations about the following 
+% *   facts and converts them into abba-sources for Bashaars Tool. This 
+% *   sources are written into the file specified by arg1-
+% *   The facts that are considered are:
+% *   ###### to be completed #########
+% **/
+%write_facts_to_graphML(Project, File):-
+%    prepare_for_writing(File,OutStream),
+%    member(FirstProject,Project),
+%    write_all_files(FirstProject,OutStream), flush_output(OutStream),
+%  	write_load_edges(OutStream), flush_output(OutStream),
+%  	write_call_edges(OutStream), flush_output(OutStream),
+% 	finish_writing(OutStream).
 
 
-write_focus_to_graphML(FocusFile, GraphFile, Dependencies):-
-    write_to_graphML(GraphFile, write_focus_facts_to_graphML(FocusFile, DependentFiles)),
-    file_paths(DependentFiles, Dependencies).  
+write_focus_to_graphML(FocusFile, GraphFile, DependentFiles):-
+    write_to_graphML(GraphFile, write_focus_facts_to_graphML(FocusFile, DependentFiles)).  
 
 write_global_to_graphML(ProjectFilePaths, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
-    file_paths(ProjectFiles, ConsultedFilePaths),
-    write_to_graphML(GraphFile, write_global_facts_to_graphML(ProjectFiles)).
+%    file_paths(ProjectFiles, ConsultedFilePaths),
+    write_to_graphML(GraphFile, write_global_facts_to_graphML(ConsultedFilePaths)).
 
 write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
@@ -76,15 +73,13 @@ relative_path_([], Head, Head).
 relative_path_([H|T], [H|T2], Result) :-
     relative_path_(T, T2, Result).
 
+:- meta_predicate(write_to_graphML(+, 1)).
 write_to_graphML(GraphFile, CALL) :-
     with_mutex(prolog_factbase,
     	with_mutex(meta_pred_finder,
     		setup_call_cleanup(
     			prepare_for_writing(GraphFile,OutStream),
-				(
-					add_output_stream_to_call(CALL, OutStream, EXTCALL),
-					EXTCALL
-				),
+				call(CALL, OutStream),
   	  			finish_writing(OutStream)
   	  		)
   	 	)
@@ -95,55 +90,45 @@ filter_consulted(ProjectFilePaths, ConsultedFilePaths) :-
     		member(Path, ProjectFilePaths), source_file(Path)
     	), ConsultedFilePaths).
 
-add_output_stream_to_call(CALL, OutStream, CALL2) :-
-    CALL =.. L1,
-    append(L1, [OutStream], L2),
-    CALL2 =.. L2.
-
 write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
-    fileT_ri(FocusFile,FocusId), !,
+    source_file(FocusFile),
+    !,
 	
-	count_call_edges_between_predicates,
-	collect_ids_for_focus_file(FocusId,DependentFiles, ReferencedPredicates,Calls),
+	ensure_call_graph_generated,
+	collect_ids_for_focus_file(FocusFile, DependentFiles, ReferencedPredicates, Calls),
 	
    	write_files(FocusFile, DependentFiles, ReferencedPredicates, OutStream),
     forall(
-    	member((SourceId,TargetId),Calls),
-    	write_call_edge(OutStream,SourceId,TargetId)
+    	member((SourceModule:SourceName/SourceArity, TargetModule:TargetName/TargetArity), Calls),
+    	write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, DependentFiles)
     ).
     
 write_global_facts_to_graphML(ProjectFiles, OutStream) :-
     
-    count_call_edges_between_predicates,
+    ensure_call_graph_generated,
     
-    forall(member(FileId, ProjectFiles),
+    forall(member(File, ProjectFiles),
 		(	
-			fileT(FileId,FileName, Module),
-			write_file(OutStream, FileName, all_preds, FileId, FileName, Module),
+			main_module_of_file(File, Module),
+			write_file(OutStream, File, all_preds, File, Module),
     		flush_output(OutStream)
     	)
     ),
     
-    findall(PredId,
+    findall(Module:Name/Arity,
     	(
-			member(FileId, ProjectFiles),
-    		predicateT(PredId,FileId,_,_,_)
+			member(File, ProjectFiles),
+    		predicate_in_file(File, Module, Name, Arity)
     	),
     	Predicates
     ),
-	findall((SourcePredicate, TargetPredicate),
-		(
-    		call_edges_for_predicates(SourcePredicate, TargetPredicate, _Counter),
-			member(SourcePredicate, Predicates),
-			member(TargetPredicate, Predicates)
-    	),
-    	FoundCalls
-    ),
-    
-    list_to_set(FoundCalls, Calls),
-    forall(member((S, T), Calls), 
-    	write_call_edge(OutStream, S, T)
-    ).
+	forall((
+		member(SourceModule:SourceName/SourceArity, Predicates),
+		calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, _NumberOfCalls),
+		memberchk(TargetModule:TargetName/TargetArity, Predicates)
+	),(
+		write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, ProjectFiles)
+	)).
     
 write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     
@@ -247,30 +232,27 @@ file_node_type(FilePath, Dependencies, 'bottom') :-
     
 file_node_type(_, _, 'intermediate') :- !.
     
-file_paths([], []).
-file_paths([Id|IdTail], [Path|PathTail]) :-
-    fileT(Id, Path, _),
-    file_paths(IdTail, PathTail).
-    
-collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls):-
+collect_ids_for_focus_file(FocusFile, Files, CalledPredicates, Calls):-
     findall(
-    	PredId,
-    	predicateT(PredId,FocusId,_,_,_),
+    	Module:Name/Arity,
+    	predicate_in_file(FocusFile, Module, Name, Arity),
     	OwnPredicates
     ),
-    collect_calls_to_predicates(OwnPredicates,[],IncomingCalls),
-    collect_calling_predicates_and_files(IncomingCalls,OwnPredicates,CallingPreds,[FocusId],CallingFiles),
-    collect_calls_from_predicates(OwnPredicates,[],OutgoingCalls),
-    collect_called_predicates_and_files(OutgoingCalls,CallingPreds,AllPreds,CallingFiles,AllFiles),
+    collect_calls_to_predicates(OwnPredicates, [], IncomingCalls),
+    collect_calling_predicates_and_files(IncomingCalls, OwnPredicates, CallingPreds, [FocusFile], CallingFiles),
+    list_to_set(CallingFiles, CallingFiles0),
+    collect_calls_from_predicates(OwnPredicates,[], OutgoingCalls, FocusFile),
+    collect_called_predicates_and_files(OutgoingCalls, CallingPreds, AllPreds, CallingFiles0, AllFiles),
     list_to_set(AllPreds, CalledPredicates),
     list_to_set(AllFiles, Files),
     append(IncomingCalls, OutgoingCalls, CallsList),
     list_to_set(CallsList, Calls).
     
 collect_calls_to_predicates([],KnownCalls,KnownCalls).
-collect_calls_to_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
-    findall( (Source,Predicate),
-    	call_edges_for_predicates(Source,Predicate,_Counter),
+collect_calls_to_predicates([TargetModule:TargetName/TargetArity|OtherPredicates], KnownCalls, AllCalls):-
+    findall(
+    	(SourceModule:SourceName/SourceArity, TargetModule:TargetName/TargetArity),
+    	calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, _NumberOfCalls),
     	FoundCalls
     ),
     (	FoundCalls \= []
@@ -281,10 +263,16 @@ collect_calls_to_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
    	),
     collect_calls_to_predicates(OtherPredicates,CallSet,AllCalls).
     
-collect_calls_from_predicates([],KnownCalls,KnownCalls).
-collect_calls_from_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
-    findall( (Predicate,Target),
-    	call_edges_for_predicates(Predicate,Target,_Counter),
+collect_calls_from_predicates([],KnownCalls,KnownCalls, _FocusFile).
+collect_calls_from_predicates([SourceModule:SourceName/SourceArity|OtherPredicates],KnownCalls,AllCalls, FocusFile):-
+    findall(
+    	(SourceModule:SourceName/SourceArity, TargetModule:TargetName/TargetArity),
+		(	functor(SourceHead, SourceName, SourceArity),
+			(	predicate_property(SourceModule:SourceHead, multifile)
+			->	calls_multifile(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, FocusFile, _)
+	    	;	calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, _)
+	    	)
+    	),
     	FoundCalls
     ),
 	(	FoundCalls \= []
@@ -293,67 +281,78 @@ collect_calls_from_predicates([Predicate|OtherPredicates],KnownCalls,AllCalls):-
    		)
    	;	CallSet = KnownCalls
    	),
-    collect_calls_from_predicates(OtherPredicates,CallSet,AllCalls).   
+    collect_calls_from_predicates(OtherPredicates, CallSet, AllCalls, FocusFile).   
     
 collect_calling_predicates_and_files([],Preds,Preds,Files,Files).    
-collect_calling_predicates_and_files([(SourcePred,_CalledPred)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
-    predicateT(SourcePred,SourceFile,_,_,_),
-    collect_calling_predicates_and_files(OtherCalls,[SourcePred|KnownCalledPreds],CalledPreds,[SourceFile|KnownCalledFiles],CalledFiles). 
+collect_calling_predicates_and_files([(SourceModule:SourceName/SourceArity,TargetModule:TargetName/TargetArity)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
+    findall(
+    	File,
+		(	functor(SourceHead, SourceName, SourceArity),
+			(	predicate_property(SourceModule:SourceHead, multifile)
+			->	calls_multifile(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, File, _)
+	    	;	predicate_property(SourceModule:SourceHead, file(File))
+	    	)
+    	),
+    	Files
+    ),
+    append(Files, KnownCalledFiles, NewKnownCalledFiles),
+    collect_calling_predicates_and_files(OtherCalls,[SourceModule:SourceName/SourceArity|KnownCalledPreds],CalledPreds,NewKnownCalledFiles,CalledFiles). 
  
     
 collect_called_predicates_and_files([],Preds,Preds,Files,Files).    
-collect_called_predicates_and_files([(_Caller,TargetPred)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
-    predicateT(TargetPred,TargetFile,_,_,_),
-    collect_called_predicates_and_files(OtherCalls,[TargetPred|KnownCalledPreds],CalledPreds,[TargetFile|KnownCalledFiles],CalledFiles).
+collect_called_predicates_and_files([(_Caller,TargetModule:TargetName/TargetArity)|OtherCalls],KnownCalledPreds, CalledPreds,KnownCalledFiles,CalledFiles):-
+    findall(File, file_of_predicate(TargetModule, TargetName, TargetArity, File), Files),
+    append(Files, KnownCalledFiles, NewKnownCalledFiles),
+    collect_called_predicates_and_files(OtherCalls,[TargetModule:TargetName/TargetArity|KnownCalledPreds],CalledPreds,NewKnownCalledFiles,CalledFiles).
     
-/**
- * write_files(+Stream)
- *    writes #### dito ####
- */
-write_all_files(RelativePath,Stream):-
-    forall(	fileT(Id,File,Module),
-    		(	write_file(Stream,RelativePath,all_preds,Id,File,Module),
-    			flush_output(Stream)
-    		)
-    	  ).
+%/*
+% * write_files(+Stream)
+% *    writes #### dito ####
+% */
+%write_all_files(RelativePath,Stream):-
+%    forall(	fileT(Id,File,Module),
+%    		(	write_file(Stream,RelativePath,all_preds,Id,File,Module),
+%    			flush_output(Stream)
+%    		)
+%    	  ).
 		
 
 write_files(RelativePath, Files, PredicatesToWrite, Stream):-
 	forall(	
-		member(FileId,Files),
-		(	fileT(FileId,FileName,Module),
-			write_file(Stream,RelativePath,PredicatesToWrite,FileId,FileName,Module),
+		member(File,Files),
+		(	main_module_of_file(File,Module),
+			write_file(Stream,RelativePath,PredicatesToWrite,File,Module),
     		flush_output(Stream)
     	)
     ).	
     
 
-write_load_edges(Stream):-
-    forall(load_edge(LoadingFileId,FileId,_,_),
-    	(	(	fileT(LoadingFileId,_,_),
-    			fileT(FileId,_,_)
-    		)
-    	->	write_load_edge(Stream,LoadingFileId,FileId)
-    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
-    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
-	    )
-	).
+%write_load_edges(Stream):-
+%    forall(load_edge(LoadingFileId,FileId,_,_),
+%    	(	(	fileT(LoadingFileId,_,_),
+%    			fileT(FileId,_,_)
+%    		)
+%    	->	write_load_edge(Stream,LoadingFileId,FileId)
+%    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
+%    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
+%	    )
+%	).
 
 
 	
 
-write_call_edges(Stream):-
-    count_call_edges_between_predicates,
-    forall(call_edges_for_predicates(SourceId,TargetId,_Counter),
-    	(	write_call_edge(Stream,SourceId,TargetId)
-    	)
-    ).
+%write_call_edges(Stream):-
+%    ensure_call_graph_generated,
+%    forall(call_edges_for_predicates(SourceId,TargetId,_Counter),
+%    	(	write_call_edge(Stream,SourceId,TargetId)
+%    	)
+%    ).
     
 
-pl_test_graph:-	
-    pl_test_graph(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
-pl_test_graph(Project, OutputFile):-
-	write_project_graph_to_file(Project, OutputFile).
+%pl_test_graph:-	
+%    pl_test_graph(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
+%pl_test_graph(Project, OutputFile):-
+%	write_project_graph_to_file(Project, OutputFile).
     
 
 

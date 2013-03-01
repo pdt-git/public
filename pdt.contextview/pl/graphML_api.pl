@@ -13,18 +13,17 @@
 
 :- module(graphML_api,[ prepare_for_writing/2,
 						finish_writing/1,
-						write_file/6,
-						write_call_edge/3,
+						write_file/5,
+						write_call_edge/8,
 						write_load_edge/4,
 						write_predicates/3,
 						write_file_as_element/7]).
 
-:- ensure_loaded(pdt_builder_analyzer('../pdt_factbase')).
-:- use_module(pdt_builder_analyzer(edge_counter)).
-:- use_module(pdt_builder_analyzer(dead_predicate_finder)).
-:- use_module(pdt_builder_analyzer('../modules_and_visibility')).
+:- use_module(util_for_graphML).
+:- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
 
 prepare_for_writing(File,OutStream):-
+	reset_id_translation,
     open(File,write,OutStream,[type(text)]),
     write_graphML_header(OutStream),
     write_graphML_ast_keys(OutStream),
@@ -37,16 +36,17 @@ finish_writing(OutStream):-
     close(OutStream).
     
     
-write_file(Stream,RelativePath, Predicates, Id,FileName,Module):-
-	open_node(Stream,Id),
-	write_data(Stream,'id',Id),
-	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,FileName),
+write_file(Stream, RelativePath, Predicates, File, Module):-
+	get_id(File, Id),
+	open_node(Stream, Id),
+	write_data(Stream, 'id', Id),
+	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,File),
 					atom_concat('/',RelativeFileName,RelativeWithSlash), !
 				),
 				_, 
 				fail
 			)
-	;	RelativeFileName=FileName
+	;	RelativeFileName = File
 	),
 	write_data(Stream,'fileName',RelativeFileName),
 	write_data(Stream,'module',Module),	
@@ -55,38 +55,41 @@ write_file(Stream,RelativePath, Predicates, Id,FileName,Module):-
 	;	write_data(Stream,'kind','module')
 	),
 	start_graph_element(Stream),
-	write_predicates(Stream, Id, Predicates),
+	write_predicates(Stream, File, Predicates),
 	close_graph_element(Stream),
 	close_node(Stream).	
 
 		
-write_predicates(Stream, FileId, all_preds):-
+write_predicates(Stream, File, all_preds):-
     !,
-	forall(	predicateT(Id,FileId,Functor,Arity,Module),
-			(	write_predicate(Stream,Id,Functor,Arity,Module),
+	forall(	(	predicate_in_file(File, Module, Name, Arity),
+				first_line_of_predicate_in_file(Module, Name, Arity, File, Line)
+			),
+			(	write_predicate(Stream, File, Module, Name, Arity, Line),
 				flush_output(Stream)
 			)
 	).	
-write_predicates(Stream, FileId, PredicatesToWrite):-
-	forall(	(	member(Id,PredicatesToWrite),
-				predicateT(Id,FileId,Functor,Arity,Module)
+write_predicates(Stream, File, PredicatesToWrite):-
+	forall(	(	member(Module:Name/Arity,PredicatesToWrite),
+				once((file_of_predicate(Module, Name, Arity, File2), File2 == File)),
+				first_line_of_predicate_in_file(Module, Name, Arity, File, Line)
 			),
 			(
-				write_predicate(Stream,Id,Functor,Arity,Module),
+				write_predicate(Stream, File, Module, Name, Arity, Line),
 				flush_output(Stream)
 			)
 	).
 
-write_load_edges(Stream):-
-    forall(load_edge(LoadingFileId,FileId,_,_),
-    	(	(	fileT(LoadingFileId,_,_),
-    			fileT(FileId,_,_)
-    		)
-    	->	write_load_edge(Stream,LoadingFileId,FileId)
-    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
-    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
-	    )
-	).
+%write_load_edges(Stream):-
+%    forall(load_edge(LoadingFileId,FileId,_,_),
+%    	(	(	fileT(LoadingFileId,_,_),
+%    			fileT(FileId,_,_)
+%    		)
+%    	->	write_load_edge(Stream,LoadingFileId,FileId)
+%    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
+%    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
+%	    )
+%	).
     
 write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates) :-
     open_node(Stream,FileId),
@@ -99,42 +102,48 @@ write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedSt
     write_data(Stream, 'exported_dynamic_predicates', ExportedDynamicPredicates),
     close_node(Stream).	
     
-write_predicate(Stream,Id,Functor,Arity,Module):-
-    open_node(Stream,Id),
-    write_data(Stream,'kind','predicate'),
-    write_data(Stream,'id',Id),
-	write_data(Stream,'functor',Functor),
-	write_data(Stream,'arity',Arity),	
-	write_data(Stream,'moduleOfPredicate',Module),	
-	(	dynamicT(Id,_)
-	->	write_data(Stream,'isDynamic','true')
+write_predicate(Stream, File, Module, Name, Arity, Line):-
+    get_id(File-Module:Name/Arity, Id),
+    open_node(Stream, Id),
+    write_data(Stream, 'kind', 'predicate'),
+    write_data(Stream, 'id', Id),
+	write_data(Stream, 'functor', Name),
+	write_data(Stream, 'arity', Arity),	
+	write_data(Stream, 'moduleOfPredicate', Module),
+	write_data(Stream, 'fileName', File),
+	write_data(Stream, 'lineNumber', Line),
+	functor(Head, Name, Arity),	
+	(	predicate_property(Module:Head, dynamic)
+	->	write_data(Stream, 'isDynamic', 'true')
 	;	true
 	),
-	(	transparentT(Id,_)
-	->	write_data(Stream,'isTransparent','true')
+	(	predicate_property(Module:Head, transparent)
+	->	write_data(Stream, 'isTransparent', 'true')
 	;	true
 	),	
-	(	multifileT(Id,_)
-	->	write_data(Stream,'isMultifile','true')
+	(	predicate_property(Module:Head, multifile)
+	->	write_data(Stream, 'isMultifile', 'true')
 	;	true
 	),		
-	(	meta_predT(Id,_)	
-	->	write_data(Stream,'isMetaPredicate','true')
+	(	(	predicate_property(Module:Head, meta_predicate(_))
+		;	extended_meta_predicate(Module:Head, _)
+		)	
+	->	write_data(Stream, 'isMetaPredicate', 'true')
 	;	true
 	),	
-	(	exporting(_,Id,_)
-	->	write_data(Stream,'isExported','true')
+	(	exported_predicate(Module, Head)
+	->	write_data(Stream, 'isExported', 'true')
 	;	true
 	),	
-	(	locally_dead_predicate(Id)
-	->	write_data(Stream,'isUnusedLocal','true')
+	(	locally_dead_predicate(Module, Name, Arity)
+	->	write_data(Stream, 'isUnusedLocal', 'true')
 	;	true
 	),	
 	
 /*	start_graph_element(Stream),
 	write_clauses(Stream,FileName),
 	close_graph_element(Stream),
-*/	close_node(Stream).	
+*/	close_node(Stream).
 
     
 write_load_edge(Stream, LoadingFileId, FileId, Imported):-
@@ -144,13 +153,24 @@ write_load_edge(Stream, LoadingFileId, FileId, Imported):-
     %write_data(Stream, 'kind', 'call'),
 	close_edge(Stream).
     
-write_call_edge(Stream,SourceId,TargetId):-
-    open_edge(Stream,SourceId,TargetId),
-    write_data(Stream,'kind','call'),
-    call_edges_for_predicates(SourceId,TargetId,Frequency),
-    write_data(Stream,'frequency',Frequency),
-	close_edge(Stream).
-    
+write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, DependentFiles) :-
+	functor(SourceHead, SourceName, SourceArity),
+	(	predicate_property(SourceModule:SourceHead, multifile)
+	->	calls_multifile(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, SourceFile, NumberOfCalls)
+	;	calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, NumberOfCalls),
+		predicate_property(SourceModule:SourceHead, file(SourceFile))
+	),
+	memberchk(SourceFile, DependentFiles),
+	file_of_predicate(TargetModule, TargetName, TargetArity, TargetFile),
+	memberchk(TargetFile, DependentFiles),
+	has_id(SourceFile-SourceModule:SourceName/SourceArity, Source),
+	has_id(TargetFile-TargetModule:TargetName/TargetArity, Target),
+    open_edge(Stream, Source, Target),
+    write_data(Stream, 'kind', 'call'),
+    write_data(Stream, 'frequency', NumberOfCalls),
+	close_edge(Stream),
+	fail.
+write_call_edge(_, _, _, _, _, _, _, _).
     
 
 write_graphML_header(OutStream):-
@@ -166,6 +186,12 @@ write_graphML_ast_keys(OutStream):-
     write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
+    nl(OutStream),
+    write(OutStream, '<key id="lineNumber" for="node" attr.name="lineNumber" attr.type="int">'),
+    nl(OutStream),
+  	write(OutStream, '    <default>-1</default>'),
+  	nl(OutStream),
+  	write(OutStream, '</key>'),
     nl(OutStream),
     write(OutStream, '<key id="file_node_name" for="node" attr.name="file_node_name" attr.type="string"/>'),
     nl(OutStream),
@@ -268,7 +294,40 @@ close_edge(Stream):-
 write_data(Stream,Key,Value):-
 	format(Stream, '   <data key="~w">~w</data>~n', [Key,Value]).	
 	
+:- dynamic(pred_to_id/5).
+:- dynamic(atom_to_id/2).
+:- dynamic(current_id/1).
 
+reset_id_translation :-
+	retractall(pred_to_id(_,_,_,_,_)),
+	retractall(atom_to_id(_,_)),
+	retractall(current_id(_)),
+	assertz(current_id(1)).
 
+get_new_id(NewId) :-
+	var(NewId),
+	retract(current_id(NewId)),
+	succ(NewId, NextId),
+	assertz(current_id(NextId)),
+	!.
 
+get_id(File-Module:Name/Arity, Id) :-
+	!,
+	(	pred_to_id(File, Module, Name, Arity, Id)
+	->	true
+	;	get_new_id(Id),
+		assertz(pred_to_id(File, Module, Name, Arity, Id))
+	).
 
+get_id(Atom, Id) :-
+	(	atom_to_id(Atom, Id)
+	->	true
+	;	get_new_id(Id),
+		assertz(atom_to_id(Atom, Id))
+	).
+
+has_id(File-Module:Name/Arity, Id) :-
+	!,
+	pred_to_id(File, Module, Name, Arity, Id).
+has_id(Atom, Id) :-
+	atom_to_id(Atom, Id).

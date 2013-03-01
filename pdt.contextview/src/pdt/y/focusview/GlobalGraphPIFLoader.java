@@ -1,10 +1,13 @@
 package pdt.y.focusview;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
@@ -45,8 +48,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		loadPaths(currentPath);
 		
 		String query;
-		query = "ensure_generated_factbase_for_source_file('" + currentPath + "'), "
-				+ "write_global_to_graphML(" + paths.toString() + ",'" + Util.prologFileName(helpFile) + "').";
+		query = bT("write_global_to_graphML", paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)));
 		return query;
 	}
 
@@ -58,6 +60,10 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		final List<String> paths = new ArrayList<String>();
 		try {			
 			IProject project = FileUtils.findFileForLocation(path).getProject();
+			
+			if (ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
+				return paths;
+			}
 			
 			project.accept(new IResourceVisitor() {
 

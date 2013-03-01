@@ -1,5 +1,7 @@
 package pdt.y.focusview;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -26,8 +28,7 @@ public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 			String projectPath = Util.normalizeOnWindows(project.getLocation().toString());
 			
 			String query;
-			query = "ensure_generated_factbase_for_source_file('" + currentPath + "'), "
-					+ "write_dependencies_to_graphML(" + paths.toString() + ", '" + projectPath + "', '" + Util.prologFileName(helpFile) + "').";
+			query = bT("write_dependencies_to_graphML", paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
 			return query;
 			
 		} catch (IOException e) {

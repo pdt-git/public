@@ -13,6 +13,7 @@
 
 package pdt.y.model;
 
+import y.base.DataAcceptor;
 import y.base.DataMap;
 import y.base.Edge;
 import y.base.Node;
@@ -35,6 +36,7 @@ public class GraphDataHolder {
 	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
+	private DataMap lineNumberMap = Maps.createHashedDataMap();
 	private DataMap fileNodeNameMap = Maps.createHashedDataMap();
 	private DataMap fileNodePathMap = Maps.createHashedDataMap();
 	private DataMap fileTypeMap = Maps.createHashedDataMap();
@@ -66,6 +68,9 @@ public class GraphDataHolder {
 		return fileNameMap;
 	}
 	
+	public DataAcceptor getLineNumberMap() {
+		return lineNumberMap;
+	}
 	public DataMap getFileNodeNameMap() {
 		return fileNodeNameMap;
 	}
@@ -263,7 +268,7 @@ public class GraphDataHolder {
 		return functorMap.get(node) + " / " + arityMap.get(node);
 	}
 
-	private String getFileName(Node node) {
+	public String getFileName(Node node) {
 		return fileNameMap.get(node).toString();
 	}
 	public String getNodeText(Node node) {
@@ -272,6 +277,10 @@ public class GraphDataHolder {
 
 	public int getFrequency(Edge edge) {
 		return callFrequencyMap.getInt(edge);
+	}
+	
+	public int getLineNumber(Node node) {
+		return lineNumberMap.getInt(node);
 	}
 
 }

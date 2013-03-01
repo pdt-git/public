@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, pdt_walk_code/1]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, calls_multifile/8, pdt_walk_code/1]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -35,11 +35,17 @@ ensure_call_graph_generated.
 calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls) :-
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls).
 
+%% calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls)
+calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls) :-
+	calls_multifile_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls).
+
 :- dynamic(calls_/7).
+:- dynamic(calls_multifile_/8).
 
 clear([]).
 clear([Module:Name/Arity|Predicates]) :-
 	retractall(calls_(_,_,_,Module,Name,Arity,_)),
+	retractall(calls_multifile_(_,_,_Module,Name,Arity,_,_)),
 	clear(Predicates).
 
 :- dynamic(predicates_to_walk/1).
@@ -86,14 +92,19 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	;	true
 	).
 
-assert_edge(M1:Callee, M2:Caller, _, _) :-
+assert_edge(M1:Callee, M2:Caller, clause(Ref), _) :-
 	functor(Callee,F1,N1),
 	(	predicate_property(M1:Callee, imported_from(M0))
 	->	M = M0
 	;	M = M1
 	),
 	functor(Caller,F2,N2), 
-	assert_edge_(M,F1,N1, M2,F2,N2). 
+	assert_edge_(M,F1,N1, M2,F2,N2),
+	(	predicate_property(M2:Caller, multifile),
+		clause_property(Ref, file(File))
+	->	assert_multifile_edge(M,F1,N1, M2,F2,N2, File)
+	;	true
+	).
 assert_edge(_, '<initialization>', _, _) :- !.
 
 assert_edge_(M1,F1,N1, M2,F2,N2) :-
@@ -103,6 +114,14 @@ assert_edge_(M1,F1,N1, M2,F2,N2) :-
 	assertz(calls_(M1,F1,N1, M2,F2,N2, Cnt_plus_1)).
 assert_edge_(M1,F1,N1, M2,F2,N2) :-
 	assertz(calls_(M1,F1,N1, M2,F2,N2, 1)).
+
+assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
+	retract( calls_multifile_(M1,F1,N1, M2,F2,N2, File, Counter) ), 
+	!,
+	Cnt_plus_1 is Counter + 1,
+	assertz(calls_multifile_(M1,F1,N1, M2,F2,N2, File, Cnt_plus_1)).
+assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
+	assertz(calls_multifile_(M1,F1,N1, M2,F2,N2, File, 1)).
 
 :- multifile(pdt_reload:pdt_reload_listener/1).
 pdt_reload:pdt_reload_listener(_Files) :-
