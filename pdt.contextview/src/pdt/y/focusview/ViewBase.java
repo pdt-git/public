@@ -50,6 +50,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.ImageRepository;
+import pdt.y.internal.ui.PredicatesListDialog;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.main.PluginActivator;
@@ -420,12 +421,23 @@ public abstract class ViewBase extends ViewPart {
 			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
 				
-//				HitInfo hitInfo = getHitInfo(e.getX(), e.getY());
-//				if (hitInfo.hasHitEdgeLabels()) {
-//					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-//					LoadEdgeRealizer realizer = (LoadEdgeRealizer)pdtGraphView.getGraph2D().getRealizer(edge);
-//					realizer.sh
-//				}
+				if (e.getClickCount() != 2)
+					return;
+
+				HitInfo hitInfo = getHitInfo(e);
+				if (hitInfo.hasHitEdgeLabels()) {
+					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
+					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
+					final String text = realizer.getInfoText();
+					
+					new UIJob("Predicates List") {
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							new PredicatesListDialog(getShell(), text).open();
+							return Status.OK_STATUS;
+						}
+					}.schedule();
+				}
 			}
 			
 			@Override

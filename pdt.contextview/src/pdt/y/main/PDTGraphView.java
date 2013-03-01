@@ -18,7 +18,6 @@ import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
-import java.util.Arrays;
 
 import javax.swing.JPanel;
 
@@ -27,7 +26,6 @@ import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
-import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
@@ -140,15 +138,8 @@ public class PDTGraphView extends  JPanel {
 	}
 	
 	private boolean calculateMode(boolean isEditorInNavigation, boolean isCtrlPressed, boolean isNavigationModeEnabled) {
-		boolean e = isEditorInNavigation;
-		boolean c = isCtrlPressed;
-		boolean n = isNavigationModeEnabled;
-		                                                // e c n setNavitaionMode
-		boolean setNavitaionMode = (!e && !c && n)  	// 0 0 1 = 1
-				|| (e && c && !n) 						// 1 1 0 = 1
-				|| (!e && c && !n) 						// 0 1 0 = 1
-				|| (e && !c && n);						// 1 0 1 = 1
-														// otherwise = 0
+		
+		boolean setNavitaionMode = isCtrlPressed ^ isNavigationModeEnabled;
 		
 		// If mode was not changed
 		if (setNavitaionMode == isEditorInNavigation) {
@@ -208,29 +199,12 @@ public class PDTGraphView extends  JPanel {
 
 		updateView();
 	}
-
-	private void updateView() {
-		
-		if (graph.getNodeArray().length == 0)
-			return;
-		
-		NodeRealizerBase realizer = (NodeRealizerBase)graph.getDefaultNodeRealizer();
-		int i = 0;
-		int[] lengths = new int[graph.getNodeArray().length];
-		
+	
+	protected void updateView() {
 		for (Node node: graph.getNodeArray()) {
-			String text = createFirstLabel(node);
-			
-			int v = realizer.calcLabelSize(text).getWidth() + 14;
-			lengths[i++] = v;
+			String labelText = graphModel.getLabelTextForNode(node);
+			graph.setLabelText(node,labelText);
 		}
-		
-		Arrays.sort(lengths);
-		
-		int maxWidth = lengths[i - 1];
-		int medianWidth = lengths[i / 2];
-		graphModel.setNodesMaxWidth(maxWidth);
-		graphModel.setNodesMedianWidth(medianWidth);
 		
 		calcLayout();
 	}
@@ -238,12 +212,6 @@ public class PDTGraphView extends  JPanel {
 	public boolean isEmpty() {
 		return graph == null 
 			|| graph.getNodeArray().length == 0;
-	}
-
-	private String createFirstLabel(Node node) {
-		String labelText = graphModel.getLabelTextForNode(node);
-		graph.setLabelText(node,labelText);
-		return labelText;
 	}
 
 	public void calcLayout() {

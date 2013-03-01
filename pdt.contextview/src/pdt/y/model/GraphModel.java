@@ -13,6 +13,8 @@
 
 package pdt.y.model;
 
+import java.util.Arrays;
+
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
@@ -70,7 +72,31 @@ public class GraphModel {
 		graph.setDefaultEdgeRealizer(callEdgeRealizer);
 	}
 
+	private void analyzeGraph() {
+		if (graph.getNodeArray().length == 0)
+			return;
+		
+		NodeRealizerBase realizer = (NodeRealizerBase)graph.getDefaultNodeRealizer();
+		int i = 0;
+		int[] lengths = new int[graph.getNodeArray().length];
+		
+		for (Node node: graph.getNodeArray()) {
+			String text = getLabelTextForNode(node);
+			
+			int v = realizer.calcLabelSize(text).getWidth() + 14;
+			lengths[i++] = v;
+		}
+		
+		Arrays.sort(lengths);
+		
+		int maxWidth = lengths[i - 1];
+		int medianWidth = lengths[i / 2];
+		setNodesMaxWidth(maxWidth);
+		setNodesMedianWidth(medianWidth);
+	}
+
 	public void categorizeData() {
+		analyzeGraph();
 		categorizeNodes();		
 		categorizeEdges();
 	}
@@ -118,8 +144,8 @@ public class GraphModel {
 		return graph;
 	}
 
-	public void setGraph(Graph2D model) {
-		this.graph = model;
+	public void setGraph(Graph2D graph) {
+		this.graph = graph;
 	}
 	
 	public void useHierarchy(){
