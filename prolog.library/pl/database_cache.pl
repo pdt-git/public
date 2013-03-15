@@ -16,7 +16,7 @@
 
 % 21.2.2011: Added option 'unique'
 
-/**
+/*
  * This file contains predicates for caching results of goals
  * as facts in a specified module. By providing the option 
  * 'unique' in the optional Options list, one can enforce that the
@@ -31,7 +31,7 @@
 ).
 
                
-/**
+/*
  * generate_all_in_module(+Module,+Template,+Call)
  * generate_all_in_module(+Module,+Template,+Call,Options)
  *
@@ -72,7 +72,7 @@ retractall_generated_in_module(Module,Template) :-
 
    
    
-/**
+/*
  * generate_in_module(+Module,+Template,+Call)
  *
  * Compute a result of an arbitrary goal (Arg3) 

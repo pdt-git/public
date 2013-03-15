@@ -17,7 +17,7 @@
 :- use_module(library(lists)).
 :- use_module(metafile_referencer).
 
-/**
+/*
  * infer_meta_arguments_for(?Module,?AHead,?MetaSpec) is det
  *
  * Arg3 is the infered meta_predicate specification of the
@@ -65,7 +65,7 @@ find_meta_pred_args_in_clause(AModule, Head, MetaArgs):-
 
 
 	 
-/**
+/*
  * find_meta_vars_in_body(+Term, +Context, +MetaVars, -MetaVars) is det
  * 
  * Analyses the code of Arg1 for calls to known meta_predicates (in the
@@ -177,7 +177,7 @@ find_meta_vars_in_body(_Term, _Context, MetaVars, MetaVars).
       
       
 
-/**
+/*
  * find_meta_vars_in_head(+Head, +MetaVars, ?MetaArgs) is det
  *
  * Succeeds if Arg1 is the head of a meta-predicate-clause and Arg2 all

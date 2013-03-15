@@ -47,7 +47,7 @@ demo_time_measurement :-
    allclasses(_NR),
    reportRuntime('Counting of all classes took ').  
 
-/**
+/*
  * Helper predicates for reporting time spent.
  *   - performance(Goal, Time, Count)
  *   - ctc_time(Goal, Time)
@@ -57,13 +57,13 @@ demo_time_measurement :-
  */
    
       
-/**
+/*
  * Measure milliseconds to find and count all results of a Goal.
  */ 
 performance(Goal, Time, CountAll) :- 
   ctc_time(count(Goal, CountAll), Time).
 
-/**
+/*
  * Measure time to find and count all results of a Goal and
  * and also all unique results. 
  */   

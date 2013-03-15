@@ -104,7 +104,7 @@ count_all_and_unique(Goal,Nall,Nunique) :-
   count_list_elements(All,_SortedUnique,Nall,Nunique).
 
 
-/**
+/*
  * count_list_elements(+All,?SortedUnique,?LengthAll,?LengthSortedUnique)
  *   Return sorted, duplicate-free list and lenght of both lists.
  */   

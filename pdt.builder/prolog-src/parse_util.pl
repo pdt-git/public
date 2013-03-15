@@ -93,7 +93,7 @@ update_facts(File, Project):-
 	
 
 		
-/**
+/*
  * cleanup_nodes/0 isdet
  * retracts everything a former run of parse_util:generate_facts/1 could have asserted.
  **/  
@@ -213,7 +213,7 @@ clean_general_references_to(Id):-
 	retractall(pos_and_vars(Id,_,_)).
 
 
-/**
+/*
  * assert_new_node(+Term,+From,+To,-Id)
  * 	creates new identity Arg4 and asserts termT and filePosT with the information given
  *  by Arg1-Arg3 to this identity. 
