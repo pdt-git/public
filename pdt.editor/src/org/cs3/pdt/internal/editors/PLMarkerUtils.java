@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.quickfix.PDTMarker;
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
@@ -30,6 +29,7 @@ import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.FileUtils;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;

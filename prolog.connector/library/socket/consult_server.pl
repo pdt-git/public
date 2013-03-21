@@ -16,7 +16,8 @@
 
 :- module(consult_server,[
 	consult_server/1,
-	consult_server/2
+	consult_server/2,
+	get_var_names/2
 	]). 
 
 
@@ -703,3 +704,25 @@ user:prolog_exception_hook(In,_Out,_Frame,CFrame):-
 	)
 	*/	
 
+:- use_module(library(apply)).
+    
+get_var_names(Goal, _) :-
+    not(atomic(Goal)),
+    !,
+    throw('first argument has to be atomic').
+    
+get_var_names(Goal, VarNames) :-
+    format(atom(Query), '~w.', [Goal]),
+    open_chars_stream(Query,Stream),
+    read_term(Stream,_,[variable_names(VarNameList)]),
+    maplist(extract_var_name, VarNameList, ExtractedList),
+    list_2_comma_separated_list(ExtractedList,VarNames).
+    
+extract_var_name(=(VarName, _), VarName) :- !.
+extract_var_name(VarName, VarName) :- !.
+
+list_2_comma_separated_list([],'') :- !.
+list_2_comma_separated_list([Element],Element) :- !.
+list_2_comma_separated_list([Element|[H|T]],ElementComma) :-
+	list_2_comma_separated_list([H|T],RestAtom),
+	format(atom(ElementComma),'~w,~w',[Element,RestAtom]).

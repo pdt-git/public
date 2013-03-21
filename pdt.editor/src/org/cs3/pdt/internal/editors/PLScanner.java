@@ -22,12 +22,12 @@ import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTPredicates;
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;

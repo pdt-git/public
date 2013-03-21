@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.prolog.common;
+package org.cs3.prolog.ui.util;
 
 import java.io.IOException;
 import java.util.Stack;

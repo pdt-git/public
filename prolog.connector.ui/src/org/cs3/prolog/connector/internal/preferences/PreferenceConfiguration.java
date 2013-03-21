@@ -13,6 +13,7 @@ import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 
@@ -185,8 +186,8 @@ public class PreferenceConfiguration {
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {
 		initWithSWIPreferences(store);
 
-		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
-		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
+		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, UIUtils.getLogtalkStartupFile());
+		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, UIUtils.getLogtalkEnvironmentVariables());
 	}
 
 }
