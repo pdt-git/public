@@ -37,11 +37,6 @@ table(X) :-
 	write(')\n').
 :- endif.
 
-:- if(\+ pdt_support(doc_collect)).
-doc_collect(_) :-
-	writeln('WARNING: doc_collect not supported in current prolog version').
-:- endif.
-
 :- if(\+ pdt_support(flag)).
 flag(Name, _, _) :-
 	var(Name),

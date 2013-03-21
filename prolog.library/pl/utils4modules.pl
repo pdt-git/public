@@ -37,6 +37,7 @@
  ).
  
 :- use_module(library(lists)).
+:- use_module(pdt_support, [pdt_support/1, doc_collect/1]).
 
 :- doc_collect(true).
 

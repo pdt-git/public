@@ -12,10 +12,11 @@
  ****************************************************************************/
 
 
+ %:- use_module(pdt_support, [pdt_support/1]).
  :- consult(pdt_support).  % <- NO! THIS BE FIRST!
 
 
- :- consult(logging).       % <- THIS BE FIRST!
+ :- consult('logging.pl').       % <- THIS BE FIRST!
   
  :- consult(compatiblitySWI).
   

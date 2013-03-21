@@ -1,5 +1,5 @@
 
-:- module(pdt_support, [pdt_support/1]).
+:- module(pdt_support, [pdt_support/1, doc_collect/1]).
 
 :- if(current_prolog_flag(dialect,swi)).
 	pdt_support(doc_collect).
@@ -19,6 +19,11 @@
 	
 :- endif.
 
+
+:- if(\+ pdt_support(doc_collect)).
+doc_collect(_) :-
+	writeln('WARNING: doc_collect not supported in current prolog version').
+:- endif.
 
 
 % pdt_support(last_call_optimisation).

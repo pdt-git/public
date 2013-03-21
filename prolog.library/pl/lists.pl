@@ -13,7 +13,7 @@
  ****************************************************************************/
 
 % Date: 21.11.2005
-
+ 
 :- if(pdt_support(remove_duplicates)).
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
@@ -55,6 +55,7 @@
 
 :- use_module(library(backcomp)).
 :- use_module(library(lists)).
+:- use_module(pdt_support, [pdt_support/1, doc_collect/1]).
 
 /*
  * Check list membership without unifying.
