@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-/**
+/*
  * This file implements generic graph algorithms in Prolog.
  *  - Tarjan's O(M+N) computation of strongly connected components (SCCs)
  *    extended to deal also with nested SCCs. Nested SCCs are collapsed 
@@ -43,7 +43,7 @@
 
 
 
-/**
+/*
  * Global data structures for depth first traversal and SCC.
  */
 :- dynamic discovery_time/2. % args = node, time
@@ -56,7 +56,7 @@
 
 
   
-/**
+/*
  * Define graph structure based on predicates graph_edge/2 
  * and graph_node/1 to be defined in the calling module.
  */ 
@@ -74,7 +74,7 @@ edge(N1,N2) :-
     ).
 
 
-/**
+/*
  * For the graph defined by node/1 and edge/2 calculate the 
  * strongly connected components (SCCs) using Tarjan's algorithm:
  *  1. Perform a depth first toplogical sort that 
@@ -139,7 +139,7 @@ member_remove_first(Elem,[Elem|Rest],Rest) :- !.
 member_remove_first(Elem,[H|Tail],[H|Rest]):-
    member_remove_first(Elem,Tail,Rest). 
     
-/**
+/*
  * Topological sorting based on depth first search returns a list
  * of depths first paths through the graph, starting randomly.
  * This variant is used in the first phase of Tarjan's algorithm
@@ -154,7 +154,7 @@ visit_all_nodes_randomly(Paths) :-
 
 
 
-/**
+/*
  * Topological sorting based on depth first search returns a list
  * of depths first paths through the graph, proceessing the nodes
  * of the graph in the order indicated by NodeList.
@@ -188,7 +188,7 @@ visit_first_node(N,Path) :-
     increment_scc_counter,
     visit_neighbours(N,Path).
 
-/**
+/*
  * Depth first traversal starting at node N returns path Path.
  */
 :- module_transparent( visit_node/2 ). 
@@ -198,7 +198,7 @@ visit_node(N,Path) :-
     visit_neighbours(N,Path).
 
 
-/**
+/*
  * A node has already been visited if its discovery time is set.
  * The node might still be visited ('grey' node) or its visit might
  * already be finished ('black' node). Use finished/1 to find out
@@ -209,7 +209,7 @@ visited(N) :-
     !.
     
     
-/**
+/*
  * Visit one neighbour at one time. Visit them all upon backtracking.
  * Uses the graph_edge/2 definition from the calling context module.
  */
@@ -231,7 +231,7 @@ visit_neighbours(N,_) :-        % all neighbours visited
     fail.
 
 
-/**
+/*
  * The node N either has no neighbours at all or it has only
  * visited ones.
  */
@@ -245,7 +245,7 @@ dead_end(N) :-
    
 
 
-/**
+/*
  * Sort nodes in reverse finishing time assigned by first 
  * toposort pass through the graph.
  */
@@ -272,7 +272,7 @@ finishing_time(f, 3).
 /* --------- Helper Predicates -------------------------- */
    
 
-/**
+/*
  * Show snapshot of helper data structures.
  */   
 show_internals :-
@@ -283,7 +283,7 @@ show_internals :-
     listing_if_defined(graph_orientation).
 
     
-/**
+/*
  * (Re)Initialize helper data structures.
  */
 clean :-
@@ -294,7 +294,7 @@ clean :-
   set_graph_orientation(forward).
 
  
-/**
+/*
  * Assert discovery_time(N,currentTime) or finishing_time(N,currentTime)
  * and increment currentTime.
  */
@@ -334,7 +334,7 @@ increment_scc_counter :-
 
 
 
-/**
+/*
  * Set graph orientation. Legal values are 'forward' and
  * 'reverse'. (Actually, anything different from 'forward'
  * is treated as 'reverse'. This flag controls the direction

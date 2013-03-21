@@ -55,7 +55,7 @@ toggle_out :-
     print('output file'),
     assert(output_to_file).
 
-/**
+/*
  * open_printf_to_memory(Key) 
  *
  * Use the following pattern to ensure closing of your stream:
@@ -94,7 +94,7 @@ open_unique_memory_stream(Prefix,Stream):-
     concat(Prefix,StreamID,Stream),
    	open_printf_to_memory(Stream). 
 
-/**
+/*
  * close_printf_to_memory(+Key,-Content) 
  *
  * Closes the current memory stream with key Key. The output is written into Content.
@@ -174,7 +174,7 @@ close_all_printf_to_memory(Content) :-
     close_all_printf_to_memory(ContentTemp2),
     concat(ContentTemp,ContentTemp2,Content).
 
-/**
+/*
  * select_printf(+Key)
  *
  * Select current memory stream.
@@ -264,7 +264,7 @@ retractT(_).
    retractable facts!    -- GK, 27.03.2009
 */
 
-/**
+/*
 	stringAppend(?Atom1, ?Atom2, Atom3)
 	
 	Atom3 forms the concatination of Atom1 and Atom2.
@@ -383,7 +383,7 @@ get_single_char(A) :-
     system:get_single_char(A).
 */
 
-/**
+/*
  * disable_tty_control
  *
  * Disables tty control char-wise read on the windows platform.

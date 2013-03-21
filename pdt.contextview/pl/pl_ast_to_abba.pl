@@ -15,9 +15,9 @@
 							pl_test/0,
 							pl_test/2]).
 								
-:- ensure_loaded('../parse_util').
+:- ensure_loaded(pdt_builder_analyzer('../parse_util')).
 
-/**
+/*
  * write_facts_to_abba(+File)
  *   Arg1 has to be a full qualified file name. The file may not exist.
  *   The predicated collects the relevant informations about the following 
@@ -50,7 +50,7 @@ write_facts_to_abba(File):-
     write_edges(OutStream),
     close(OutStream).
     
-/**
+/*
  * write_files(+Stream)
  *    writes #### dito ####
  */

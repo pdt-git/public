@@ -145,7 +145,7 @@ compute_predicate_properties_for_file(File):-
 compute_predicate_properties_for_file(File):-
 	format('Warning: An error occured while computing predicate properties for file-id: ~w.~n',[File]).
 
-/**
+/*
  * analyse_directive(+Directive,+ParentId,+Module)
  *   looks into the term of Arg1 and if it is a known 
  *   kind of directive term stores accordingly information

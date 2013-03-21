@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package pdt.y.focusview;
+package pdt.y.internal;
 
 import java.util.ArrayList;
 import java.util.List;

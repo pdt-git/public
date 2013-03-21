@@ -14,7 +14,7 @@
 :- use_module(library(apply)).
 :- use_module(library(charsio)).
 
-/**
+/*
  * mgh(+Literal, ?MostGeneralLiteral)
  *
  * Arg2 is the most general form of the literal in Arg1
@@ -29,7 +29,7 @@ mgh(Term, Term_mgh):-
     functor(Term_mgh, Functor, Arity).
 
 
-/**
+/*
  * built_in(?Head)
  *
  * Check whether the specified term is the head of a built-in
@@ -40,7 +40,7 @@ built_in(Head) :-
     predicate_property(Head, built_in).    
     
     
-/**
+/*
  * repeat_n_times(+Goal,+N)
  */
 repeat_n_times(Goal,N) :-             % initialize loop counter
@@ -63,7 +63,7 @@ all(G) :- prolog_iteration_via_backtracking(G) .
 prolog_iteration_via_backtracking(G) :- (call(G), fail) ; true .
 
 
-/**
+/*
  * has_property(+Pred, ?Prop, ?HasProp) is det
  * 
  * Arg3 is 1 if the predicate referenced by Arg1 has the predicate of Arg2.

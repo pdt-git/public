@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-/**
+/*
  * Synchronizes updates and queries
  * on the factbase.
  *
@@ -70,7 +70,7 @@
 	increment_snapshot_count/1
   ]).
   
-/**
+/*
  * enable debugging of the sync messages via debug(sync).
  */
   
@@ -86,7 +86,7 @@
 
 /* depends_fact(a, b). */
 /* depends_fact(b, c). */
-/**
+/*
  * Examples:
  *
  * depends_fact(drogen, drogensuechtiger).
@@ -123,7 +123,7 @@ depends(Master, Slave) :-
 
 /********  API *************/
 
-/**
+/*
  * add(+Term)
  *
  * Der Term wird als hinzuzufuegender Fakt 
@@ -135,7 +135,7 @@ add(Term) :-
   thread_self(ThreadID), 
   assert(edb_local(ThreadID, Term, assert)). 
 
-/**
+/*
  * delete(+Term)
  * Der Term wird als zu loeschender Fakt 
  * im Format edb_local/3 aufgenommen.
@@ -145,7 +145,7 @@ delete(Term) :-
   thread_self(ThreadID), 
   assert(edb_local(ThreadID, Term, retract)).
   
-/**
+/*
  * delete(+Term)
  * Der Term wird als zu loeschender Fakt 
  * im Format edb_local/3 aufgenommen.
@@ -155,7 +155,7 @@ deleteAll(Term) :-
   thread_self(ThreadID), 
   assert(edb_local(ThreadID, Term, retractall)).
 
-/**
+/*
  * query(+Term)
  *
  * Use query/1 to evaluate a query transaction-safe.
@@ -226,7 +226,7 @@ increment_snapshot_count(_) :-
   add(sync:snapshot_count(1)).
 
     
-/**
+/*
  * notify_if_predicate_updated(+Signature)    
  *
  */
@@ -264,7 +264,7 @@ internal_rollback(ThreadID, Term, Op) :-
   retract(edb_local(ThreadID, Term, Op)).
 
 
-/**
+/*
  * rollback(+ThreadID)
  *
  * Alle in edb_local/3 fuer den angegebenen Thread gespeicherten Daten werden
@@ -275,7 +275,7 @@ rollback(ThreadID) :-
   forall(edb_local(ThreadID, Term, Op), internal_rollback(ThreadID, Term, Op)),
   retractall(depends_local(_)).
 
-/**
+/*
  * init_idb(+Subject)
  *
  * Subject currently MUST be a literal.
@@ -303,7 +303,7 @@ init_idb(AtomSubject):-
 	
 init_idb(_).
 
-/**
+/*
  * unregister_observer(+Subject)
  *
  * Subject currently MUST be a literal.
@@ -319,7 +319,7 @@ unregister_observer(Subject) :-
   dec_term_ref(Ref),
   gc_idb.
 
-/**
+/*
  * gc_idb
  *
  * Looks up all term references
@@ -340,7 +340,7 @@ gc_idb :-
     
 
 
-/**
+/*
  * term_ref(?Term,?Ref)
  *
  * Return unique reference
@@ -361,7 +361,7 @@ term_ref(Term, Ref) :-
   RecordedTerm =@= Term,
   !.
 
-/**
+/*
  * init_term_ref(+Term,-Ref)
  *
  * Looks up a reference to
@@ -381,7 +381,7 @@ init_term_ref(Term,Ref) :-
   recordz(term_ref,Term,Ref),
   inc_term_ref(Ref).  
 
-/**
+/*
  * remove_term_idb(+Ref)
  *
  * Removes a term from the term_ref
@@ -395,7 +395,7 @@ remove_term_idb(Ref) :-
   retractall(idb_copy(Ref,_)).
   
   
-/**
+/*
  * inc_term_ref(+TermReference)
  *
  * Increments the number 
@@ -412,7 +412,7 @@ inc_term_ref(Ref) :-
   plus(Num, 1, Inc),
   assert(num_observers_for_term(Ref,Inc)).
 
-/**
+/*
  * dec_term_ref(+TermReference)
  *
  * Decrements the number 
@@ -437,7 +437,7 @@ dec_term_ref(Ref) :-
   plus(Dec, 1, Num),
   assert(num_observers_for_term(Ref,Dec)).
 
-/**
+/*
  * evaluate_and_store_idb(+Ref)
  *
  * reevaluates the query defined by the
@@ -486,7 +486,7 @@ recover_from_non_existing_predicate(Ref, Term):-
 %   multifile(Term),
    assert((idb(Ref, Term) :- fail)).
 
-/**
+/*
  * updated_idb(TermReference)
  *
  * Delete all idb_copy/1 clauses
@@ -503,7 +503,7 @@ update_idb(Term,Ref):-
     retractall(idb(Ref,_)),
     evaluate_and_store_idb(Ref).
     
-/**
+/*
  * changed_idb(Term)
  *
  * TODO: Documentation
@@ -529,7 +529,7 @@ display(Op, Term) :-
   debug(sync,'~w(~w).~n',[Op,Term]).
  
 
-/**
+/*
  * separate_functor_arity_module_safe(?PredicateSignature, ?FunctorInclModule, ?Arity)
  *
  * examples:  test:f/1, test:f, 1

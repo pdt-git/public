@@ -30,13 +30,14 @@
     pretty_print_list/2,          % (+List,+Indent)!io 
     pretty_print_list_body/2,     % (+List,+Indent)
     list_2_comma_separated_list/2, % (+List,-Atom) is det.
-    list_2_separated_list/3 % (+List,-Atom) is det.
+    list_2_separated_list/3, % (+List,-Atom) is det.
+    finite_length/2
 ] ).
 
 :- use_module(library(backcomp)).
 :- use_module(library(lists)).
 
-/**
+/*
  * Check list membership without unifying.
  * Succeed only upon *identical* terms.
  * Suceed multiply if member multiply in list!!!!
@@ -53,7 +54,7 @@ nth1_non_unifying__([_|T], Elem, Index, Depth) :-
 
 
 
-/**
+/*
  * union_and_intersection(+Set1,+Set2,?Union,?Intersection) is det
  *
  * Determines the union and intersection of two sets represented as
@@ -122,7 +123,7 @@ inters__identity_based([X|T1],[Y|T2], NewI):-
 %    union_inters__(C,F,G,H).
  
 
-/**
+/*
  * union_sorted(+Set1,+Set2,?Union) is det
  *
  * Determines the union of two sets represented as dupliate-free lists.
@@ -146,7 +147,7 @@ union_sorted__([X|T1],[Y|T2],NewU):-
    ).
 
 
-/**
+/*
  * union_order_preserving(+Set1,+Set2,?Union) is det
  *
  * Determines the union of two sets represented as dupliate-free lists.
@@ -172,7 +173,7 @@ remove_duplicates([],[]).
 */
 
 
-/**
+/*
  * remove_duplicates_sorted(+List, ?DuplicateFree) is det
  *
  * Arg2 is the duplicate-free version of Arg1. The first occurence
@@ -200,7 +201,7 @@ remove_duplicates_sorted__([First|Rest], Previous, Result ) :-
    ).
 
 
-/**
+/*
  * remove_duplicates(+List, ?DuplicateFree) is det
  *
  * Arg2 is the duplicate-free version of Arg1. The first occurence
@@ -215,7 +216,7 @@ remove_duplicates([First|Rest],[First|NoDup]) :-
    remove_duplicates(Rest,NoDup).
 remove_duplicates([],[]).
 
-/**
+/*
  * split_unique(+List,+Elem,?BeforeNoDups,?AfterNoDups)
  *
  * Arg2 is an element from the list Arg1.
@@ -236,7 +237,7 @@ flatten_one_level([H|T],Res) :-
 */
 
 
-/**
+/*
  * list_sum(+Numbers, ?Total)
  *  - Arg1 = List of numbers (integer or real)
  *  - Arg2 = Sum of the elements of Arg1.
@@ -254,7 +255,7 @@ list_sum([H|T],Temp,Res) :-
 %list_sum([1,2],3).
 %list_sum([1,2,3,4,0,3,2,1],16).
 
-/**
+/*
  *  Generic list visitor. Traverses any binary encoded list and
  *  executes Pred(X) on all its elements. The functor of the
  *  terms representing binary lists is irrelevant as long as the
@@ -270,7 +271,7 @@ traverseList(List,Stop,Pred):-
     call(Pred),
     traverseList(Tail,Stop,Pred).
 
-/**
+/*
  * list_to_disjunction(+List,?Disjunction) is det.
  *
  * Arg1 is a List and Arg2 is its representation as a disjunction.
@@ -280,7 +281,7 @@ list_to_disjunction([A],A   ) :-!.
 list_to_disjunction([A|B],(A;Disj)) :-
   list_to_disjunction(B,Disj).
 
-/**
+/*
  * list_to_conjunction(+List,?Conjunction) is det.
  *
  * Arg1 is a List and Arg2 is its representation as a conjunction.
@@ -290,7 +291,7 @@ list_to_conjunction([A],A   ) :-!.
 list_to_conjunction([A|B],(A,Conj)) :-
   list_to_conjunction(B,Conj).
 
-/**
+/*
  * pretty_print_list(+List)
  *  Pretty-print a list, with each element starting on a new line
  *  and fixed two character indentation of each element.
@@ -313,7 +314,7 @@ pretty_print_list_body__([A|B]) :-
 pretty_print_list_body__([]) .
      
 
-/**
+/*
  * pretty_print_list(+List, +Indent)
  *  Pretty-print List, with each element starting on a new line.
  *  Indent is the indentation of each element. It is an atom, 
@@ -366,4 +367,6 @@ aformat(Atom,FormatString,List):-
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)]) .  
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)], 8) . 
 
-
+finite_length(List, Length) :-
+	'$skip_list'(Length, List, Tail),
+	Tail == [].

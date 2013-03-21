@@ -18,10 +18,9 @@ import pdt.y.preferences.EdgeAppearancePreferences;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
-import y.view.GenericEdgeRealizer;
 import y.view.LineType;
 
-public class CallEdgeRealizer extends GenericEdgeRealizer {
+public class CallEdgeRealizer extends EdgeRealizerBase {
 
 	private static final float METER_LIMIT = (float)1.45;
 	private static final float DASH_PHASE = (float)0.0;

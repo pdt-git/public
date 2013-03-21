@@ -15,7 +15,7 @@
 :- use_module(library(lists)).
 :- use_module(library(statistics)).
 
-/**
+/*
  * walking_file_list(+FileList,+Functor,+Arity)
  *
  *	Arg2 is the functor and Arg3 the Arity of a predicate
@@ -30,7 +30,7 @@ walking_file_list([File|Files],Functor,Arity):-
     check_file_or_dir(File,Functor,Arity),
     walking_file_list(Files,Functor,Arity),!.
   
-/**
+/*
  *	check_file_or_dir(+File,+Functor,+Arity)
  *	Arg2 is the functor and Arg3 the Arity of a predicate
  *	that succeeds with a prolog file as the first argument.
@@ -53,7 +53,7 @@ check_file_or_dir(Dir,Functor,Arity):-
 	walking_prolog_directory(Dir,Functor,Arity),!.
 check_file_or_dir(_,_,_).
     
-/**
+/*
  * walking_prolog_directory(+Dir,+Functor,+Arity)
  *	if Arg2 is the functor and Arg3 the Arity of a predicate
  *	that succeeds with a prolog file as the first argument,
@@ -67,7 +67,7 @@ walking_prolog_directory(Dir,Functor,Arity):-
     forall(member(File, Files), 
  		   check_file_or_dir(File,Functor,Arity)).   
 
-/**
+/*
  * do_nothing_on_file(+File)
  * does nothing to a file - just for runtime testing.
  */

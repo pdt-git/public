@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-/** 
+/*
  * This module provides the infrastructure for managing CTC data 
  * (PEFs) and CTC programs (CTs and CT sequences) in multiple  
  * modules without having to add a module parameter to each CTC 
@@ -34,7 +34,7 @@
  * Predefined predicates: prev_ctc_id/1, ctc_id_init/0, new_node_id/1
  */
 
-/**
+/*
  * Identity counter. Initialized to 10000.
  */
 :- dynamic prev_ctc_id/1.
@@ -45,7 +45,7 @@ ctc_id_init_pdt :-
 
 ?- ctc_id_init_pdt.
 
-/**
+/*
  * new_node_id(-Id): Bind id to a unique term.
  */
 new_node_id_pdt(NewId) :-

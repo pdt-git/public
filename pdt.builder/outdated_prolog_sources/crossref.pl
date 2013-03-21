@@ -53,7 +53,7 @@
  */
 :- dynamic db_xrefFromToFiles/3.
 
-/**
+/*
  * db_xrefFromToFilesOnly(?CallerFile,?CalledFile)
  *   Predicates defined in file arg2 are called from predicates in file arg1.
  */
@@ -100,7 +100,7 @@ listXref :-
     listing(db_xrefFromToFilesOnly).
 
 
-/**
+/*
  * is_metaterm(?Literal, ?MetaArguments )
  *  Arg1 is a literal representing a metacall and 
  *  Arg2 is the list of its meta-arguments.
@@ -283,7 +283,7 @@ storeXrefInfoForPreds(SingleNonMetaLiteral, Caller) :-
 
 %:- endif . % End of conditional compilation 
     
-/**
+/*
  * Store Xref Info for one pair of caller (arg1) and called 8arg2) pred.
  * The called pred (arg2) is not a metapredicate.
  */
@@ -340,7 +340,7 @@ storeXrefInfoForPred___(CallerName/CallerArity,
                           CallerShort,
                           CalledShort) ).
 
-/**
+/*
  * If File has a known prefix, remove the prefix for better readability.
  */
 extractBasePath_(File,Short) :-
@@ -349,7 +349,7 @@ extractBasePath_(File,Short) :-
     !.
 extractBasePath_(File,File) .
 
-/**
+/*
  * xrefBasePath(absolutePath)
  *
  * The prefix arg1 is removed from all file names stored in the xrefDb
@@ -363,7 +363,7 @@ extractBasePath_(File,File) .
 :- multifile(xrefBasePath/1).
 :- dynamic(xrefBasePath/1).
 
-/**
+/*
   * storeXrefInfoForFiles/0
   *   Stores the results of xrefInfoForFiles(CallerFile,CalledFile,CalledPreds)
   *   as db_xrefFromToFiles(CallerFile,CalledFile,CalledPreds) facts to be
@@ -403,7 +403,7 @@ xrefInfoForFiles(List) :-
            List).
     % print_linewise(List).
 
- /**
+ /*
   * xrefInfoForFiles_(?CallerFile,?CalledFile,?CalledPreds)
   *    The predicates in the list arg3, defined in file arg2,
   *    are called from predicates in file arg1.
@@ -417,7 +417,7 @@ xrefInfoForFiles_(CallerFile,CalledFile,CalledPreds) :-
                                            CallerFile, CalledFile),
            CalledPreds).
 
-/**
+/*
   * storeXrefInfoForFilesOnly
   *    Stores the results of xrefInfoForFilesOnly_(CallerFile,CalledFiles)
   *    as db_xrefFromToFilesOnly(CallerFile,CalledFiles) facts to be

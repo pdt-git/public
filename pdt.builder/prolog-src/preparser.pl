@@ -16,7 +16,7 @@
 :- ensure_loaded(parse_util).
 :- use_module(directive_handler).
  
-/**
+/*
  * parse(?File)
  * 	opens a stream to the file Arg1, tries to parse it as a prolog program and
  * 	closes the stream afterwards. 
@@ -26,7 +26,7 @@ parse(File):-
     parse(File,InStream),
     close(InStream).
       
-/**
+/*
  * parse(+File, +InStream)
  * 	creates some unic facts for the file Arg1 and starts the parsing of the
  * 	clauses contained in the stream Arg2 (which should be one to the file Arg1).
@@ -39,7 +39,7 @@ parse(File,InStream):-
     assert(fileT(Id,File,ActualModule)),    
     assert(fileT_ri(File,Id)).
 
-/**
+/*
  * parse_clause(+InStream,+FileId)
  *	  reads the first term from Arg1 if it is not EoF,
  *    parses possible subterms recursively and asserts some unic facts about the term.
@@ -68,12 +68,12 @@ parse_clauses(InStream,FileId):-
  			fail
     	),
     !.
-/**
+/*
  * ToDo: safe singeltons if needed,
  *       rewrite discription
  */
     
-/**
+/*
  * parse_clause_elements(+Term,+Pos,+Parent,+VarNames,+Module)
  *    parses the term given in Arg1 to PEFs. The term has to be a clause.
  *    If it is a

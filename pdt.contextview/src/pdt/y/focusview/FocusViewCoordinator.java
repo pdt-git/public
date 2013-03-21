@@ -6,9 +6,9 @@ import pdt.y.main.PDTGraphView;
 
 public class FocusViewCoordinator extends ViewCoordinatorBase {
 	
-	final HashMap<String, FocusView.FocusViewControl> views = new HashMap<String, FocusView.FocusViewControl>();
+	final HashMap<String, ViewBase.FocusViewControl> views = new HashMap<String, ViewBase.FocusViewControl>();
 	
-	public FocusViewCoordinator(FocusView focusView) {
+	public FocusViewCoordinator(ViewBase focusView) {
 		super(focusView);
 	}
 	
@@ -16,10 +16,10 @@ public class FocusViewCoordinator extends ViewCoordinatorBase {
 		currentFocusView = views.get(path);
 		if (currentFocusView == null) {
 			PDTGraphView pdtGraphView = new PDTGraphView(focusView);
-			FocusGraphPIFLoader loader = new FocusGraphPIFLoader(pdtGraphView);
-			loader.setFocusFile(path);
+			GraphPIFLoaderBase loader = focusView.createGraphPIFLoader(pdtGraphView);
+			loader.setCurrentPath(path);
 			
-			currentFocusView = focusView.new FocusViewControl(pdtGraphView, loader);
+			currentFocusView = focusView.createFocusViewControl(pdtGraphView, loader);
 
 			refreshCurrentView();
 			

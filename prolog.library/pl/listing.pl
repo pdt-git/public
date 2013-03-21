@@ -13,7 +13,7 @@
 
 :- use_module(library(listing)).
 
-/**
+/*
  * listing*(?Module,+FunctorSubstring,?Arity)
  * 
  * Call listing(Module:Functor/Arity) for each currently defined
@@ -31,7 +31,7 @@ listing*(Module,FunctorSubstring,Arity) :-
     ;  throw( secondArgumentNotAtomic( listing*(Module,FunctorSubstring,Arity) ) )
     .
     
-/**
+/*
  * listing_if_defined(+Functor)
  * listing_if_defined(+Functor/+Arity)
  * listing_if_defined(+Head)

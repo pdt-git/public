@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-/**
+/*
  * TODO
  */
 
@@ -54,7 +54,7 @@
 /****************** INTERNAL ***********************/
 
 earthRadius(6371).% km
-/**
+/*
  * point_of_interest(MAC , cordinates(Latitude,Longitude,Altitude)) 
  *
  * The MAC address (if associated with an AP or mobile device)
@@ -62,7 +62,7 @@ earthRadius(6371).% km
  */
 :- dynamic point_of_interest/3. 
 
-/**
+/*
  * distance(+gps(Long1,Lat1,Alt1),+gps(Long2,Lat2,Alt2),-Km)
  */
 

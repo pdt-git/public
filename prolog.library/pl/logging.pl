@@ -27,7 +27,7 @@ consult_silent_if_logging_disabled(FileOrFiles) :-
 consult_silent(FileOrFiles) :-              % used for loading test data.
     load_files(FileOrFiles, [silent(true)]).
   
-/**
+/*
  * Execute Goal and redirect all output to a file. For enforcing 
  * logging during execution of Goal wrap calls to this predicate   
  * as "do_with_logging_enabled(log_once_to_file(File,Goal))".
@@ -51,7 +51,7 @@ disable_logging :-
    set_prolog_flag(last_call_optimisation,true),
    retractall(loggingEnabled).
 
-/**
+/*
  * Only call a goal (that produces console output) if logging is enabled.
  * Indended for use with 'listing' and friends.
  */
@@ -61,7 +61,7 @@ do_if_logging_enabled(Goal) :-
    		-> call(Goal) ; true 
    ). 
     
-/**
+/*
  * Do with logging ENABLED and reset logging status afterwards.
  */
 verbose(Goal) :- 
@@ -73,7 +73,7 @@ do_with_logging_enabled(Goal) :-
        ; (enable_logging,enable_ignore_logging_in_module, call(Goal), disable_logging, disable_ignore_logging_in_module)
    ).
 
-/**
+/*
  * Do with logging DISABLED and reset logging status afterwards.
  */
 silent(Goal) :- 
@@ -89,7 +89,7 @@ do_with_logging_disabled(Goal) :-
 /* ======================================================================== 
  * Control of module
  * ======================================================================== */
-/**
+/*
  *  Disables / Enables logging for an specific module
  */
 :- dynamic mod_is_disabled/1.
@@ -122,14 +122,14 @@ disable_ignore_logging_in_module:-
 is_ignore_logging_in_module:-
 	clause(mod_ignore_is_enabled,_).    
 	
-/**
+/*
  *  Enables logging for all  modules
  */
 reset_logging_all_modules:-
 	retractall(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
-/**
+/*
  *  Disables / Enables the out of the hierachie of the contextmodule 
  */
 disable_showLoggingContextModules:-retractall(showContextModules_enabled).
@@ -140,7 +140,7 @@ enable_showLoggingContextModules:-
     format('WARNING: ==============================================~n').
 	
 
-/**
+/*
  *  check if the call-context-module is disabled 
  */
 check_logging_module:-
@@ -159,7 +159,7 @@ member_logging_enabled([Module|T]) :-
      ; ( mod_is_enabled(Module) -> true ; member_logging_enabled(T) )
    ).
    
-/**
+/*
  *  Rekusive predicate to get the list of context-modules 
  */
 getContextModules(ParentModules):-   
@@ -192,7 +192,7 @@ showContextModules:-
  * Controlled logging
  * ======================================================================== */
 
-/**
+/*
  * Printing of errors and warnings and logging of assert operations.
  */   
 ctc_error(Formatterm,Atomlist) :-
@@ -216,7 +216,7 @@ assert_logging(Fact) :-
     assert(Fact).
 
 
-/**
+/*
  * Basic output predicates including conditional logging to stdout 
  * and to any stream. 
  */               
