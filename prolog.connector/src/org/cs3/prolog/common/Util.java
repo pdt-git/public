@@ -957,15 +957,15 @@ public class Util {
 		return new SocketPrologInterface(name);
 	}
 	
-	public static PrologInterface newStandalonePrologInterface() throws IOException {
-		return newStandalonePrologInterface(null);
-	}
-	
-	public static PrologInterface newStandalonePrologInterface(String name) throws IOException {
+	public static PrologInterface newStandalonePrologInterface(String name, String executable) throws IOException {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		copyConsultServerToTempDir(tempDir);
 		SocketPrologInterface pif = new SocketPrologInterface(name);
-		pif.setExecutable(Util.guessExecutableName());
+		if (executable == null) {
+			pif.setExecutable(Util.guessExecutableName());
+		} else {
+			pif.setExecutable(executable);
+		}
 		pif.setFileSearchPath("library=" + Util.normalizeOnWindows(tempDir));
 		pif.setHost("localhost");
 		pif.setTimeout("15000");
