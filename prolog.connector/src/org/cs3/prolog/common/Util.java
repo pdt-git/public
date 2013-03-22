@@ -957,10 +957,14 @@ public class Util {
 		return new SocketPrologInterface(name);
 	}
 	
-	public static PrologInterface newStandalonePrologInterface(String name, String executable) throws IOException {
+	public static PrologInterface newStandalonePrologInterface() throws IOException {
+		return newStandalonePrologInterface(null);
+	}
+	
+	public static PrologInterface newStandalonePrologInterface(String executable) throws IOException {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		copyConsultServerToTempDir(tempDir);
-		SocketPrologInterface pif = new SocketPrologInterface(name);
+		SocketPrologInterface pif = new SocketPrologInterface(null);
 		if (executable == null) {
 			pif.setExecutable(Util.guessExecutableName());
 		} else {
