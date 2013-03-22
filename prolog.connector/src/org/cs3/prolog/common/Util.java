@@ -19,6 +19,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -954,6 +955,34 @@ public class Util {
 	
 	public static PrologInterface newPrologInterface(String name) {
 		return new SocketPrologInterface(name);
+	}
+	
+	public static PrologInterface newStandalonePrologInterface() throws IOException {
+		return newStandalonePrologInterface(null);
+	}
+	
+	public static PrologInterface newStandalonePrologInterface(String name) throws IOException {
+		String tempDir = System.getProperty("java.io.tmpdir");
+		copyConsultServerToTempDir(tempDir);
+		SocketPrologInterface pif = new SocketPrologInterface(name);
+		pif.setExecutable(Util.guessExecutableName());
+		pif.setFileSearchPath("library=" + Util.normalizeOnWindows(tempDir));
+		pif.setHost("localhost");
+		pif.setTimeout("15000");
+		pif.setStandAloneServer("false");
+		pif.setEnvironment(Util.guessEnvironmentVariables());
+		pif.setHidePlwin(true);
+		pif.setUseSessionPooling(true);
+		return pif;
+	}
+	
+	private static void copyConsultServerToTempDir(String tempDir) throws IOException {
+		InputStream resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("library/socket/consult_server.pl");
+		File consultServerPl = new File(tempDir, "consult_server.pl");
+		if (consultServerPl.exists()) {
+			consultServerPl.delete();
+		}
+		copy(resourceAsStream, new FileOutputStream(consultServerPl));
 	}
 
 	private static Set<File> tempFiles = new HashSet<File>();
