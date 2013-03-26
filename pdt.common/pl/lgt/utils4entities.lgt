@@ -297,7 +297,7 @@ defined_in_files(Entity,Name,Arity,Locations) :-
 call_local_pred_of_entity(Entity, Head) :-
 	functor(Head,F,N),
 	defined_in_entity(Entity, F,N,Entity),
-	Object<<Head.
+	Entity<<Head.
 
 /*
  * call_in_entity(+Object, +Head) is nondet
@@ -362,7 +362,7 @@ retract_in_entity(Entity,Head,Body) :- defined_in_entity(Entity, Head), retract(
 
 retractall_in_entity(Entity,Head) :- defined_in_entity(Entity, Head) -> retractall( :(Entity,Head) ) ; true.
 
-listing_in_entity(Entity,Goal) :- listing( Entity:Goal ).
+%listing_in_entity(Entity,Goal) :- listing( Entity:Goal ).
 
 /*
  * Copy all clauses whose head unifies Arg3 from module Arg1 to

@@ -26,7 +26,7 @@
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),
-             [ split_file_path/4                % (File,Folder,FileName,BaseName,Extension)
+             [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
              ] ).
 :- reexport(   'xref/pdt_xref', 
              [ find_reference_to/12             % ...
@@ -34,13 +34,12 @@
 :- use_module( properties, 
              [ properties_for_predicate/4
              ] ).
-:- use_module( pdt_prolog_library(utils4modules),
-             [ module_of_file/2                 % (File,FileModule)
-             , defined_in/4             % (SubModule,Name,Arity,DeclModule),
-             , defined_in_module/3              % (Module,Name,Arity),
-             , declared_in_file/4               % (Module,Name,Arity,Location)
-             , defined_in_files/4               % (Module,Name,Arity,Locations)
-             ] ).
+%:- use_module( pdt_prolog_library(utils4modules_visibility),
+%             [ module_of_file/2                 % (File,FileModule)
+%             , defined_in_module/3              % (Module,Name,Arity),
+%             , declared_in_file/4               % (Module,Name,Arity,Location)
+%             , defined_in_files/4               % (Module,Name,Arity,Locations)
+%             ] ).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 % TODO: Why this import?
