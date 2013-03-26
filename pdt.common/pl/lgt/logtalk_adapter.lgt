@@ -23,7 +23,7 @@
 	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
 	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
-	find_definition_contained_in/9,
+	find_definition_contained_in/10,
 	get_pred/7,
 	find_pred/8,
 	predicates_with_property/3,
@@ -280,7 +280,7 @@ find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, 
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
+find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
 	split_file_path:split_file_path(FullPath, Directory, File, _, lgt),
 	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
@@ -317,6 +317,7 @@ find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity,
 		),
 		SearchCategory = definition
 	;	% entity multifile definitions
+		memberchk(multifile(true), Options),
 		entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0)),
 		entity_property(From, _, file(FromFile, FromDirectory)),
 		atom_concat(FromDirectory, FromFile, FromPath),

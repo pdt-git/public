@@ -39,6 +39,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDT.PREF_EXTERNAL_FILE_SAVE_WARNING, true);
 		store.setDefault(PDT.PREF_AUTO_COMPLETE_ARGLIST, true);
 		store.setDefault(PDT.PREF_CONSULT_ON_SAVE, true);
+		store.setDefault(PDT.PREF_OUTLINESHOW_MULTIFILE, true);
+		store.setDefault(PDT.PREF_OUTLINE_SHOW_ALL_CLAUSES, "true");
 		
 		// Editor Color preferences
 		initializeDefaultPreferences_FontAndColor(store);		
