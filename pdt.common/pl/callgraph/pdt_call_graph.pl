@@ -127,13 +127,14 @@ assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
 pdt_reload:pdt_reload_listener(_Files) :-
 	(	first_run
 	->	true
-	;	setof(Module:Name/Arity, Head^(
+	;	setof(Module:Name/Arity, Head^File^(
 			(	pdt_reload:reloaded_file(File),
 				source_file(Head, File),
 				pi_of_head(Head, Module, Name, Arity)
 			;	retract(predicate_to_clear(Module, Name, Arity))
 			)
 		), Predicates),
+		!,
 		clear(Predicates),
 		generate_call_graph(Predicates)
 	).

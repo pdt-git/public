@@ -507,11 +507,23 @@ find_definition_in_file(_/*false*/, IsMultifile, ContextFile, Module, Name, Arit
 	;	ContextFile = File,
 		predicate_property(Module:Head, line_count(Line)),
 		nth_clause(Module:Head, _, Ref),
-		clause_property(Ref, line_count(Line))
+		clause_property(Ref, line_count(Line)),
+		!
 	).
 
 :- dynamic(file_line/3).
-%:- dynamic(x/1).
+find_lines(Head, File, Line, Ref) :-
+	predicate_property(Head, number_of_clauses(N)), 
+	N > 1000,
+	!,
+	(	Head = user:Head2
+	->	true
+	;	Head = Head2
+	),
+	findall(F, (source_file(F), source_file(X, F), X = Head2), Files),
+	Line = 1,
+	Ref = [],
+	member(File, Files).
 find_lines(Head, File, Line, Ref) :-
 	with_mutex(find_lines, (
 		retractall(file_line(_, _, _)),
