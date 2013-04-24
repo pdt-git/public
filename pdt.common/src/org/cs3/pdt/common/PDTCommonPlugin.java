@@ -13,12 +13,21 @@
 
 package org.cs3.pdt.common;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.cs3.prolog.common.OptionProviderListener;
+import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.PrologConnectorPredicates;
+import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
@@ -192,6 +201,96 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		}
 	}
 	
+	private Set<ReconsultHook> currentHooks = new HashSet<ReconsultHook>();
+
+	public void registerReconsultHook(ReconsultHook hook) {
+		currentHooks.add(hook);
+	}
+
+	public void unregisterReconsultHook(ReconsultHook hook) {
+		currentHooks.remove(hook);
+	}
+	
+	public Set<ReconsultHook> getReconsultHooks() {
+		return currentHooks;
+	}
+	
+	public void notifyReconsultHooks(PrologInterface pif) {
+		for (ReconsultHook r : currentHooks) {
+			r.lastFileReconsulted(pif);
+		}
+	}
+	
+	// TODO: problem with quotes
+	public void reconsultFiles(PrologInterface pif, boolean onlyEntryPoints) {
+		Debug.debug("Reconsult files");
+		List<String> consultedFiles = pif.getConsultedFiles();
+		if (consultedFiles != null) {
+			synchronized (consultedFiles) {
+				
+				String reconsultQuery = null;
+				if (onlyEntryPoints) {
+					reconsultQuery = createReconsultQueryEntryPoints(consultedFiles);
+				} else {
+					reconsultQuery = createReconsultQuery(consultedFiles);
+				}
+				
+				try {
+					pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, "[" + reconsultQuery + "]"));
+				} catch (PrologInterfaceException e) {
+					Debug.report(e);
+				}
+				
+				notifyReconsultHooks(pif);
+			}
+		}
+	}
+
+	private String createReconsultQueryEntryPoints(List<String> consultedFiles) {
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String fileName : consultedFiles) {
+			try {
+				IFile file = FileUtils.findFileForLocation(fileName);
+				if(file == null){
+					System.out.println("DEBUG");
+					continue;
+				}
+				String isEntryPoint = file.getPersistentProperty(new QualifiedName("pdt", "entry.point"));
+
+				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
+					if (first) {
+						first = false;
+					} else {
+						buf.append(", ");
+					}
+					buf.append(Util.quoteAtom(fileName));
+					Debug.debug("reload " + fileName + ", because it was consulted before");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+		return buf.toString();
+	}
+
+	private String createReconsultQuery(List<String> consultedFiles) {
+
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String fileName : consultedFiles) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(", ");
+			}
+			buf.append(Util.quoteAtom(fileName));
+			Debug.debug("reload " + fileName + ", because it was consulted before");
+		}
+		return buf.toString();
+	}
 }
 
 

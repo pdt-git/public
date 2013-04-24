@@ -75,22 +75,22 @@ has_property(Pred,Prop,1) :-
 has_property(_Pred,_Prop,0).
 
 
-:- use_module(library(apply)).
-    
-get_var_names(Goal, _) :-
-    not(atomic(Goal)),
-    !,
-    throw('first argument has to be atomic').
-    
-get_var_names(Goal, VarNames) :-
-    format(atom(Query), '~w.', [Goal]),
-    open_chars_stream(Query,Stream),
-    read_term(Stream,_,[variable_names(VarNameList)]),
-    maplist(extract_var_name, VarNameList, ExtractedList),
-    list_2_comma_separated_list(ExtractedList,VarNames).
-    
-extract_var_name(=(VarName, _), VarName) :- !.
-extract_var_name(VarName, VarName) :- !.
+%:- use_module(library(apply)).
+%    
+%get_var_names(Goal, _) :-
+%    not(atomic(Goal)),
+%    !,
+%    throw('first argument has to be atomic').
+%    
+%get_var_names(Goal, VarNames) :-
+%    format(atom(Query), '~w.', [Goal]),
+%    open_chars_stream(Query,Stream),
+%    read_term(Stream,_,[variable_names(VarNameList)]),
+%    maplist(extract_var_name, VarNameList, ExtractedList),
+%    list_2_comma_separated_list(ExtractedList,VarNames).
+%    
+%extract_var_name(=(VarName, _), VarName) :- !.
+%extract_var_name(VarName, VarName) :- !.
     
 
 

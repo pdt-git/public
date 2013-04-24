@@ -37,7 +37,6 @@ import org.cs3.prolog.common.InputStreamPump;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntime;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.internal.pif.ServerStartAndStopStrategy;
 import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
@@ -51,9 +50,13 @@ private static JackTheProcessRipper processRipper;
 			":- dynamic pdt_startup_error_message/1.\n" +
 			":- dynamic collect_pdt_startup_error_messages/0.\n" +
 			"collect_pdt_startup_error_messages.\n" +
-			"message_hook(error(Error,File),_,_):-\n" +
-			"    collect_pdt_startup_error_messages,\n" + 
-			"    message_to_string(error(Error,File),Msg),\n" +
+			"message_hook(_,Level,Lines):-\n" +
+			"    collect_pdt_startup_error_messages,\n" +
+			"    (Level == error; Level == warning),\n" + 
+			"    prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),\n" +
+			"    prolog_load_context(source, File),\n" +
+			"    with_output_to(atom(Msg0), (current_output(O), print_message_lines(O, '', Lines))),\n" +
+			"    format(atom(Msg), 'Location: ~w:~w~nMessage: ~w', [File, Line, Msg0]),\n" +
 			"    assertz(pdt_startup_error_message(Msg)),\n" +
 			"    fail.\n" +
 			"write_pdt_startup_error_messages_to_file(_File) :-\n" +
@@ -63,7 +66,17 @@ private static JackTheProcessRipper processRipper;
 			"write_pdt_startup_error_messages_to_file(File) :-\n" +
 			"    open(File, write, Stream),\n" +
 			"    forall(pdt_startup_error_message(Msg),format(Stream, '~w~n', [Msg])),\n" +
-			"    close(Stream).";
+			"    close(Stream).\n";
+	private static final String STARTUP_ERROR_LOG_LOGTALK_CODE =
+			":- multifile('$lgt_logtalk.message_hook'/5).\n" +
+			":- dynamic('$lgt_logtalk.message_hook'/5).\n" +
+			"'$lgt_logtalk.message_hook'(_, Kind, core, Tokens, _) :-\n" +
+			"    collect_pdt_startup_error_messages,\n" +
+			"    functor(Kind, Level, _),\n" +
+			"    (Level == error; Level == warning),\n" + 
+			"    with_output_to(atom(Msg), (current_output(S), logtalk::print_message_tokens(S, '', Tokens))),\n" +
+			"    assertz(pdt_startup_error_message(Msg)),\n" +
+			"    fail.\n";
 
 	public SocketServerStartAndStopStrategy() {
 		processRipper=JackTheProcessRipper.getInstance();
@@ -92,18 +105,18 @@ private static JackTheProcessRipper processRipper;
 	private Process startSocketServer(SocketPrologInterface socketPif) {
 		File lockFile = Util.getLockFile();
 		socketPif.setLockFile(lockFile);
-		PrologRuntimePlugin.getDefault().addTempFile(lockFile);
+		Util.addTempFile(lockFile);
 		File errorLogFile = Util.getLockFile();
 		socketPif.setErrorLogFile(errorLogFile);
-		PrologRuntimePlugin.getDefault().addTempFile(errorLogFile);
+		Util.addTempFile(errorLogFile);
 		int port = getFreePort(socketPif);
 		Process process = getNewProcess(socketPif, port);
 		try {			
 			initializeBuffers(socketPif, process);
 			waitForProcessToGetRunning(socketPif, process);
 			String errorLogFileContent = getErrorLogFileContent(socketPif);
-			if (errorLogFileContent != null) {
-				Debug.warning("Prolog errors during initialization:\n" + errorLogFileContent);
+			if (errorLogFileContent != null && !errorLogFileContent.isEmpty()) {
+				Debug.warning("Prolog warnings and errors during initialization:\n" + errorLogFileContent);
 			}
 			return process;
 		} catch (IOException e) {
@@ -230,7 +243,7 @@ private static JackTheProcessRipper processRipper;
 		File tmpFile = null;
 		try {
 			tmpFile = File.createTempFile("socketPif", null);
-			PrologRuntimePlugin.getDefault().addTempFile(tmpFile);
+			Util.addTempFile(tmpFile);
 			writeInitialisationToTempFile(socketPif, port, tmpFile);
 		} catch (IOException e) {
 			Debug.report(e);
@@ -269,6 +282,9 @@ private static JackTheProcessRipper processRipper;
 //      Don't set the encoding globally because it 
 //		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
 		tmpWriter.println(STARTUP_ERROR_LOG_PROLOG_CODE);
+		if (socketPif.getExecutable().contains("logtalk")) {
+			tmpWriter.print(STARTUP_ERROR_LOG_LOGTALK_CODE);
+		}
 		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
 		tmpWriter.println(":- guitracer.");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");

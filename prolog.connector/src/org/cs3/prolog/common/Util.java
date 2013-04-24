@@ -25,19 +25,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.ServerSocket;
-import java.net.URL;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
+import org.cs3.prolog.internal.pif.socket.SocketPrologInterface;
+import org.cs3.prolog.pif.PrologInterface;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -202,25 +200,6 @@ public class Util {
 		return mac;
 	}
 
-	public static String quotedPrologFileNameList(Collection<IFile> files) throws IOException {
-		boolean first = true;
-		StringBuffer buffer = new StringBuffer("[");
-		for (IFile f : files) {
-			if (first) {
-				first = false;
-			} else {
-				buffer.append(", ");
-			}
-			buffer.append(Util.quoteAtom(Util.prologFileName(f)));
-		};
-		buffer.append("]");
-		return buffer.toString();
-	}
-	
-	public static String prologFileName(IFile file) throws IOException {
-		return prologFileName(file.getLocation().toFile().getCanonicalFile());
-	}
-	
 	public static String prologFileName(File f) {
 		try {
 			return normalizeOnWindows(f.getCanonicalPath());
@@ -970,106 +949,57 @@ public class Util {
 		}
 	}
 
-	/*
-	 * save URL from urlString to file outputFile
-	 */
-	public static boolean saveUrlToFile(String urlString, File outputFile, IProgressMonitor monitor)
-	{	
-		
-		URL url;
-		try {
-			url = new URL(urlString.replace(" ", "%20"));
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			conn.connect();
-
-			int responseCode = conn.getResponseCode();
-
-			if (responseCode == HttpURLConnection.HTTP_OK)
-			{
-				if (monitor != null)
-				{
-					int size = conn.getContentLength();
-					monitor.beginTask("Downloading " + outputFile.getName(), size);
-				}
-				OutputStream os = new FileOutputStream(outputFile);
-
-				byte tmp_buffer[] = new byte[4096];
-				InputStream is = conn.getInputStream();
-				int n;
-				while ((n = is.read(tmp_buffer)) > 0) {
-					os.write(tmp_buffer, 0, n);
-					os.flush();
-					if (monitor != null)
-						monitor.worked(4096);
-				}
-				is.close();
-				os.close();
-				return true;
-			} else {
-				return false;
-				//throw new IllegalStateException("HTTP response: " + responseCode);
-			}
-		} catch (Exception e) {
-			return false;
-		}
-		
+	public static PrologInterface newPrologInterface() {
+		return newPrologInterface(null);
 	}
 	
-	/*
-	 * get filesize from URL from urlString
-	 */
-	public static int getFilesizeFromUrl(String urlString)
-		throws  IllegalStateException, IOException
-	{	
-		
-		URL url = new URL(urlString.replace(" ", "%20"));
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.connect();
-		
-		int responseCode = conn.getResponseCode();
-		
-		if (responseCode == HttpURLConnection.HTTP_OK)
-		{
-			return conn.getContentLength();
-		} else {
-	    throw new IllegalStateException("HTTP response: " + responseCode);
+	public static PrologInterface newPrologInterface(String name) {
+		return new SocketPrologInterface(name);
 	}
+	
+	public static PrologInterface newStandalonePrologInterface() throws IOException {
+		return newStandalonePrologInterface(null);
+	}
+	
+	public static PrologInterface newStandalonePrologInterface(String executable) throws IOException {
+		String tempDir = System.getProperty("java.io.tmpdir");
+		copyConsultServerToTempDir(tempDir);
+		SocketPrologInterface pif = new SocketPrologInterface(null);
+		if (executable == null) {
+			pif.setExecutable(Util.guessExecutableName());
+		} else {
+			pif.setExecutable(executable);
+		}
+		pif.setFileSearchPath("library=" + Util.normalizeOnWindows(tempDir));
+		pif.setHost("localhost");
+		pif.setTimeout("15000");
+		pif.setStandAloneServer("false");
+		pif.setEnvironment(Util.guessEnvironmentVariables());
+		pif.setHidePlwin(true);
+		pif.setUseSessionPooling(true);
+		return pif;
+	}
+	
+	private static void copyConsultServerToTempDir(String tempDir) throws IOException {
+		InputStream resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("library/socket/consult_server.pl");
+		File consultServerPl = new File(tempDir, "consult_server.pl");
+		if (consultServerPl.exists()) {
+			consultServerPl.delete();
+		}
+		copy(resourceAsStream, new FileOutputStream(consultServerPl));
 	}
 
-	public static String getLogtalkStartupFile() {
-		if (isWindows()) {
-			return "\"%LOGTALKHOME%\\integration\\logtalk_swi.pl\"";
-		} else {
-			String logtalkHome = System.getenv("LOGTALKHOME");
-			if (logtalkHome != null) {
-				return new Path(logtalkHome).append("integration").append("logtalk_swi.pl").toOSString();
-			} else {
-				return "";
-			}
+	private static Set<File> tempFiles = new HashSet<File>();
+	
+	public static void addTempFile(File tempFile) {
+		if (tempFile != null) {
+			tempFiles.add(tempFile);
 		}
 	}
 	
-	public static String getLogtalkEnvironmentVariables() {
-		if (isWindows()) {
-			return "";
-		} else {
-			StringBuffer buf = new StringBuffer();
-			String guessedEnvironmentVariables = guessEnvironmentVariables();
-			if (!guessedEnvironmentVariables.isEmpty()) {
-				buf.append(guessedEnvironmentVariables);
-				buf.append(", ");
-			}
-			buf.append("LOGTALKHOME=");
-			buf.append(System.getenv("LOGTALKHOME"));
-			buf.append(", ");
-			buf.append("LOGTALKUSER=");
-			buf.append(System.getenv("LOGTALKUSER"));
-			return buf.toString();
-		}
+	public static Set<File> getTempFiles() {
+		return new HashSet<File>(tempFiles);
 	}
-
 
 }
 

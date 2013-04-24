@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.search.PrologSearchPage;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
@@ -212,38 +213,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									}
 									final String reconsultFiles = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_NONE);
 									
+									getPrologInterface().start();
 									if (reconsultFiles.equals(PDTConsole.RECONSULT_NONE)) {
 										getPrologInterface().clearConsultedFiles();
 									} else {
-
-										getPrologInterface().addLifeCycleHook(new LifeCycleHook() {
-
-											@Override
-											public void setData(Object data) {}
-
-											@Override
-											public void onInit(PrologInterface pif, PrologSession initSession)
-													throws PrologInterfaceException {}
-
-											@Override
-											public void onError(PrologInterface pif) {}
-
-											@Override
-											public void lateInit(PrologInterface pif) {}
-
-											@Override
-											public void beforeShutdown(PrologInterface pif, PrologSession session)
-													throws PrologInterfaceException {}
-
-											@Override
-											public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-												pif.reconsultFiles(reconsultFiles.equals(PDTConsole.RECONSULT_ENTRY));
-												pif.removeLifeCycleHook(HOOK_ID+"_");
-
-											}
-										}, HOOK_ID + "_", new String[0]);
+										PDTCommonPlugin.getDefault().reconsultFiles(getPrologInterface(), reconsultFiles.equals(PDTConsole.RECONSULT_ENTRY));
 									}
-									getPrologInterface().start();
 
 									Display.getDefault().asyncExec(new Runnable() {
 										@Override

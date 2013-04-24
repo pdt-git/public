@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
+import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
+import org.cs3.prolog.ui.util.FileUtils;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -74,7 +75,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 					IFile file = (IFile)resource;
 					if (file.getFileExtension() != null && file.getFileExtension().equals("pl")) {
 						try {
-							paths.add(Util.quoteAtom(Util.prologFileName(file)));
+							paths.add(Util.quoteAtom(UIUtils.prologFileName(file)));
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

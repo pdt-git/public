@@ -23,7 +23,7 @@
 	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
 	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
-	find_definition_contained_in/9,
+	find_definition_contained_in/10,
 	get_pred/7,
 	find_pred/8,
 	predicates_with_property/3,
@@ -142,12 +142,12 @@ find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, 
 	visibility_text(DeclOrDef, Visibility0, Visibility).
 
 
-find_definitions_categorized0(Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+find_definitions_categorized0(Term, _Functor, _Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
 	decode(Term, This, Entity, _Kind, _Template, Location, Properties, DeclOrDef, Visibility),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
 
-find_definitions_categorized0(Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, [invisible| Properties], Visibility) :-
+find_definitions_categorized0(_Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, [invisible| Properties], Visibility) :-
 	entity(Entity),
 	Entity \= This,
 	(	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)),
@@ -280,7 +280,7 @@ find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, 
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
+find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
 	split_file_path:split_file_path(FullPath, Directory, File, _, lgt),
 	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
@@ -317,6 +317,7 @@ find_definition_contained_in(FullPath, Entity, EntityLine, Kind, Functor, Arity,
 		),
 		SearchCategory = definition
 	;	% entity multifile definitions
+		memberchk(multifile(true), Options),
 		entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0)),
 		entity_property(From, _, file(FromFile, FromDirectory)),
 		atom_concat(FromDirectory, FromFile, FromPath),
@@ -375,48 +376,48 @@ find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
                 * PROLOG ERROR MESSAGE HOOK         *
                 *************************************/
 
-:- dynamic(traced_messages/3).
-:- dynamic(warning_and_error_tracing/0).
-
-activate_warning_and_error_tracing :-
-	assertz(warning_and_error_tracing).
-
-deactivate_warning_and_error_tracing:-
-	retractall(warning_and_error_tracing),
-	retractall(traced_messages(_,_,_)).
-
-
-%% message_hook(+Term, +Level,+ Lines) is det.
+%:- dynamic(traced_messages/3).
+%:- dynamic(warning_and_error_tracing/0).
 %
-% intercept prolog messages to collect term positions and
-% error/warning messages in traced_messages/3
+%activate_warning_and_error_tracing :-
+%	assertz(warning_and_error_tracing).
 %
-% @author trho
+%deactivate_warning_and_error_tracing:-
+%	retractall(warning_and_error_tracing),
+%	retractall(traced_messages(_,_,_)).
 %
-:- multifile(user::message_hook/3).
-
-user::message_hook(_Term, Level, Lines) :-
-	warning_and_error_tracing,
-	pdt_term_position(StartLine),
-	assertz(traced_messages(Level, StartLine, Lines)),
-	fail.
-
-%% errors_and_warnings(Level,Line,Length,Message) is nondet.
 %
-errors_and_warnings(Level,Line,0,Message) :-
-	traced_messages(Level, Line,Lines),
-%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
-	new_memory_file(Handle),
-	open_memory_file(Handle, write, Stream),
-	print_message_lines(Stream,'',Lines),
-	close(Stream),
-	memory_file_to_atom(Handle,Message),
-	free_memory_file(Handle).
-
-pdt_term_position(StartLine) :-
-	logtalk_load_context(term_position, StartLine-_EndLine).
-pdt_term_position(StartLine) :-
-	prolog_load_context(term_position, '$stream_position'(_,StartLine,_,_,_)).
+%%% message_hook(+Term, +Level,+ Lines) is det.
+%%
+%% intercept prolog messages to collect term positions and
+%% error/warning messages in traced_messages/3
+%%
+%% @author trho
+%%
+%:- multifile(user::message_hook/3).
+%
+%user::message_hook(_Term, Level, Lines) :-
+%	warning_and_error_tracing,
+%	pdt_term_position(StartLine),
+%	assertz(traced_messages(Level, StartLine, Lines)),
+%	fail.
+%
+%%% errors_and_warnings(Level,Line,Length,Message) is nondet.
+%%
+%errors_and_warnings(Level,Line,0,Message) :-
+%	traced_messages(Level, Line,Lines),
+%%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
+%	new_memory_file(Handle),
+%	open_memory_file(Handle, write, Stream),
+%	print_message_lines(Stream,'',Lines),
+%	close(Stream),
+%	memory_file_to_atom(Handle,Message),
+%	free_memory_file(Handle).
+%
+%pdt_term_position(StartLine) :-
+%	logtalk_load_context(term_position, StartLine-_EndLine).
+%pdt_term_position(StartLine) :-
+%	prolog_load_context(term_position, '$stream_position'(_,StartLine,_,_,_)).
 
 
                /*****************************************

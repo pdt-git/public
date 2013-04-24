@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.cs3.prolog.common.Util;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -103,7 +103,7 @@ public class ExampleProject {
 		
 		int externFileSize = -1;
 		try {
-			externFileSize = Util.getFilesizeFromUrl(url);
+			externFileSize = PDTCommonUtil.getFilesizeFromUrl(url);
 		} catch (Exception e) {
 		}
 
@@ -223,7 +223,7 @@ public class ExampleProject {
 		targetFile.renameTo(backupFile);
 		
 		// Projekt unter der angegeben url runterladen und unter filename abspeichern
-		if (Util.saveUrlToFile(url, targetFile, monitor))
+		if (PDTCommonUtil.saveUrlToFile(url, targetFile, monitor))
 		{
 			backupFile.delete();
 		} else

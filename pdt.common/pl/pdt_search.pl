@@ -17,6 +17,7 @@
          , find_definitions_categorized/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
+         , find_definition_contained_in/10
          , find_completion/12
          , find_entity_definition/5
          , find_module_reference/8
@@ -26,7 +27,7 @@
          ]).
 
 :- use_module( prolog_connector_pl(split_file_path),
-             [ split_file_path/4                % (File,Folder,FileName,BaseName,Extension)
+             [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
              ] ).
 :- reexport(   'xref/pdt_xref', 
              [ find_reference_to/12             % ...
@@ -34,13 +35,12 @@
 :- use_module( properties, 
              [ properties_for_predicate/4
              ] ).
-:- use_module( pdt_prolog_library(utils4modules),
-             [ module_of_file/2                 % (File,FileModule)
-             , defined_in/4             % (SubModule,Name,Arity,DeclModule),
-             , defined_in_module/3              % (Module,Name,Arity),
-             , declared_in_file/4               % (Module,Name,Arity,Location)
-             , defined_in_files/4               % (Module,Name,Arity,Locations)
-             ] ).
+%:- use_module( pdt_prolog_library(utils4modules_visibility),
+%             [ module_of_file/2                 % (File,FileModule)
+%             , defined_in_module/3              % (Module,Name,Arity),
+%             , declared_in_file/4               % (Module,Name,Arity,Location)
+%             , defined_in_files/4               % (Module,Name,Arity,Locations)
+%             ] ).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 % TODO: Why this import?
@@ -418,12 +418,14 @@ find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, 
          
 % TODO: This is meanwhile subsumed by other predicates. Integrate!
    
-%% find_definition_contained_in(+File, -Entity, -EntityLine, -EntityKind, -Name, -Arity, -SearchCategory, -Line, -PropertyList) is nondet.
+%% find_definition_contained_in(+File, +Options, -Entity, -EntityLine, -EntityKind, -Name, -Arity, -SearchCategory, -Line, -PropertyList) is nondet.
 %
 % Look up the starting line of a clause of a predicate Name/Arity defined in File. 
 % Do this upon backtracking for each clause of each predicate in File.
 %
 % @param File           The file to search for definitions.
+% @param Options        multifile(boolean): show clauses of other files for multifile predicates
+%                       all_clauses(boolean): show all clauses or only the first of a predicate in a file
 % @param Entity         The module (in Prolog) or Entity (in logtalk) to which a predicate belongs.
 %                       Note that there can be multiple entities in a file. 
 % @param EntityKind     "module" (in Prolog) or "object|category|protocoll" (in Logtalk)
@@ -437,12 +439,15 @@ find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, 
 % Called from PDTOutlineQuery.java
 
 find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
+	find_definition_contained_in(File, [multifile(true), all_clauses(true)], Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
+
+find_definition_contained_in(File, Options, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
     current_predicate(logtalk_load/1),
-    logtalk_adapter::find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
+    logtalk_adapter::find_definition_contained_in(File, Options, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
 
-find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
+find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
     SearchCategory = definition,
     
 %    module_of_file(ContextFile, ContextModule),
@@ -458,7 +463,8 @@ find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Fu
 
     % In the case of a multifile predicate, we want to find all clauses for this 
     % predicate, even when they occur in other files
-    defined_in_file(DefiningModule, Functor, Arity, Ref, _, DefiningFile, Line),
+    %defined_in_file(DefiningModule, Functor, Arity, Ref, _, DefiningFile, Line),
+    find_definition_in_file(Options, ContextFile, DefiningModule, Functor, Arity, Ref, DefiningFile, Line),
     (	DefiningFile == ContextFile
     ->	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% local definition
@@ -477,6 +483,72 @@ find_definition_contained_in(ContextFile, DefiningModule, ModuleLine, module, Fu
     ->	PropertyList = [FirstArg|PropertyList1]
     ;	PropertyList = PropertyList1
     ).
+
+find_definition_in_file(Options, ContextFile, Module, Name, Arity, Ref, File, Line) :-
+	memberchk(multifile(IsMultifile), Options),
+	memberchk(all_clauses(IsAllClauses), Options),
+	find_definition_in_file(IsAllClauses, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line).
+
+find_definition_in_file(true, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line) :-
+	!,
+	(	IsMultifile == true
+	->	true
+	;	ContextFile = File
+	),
+	defined_in_file(Module, Name, Arity, Ref, _, File, Line).
+find_definition_in_file(_/*false*/, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line) :-
+	functor(Head, Name, Arity),
+	(	predicate_property(Module:Head, multifile)
+	->	(	IsMultifile == true
+		->	true
+		;	ContextFile = File
+		),
+		find_lines(Module:Head, File, Line, Ref)
+	;	ContextFile = File,
+		predicate_property(Module:Head, line_count(Line)),
+		nth_clause(Module:Head, _, Ref),
+		clause_property(Ref, line_count(Line)),
+		!
+	).
+
+:- dynamic(file_line/3).
+find_lines(Head, File, Line, Ref) :-
+	predicate_property(Head, number_of_clauses(N)), 
+	N > 1000,
+	!,
+	(	Head = user:Head2
+	->	true
+	;	Head = Head2
+	),
+	findall(F, (source_file(F), source_file(X, F), X = Head2), Files),
+	Line = 1,
+	Ref = [],
+	member(File, Files).
+find_lines(Head, File, Line, Ref) :-
+	with_mutex(find_lines, (
+		retractall(file_line(_, _, _)),
+		walk_clauses(Head, 1),
+		findall(F-L-R, file_line(F, L, R), Locations)
+	)),
+	member(File-Line-Ref, Locations).
+walk_clauses(Head, N) :-
+	nth_clause(Head, N, Ref),
+	!,
+	(	clause_property(Ref, file(File)),
+		clause_property(Ref, line_count(Line))
+	->	(	file_line(File, L, _)
+		->	(	Line < L
+			->	retract(file_line(File, L, _)),
+				assertz(file_line(File, Line, Ref))
+			;	true
+			)
+		;	assertz(file_line(File, Line, Ref))
+		)
+	;	true
+	),
+	succ(N, N2),
+	walk_clauses(Head, N2).
+walk_clauses(_, _).
 
 first_argument_of_clause(Ref, first_argument(Arg)) :-
 	catch(clause(_:Head, _, Ref), _, fail),

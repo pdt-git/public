@@ -3,8 +3,8 @@ package pdt.y.focusview;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IProject;
 
 import pdt.y.main.PDTGraphView;

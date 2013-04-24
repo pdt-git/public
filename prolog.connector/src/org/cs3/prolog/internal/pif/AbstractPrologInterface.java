@@ -16,8 +16,6 @@
  */
 package org.cs3.prolog.internal.pif;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -28,26 +26,19 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.PreferenceProvider;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.connector.PrologRuntime;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.cterm.CTermUtil;
 import org.cs3.prolog.internal.lifecycle.LifeCycle;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.ReconsultHook;
 import org.cs3.prolog.session.AsyncPrologSession;
 import org.cs3.prolog.session.Disposable;
 import org.cs3.prolog.session.PrologSession;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.QualifiedName;
 
 /**
  * convenience implementation of common infrastructure.
@@ -629,89 +620,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			consultedFiles.add(fileName);
 		}
 	}
-
-
-	// TODO: problem with quotes
-	@Override
-	public void reconsultFiles(boolean onlyEntryPoints) {
-		Debug.debug("Reconsult files");
-		if (consultedFiles != null) {
-			synchronized (lifecycle) {
-				synchronized (consultedFiles) {
-
-					String reconsultQuery = null;
-					if (onlyEntryPoints) {
-						reconsultQuery = createReconsultQueryEntryPoints();
-					} else {
-						reconsultQuery = createReconsultQuery();
-					}
-
-					try {
-						queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, "[" + reconsultQuery + "]"));
-					} catch (PrologInterfaceException e) {
-						Debug.report(e);
-					}
-
-					notifyLastFileReconsulted();
-				}
-			}
-		}
-	}
-
-	private String createReconsultQueryEntryPoints() {
-
-		StringBuffer buf = new StringBuffer();
-		boolean first = true;
-		for (String fileName : consultedFiles) {
-			try {
-				IFile file = FileUtils.findFileForLocation(fileName);
-				if(file == null){
-					System.out.println("DEBUG");
-					continue;
-				}
-				String isEntryPoint = file.getPersistentProperty(new QualifiedName("pdt", "entry.point"));
-
-				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
-					if (first) {
-						first = false;
-					} else {
-						buf.append(", ");
-					}
-					buf.append(Util.quoteAtom(fileName));
-					Debug.debug("reload " + fileName + ", because it was consulted before");
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		}
-		return buf.toString();
-	}
-
-	private String createReconsultQuery() {
-
-		StringBuffer buf = new StringBuffer();
-		boolean first = true;
-		for (String fileName : consultedFiles) {
-			if (first) {
-				first = false;
-			} else {
-				buf.append(", ");
-			}
-			buf.append(Util.quoteAtom(fileName));
-			Debug.debug("reload " + fileName + ", because it was consulted before");
-		}
-		return buf.toString();
-	}
-
-	private void notifyLastFileReconsulted() {
-		for (ReconsultHook r : PrologRuntimePlugin.getDefault().getReconsultHooks()) {
-			r.lastFileReconsulted(this);
-		}
-	}
-
-
 
 }
 

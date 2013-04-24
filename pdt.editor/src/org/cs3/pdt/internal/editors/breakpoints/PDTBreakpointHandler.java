@@ -24,10 +24,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPredicates;
-import org.cs3.prolog.common.FileUtils;
+import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.ReconsultHook;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.lifecycle.PrologEventDispatcher;
@@ -35,9 +35,9 @@ import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceEvent;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.PrologInterfaceListener;
-import org.cs3.prolog.pif.ReconsultHook;
 import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.ui.util.FileUtils;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -85,7 +85,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	private PDTBreakpointHandler() {
 		checkForPif();
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
-		PrologRuntimePlugin.getDefault().registerReconsultHook(this);
+		PDTCommonPlugin.getDefault().registerReconsultHook(this);
 	}
 
 	private void checkForPif() {
