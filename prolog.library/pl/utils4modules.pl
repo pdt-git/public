@@ -37,9 +37,8 @@
  ).
  
 :- use_module(library(lists)).
-:- use_module(pdt_support, [pdt_support/1, doc_collect/1]).
+:- use_module(pdt_support, [pdt_support/1]).
 
-:- doc_collect(true).
 
 :- module_transparent(call_and_report_contex_module/1).
 call_and_report_contex_module(Goal) :- 

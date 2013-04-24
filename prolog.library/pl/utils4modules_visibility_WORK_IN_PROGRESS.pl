@@ -38,7 +38,6 @@
            undefined_in/3                  % Module, Name, Arity 
          ] ).
  
-:- doc_collect(true).
 
         
 %% module_of_file(?File,?Module)
@@ -73,7 +72,6 @@ module_of_file(File,Module):-
            ]
  ).
  
-:- doc_collect(true).
 
 %% hidden_module(M)
 %
