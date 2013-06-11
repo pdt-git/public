@@ -28,8 +28,10 @@ public interface PrologSession extends Disposable{
 	 * @throws PrologException
 	 * @throws PrologInterfaceException
 	 */
-    public Map<String,Object> queryOnce(String query) throws PrologException,PrologInterfaceException;
-    public List<Map<String,Object>> queryAll(String query) throws PrologException,PrologInterfaceException;
+    public Map<String,Object> queryOnce(String query) throws PrologException, PrologInterfaceException;
+    public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologInterfaceException;
+    public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologInterfaceException;
+	
 }
 
 
