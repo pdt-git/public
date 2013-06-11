@@ -981,7 +981,14 @@ public class Util {
 	}
 	
 	private static void copyConsultServerToTempDir(String tempDir) throws IOException {
-		InputStream resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("library/socket/consult_server.pl");
+		InputStream resourceAsStream;
+		resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("library/socket/consult_server.pl");
+		if (resourceAsStream == null) {
+			resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("consult_server.pl");
+		}
+		if (resourceAsStream == null) {
+			throw new RuntimeException("Cannot find consult_server.pl!");
+		}
 		File consultServerPl = new File(tempDir, "consult_server.pl");
 		if (consultServerPl.exists()) {
 			consultServerPl.delete();
