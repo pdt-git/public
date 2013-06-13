@@ -448,37 +448,37 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	
 print_solution(OutStream,Vars):-
 	forall(
-		(member(Key=Val,Vars), nonvar(Val)),
-		print_binding(OutStream,Key,Val)
+		(member(Key=Val,Vars)),
+		print_binding(OutStream,Key,Val,Vars)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
 	
-print_binding(Out,Key,Val):-
+print_binding(Out,Key,Val,Vars):-
 		my_write(Out,'<'),
 		write(Out,Key),
 		my_write(Out, '>'),		
-		print_value(Out,Val),		
+		print_value(Out,Val,Vars),		
 		nl(Out).
 
-print_values([],_). 
-print_values([Head|Tail],Out):-
-	print_value(Out,Head),		
-	print_values(Tail,Out).
+print_values([],_,_). 
+print_values([Head|Tail],Out,Vars):-
+	print_value(Out,Head,Vars),		
+	print_values(Tail,Out,Vars).
 	
 
-print_value(Out,Val):-    	
+print_value(Out,Val,Vars):-    	
 	option(canonical,true),
 	!,
 	my_write(Out,'<'),
-	(write_escaped(Out,Val);true),
+	(write_escaped(Out,Val,Vars);true),
 	my_write(Out, '>').
-print_value(Out,Val):-    	
+print_value(Out,Val,Vars):-    	
 	( 	is_list(Val), option(interprete_lists,true)
  	->	my_write(Out,'{'),
-		print_values(Val,Out),
+		print_values(Val,Out,Vars),
 		my_write(Out, '}')		
 	;	my_write(Out,'<'),
-		write_escaped(Out,Val),
+		write_escaped(Out,Val,Vars),
 		my_write(Out, '>')
 	).
 
@@ -622,8 +622,8 @@ my_format(Format,Args):-
     debug(consult_server,Format,Args).
 	
 
-write_escaped(Out,Term):-
-    write_term_to_memfile(Term,Memfile),
+write_escaped(Out,Term,Vars):-
+    write_term_to_memfile(Term,Memfile,Vars),
     new_memory_file(TmpFile),
     open_memory_file(Memfile,read,In),
     open_memory_file(TmpFile,write,Tmp),
@@ -635,7 +635,7 @@ write_escaped(Out,Term):-
     free_memory_file(Memfile),
     my_write(Out,Atom).
 
-write_term_to_memfile(Term,Memfile):-
+write_term_to_memfile(Term,Memfile,Vars):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
 	call_cleanup(
@@ -643,7 +643,7 @@ write_term_to_memfile(Term,Memfile):-
 		->	write_canonical(Stream,Term)
 		;	write(Stream,Term)
 		),*/
-		write_canonical(Stream,Term),
+		write_term(Stream,Term,[ignore_ops(true),quoted(true),variable_names(Vars)]),
 		close(Stream)
 	).
 
