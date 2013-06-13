@@ -186,8 +186,8 @@ public class PreferenceConfiguration {
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {
 		initWithSWIPreferences(store);
 
-		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, UIUtils.getLogtalkStartupFile());
-		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, UIUtils.getLogtalkEnvironmentVariables());
+		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
+		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
 	}
 
 }
