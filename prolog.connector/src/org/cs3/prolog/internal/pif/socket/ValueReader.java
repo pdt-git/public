@@ -20,12 +20,8 @@ import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.prolog.common.Util;
-import org.cs3.prolog.cterm.CAtom;
-import org.cs3.prolog.cterm.CString;
 import org.cs3.prolog.cterm.CTerm;
 import org.cs3.prolog.cterm.CTermFactory;
-import org.cs3.prolog.cterm.CTermUtil;
-import org.cs3.prolog.cterm.CVariable;
 import org.cs3.prolog.pif.PrologInterface;
 
 public class ValueReader {
@@ -112,20 +108,15 @@ public class ValueReader {
 	private Object parseValue(int flags) {
 		Object value;
 		String unparsedValue = Util.unescapeBuffer(valueBuffer);
-		CTerm ctermValue = CTermFactory.createCTerm(unparsedValue);
 		
 		if (Util.flagsSet(flags,PrologInterface.CTERMS)) {
+			CTerm ctermValue = CTermFactory.createCTerm(unparsedValue);
 			value=ctermValue;
 		} else{
-			if(Util.flagsSet(flags, PrologInterface.UNQUOTE_ATOMS)					
-				&&(ctermValue instanceof CString ||ctermValue instanceof CAtom)){
-			value = ctermValue.getFunctorValue();
-			}
-			else if (ctermValue instanceof CVariable) {
-				value=((CVariable)ctermValue).getFunctorValue();
-			}
-			else{
-				value=CTermUtil.renderTerm(ctermValue);
+			if(Util.flagsSet(flags, PrologInterface.UNQUOTE_ATOMS)) {
+				value = Util.unquoteAtom(unparsedValue);
+			} else {
+				value=unparsedValue;
 			}
 		}
 		return value;
