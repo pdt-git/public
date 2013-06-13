@@ -14,15 +14,42 @@
 
 package org.cs3.prolog.cterm;
 
+import java.math.BigInteger;
+
 import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 
 public class CInteger extends CTerm{
+	
+	private BigInteger bigInt;
+	
 	public CInteger(ASTNode node) {
 		super(node);
+		bigInt = new BigInteger(getFunctorValue());
 	}
-	public int getIntValue() {		
-		return Integer.parseInt(getFunctorValue());
+	
+	public int getIntValue() {
+		int intValue = bigInt.intValue();
+		
+		if (bigInt.compareTo(BigInteger.valueOf(intValue)) == 0) {
+			return intValue;
+		} else {
+			throw new NumberFormatException("Value is to large to fit in an int (" + bigInt + ")");
+		}
+	}
+	
+	public long getLongValue() {
+		long longValue = bigInt.longValue();
+		
+		if (bigInt.compareTo(BigInteger.valueOf(longValue)) == 0) {
+			return longValue;
+		} else {
+			throw new NumberFormatException("Value is to large to fit in a long (" + bigInt + ")");
+		}
+	}
+	
+	public BigInteger getBigIntegerValue() {
+		return new BigInteger(getFunctorValue());
 	}
 
 }

@@ -14,12 +14,16 @@
 
 package org.cs3.prolog.cterm;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.prolog.common.QueryUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.session.PrologSession;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.
@@ -143,6 +147,44 @@ public class CTermUtil {
 		String name = term.getArgument(0).getFunctorValue();
 		int arity = ((CInteger) term.getArgument(1)).getIntValue();
 		return module + ":" + name + "/" + arity;
+	}
+	
+
+	
+	public static CTerm parseNonCanonicalTerm(String query) throws IOException, PrologInterfaceException {
+		PrologInterface pif = Util.newStandalonePrologInterface();
+		CTerm returnTerm = parseNonCanonicalTerm(query, pif);
+		pif.stop();
+		return returnTerm;
+	}
+
+	public static CTerm parseNonCanonicalTerm(String term, PrologInterface pif) throws PrologInterfaceException {
+
+		PrologSession session = pif.getSession(PrologInterface.CTERMS);
+		
+		String query = QueryUtils.bT("atom_to_term", Util.quoteAtom(term), "Term", "D");
+
+		Map<String, Object> result = session.queryOnce(query);
+		session.dispose();
+
+		CTerm cTerm = (CTerm) result.get("Term");
+		cTerm.toString(); // FIXME: XXX: if this is not here, everything crashes ... nobody knows why
+		Map<String, CTerm> map = listAsMap((CTerm) result.get("D"));
+		Map<String, String> dictionary = transformDictionary(map);
+		cTerm.rename(dictionary);
+		return cTerm;
+
+	}
+	
+	private static Map<String, String> transformDictionary(Map<String, CTerm> map) {
+		Map<String, String> newMap = new HashMap<String, String>();
+		
+		for(String key : map.keySet()) {
+			CTerm cTerm = map.get(key);
+			newMap.put(cTerm.getFunctorValue(), Util.unquoteAtom(key));
+		}
+		
+		return newMap;
 	}
 }
 

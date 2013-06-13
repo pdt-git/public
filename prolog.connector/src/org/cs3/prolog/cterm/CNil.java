@@ -19,6 +19,7 @@ import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 public class CNil extends CTerm {
 	
+	// CNil represents the empty list []
 	public CNil(ASTNode node) {
 		super(node);
 	}

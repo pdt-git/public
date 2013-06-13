@@ -14,12 +14,15 @@
 
 package org.cs3.prolog.cterm;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 public class CTerm {
 	protected ASTNode node;
-	private String functorValue;
+	protected String functorValue;
 	
 	public CTerm(ASTNode node) {
 		this.node=node;
@@ -48,6 +51,17 @@ public class CTerm {
 
 	public int getArity() {	
 		return 0;
+	}
+	
+	public void rename(Map<String, String> dictionary) {
+		String newName = dictionary.get(getFunctorValue());
+		if (newName != null) {
+			functorValue = newName;
+		}
+	}
+
+	public void filterAnonymousVariables(Set<String> variableSet) {
+		
 	}
 
 }
