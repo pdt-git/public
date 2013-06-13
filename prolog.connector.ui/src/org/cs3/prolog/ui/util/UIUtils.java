@@ -492,37 +492,5 @@ public final class UIUtils {
 		return Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
 	}
 
-	public static String getLogtalkStartupFile() {
-		if (Util.isWindows()) {
-			return "\"%LOGTALKHOME%\\integration\\logtalk_swi.pl\"";
-		} else {
-			String logtalkHome = System.getenv("LOGTALKHOME");
-			if (logtalkHome != null) {
-				return new Path(logtalkHome).append("integration").append("logtalk_swi.pl").toOSString();
-			} else {
-				return "";
-			}
-		}
-	}
-	
-	public static String getLogtalkEnvironmentVariables() {
-		if (Util.isWindows()) {
-			return "";
-		} else {
-			StringBuffer buf = new StringBuffer();
-			String guessedEnvironmentVariables = Util.guessEnvironmentVariables();
-			if (!guessedEnvironmentVariables.isEmpty()) {
-				buf.append(guessedEnvironmentVariables);
-				buf.append(", ");
-			}
-			buf.append("LOGTALKHOME=");
-			buf.append(System.getenv("LOGTALKHOME"));
-			buf.append(", ");
-			buf.append("LOGTALKUSER=");
-			buf.append(System.getenv("LOGTALKUSER"));
-			return buf.toString();
-		}
-	}
-
 }
 
