@@ -74,13 +74,13 @@ public class SocketSession implements PrologSession {
 	@Override
 	public List<Map<String, Object>> queryAll(String query) throws PrologException,
 	PrologInterfaceException {
-		return queryAll(query, 1);
+		return queryAll(query, QUERY_ALL_AT_ONCE);
 	}
 	
 	@Override
 	public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException,
 	PrologInterfaceException {
-		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologInterface.CTERMS) != 0)) {
+		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologInterface.CTERMS) == 0)) {
 			return queryAllAtOnce(query);
 		} else {
 			return queryAllDefault(query);
