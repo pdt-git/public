@@ -127,7 +127,7 @@ private static JackTheProcessRipper processRipper;
 
 	private static Process getNewProcess(SocketPrologInterface socketPif, int port) {
 		String[] commandArray = getCommandArray(socketPif, port);
-		String[] envarray = getEnvironmentAsArray(socketPif);
+		Map<String, String> env = getEnvironmentAsArray(socketPif);
 		Process process = null;
 		try {
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
@@ -141,12 +141,18 @@ private static JackTheProcessRipper processRipper;
 			}
 			commandArray=commands.toArray(new String[0]);
 			
-			if (envarray.length == 0) {
+			if (env.size() == 0) {
 				Debug.info("inheriting system environment");
-				process = Runtime.getRuntime().exec(commandArray);
+				ProcessBuilder processBuilder = new ProcessBuilder(commands);
+				processBuilder.environment();
+				process = processBuilder.start();
 			} else {
-				Debug.info("using environment: " + Util.prettyPrint(envarray));
-				process = Runtime.getRuntime().exec(commandArray, envarray);
+				Debug.info("using environment: " + Util.prettyPrint(env));
+				ProcessBuilder processBuilder = new ProcessBuilder(commands);
+				Map<String, String> processEnvironment = processBuilder.environment();
+				processEnvironment.clear();
+				processEnvironment.putAll(env);
+				process = processBuilder.start();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -212,7 +218,7 @@ private static JackTheProcessRipper processRipper;
 
 
 
-	private static String[] getEnvironmentAsArray(SocketPrologInterface socketPif) {
+	private static Map<String, String> getEnvironmentAsArray(SocketPrologInterface socketPif) {
 		String environment = socketPif.getEnvironment();
 		Map<String, String> env = new HashMap<String, String>();
 		String[] envarray = Util.split(environment, ",");
@@ -220,14 +226,7 @@ private static JackTheProcessRipper processRipper;
 			String[] mapping = Util.split(envarray[i], "=");
 			env.put(mapping[0], mapping[1]);
 		}
-		envarray = new String[env.size()];
-		int i = 0;
-		for (Iterator<String> it = env.keySet().iterator(); it.hasNext();) {
-			String key = it.next();
-			String value = env.get(key);
-			envarray[i++] = key + "=" + value;
-		}
-		return envarray;
+		return env;
 	}
 
 	private static String[] getCommandArray(SocketPrologInterface socketPif, int port) {
