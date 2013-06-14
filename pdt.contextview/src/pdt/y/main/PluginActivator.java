@@ -47,7 +47,11 @@ public class PluginActivator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		if (Util.isMacOS()) {
-			SWT_AWT.embeddedFrameClass = "sun.lwawt.macosx.CViewEmbeddedFrame";
+			String c = "sun.lwawt.macosx.CViewEmbeddedFrame";
+			try {
+				Class.forName(c);
+				SWT_AWT.embeddedFrameClass = c;
+			} catch (Exception e) {}
 		}
 	}
 
