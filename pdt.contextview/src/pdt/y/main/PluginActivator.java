@@ -16,7 +16,9 @@ package pdt.y.main;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.cs3.prolog.common.Util;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -44,6 +46,9 @@ public class PluginActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		if (Util.isMacOS()) {
+			SWT_AWT.embeddedFrameClass = "sun.lwawt.macosx.CViewEmbeddedFrame";
+		}
 	}
 
 	@Override
