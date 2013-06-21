@@ -18,7 +18,7 @@
 	consult_server/1,
 	consult_server/2,
 	get_var_names/2
-	]). 
+	]).
 
 
 %:-debug(consult_server(startup)).
@@ -448,10 +448,16 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	
 print_solution(OutStream,Vars):-
 	forall(
-		(member(Key=Val,Vars)),
+		(member(Key=Val,Vars), filter_variable(Val)),
 		print_binding(OutStream,Key,Val,Vars)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
+	
+filter_variable(_) :-
+	option(unbound_variables,true), !.
+	
+filter_variable(Val) :-
+	nonvar(Val).
 	
 print_binding(Out,Key,Val,Vars):-
 		my_write(Out,'<'),

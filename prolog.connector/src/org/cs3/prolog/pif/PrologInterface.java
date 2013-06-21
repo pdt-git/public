@@ -77,13 +77,34 @@ public interface PrologInterface {
 	 */
 	public final static int CTERMS = 4;
 
+	
+	/**
+	 * session flag.
+	 * 
+	 * If this flag is set, all variables will be part of the result, even
+	 * the variables which are not bound (you will have entries like A=A)
+	 * 
+	 */
+	public final static int UNBOUND_VARIABLES = 8;
+	
 	/**
 	 * 
 	 * session flag.
+	 * 
 	 * This is what will be used by the legacy PrologInterface.getSession()
 	 * method.
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
+	
+	/**
+	 * 
+	 * session flag.
+	 * 
+	 * This is what should be used by JPC. It creates CTerms and create
+	 * result entries for unbound variables.
+	 * 
+	 */
+	public final static int JPC = CTERMS | UNBOUND_VARIABLES;
 	
 	
 	
