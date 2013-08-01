@@ -156,9 +156,13 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     		member((S, T), FoundDependencies),
     		nth1(SId, ProjectFilePaths, S),
     		nth1(TId, ProjectFilePaths, T),
-    		file_imports(S, T, Imports)
+    		file_imports(S, T, Imports),
+    		length(Imports, NImports)
     	),
-		write_load_edge(OutStream, SId, TId, Imports)
+		(	NImports > 0
+		->	write_load_edge(OutStream, SId, TId, Imports, NImports)
+		;	write_load_edge(OutStream, SId, TId, Imports)
+		)
     ).
    
 file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates) :-
