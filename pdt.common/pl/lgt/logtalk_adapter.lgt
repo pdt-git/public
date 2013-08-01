@@ -500,6 +500,7 @@ predicate_name_with_unary_property_(Name,Property,Arg) :-
 
 % decode(Term, This, Entity, Kind, Template, Location, Properties).
 
+:- private(decode/9).
 decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	!,
 	nonvar(Object),
