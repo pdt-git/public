@@ -176,8 +176,8 @@ exports_classification([E|Tail], [E|STail], D) :-
 exports_classification([], [], []) :- !.
 
 file_imports(File1, File2, PredNames) :-
-    module_of_file(File1,M1),
-    module_of_file(File2,M2), 
+    once(module_of_file(File1,M1)),
+    once(module_of_file(File2,M2)), 
     module_imports_from(M1,M2,Preds),
     findall(Name/Arity,
     	(
@@ -189,7 +189,9 @@ file_imports(File1, File2, PredNames) :-
 module_imports_from(M1,M2,Preds) :-   
     setof( Head,
            predicate_property(M1:Head, imported_from(M2)),
-           Preds).
+           Preds),
+    !.
+module_imports_from(_M1,_M2,[]).
 
 % Module consults all Preds from File:
 module_consults_from(Module,File,Preds) :-
