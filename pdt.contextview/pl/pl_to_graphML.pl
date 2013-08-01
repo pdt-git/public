@@ -55,7 +55,11 @@ write_global_to_graphML(ProjectFilePaths, GraphFile):-
 write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     %relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
-    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
+    (	current_predicate(logtalk_load/1)
+    ->	filter_logtalk(ConsultedFilePaths, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths),
+    	write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths))
+    ;	write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths))
+    ).
 
 relative_paths(_, [], []).
 relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-
@@ -72,6 +76,16 @@ relative_path(BasePath, Path, RelativePath) :-
 relative_path_([], Head, Head).
 relative_path_([H|T], [H|T2], Result) :-
     relative_path_(T, T2, Result).
+
+filter_logtalk([], [], []) :- !.
+filter_logtalk([F|Fs], Ps, [F|Ls]) :-
+	(	atom_concat(_, lgt, F)
+	;	atom_concat(_, logtalk, F)
+	),
+	!,
+	filter_logtalk(Fs, Ps, Ls).
+filter_logtalk([F|Fs], [F|Ps], Ls) :-
+	filter_logtalk(Fs, Ps, Ls).
 
 :- meta_predicate(write_to_graphML(+, 1)).
 write_to_graphML(GraphFile, CALL) :-
@@ -130,6 +144,10 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
 		write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, ProjectFiles)
 	)).
     
+write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths, OutStream) :-
+	write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, OutStream),
+	lgt_to_graphML::write_dependencies_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths, OutStream).
+	
 write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     
 	findall((SourceFile, TargetFile),
