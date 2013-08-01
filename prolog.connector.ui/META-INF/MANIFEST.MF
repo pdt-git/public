@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Prolog Connector UI
 Bundle-SymbolicName: org.cs3.prolog.connector.ui;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.1.1.qualifier
 Bundle-Activator: org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin
 Export-Package: org.cs3.prolog.connector.ui,
  org.cs3.prolog.pif.service,
