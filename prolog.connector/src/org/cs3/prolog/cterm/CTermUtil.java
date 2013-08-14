@@ -160,7 +160,7 @@ public class CTermUtil {
 
 	public static CTerm parseNonCanonicalTerm(String term, PrologInterface pif) throws PrologInterfaceException {
 
-		PrologSession session = pif.getSession(PrologInterface.CTERMS);
+		PrologSession session = pif.getSession(PrologInterface.CTERMS|PrologInterface.UNBOUND_VARIABLES);
 		
 		String query = QueryUtils.bT("atom_to_term", Util.quoteAtom(term), "Term", "D");
 
