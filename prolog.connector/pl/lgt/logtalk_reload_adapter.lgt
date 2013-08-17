@@ -24,9 +24,7 @@
 				true
 			;	logtalk_load_context(term_position, StartLine-_EndLine)
 			),
-			logtalk_load_context(file, File),
-			logtalk_load_context(directory, Directory),
-			atom_concat(Directory, File, Path),
+			logtalk_load_context(source, Path),
 			functor(Kind, Level, _),
 			{pdt_reload:assertz(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
 			{pdt_reload:trace_reload(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
