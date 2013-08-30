@@ -76,6 +76,8 @@ public class PreferenceConstants {
 	public static final String LAYOUT_HIERARCHY = "LAYOUT_HIERARCHY";
 	
 	public static final String LAYOUT_ORGANIC = "LAYOUT_ORGANIC";
+	
+	public static final String LAYOUT_COMPACTNESS = "APPEARANCE_COMPACTNESS";
 
 	
 	/* Appearance */

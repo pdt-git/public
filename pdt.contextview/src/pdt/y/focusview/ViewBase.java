@@ -82,12 +82,6 @@ public abstract class ViewBase extends ViewPart {
 	private boolean navigationEnabled = false;
 	
 	public ViewBase() {
-		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
-			@Override
-			public void preferencesUpdated() {
-				updateCurrentFocusView();	
-			}
-		});
 	}
 
 	protected abstract ViewCoordinatorBase createViewCoordinator();

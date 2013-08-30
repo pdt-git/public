@@ -54,35 +54,35 @@ public class RefreshModeFieldEditor extends FieldEditor {
 	@Override
 	protected void doFillIntoGrid(Composite parent, int numColumns) {
 		Control control = getLabelControl(parent);
-		GridData gdInfo = new GridData();
-        gdInfo.horizontalSpan = numColumns;
-        gdInfo.horizontalIndent = 9;
-        gdInfo.verticalIndent = 5;
-        control.setLayoutData(gdInfo);
+		//GridData gdInfo = new GridData();
+        //gdInfo.horizontalSpan = numColumns;
+        //gdInfo.horizontalIndent = 9;
+        //gdInfo.verticalIndent = 5;
+        //control.setLayoutData(gdInfo);
         
-        Label text = new Label(parent, SWT.NONE);
-        text.setText("Specify when to redraw the Focus View.");
-        text.setLayoutData(gdInfo);
+        //Label text = new Label(parent, SWT.NONE);
+        //text.setText("Specify when to redraw the Focus View.");
+        //text.setLayoutData(gdInfo);
         
-        Label note = new Label(parent, SWT.NONE);
-        FontData fontData = note.getFont().getFontData()[0];
-        Font font = new Font(parent.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.ITALIC));
-        note.setFont(font);
-        note.setText("NOTE: Refreshing undoes any manual layout of the graph!");
-        note.setLayoutData(gdInfo);
-		
 		control = getRadioBoxControl(parent);
-		GridData gdRadio = new GridData(GridData.FILL_HORIZONTAL);
-        gdRadio.horizontalSpan = numColumns;
-        gdRadio.verticalIndent = 10;
-        control.setLayoutData(gdRadio);
+		//GridData gdRadio = new GridData(GridData.FILL_HORIZONTAL);
+        //gdRadio.horizontalSpan = numColumns;
+        //gdRadio.verticalIndent = 10;
+        //control.setLayoutData(gdRadio);
+        
+        //Label note = new Label(parent, SWT.NONE);
+        //FontData fontData = note.getFont().getFontData()[0];
+        //Font font = new Font(parent.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.ITALIC));
+        //note.setFont(font);
+        //note.setText("NOTE: Refreshing undoes any manual layout of the graph!");
+        //note.setLayoutData(gdInfo);
 	}
 	
 	protected Composite getRadioBoxControl(Composite parent) {
 		
 		Group radioBox = new Group(parent, SWT.NONE);
 		
-		radioBox.setText("Refresh");
+		//radioBox.setText("Refresh Mode");
 		
 		GridLayout layout = new GridLayout();
         layout.marginWidth = 10;
