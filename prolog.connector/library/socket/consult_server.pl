@@ -246,7 +246,7 @@ handle_command(InStream,OutStream,'QUERY',continue):-
 	debug('handle_command', 'before my_format', []),
 	my_format(OutStream,"GIVE_TERM~n",[]),	
 	debug('handle_command', 'after my_format', []),
-	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
+	my_read_term2(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
 	( 
 	(debug('handle_command', 'before iterate_solutions ~w', [Term]),
 	iterate_solutions(InStream,OutStream,Term,Vars),
@@ -255,7 +255,7 @@ handle_command(InStream,OutStream,'QUERY',continue):-
 	).
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
-	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
+	my_read_term2(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
 	(
 		all_solutions(OutStream,Term,Vars)
 	;
@@ -525,6 +525,16 @@ handle_exception_X(_InStream,OutStream,wrapped(Error),continue):-
 	),
 	!.
 	
+handle_exception_X(_InStream,OutStream,fatal_read_term_error(Error),stop):-
+	catch(		
+		report_error(OutStream,Error),					
+		_,(
+%			shut_down(InStream,OutStream),
+			fail
+			)
+	),
+	!.
+	
 handle_exception_X(_InStream,_OutStream,Error,stop):-
 	debug(consult_server(handler),"Unhandled Exception :~w~n Trying to shut down...~n",[Error]).
 	
@@ -607,6 +617,10 @@ request_line(InStream, OutStream, Prompt, Line):-
 	
 my_read_term(InStream,Term,Options):-
 	with_interrupts(5,read_term(InStream,Term,Options)),
+	debug(consult_server(traffic),"(Up:~w read_term) <<<~w~n",[InStream,Term]).
+:- use_module(library(time)).
+my_read_term2(InStream,Term,Options):-
+	catch(call_with_time_limit(5,read_term(InStream,Term,Options)), E, throw(fatal_read_term_error(E))),
 	debug(consult_server(traffic),"(Up:~w read_term) <<<~w~n",[InStream,Term]).
 	
 my_write_term(OutStream,Elm,Options):-
