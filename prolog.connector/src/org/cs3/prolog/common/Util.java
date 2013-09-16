@@ -384,6 +384,10 @@ public class Util {
 	}
 
 	private static int appendUnescapedChar(String image, int i, StringBuffer sb) {
+		if (image.length() <= i + 1) {
+			sb.append('\\');
+			return 1;
+		}
 		char c = image.charAt(i + 1);
 		if (Character.isDigit(c)) {
 			return appendUnescapedOctalCharSpec(image, i, sb);
@@ -419,8 +423,10 @@ public class Util {
 		case 'x':
 			return appendUnescapedHexCharSpec(image, i, sb);
 		default:
-			sb.append(c);
-			return 2;
+			sb.append('\\');
+			return 1;
+//			sb.append(c);
+//			return 2;
 		}
 	}
 
