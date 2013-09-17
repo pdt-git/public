@@ -422,6 +422,9 @@ public class Util {
 			return 2;
 		case 'x':
 			return appendUnescapedHexCharSpec(image, i, sb);
+		case '\\':
+			sb.append('\\');
+			return 2;
 		default:
 			sb.append('\\');
 			return 1;
