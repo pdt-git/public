@@ -114,7 +114,7 @@ public class ValueReader {
 			value=ctermValue;
 		} else{
 			if(Util.flagsSet(flags, PrologInterface.UNQUOTE_ATOMS)) {
-				value = Util.unquoteAtom(unparsedValue);
+				value = Util.unquoteStringOrAtom(unparsedValue);
 			} else {
 				value=unparsedValue;
 			}
