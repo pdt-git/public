@@ -27,6 +27,7 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 	private Object parent;
 //	private String file;
 	private PrologClause clause;
+private String firstArgument;
 	
 //	public OutlineClauseElement(String label, String file, int line, String type, PrologTreeElement parent) {
 //		this.label = label;
@@ -96,7 +97,7 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 	}
 
 	private String calculateOccuranceLabel() {
-		String firstArgument = PDTCommonUtil.getProperty("first_argument", clause.getProperties());
+		firstArgument = PDTCommonUtil.getProperty("first_argument", clause.getProperties());
 		if (firstArgument != null) {
 			return clause.getLine() + ": " + Util.unquoteAtom(firstArgument);
 		} else {
@@ -116,6 +117,11 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 	public int getArity() {
 		return clause.getArity();
 	}
+	
+	public String getFirstArgument() {
+		return firstArgument;
+	}
+	
 }
 
 
