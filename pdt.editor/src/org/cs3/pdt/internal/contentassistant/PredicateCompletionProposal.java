@@ -23,11 +23,22 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateException;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
@@ -96,8 +107,14 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 	private String visibility;
 	private boolean isBuiltin;
 	
+	private DocumentTemplateContext2 context;
+	private Template indicatorOnly;
+//	private Template functorOnly;
+	private int currentStateMask = -1;
+	
 	private PredicateCompletionProposal(IDocument document, String insertion, String displayString, int offset, int length, String module, String name, int arity, String visibility, boolean isBuiltin, List<String> argNames, String docKind, String doc) {
-		super(document, insertion, displayString, offset, length);
+		super(newTemplate(insertion), new DocumentTemplateContext2(new TemplateContextType(contextTypeId), document, offset, length), new Region(offset, length), displayString);
+//		super(document, insertion, displayString, offset, length);
 		this.module = module;
 		this.name = name;
 		this.arity = arity;
@@ -106,8 +123,50 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		this.argNames = argNames;
 		this.docKind = docKind;
 		this.doc = doc;
+		
+		this.context = (DocumentTemplateContext2) getContext();
+		this.context.setProposal(this);
+		this.indicatorOnly = newTemplate(name + "/" + arity);
+//		this.functorOnly = newTemplate(name);
+	}
+	
+	private static Template newTemplate(String insertion) {
+		return new Template(insertion, "InsertMe", contextTypeId , insertion, true);
 	}
 
+	private static class DocumentTemplateContext2 extends DocumentTemplateContext {
+
+		private PredicateCompletionProposal predicateCompletionProposal;
+
+		public DocumentTemplateContext2(TemplateContextType type, IDocument document, int offset, int length) {
+			super(type, document, offset, length);
+		}
+
+		public void setProposal(PredicateCompletionProposal predicateCompletionProposal) {
+			this.predicateCompletionProposal = predicateCompletionProposal;
+		}
+		
+		@Override
+		public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
+			if ((predicateCompletionProposal.currentStateMask & SWT.CTRL) != 0) {
+				return super.evaluate(predicateCompletionProposal.indicatorOnly);
+			// ab: SHIFT does not work
+//			} else if ((predicateCompletionProposal.currentStateMask & SWT.SHIFT) != 0) {
+//				return super.evaluate(predicateCompletionProposal.functorOnly);
+			} else {
+				return super.evaluate(template);
+			}
+		}
+		
+	}
+	
+	@Override
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+		currentStateMask = stateMask;
+		super.apply(viewer, trigger, stateMask, offset);
+		currentStateMask = -1;
+	}
+	
 	@Override
 	public int compareTo(ComparableTemplateCompletionProposal o) {
 		if (o instanceof VariableCompletionProposal) {
