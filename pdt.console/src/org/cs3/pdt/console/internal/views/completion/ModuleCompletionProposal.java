@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.console.internal.views;
+package org.cs3.pdt.console.internal.views.completion;
 
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.eclipse.swt.graphics.Image;
@@ -28,7 +28,7 @@ public class ModuleCompletionProposal extends ComparableCompletionProposal {
 	}
 	
 	@Override
-	public String getContent() {
+	public String getContent(int stateMask) {
 		if (content == null) {
 			content = (module + (addSingleQuote ? "'" : "")).substring(prefixLength);
 		}
@@ -37,7 +37,7 @@ public class ModuleCompletionProposal extends ComparableCompletionProposal {
 
 	@Override
 	public int getCursorPosition() {
-		return getContent().length();
+		return getContent(-1).length();
 	}
 
 	@Override

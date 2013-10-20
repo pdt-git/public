@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.console.internal.views;
+package org.cs3.pdt.console.internal.views.completion;
 /*******************************************************************************
  * Copyright (c) 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials

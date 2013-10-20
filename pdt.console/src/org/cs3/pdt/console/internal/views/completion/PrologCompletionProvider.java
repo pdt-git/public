@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.console.internal.views;
+package org.cs3.pdt.console.internal.views.completion;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
 
@@ -27,7 +27,6 @@ import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.eclipse.jface.fieldassist.IContentProposal;
 
 public class PrologCompletionProvider {
 

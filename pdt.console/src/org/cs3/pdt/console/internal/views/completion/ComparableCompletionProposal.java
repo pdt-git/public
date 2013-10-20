@@ -12,9 +12,8 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.console.internal.views;
+package org.cs3.pdt.console.internal.views.completion;
 
-import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.swt.graphics.Image;
 
 public abstract class ComparableCompletionProposal implements IContentProposal, Comparable<ComparableCompletionProposal> {

@@ -10,7 +10,7 @@
  *     Hannes Erven <hannes@erven.at> - Bug 293841 - [FieldAssist] NumLock keyDown event should not close the proposal popup [with patch]
  *******************************************************************************/
 
-package org.cs3.pdt.console.internal.views;
+package org.cs3.pdt.console.internal.views.completion;
 
 import java.util.ArrayList;
 
@@ -18,12 +18,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.PopupDialog;
-import org.eclipse.jface.fieldassist.IContentProposal;
-import org.eclipse.jface.fieldassist.IContentProposalListener;
-import org.eclipse.jface.fieldassist.IContentProposalProvider;
-import org.eclipse.jface.fieldassist.IControlContentAdapter;
-import org.eclipse.jface.fieldassist.IControlContentAdapter2;
-import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
@@ -357,7 +351,7 @@ public class ContentProposalAdapter {
 					e.doit = false;
 					Object p = getSelectedProposal();
 					if (p != null) {
-						acceptCurrentProposal();
+						acceptCurrentProposal(e.stateMask);
 					} else {
 						close();
 					}
@@ -671,7 +665,7 @@ public class ContentProposalAdapter {
 
 				// Default selection was made. Accept the current proposal.
 				public void widgetDefaultSelected(SelectionEvent e) {
-					acceptCurrentProposal();
+					acceptCurrentProposal(e.stateMask);
 				}
 			});
 			return proposalTable;
@@ -807,7 +801,7 @@ public class ContentProposalAdapter {
 				return EMPTY;
 			}
 			if (labelProvider == null) {
-				return proposal.getLabel() == null ? proposal.getContent()
+				return proposal.getLabel() == null ? proposal.getContent(-1)
 						: proposal.getLabel();
 			}
 			return labelProvider.getText(proposal);
@@ -990,14 +984,14 @@ public class ContentProposalAdapter {
 		/*
 		 * Accept the current proposal.
 		 */
-		private void acceptCurrentProposal() {
+		private void acceptCurrentProposal(int stateMask) {
 			// Close before accepting the proposal. This is important
 			// so that the cursor position can be properly restored at
 			// acceptance, which does not work without focus on some controls.
 			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=127108
 			IContentProposal proposal = getSelectedProposal();
 			close();
-			proposalAccepted(proposal);
+			proposalAccepted(proposal, stateMask);
 		}
 
 		/*
@@ -1889,9 +1883,10 @@ public class ContentProposalAdapter {
 				// Check whether there are any proposals to be shown.
 				recordCursorPosition(); // must be done before getting proposals
 				IContentProposal[] proposals = getProposals();
-				if (proposals.length == 1) {
-					proposalAccepted(proposals[0]);
-				} else if (proposals.length > 1) {
+//				if (proposals.length == 1) {
+//					proposalAccepted(proposals[0], -1);
+//				} else
+				if (proposals.length >= 1) {
 					if (DEBUG) {
 						System.out.println("POPUP OPENED BY PRECEDING EVENT"); //$NON-NLS-1$
 					}
@@ -1943,14 +1938,14 @@ public class ContentProposalAdapter {
 	 * 
 	 * @param proposal the accepted proposal
 	 */
-	private void proposalAccepted(IContentProposal proposal) {
+	private void proposalAccepted(IContentProposal proposal, int stateMask) {
 		switch (proposalAcceptanceStyle) {
 		case (PROPOSAL_REPLACE):
-			setControlContent(proposal.getContent(), proposal
+			setControlContent(proposal.getContent(stateMask), proposal
 					.getCursorPosition());
 			break;
 		case (PROPOSAL_INSERT):
-			insertControlContent(proposal.getContent(), proposal
+			insertControlContent(proposal.getContent(stateMask), proposal
 					.getCursorPosition());
 			break;
 		default:

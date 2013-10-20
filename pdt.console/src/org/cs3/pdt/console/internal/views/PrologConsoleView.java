@@ -40,6 +40,7 @@ import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
+import org.cs3.pdt.console.internal.views.completion.PrologCompletionProvider;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.DefaultSubscription;

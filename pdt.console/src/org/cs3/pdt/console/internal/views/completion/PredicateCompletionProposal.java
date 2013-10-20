@@ -11,12 +11,13 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.console.internal.views;
+package org.cs3.pdt.console.internal.views.completion;
 
 import java.util.List;
 
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.console.internal.ImageRepository;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 
 public class PredicateCompletionProposal extends ComparableCompletionProposal {
@@ -25,9 +26,11 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	private int arity;
 	private String label;
 	private List<String> argNames;
-	private String content;
+	private String term;
+	private String indicator;
 	private String visibility;
 	private boolean isBuiltin;
+	private int lastStateMask = -1;
 	
 	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, List<String> argNames, boolean addSingleQuote) {
 		super(prefixLength, addSingleQuote);
@@ -41,14 +44,20 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		} else {
 			label = functor + "/" + arity + " - " + module;
 		}
+		term = (functor + (addSingleQuote ? "'" : "") + getArglist()).substring(prefixLength);
+		indicator = (functor + "/" + arity).substring(prefixLength);
 	}
 	
 	@Override
-	public String getContent() {
-		if (content == null) {
-			content = (functor + (addSingleQuote ? "'" : "") + getArglist()).substring(prefixLength);
+	public String getContent(int stateMask) {
+		lastStateMask = stateMask;
+		if ((stateMask & SWT.CTRL) != 0) {
+			return indicator;
+		} else if ((stateMask & SWT.SHIFT) != 0) {
+			return functor.substring(prefixLength);
+		} else {
+			return term;
 		}
-		return content;
 	}
 
 	private String getArglist() {
@@ -88,7 +97,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	
 	@Override
 	public int getCursorPosition() {
-		return getContent().length();
+		return getContent(lastStateMask).length();
 	}
 
 	@Override
