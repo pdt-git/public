@@ -175,9 +175,9 @@ report_to_file(Folder,Call) :- with_output_to_folder(Folder,Call).
 /*
  * export_all_results(+File, +Goal)
  *   Open an output stream for File and redirect the  output
- *   of the goal to that stream. Find all solution for Goal
- *   and report the number of solutions at the end.
- *   Close the stream afterwards.
+ *   of the goal to that stream. Find all solution for Goal,
+ *   report the number of solutions and print each solution on 
+ *   a separate line. Close the stream afterwards.
  *
  *   +File is a file in Unix notation (with slashes "/" as 
  *   separators). On Windows, the path may start with the 
@@ -189,7 +189,9 @@ report_to_file(Folder,Call) :- with_output_to_folder(Folder,Call).
 export_all_results(File, Goal) :-
    with_output_to_file(File, 
        ( count(Goal,N),  % enforces calculating all results
-         format('Found ~a results.~n',[N])
+         format('Found ~a results.~n',[N]),
+         forall(Goal, writeln(Goal)),
+         nl
        )
     ).
  
