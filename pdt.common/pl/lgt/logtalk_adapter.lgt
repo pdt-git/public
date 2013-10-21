@@ -287,7 +287,7 @@ find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functo
 	(	current_logtalk_flag(version, version(3, _, _)) ->
 		logtalk::loaded_file(FullPath)
 	;	logtalk::loaded_file(File, Directory)
-	)
+	),
 	% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(EntityLine, _)),
