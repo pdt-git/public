@@ -19,30 +19,30 @@
 
 	logtalk::message_hook(Term, Kind, core, Tokens) :-
 	    with_mutex('reloadMutex', (
-			pdt_reload:warning_and_error_tracing,
+			{pdt_reload:warning_and_error_tracing},
 			(	arg(2, Term, StartLine-_EndLine) ->
 				true
 			;	logtalk_load_context(term_position, StartLine-_EndLine)
 			),
 			logtalk_load_context(source, Path),
 			functor(Kind, Level, _),
-			pdt_reload:assertz(traced_messages(logtalk, Level, StartLine, Tokens, Path)),
-			pdt_reload:trace_reload(traced_messages(logtalk, Level, StartLine, Tokens, Path)),
+			{pdt_reload:assertz(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
+			{pdt_reload:trace_reload(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
 		%	assertz(user:am(_Term, Level,Lines)),
 			fail
 		)).
 	
 	logtalk::message_hook(loading_file(FullPath, _Options), _, core, _) :-
 		with_mutex('reloadMutex', (
-			pdt_reload:warning_and_error_tracing,
-			pdt_reload:assertz(reloaded_file__(FullPath)),
+			{pdt_reload:warning_and_error_tracing},
+			{pdt_reload:assertz(reloaded_file__(FullPath))},
 			fail
 		)).
 
 	logtalk::message_hook(reloading_file(FullPath, _Options), _, core, _) :-
 		with_mutex('reloadMutex', (
-			pdt_reload:warning_and_error_tracing,
-			pdt_reload:assertz(reloaded_file__(FullPath)),
+			{pdt_reload:warning_and_error_tracing},
+			{pdt_reload:assertz(reloaded_file__(FullPath))},
 			fail
 		)).
 
