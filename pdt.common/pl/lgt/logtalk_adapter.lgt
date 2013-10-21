@@ -281,8 +281,14 @@ find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, 
 % Called from PrologOutlineInformationControl.java
 
 find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
-	split_file_path:split_file_path(FullPath, Directory, File, _, lgt),
-	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
+	once((	split_file_path:split_file_path(FullPath, Directory, File, _, lgt)
+		;	split_file_path:split_file_path(FullPath, Directory, File, _, logtalk)
+	)),
+	(	current_logtalk_flag(version, version(3, _, _)) ->
+		logtalk::loaded_file(FullPath)
+	;	logtalk::loaded_file(File, Directory)
+	)
+	% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(EntityLine, _)),
 	(	% entity declarations

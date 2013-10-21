@@ -814,9 +814,16 @@ has_super_module(Module, SuperModule) :-
  
 
 loaded_file(FullPath) :-
-	(	split_file_path(FullPath, Directory, File, _, lgt)
-	->	current_predicate(logtalk_load/1),
-		logtalk::loaded_file(File, Directory)
-	;	source_file(FullPath)
+	(	(	split_file_path(FullPath, Directory, Basename, _, lgt)
+		;	split_file_path(FullPath, Directory, Basename, _, logtalk)
+		) ->
+		% Logtalk source file
+		current_predicate(logtalk_load/1),
+		% assume that Logtalk is loaded
+		(	current_logtalk_flag(version, version(3, _, _)) ->
+			logtalk::loaded_file(FullPath)
+		;	logtalk::loaded_file(Basename, Directory)
+		)
+	;	% assume Prolog source file
+		source_file(FullPath)
 	).
-
