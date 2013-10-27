@@ -13,6 +13,7 @@ import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 

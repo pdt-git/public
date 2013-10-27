@@ -13,6 +13,7 @@
 
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
 import org.eclipse.jface.viewers.Viewer;
@@ -29,6 +30,16 @@ class LexicalPrologOutlineSorter extends PositionalPrologOutlineSorter {
 			}
 		} else if ((e1 instanceof OutlinePredicateElement) && (e2 instanceof OutlinePredicateElement)) {
 			return ((OutlinePredicateElement)e1).getFunctor().compareTo(((OutlinePredicateElement)e2).getFunctor());
+		} else if ((e1 instanceof OutlineClauseElement) && (e2 instanceof OutlineClauseElement)) {
+			OutlineClauseElement c1 = (OutlineClauseElement)e1;
+			OutlineClauseElement c2 = (OutlineClauseElement)e2;
+			if (c1.getFirstArgument() == null && c2.getFirstArgument() != null) {
+				return 1;
+			} else if (c1.getFirstArgument() != null && c2.getFirstArgument() == null) {
+				return -1;
+			} else if (c1.getFirstArgument() != null && c2.getFirstArgument() != null) {
+				return c1.getFirstArgument().compareTo(c2.getFirstArgument());
+			}
 		}
 		return super.compare(viewer, e1, e2);
 	}

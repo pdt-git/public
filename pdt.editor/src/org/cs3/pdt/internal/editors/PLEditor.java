@@ -40,7 +40,6 @@ import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.metadata.GoalProvider;
 import org.cs3.pdt.metadata.PredicateReadingUtilities;
-import org.cs3.prolog.common.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -48,6 +47,7 @@ import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.pif.service.ConsultListener;
+import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -988,7 +988,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			ArrayList<OccurrenceLocation> locationList = parseOccurrences(
 					fCaretOffset, document);
 			if (locationList == null) {
-				// removeOccurrenceAnnotations();
+//				removeOccurrenceAnnotations();
 				return Status.CANCEL_STATUS;
 			}
 
@@ -1151,6 +1151,11 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		Map<String, List<OccurrenceLocation>> nonSingletonOccurs = new HashMap<String, List<OccurrenceLocation>>();
 
 		try {
+			ITypedRegion partition = document.getPartition(caretOffset);
+			if (partition == null || isComment(partition)) {
+				oldSelection = null;
+				return locationList;
+			}
 			TextSelection var = getVariableAtOffset(document, caretOffset);
 			String varName = var.getText();
 			if (oldSelection != null && oldSelection.equals(var)) {
@@ -1228,6 +1233,11 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				} else {
 					locationList.add(new OccurrenceLocation(var.getOffset(),
 							var.getLength(), 1, "desc"));
+				}
+			} else {
+				ITypedRegion region = document.getPartition(var.getOffset());
+				if (!isComment(region)) {
+					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 0, "desc"));
 				}
 			}
 		} catch (BadLocationException e) {

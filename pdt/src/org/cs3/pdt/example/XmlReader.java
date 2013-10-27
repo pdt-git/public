@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-import org.cs3.prolog.common.Util;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -40,7 +40,7 @@ public class XmlReader extends DefaultHandler {
 			examplesDir.mkdirs();
 			f = new File(examplesDir, XML_NAME);
 			// Aktuelle Version der XML-Datei laden
-			Util.saveUrlToFile(urlString, f, null);
+			PDTCommonUtil.saveUrlToFile(urlString, f, null);
 
 			xr = XMLReaderFactory.createXMLReader();
 			xr.setContentHandler(this);

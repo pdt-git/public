@@ -52,6 +52,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("id", dataHolder.getNodeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", dataHolder.getModuleMap(), KeyScope.NODE,KeyType.STRING);
 		core.addInputDataAcceptor("description", dataHolder.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("lineNumber", dataHolder.getLineNumberMap(), KeyScope.NODE, KeyType.INT);
 		core.addInputDataAcceptor("kind", dataHolder.getKindMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("functor", dataHolder.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("arity", dataHolder.getArityMap(), KeyScope.NODE, KeyType.INT);
@@ -62,6 +63,12 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isExported", dataHolder.getExportedMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isUnusedLocal", dataHolder.getUnusedLocalMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("exported_static_predicates", dataHolder.getModulePublicStaticPredicatesMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("exported_dynamic_predicates", dataHolder.getModulePublicDynamicPredicatesMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("imported_predicates", dataHolder.getModuleImportedPredicatesMap(), KeyScope.EDGE, KeyType.STRING);
+		core.addInputDataAcceptor("file_node_name", dataHolder.getFileNodeNameMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("file_node_path", dataHolder.getFileNodePathMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("file_node_type", dataHolder.getFileTypeMap(), KeyScope.NODE, KeyType.STRING);
 	}
 
 	private boolean loadFile(URL resource){

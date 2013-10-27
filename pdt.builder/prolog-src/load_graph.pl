@@ -16,7 +16,7 @@
 :- use_module(library(lists)).
 
 
-/**
+/*
  * build_new_load_graph/0
  *   retracts all load_edge/3 of a former load-graph and
  *   builds a new one with respect to all given
@@ -29,7 +29,7 @@ build_new_load_graph:-
     retractall(warning(_,'link to external library',_)),
     build_load_graph.
 
-/**
+/*
 * build_load_graph/0
 *   tries to build the corresponding load_edge/3 for each load_dir/4 it
 *   can find.
@@ -56,7 +56,7 @@ build_load_graph.
 %build_load_graph:-
 %	retractall(load_dir(_,_,_,_)).
 
-/**
+/*
  * build_load_edges_for_list(+ArgList,+LoadingFileId,+LoadingDirectiveId)
  *   builds the load edges for all Arguments inside of ArgList with the
  *   help of build_complex_load_edges/3. 
@@ -113,7 +113,7 @@ lookup_direct_file_reference(ToLoad,LoadingId,Id):-
 	!.   
 
 
-/**
+/*
  * find_file_id_for_file_name(?FileName, ?Id) is_det
  * 
  * This predicate can be used if one get's a file name via absolute_file_name/3.
@@ -135,7 +135,7 @@ find_file_id_for_file_name(FileName,Id):-
     downcase_atom(AFileName,LowerAFileName),
     LowerFileName == LowerAFileName.
 
-/**
+/*
  * compute_dir_with_file_search_path(+Key, -FinalDir)
  *   resolves the directory represented by Arg1
  *   with file_search_path/2.
@@ -162,7 +162,7 @@ get_path_with_prolog_file_ending(FilePath,FilePathPl):-
     append(PrePath,FilePl,ListPl),
     atomic_list_concat(ListPl,'/',FilePathPl).	
  
-/**
+/*
  * combine_tow_path_elements(+First,+Second,-Combination,+Directive)
  *    Arg3 is the atom that begins with Arg1, is followed
  *    with a '/' and ends with Arg2. If Arg1 and Arg2 are
@@ -182,7 +182,7 @@ get_path_with_prolog_file_ending(FilePath,FilePathPl):-
     ).*/
 
 
-/**
+/*
  * combine_tow_path_elements(+First,+Second,-Combination)
  *    Arg3 is the atom that begins with Arg1, is followed
  *    with a '/' and ends with Arg2. If Arg1 and Arg2 are
@@ -200,7 +200,7 @@ listify_path_element(Elem,List):-
     ;	path_to_list(Elem,List)
     ).
     
-/**
+/*
  * path_to_list(+Path,?List)
  *	  This is more or less the reversion of atomic_list_concat/3 
  *    with '/' as seperator.

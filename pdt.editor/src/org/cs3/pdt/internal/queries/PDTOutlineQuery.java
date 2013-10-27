@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
@@ -45,6 +47,7 @@ public class PDTOutlineQuery {
 
 			String query = bT(PDTCommonPredicates.FIND_DEFINITION_CONTAINED_IN,
 					Util.quoteAtom(fileName),
+					getOptions(),
 					"Entity",
 					"EntityLine",
 					"KindOfEntity",
@@ -64,6 +67,15 @@ public class PDTOutlineQuery {
 			if(session!=null)session.dispose();
 		}
 		return new HashMap<String, OutlineModuleElement>();
+	}
+	
+	private static String getOptions() {
+		StringBuffer buf = new StringBuffer("[multifile(");
+		buf.append(PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_OUTLINESHOW_MULTIFILE));
+		buf.append("), all_clauses(");
+		buf.append(PDTPlugin.getDefault().getPreferenceStore().getString(PDT.PREF_OUTLINE_SHOW_ALL_CLAUSES));
+		buf.append(")]");
+		return buf.toString();
 	}
 
 	@SuppressWarnings("unchecked")

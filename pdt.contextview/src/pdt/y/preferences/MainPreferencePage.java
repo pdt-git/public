@@ -15,8 +15,10 @@ package pdt.y.preferences;
 
 import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE;
 import static pdt.y.preferences.PreferenceConstants.REFRESH_MODE_AUTOMATIC;
+import static pdt.y.preferences.PreferenceConstants.LAYOUT_COMPACTNESS;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.ScaleFieldEditor;
 import org.eclipse.ui.IWorkbench;
 
 import pdt.y.main.PluginActivator;
@@ -50,7 +52,7 @@ public class MainPreferencePage
 	 */
 	@Override
 	public void createFieldEditors() {
-		
+		addField(new ScaleFieldEditor(LAYOUT_COMPACTNESS, "Layout Compactness", getFieldEditorParent(), 0, 900, 100, 100));
 		addField(new RefreshModeFieldEditor(getFieldEditorParent()));
 	}
 
@@ -65,6 +67,14 @@ public class MainPreferencePage
 	public static boolean isAutomaticUpdate() {
 		String mode = getCurrentPreferences().getString(REFRESH_MODE);
 		return mode.equals(REFRESH_MODE_AUTOMATIC);
+	}
+
+	public static int getLayoutCompactness() {
+		return 1000 - getCurrentPreferences().getInt(PreferenceConstants.LAYOUT_COMPACTNESS);
+	}
+	
+	public static void setLayoutCompactness(int value) {
+		getCurrentPreferences().setValue(PreferenceConstants.LAYOUT_COMPACTNESS, value);
 	}
 }
 

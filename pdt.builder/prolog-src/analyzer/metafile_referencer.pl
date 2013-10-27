@@ -174,7 +174,7 @@ find_unknown_meta_predicates.
     
 
 
-/**
+/*
  *	know_meta_predicat(?Module,?Name, ?Arity, ?MetaArgs) is nondet
  *
  *  succeds when the predicate represented by Arg1:Arg2/Arg3 

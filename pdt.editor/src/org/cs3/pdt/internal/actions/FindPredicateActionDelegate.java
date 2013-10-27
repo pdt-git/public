@@ -157,7 +157,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				}
 			} else {
 				if (!"lgt".equals(file.getFileExtension())) {
-					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(Util.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(UIUtils.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
 					if (result.isEmpty()) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),

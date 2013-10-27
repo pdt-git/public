@@ -32,6 +32,7 @@ public abstract class LifeCycle {
 
 		public DispatcherThread(String name) {
 			super(name);
+			setDaemon(true);
 		}
 
 		private synchronized void enqueue(WorkRunnable r) {

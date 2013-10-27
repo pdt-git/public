@@ -271,7 +271,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 				}
 			}
 		} else if (match instanceof PredicateMatch) {
-			PrologMatch predicateMatch = (PrologMatch) match;
+			PredicateMatch predicateMatch = (PredicateMatch) match;
 			String signature = predicateMatch.getModule() + predicateMatch.getVisibility();
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement != null) {

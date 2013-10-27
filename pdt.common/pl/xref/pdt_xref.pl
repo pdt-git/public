@@ -22,7 +22,7 @@
 :- use_module( pdt_common_pl(properties), [properties_for_predicate/4] ).
 :- use_module(library(lists)).
 
-:- use_module(library(prolog_codewalk)).
+:- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 
 %:- ensure_loaded('../pdt_factbase.pl').
 %:- use_module('../modules_and_visibility').
@@ -33,36 +33,40 @@ find_unique( Goal ) :-
     setof( Goal, Goal, Set),
     member(Goal, Set).
     
-:- dynamic(result/3).
+:- dynamic(result/4).
 
-assert_result(QGoal, _, clause_term_position(Ref, TermPosition)) :-
+assert_result(QGoal, Caller, Location) :-
+	assert_result(QGoal, Caller, Location, _).
+assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
     QGoal = _:Goal,
-    assertz(result(Goal, Ref, TermPosition)),
+    assertz(result(Goal, Ref, TermPosition, Kind)),
     !.
 
-assert_result(_,_,_).
+assert_result(_,_,_,_).
 
 assert_result(QGoal-clause_term_position(Ref, TermPosition)) :-
 	QGoal = _:Goal,
-	assertz(result(Goal, Ref, TermPosition)),
+	assertz(result(Goal, Ref, TermPosition, [])),
 	!.
 
 assert_result(_). 
 
-%% find_reference_to(+Functor,+Arity,DefFile, DefModule,RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,?PropertyList)
+%% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
 find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList]) :-
-	retractall(result(_, _, _)),
+	retractall(result(_, _, _, _)),
 	(	var(Functor), var(SearchMod) -> !, fail ; true),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
-	result(ReferencingGoal, ClauseRef, Termposition),
-	clause_property(ClauseRef, file(RefFile)),
+	retract(result(ReferencingGoal, ClauseRef, Termposition, _)),
 	clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
-	clause_property(ClauseRef, line_count(Line)),
-	(	nonvar(SearchMod)
+	(	nonvar(SearchMod),
+		var(Functor),
+		var(Arity)
 	->	SearchMod \== RefModule
 	;	true
 	),
+	clause_property(ClauseRef, file(RefFile)),
+	clause_property(ClauseRef, line_count(Line)),
 	nth_clause(_, Nth, ClauseRef),
 	properties_for_predicate(RefModule,RefName,RefArity,PropertyList),
 	(	Termposition = term_position(Start, End, _, _, _)
@@ -70,8 +74,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 	;	Termposition = Start-End
 	),
 	format(atom(Position), '~w-~w', [Start, End]),
-	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
-	retract(result(ReferencingGoal, ClauseRef, Termposition)).
+	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]).
 
 perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	(	nonvar(Functor)
@@ -83,7 +86,8 @@ perform_search(Functor, Arity, SearchMod, ExactMatch) :-
 	->	functor(Goal, SearchFunctor, SearchArity)
 	;	true
 	),
-	prolog_walk_code([trace_reference(SearchMod:Goal), on_trace(pdt_xref:assert_result)]),
+	collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates),
+	pdt_walk_code([trace_reference(SearchMod:Goal), predicates(Candidates), on_trace(pdt_xref:assert_result)]),
 	fail.
 
 perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
@@ -122,6 +126,11 @@ search_predicate_indicator(Functor, Arity, SearchMod, false, SearchFunctor, Sear
 	),
 	member(SearchFunctor/SearchArity, FAs).
 
+collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates) :-
+	ensure_call_graph_generated,
+	setof(Module:Name/Arity, (
+		calls(SearchMod, SearchFunctor, SearchArity, Module, Name, Arity, _)
+	), Candidates).
 	
 %find_reference_to(Functor,Arity,DefFile, SearchMod, ExactMatch,
 %                  RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList) :-

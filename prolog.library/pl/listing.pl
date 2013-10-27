@@ -11,6 +11,8 @@
  * 
  ****************************************************************************/
 
+:- use_module(library(listing)).
+
 /*
  * listing*(?Module,+FunctorSubstring,?Arity)
  * 

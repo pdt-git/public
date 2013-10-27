@@ -33,7 +33,6 @@ import org.cs3.prolog.load.DefaultPrologLibrary;
 import org.cs3.prolog.load.PrologLibrary;
 import org.cs3.prolog.load.PrologLibraryManager;
 import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.ReconsultHook;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -72,7 +71,7 @@ public class PrologRuntimePlugin extends Plugin {
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		plugin = null;
-		for (File tempFile : tempFiles) {
+		for (File tempFile : Util.getTempFiles()) {
 			try {
 				tempFile.delete();
 			} catch (SecurityException e) {}
@@ -481,28 +480,6 @@ public class PrologRuntimePlugin extends Plugin {
 	
 	public static PrologInterface newPrologInterface(String name) {
 		return new SocketPrologInterface(name);
-	}
-
-	private Set<ReconsultHook> currentHooks = new HashSet<ReconsultHook>();
-
-	public void registerReconsultHook(ReconsultHook hook) {
-		currentHooks.add(hook);
-	}
-
-	public void unregisterReconsultHook(ReconsultHook hook) {
-		currentHooks.remove(hook);
-	}
-	
-	public Set<ReconsultHook> getReconsultHooks() {
-		return currentHooks;
-	}
-	
-	private Set<File> tempFiles = new HashSet<File>();
-	
-	public void addTempFile(File tempFile) {
-		if (tempFile != null) {
-			tempFiles.add(tempFile);
-		}
 	}
 
 }

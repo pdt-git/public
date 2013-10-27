@@ -13,11 +13,15 @@
 
 package pdt.y.model;
 
+import java.util.Arrays;
+
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
 import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
+import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
+import pdt.y.model.realizer.nodes.UMLClassNodeRealizer;
 import y.base.Edge;
 import y.base.EdgeMap;
 import y.base.Node;
@@ -38,14 +42,18 @@ public class GraphModel {
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer predicateNodeRealizer;
+	private NodeRealizerBase fileNodeRealizer;
 	private GroupNodeRealizer filegroupNodeRealizer;
 	private GroupNodeRealizer moduleGroupNodeRealizer;
 	
 	private EdgeRealizer callEdgeRealizer;
 	private EdgeRealizer loadEdgeRealizer;
+	
+	private int nodesMaxWidth;
+	private int nodesMedianWidth;
+	private int nodesHeight;
 
 	public GraphModel(){
-		  
 		initNodeRealizers();
 		initEdgeRealizers();
 	}
@@ -53,17 +61,42 @@ public class GraphModel {
 	private void initNodeRealizers() {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
-		predicateNodeRealizer = new PredicateNodeRealizer(this);    
+		predicateNodeRealizer = new PredicateNodeRealizer(this);
+		fileNodeRealizer = new UMLClassNodeRealizer(this);
 		graph.setDefaultNodeRealizer(predicateNodeRealizer);
 	}
 
 	private void initEdgeRealizers() {
-		loadEdgeRealizer = new LoadEdgeRealizer();
+		loadEdgeRealizer = new LoadEdgeRealizer(this);
 		callEdgeRealizer = new CallEdgeRealizer();
 		graph.setDefaultEdgeRealizer(callEdgeRealizer);
 	}
 
+	private void analyzeGraph() {
+		if (graph.getNodeArray().length == 0)
+			return;
+		
+		NodeRealizerBase realizer = (NodeRealizerBase)graph.getDefaultNodeRealizer();
+		int i = 0;
+		int[] lengths = new int[graph.getNodeArray().length];
+		
+		for (Node node: graph.getNodeArray()) {
+			String text = getLabelTextForNode(node);
+			
+			int v = realizer.calcLabelSize(text).getWidth() + 14;
+			lengths[i++] = v;
+		}
+		
+		Arrays.sort(lengths);
+		
+		int maxWidth = lengths[i - 1];
+		int medianWidth = lengths[i / 2];
+		setNodesMaxWidth(maxWidth);
+		setNodesMedianWidth(medianWidth);
+	}
+
 	public void categorizeData() {
+		analyzeGraph();
 		categorizeNodes();		
 		categorizeEdges();
 	}
@@ -74,8 +107,14 @@ public class GraphModel {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleGroupNodeRealizer));
 			} else if (dataHolder.isFile(node)) {
 				graph.setRealizer(node, new FileGroupNodeRealizer(filegroupNodeRealizer));
+			} else if (dataHolder.isFileNode(node)) {
+				UMLClassNodeRealizer newNodeRealizer = new UMLClassNodeRealizer(fileNodeRealizer);
+				graph.setRealizer(node, newNodeRealizer);
+				newNodeRealizer.initialize();
 			} else {
-				// no realizer to set because it is already bound to default realizer
+				PredicateNodeRealizer newNodeRealizer = new PredicateNodeRealizer(predicateNodeRealizer);
+				graph.setRealizer(node, newNodeRealizer);
+				newNodeRealizer.fitContent();
 			}
 		}
 	}
@@ -83,7 +122,14 @@ public class GraphModel {
 	private void categorizeEdges() {
 		for (Edge edge: graph.getEdgeArray()) {
 			if (dataHolder.isLoadingEdge(edge)) {
-				graph.setRealizer(edge, new LoadEdgeRealizer(loadEdgeRealizer));
+				LoadEdgeRealizer newLoadEdgeRealizer = new LoadEdgeRealizer(loadEdgeRealizer);
+				graph.setRealizer(edge, newLoadEdgeRealizer);
+				
+				String imports = dataHolder.getModuleImportedPredicates(edge);
+				if (!imports.equals("[]")) {
+					newLoadEdgeRealizer.setLabelText(imports.split(",").length + "");
+				}
+				
 			} else if (dataHolder.isCallEdge(edge)) {
 				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
 				graph.setRealizer(edge, newCallEdgeRealizer);
@@ -98,8 +144,8 @@ public class GraphModel {
 		return graph;
 	}
 
-	public void setGraph(Graph2D model) {
-		this.graph = model;
+	public void setGraph(Graph2D graph) {
+		this.graph = graph;
 	}
 	
 	public void useHierarchy(){
@@ -131,8 +177,29 @@ public class GraphModel {
 		return dataHolder.getLabelTextForNode(node);
 	}
 	
-	
+	public int getNodesMaxWidth() {
+		return nodesMaxWidth;
+	}
 
+	public void setNodesMaxWidth(int nodesMaxWidth) {
+		this.nodesMaxWidth = nodesMaxWidth;
+	}
+
+	public int getNodesMedianWidth() {
+		return nodesMedianWidth;
+	}
+
+	public void setNodesMedianWidth(int nodesMedianWidth) {
+		this.nodesMedianWidth = nodesMedianWidth;
+	}
+
+	public int getNodesHeight() {
+		return nodesHeight;
+	}
+
+	public void setNodesHeight(int nodesHeight) {
+		this.nodesHeight = nodesHeight;
+	}
 
 	public void assignPortsToEdges() {
 		EdgeMap sourceMap = graph.createEdgeMap();
@@ -144,7 +211,6 @@ public class GraphModel {
 		}
 		graph.addDataProvider(PortConstraintKeys.SOURCE_PORT_CONSTRAINT_KEY, sourceMap);
 	}
-
 
 	public int getFrequency(Edge edge) {
 		return dataHolder.getFrequency(edge);

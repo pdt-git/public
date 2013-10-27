@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.cterm.CTermUtil;
@@ -66,50 +67,67 @@ public class SocketSession implements PrologSession {
 			client = null;
 		}
 	}
-
-//	@Override
-//	public List<Map<String, Object>> queryAll(String query) throws PrologException,
-//		PrologInterfaceException {
-//		CTermUtil.checkFlags(flags);
-//		if (isDisposed()) {
-//			throw new IllegalStateException("Session is disposed!");
-//		}
-//		if (query.length() == 0) {
-//			return generateEmptyResults();
-//		}
-//		Vector<Map<String, Object>> results;
-//		try {
-//			configureProtocol(flags);
-//			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
-//			client.writeln(SocketCommunicationConstants.QUERY_ALL);
-//			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
-//			normalizeQuery(query);
-//			results = readResults();
-//		} catch (IOException e) {
-//			throw pif.error(e);
-//		} 
-//		return results;
-//	}
-//	
-//	private Vector<Map<String, Object>> readResults() throws IOException {
-//	Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
-//	Map<String, Object> result = read_solution(flags);
-//	while (result != null) {
-//		results.add(result);
-//		result = read_solution(flags);
-//	}
-//	return results;
-//}
-//	
-//	private List<Map<String, Object>> generateEmptyResults() {
-//	List<Map<String, Object>> l = new Vector<Map<String, Object>>();
-//	l.add(generateAnEmtpyResult());
-//	return l;
-//}
 	
+	public static final int QUERY_ALL_DEFAULT = 0;
+	public static final int QUERY_ALL_AT_ONCE = 1;
 	
 	@Override
-	public List<Map<String, Object>> queryAll(String query) throws PrologInterfaceException {
+	public List<Map<String, Object>> queryAll(String query) throws PrologException,
+	PrologInterfaceException {
+		return queryAll(query, QUERY_ALL_AT_ONCE);
+	}
+	
+	@Override
+	public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException,
+	PrologInterfaceException {
+		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologInterface.CTERMS) == 0)) {
+			return queryAllAtOnce(query);
+		} else {
+			return queryAllDefault(query);
+		}
+	}
+
+	private List<Map<String, Object>> queryAllDefault(String query) throws PrologException,
+		PrologInterfaceException {
+		CTermUtil.checkFlags(flags);
+		if (isDisposed()) {
+			throw new IllegalStateException("Session is disposed!");
+		}
+		if (query.length() == 0) {
+			return generateEmptyResults();
+		}
+		Vector<Map<String, Object>> results;
+		try {
+			configureProtocol(flags);
+			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+			client.writeln(SocketCommunicationConstants.QUERY_ALL);
+			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+			normalizeQuery(query);
+			results = readResults();
+		} catch (IOException e) {
+			throw pif.error(e);
+		} 
+		return results;
+	}
+	
+	private Vector<Map<String, Object>> readResults() throws IOException {
+	Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
+	Map<String, Object> result = read_solution(flags);
+	while (result != null) {
+		results.add(result);
+		result = read_solution(flags);
+	}
+	return results;
+}
+	
+	private List<Map<String, Object>> generateEmptyResults() {
+	List<Map<String, Object>> l = new Vector<Map<String, Object>>();
+	l.add(generateAnEmtpyResult());
+	return l;
+}
+	
+	
+	private List<Map<String, Object>> queryAllAtOnce(String query) throws PrologInterfaceException {
 		int oldflags = flags;
 		flags = flags | PrologInterface.PROCESS_LISTS;
 		

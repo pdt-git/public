@@ -48,6 +48,7 @@ public class JackTheProcessRipper extends Thread {
 			}
 		};
 		theRuntime.addShutdownHook(shutdownHook);
+		setDaemon(true);
 		start();
 	}
 

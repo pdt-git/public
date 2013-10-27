@@ -1,4 +1,4 @@
-/**
+/*
  * Structure of the file:
  *
  * - conditions used by CTs
@@ -60,7 +60,7 @@ action( showError(Kind,ID,Msg)):-                                   showError(Ki
     
 
 
-/**
+/*
  * addArgList(FnArgs, PcArgs, Ids, Parent, ForwMethod)
  * 
  * ACTION
@@ -76,7 +76,7 @@ addArgList([FnArg|FnArgs], PcArgs, [Ident|Idents], Parent, ForwMethod) :-
     addArg(FnArg,PcArgs,Ident,Parent,ForwMethod),
     addArgList(FnArgs, PcArgs, Idents, Parent, ForwMethod).
 
-/**
+/*
  * addArg(+FnArg,+JpArgs,+Ident,+Parent,+ForwMethod)
  * 
  * ACTION
@@ -96,7 +96,7 @@ addArg(FnArg,PcArgs,Ident,Parent,ForwMethod):-
     lookupForwParameter(ForwMethod, FnArg,PcArgs,ArgParams,Param, Name),
     add(identT(Ident,Parent,ForwMethod,Name,Param)).
 
-/**
+/*
  * add_advice_instance_method_parameters(+AdviceInstanceMethod, +JP, +AdviceParametersAndKinds,ThisType, TargetType, Parameters)
  *
  * @param AdviceParametersAndKinds [(Param, Kind),...] : Kind = target, this, argument id at join point
@@ -129,7 +129,7 @@ addArg(FnArg,PcArgs,Ident,Parent,ForwMethod):-
     ).
     
 
-/**
+/*
  *
  */
 get_or_add_argument_parameters(_, [],_, _, []).
@@ -169,7 +169,7 @@ get_arg_name(ArgID,Num,ArgName):-
     atom_concat('_arg', Num, ArgName).
 
 
-/**
+/*
   * get_or_add_parameter_if_afterThrowingOrReturning_param_exists(+AdviceParametersAndKinds, -Param)
   *
   * if the current advice is an afterThrowing oder afterReturning advice, the extra formal will be added to
@@ -184,7 +184,7 @@ get_or_add_parameter_if_afterThrowingOrReturning_param_exists(AdviceParametersAn
 get_or_add_parameter_if_afterThrowingOrReturning_param_exists( _, _).
 
  
-/**
+/*
  *get_or_add_parameter(_,+Kind,+AdviceParametersAndKinds,_,-Param) :-
  */  
 get_or_add_parameter(_,Kind,AdviceParametersAndKinds,_,Param) :-
@@ -199,7 +199,7 @@ get_or_add_parameter(AdviceInstanceMethod,'this', _, TargetType, Param) :-
 	createThisInstanceParam(TargetType, AdviceInstanceMethod, Param),
 	!.
 
-/**
+/*
  * get_join_point_arguments(JP, Args)
  *
  */
@@ -219,7 +219,7 @@ get_join_point_arguments(JP, [Arg]) :-
   !.
   
  get_join_point_arguments(_, []).  
-/**
+/*
   * join_point_exceptions(+JP, -Exceptions)
   *
   */
@@ -236,7 +236,7 @@ join_point_exceptions(_,[]).
 
 
 
-/**
+/*
  * matches_jp_exceptions(+ExceptionFQ,-ExceptionIDs)
  *
  * TESTED
@@ -259,7 +259,7 @@ matches_exceptions(_,[]):- fail.
     
     
 
-/**
+/*
  * getTargetType(+JpID,-RecieverType)
  *
  *
@@ -285,7 +285,7 @@ getReceiverType(JpID,RecieverType):-
   getType(EnclClass,RecieverType).
   
   
-/**
+/*
  * add_unboxing_return(Return, _parent, EnclMethod, _expr)
  *
  * ACTION
@@ -324,7 +324,7 @@ add_unboxing_return(_return, _parent, _encl, _expr):-
 add_unboxing_return(_return, _parent, _encl, _expr):-
     add(returnT(_return,_parent,_encl,_expr)).
   
-%/**
+%/*
 % * add_advice_param_ref(JoinPoint,AdviceParam,Id,Parent,EnclMethod)
 % *
 % * ACTION
@@ -337,7 +337,7 @@ add_unboxing_return(_return, _parent, _encl, _expr):-
 %    getForwParam(_pc, _adviceParam, _param,_name),
 %    add(identT(_id,_parent,_encl,_name,_param)).
     
-    /**
+    /*
  * showError(+Kind, +ID,+Msg)
  * 
  * ACTION
@@ -366,14 +366,14 @@ showError(Kind,ID,Msg):-
     gen_tree(ID),
     flush_output,
 
-    /**
+    /*
     * Added Dec 20, 2004 to store all errors/warnings
     * and move it to the Eclipse Problems View. (AL)
     */
     assert(isErrorWarningMessage(Kind, ID, Msg)).
     
     
-/**
+/*
  * addParamList(+Params, +Ids,+Parent)
  *
  * ACTION
@@ -385,7 +385,7 @@ addParamList([Param|Params], [Id|Ids],Parent) :-
     add(paramT(Id,Parent,Type,Name)),
     addParamList(Params, Ids,Parent).    
     
-/**
+/*
  * addParamReferenceList(+Refs, +Params, +Parent,+Encl)
  *
  * ACTION
@@ -404,7 +404,7 @@ addParamReferenceList([Ref|Refs], [Param|Params], Parent,Encl) :-
     
     
     
-/**
+/*
  * add_to_class_fq(+Class,+Member|+MemberList)
  * 
  * ACTION
@@ -442,7 +442,7 @@ add_to_class_fq(_class, _id) :-
 
 /************************** CT CONDITIONS (cond/1) *************************/
 
-/**
+/*
  * bindForwMethod(+JoinPoint,-ForwardingMethod,-Body)
  *
  * CONDITION
@@ -462,7 +462,7 @@ bindForwMethod(_Method,_Method,_Body):-
 bindForwMethod(_,_forwMethod,_forwBody):-
     new_ids([_forwMethod,_forwBody]).
 */
-/**
+/*
  * extract_class_name(+FQN,-Package, -ClassName)
  *
  * CONDITION
@@ -496,7 +496,7 @@ extract_class_name_(_, ClassName, '',ClassName).
 :- multifile fieldAccess/2.
 :- multifile action/1.
 
-/**
+/*
  * forwarding(Forwarding, LastForwarding,Jp)
  * 
  * except for the first fact:
@@ -505,7 +505,7 @@ extract_class_name_(_, ClassName, '',ClassName).
 :- dynamic forwarding/3.
 :- dynamic forwarding/1.
 
-/**
+/*
  * forwards(LastCall, LastForwarding, Kind, Jp)
  *
  * LastCall: the call at the real join point
@@ -521,7 +521,7 @@ extract_class_name_(_, ClassName, '',ClassName).
 
 /*** AUXILIARY PREDICATES ***************************************/
   
-/**
+/*
  * replaceStatementWithForwarding(JoinPoint) 
  *
  * see replaceStatementWithForwarding(JoinPoint,ForwMethod,ForwBody).
@@ -530,7 +530,7 @@ extract_class_name_(_, ClassName, '',ClassName).
 replaceStatementWithForwarding(JP) :-
     replaceStatementWithForwarding(JP,_,_).
 
-/**
+/*
  * replaceStatementWithForwarding(JoinPoint,ForwMethod,ForwBody) 
  *
  * Replaces a Joinpoint execution with the call of a forwarding method.
@@ -552,7 +552,7 @@ replaceStatementWithForwarding(JP,ForwMethod,ForwBody) :-
     createForwardingMethod(RealJP, EnclClass,ForwMethod,ForwBody),
     add_encl_meth_params(RealJP).
 
-/**
+/*
  * add_encl_meth_params(+Pc) 
  */
 add_encl_meth_params(JP):-
@@ -565,7 +565,7 @@ add_encl_meth_params(JP):-
     pc_param_num(JP,Kind,PN),
     add_encl_params_to_forw_if_need(JP,PN,LastForwMethod).
     
-/**
+/*
  * add_encl_params_to_forw_if_need(+Pc,+PN,+ForwMethod)
  *
  * Add parameters of the enclosing method at the
@@ -604,7 +604,7 @@ add_encl_params_to_forw_if_need(Pc,PN,ForwMethod):-
     add_encl_params_to_forw_if_need(Pc,PN,LastForwMethod).
 
 
-/**
+/*
  * 	copy_params(+EnclParams,?CopiedParams,+ForwMethod)
  * 
  *  ?f CopiedParams is not bound, new ids will be created for 
@@ -618,7 +618,7 @@ copy_params([Param|Params],[Copy|Copies],NewEncl):-
     add(paramT(Copy,NewEncl,Type,Name)),
     copy_params(Params,Copies,NewEncl).
 
-/**
+/*
  * create_refs_to_encl_params(+Encl,+Len,-Refs)
  *
  * create idents which reference the Len-length tail 
@@ -636,7 +636,7 @@ create_ref_idents([Param|Params],[Ref|Refs]):-
 	createIdentRefParam(Param,Parent,Ref),
 	create_ref_idents(Params,Refs).
    
-/**
+/*
  * pc_param_num(+Pc,+Kind,?PN)
  */
 pc_param_num(_Pc,getField,2).
@@ -715,7 +715,7 @@ createAdviceMethod(JP,Statements,ForwMethod,ForwBody):-
    add(blockT(ForwBody,ForwMethod,ForwMethod,Statements)).
 
 
-/**
+/*
  * createThisOrGetReceiver(OldParent, NewParent, Encl, OldReceiver, NewReceiver, DeclaringType) 
  */
 
@@ -748,7 +748,7 @@ createThisOrGetReceiver(_Parent, NewParent, _encl, Receiver, Receiver,_Declaring
     !,
     set_parent(Receiver, NewParent).
 
-/**
+/*
  * create_this_or_null_if_static(ID,Parent,EnclMethod,EnclClass)
  *
  * Will create a reference to this, if EnclMethod is not a static method.
@@ -947,7 +947,7 @@ getOrigArgs(_call,_args,_OrigArgs) :-
     _args = [_|[_|_OrigArgs]].
 
 getOrigArgs(_call,_Args,_Args).
-/**
+/*
  * updateForwardsFact(+Call,+Kind,+ForwCall,+ForwMethod)
  */
 updateForwardsFact(_call,_,_forwCall,_forwMethod):-
@@ -963,7 +963,7 @@ updateForwardsFact(_stmt,_kind, _forwCall,_forwMethod):-
     add(forwarding(_forwMethod, _stmt,_stmt)).
 %    add(forwarding(_forwCall)).
 
-/**
+/*
  * createForwardingMethod(Stat,Class,ForwMethod,ForwBody)
  *
  * Creates a forwarding method 
@@ -1026,7 +1026,7 @@ appendForwPrefix(_stat,_prefix, _forwName,_ForwName) :-
 
     %    add(_Receiver, _apply, _encl, 'this', _enclClass).
 
-/**
+/*
  * prependBlockStatments(+Block, +Statements)
  *
  * prepends the id list Statements to block Block.
@@ -1058,7 +1058,7 @@ appendBlockStatment(_block, _post) :-
     add(blockT(_body, _p, _e, _newStats)).
 
 
-/**
+/*
  * matchParams(ParametersOrArgs, PatternList)
  * 
  * matches a parameter/expression list with a pattern list or
@@ -1128,7 +1128,7 @@ matchParams([_VdHead | VdTail], [Term | PatTail]) :-
 	var(Term),
     matchParams(VdTail,PatTail).
     
-/**
+/*
  * matchLMVPattern(ParametersOrArgs, PatternList)
  * 
  * matches a PEF-list with a pattern list or
@@ -1222,7 +1222,7 @@ createIdentsReferencingAdviceParams(_call,_enclMethod,[_adviceArg|_adviceArgs],[
     add(identT(_Ident, _call, _enclMethod, _name, _param)),
     createIdentsReferencingAdviceParams(_call,_enclMethod,_adviceArgs,_Idents).
     
-/**
+/*
  * boxing_class(+BasicType, ?BoxingClass)
  *
  * Binds BoxingClass to the corresponding
@@ -1330,7 +1330,7 @@ validThisType(EnclClass,Type):-
     !.
 validThisType(EnclClass,EnclClass).
 
-/**
+/*
  * outerOrEnclClass(+EnclClass,OuterClass)
  *
  * bind outer class if available, otherwise
@@ -1559,7 +1559,7 @@ copy_method_body(Method,BodyToCopy,Body):-
     cloneTree(BodyToCopy, Method, Method, Body).
 
 
-/**
+/*
  * bindIdIfNeeded(ID) 
  *
  * Binds ID with new_id/1 if ID is a variable.
@@ -1570,7 +1570,7 @@ bindIdIfNeeded(ID) :-
     new_id(ID).
 bindIdIfNeeded(_ID).
 
-/**
+/*
  * apply_aj_cts.
  * 
  * debugging predicate
@@ -1629,7 +1629,7 @@ getNonAnonymousEnclosingClass_fq(Id,Class_fq):-
 	.
 	
 
-/**
+/*
  * getReturnType(+ID, -TypeString)
  *
  * Returns the return type
@@ -1650,7 +1650,7 @@ anonymousClass(ID):-
 
 
 
-/**
+/*
  * local_vars_of_jp_rek(+[IDs],-[LocalVars])
  *
  * collects all local variables of a joinpoint, which could
@@ -1802,17 +1802,17 @@ block_stmt(Id):-  catchT(Id,_,_,_,_).
  
  
     
-/**
+/*
  * advice(ID, Name, [Arg,...])
  */
  
-/**
+/*
  * created_by_advice(AdviceId, ForwId)
  */ 
 
  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++not used anymore*/
  
-/**
+/*
  * add_proceed_call(+JoinPoint,+Id,+Parent,+EnclMethod,+AdviceArgs,+ProceedArgs)
  *
  * ACTION
@@ -1858,7 +1858,7 @@ around(_stat,_aroundStmts,_forwMethod,_forwBody) :-
     enclClass(_realStat, _enclClass),
     createAroundMethod(_realStat, _enclClass, _aroundStmts,_forwMethod,_forwBody).
   */ 
-  /**
+  /*
  * around(Joinpoint,Statements,ForwardingMethod,ForwardingBody)
  *
  * If this is the first advice for Joinpoint,
@@ -1879,7 +1879,7 @@ around(_stat,_aroundStmts,_forwMethod,_forwBody) :-
 %  add(aopT(JP,'around', ForwMethod)).
     
    
-/**
+/*
  *  before(Joinpoint, Statements, ForwardingMethod, ForwardingBody)
  *
  * ACTION
@@ -1908,7 +1908,7 @@ around(_stat,_aroundStmts,_forwMethod,_forwBody) :-
 
 
 
-/**
+/*
  *  after(Joinpoint, Statements, ForwardingMethod, ForwardingBody)
  *
  * ACTION

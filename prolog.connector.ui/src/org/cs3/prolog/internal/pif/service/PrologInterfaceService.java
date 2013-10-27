@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.DefaultSubscription;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
@@ -37,6 +36,7 @@ import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
 import org.cs3.prolog.pif.service.ConsultListener;
 import org.cs3.prolog.pif.service.IPrologInterfaceService;
 import org.cs3.prolog.pif.service.PDTReloadExecutor;
+import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

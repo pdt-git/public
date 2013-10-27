@@ -23,7 +23,6 @@ import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologInterface;
@@ -54,7 +53,7 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		try {
 			String fileList = null;
 			try {
-				fileList = Util.quotedPrologFileNameList(files);
+				fileList = UIUtils.quotedPrologFileNameList(files);
 			} catch (IOException e) {
 				Debug.report(e);
 				return false;

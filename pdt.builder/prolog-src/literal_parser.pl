@@ -58,18 +58,18 @@ parse_body_literals([A|B], Pos, _ParentId, _ClauseId, _Module, _VarNames) :-
    Pos = list_position(From, To, _ElemPos, _TailPos),		
    assert_new_node([A|B],From,To,_Id).		
    	
-/**
+/*
 * ToDo: list elemens should be visited!!!!
 **/
 
-/**
+/*
 * ToDo: edge-references for meta-literals
 **/
 parse_body_literals('$VAR'(_A), _Pos, _ParentId, _ClauseId, _Module, _VarNames) :- 
 	!. 
 %	Pos = From - To.
 %	assert_new_node('$Var'(A),From,To,_Id).    %<===
-/**
+/*
 * ToDo: is that all that should happening for Variables?
 **/  							
   

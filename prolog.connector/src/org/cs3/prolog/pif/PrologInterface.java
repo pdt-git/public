@@ -225,8 +225,6 @@ public interface PrologInterface {
 
 	public void clearConsultedFiles();
 	
-	public void reconsultFiles(boolean onlyEntryPoints);
-
 }
 
 

@@ -16,8 +16,8 @@ package org.cs3.prolog.ui.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
-import org.cs3.prolog.common.FileUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -30,7 +30,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
@@ -451,7 +450,6 @@ public final class UIUtils {
 	}
 	
 	public static IDocument getDocument(IFile file) throws CoreException{
-		file.refreshLocal(0, new NullProgressMonitor());
 		IPath path = file.getFullPath();
 		return getDocument(path,LocationKind.IFILE);
 	}
@@ -472,6 +470,27 @@ public final class UIUtils {
 		finally {
 			manager.disconnect(location, kind,null);
 		}
-	}	
+	}
+	
+	public static String quotedPrologFileNameList(Collection<IFile> files) throws IOException {
+		boolean first = true;
+		StringBuffer buffer = new StringBuffer("[");
+		for (IFile f : files) {
+			if (first) {
+				first = false;
+			} else {
+				buffer.append(", ");
+			}
+			buffer.append(Util.quoteAtom(prologFileName(f)));
+		}
+		;
+		buffer.append("]");
+		return buffer.toString();
+	}
+
+	public static String prologFileName(IFile file) throws IOException {
+		return Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+	}
+
 }
 

@@ -16,7 +16,7 @@
 :- use_module(parse_util).
 
 
-/**
+/*
  * consult_entry_point_and_parse(+File, +Project)
  *    - loades the file represented by Arg1 and everything that has to 
  *   	be loaded together with it.

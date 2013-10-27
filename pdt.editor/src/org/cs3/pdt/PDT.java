@@ -57,7 +57,11 @@ public final class PDT {
 	public static final String PREF_AUTO_COMPLETE_ARGLIST = "pdt.autocompletion.arglist";
 
 	public static final String PREF_CONSULT_ON_SAVE = "pdt.consult.on.save";
-
+	
+	public static final String PREF_OUTLINESHOW_MULTIFILE = "pdt.show.multifile";
+	
+	public static final String PREF_OUTLINE_SHOW_ALL_CLAUSES = "pdt.show.all.clauses";
+	
 }
 
 

@@ -17,10 +17,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
+import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
@@ -30,18 +28,27 @@ import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.progress.UIJob;
 
+import pdt.y.internal.FocusViewSubscription;
 import pdt.y.main.PDTGraphView;
 
 public abstract class GraphPIFLoaderBase {
 
 	protected File helpFile;
-	private PDTGraphView view;
+	protected PDTGraphView view;
 	private PrologInterface pif;
-	private ExecutorService executor = Executors.newCachedThreadPool();
+	//private ExecutorService executor = Executors.newCachedThreadPool();
 
-	public GraphPIFLoaderBase(PDTGraphView view) {
+	public GraphPIFLoaderBase(PDTGraphView view, String helpFileName) {
 		this.view = view;
+		
+		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
+		ResourceFileLocator locator = plugin.getResourceLocator();
+		helpFile = locator.resolve(helpFileName);
 	}
 
 	protected abstract String generateQuery(File helpFile);
@@ -60,18 +67,17 @@ public abstract class GraphPIFLoaderBase {
 				// Map<String, Object> result = sendQueryToCurrentPiF(query);
 				// result.get("FocusId");
 
-				FutureTask<?> futureTask = new FutureTask<Object>(
-						new Runnable() {
-							@Override
-							public void run() {
-								try {
-									view.loadGraph(helpFile.toURI().toURL());
-								} catch (MalformedURLException e) {
-									Debug.rethrow(e);
-								}
-							};
-						}, null);
-				executor.execute(futureTask);
+				new UIJob("Layouting") {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						try {
+							doLoadFile();
+						} catch (MalformedURLException e) {
+							Debug.rethrow(e);
+						}
+						return Status.OK_STATUS;
+					}
+				}.schedule();
 				
 				return output;
 			}
@@ -82,6 +88,10 @@ public abstract class GraphPIFLoaderBase {
 		}
 		return null;
 	}
+
+	protected void doLoadFile() throws MalformedURLException {
+		view.loadGraph(helpFile.toURI().toURL());
+	};
 	
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
 		throws PrologInterfaceException {
@@ -118,4 +128,8 @@ public abstract class GraphPIFLoaderBase {
 		}
 		return true;
 	}
+
+	public abstract void setCurrentPath(String currentPath);
+
+	public abstract String getCurrentPath();
 }

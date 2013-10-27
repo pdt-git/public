@@ -16,15 +16,13 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.progress.UIJob;
 
-import pdt.y.preferences.MainPreferencePage;
-
 
 public abstract class ViewCoordinatorBase implements IPartListener, ConsultListener  {
 	
-	protected FocusView focusView;
-	protected FocusView.FocusViewControl currentFocusView;
+	protected ViewBase focusView;
+	protected ViewBase.FocusViewControl currentFocusView;
 
-	public ViewCoordinatorBase(FocusView focusView) {
+	public ViewCoordinatorBase(ViewBase focusView) {
 		this.focusView = focusView;
 
 		
@@ -40,6 +38,9 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	
 	@Override
 	public void partActivated(IWorkbenchPart part) {
+		if (focusView.getViewContainer().isDisposed()) {
+			return;
+		}
 		if (part instanceof IEditorPart) {
 			IEditorPart editorPart = (IEditorPart) part;
 			final String fileName = PDTCommonUtil.prologFileName(editorPart.getEditorInput());
@@ -95,14 +96,12 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	protected void refreshCurrentView() {
-		if (MainPreferencePage.isAutomaticUpdate() && currentFocusView != null) {
-			new UIJob("Update View") {
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					currentFocusView.reload();
-					return Status.OK_STATUS;
-				}
-			}.schedule();
-		}
+		currentFocusView.reload();
+	}
+	
+	public void dispose() {
+		focusView.getSite().getWorkbenchWindow().getPartService().removePartListener(this);
+		
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
 	}
 }
