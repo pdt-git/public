@@ -11,6 +11,8 @@
  * 
  ****************************************************************************/
 
+:- module(contains, [contains/2]).
+
 :- use_module(library(lists)). 
 
 %sublist(S, L) :-

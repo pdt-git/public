@@ -29,8 +29,8 @@
 :- use_module( prolog_connector_pl(split_file_path),
              [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
              ] ).
-:- reexport(   'xref/pdt_xref', 
-             [ find_reference_to/12             % ...
+:- use_module( 'xref/pdt_xref', 
+             [ find_reference_to/13             % ...
              ] ).
 :- use_module( properties, 
              [ properties_for_predicate/4
@@ -42,9 +42,7 @@
 %             , defined_in_files/4               % (Module,Name,Arity,Locations)
 %             ] ).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
-
-% TODO: Why this import?
-:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
+:- use_module(pdt_manual_entry).
 
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 

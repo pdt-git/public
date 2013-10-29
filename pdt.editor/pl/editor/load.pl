@@ -16,7 +16,7 @@
 
 
 
-:- [pdt_editor_breakpoints].
-:- [pdt_editor_edit_hook].
-:- [pdt_editor_highlighting].
+:- use_module(pdt_editor_breakpoints, []).
+:- use_module(pdt_editor_edit_hook, []).
+:- use_module(pdt_editor_highlighting, []).
 

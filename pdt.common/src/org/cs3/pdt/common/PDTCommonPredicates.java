@@ -17,9 +17,9 @@ public class PDTCommonPredicates {
 
 	// entry points
 	public static final String MODULE_PDT_ENTRY_POINTS = "pdt_entry_points";
-	public static final String PDT_ENTRY_POINT = "pdt_entry_point";
-	public static final String ADD_ENTRY_POINT = "add_entry_point";
-	public static final String REMOVE_ENTRY_POINTS = "remove_entry_points";
+	public static final String PDT_ENTRY_POINT = "pdt_entry_points:pdt_entry_point";
+	public static final String ADD_ENTRY_POINT = "pdt_entry_points:add_entry_point";
+	public static final String REMOVE_ENTRY_POINTS = "pdt_entry_points:remove_entry_points";
 	
 	// search
 	public static final String FIND_REFERENCE_TO = "pdt_search:find_reference_to";

@@ -11,7 +11,16 @@
  * 
  ****************************************************************************/
 
+:- module(listing, [
+	listing_if_defined/1,
+	listing_if_defined/1,
+	list_defined_pred_if_logging_enabled/2
+]).
+
 :- use_module(library(listing)).
+:- use_module(logging).
+:- use_module(general).
+:- use_module(utils4modules).
 
 /*
  * listing*(?Module,+FunctorSubstring,?Arity)

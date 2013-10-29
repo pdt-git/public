@@ -20,6 +20,7 @@
 :- use_module(util_for_graphML).
 :- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 :- use_module(pdt_common_pl(pdt_search)).
+:- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 %write_project_graph_to_file(Project, OutputFile):-
 %	parse_util:generate_facts(Project),

@@ -15,7 +15,14 @@
  /*
    * Assert the fact in arg1 only if it isn't there already. Succeed otherwise.
    */
-   
+:- module(database, [
+	assert_unique_ground_fact/1, 
+	assert_unique_fact/1,
+	assert_unique/1
+]).
+
+:- use_module(logging).
+
 :- module_transparent assert_unique_ground_fact/1, 
                       assert_unique_fact/1,
                       assert_unique/1.

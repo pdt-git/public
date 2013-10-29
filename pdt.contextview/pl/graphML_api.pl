@@ -21,6 +21,7 @@
 
 :- use_module(util_for_graphML).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
+:- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 
 prepare_for_writing(File,OutStream):-
 	reset_id_translation,

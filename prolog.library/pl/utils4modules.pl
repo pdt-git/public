@@ -38,7 +38,9 @@
  
 :- use_module(library(lists)).
 :- use_module(pdt_support, [pdt_support/1]).
-
+:- use_module(logging).
+:- use_module(database).
+:- use_module(utils4modules_visibility).
 
 :- module_transparent(call_and_report_contex_module/1).
 call_and_report_contex_module(Goal) :- 

@@ -19,6 +19,15 @@
  *  - Semantic: Counting derivations (success) versus results.
  *  - Implementation: Based on nb_setargs/3, flag/3 or findall/3.
  * *********************************************************** */
+:- module(count, [
+	count_facts/2,
+	count_success/2,
+	count/2,
+	count_and_print/2,
+	count_unique/3,
+	count_all_and_unique/3
+]).
+
 :- use_module(library(lists)).
  
 count_facts(Goal, Nr) :-

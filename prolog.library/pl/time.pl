@@ -11,7 +11,17 @@
  * 
  ****************************************************************************/
 
+:- module(ctc_time, [
+	time/2,
+	performance/4,
+	performance/3,
+	performanceUnique/4,
+	ctc_time/3,
+	ctc_time/2
+]).
 
+:- use_module(logging).
+:- use_module(count).
 
 :- module_transparent time/2.    
   

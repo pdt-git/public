@@ -11,6 +11,16 @@
  * 
  ****************************************************************************/
 
+:- module(general, [
+	mgh/2,
+	built_in/1,
+	repeat_n_times/2,
+	repeat_n_times_loop/2,
+	all/1,
+	prolog_iteration_via_backtracking/1,
+	has_property/3
+]).
+
 :- use_module(library(apply)).
 :- use_module(library(charsio)).
 

@@ -15,8 +15,16 @@
 % Date: 13.02.2006, 04.02.2009
 
 % TODO: Move all logging primitives here.
+
+:- module(logging, [
+	ctc_warning/2,
+	ctc_error/2,
+	log_on_stdout/2,
+	do_if_logging_enabled/1
+]).
    
 :- use_module(library(lists)).
+:- use_module(files).
 
 consult_silent_if_logging_disabled(FileOrFiles) :-
     (  not(loggingEnabled) 
@@ -120,7 +128,7 @@ enable_logging_in_module(Module):-
 	retractall(mod_is_disabled(Module)).
 
 
-
+:- dynamic(mod_ignore_is_enabled/0).
 enable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled),
     assert(mod_ignore_is_enabled).
@@ -138,6 +146,7 @@ reset_logging_all_modules:-
 	retractall(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
+:- dynamic(showContextModules_enabled/0).
 /*
  *  Disables / Enables the out of the hierachie of the contextmodule 
  */
