@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 
+import pdt.y.PDTGraphPredicates;
 import pdt.y.main.PDTGraphView;
 
 public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
@@ -49,7 +50,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		loadPaths(currentPath);
 		
 		String query;
-		query = bT("write_global_to_graphML", paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)));
+		query = bT(PDTGraphPredicates.WRITE_GLOBAL_TO_GRAPHML, paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)));
 		return query;
 	}
 

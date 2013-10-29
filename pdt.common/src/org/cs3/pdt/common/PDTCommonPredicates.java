@@ -40,6 +40,9 @@ public class PDTCommonPredicates {
 	public static final String FIND_UNDEFINED_CALL = "pdt_call_analysis:find_undefined_call";
 	public static final String FIND_DEAD_PREDICATE = "pdt_call_analysis:find_dead_predicate";
 
+	// meta predicate search
+	public static final String FIND_UNDECLARED_META_PREDICATE = "pdt_call_analysis:find_undeclared_meta_predicate";
+	
 }
 
 
