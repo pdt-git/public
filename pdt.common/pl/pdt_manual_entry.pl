@@ -56,7 +56,7 @@ predicate_manual_entry(Module, Pred,Arity,Content) :-
 	
 predicate_manual_entry(_Module, Pred,Arity,Content) :-
 	catch(ast_node_signature_doc(_Language, Pred, Arity, Doc), _, fail),
-	sformat(Content,'~w',[Doc]),
+	format(string(Content),'~w',[Doc]),
 	!.
 	
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').

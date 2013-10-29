@@ -344,11 +344,11 @@ pretty_print_list_body__([]) .
  *  e.g. '   ' for 3 character indentation.
  */
 pretty_print_list(List, Indent) :-
-    concat_atom(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
+    atomic_list_concat(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
     pp_list(List, Formatstring).
 
 pretty_print_list_body(List, Indent) :-
-    concat_atom(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
+    atomic_list_concat(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
     pp_list_body(List, Formatstring).
     
     
@@ -356,7 +356,7 @@ pp_list([], Indent) :-
     atom_concat(Indent,'[]~n',Emptylist), 
     format(Emptylist).
 pp_list([A|B], Indent) :-
-    concat_atom([Indent,'[~n '], Liststart), % 
+    atomic_list_concat([Indent,'[~n '], Liststart), % 
     format(Liststart),
     pp_list_body([A|B], Indent),
     atom_concat(Indent,']~n',Listend), 
@@ -384,8 +384,7 @@ list_2_separated_list([Element|Rest],Separator,ElementSeparated) :-
 	
 
 aformat(Atom,FormatString,List):-
-	sformat(String,FormatString,List),
-	string_to_atom(String,Atom).
+	format(atom(Atom),FormatString,List).
 
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)]) .  
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)], 8) . 

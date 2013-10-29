@@ -107,7 +107,7 @@ server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer):-
     set_stream(OutStream,encoding(utf8)),
 %	tcp_host_to_address(Host, Peer),
 	flag(pdt_console_client_id,Id,Id+1),
-	concat_atom(['pdt_console_client_',Id,'_',Name],Alias),
+	atomic_list_concat(['pdt_console_client_',Id,'_',Name],Alias),
 	thread_create(service_client(InStream, OutStream, Peer, Options),
 		      ID,
 		      [ alias(Alias)
