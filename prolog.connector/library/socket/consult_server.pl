@@ -30,6 +30,9 @@
 
 :- use_module(library(socket)).
 :- use_module(library(memfile)).
+:- use_module(library(lists)).
+:- use_module(library(readutil)).
+:- use_module(library(charsio)).
 :- use_module(library(debug)).
 
 option_default(interprete_lists,true).
@@ -114,18 +117,11 @@ consult_server(Port):-
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
 	atomic_list_concat([consult_server,'@',Port],Alias),
-	%accept_loop(ServerSocket).
 	recordz(pif_flag,port(Port),_),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
 
 consult_server(Port,Lockfile):-
-	tcp_socket(ServerSocket),
-	tcp_setopt(ServerSocket, reuseaddr),
-	tcp_bind(ServerSocket, Port),
-	tcp_listen(ServerSocket, 5),
-	atomic_list_concat([consult_server,'@',Port],Alias),
-	recordz(pif_flag,port(Port),_),
-	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]),
+	consult_server(Port),
 	create_lock_file(Lockfile).
 
 
@@ -149,8 +145,7 @@ accept_loop_impl(ServerSocket) :-
 	debug(consult_server(accept_loop),"enter accept_loop_impl~n",[]),
 	tcp_accept(ServerSocket, Slave, Peer),
 	debug(consult_server(accept_loop),"accepted inbound connection~n",[]),
-	term_to_atom(Peer, Host),
-	debug(consult_server(accept_loop),"connect from host ~w~n",[Host]),
+	debug(consult_server(accept_loop),"connect from host ~w~n",[Peer]),
 	accept_loop_impl_X(ServerSocket,Slave).
 
 accept_loop_impl_X(ServerSocket,Slave):-
@@ -162,7 +157,7 @@ accept_loop_impl_X(ServerSocket,Slave):-
     tcp_close_socket(ServerSocket).
 
 accept_loop_impl_X(ServerSocket,Slave):-	
-	debug(consult_server(accept_loop),"enter accept_loop_impl~n",[]),
+	debug(consult_server(accept_loop),"enter accept_loop_impl_X~n",[]),
 	tcp_open_socket(Slave, InStream, OutStream),	
 	debug(consult_server(accept_loop),"socket opened~n",[]),
 	unused_thread_name(handle_client,'',Alias),
@@ -232,7 +227,8 @@ handle_command(_,_,'SHUTDOWN',stop):-
 handle_command(_,_,'',continue):-
 	clear_options.
 handle_command(_,OutStream,'PING',continue):-
-		current_prolog_flag(pid,Pid),
+debug(_,'prolog flag',[]),
+	current_prolog_flag(pid,Pid),
     thread_self(Alias),
 	my_format(OutStream,"PONG ~w:~w~n",[Pid,Alias]).
 handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
@@ -569,7 +565,7 @@ codes_or_eof_to_atom(Codes,Atom):-
 	
 count_thread(Prefix,Count):-
 	findall(A,
-		(	current_thread(A,_),
+		(	my_current_thread(A,_),
 			atom_concat(Prefix,_,A),
 			debug(consult_server(handler),"There is e.g. a thread named ~w~n",[A])
 		),
@@ -582,12 +578,14 @@ unused_thread_name(Prefix,Suffix,Name):-
 	
 unused_thread_name(Prefix,Suffix,Try,Name):-
 	atomic_list_concat([Prefix,Try,Suffix],A),
-	(	current_thread(A,_)
+	(	my_current_thread(A,_)
 	->	plus(Try,1,Next),
 		unused_thread_name(Prefix,Suffix,Next,Name)
 	;	Name=A			
 	).
 	
+my_current_thread(A,P) :-
+  catch(current_thread(A,P),_,fail).
 	
 	
 	

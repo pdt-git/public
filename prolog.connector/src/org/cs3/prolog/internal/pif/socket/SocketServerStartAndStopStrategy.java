@@ -284,19 +284,19 @@ private static JackTheProcessRipper processRipper;
 		if (socketPif.getExecutable().contains("logtalk")) {
 			tmpWriter.print(STARTUP_ERROR_LOG_LOGTALK_CODE);
 		}
-		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
-		tmpWriter.println(":- guitracer.");
+		tmpWriter.println(":- (current_prolog_flag(xpce_threaded, _) -> set_prolog_flag(xpce_threaded, true) ; true).");
+		tmpWriter.println(":- (current_predicate(guitracer/0) -> guitracer ; true).");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":- doc_collect(false).");
+		tmpWriter.println(":- (current_predicate(doc_collect/1) -> doc_collect(false) ; true).");
 		if (socketPif.isHidePlwin()) {
-			tmpWriter.println(":- (  (current_prolog_flag(windows, true))" + "->win_window_pos([show(false)])" + ";true).");
+			tmpWriter.println(":- (  (current_predicate(win_window_pos/1), current_prolog_flag(windows, true))  -> win_window_pos([show(false)]) ; true).");
 		}
-		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
+		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false) ; true).");
 
-		String value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_GENERATE_FACTBASE)) ? "true" : "false");
-		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
-		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
-		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
+//		String value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_GENERATE_FACTBASE)) ? "true" : "false");
+//		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
+//		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
+//		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
 		tmpWriter.println(":- [library(consult_server)].");
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
@@ -305,7 +305,7 @@ private static JackTheProcessRipper processRipper;
 		}
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker2.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
+		tmpWriter.println(":- consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
 		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + Util.prologFileName(socketPif.getErrorLogFile()) + "').");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker4.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.close();
