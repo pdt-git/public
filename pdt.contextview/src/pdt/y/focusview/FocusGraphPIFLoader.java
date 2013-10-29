@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import org.cs3.prolog.common.Util;
 
+import pdt.y.PDTGraphPredicates;
 import pdt.y.main.PDTGraphView;
 
 public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
@@ -39,7 +40,7 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
 	protected String generateQuery(File helpFile) {
 		String query;
-		query = bT("write_focus_to_graphML", Util.quoteAtom(focusFile), Util.quoteAtom(Util.prologFileName(helpFile)), "Dependencies");
+		query = bT(PDTGraphPredicates.WRITE_FOCUS_TO_GRAPHML, Util.quoteAtom(focusFile), Util.quoteAtom(Util.prologFileName(helpFile)), "Dependencies");
 		return query;
 	}
 

@@ -1,5 +1,4 @@
-
-:- module(pdt_support, [pdt_support/1]).
+:- module( pdt_support, [ pdt_support/1 ]).
 
 :- if(current_prolog_flag(dialect,swi)).
 	pdt_support(doc_collect).
@@ -8,11 +7,13 @@
 	pdt_support(tests).
 	pdt_support(clause_property).
 	pdt_support(last_call_optimisation).
+	pdt_support(tty_control).
 
 :- elif(current_prolog_flag(dialect,yap)).
 	pdt_support(reverse_list).
 	pdt_support(table).
 	pdt_support(remove_duplicates).
+	pdt_support(tty_control).
 
 :- else.
 	:- writeln('WARNING: unsupported Prolog dialect!\nSupported dialects are: SWI, YAP').
@@ -51,3 +52,35 @@
 % pdt_support(clause_property).
 
 % pdt_support(reverse_list).
+
+
+
+
+
+:- if( \+ pdt_support(doc_collect) ).
+user:doc_collect(true) :-
+	writeln('Warning: doc_collect/1 not supported by current prolog system').
+:- endif.
+
+:- if( \+ pdt_support(table)).
+user:table(X) :-
+	write('WARNING: tabling not supported in current prolog version (predicate: '),
+	write(X),
+	write(')\n').
+:- endif.
+
+:- if(\+ pdt_support(flag)).
+user:flag(Name, _, _) :-
+	var(Name),
+	throw(instantiation_error(Name)), !.
+
+user:flag(Name, OldValue, NewValue) :-
+	nb_current(Name, OldValue),
+	nonvar(NewValue),
+	nb_setval(Name, NewValue), !.
+	
+user:flag(Name, OldValue, NewValue) :-
+	OldValue = 0,
+	nonvar(NewValue),
+	nb_setval(Name, NewValue), !.
+:- endif.

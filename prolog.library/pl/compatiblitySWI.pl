@@ -19,48 +19,22 @@
 :- multifile test/1.
 
 /*
- * SWI Kompability
+ * SWI Compability
  * specific for SWI Prolog
  */
 
 :- dynamic outdir/1.
 :- dynamic file_output/1.
 :- dynamic output_to_file/0.
-%:- dynamic output_to_tmp/1.
 :- dynamic output_to_memory/3.
 :- dynamic output_to_memory_key/1.
 
-:- if( \+ pdt_support(table)).
-table(X) :-
-	write('WARNING: tabling not supported in current prolog version (predicate: '),
-	write(X),
-	write(')\n').
-:- endif.
-
-:- if(\+ pdt_support(flag)).
-flag(Name, _, _) :-
-	var(Name),
-	throw(instantiation_error(Name)), !.
-
-flag(Name, OldValue, NewValue) :-
-	nb_current(Name, OldValue),
-	nonvar(NewValue),
-	nb_setval(Name, NewValue), !.
-	
-flag(Name, OldValue, NewValue) :-
-	OldValue = 0,
-	nonvar(NewValue),
-	nb_setval(Name, NewValue), !.
-:- endif.
 
 index_information(Predicate, I) :-
 	predicate_property(Predicate, indexed(I)).
 
 outdir(A):-
     project_option(_,output_project(A)).
-
-%outdir('out_faj/').
-%
 
 set_outdir(Dir):-
 	findall(Project,(
