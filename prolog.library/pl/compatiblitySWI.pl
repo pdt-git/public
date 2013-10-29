@@ -19,7 +19,7 @@
 :- multifile test/1.
 
 /*
- * SWI Kompability
+ * SWI Compability
  * specific for SWI Prolog
  */
 
