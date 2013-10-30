@@ -18,7 +18,7 @@
 
  :- use_module('logging.pl', []).       % <- THIS BE FIRST!
   
- :- use_module(compatiblitySWI, []).
+ :- consult(compatiblitySWI).
   
  :- use_module(database, []).      % Assert, retract, ...
  :- use_module(files, []).         % File handling
