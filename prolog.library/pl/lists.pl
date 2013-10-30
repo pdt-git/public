@@ -54,7 +54,6 @@
 ] ).
 :- endif.
 
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
 :- use_module(pdt_support, [pdt_support/1]).
 

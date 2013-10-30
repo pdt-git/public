@@ -25,7 +25,6 @@
 	pif_dispatch/3
 ]).
 
-:- use_module(library(backcomp)).
 :- use_module(library(debug)).
 
 :-dynamic pif_observe_hook/3,pif_unobserve_hook/3.

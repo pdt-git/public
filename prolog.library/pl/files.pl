@@ -28,7 +28,6 @@
 
 % Conditional loading:
 
-:- use_module(library(backcomp)).
 :- use_module(library(memfile)).
 :- use_module(logging).
 :- use_module(count).

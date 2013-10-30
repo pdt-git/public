@@ -22,7 +22,6 @@
          ]).
          
 
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
 :- use_module(library(helpidx)).
 :- use_module(library(memfile)).

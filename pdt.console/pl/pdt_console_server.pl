@@ -68,7 +68,6 @@
 	console_thread_name/1
 ]).
 :- use_module(library(socket)).
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
  
 

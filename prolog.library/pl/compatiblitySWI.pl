@@ -12,7 +12,6 @@
  * 
  ****************************************************************************/
 
-:- use_module(library(backcomp)).
 :- use_module(library(error)). 
 :- use_module(library(memfile)).  
 
@@ -387,7 +386,7 @@ get_single_char(A) :-
  *
  * Disables tty control char-wise read on the windows platform.
  */
-:- if(pdt_support(tty_control)).
+:- if(pdt_support:pdt_support(tty_control)).
 disable_tty_control :- 
   current_prolog_flag(windows,_T) -> 
   set_prolog_flag(tty_control,false). 

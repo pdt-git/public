@@ -14,7 +14,6 @@
 :-module(junitadapter, []).
 
 :- use_module(library(plunit)).
-:- use_module(library(backcomp)).
 
 :- dynamic file_to_test/1.
 

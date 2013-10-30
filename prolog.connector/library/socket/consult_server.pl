@@ -565,7 +565,7 @@ codes_or_eof_to_atom(Codes,Atom):-
 	
 count_thread(Prefix,Count):-
 	findall(A,
-		(	my_current_thread(A,_),
+		(	my_current_thread(A),
 			atom_concat(Prefix,_,A),
 			debug(consult_server(handler),"There is e.g. a thread named ~w~n",[A])
 		),
@@ -578,14 +578,14 @@ unused_thread_name(Prefix,Suffix,Name):-
 	
 unused_thread_name(Prefix,Suffix,Try,Name):-
 	atomic_list_concat([Prefix,Try,Suffix],A),
-	(	my_current_thread(A,_)
+	(	my_current_thread(A)
 	->	plus(Try,1,Next),
 		unused_thread_name(Prefix,Suffix,Next,Name)
 	;	Name=A			
 	).
 	
-my_current_thread(A,P) :-
-  catch(current_thread(A,P),_,fail).
+my_current_thread(A) :-
+  catch(thread_property(A,status(_)), error(existence_error(thread, _), _), fail).
 	
 	
 	
