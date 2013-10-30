@@ -285,11 +285,11 @@ private static JackTheProcessRipper processRipper;
 			tmpWriter.print(STARTUP_ERROR_LOG_LOGTALK_CODE);
 		}
 		tmpWriter.println(":- (current_prolog_flag(xpce_threaded, _) -> set_prolog_flag(xpce_threaded, true) ; true).");
-		tmpWriter.println(":- (current_predicate(guitracer/0) -> guitracer ; true).");
+		tmpWriter.println(":- (current_prolog_flag(dialect, swi) -> guitracer ; true).");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":- (current_predicate(doc_collect/1) -> doc_collect(false) ; true).");
+		tmpWriter.println(":- (current_prolog_flag(dialect, swi) -> doc_collect(false) ; true).");
 		if (socketPif.isHidePlwin()) {
-			tmpWriter.println(":- (  (current_predicate(win_window_pos/1), current_prolog_flag(windows, true))  -> win_window_pos([show(false)]) ; true).");
+			tmpWriter.println(":- (  (current_prolog_flag(dialect, swi), current_prolog_flag(windows, true))  -> win_window_pos([show(false)]) ; true).");
 		}
 		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false) ; true).");
 
