@@ -84,14 +84,8 @@ notify_reload_listeners(Files) :-
 notify_reload_listeners(_).
 
 pdt_reload_listener(Files) :-
-    list_2_separated_list(Files, '<>', FileList),
+    atomic_list_concat(Files, '<>', FileList),
     catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
-
-list_2_separated_list([],_,'') :- !.
-list_2_separated_list([Element],_,Element) :- !.
-list_2_separated_list([Element|Rest],Separator,ElementSeparated) :-
-	list_2_separated_list(Rest,Separator,RestAtom),
-	format(atom(ElementSeparated),'~w~w~w',[Element,Separator,RestAtom]).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *
