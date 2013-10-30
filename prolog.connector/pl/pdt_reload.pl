@@ -30,7 +30,6 @@
 :- use_module(split_file_path).
 :- use_module(library(make)).
 
-:- use_module(library(make)).
 :- use_module(library(lists)).
 :- use_module(library(memfile)).
 :- use_module(library(debug)).
