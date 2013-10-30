@@ -14,7 +14,8 @@
 
 :- module(pdt_editor_breakpoints,[
 	pdt_set_breakpoint/4,			% used in PDTBreakpointHandler.java
-	pdt_breakpoint_properties/4
+	pdt_breakpoint_properties/4,
+	pdt_breakpoint_property/2
 ]).
 
 :- if(current_prolog_flag(dialect, swi)).
@@ -42,6 +43,9 @@ pdt_breakpoint_properties(Id, File, Line, Offset) :-
     breakpoint_property(Id, line_count(Line)),
     breakpoint_property(Id, character_range(Offset, _)).
 
+pdt_breakpoint_property(Id, Property) :-
+	breakpoint_property(Id, Property).
+
 :- multifile(user:message_hook/3).
 :- dynamic(user:message_hook/3).
 
@@ -55,5 +59,6 @@ user:message_hook(breakpoint(delete, Id), _Kind, _Lines) :-
 
 pdt_set_breakpoint(_,_,_,_) :- fail.
 pdt_breakpoint_properties(_,_,_,_) :- fail.
+pdt_breakpoint_property(_,_) :- fail.
 
 :- endif.

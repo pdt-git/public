@@ -199,7 +199,7 @@ stop_server :-
 stop_server.
 
 do_stop_server(Port) :-
-	recordz(pdt_console_server_flag, shutdown),
+	recordz(pdt_console_server_flag, shutdown, _),
 	tcp_socket(Socket),
 	tcp_connect(Socket, localhost:Port),
 	tcp_close_socket(Socket),
