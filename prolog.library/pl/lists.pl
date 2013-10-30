@@ -14,7 +14,7 @@
 
 % Date: 21.11.2005
  
-:- if(pdt_support(remove_duplicates)).
+:- if(pdt_support:pdt_support(remove_duplicates)).
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
@@ -221,7 +221,7 @@ remove_duplicates_sorted__([First|Rest], Previous, Result ) :-
    ).
 
 
-:- if(\+ pdt_support(remove_duplicates)).
+:- if(\+ pdt_support:pdt_support(remove_duplicates)).
 /*
  * remove_duplicates(+List, ?DuplicateFree) is det
  *

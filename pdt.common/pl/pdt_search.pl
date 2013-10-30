@@ -12,8 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_search,
-         [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
-         , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
+         [ find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
          , find_definitions_categorized/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
@@ -43,7 +42,6 @@
 %             ] ).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 :- use_module(pdt_manual_entry).
-
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
 

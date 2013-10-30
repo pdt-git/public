@@ -17,6 +17,8 @@
 	pdt_breakpoint_properties/4
 ]).
 
+:- if(current_prolog_flag(dialect, swi)).
+
 :- use_module(library(prolog_breakpoints)).
 :- use_module(library(debug)).
 
@@ -49,4 +51,9 @@ user:message_hook(breakpoint(set, Id), _Kind, _Lines) :-
 user:message_hook(breakpoint(delete, Id), _Kind, _Lines) :-
     catch(pif_observe:pif_notify(remove_breakpoint,Id),_,true), fail.
 
+:- else.
 
+pdt_set_breakpoint(_,_,_,_) :- fail.
+pdt_breakpoint_properties(_,_,_,_) :- fail.
+
+:- endif.

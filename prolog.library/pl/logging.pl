@@ -48,7 +48,7 @@ log_once_to_file(File,Goal) :-
  * ======================================================================== */
 :- dynamic loggingEnabled/0.
 
-:- if(pdt_support(last_call_optimisation)).
+:- if(pdt_support:pdt_support(last_call_optimisation)).
 enable_logging :- 
    retractall(loggingEnabled),      % prevent accidental backtracking(!)
    set_prolog_flag(last_call_optimisation,false), % important for retrieval of parentmodule

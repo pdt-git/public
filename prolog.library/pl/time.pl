@@ -83,7 +83,7 @@ performance(Goal, Time, CountAll) :-
 performanceUnique(Goal, Time, CountAll,CountUnique) :- 
   ctc_time(count_all_and_unique(Goal,CountAll,CountUnique), Time).
 
-:- if(pdt_support(count_inferences)).
+:- if(pdt_support:pdt_support(count_inferences)).
 
 ctc_time(Call, Time, Inferences) :- 
    startStopwatchWithInfer(InferencesOld), 

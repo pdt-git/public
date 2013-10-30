@@ -14,13 +14,9 @@
 
 :- module( pdt_manual_entry,
          [ predicate_manual_entry/4    % (_Module,Pred,Arity,Content)
-         , manual_entry/3              % Preferably use predicate_manual_entry/4 
-           % Duplicates most of the above and a predicate from 
-           % pdt.runtime.ui/library/pdt/facade/pdt_content_assistant.pl
-           % Called only from 
-           % pdt.core/src/org/cs3/pl/metadata/internal/classic/DefaultMetainfoProvider.java
          ]).
          
+:- if(current_prolog_flag(dialect, swi)).
 
 :- use_module(library(lists)).
 :- use_module(library(helpidx)).
@@ -103,7 +99,11 @@ manual_entry(Pred,-1,Content) :-
     string_to_atom(ContentString,Content).
 */
 
+:- else.
 
+predicate_manual_entry(_, _, _, _) :- fail.
+
+:- endif.
 
 
 

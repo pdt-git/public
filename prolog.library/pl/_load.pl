@@ -33,9 +33,11 @@
  :- use_module(utils4modules, []). % Module handling
 
  :- use_module(utils4modules_visibility, []). % Visibility handling
- 
+
+:- if(current_prolog_flag(dialect, swi)). 
  :- use_module(junitadapter, []).
- 
+:- endif.
+
 % :- consult(pdt_xref_experimental).     % find_references, ...
 
 

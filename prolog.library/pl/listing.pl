@@ -17,7 +17,10 @@
 	list_defined_pred_if_logging_enabled/2
 ]).
 
+:- if(current_prolog_flag(dialect, swi)).
 :- use_module(library(listing)).
+:- endif.
+
 :- use_module(logging).
 :- use_module(general).
 :- use_module(utils4modules).

@@ -17,6 +17,8 @@
 
 
 :- use_module(pdt_editor_breakpoints, []).
-:- use_module(pdt_editor_edit_hook, []).
 :- use_module(pdt_editor_highlighting, []).
 
+:- if(current_prolog_flag(dialect, swi)).
+:- use_module(pdt_editor_edit_hook, []).
+:- endif.
