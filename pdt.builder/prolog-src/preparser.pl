@@ -87,7 +87,7 @@ parse_clauses(InStream,FileId):-
  *    Additionally the remaining arguments are used to define filePosTs for the
  *    corresponding position information.
  **/
-parse_clause_elements(:- Body, Pos, FileId, VarNames, UnchangedModule) :- % Directive
+parse_clause_elements((:- Body), Pos, FileId, VarNames, UnchangedModule) :- % Directive
    	!, 
    	Pos = term_position(From, To, _FFrom, _FTo, [SubPos]),
    	assert_new_node( :- Body,From,To,DirectiveId), 
@@ -98,7 +98,7 @@ parse_clause_elements(:- Body, Pos, FileId, VarNames, UnchangedModule) :- % Dire
    	Body =.. [Functor|Args],
  	assert(pos_and_vars(DirectiveId,SubPos,VarNames)).
    
-parse_clause_elements(Head :- Body, Pos, FileId, VarNames, Module) :-  % Rule
+parse_clause_elements((Head :- Body), Pos, FileId, VarNames, Module) :-  % Rule
 	!, 
 	Pos = term_position(From, To, _FFrom, _FTo, SubPos),
  	SubPos = [HeadPos, BodyPos], 

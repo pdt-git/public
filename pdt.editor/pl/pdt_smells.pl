@@ -13,7 +13,7 @@
 
 :- module(pdt_smells, [smell_marker_pdt/7]).
 
-:- user:ensure_loaded(pdt_builder_analyzer('meta_pred_toplevel.pl')).
+%:- user:ensure_loaded(pdt_builder_analyzer('meta_pred_toplevel.pl')).
 
 :- multifile smell_description_pdt/3.
 :- multifile smell/5.
