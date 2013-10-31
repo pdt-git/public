@@ -126,7 +126,7 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
 	forall((
 		member(SourceModule:SourceName/SourceArity, Predicates),
 		calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, _NumberOfCalls),
-		memberchk(TargetModule:TargetName/TargetArity, Predicates)
+		once(member(TargetModule:TargetName/TargetArity, Predicates))
 	),(
 		write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, ProjectFiles)
 	)).

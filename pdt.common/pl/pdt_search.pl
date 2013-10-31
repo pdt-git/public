@@ -481,8 +481,8 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
     ).
 
 find_definition_in_file(Options, ContextFile, Module, Name, Arity, Ref, File, Line) :-
-	memberchk(multifile(IsMultifile), Options),
-	memberchk(all_clauses(IsAllClauses), Options),
+	once(member(multifile(IsMultifile), Options)),
+	once(member(all_clauses(IsAllClauses), Options)),
 	find_definition_in_file(IsAllClauses, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line).
 
 find_definition_in_file(true, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line) :-

@@ -161,9 +161,9 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
 	;	calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, NumberOfCalls),
 		predicate_property(SourceModule:SourceHead, file(SourceFile))
 	),
-	memberchk(SourceFile, DependentFiles),
+	once(member(SourceFile, DependentFiles)),
 	file_of_predicate(TargetModule, TargetName, TargetArity, TargetFile),
-	memberchk(TargetFile, DependentFiles),
+	once(member(TargetFile, DependentFiles)),
 	has_id(SourceFile-SourceModule:SourceName/SourceArity, Source),
 	has_id(TargetFile-TargetModule:TargetName/TargetArity, Target),
     open_edge(Stream, Source, Target),
