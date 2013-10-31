@@ -44,6 +44,7 @@
 :- use_module(pdt_manual_entry).
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
+:- use_module(library(prolog_clause)).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
