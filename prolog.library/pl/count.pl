@@ -70,13 +70,15 @@ count(_, N) :-
 :- module_transparent count_and_print/2.
 
 count_and_print(Goal, _) :-
-  flag(successcounter,_,0),
+  nb_setval(successcounter,0),
   catch(Goal,_Any,fail),     % turn exceptions into failures
-    flag(successcounter,N,N+1),
+    nb_getval(successcounter,N),
+    N2 is N + 1,
+    nb_setval(successcounter,N2),
     format('~w.~n', [Goal]),
   fail.
 count_and_print(_, N) :-
-  flag(successcounter,N,N).
+  nb_getval(successcounter,N).
   
   
 :- module_transparent count_unique/2.
