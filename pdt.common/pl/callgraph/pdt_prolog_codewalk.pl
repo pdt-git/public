@@ -214,7 +214,7 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	       ),
 	       find_walk_from_module(M, OTerm)),
 	walk_from_multifile(OTerm),
-	walk_from_initialization(OTerm),
+%	walk_from_initialization(OTerm),
 	infer_new_meta_predicates(New, OTerm),
 	statistics(cputime, CPU1),
 	(   New \== []
@@ -351,7 +351,7 @@ walk_called_by_body(Body, Module, OTerm) :-
 	format(user_error, 'Failed to analyse:~n', []),
 	portray_clause(('<head>' :- Body)),
 	(   debugging(autoload(trace))
-	->  gtrace,
+	->  trace, %gtrace,
 	    walk_called_by_body(Body, Module, OTerm)
 	;   true
 	).
@@ -455,14 +455,14 @@ walk_called(Goal, Module, TermPos, OTerm) :-
 	fail.					% Continue search
 walk_called(Goal, Module, _, OTerm) :-
 	evaluate(Goal, Module, OTerm), !.
-walk_called(Goal, M, TermPos, OTerm) :-
-	prolog:called_by(Goal, Called),
-	Called \== [], !,
-	walk_called_by(Called, M, Goal, TermPos, OTerm).
+%walk_called(Goal, M, TermPos, OTerm) :-
+%	prolog:called_by(Goal, Called),
+%	Called \== [], !,
+%	walk_called_by(Called, M, Goal, TermPos, OTerm).
 walk_called(Meta, M, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	(   walk_option_autoload(OTerm, false)
 	->  nonvar(Module),
-	    '$get_predicate_attribute'(Module:Meta, defined, 1)
+	    without_autoloading((functor(Meta,N,A), current_predicate(Module:N/A)))
 	;   true
 	),
 	(   extended_meta_predicate(M:Meta, Head)
@@ -474,12 +474,20 @@ walk_called(Meta, M, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	walk_meta_call(1, Head, Meta, M, ArgPosList, OTerm).
 walk_called(Goal, Module, _, _) :-
 	nonvar(Module),
-	'$get_predicate_attribute'(Module:Goal, defined, 1), !.
+	without_autoloading((functor(Goal,N,A), current_predicate(Module:N/A))), !.
 walk_called(Goal, Module, TermPos, OTerm) :-
 	callable(Goal), !,
 	undefined(Module:Goal, TermPos, OTerm).
 walk_called(Goal, _Module, TermPos, OTerm) :-
 	not_callable(Goal, TermPos, OTerm).
+
+without_autoloading(Goal) :-
+	(	current_prolog_flag(autoload, Old)
+	->	set_prolog_flag(autoload, false),
+		call(Goal),
+		set_prolog_flag(autoload, Old)
+	;	call(Goal)
+	).
 
 %%	undecided(+Variable, +TermPos, +OTerm)
 
@@ -757,26 +765,27 @@ remove_quantifier(M1:Goal0, Goal,
 remove_quantifier(Goal, Goal, TermPos, TermPos, M, M, _).
 
 
-%%	walk_called_by(+Called:list, +Module, +Goal, +TermPos, +OTerm)
+%%%	walk_called_by(+Called:list, +Module, +Goal, +TermPos, +OTerm)
+%%
+%%	Walk code explicitly mentioned to  be   called  through the hook
+%%	prolog:called_by/2.
 %
-%	Walk code explicitly mentioned to  be   called  through the hook
-%	prolog:called_by/2.
+%walk_called_by([], _, _, _, _).
+%walk_called_by([H|T], M, Goal, TermPos, OTerm) :-
+%	(   H = G+N
+%	->  subterm_pos(G, Goal, TermPos, GPos),
+%	    (   extend(G, N, G2, GPos, GPosEx, OTerm)
+%	    ->	walk_called(G2, M, GPosEx, OTerm)
+%	    ;	true
+%	    )
+%	;   subterm_pos(G, Goal, TermPos, GPos),
+%	    walk_called(H, M, GPos, OTerm)
+%	),
+%	walk_called_by(T, M, Goal, TermPos, OTerm).
 
-walk_called_by([], _, _, _, _).
-walk_called_by([H|T], M, Goal, TermPos, OTerm) :-
-	(   H = G+N
-	->  subterm_pos(G, Goal, TermPos, GPos),
-	    (   extend(G, N, G2, GPos, GPosEx, OTerm)
-	    ->	walk_called(G2, M, GPosEx, OTerm)
-	    ;	true
-	    )
-	;   subterm_pos(G, Goal, TermPos, GPos),
-	    walk_called(H, M, GPos, OTerm)
-	),
-	walk_called_by(T, M, Goal, TermPos, OTerm).
-
-subterm_pos(Sub, Term, TermPos, SubTermPos) :-
-	subterm_pos(Sub, Term, same_term, TermPos, SubTermPos), !.
+% SWI specific same_term/2
+%subterm_pos(Sub, Term, TermPos, SubTermPos) :-
+%	subterm_pos(Sub, Term, same_term, TermPos, SubTermPos), !.
 subterm_pos(Sub, Term, TermPos, SubTermPos) :-
 	subterm_pos(Sub, Term, ==, TermPos, SubTermPos), !.
 subterm_pos(Sub, Term, TermPos, SubTermPos) :-

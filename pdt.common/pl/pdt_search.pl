@@ -391,6 +391,7 @@ primary_location(Locations,_,File,FirstLine) :-
     Sorted = [ NrOfClauses-File-FirstLine |_ ].
     
 
+:- if(current_prolog_flag(dialect, swi)).
 find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, RefFile, RefLine) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
 	extract_name_arity(Term,Module, Head,_Name,_Arity),
@@ -406,6 +407,10 @@ find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, 
 	;	RefFile = foreign,
 		RefLine = -1
 	).
+:- else.
+find_alternative_predicates(_EnclFile, _TermString, _RefModule, _RefName, _RefArity, _RefFile, _RefLine) :-
+	fail.
+:- endif.
 
         /***********************************************************************
          * Find Definitions in File                                            *
@@ -721,6 +726,7 @@ find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, 
 	current_module(Name),
 	atom_concat(ModulePrefix,_,Name).
 
+:- if(current_prolog_flag(dialect, swi)).
 find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _) :- 
 	atomic(AtomPrefix),
 	garbage_collect_atoms,
@@ -730,7 +736,7 @@ find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _
 	ReferenceCount > 0, 
 %	Atom \= AtomPrefix,
 	\+ current_predicate(Atom/_Arity).
-
+:- endif.
 
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
