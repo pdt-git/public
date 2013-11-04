@@ -21,6 +21,7 @@
 :- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 :- use_module(pdt_common_pl(pdt_search)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
+:- use_module(library(lists), [list_to_set/2, append/3, member/2]).
 
 %write_project_graph_to_file(Project, OutputFile):-
 %	parse_util:generate_facts(Project),
