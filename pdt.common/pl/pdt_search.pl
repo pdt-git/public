@@ -830,3 +830,5 @@ loaded_file(FullPath) :-
 	;	% assume Prolog source file
 		source_file(FullPath)
 	).
+
+source_file_property(_,_) :- fail.

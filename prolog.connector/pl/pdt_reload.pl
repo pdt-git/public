@@ -28,7 +28,7 @@
                 *************************************/
 
 :- use_module(split_file_path).
-:- use_module(library(make)).
+%:- use_module(library(make)).
 
 :- use_module(library(lists)).
 :- use_module(library(memfile)).
@@ -71,7 +71,8 @@ pdt_reload__(File):-
 	
 	% we have to continiue, even if reload_file fails
 	% normally failing means: the file has errors
-	(make:reload_file(File) -> true ; true).
+	(user:consult(File) -> true ; true).
+%	(make:reload_file(File) -> true ; true).
 
 :- multifile(pdt_reload_listener/1).
 
