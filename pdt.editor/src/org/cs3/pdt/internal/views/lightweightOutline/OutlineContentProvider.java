@@ -15,11 +15,11 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.common.structureElements.PrologTreeElement;
 import org.cs3.pdt.internal.structureElements.PrologOutlineTreeElement;
-import org.eclipse.jdt.ui.IWorkingCopyProvider;
+//import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvider  {
+class OutlineContentProvider implements ITreeContentProvider {//, IWorkingCopyProvider  {
 
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
@@ -66,10 +66,10 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 	}
 
 
-	@Override
-	public boolean providesWorkingCopies() {
-		return false;
-	}
+//	@Override
+//	public boolean providesWorkingCopies() {
+//		return false;
+//	}
 
 
 	@Override

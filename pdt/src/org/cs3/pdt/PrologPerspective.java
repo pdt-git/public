@@ -14,7 +14,6 @@
 package org.cs3.pdt;
 
 import org.cs3.pdt.console.internal.views.PrologConsoleView;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
@@ -54,7 +53,8 @@ public class PrologPerspective implements IPerspectiveFactory {
 		viewsFolder.addView("pdt.view.global");
 		viewsFolder.addView("pdt.view.dependencies");
 		
-		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, 0.2f, editorArea);
+		layout.addView(IPageLayout.ID_PROJECT_EXPLORER, IPageLayout.LEFT, 0.2f, editorArea);
+//		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, 0.2f, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, 0.8f, editorArea);
 	}
 	

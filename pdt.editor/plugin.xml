@@ -93,9 +93,24 @@
       point="org.eclipse.ui.commands">
    <command
          categoryId="org.cs3.pdt.editing"
+         description="Open Primary Definition or Declaration"
+         id="org.eclipse.pdt.ui.open.primary.definition"
+         name="Open Primary Definition or Declaration"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Find all Definitions and Declarations"
+         id="org.eclipse.pdt.ui.find.all.definitions"
+         name="Find all Definitions and Declarations"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Find References"
+         id="org.eclipse.pdt.ui.find.references"
+         name="Find References"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
          description="Show Quick Outline"
          id="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
-         name="Toggle Comments"/>
+         name="Show Quick Outline"/>
    <command
          categoryId="org.cs3.pdt.editing"
          description="Toggles comment prefix on selected lines"
