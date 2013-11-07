@@ -33,7 +33,6 @@ import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -740,7 +739,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         String selectedText = selection.getText();
         if (selectedText != null && selectedText.length() > 0) {
             int i = 0;
-            while (i < selectedText.length() && !IndentManipulation.isLineDelimiterChar(selectedText.charAt(i))) {
+            while (i < selectedText.length() && selectedText.charAt(i) != '\n' && selectedText.charAt(i) != '\r') {
                 i++;
             }
             if (i > 0) {

@@ -104,24 +104,24 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener {
 
-	public static String COMMAND_OPEN_PRIMARY_DEFINITION = "org.eclipse.pdt.ui.open.primary.definition";
+	public static final String COMMAND_OPEN_PRIMARY_DEFINITION = "org.eclipse.pdt.ui.open.primary.definition";
 	
-	public static String COMMAND_FIND_ALL_DEFINITIONS = "org.eclipse.pdt.ui.find.all.definitions";
+	public static final String COMMAND_FIND_ALL_DEFINITIONS = "org.eclipse.pdt.ui.find.all.definitions";
 	
-	public static String COMMAND_FIND_REFERENCES = "org.eclipse.pdt.ui.find.references";
+	public static final String COMMAND_FIND_REFERENCES = "org.eclipse.pdt.ui.find.references";
 	
-	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
+	public static final String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
 
-	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
+	public static final String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
-	public static String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
+	public static final String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
-	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
+	public static final String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
-	public static String COMMAND_RUN_UNIT_TEST = "org.eclipse.pdt.ui.edit.run.unit.test";
+	public static final String COMMAND_RUN_UNIT_TEST = "org.eclipse.pdt.ui.edit.run.unit.test";
 
-	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
-
+	public static final String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
+	
 	private ColorManager colorManager;
 
 	private NonNaturePrologOutline fOutlinePage;

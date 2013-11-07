@@ -14,6 +14,7 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.structureElements.OutlineClauseElement;
+import org.cs3.pdt.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicateElement;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -43,9 +44,10 @@ class NamePatternFilter extends ViewerFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		StringMatcher matcher= this.abstractInformationControl.getMatcher();
-		if (matcher == null || !(viewer instanceof TreeViewer))
+		if (matcher == null || !(viewer instanceof TreeViewer)) {
 			return true;
-
+		}
+		
 		String matchName = null;
 		if (element instanceof OutlineClauseElement) {
 			OutlineClauseElement c = (OutlineClauseElement) element;
@@ -71,6 +73,14 @@ class NamePatternFilter extends ViewerFilter {
 		}
 		if (element instanceof OutlinePredicateElement) {
 			OutlinePredicateElement e = (OutlinePredicateElement) element;
+			for (Object child: e.getChildren()) {
+				if (select(viewer, element, child)) {
+					return true;
+				}
+			}
+		}
+		if (element instanceof OutlineFileElement) {
+			OutlineFileElement e = (OutlineFileElement) element;
 			for (Object child: e.getChildren()) {
 				if (select(viewer, element, child)) {
 					return true;

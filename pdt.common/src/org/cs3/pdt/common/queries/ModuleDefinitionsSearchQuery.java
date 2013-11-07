@@ -23,7 +23,6 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
-import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 

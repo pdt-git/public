@@ -21,7 +21,6 @@ import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -204,7 +203,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 
 	public InformationPresenter getOutlinePresenter(ISourceViewer sourceViewer) {
 		InformationPresenter presenter;
-		presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
+		presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		presenter.setAnchor(AbstractInformationControlManager.ANCHOR_GLOBAL);
 		IInformationProvider provider= new IInformationProvider() {
@@ -254,13 +253,13 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	 * @return an information control creator
 	 * @since 2.1
 	 */
-	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer, final String commandId) {
+	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE;
 				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
-				return new PrologOutlineInformationControl(editor.getDocumentProvider().getDocument(editor.getEditorInput()),parent, shellStyle, treeStyle, commandId);
+				return new PrologOutlineInformationControl(editor.getDocumentProvider().getDocument(editor.getEditorInput()), parent, shellStyle, treeStyle);
 			}
 		};
 	}
