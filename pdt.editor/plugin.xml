@@ -169,6 +169,24 @@
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+U"/>
+   <key
+         commandId="org.eclipse.pdt.ui.open.primary.definition"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="F3">
+   </key>
+   <key
+         commandId="org.eclipse.pdt.ui.find.all.definitions"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+G">
+   </key>
+   <key
+         commandId="org.eclipse.pdt.ui.find.references"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+SHIFT+G">
+   </key>
          
 </extension>
 <extension
