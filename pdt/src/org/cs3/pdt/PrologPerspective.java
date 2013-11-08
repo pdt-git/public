@@ -34,6 +34,10 @@ public class PrologPerspective implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");
 		layout.addNewWizardShortcut("pdt.module.wizard");
+		layout.addShowViewShortcut(PrologConsoleView.HOOK_ID);
+		layout.addShowViewShortcut("pdt.view.global");
+		layout.addShowViewShortcut("pdt.view.focus");
+		layout.addShowViewShortcut("pdt.view.dependencies");
 	}
 
 	public void defineLayout(IPageLayout layout) {
