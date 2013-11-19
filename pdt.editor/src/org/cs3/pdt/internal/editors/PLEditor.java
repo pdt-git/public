@@ -875,11 +875,11 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {
-		 if(input instanceof FileStoreEditorInput){
+//		 if(input instanceof FileStoreEditorInput){
              return new ExternalDocumentProvider();
-		 } else{
-			 return new PLDocumentProvider();
-		 }
+//		 } else{
+//			 return new PLDocumentProvider();
+//		 }
 	}
 
 	private boolean isExternalInput() {

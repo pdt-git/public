@@ -1143,6 +1143,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	@Override
 	public void setPrologInterface(PrologInterface newPif) {
+		setPrologInterface(newPif, true);
+	}
+	
+	private void setPrologInterface(PrologInterface newPif, boolean updateActivePif) {
 		if(currentPif==newPif){
 			return;
 		}
@@ -1159,7 +1163,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			}
 			reconfigureViewer(currentPif);
 			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().setActivePrologInterface(currentPif);
+			if (updateActivePif) {
+				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().setActivePrologInterface(currentPif);
+			}
 
 		} else {
 			Debug.debug("no pif (yet).");
@@ -1405,7 +1411,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				}
 			});
 		} else {
-			setPrologInterface(pif);
+			setPrologInterface(pif, false);
 		}
 	}
 
