@@ -1048,9 +1048,11 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	public void clearOutput() {
 		thatWasMe = true;
-		int c = control.getCaretOffset() - startOfInput;
-		control.getContent().replaceTextRange(0, startOfInput, "");
-		startOfInput = 0;
+		int inputLine = control.getLineAtOffset(startOfInput);
+		int inputLineOffset = control.getOffsetAtLine(inputLine);
+		int c = control.getCaretOffset() - inputLineOffset;
+		control.getContent().replaceTextRange(0, inputLineOffset, "");
+		startOfInput -= inputLineOffset;
 		control.setCaretOffset(c);
 		thatWasMe = false;
 
