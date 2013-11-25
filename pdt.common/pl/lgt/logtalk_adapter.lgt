@@ -14,6 +14,7 @@
 
 :- ensure_loaded(pdt_prolog_library(general)).
 
+:- set_prolog_flag(color_term, false).
 
 :- object(logtalk_adapter).
 
