@@ -252,7 +252,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		if (project.isAccessible()) {
         			searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers(), project);
         		} else {
-        			Debug.error(project.getName() + " is not accessable.");
+        			Debug.error(project.getName() + " is not accessible.");
         		}
         	} else {
         		searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
@@ -263,7 +263,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		if (project.isAccessible()) {
         			searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers(), project);
         		} else {
-        			Debug.error(project.getName() + " is not accessable.");
+        			Debug.error(project.getName() + " is not accessible.");
         		}
         	} else {
         		searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
@@ -274,7 +274,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		if (project.isAccessible()) {
         			searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers(), project);
         		} else {
-        			Debug.error(project.getName() + " is not accessable.");
+        			Debug.error(project.getName() + " is not accessible.");
         		}
         	} else {
         		searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
