@@ -90,22 +90,23 @@ find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef
 	;	Term = SearchFunctor/SearchArity
 	),
 	(	ExactMatch == true ->
-		any_predicate_declaration_or_definition(SearchFunctor, SearchArity, Entity, Kind, DeclOrDef, Properties),
+		any_predicate_declaration_or_definition(SearchFunctor, SearchArity, Entity, Kind, From, DeclOrDef, Properties),
 		Functor = SearchFunctor,
 		Arity = SearchArity
-	;	any_predicate_declaration_or_definition(Functor, SearchArity, Entity, Kind, DeclOrDef, Properties),
+	;	any_predicate_declaration_or_definition(Functor, SearchArity, Entity, Kind, From, DeclOrDef, Properties),
 		once(sub_atom(Functor, _, _, _, SearchFunctor)),
 		Arity = SearchArity
 	),
-	entity_property(Entity, Kind, file(File, Directory)),
+	entity_property(From, _, file(File, Directory)),
 	atom_concat(Directory, File, FullPath),
 	memberchk(line_count(Line), Properties).
 
-any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, declaration, Properties) :-
+any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, Entity, declaration, Properties) :-
 	entity_property(Entity, Kind, declares(Functor/Arity, Properties)).
-any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, definition, Properties) :-
-	(	entity_property(Entity, Kind, defines(Functor/Arity, Properties0))
-	;	entity_property(Entity, Kind, includes(Functor/Arity, _From, Properties0))
+any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, From, definition, Properties) :-
+	(	entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
+		From = Entity
+	;	entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0))
 	),
 	% we add a scope property to ensure that the correct visibility icon is used when showing search results
 	functor(Predicate, Functor, Arity),
