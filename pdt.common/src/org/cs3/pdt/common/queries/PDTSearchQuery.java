@@ -173,7 +173,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	protected abstract Match constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
 	protected PrologMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int line, List<String> properties, String visibility, String declOrDef) {
-		String signature = declOrDef + visibility + definingModule + functor + arity + line;
+		String signature = declOrDef + visibility + definingModule + functor + arity + line + file;
 		if (signatures.contains(signature)) {
 			return null;
 		} else {
@@ -186,7 +186,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	}
 
 	protected PrologMatch createUniqueMatch(String definingModule, String functor, int arity, IFile file, int offset, int length, List<String> properties, String visibility, String declOrDef) {
-		String signature = declOrDef + visibility + definingModule + functor + arity + offset + "#" + length;
+		String signature = declOrDef + visibility + definingModule + functor + arity + offset + "#" + length + file;
 		if (signatures.contains(signature)) {
 			return null;
 		} else {
