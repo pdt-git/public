@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_xref,
-         [ find_reference_to/13 % +Functor,+Arity,?DefFile,?DefModule,
+         [ find_reference_to2/13 % +Functor,+Arity,?DefFile,?DefModule,
                                 % ?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind,?PropertyList,?ExactMatch
          ]
          ).
@@ -33,103 +33,169 @@ find_unique( Goal ) :-
     setof( Goal, Goal, Set),
     member(Goal, Set).
     
-:- dynamic(result/4).
+:- dynamic(result/5).
 
-assert_result(QGoal, Caller, Location) :-
-	assert_result(QGoal, Caller, Location, _).
-assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
-    QGoal = _:Goal,
-    assertz(result(Goal, Ref, TermPosition, Kind)),
+assert_result(IsAlias, QGoal, Caller, Location) :-
+	assert_result(IsAlias, QGoal, Caller, Location, _).
+assert_result(IsAlias, QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
+    QGoal = _:_Goal,
+    assertz(result(IsAlias, QGoal, Ref, TermPosition, Kind)),
+    !.
+assert_result(IsAlias, QGoal, _, file_term_position(File, TermPosition), Kind) :-
+    QGoal = _:_Goal,
+    assertz(result(IsAlias, QGoal, File, TermPosition, Kind)),
     !.
 
-assert_result(_,_,_,_).
+assert_result(IsAlias, QGoal, _, clause(Ref), Kind) :-
+    QGoal = _:_Goal,
+    assertz(result(IsAlias, QGoal, Ref, no_term_position, Kind)),
+    !.
 
-assert_result(QGoal-clause_term_position(Ref, TermPosition)) :-
-	QGoal = _:Goal,
-	assertz(result(Goal, Ref, TermPosition, [])),
+assert_result(_,_,_,_,_).
+
+assert_result(IsAlias, QGoal-clause_term_position(Ref, TermPosition)) :-
+	QGoal = _:_Goal,
+	assertz(result(IsAlias, QGoal, Ref, TermPosition, [])),
 	!.
 
-assert_result(_). 
+assert_result(_,_). 
 
-%% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList]) :-
-	retractall(result(_, _, _, _)),
+%% find_reference_to2(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
+find_reference_to2(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,PropertyList) :-
+	retractall(result(_, _, _, _, _)),
 	(	var(Functor), var(SearchMod) -> !, fail ; true),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
-	retract(result(ReferencingGoal, ClauseRef, Termposition, _)),
-	clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
-	(	nonvar(SearchMod),
-		var(Functor),
-		var(Arity)
-	->	SearchMod \== RefModule
+	retract(result(Alias, M0:ReferencingGoal, ClauseRefOrFile, Termposition, _)),
+	(	functor(ReferencingGoal, N, A),
+		declared_in_module(M0, N, A, M)
+	->	format(atom(Prefix), '~w:', [M]),
+		PrefixProperty = prefix(Prefix),
+		format(atom(Called), '~w:~w/~w', [M, N, A]),
+		CalledProperty = called(Called)
 	;	true
 	),
-	clause_property(ClauseRef, file(RefFile)),
-	clause_property(ClauseRef, line_count(Line)),
-	nth_clause(_, Nth, ClauseRef),
-	properties_for_predicate(RefModule,RefName,RefArity,PropertyList),
-	(	Termposition = term_position(Start, End, _, _, _)
-	->	true
-	;	Termposition = Start-End
+	(	atom(ClauseRefOrFile)
+	->	RefFile = ClauseRefOrFile,
+		Line = 1,
+		once(module_of_file(RefFile, RefModule)),
+		RefName = (:-),
+		RefArity = 1
+	;	ClauseRef = ClauseRefOrFile,
+		clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
+		(	nonvar(SearchMod),
+			var(Functor),
+			var(Arity)
+		->	SearchMod \== RefModule
+		;	true
+		),
+		clause_property(ClauseRef, file(RefFile)),
+		clause_property(ClauseRef, line_count(Line)),
+		nth_clause(_, Nth, ClauseRef)
 	),
-	format(atom(Position), '~w-~w', [Start, End]),
-	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]).
+	properties_for_predicate(RefModule,RefName,RefArity,PropertyList0),
+	(	(	Termposition = term_position(Start, End, _, _, _)
+		;	Termposition = Start-End
+		)
+	->	format(atom(Position), '~w-~w', [Start, End])
+	;	Position = Line
+	),
+	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
+	[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList0] = PropertyList1,
+	(	nonvar(Alias)
+	->	format(atom(AliasAtom), 'alias for ~w', [Alias]),
+		PropertyList2 = [is_alias(AliasAtom)|PropertyList1]
+	;	PropertyList2 = PropertyList1
+	),
+	(	nonvar(PrefixProperty),
+		nonvar(Called)
+	->	PropertyList = [PrefixProperty, CalledProperty|PropertyList2]
+	;	PropertyList = PropertyList2
+	).
 
-perform_search(Functor, Arity, SearchMod, ExactMatch) :-
+perform_search(Functor, Arity, Module, ExactMatch) :-
 	(	nonvar(Functor)
-	->	search_predicate_indicator(Functor, Arity, SearchMod, ExactMatch, SearchFunctor, SearchArity)
-	;	true
+	->	search_predicate_indicator(Functor, Arity, ExactMatch, SearchModule, SearchFunctor, SearchArity, IsAlias)
+	;	Module = SearchModule
 	),
 	(	nonvar(SearchFunctor),
 		nonvar(SearchArity)
 	->	functor(Goal, SearchFunctor, SearchArity)
 	;	true
 	),
-	collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates),
-	pdt_walk_code([trace_reference(SearchMod:Goal), predicates(Candidates), on_trace(pdt_xref:assert_result)]),
+	collect_candidates(SearchModule, SearchFunctor, SearchArity, Candidates),
+	pdt_walk_code([trace_reference(SearchModule:Goal), predicates(Candidates), on_trace(pdt_xref:assert_result(IsAlias))]),
 	fail.
 
 perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
 
-search_predicate_indicator(SearchFunctor, SearchArity, _SearchMod, true, SearchFunctor, SearchArity) :-
+search_predicate_indicator(SearchFunctor0, SearchArity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	nonvar(SearchArity),
-	!.
+	!,
+	declared_in_module(SearchModule0, SearchFunctor0, SearchArity, SearchModule0),
+	(	SearchModule0 = SearchModule,
+		SearchFunctor0 = SearchFunctor
+	;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
+		IsAlias = SearchModule0:SearchFunctor0/SearchArity
+	).
 
-search_predicate_indicator(SearchFunctor, Arity, SearchMod, true, SearchFunctor, SearchArity) :-
+search_predicate_indicator(SearchFunctor0, Arity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	var(Arity),
 	!,
 	setof(
-		A,
-		SearchMod^current_predicate(SearchMod:SearchFunctor/A),
-		As
+		M-A,
+		declared_in_module(M, SearchFunctor0, A, M),
+		MAs
 	),
-	member(SearchArity, As).
+	member(SearchModule0-SearchArity, MAs),
+	(	SearchModule0 = SearchModule,
+		SearchFunctor0 = SearchFunctor
+	;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
+		IsAlias = SearchModule0:SearchFunctor0/SearchArity
+	).
 
-search_predicate_indicator(Functor, SearchArity, SearchMod, false, SearchFunctor, SearchArity) :-
+search_predicate_indicator(Functor, SearchArity, false, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	nonvar(SearchArity),
 	!,
 	setof(
-		F,
-		SearchMod^(current_predicate(SearchMod:F/SearchArity), once(sub_atom(F, _, _, _, Functor))),
-		Fs
+		M-F,
+		(declared_in_module(M, F, SearchArity, M), once(sub_atom(F, _, _, _, Functor))),
+		MFs
 	),
-	member(SearchFunctor, Fs).
+	member(SearchModule0-SearchFunctor0, MFs),
+	(	SearchModule0 = SearchModule,
+		SearchFunctor0 = SearchFunctor
+	;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
+		IsAlias = SearchModule0:SearchFunctor0/SearchArity
+	).
 
-search_predicate_indicator(Functor, Arity, SearchMod, false, SearchFunctor, SearchArity) :-
+search_predicate_indicator(Functor, Arity, false, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	var(Arity),
 	!,
 	setof(
-		F/A,
-		SearchMod^(current_predicate(SearchMod:F/A), once(sub_atom(F, _, _, _, Functor))),
-		FAs
+		M-F-A,
+		(declared_in_module(M, F, A, M), once(sub_atom(F, _, _, _, Functor))),
+		MFAs
 	),
-	member(SearchFunctor/SearchArity, FAs).
+	member(SearchModule0-SearchFunctor0-SearchArity, MFAs),
+	(	SearchModule0 = SearchModule,
+		SearchFunctor0 = SearchFunctor
+	;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
+		IsAlias = SearchModule0:SearchFunctor0/SearchArity
+	).
 
-collect_candidates(SearchMod, SearchFunctor, SearchArity, Candidates) :-
+possible_alias(Module, Name, Arity, ImportingModule, AliasName) :-
+	functor(Head, Name, Arity),
+	\+ predicate_property(Module:Head, multifile),
+	predicate_property(Module:Head, file(File)),
+	source_file_property(File, load_context(ImportingModule, _Position, Options)),
+	memberchk(imports(Imports), Options),
+	memberchk(Name/Arity as AliasName, Imports).
+
+collect_candidates(SearchModule, SearchFunctor, SearchArity, Candidates) :-
 	ensure_call_graph_generated,
 	setof(Module:Name/Arity, (
-		calls(SearchMod, SearchFunctor, SearchArity, Module, Name, Arity, _)
+		NumberOfCalls^calls(SearchModule, SearchFunctor, SearchArity, Module, Name, Arity, NumberOfCalls)
 	), Candidates).
 	
 %find_reference_to(Functor,Arity,DefFile, SearchMod, ExactMatch,

@@ -45,7 +45,7 @@ calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName,
 clear([]).
 clear([Module:Name/Arity|Predicates]) :-
 	retractall(calls_(_,_,_,Module,Name,Arity,_)),
-	retractall(calls_multifile_(_,_,_Module,Name,Arity,_,_)),
+	retractall(calls_multifile_(_,_,_,Module,Name,Arity,_,_)),
 	clear(Predicates).
 
 :- dynamic(predicates_to_walk/1).

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.Util;

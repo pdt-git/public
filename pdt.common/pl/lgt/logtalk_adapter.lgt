@@ -19,7 +19,7 @@
 :- object(logtalk_adapter).
 
 :- public([
-	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+	find_reference_to/13, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
 	find_entity_definition/5,
 	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
@@ -60,6 +60,29 @@
 
 %:- use_module(pdt_prolog_library(utils4modules)).
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
+
+%% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
+find_reference_to(Functor, Arity, FromFile, _From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,StartLine-EndLine,_Nth,_Call,[clause_line(StartLine), called(Called)|PropertyList]) :-
+
+	entity_property(Entity, _, uses(From, Functor/Arity, AliasFunctor/Arity, CallerFunctor/CallerArity, StartLine-EndLine)),
+
+	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
+	atom_concat(EntityDirectory, EntityBase, EntityFile),
+
+	entity_property(From, _, file(FromBase, FromDirectory)),
+	atom_concat(FromDirectory, FromBase, FromFile),
+	(	Functor \== AliasFunctor
+	->	format(atom(AliasAtom), '~w aliased to ~w', [Functor/Arity, AliasFunctor/Arity]),
+		PropertyList = [is_alias(AliasAtom)]
+	;	PropertyList = []
+	),
+	format(atom(Called), '~w::~w/~w', [From, Functor, Arity]).
+	
+	
+
+
+
+
 
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
