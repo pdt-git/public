@@ -761,7 +761,7 @@ find_module_definition(SearchModule, ExactMatch, File, Line, Module) :-
 	module_property(Module, line_count(Line)).
 	
 
-find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, PropertyList) :-
+find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, [show_line(true)|PropertyList]) :-
 	once(properties_for_predicate(system, load_files, 2, PropertyList)),
 	find_use_module(Module, ExactMatch, _, _, File, Line). 
 

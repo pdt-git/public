@@ -69,7 +69,7 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Functor, Arity, FromFile, _From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,StartLine-EndLine,_Nth,_Call,[clause_line(StartLine), called(Called)|PropertyList]) :-
+find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,StartLine-EndLine,_Nth,_Call,[clause_line(StartLine), called(Called)|PropertyList]) :-
 
 	entity_property(Entity, _, uses(From, Functor/Arity, AliasFunctor/Arity, CallerFunctor/CallerArity, StartLine-EndLine)),
 
