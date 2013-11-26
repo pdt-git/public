@@ -52,7 +52,9 @@ public class GraphDataHolder {
 	private DataMap unusedLocal = Maps.createHashedDataMap();
 	private DataMap modulePublicStaticPredicatesMap = Maps.createHashedDataMap();
 	private DataMap modulePublicDynamicPredicatesMap = Maps.createHashedDataMap();
+	private DataMap nodeStereoTypeMapMap = Maps.createHashedDataMap();
 	private DataMap moduleImportedPredicatesMap = Maps.createHashedDataMap();
+	private DataMap edgeLabelMap = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -128,12 +130,20 @@ public class GraphDataHolder {
 		return modulePublicDynamicPredicatesMap;
 	}
 	
+	public DataMap getNodeStereoTypeMap() {
+		return nodeStereoTypeMapMap;
+	}
+	
 	public DataMap getModuleImportedPredicatesMap() {
 		return moduleImportedPredicatesMap;
 	}
 	
 	public DataMap getFileTypeMap() {
 		return fileTypeMap;
+	}
+	
+	public DataMap getEdgeLabelMap() {
+		return edgeLabelMap;
 	}
 
 	public boolean isPredicate(Node node) {
@@ -281,6 +291,24 @@ public class GraphDataHolder {
 	
 	public int getLineNumber(Node node) {
 		return lineNumberMap.getInt(node);
+	}
+	
+	public String getEdgeLabel(Edge edge) {
+		Object object = edgeLabelMap.get(edge);
+		if (object != null) {
+			return object.toString();
+		} else {
+			return null;
+		}
+	}
+	
+	public String getNodeStereoType(Node node) {
+		Object object = nodeStereoTypeMapMap.get(node);
+		if (object != null) {
+			return object.toString();
+		} else {
+			return null;
+		}
 	}
 
 }

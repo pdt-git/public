@@ -16,8 +16,10 @@
 						write_file/5,
 						write_call_edge/8,
 						write_load_edge/4,
+						write_load_edge/5,
 						write_predicates/3,
-						write_file_as_element/7]).
+						write_file_as_element/7,
+						write_file_as_element/8]).
 
 :- use_module(util_for_graphML).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
@@ -92,6 +94,9 @@ write_predicates(Stream, File, PredicatesToWrite):-
 %	).
     
 write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates) :-
+	write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates, _).
+
+write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates, StereoType) :-
     open_node(Stream,FileId),
     write_data(Stream,'kind','file_node'),
     write_data(Stream,'id',FileId),
@@ -100,6 +105,10 @@ write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedSt
     write_data(Stream, 'file_node_type', FileType),
     write_data(Stream, 'exported_static_predicates', ExportedStaticPredicates),
     write_data(Stream, 'exported_dynamic_predicates', ExportedDynamicPredicates),
+    (	nonvar(StereoType)
+    ->	write_data(Stream, 'node_stereotype', StereoType)
+    ;	true
+    ),
     close_node(Stream).	
     
 write_predicate(Stream, File, Module, Name, Arity, Line):-
@@ -146,10 +155,17 @@ write_predicate(Stream, File, Module, Name, Arity, Line):-
 */	close_node(Stream).
 
     
-write_load_edge(Stream, LoadingFileId, FileId, Imported):-
+write_load_edge(Stream, LoadingFileId, FileId, Imported) :-
+	write_load_edge(Stream, LoadingFileId, FileId, Imported, _).
+
+write_load_edge(Stream, LoadingFileId, FileId, Imported, Label) :-
     open_edge(Stream, FileId, LoadingFileId),
     write_data(Stream, 'kind', 'loading'),
     write_data(Stream, 'imported_predicates', Imported),
+    (	nonvar(Label)
+    ->	write_data(Stream, 'edge_label', Label)
+    ;	true
+    ),
     %write_data(Stream, 'kind', 'call'),
 	close_edge(Stream).
     
@@ -257,8 +273,12 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="exported_dynamic_predicates" for="node" attr.name="exported_dynamic_predicates" attr.type="string" />'),
     nl(OutStream),
+    write(OutStream, '<key id="node_stereotype" for="node" attr.name="node_stereotype" attr.type="string" />'),
+    nl(OutStream),
     write(OutStream, '<key id="imported_predicates" for="edge" attr.name="imported_predicates" attr.type="string" />'),
     nl(OutStream),
+    write(OutStream, '<key id="edge_label" for="edge" attr.name="edge_label" attr.type="string" />'),
+  	nl(OutStream),
     nl(OutStream).
     
 

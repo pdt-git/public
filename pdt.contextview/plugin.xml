@@ -84,5 +84,10 @@
                contribution="org.cs3.pdt.common.pl.path">
          </dependency>
       </fileContribution>
+      <fileSearchPathContribution
+            alias="pdt_contextview_pl"
+            id="pdt.contextview.pl"
+            path="pl/">
+      </fileSearchPathContribution>
    </extension>
 </plugin>

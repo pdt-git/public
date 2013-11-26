@@ -14,20 +14,19 @@
 
 :- multifile(logtalk_library_path/2).
 :- dynamic(logtalk_library_path/2).
-logtalk_library_path(prolog_connector_pl_lgt, Library) :-
-	absolute_file_name(prolog_connector_pl('lgt/loader.pl'), FilePath),
+logtalk_library_path(pdt_contextview_pl_lgt, Library) :-
+	absolute_file_name(pdt_contextview_pl('lgt/loader.pl'), FilePath),
 	file_directory_name(FilePath,Directory),
 	atom_concat(Directory, '/', Library).
 
-load_lgt_reload_adapter :-
+load_lgt_graphml :-
     (current_predicate(user:logtalk_load/1)
-    -> set_logtalk_flag(code_prefix, '.'), set_logtalk_flag(optimize, off), set_prolog_flag(optimise, off),
-       logtalk_load([
-			prolog_connector_pl_lgt(logtalk_reload_adapter)
+    -> logtalk_load([
+			pdt_contextview_pl_lgt(lgt_to_graphml)
        ])
 	;  true
 	).
 	
-:- initialization( load_lgt_reload_adapter ). 
+:- initialization( load_lgt_graphml ). 
 
 
