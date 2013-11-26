@@ -67,14 +67,6 @@ find_reference_to2(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNa
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
 	retract(result(Alias, M0:ReferencingGoal, ClauseRefOrFile, Termposition, _)),
-	(	functor(ReferencingGoal, N, A),
-		declared_in_module(M0, N, A, M)
-	->	format(atom(Prefix), '~w:', [M]),
-		PrefixProperty = prefix(Prefix),
-		format(atom(Called), '~w:~w/~w', [M, N, A]),
-		CalledProperty = called(Called)
-	;	true
-	),
 	(	atom(ClauseRefOrFile)
 	->	RefFile = ClauseRefOrFile,
 		Line = 1,
@@ -102,15 +94,29 @@ find_reference_to2(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNa
 	),
 	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
 	[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList0] = PropertyList1,
+	(	functor(ReferencingGoal, N, A),
+		declared_in_module(M0, N, A, M)
+	->	format(atom(Called), '~w:~w/~w', [M, N, A]),
+		CalledProperty = called(Called),
+		(	M \== RefModule
+		->	format(atom(Prefix), '~w:', [M]),
+			PrefixProperty = prefix(Prefix)
+		;	true
+		)
+	;	true
+	),
 	(	nonvar(Alias)
 	->	format(atom(AliasAtom), 'alias for ~w', [Alias]),
 		PropertyList2 = [is_alias(AliasAtom)|PropertyList1]
 	;	PropertyList2 = PropertyList1
 	),
-	(	nonvar(PrefixProperty),
-		nonvar(Called)
-	->	PropertyList = [PrefixProperty, CalledProperty|PropertyList2]
-	;	PropertyList = PropertyList2
+	(	nonvar(PrefixProperty)
+	->	PropertyList3 = [PrefixProperty|PropertyList2]
+	;	PropertyList3 = PropertyList2
+	),
+	(	nonvar(CalledProperty)
+	->	PropertyList = [CalledProperty|PropertyList3]
+	;	PropertyList = PropertyList3
 	).
 
 perform_search(Functor, Arity, Module, ExactMatch) :-
@@ -132,11 +138,14 @@ perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
 search_predicate_indicator(SearchFunctor0, SearchArity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	nonvar(SearchArity),
 	!,
-	declared_in_module(SearchModule0, SearchFunctor0, SearchArity, SearchModule0),
-	(	SearchModule0 = SearchModule,
+	(	declared_in_module(SearchModule0, SearchFunctor0, SearchArity, SearchModule0)
+	*->	(	SearchModule0 = SearchModule,
+			SearchFunctor0 = SearchFunctor
+		;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
+			IsAlias = SearchModule0:SearchFunctor0/SearchArity
+		)
+	;	SearchModule0 = SearchModule,
 		SearchFunctor0 = SearchFunctor
-	;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
-		IsAlias = SearchModule0:SearchFunctor0/SearchArity
 	).
 
 search_predicate_indicator(SearchFunctor0, Arity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
