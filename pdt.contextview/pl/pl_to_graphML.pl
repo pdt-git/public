@@ -14,7 +14,8 @@
 :- module(pl_to_graphML, [	%write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
-								write_dependencies_to_graphML/3]).
+								write_dependencies_to_graphML/3,
+								write_dependencies_to_graphML2/3]).
 
 :- use_module(graphML_api).
 :- use_module(util_for_graphML).
@@ -60,6 +61,10 @@ write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     	write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths))
     ;	write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths))
     ).
+
+write_dependencies_to_graphML2(ProjectFilePaths, ProjectPath, GraphFile):-
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+    write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
 
 relative_paths(_, [], []).
 relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-

@@ -25,6 +25,12 @@
             class="pdt.y.focusview.DependenciesView"
             id="pdt.view.dependencies">
       </view>
+      <view
+            category="org.cs3.pdt"
+            class="pdt.y.focusview.DependenciesView2"
+            id="pdt.view.dependencies2"
+            name="PDT Load Graph2">
+      </view>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
