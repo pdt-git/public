@@ -23,6 +23,14 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	
 	private static final String NAME_OF_GLOBAL_HELPING_FILE = "pdt-global-help.graphml";
 	
+	private static final ArrayList<String> extensions = new ArrayList<String>();
+	static {
+		extensions.add("pl");
+		extensions.add("prolog");
+		extensions.add("lgt");
+		extensions.add("logtalk");
+	}
+	
 	protected List<String> paths = new ArrayList<String>();
 	protected String currentPath;
 
@@ -73,7 +81,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 					if (!(resource instanceof IFile)) 
 						return true;
 					IFile file = (IFile)resource;
-					if (file.getFileExtension() != null && file.getFileExtension().equals("pl")) {
+					if (file.getFileExtension() != null && extensions.contains(file.getFileExtension())) {
 						try {
 							paths.add(Util.quoteAtom(UIUtils.prologFileName(file)));
 						} catch (IOException e) {

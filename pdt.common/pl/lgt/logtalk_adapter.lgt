@@ -19,6 +19,7 @@
 :- object(logtalk_adapter).
 
 :- public([
+	loaded_by/4,	% ?SourceFile, ?ParentSourceFile, -Line, -Directive
 	find_reference_to/13, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
 	find_entity_definition/5,
 	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
@@ -60,6 +61,12 @@
 
 %:- use_module(pdt_prolog_library(utils4modules)).
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
+
+
+/* For Load File Dependency Graph: */
+loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
+	logtalk::loaded_file_property(LoadedFile, parent(LoadingFile)).
+
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
 find_reference_to(Functor, Arity, FromFile, _From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,StartLine-EndLine,_Nth,_Call,[clause_line(StartLine), called(Called)|PropertyList]) :-

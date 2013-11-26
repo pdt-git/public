@@ -776,6 +776,14 @@ search_module_name(ModulePart, false, Module) :-
 
 /* For Load File Dependency Graph: */
 loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
+	(	split_file_path(LoadedFile, _, _, _, lgt)
+	;	split_file_path(LoadedFile, _, _, _, logtalk)
+	),
+	% Logtalk source file
+	!,
+	logtalk_adapter::loaded_by(LoadedFile, LoadingFile, Line, Directive).
+
+loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
 	source_file(LoadedFile),
 	source_file_property(LoadedFile, load_context(_LoadingModule, LoadingFile:Line, _OptionList)),
 	% If the loaded file is a module conclude that the
