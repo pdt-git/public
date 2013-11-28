@@ -558,6 +558,7 @@ walk_clauses(_, _).
 
 first_argument_of_clause(Ref, first_argument(Arg)) :-
 	catch(clause(_:Head, _, Ref), _, fail),
+	compound(Head),
 	arg(1, Head, FirstArg),
 	(	var(FirstArg)
 	->	clause_info(Ref, _, _, Varnames), 
