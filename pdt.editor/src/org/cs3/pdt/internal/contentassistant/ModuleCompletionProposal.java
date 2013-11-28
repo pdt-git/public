@@ -14,12 +14,10 @@
 
 package org.cs3.pdt.internal.contentassistant;
 
-import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Image;
 
-@SuppressWarnings("unused")
 public class ModuleCompletionProposal extends ComparableTemplateCompletionProposal {
 
 	private String module;
@@ -34,9 +32,11 @@ public class ModuleCompletionProposal extends ComparableTemplateCompletionPropos
 		if (o instanceof VariableCompletionProposal) {
 			return 1;
 		} else if (o instanceof ModuleCompletionProposal) {
-			return getDisplayString().compareTo(o.getDisplayString());
+			return module.compareTo(((ModuleCompletionProposal) o).module);
 		} else if (o instanceof PredicateCompletionProposal) {
-			return getDisplayString().compareTo(((PredicateCompletionProposal) o).getSignature());
+			return module.compareTo(((PredicateCompletionProposal) o).getSignature());
+		} else if (o instanceof SimpleCompletionProposal) {
+			return module.compareTo(o.getDisplayString());
 		} else {
 			return -1;
 		}

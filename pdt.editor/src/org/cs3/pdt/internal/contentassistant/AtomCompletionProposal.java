@@ -29,7 +29,7 @@ public class AtomCompletionProposal extends ComparableTemplateCompletionProposal
 
 	@Override
 	public int compareTo(ComparableTemplateCompletionProposal o) {
-		if (o instanceof PredicateCompletionProposal || o instanceof ModuleCompletionProposal || o instanceof VariableCompletionProposal) {
+		if (o instanceof PredicateCompletionProposal || o instanceof ModuleCompletionProposal || o instanceof VariableCompletionProposal || o instanceof SimpleCompletionProposal) {
 			return 1;
 		} else if (o instanceof AtomCompletionProposal){
 			return atom.compareTo(((AtomCompletionProposal) o).atom);

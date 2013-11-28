@@ -175,6 +175,8 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 			return getSignature().compareTo(((PredicateCompletionProposal) o).getSignature());
 		} else if (o instanceof ModuleCompletionProposal) {
 			return getSignature().compareTo(o.getDisplayString());
+		} else if (o instanceof SimpleCompletionProposal) {
+			return getSignature().compareTo(o.getDisplayString());
 		} else {
 			return -1;
 		}

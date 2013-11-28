@@ -108,6 +108,8 @@ public class ImageRepository {
     public static final String FILTER_PRIVATE = "protected_co_crossed.gif";
     public static final String FILTER_SYSTEM = "system_filter.png";
     public static final String NO_FILTER_SYSTEM = "system.png";
+    
+    public static final String TEMPLATE = "template_obj.gif";
 
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
