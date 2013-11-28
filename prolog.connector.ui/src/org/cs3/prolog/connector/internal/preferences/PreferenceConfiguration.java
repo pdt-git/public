@@ -167,7 +167,7 @@ public class PreferenceConfiguration {
 		
 		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
 		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
-		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getStackCommandLineParameters());
+		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getCommandLineArguments());
 		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, "");
 		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
 		

@@ -565,11 +565,11 @@ public class Util {
 	}
 
 
-	private static String stackCommandLineParameters = null;
+	private static String commandLineArguments = null;
 	
-	public static String getStackCommandLineParameters() {
-		Debug.debug("getStackCommandLineParameters start");
-		if (stackCommandLineParameters == null) {
+	public static String getCommandLineArguments() {
+		Debug.debug("getCommandLineArguments start");
+		if (commandLineArguments == null) {
 		
 			String swiExecutable;
 			
@@ -594,15 +594,15 @@ public class Util {
 	
 			if (bits.equals("64")) {
 				// no parameters for SWI-Prolog 64bit
-				stackCommandLineParameters = "";
+				commandLineArguments = PDTConstants.OTHER_COMMAND_LINE_ARGUMENTS;
 			} else {
-				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+				commandLineArguments = PDTConstants.OTHER_COMMAND_LINE_ARGUMENTS + " " + PDTConstants.STACK_COMMMAND_LINE_ARGUMENTS;
 			}
 
 		}
-		Debug.debug("getStackCommandLineParameters end: '" + stackCommandLineParameters+ "'");
+		Debug.debug("getCommandLineArguments end: '" + commandLineArguments+ "'");
 		
-		return stackCommandLineParameters;
+		return commandLineArguments;
 	}
 
 	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
@@ -639,10 +639,10 @@ public class Util {
 
 		if (isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
-				+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getStackCommandLineParameters();
+				+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getCommandLineArguments();
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getCommandLineArguments();
 
 	}
 	
@@ -666,10 +666,10 @@ public class Util {
 
 		if (isWindows()) {
 			return //"cmd.exe /c start \"cmdwindow\" /min "
-			findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
+			findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + getCommandLineArguments();
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getCommandLineArguments();
 
 	}
 
