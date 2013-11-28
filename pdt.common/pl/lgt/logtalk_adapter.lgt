@@ -504,7 +504,7 @@ predicate_name_with_property_(Module,Name,Property) :-
 make_duplicate_free_string(AllPredicateNames,Predicates) :-
 	setof(Name, member(Name,AllPredicateNames), UniqueNames),
 	format(string(S),'~w',[UniqueNames]),
-	string_to_atom(S,Predicates).
+	{string_to_atom(S,Predicates)}.
 
 
 
@@ -525,8 +525,8 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments) :-
 	findall(Arg,  member((_,Arg), PredArgList), AllArgs),
 	format(string(S1),'~w',[AllProps]),
 	format(string(S2),'~w',[AllArgs]),
-	string_to_atom(S1,Predicates),
-	string_to_atom(S2,PropertyArguments).
+	{string_to_atom(S1,Predicates)},
+	{string_to_atom(S2,PropertyArguments)}.
 
 % helper
 predicate_name_with_unary_property_(Name,Property,Arg) :-
