@@ -289,11 +289,9 @@ handle_batch_messages(OutStream):-
     ->	thread_get_message(batch_message(Message)), 
 		debug(consult_server(handler),"dequeued message: ~w~n",[Message]),
     	fail
-    ;	(	var(Message)
-    	->	true
-    	;	debug(consult_server(handler),"could not handle message: ~w~n",[Message])
-	    )
-    ),!.
+    ;	true
+    ),
+    !.
     
 %note on aborts: an abort request is complete if BOTH the async abort message aswell as the
 %sync abort marker have been recieved. I originally assumed that the async message would always 

@@ -144,7 +144,7 @@ search_predicate_indicator(SearchFunctor0, SearchArity, true, SearchModule, Sear
 		;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
 			IsAlias = SearchModule0:SearchFunctor0/SearchArity
 		)
-	;	SearchModule0 = SearchModule,
+	;	%SearchModule0 = SearchModule,
 		SearchFunctor0 = SearchFunctor
 	).
 
