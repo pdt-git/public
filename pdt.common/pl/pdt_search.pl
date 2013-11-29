@@ -53,7 +53,7 @@
 
 find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position-_,NthClause,Kind,PropertyList).
+	logtalk_adapter::find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList).
 find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList) :-
 	pdt_xref:find_reference_to2(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList).
 
