@@ -69,16 +69,19 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,StartLine-EndLine,_Nth,_Call,[clause_line(StartLine), called(Called)|PropertyList]) :-
-
-	entity_property(Entity, _, uses(From, Functor/Arity, AliasFunctor/Arity, CallerFunctor/CallerArity, StartLine-EndLine)),
-
+find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,Line,_Nth,_Call,[clause_line(Line), called(Called)|PropertyList]) :-
+	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties))
+	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties))
+	;	entity_property(From, _, calls(Functor/Arity, Properties))
+	),
+	once(member(caller(CallerFunctor/CallerArity), Properties)),
+	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),
-
 	entity_property(From, _, file(FromBase, FromDirectory)),
 	atom_concat(FromDirectory, FromBase, FromFile),
-	(	Functor \== AliasFunctor
+	(	member(as(AliasFunctor/Arity), Properties),
+		Functor \== AliasFunctor
 	->	format(atom(AliasAtom), '~w aliased to ~w', [Functor/Arity, AliasFunctor/Arity]),
 		PropertyList = [is_alias(AliasAtom)]
 	;	PropertyList = []
@@ -730,7 +733,11 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
-	entity_property(This, _, uses(Object, OriginalFunctor/Arity, Functor/Arity)),
+	(	entity_property(This, _, calls(Object::Functor/Arity, _)) ->
+		OriginalFunctor = Functor
+	;	entity_property(This, _, calls(Object::OriginalFunctor/Arity, Properties)),
+		member(as(Functor/Arity), Properties)
+	),
 	!,
 	functor(Template, OriginalFunctor, Arity),
 	decode(Object::Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).
@@ -738,7 +745,11 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
-	entity_property(This, _, use_module(Module, OriginalFunctor/Arity, Functor/Arity)),
+	(	entity_property(This, _, calls(Module:Functor/Arity, _)) ->
+		OriginalFunctor = Functor
+	;	entity_property(This, _, calls(Module:OriginalFunctor/Arity, Properties)),
+		member(as(Functor/Arity), Properties)
+	),
 	!,
 	functor(Template, OriginalFunctor, Arity),
 	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).
