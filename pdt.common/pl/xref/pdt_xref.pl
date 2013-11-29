@@ -82,6 +82,8 @@ find_reference_to2(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNa
 		;	true
 		),
 		clause_property(ClauseRef, file(RefFile)),
+		% check that RefFile is not derived from another file
+		clause_property(ClauseRef, source(RefFile)),
 		clause_property(ClauseRef, line_count(Line)),
 		nth_clause(_, Nth, ClauseRef)
 	),
