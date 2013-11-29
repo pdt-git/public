@@ -11,11 +11,11 @@ import org.eclipse.core.resources.IProject;
 
 import pdt.y.main.PDTGraphView;
 
-public class DependenciesGraphPIFLoader2 extends GlobalGraphPIFLoader {
+public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
 	
-	private static final String NAME_OF_DEPENDENCIES_HELPING_FILE = "pdt-dependencies-help2.graphml";
+	private static final String NAME_OF_DEPENDENCIES_HELPING_FILE = "pdt-logtalk-entity-help.graphml";
 	
-	public DependenciesGraphPIFLoader2(PDTGraphView view) {
+	public LogtalkEntityGraphPIFLoader(PDTGraphView view) {
 		super(view, NAME_OF_DEPENDENCIES_HELPING_FILE);
 	}
 	
@@ -28,7 +28,7 @@ public class DependenciesGraphPIFLoader2 extends GlobalGraphPIFLoader {
 			String projectPath = Util.normalizeOnWindows(project.getLocation().toString());
 			
 			String query;
-			query = bT("write_dependencies_to_graphML2", paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
+			query = bT("write_logtalk_entities_to_graphML", paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
 			return query;
 			
 		} catch (IOException e) {

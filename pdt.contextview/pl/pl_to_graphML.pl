@@ -15,7 +15,7 @@
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
 								write_dependencies_to_graphML/3,
-								write_dependencies_to_graphML2/3]).
+								write_logtalk_entities_to_graphML/3]).
 
 :- use_module(graphML_api).
 :- use_module(util_for_graphML).
@@ -55,16 +55,15 @@ write_global_to_graphML(ProjectFilePaths, GraphFile):-
 
 write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
-    %relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
-    (	current_predicate(logtalk_load/1)
-    ->	filter_logtalk(ConsultedFilePaths, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths),
-    	write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths))
-    ;	write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths))
-    ).
-
-write_dependencies_to_graphML2(ProjectFilePaths, ProjectPath, GraphFile):-
-    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
+
+write_logtalk_entities_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+    (	current_predicate(logtalk_load/1)
+    ->	filter_logtalk(ConsultedFilePaths, _, ConsultedLogtalkFilePaths),
+    	write_to_graphML(GraphFile, write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths))
+    ;	true
+    ).
 
 relative_paths(_, [], []).
 relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-
@@ -149,10 +148,6 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
 		write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, ProjectFiles)
 	)).
     
-write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, ConsultedLogtalkFilePaths, OutStream) :-
-	write_dependencies_facts_to_graphML(ProjectPath, ConsultedPrologFilePaths, OutStream),
-	lgt_to_graphML::write_dependencies_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths, OutStream).
-	
 write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     
 	findall((SourceFile, TargetFile),
@@ -260,7 +255,10 @@ file_node_type(FilePath, Dependencies, 'bottom') :-
     not(member((FilePath, _), Dependencies)), !.
     
 file_node_type(_, _, 'intermediate') :- !.
-    
+
+write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths, OutStream) :-
+	lgt_to_graphML::write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths, OutStream).
+	
 collect_ids_for_focus_file(FocusFile, Files, CalledPredicates, Calls):-
     findall(
     	Module:Name/Arity,

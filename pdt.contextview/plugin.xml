@@ -27,9 +27,9 @@
       </view>
       <view
             category="org.cs3.pdt"
-            class="pdt.y.focusview.DependenciesView2"
-            id="pdt.view.dependencies2"
-            name="PDT Load Graph2">
+            class="pdt.y.focusview.LogtalkEntityView"
+            id="pdt.view.logtalk.entity"
+            name="Logtalk Entity Graph">
       </view>
    </extension>
    <extension

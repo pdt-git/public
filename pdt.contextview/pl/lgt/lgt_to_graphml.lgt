@@ -14,16 +14,16 @@
 		;	assertz(referenced_entity_(Entity))
 		).
 
-	:- public(write_dependencies_facts_to_graphML/3).
-	write_dependencies_facts_to_graphML(_ProjectPath, ProjectFilePaths, OutStream) :-
+	:- public(write_logtalk_entity_facts_to_graphML/3).
+	write_logtalk_entity_facts_to_graphML(_ProjectPath, ProjectFilePaths, OutStream) :-
 		reset_external_entities,
 		member(File, ProjectFilePaths),
 		{'$lgt_file_name'(logtalk, File, Directory, Basename, _SourceFile)},
 		process(Basename, Directory, File, OutStream),
 		fail.
-	write_dependencies_facts_to_graphML(_ProjectPath, _ProjectFilePaths, OutStream) :-
+	write_logtalk_entity_facts_to_graphML(_ProjectPath, _ProjectFilePaths, OutStream) :-
 		output_external_entities(OutStream).
-	write_dependencies_facts_to_graphML(_,_,_).
+	write_logtalk_entity_facts_to_graphML(_,_,_).
 	
 	reset_external_entities :-
 		retractall(included_entity_(_)),
