@@ -21,6 +21,8 @@ import java.net.URL;
 
 import javax.swing.JPanel;
 
+import org.cs3.prolog.common.Util;
+
 import pdt.y.focusview.ViewBase;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphDataHolder;
@@ -225,7 +227,11 @@ public class PDTGraphView extends  JPanel {
 	}
 	
 	public void updateLayout() {
-		view.applyLayoutAnimated(layoutModel.getLayouter());
+		if (Util.isMacOS()) {
+			view.applyLayout(layoutModel.getLayouter());
+		} else {
+			view.applyLayoutAnimated(layoutModel.getLayouter());
+		}
 		view.fitContent();
 		view.updateView();
 	}
