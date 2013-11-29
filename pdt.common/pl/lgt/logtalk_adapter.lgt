@@ -70,16 +70,23 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
 find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,Line,_Nth,_Call,[clause_line(Line), called(Called)|PropertyList]) :-
-	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties))
-	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties))
-	;	entity_property(From, _, calls(Functor/Arity, Properties))
+	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties)),
+		Kind = logtalk
+	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties)),
+		Kind = prolog
+	;	entity_property(From, _, calls(Functor/Arity, Properties)),
+		Kind = logtalk
 	),
 	once(member(caller(CallerFunctor/CallerArity), Properties)),
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),
-	entity_property(From, _, file(FromBase, FromDirectory)),
-	atom_concat(FromDirectory, FromBase, FromFile),
+	(	Kind == logtalk ->
+		entity_property(From, _, file(FromBase, FromDirectory)),
+		atom_concat(FromDirectory, FromBase, FromFile)
+	;	% Kind = prolog
+		module_property(From, file(FromFile))
+	),
 	(	member(as(AliasFunctor/Arity), Properties),
 		Functor \== AliasFunctor
 	->	format(atom(AliasAtom), '~w aliased to ~w', [Functor/Arity, AliasFunctor/Arity]),
@@ -87,12 +94,6 @@ find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFun
 	;	PropertyList = []
 	),
 	format(atom(Called), '~w::~w/~w', [From, Functor, Arity]).
-	
-	
-
-
-
-
 
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
