@@ -21,6 +21,7 @@
 :- public([
 	loaded_by/4,	% ?SourceFile, ?ParentSourceFile, -Line, -Directive
 	find_reference_to/13, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
+	find_entity_reference/8,
 	find_entity_definition/5,
 	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
@@ -95,6 +96,15 @@ find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFun
 	),
 	format(atom(Called), '~w::~w/~w', [From, Functor, Arity]).
 
+find_entity_reference(Entity, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+	search_entity_name(Entity, ExactMatch, SearchEntity),
+	find_reference_to(_, _, _, SearchEntity, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, _, _, PropertyList).
+
+search_entity_name(Entity, true, Entity) :- !.
+search_entity_name(EntityPart, false, EntityName) :-
+	entity(Entity),
+	functor(Entity, EntityName, _),
+	once(sub_atom(EntityName, _, _, _, EntityPart)).
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	entity(Entity),

@@ -770,6 +770,10 @@ find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName
 	search_module_name(Module, ExactMatch, SearchModule),
 	find_reference_to(_, _, _, SearchModule, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, _, _, PropertyList).
 
+find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+	current_predicate(logtalk_load/1),
+	logtalk_adapter::find_entity_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
+
 search_module_name(Module, true, Module) :- !.
 search_module_name(ModulePart, false, Module) :-
 	current_module(Module),
