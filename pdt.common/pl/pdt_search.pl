@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_search,
-         [ find_reference_to/13                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
+         [ find_reference_to/11                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
          , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
          , find_definitions_categorized/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
@@ -29,9 +29,9 @@
 :- use_module( prolog_connector_pl(split_file_path),
              [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
              ] ).
-%:- reexport(   'xref/pdt_xref', 
-%             [ find_reference_to/13             % ...
-%             ] ).
+:- use_module( 'xref/pdt_xref', 
+             [ find_reference_to/13             % ...
+             ] ).
 :- use_module( properties, 
              [ properties_for_predicate/4
              ] ).
@@ -51,11 +51,11 @@
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
-find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList) :-
+find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList).
-find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList) :-
-	pdt_xref:find_reference_to2(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,PropertyList).
+	logtalk_adapter::find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,_NthClause,_Kind,PropertyList).
+find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,PropertyList) :-
+	find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,RefArity,RefFile,Position,_NthClause,_Kind,PropertyList).
 
         /***********************************************************************
          * Find Definitions and Declarations and categorize them by visibility *
