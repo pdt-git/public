@@ -123,7 +123,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 
 perform_search(Functor, Arity, Module, ExactMatch) :-
 	(	nonvar(Functor)
-	->	search_predicate_indicator(Functor, Arity, ExactMatch, SearchModule, SearchFunctor, SearchArity, IsAlias)
+	->	search_predicate_indicator(Module, Functor, Arity, ExactMatch, SearchModule, SearchFunctor, SearchArity, IsAlias)
 	;	Module = SearchModule
 	),
 	(	nonvar(SearchFunctor),
@@ -137,7 +137,7 @@ perform_search(Functor, Arity, Module, ExactMatch) :-
 
 perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
 
-search_predicate_indicator(SearchFunctor0, SearchArity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
+search_predicate_indicator(SearchModule0, SearchFunctor0, SearchArity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	nonvar(SearchArity),
 	!,
 	(	declared_in_module(SearchModule0, SearchFunctor0, SearchArity, SearchModule0)
@@ -146,11 +146,11 @@ search_predicate_indicator(SearchFunctor0, SearchArity, true, SearchModule, Sear
 		;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
 			IsAlias = SearchModule0:SearchFunctor0/SearchArity
 		)
-	;	%SearchModule0 = SearchModule,
+	;	SearchModule0 = SearchModule,
 		SearchFunctor0 = SearchFunctor
 	).
 
-search_predicate_indicator(SearchFunctor0, Arity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
+search_predicate_indicator(SearchModule0, SearchFunctor0, Arity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	var(Arity),
 	!,
 	setof(
@@ -165,7 +165,7 @@ search_predicate_indicator(SearchFunctor0, Arity, true, SearchModule, SearchFunc
 		IsAlias = SearchModule0:SearchFunctor0/SearchArity
 	).
 
-search_predicate_indicator(Functor, SearchArity, false, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
+search_predicate_indicator(SearchModule0, Functor, SearchArity, false, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	nonvar(SearchArity),
 	!,
 	setof(
@@ -180,7 +180,7 @@ search_predicate_indicator(Functor, SearchArity, false, SearchModule, SearchFunc
 		IsAlias = SearchModule0:SearchFunctor0/SearchArity
 	).
 
-search_predicate_indicator(Functor, Arity, false, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
+search_predicate_indicator(SearchModule0, Functor, Arity, false, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	var(Arity),
 	!,
 	setof(

@@ -70,7 +70,11 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,Line,_Nth,_Call,[clause_line(Line), called(Called)|PropertyList]) :-
+find_reference_to(SearchFunctor, Arity, FromFile, From, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile,Line,_Nth,_Call,[clause_line(Line), called(Called)|PropertyList]) :-
+	(	ExactMatch == true
+	->	SearchFunctor = Functor
+	;	true
+	),
 	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties)),
 		Kind = logtalk
 	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties)),
@@ -78,7 +82,10 @@ find_reference_to(Functor, Arity, FromFile, From, _ExactMatch, Entity, CallerFun
 	;	entity_property(From, _, calls(Functor/Arity, Properties)),
 		Kind = logtalk
 	),
-	once(member(caller(CallerFunctor/CallerArity), Properties)),
+	(	ExactMatch \== true
+	->	once(sub_atom(Functor, _, _, _, SearchFunctor))
+	;	true
+	),	once(member(caller(CallerFunctor/CallerArity), Properties)),
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),
@@ -129,10 +136,7 @@ find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 
 
 find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
-	(	atom(Term) ->
-		Term = SearchFunctor
-	;	Term = SearchFunctor/SearchArity
-	),
+	split_search_pi(Term, Entity, SearchFunctor, SearchArity),
 	(	ExactMatch == true ->
 		any_predicate_declaration_or_definition(SearchFunctor, SearchArity, Entity, Kind, From, DeclOrDef, Properties),
 		Functor = SearchFunctor,
@@ -144,6 +148,11 @@ find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef
 	entity_property(From, _, file(File, Directory)),
 	atom_concat(Directory, File, FullPath),
 	memberchk(line_count(Line), Properties).
+
+split_search_pi(Module:Functor/Arity, Module, Functor, Arity) :- !.
+split_search_pi(       Functor/Arity, _     , Functor, Arity) :- !.
+split_search_pi(Module:Functor      , Module, Functor, _    ) :- !.
+split_search_pi(       Functor      , _     , Functor, _    ) :- atom(Functor).
 
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, Entity, declaration, Properties) :-
 	entity_property(Entity, Kind, declares(Functor/Arity, Properties)).

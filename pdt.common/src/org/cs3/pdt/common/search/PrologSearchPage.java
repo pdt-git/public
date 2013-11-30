@@ -217,19 +217,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         Goal goal;
         if (searchFor == PREDICATE) {
-            String functor = "";
-            int arity = 0;
-            int lastSlash = data.pattern.lastIndexOf("/");
-            if (lastSlash == -1) {
-                functor = data.pattern;
-                arity = -1;
-            } else {
-                try {
-                    arity = Integer.parseInt(data.pattern.substring(lastSlash + 1));
-                } catch (NumberFormatException e) {}
-                functor = data.pattern.substring(0, lastSlash);
-            }
-            goal = new Goal("", null, Util.quoteAtom(functor), arity, null, data.isExactMatch());
+        	Object[] moduleFunctorArity = getModuleFunctorArity(data.pattern);
+            goal = new Goal("", (String) moduleFunctorArity[0], Util.quoteAtom((String) moduleFunctorArity[1]), (Integer) moduleFunctorArity[2], null, data.isExactMatch());
             
             if (limitTo == REFERENCES) {
             	searchQuery = new ReferencesSearchQueryDirect(goal);
@@ -329,15 +318,17 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	return projectScopeCheckBox.getSelection();
     }
    
-    private Object[] getFunctorAndArity(String pattern) {
+    private Object[] getModuleFunctorArity(String pattern) {
         if (pattern == null || pattern.isEmpty()) {
             return null;
         }
+        String module = null;
         String functor = "";
+        String beforeArity;
         int arity = 0;
         int lastSlash = pattern.lastIndexOf("/");
         if (lastSlash == -1) {
-            functor = pattern;
+        	beforeArity = pattern;
             arity = -1;
         } else {
             try {
@@ -348,9 +339,27 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             if (arity < 0) {
                 return null;
             }
-            functor = pattern.substring(0, lastSlash);
+            beforeArity = pattern.substring(0, lastSlash);
         }
-        return new Object[]{functor, arity};
+        if (beforeArity.isEmpty()) {
+        	return null;
+        }
+        int firstSplitter = beforeArity.indexOf("::");
+        int splitterLength = 2;
+        if (firstSplitter == -1) {
+        	firstSplitter = beforeArity.indexOf(":");
+        	splitterLength = 1;
+        }
+        if (firstSplitter == -1) {
+        	functor = beforeArity;
+        } else {
+        	module = beforeArity.substring(0, firstSplitter);
+        	functor = beforeArity.substring(firstSplitter + splitterLength);
+        	if (module.isEmpty() || functor.isEmpty()) {
+        		return null;
+        	}
+        }
+        return new Object[]{module, functor, arity};
     }
 
     private void setPattern(String pattern) {
@@ -687,7 +696,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         } else if (getSearchFor() == MODULE) {
         	return true;
         }
-        return getFunctorAndArity(pattern) != null;
+        return getModuleFunctorArity(pattern) != null;
     }
 
 

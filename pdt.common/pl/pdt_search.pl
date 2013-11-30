@@ -66,10 +66,7 @@ find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,
 %% find_definitions_categorized(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
 % 
 find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList):-
-	(	atom(Term)
-	->	SearchFunctor = Term
-	;	Term = SearchFunctor/Arity
-	),
+	split_search_pi(Term, DefiningModule, SearchFunctor, Arity),
 	(	ExactMatch == true
 	->	Functor = SearchFunctor,
 		declared_in_module(DefiningModule, Functor, Arity, DefiningModule)
@@ -92,6 +89,11 @@ find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, D
 	current_predicate(logtalk_load/1),
 	logtalk_adapter::find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList).
 
+
+split_search_pi(Module:Functor/Arity, Module, Functor, Arity) :- !.
+split_search_pi(       Functor/Arity, _     , Functor, Arity) :- !.
+split_search_pi(Module:Functor      , Module, Functor, _    ) :- !.
+split_search_pi(       Functor      , _     , Functor, _    ) :- atom(Functor).
 
 % find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
 %                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)

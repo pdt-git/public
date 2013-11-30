@@ -40,7 +40,11 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 		String term;
 		
 		if (goal.getArity() == -1) {
-			term = goal.getFunctor();
+			if (module == null || module.isEmpty()) {
+				term = goal.getFunctor();
+			} else {
+				term = module + ":" + goal.getFunctor();
+			}
 		} else {
 			term = goal.getSignature();
 		}
