@@ -22,6 +22,8 @@
 :- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 :- use_module(pdt_common_pl(pdt_search)).
 
+:- op(600, xfy, ::).   % Logtalk message sending operator
+
 %write_project_graph_to_file(Project, OutputFile):-
 %	parse_util:generate_facts(Project),
 %	writeln('generating graphml-file'),
