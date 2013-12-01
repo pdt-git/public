@@ -65,7 +65,7 @@ find_reference_to(Functor,Arity,DefFile, DefModule,ExactMatch,RefModule,RefName,
 
 %% find_definitions_categorized(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
 % 
-find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList):-
+find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList) :-
 	split_search_pi(Term, DefiningModule, SearchFunctor, Arity),
 	(	ExactMatch == true
 	->	Functor = SearchFunctor,

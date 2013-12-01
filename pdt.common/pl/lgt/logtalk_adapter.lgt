@@ -79,13 +79,15 @@ find_reference_to(SearchFunctor, Arity, FromFile, From, ExactMatch, Entity, Call
 		Kind = logtalk
 	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties)),
 		Kind = prolog
-	;	entity_property(From, _, calls(Functor/Arity, Properties)),
+	;	entity_property(Entity, _, calls(Functor/Arity, Properties)),
+		From = Entity,
 		Kind = logtalk
 	),
 	(	ExactMatch \== true
 	->	once(sub_atom(Functor, _, _, _, SearchFunctor))
 	;	true
-	),	once(member(caller(CallerFunctor/CallerArity), Properties)),
+	),
+	once(member(caller(CallerFunctor/CallerArity), Properties)),
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),
