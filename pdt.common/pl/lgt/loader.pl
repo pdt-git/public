@@ -23,6 +23,7 @@ load_lgt_adapter :-
     -> logtalk_load([
             library(types_loader),
             library(metapredicates_loader),
+            help(loader),
 		    pdt_common_pl_lgt(utils4entities),
 			pdt_common_pl_lgt(logtalk_adapter)
        ])

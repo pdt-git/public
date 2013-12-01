@@ -433,6 +433,10 @@ find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 	),
 	atom_concat(Prefix, _, Name).
 
+find_completion(Prefix, _EnclosingFile, _Line, predicate, '', Name, Arity, private, true, _, lgt_help_file, FileName) :-
+	atomic(Prefix),
+	help::completion(Prefix, Name/Arity-FileName).
+
 
                /*************************************
                 * PROLOG ERROR MESSAGE HOOK         *
