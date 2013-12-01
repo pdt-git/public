@@ -137,6 +137,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
 					
 					String module = result.get("Module").toString();
+					if (module.isEmpty()) {
+						module = null;
+					}
 					
 					String strArity = (String) result.get("Arity");
 					int arity = Integer.parseInt(strArity);
