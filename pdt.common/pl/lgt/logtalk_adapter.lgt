@@ -103,7 +103,10 @@ find_reference_to(SearchFunctor, Arity, FromFile, From, ExactMatch, Entity, Call
 		PropertyList = [is_alias(AliasAtom)]
 	;	PropertyList = []
 	),
-	format(atom(Called), '~w::~w/~w', [From, Functor, Arity]).
+	(	From == Entity
+	->	format(atom(Called), '~w/~w', [Functor, Arity])
+	;	format(atom(Called), '~w::~w/~w', [From, Functor, Arity])
+	).
 
 find_entity_reference(Entity, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
