@@ -59,6 +59,7 @@ predicates_with_property(Property, FileName, Predicates) :-
 	;	split_file_path(FileName, _, _, _, logtalk)
 	),
 	!,
+	current_predicate(logtalk_load/1),
 	logtalk_editor_adapter::predicates_with_property(Property, FileName, AllPredicateNames),
 	make_duplicate_free_string(AllPredicateNames,Predicates).
 predicates_with_property(Property, _FileName, Predicates) :-
