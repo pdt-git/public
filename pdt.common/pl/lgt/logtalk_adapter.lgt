@@ -349,7 +349,8 @@ find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functo
 	(	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
 		% we add a number_of_clauses/1 declaration property just to simplify coding in the Java side
-		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)) ->
+		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)),
+			DefinitionProperties \== [] ->
 			memberchk(number_of_clauses(N0), DefinitionProperties)
 		;	N0 = 0
 		),
