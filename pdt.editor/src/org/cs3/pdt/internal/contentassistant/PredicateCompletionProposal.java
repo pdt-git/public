@@ -14,12 +14,14 @@
 
 package org.cs3.pdt.internal.contentassistant;
 
+import java.io.File;
 import java.util.List;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.prolog.common.Util;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.resource.JFaceResources;
@@ -181,9 +183,18 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 			} else {
 				return null;
 			}
-		} else {
-			return null;
+		} else if (SearchConstants.COMPLETION_DOC_KIND_FILE.equals(docKind)) {
+			String fileContent = Util.readFromFile(new File(doc));
+			if (fileContent != null && !fileContent.isEmpty()) {
+				return fileContent;
+			}
+		} else if (SearchConstants.COMPLETION_DOC_KIND_LGT_HELP_FILE.equals(docKind)) {
+			String fileContent = Util.readFromFile(new File(doc));
+			if (fileContent != null && !fileContent.isEmpty()) {
+				return fileContent.substring(fileContent.indexOf("<html"));
+			}
 		}
+		return null;
 	}
 
 	@Override

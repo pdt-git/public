@@ -33,6 +33,8 @@ public final class SearchConstants {
 	public static final String COMPLETION_DOC_KIND_NODOC = "nodoc";
 	public static final String COMPLETION_DOC_KIND_TEXT = "text";
 	public static final String COMPLETION_DOC_KIND_HTML = "html";
+	public static final String COMPLETION_DOC_KIND_FILE = "file";
+	public static final String COMPLETION_DOC_KIND_LGT_HELP_FILE = "lgt_help_file";
 
 	private SearchConstants() {}
 }
