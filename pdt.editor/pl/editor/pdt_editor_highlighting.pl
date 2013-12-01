@@ -18,6 +18,11 @@
          ]).
 :- use_module(library(backcomp)).
 :- use_module(library(lists)).
+:- use_module( prolog_connector_pl(split_file_path),
+             [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
+             ] ).
+
+:- op(600, xfy, ::).   % Logtalk message sending operator
 
                /************************************************
                 * PREDICATE PROPERTIES FOR SYNTAX HIGHLIGHTING *
@@ -49,6 +54,13 @@
 %	findall(Name, predicate_name_with_property_(Module,Name,undefined), AllPredicateNames),
 %	make_duplicate_free_string(AllPredicateNames,Predicates).
 
+predicates_with_property(Property, FileName, Predicates) :-
+	(	split_file_path(FileName, _, _, _, lgt)
+	;	split_file_path(FileName, _, _, _, logtalk)
+	),
+	!,
+	logtalk_editor_adapter::predicates_with_property(Property, FileName, AllPredicateNames),
+	make_duplicate_free_string(AllPredicateNames,Predicates).
 predicates_with_property(Property, _FileName, Predicates) :-
     findall(Name, predicate_name_with_property_(_Module,Name,Property), AllPredicateNames),
 	make_duplicate_free_string(AllPredicateNames,Predicates).
