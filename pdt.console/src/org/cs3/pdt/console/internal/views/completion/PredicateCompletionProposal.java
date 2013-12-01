@@ -22,30 +22,31 @@ import org.eclipse.swt.graphics.Image;
 
 public class PredicateCompletionProposal extends ComparableCompletionProposal {
 
-	private String functor;
-	private int arity;
+	private String signature;
 	private String label;
-	private List<String> argNames;
+	
 	private String term;
 	private String indicator;
+	private String functor;
+	
 	private String visibility;
 	private boolean isBuiltin;
+	
 	private int lastStateMask = -1;
 	
 	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, List<String> argNames, boolean addSingleQuote) {
 		super(prefixLength, addSingleQuote);
-		this.functor = functor;
-		this.arity = arity;
-		this.argNames = argNames;
 		this.visibility = visibility;
 		this.isBuiltin = isBuiltin;
+		signature = functor + "/" + arity;
 		if (module == null) {
-			label = functor + "/" + arity;
+			label = signature;
 		} else {
-			label = functor + "/" + arity + " - " + module;
+			label = signature + " - " + module;
 		}
-		term = (functor + (addSingleQuote ? "'" : "") + getArglist()).substring(prefixLength);
-		indicator = (functor + "/" + arity).substring(prefixLength);
+		term = (functor + (addSingleQuote ? "'" : "") + getArglist(arity, argNames)).substring(prefixLength);
+		indicator = (functor + (addSingleQuote ? "'" : "") + "/" + arity).substring(prefixLength);
+		this.functor = functor + (addSingleQuote ? "'" : "");
 	}
 	
 	@Override
@@ -60,7 +61,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		}
 	}
 
-	private String getArglist() {
+	private String getArglist(int arity, List<String> argNames) {
 		if (arity < 1) {
 			return "";
 		}
@@ -127,7 +128,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	}
 	
 	String getSignature() {
-		return functor + "/" + arity;
+		return signature;
 	}
 
 	@Override
