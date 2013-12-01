@@ -295,9 +295,25 @@ retrieve_term_from_atom(EnclFile, TermString, Term) :-
 find_primary_definition_visible_in_(EnclFile, SelectedLine,Term,ReferencedModule,MainFile,FirstLine,single) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
+    current_predicate(logtalk_load/1),
     logtalk_adapter::find_primary_definition_visible_in(EnclFile, SelectedLine,Term,_Functor,_Arity,ReferencedModule,MainFile,FirstLine).
 
 % The second argument is just an atom contianing the string representation of the term:     
+find_primary_definition_visible_in_(_EnclFile,_SelectedLine,Term,_ReferencedModule,MainFile,FirstLine,single) :-
+	Term = Obj::Call,
+	!,
+    current_predicate(logtalk_load/1),
+    nonvar(Obj),
+    nonvar(Call),
+    functor(Call, Name, Arity),
+	(	object_property(Obj, defines(Name/Arity, Properties))
+	;	object_property(Obj, declares(Name/Arity, Properties))
+	),
+	memberchk(line_count(FirstLine), Properties),
+	object_property(Obj, file(FileName, Directory)),
+	atom_concat(Directory, FileName, MainFile),
+	!.
+    	
 find_primary_definition_visible_in_(EnclFile,_SelectedLine,Term,ReferencedModule,MainFile,FirstLine,ResultKind) :-
     extract_name_arity(Term, _,_Head,Name,Arity),
     find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
