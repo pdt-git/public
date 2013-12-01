@@ -16,35 +16,16 @@ package org.cs3.pdt.internal.contentassistant;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.swt.graphics.Image;
 
 public class ModuleCompletionProposal extends ComparableTemplateCompletionProposal {
 
-	private String module;
-
 	public ModuleCompletionProposal(IDocument document, String module, int offset, int length) {
-		super(document, module, module, offset, length);
-		this.module = module;
+		super(document, module, "", module, offset, length, ImageRepository.getImage(ImageRepository.PACKAGE));
 	}
 
 	@Override
-	public int compareTo(ComparableTemplateCompletionProposal o) {
-		if (o instanceof VariableCompletionProposal) {
-			return 1;
-		} else if (o instanceof ModuleCompletionProposal) {
-			return module.compareTo(((ModuleCompletionProposal) o).module);
-		} else if (o instanceof PredicateCompletionProposal) {
-			return module.compareTo(((PredicateCompletionProposal) o).getSignature());
-		} else if (o instanceof SimpleCompletionProposal) {
-			return module.compareTo(o.getDisplayString());
-		} else {
-			return -1;
-		}
-	}
-
-	@Override
-	public Image getImage() {
-		return ImageRepository.getImage(ImageRepository.PACKAGE);
+	protected int getPriority() {
+		return PRIORITY_1;
 	}
 	
 }

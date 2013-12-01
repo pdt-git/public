@@ -42,24 +42,27 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
-@SuppressWarnings({ "unused", "restriction" })
+@SuppressWarnings({ "restriction" })
 public class PredicateCompletionProposal extends ComparableTemplateCompletionProposal implements ICompletionProposalExtension5, IInformationControlCreator {
 
 	public static PredicateCompletionProposal createProposal(IDocument document, int offset, int length, String module, String name, int arity, List<String> argNames, String visibility, boolean isBuiltin, String docKind, String doc) {
-		String insertion = createInsertion(name, arity, argNames);
-		String displayString = createDisplayString(module, name, arity);
-		return new PredicateCompletionProposal(document, insertion, displayString, offset, length, module, name, arity, visibility, isBuiltin, argNames, docKind, doc);
-	}
-	
-	private static String createDisplayString(String module, String name, int arity)  {
+		String pattern = createPattern(name, arity, argNames);
+		String displayString;
 		if (module == null) {
-			return name + "/" + arity;
+			displayString =  name + "/" + arity;
 		} else {
-			return name + "/" + arity + " - " + module;
+			displayString =  name + "/" + arity + " - " + module;
 		}
+		String signature = name + "/" + arity;
+		Image image = getImage(isBuiltin, visibility);
+		Template termTemplate = new Template(name, "", contextTypeId, pattern, true);
+		Template indicatorTemplate = new Template(name, "", contextTypeId, signature, true);
+		DocumentTemplateContext2 documentTemplateContext = new DocumentTemplateContext2(new TemplateContextType(contextTypeId), document, offset, length);
+		Region region = new Region(offset, length);
+		return new PredicateCompletionProposal(termTemplate, documentTemplateContext, region, image, indicatorTemplate, displayString, signature, docKind, doc);
 	}
 	
-	private static String createInsertion(String name, int arity, List<String> argNames) {
+	private static String createPattern(String name, int arity, List<String> argNames) {
 		if (arity <= 0) {
 			return name;
 		}
@@ -67,7 +70,7 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		if (!createArglist) {
 			return name;
 		}
-		StringBuffer buf = new StringBuffer(name);
+		StringBuilder buf = new StringBuilder(name);
 		buf.append("(");
 		if (argNames == null) {
 			for (int i = 0; i < arity; i++) {
@@ -97,41 +100,40 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		buf.append(")");
 		return buf.toString();
 	}
+	
+	private static Image getImage(boolean isBuiltin, String visibility) {
+		if (isBuiltin) {
+			return ImageRepository.getImage(ImageRepository.PE_BUILT_IN);
+		} else {
+			if (SearchConstants.VISIBILITY_PUBLIC.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+			} else if (SearchConstants.VISIBILITY_PROTECTED.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
+			} else if (SearchConstants.VISIBILITY_PRIVATE.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
+			}
+		}
+		return null;
+	}
 
-	private String module;
-	private String name;
-	private int arity;
+	private Template indicatorOnly;
+	private String displayString;
+	private String signature;
 	private String docKind;
 	private String doc;
-	private List<String> argNames; 
-	private String visibility;
-	private boolean isBuiltin;
 	
-	private DocumentTemplateContext2 context;
-	private Template indicatorOnly;
-//	private Template functorOnly;
 	private int currentStateMask = -1;
 	
-	private PredicateCompletionProposal(IDocument document, String insertion, String displayString, int offset, int length, String module, String name, int arity, String visibility, boolean isBuiltin, List<String> argNames, String docKind, String doc) {
-		super(newTemplate(insertion), new DocumentTemplateContext2(new TemplateContextType(contextTypeId), document, offset, length), new Region(offset, length), displayString);
-//		super(document, insertion, displayString, offset, length);
-		this.module = module;
-		this.name = name;
-		this.arity = arity;
-		this.visibility = visibility;
-		this.isBuiltin = isBuiltin;
-		this.argNames = argNames;
-		this.docKind = docKind;
+	public PredicateCompletionProposal(Template template, TemplateContext context, IRegion region, Image image, Template indicatorOnly, String displayString, String signature, String docKind, String doc) {
+		super(template, context, region, image);
+		this.indicatorOnly = indicatorOnly;
+		this.displayString = displayString;
+		this.signature = signature;
 		this.doc = doc;
+		this.docKind = docKind;
 		
-		this.context = (DocumentTemplateContext2) getContext();
-		this.context.setProposal(this);
-		this.indicatorOnly = newTemplate(name + "/" + arity);
-//		this.functorOnly = newTemplate(name);
-	}
-	
-	private static Template newTemplate(String insertion) {
-		return new Template(insertion, "InsertMe", contextTypeId , insertion, true);
+		((DocumentTemplateContext2) getContext()).setProposal(this);
+		setInformationControlCreator(this);
 	}
 
 	private static class DocumentTemplateContext2 extends DocumentTemplateContext {
@@ -150,9 +152,6 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 			if ((predicateCompletionProposal.currentStateMask & SWT.CTRL) != 0) {
 				return super.evaluate(predicateCompletionProposal.indicatorOnly);
-			// ab: SHIFT does not work
-//			} else if ((predicateCompletionProposal.currentStateMask & SWT.SHIFT) != 0) {
-//				return super.evaluate(predicateCompletionProposal.functorOnly);
 			} else {
 				return super.evaluate(template);
 			}
@@ -165,21 +164,6 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		currentStateMask = stateMask;
 		super.apply(viewer, trigger, stateMask, offset);
 		currentStateMask = -1;
-	}
-	
-	@Override
-	public int compareTo(ComparableTemplateCompletionProposal o) {
-		if (o instanceof VariableCompletionProposal) {
-			return 1;
-		} else if (o instanceof PredicateCompletionProposal) {
-			return getSignature().compareTo(((PredicateCompletionProposal) o).getSignature());
-		} else if (o instanceof ModuleCompletionProposal) {
-			return getSignature().compareTo(o.getDisplayString());
-		} else if (o instanceof SimpleCompletionProposal) {
-			return getSignature().compareTo(o.getDisplayString());
-		} else {
-			return -1;
-		}
 	}
 
 	@Override
@@ -201,11 +185,6 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 			return null;
 		}
 	}
-	
-	@Override
-	public IInformationControlCreator getInformationControlCreator() {
-		return this;
-	}
 
 	@Override
 	public IInformationControl createInformationControl(Shell parent) {
@@ -220,25 +199,20 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 			return new DefaultInformationControl(parent);
 		}
 	}
-	
+
 	@Override
-	public Image getImage() {
-		if (isBuiltin) {
-			return ImageRepository.getImage(ImageRepository.PE_BUILT_IN);
-		} else {
-			if (SearchConstants.VISIBILITY_PUBLIC.equals(visibility)) {
-				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
-			} else if (SearchConstants.VISIBILITY_PROTECTED.equals(visibility)) {
-				return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
-			} else if (SearchConstants.VISIBILITY_PRIVATE.equals(visibility)) {
-				return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
-			}
-		}
-		return null;
+	protected int getPriority() {
+		return PRIORITY_1;
 	}
 	
-	String getSignature() {
-		return name + "/" + arity;
+	@Override
+	protected String getCompareText() {
+		return signature;
+	}
+	
+	@Override
+	public String getDisplayString() {
+		return displayString;
 	}
 	
 }

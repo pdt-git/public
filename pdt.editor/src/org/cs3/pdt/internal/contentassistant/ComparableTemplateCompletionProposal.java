@@ -22,40 +22,53 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateProposal;
+import org.eclipse.swt.graphics.Image;
 
 public abstract class ComparableTemplateCompletionProposal extends TemplateProposal implements Comparable<ComparableTemplateCompletionProposal> {
 
 	protected static final String contextTypeId = "MyContextType";
-	private String displayString;
 	
-	public ComparableTemplateCompletionProposal(IDocument document, String insertion, String displayString, int offset, int length) {
-		super(new Template(insertion, "InsertMe", contextTypeId , insertion, true), new DocumentTemplateContext(new TemplateContextType(contextTypeId), document, offset, length), new Region(offset, length), null);
-		this.displayString = displayString;
-	}
-
-	public ComparableTemplateCompletionProposal(Template template, TemplateContext context, IRegion region, String displayString) {
-		super(template, context, region, null);
-		this.displayString = displayString;
-	}
-
-	@Override
-	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return getDisplayString();
-	}
-
-	@Override
-	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
-		return completionOffset;
-	}
-
+	protected static final int PRIORITY_0 = 0;
+	protected static final int PRIORITY_1 = 1;
+	protected static final int PRIORITY_2 = 2;
 	
-	@Override
-	public String getDisplayString() {
-		return displayString;
+	public ComparableTemplateCompletionProposal(IDocument document, String name, String description, String pattern, int offset, int length, Image image) {
+		super(new Template(name, description, contextTypeId , pattern, true), new DocumentTemplateContext(new TemplateContextType(contextTypeId), document, offset, length), new Region(offset, length), image);
+	}
+
+	public ComparableTemplateCompletionProposal(Template template, TemplateContext context, IRegion region, Image image) {
+		super(template, context, region, image);
 	}
 
 	@Override
 	public String getAdditionalProposalInfo() {
 		return null;
 	}
+	
+	@Override
+	public int compareTo(ComparableTemplateCompletionProposal p) {
+		int c = p.getPriority() - getPriority();
+		if (c != 0) {
+			return c;
+		} else {
+			return getCompareText().compareTo(p.getCompareText());
+		}
+	}
+	
+	protected abstract int getPriority();
+	
+	protected String getCompareText() {
+		return getTemplate().getName();
+	}
+	
+	@Override
+	public String getDisplayString() {
+		Template template = getTemplate();
+		if (template.getDescription().isEmpty()) {
+			return template.getName();
+		} else {
+			return super.getDisplayString();
+		}
+	}
+	
 }

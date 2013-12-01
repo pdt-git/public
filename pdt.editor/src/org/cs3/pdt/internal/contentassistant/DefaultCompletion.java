@@ -26,7 +26,7 @@ public class DefaultCompletion {
 		if (fileName.endsWith(".lgt") || fileName.endsWith(".logtalk")) {
 			for (DefaultCompletion com : getDefaultCompletions()) {
 				if (com.canApply(fileName, prefix)) {
-					proposals.add(new SimpleCompletionProposal(document, com.completionWithCurrentDate(), com.key, com.key + " - " + com.name, begin, len));
+					proposals.add(new SimpleCompletionProposal(document, com.key, com.name, com.completionWithCurrentDate(), begin, len));
 				}
 			}
 		}
