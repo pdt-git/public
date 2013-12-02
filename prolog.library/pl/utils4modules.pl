@@ -86,9 +86,6 @@ assert_in_module(Mod,Head      ) :- assert( :(Mod,Head)            ).
 assert_in_module(Mod,Head,[]   ) :- assert( :(Mod,Head)            ).
 assert_in_module(Mod,Head,Body ) :- not(is_list(Body)), !, assert( :(Mod,':-'(Head,Body)) ).
 
-assert_in_module(Mod,Head, []) :-
-    assert_in_module(Mod,Head ).
-    
 assert_in_module(Mod,Head,      [Opt]) :- 
    (  Opt == unique
    -> assert_unique( :(Mod,Head))
