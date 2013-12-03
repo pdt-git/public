@@ -13,6 +13,8 @@
 
 package org.cs3.pdt.common.search;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -20,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.DeadPredicatesSearchQuery;
 import org.cs3.pdt.common.queries.GlobalDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.MetaPredicatesSearchQuery;
@@ -171,7 +172,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     // limit to
     private final static int DECLARATIONS = 0;
     private final static int REFERENCES = 1;
-
+    
     public static final String EXTENSION_POINT_ID = "org.cs3.pdt.prologSearchPage";
 
     private static final int HISTORY_SIZE = 12;
@@ -217,24 +218,25 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         PDTSearchQuery searchQuery = null;
 
-        Goal goal;
+//        Goal goal;
         if (searchFor == PREDICATE) {
         	SearchPattern searchPattern = SearchPattern.createSearchPattern(data.pattern);
-            goal = new Goal("", searchPattern.module, Util.quoteAtom(searchPattern.name), searchPattern.arity, null, data.isExactMatch());
+        	String searchGoal = searchPattern.toSearchGoal();
+//            goal = new Goal("", searchPattern.module, Util.quoteAtom(searchPattern.name), searchPattern.arity, null, data.isExactMatch());
             
             if (limitTo == REFERENCES) {
-            	searchQuery = new ReferencesSearchQueryDirect(goal);
+            	searchQuery = new ReferencesSearchQueryDirect(searchGoal, data.pattern, data.isExactMatch());
             } else {
-            	searchQuery = new GlobalDefinitionsSearchQuery(goal);
+            	searchQuery = new GlobalDefinitionsSearchQuery(searchGoal, data.pattern, data.isExactMatch());
             }
         } else if (searchFor == MODULE) {
-        	boolean exactMatch = data.isExactMatch();
-			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
-            
+//        	boolean exactMatch = data.isExactMatch();
+//			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
+//            
             if (limitTo == REFERENCES) {
-            	searchQuery = new ModuleReferenceSearchQuery(goal);
+            	searchQuery = new ModuleReferenceSearchQuery(Util.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             } else {
-            	searchQuery = new ModuleDefinitionsSearchQuery(goal);
+            	searchQuery = new ModuleDefinitionsSearchQuery(Util.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             }
         } else if (searchFor == UNDEFINED_CALL) {
 //        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
@@ -409,6 +411,16 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				this.arity = parseInt;
 			}
 		}
+    	
+    	public String toSearchGoal() {
+    		return bT(SearchConstants.PREDICATE_GOAL_FUNCTOR, 
+    				module != null ? Util.quoteAtomIfNeeded(module) : "_",
+    				mSeparator != null ? mSeparator : "_",
+    				Util.quoteAtomIfNeeded(name),
+    				aSeparator != null ? aSeparator : "_",
+    				arity >= 0 ? arity : "_");
+    	}
+    	
     }
 
     private void setPattern(String pattern) {

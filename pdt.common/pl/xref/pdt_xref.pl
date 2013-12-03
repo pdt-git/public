@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_xref,
-         [ find_reference_to/13 % +Functor,+Arity,?DefFile,?DefModule,
+         [ find_reference_to/10 % +Functor,+Arity,?DefFile,?DefModule,
                                 % ?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind,?PropertyList,?ExactMatch
          ]
          ).
@@ -61,7 +61,11 @@ assert_result(IsAlias, QGoal-clause_term_position(Ref, TermPosition)) :-
 assert_result(_,_). 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefName,RefArity,RefFile,Position,Nth,call,PropertyList) :-
+find_reference_to(Term, _File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+	(	Term = predicate(SearchMod, _, Functor, _, Arity)
+	;	Term = module(SearchMod)
+	),
+	!,
 	retractall(result(_, _, _, _, _)),
 	(	var(Functor), var(SearchMod) -> !, fail ; true),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
@@ -84,8 +88,7 @@ find_reference_to(Functor,Arity,_DefFile, SearchMod, ExactMatch,RefModule,RefNam
 		clause_property(ClauseRef, file(RefFile)),
 		% check that RefFile is not derived from another file
 		clause_property(ClauseRef, source(RefFile)),
-		clause_property(ClauseRef, line_count(Line)),
-		nth_clause(_, Nth, ClauseRef)
+		clause_property(ClauseRef, line_count(Line))
 	),
 	properties_for_predicate(RefModule,RefName,RefArity,PropertyList0),
 	(	(	Termposition = term_position(Start, End, _, _, _)

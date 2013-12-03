@@ -14,7 +14,6 @@
 
 package org.cs3.pdt.common.queries;
 
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -31,14 +30,14 @@ public abstract class MarkerCreatingSearchQuery extends PDTSearchQuery {
 	private String value;
 	private String markerType;
 
-	public MarkerCreatingSearchQuery(Goal goal, boolean createMarkers, String markerType) {
-		super(goal);
+	public MarkerCreatingSearchQuery(boolean createMarkers, String markerType) {
+		super(null, "");
 		this.createMarkers = createMarkers;
 		this.markerType = markerType;
 	}
 	
-	public MarkerCreatingSearchQuery(Goal goal, boolean createMarkers, String attribute, String value) {
-		super(goal);
+	public MarkerCreatingSearchQuery(boolean createMarkers, String attribute, String value) {
+		super(null, "");
 		this.createMarkers = createMarkers;
 		this.attribute = attribute;
 		this.value = value;

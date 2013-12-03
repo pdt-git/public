@@ -20,18 +20,16 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
-import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
 public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 
-	public ModuleDefinitionsSearchQuery(Goal goal) {
-		super(goal);
-		if (goal.isExactMatch()) {
+	public ModuleDefinitionsSearchQuery(String goal, String searchGoalLabel, boolean isExactMatch) {
+		super(goal, searchGoalLabel, isExactMatch);
+		if (isExactMatch) {
 			setSearchType("Definitions of module");
 		} else {
 			setSearchType("Definitions of modules containing");			
@@ -39,10 +37,10 @@ public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
+	protected String buildSearchQuery() {
 		String query = bT(PDTCommonPredicates.FIND_ENTITY_DEFINITION,
-				module,
-				Boolean.toString(goal.isExactMatch()),
+				getGoal(),
+				Boolean.toString(isExactMatch()),
 				"File",
 				"Line",
 				"Module");

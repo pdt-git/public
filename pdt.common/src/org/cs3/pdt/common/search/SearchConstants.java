@@ -35,6 +35,9 @@ public final class SearchConstants {
 	public static final String COMPLETION_DOC_KIND_HTML = "html";
 	public static final String COMPLETION_DOC_KIND_FILE = "file";
 	public static final String COMPLETION_DOC_KIND_LGT_HELP_FILE = "lgt_help_file";
+	
+	// search goals
+	public static final String PREDICATE_GOAL_FUNCTOR = "predicate";
 
 	private SearchConstants() {}
 }

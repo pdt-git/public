@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
@@ -45,7 +44,7 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 	}
 
 	public UndefinedCallsSearchQuery(boolean createMarkers, IProject root) {
-		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
+		super(createMarkers, ATTRIBUTE, ATTRIBUTE);
 		this.root = root;
 		if (root == null) {
 			setSearchType("Undefined calls");
@@ -56,7 +55,7 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
+	protected String buildSearchQuery() {
 		return bT(PDTCommonPredicates.FIND_UNDEFINED_CALL,
 				rootPath == null ? "_" : rootPath,
 				"Module",
