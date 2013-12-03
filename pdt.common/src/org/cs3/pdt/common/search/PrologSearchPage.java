@@ -408,12 +408,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				}
 				this.arity = parseInt;
 			}
-			System.out.println(this.module);
-			System.out.println(this.mSeparator);
-			System.out.println(this.name);
-			System.out.println(this.aSeparator);
-			System.out.println(this.arity);
-			System.out.println();
 		}
     }
 
