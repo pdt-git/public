@@ -16,6 +16,8 @@ package org.cs3.pdt.common.search;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.metadata.Goal;
@@ -217,8 +219,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         Goal goal;
         if (searchFor == PREDICATE) {
-        	Object[] moduleFunctorArity = getModuleFunctorArity(data.pattern);
-            goal = new Goal("", (String) moduleFunctorArity[0], Util.quoteAtom((String) moduleFunctorArity[1]), (Integer) moduleFunctorArity[2], null, data.isExactMatch());
+        	SearchPattern searchPattern = SearchPattern.createSearchPattern(data.pattern);
+            goal = new Goal("", searchPattern.module, Util.quoteAtom(searchPattern.name), searchPattern.arity, null, data.isExactMatch());
             
             if (limitTo == REFERENCES) {
             	searchQuery = new ReferencesSearchQueryDirect(goal);
@@ -318,48 +320,101 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	return projectScopeCheckBox.getSelection();
     }
    
-    private Object[] getModuleFunctorArity(String pattern) {
-        if (pattern == null || pattern.isEmpty()) {
-            return null;
-        }
-        String module = null;
-        String functor = "";
-        String beforeArity;
-        int arity = 0;
-        int lastSlash = pattern.lastIndexOf("/");
-        if (lastSlash == -1) {
-        	beforeArity = pattern;
-            arity = -1;
-        } else {
-            try {
-                arity = Integer.parseInt(pattern.substring(lastSlash + 1));
-            } catch (NumberFormatException e) {
-                return null;
-            }
-            if (arity < 0) {
-                return null;
-            }
-            beforeArity = pattern.substring(0, lastSlash);
-        }
-        if (beforeArity.isEmpty()) {
-        	return null;
-        }
-        int firstSplitter = beforeArity.indexOf("::");
-        int splitterLength = 2;
-        if (firstSplitter == -1) {
-        	firstSplitter = beforeArity.indexOf(":");
-        	splitterLength = 1;
-        }
-        if (firstSplitter == -1) {
-        	functor = beforeArity;
-        } else {
-        	module = beforeArity.substring(0, firstSplitter);
-        	functor = beforeArity.substring(firstSplitter + splitterLength);
-        	if (module.isEmpty() || functor.isEmpty()) {
-        		return null;
-        	}
-        }
-        return new Object[]{module, functor, arity};
+//    private SearchPattern getSearchPattern(String pattern) {
+//        if (pattern == null || pattern.isEmpty()) {
+//            return null;
+//        }
+//        String module = null;
+//        String mSeparator;
+//        String functor = "";
+//        String aSeparator = null;
+//        int arity = 0;
+//        
+//        String beforeArity;
+//        int lastSlash = pattern.lastIndexOf("//");
+//        if (lastSlash == -1) {
+//        	lastSlash = pattern.lastIndexOf("/");
+//        	if (lastSlash != -1) {
+//        		aSeparator = "/";
+//        	}
+//        } else {
+//        	aSeparator = "//";
+//        }
+//        if (lastSlash == -1) {
+//        	beforeArity = pattern;
+//            arity = -1;
+//        } else {
+//            try {
+//                arity = Integer.parseInt(pattern.substring(lastSlash + aSeparator.length()));
+//            } catch (NumberFormatException e) {
+//                return null;
+//            }
+//            if (arity < 0) {
+//                return null;
+//            }
+//            beforeArity = pattern.substring(0, lastSlash);
+//        }
+//        if (beforeArity.isEmpty()) {
+//        	return null;
+//        }
+//        int firstSplitter = beforeArity.indexOf("::");
+//        int splitterLength = 2;
+//        if (firstSplitter == -1) {
+//        	firstSplitter = beforeArity.indexOf(":");
+//        	splitterLength = 1;
+//        }
+//        if (firstSplitter == -1) {
+//        	functor = beforeArity;
+//        } else {
+//        	module = beforeArity.substring(0, firstSplitter);
+//        	functor = beforeArity.substring(firstSplitter + splitterLength);
+//        	if (module.isEmpty() || functor.isEmpty()) {
+//        		return null;
+//        	}
+//        }
+//        return new Object[]{module, functor, arity};
+//    }
+    
+    private static class SearchPattern {
+    	private static final Pattern p = Pattern.compile("(([^:]+)(:|::))?([^:/]+)((/|//)(\\d+))?");
+    	
+    	private static SearchPattern createSearchPattern(String pattern) {
+    		Matcher matcher = p.matcher(pattern);
+    		if (matcher.matches()) {
+    			return new SearchPattern(matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(6), matcher.group(7));
+    		}
+    		return null;
+    	}
+    	
+    	final String module;
+    	final String mSeparator;
+    	final String name;
+    	final String aSeparator;
+    	final int arity;
+    	
+    	private SearchPattern(String module, String mSeparator, String name, String aSeparator, String arity) {
+			super();
+			this.module = module;
+			this.mSeparator = mSeparator;
+			this.name = name;
+			this.aSeparator = aSeparator;
+			if (arity == null) {
+				this.arity = -1;
+			} else {
+				int parseInt = -1;
+				try {
+					parseInt = Integer.parseInt(arity);
+				} catch (NumberFormatException e) {
+				}
+				this.arity = parseInt;
+			}
+			System.out.println(this.module);
+			System.out.println(this.mSeparator);
+			System.out.println(this.name);
+			System.out.println(this.aSeparator);
+			System.out.println(this.arity);
+			System.out.println();
+		}
     }
 
     private void setPattern(String pattern) {
@@ -696,7 +751,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         } else if (getSearchFor() == MODULE) {
         	return true;
         }
-        return getModuleFunctorArity(pattern) != null;
+        return SearchPattern.createSearchPattern(pattern) != null;
     }
 
 
