@@ -177,10 +177,10 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 			return "<html><head><style>\n" + PDTUtils.getPlDocCss() + "\n</style></head><body>" + doc + "</body></html>";
 		} else if (SearchConstants.COMPLETION_DOC_KIND_HTML.equals(docKind)) {
 			if (doc != null) {
-				if(doc.indexOf("\n") > -1){
-					doc="<b>"+doc.trim().replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
-				}
-				return "<html><head><style>\n" + PDTUtils.getPlDocCss() + "\n</style></head><body>" + doc + "</body></html>";
+//				if(doc.indexOf("\n") > -1){
+//					doc="<b>"+doc.trim().replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
+//				}
+				return "<html><head><style>\n" + PDTUtils.getPlDocCss() + "\n</style></head><body>" + doc.trim() + "</body></html>";
 			} else {
 				return null;
 			}
