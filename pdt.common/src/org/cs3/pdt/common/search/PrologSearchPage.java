@@ -62,8 +62,8 @@ import org.eclipse.swt.widgets.Label;
 
 public class PrologSearchPage extends DialogPage implements ISearchPage {
 
-    private static final String PREDICATE_DEF_HINT = "Search for predicates declarations and definitions (e.g. \"member\" or \"member/2\")";
-    private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\")";
+    private static final String PREDICATE_DEF_HINT = "Search for predicates declarations and definitions (e.g. \"member\" or \"member/2\") or DCG non-terminals (e.g. \"token//1\")";
+    private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\") or DCG non-terminals (e.g. \"token//1\")";
     private static final String ENTITY_DEF_HINT = "Search for entities (e.g. module \"lists\")";
     private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
     private static final String UNDEFINED_HINT = "Search for all undefined calls";
