@@ -71,7 +71,12 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
 find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
-	(	Term = predicate(From, _, SearchFunctor, _, Arity)
+	(	Term = predicate(From, _, SearchFunctor, Separator, Arity0),
+		(	Separator == (//),
+			nonvar(Arity0)
+		->	Arity is Arity0 + 2
+		;	Arity = Arity0
+		)
 	;	Term = entity(From)
 	),
 	!,
