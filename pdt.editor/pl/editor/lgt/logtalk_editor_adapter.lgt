@@ -36,11 +36,9 @@ predicates_with_property(Property, FileName, Predicates) :-
 
 :- private(predicate_with_property/3).
 
-%predicate_with_property(built_in, _FileName, Name) :-
-%	user::current_predicate(Name/Arity),
-%	functor(Head, Name, Arity),
-%	user::predicate_property(Head, iso).
-%
+predicate_with_property(built_in, _FileName, Name) :-
+	iso_predicate(Name, _, _, _).
+
 predicate_with_property(built_in, _FileName, Name) :-
 	help::completion('', Name/_Arity-_HelpFile).
 
@@ -51,5 +49,30 @@ predicate_with_property(Property, _FileName, Name) :-
 	help::completion('', Name/Arity-_HelpFile),
 	functor(Head, Name, Arity),
 	catch(logtalk<<predicate_property(Head, Property),_,fail).
+
+:- private(iso_predicate/4). % (Name, Arity, Head, MetaHead)
+:- dynamic(iso_predicate/4).
+
+:- initialization(collect_iso_predicates).
+
+:- private(collect_iso_predicates/0).
+
+collect_iso_predicates :-
+	retractall(iso_predicate(_, _, _, _)),
+	user::current_predicate(Name/Arity),
+	Name \== (:),
+	functor(Head, Name, Arity),
+	user::predicate_property(Head, iso),
+	(	user::predicate_property(Head, meta_predicate(MetaHead))
+	->	true
+	;	MetaHead = []
+	),
+	(	iso_predicate(Name, Arity, _, _)
+	->	true
+	;	assertz(iso_predicate(Name, Arity, Head, MetaHead))
+	),
+	fail.
+
+collect_iso_predicates.
 
 :- end_object.
