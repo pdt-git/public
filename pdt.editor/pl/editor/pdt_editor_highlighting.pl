@@ -71,7 +71,9 @@ predicates_with_property(Property, _FileName, Predicates) :-
 predicate_name_with_property_(Module,Name,Property) :-
     current_module(Module),
     current_predicate(Module:Name/Arity),
-	Name \= '[]',
+	Name \== [],
+	Name \== (:),
+	\+ atom_concat('$', _, Name),
 	functor(Head,Name,Arity),
 	predicate_property(Module:Head,Property).
 	
