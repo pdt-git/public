@@ -12,8 +12,8 @@
  ****************************************************************************/
 
 :- module( pdt_xref,
-         [ find_reference_to/10 % +Functor,+Arity,?DefFile,?DefModule,
-                                % ?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind,?PropertyList,?ExactMatch
+         [ find_reference_to/10 % +Term,?File,?Line,+ExactMatch,
+                                % -RefModule,-RefName,-RefArity,-RefFile,-RefLine,-PropertyList
          ]
          ).
 
@@ -60,7 +60,7 @@ assert_result(IsAlias, QGoal-clause_term_position(Ref, TermPosition)) :-
 
 assert_result(_,_). 
 
-%% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
+%% find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	(	Term = predicate(SearchMod, _, Functor, _, Arity)
 	;	Term = module(SearchMod)

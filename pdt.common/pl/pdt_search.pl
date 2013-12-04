@@ -51,6 +51,8 @@
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
+%% find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
+
 find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	current_predicate(logtalk_load/1),
 	logtalk_adapter::find_reference_to(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
@@ -63,9 +65,9 @@ find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefAr
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
-%% find_predicate_definitions(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
+%% find_predicate_definitions(+Term, +ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -File, -Location, -Properties) is nondet.
 % 
-find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList) :-
+find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File, Location, PropertyList) :-
 	Term = predicate(DefiningModule, _, SearchFunctor, _, Arity),
 	(	ExactMatch == true
 	->	Functor = SearchFunctor,
@@ -90,10 +92,8 @@ find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, Dec
 	logtalk_adapter::find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList).
 
 
-% find_categorized_predicate_definitions(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
-%                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
-%                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
-% Logtalk
+%% find_categorized_predicate_definitions(+Term, +EnclFile, +SelectionLine, Functor, Arity, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility)
+
 find_categorized_predicate_definitions(Term, EnclFile, SelectionLine, Functor, Arity, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
     Term \= _:_,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
@@ -754,6 +754,7 @@ find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _
 	\+ current_predicate(Atom/_Arity).
 
 
+%% find_entity_definition(SearchString, ExactMatch, File, Line, Entity)
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	current_predicate(logtalk_load/1),
@@ -774,6 +775,8 @@ find_module_definition(SearchModule, ExactMatch, File, Line, Module) :-
 	module_property(Module, line_count(Line)).
 	
 
+%% find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList)
+
 find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, [show_line(true)|PropertyList]) :-
 	once(properties_for_predicate(system, load_files, 2, PropertyList)),
 	find_use_module(Module, ExactMatch, _, _, File, Line). 
@@ -790,6 +793,8 @@ search_module_name(Module, true, Module) :- !.
 search_module_name(ModulePart, false, Module) :-
 	current_module(Module),
 	once(sub_atom(Module, _, _, _, ModulePart)).
+
+%% loaded_by(LoadedFile, LoadingFile, Line, Directive)
 
 /* For Load File Dependency Graph: */
 loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
