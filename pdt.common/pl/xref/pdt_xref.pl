@@ -62,7 +62,12 @@ assert_result(_,_).
 
 %% find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
-	(	Term = predicate(SearchMod, _, Functor, _, Arity)
+	(	Term = predicate(SearchMod, _, Functor, Separator, Arity0),
+		(	Separator == (//),
+			nonvar(Arity0)
+		->	Arity is Arity0 + 2
+		;	Arity = Arity0
+		)
 	;	Term = module(SearchMod)
 	),
 	!,
