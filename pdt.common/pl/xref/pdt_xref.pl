@@ -106,7 +106,10 @@ find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefAri
 	[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList0] = PropertyList1,
 	(	functor(ReferencingGoal, N, A),
 		declared_in_module(M0, N, A, M)
-	->	format(atom(Called), '~w:~w/~w', [M, N, A]),
+	->	(	Separator == (//)
+		->	format(atom(Called), '~w:~w//~w', [M, N, Arity0])
+		;	format(atom(Called), '~w:~w/~w', [M, N, A])
+		),
 		CalledProperty = called(Called),
 		(	M \== RefModule
 		->	format(atom(Prefix), '~w:', [M]),

@@ -110,8 +110,14 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 	;	PropertyList0 = []
 	),
 	(	From == Entity
-	->	format(atom(Called), '~w/~w', [Functor, Arity])
-	;	format(atom(Called), '~w::~w/~w', [From, Functor, Arity])
+	->	(	Separator == (//)
+		->	format(atom(Called), '~w//~w', [Functor, Arity0])
+		;	format(atom(Called), '~w/~w', [Functor, Arity])
+		)
+	;	(	Separator == (//)
+		->	format(atom(Called), '~w::~w//~w', [From, Functor, Arity0])
+		;	format(atom(Called), '~w::~w/~w', [From, Functor, Arity])
+		)
 	),
 	PropertyList = [clause_line(Line), called(Called)|PropertyList0].
 
