@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.prolog.common.Util;
@@ -173,13 +174,13 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		if (SearchConstants.COMPLETION_DOC_KIND_NODOC.equals(docKind)) {
 			return null;
 		} else if (SearchConstants.COMPLETION_DOC_KIND_TEXT.equals(docKind)) {
-			return doc;
+			return "<html><head><style>\n" + PDTUtils.getPlDocCss() + "\n</style></head><body>" + doc + "</body></html>";
 		} else if (SearchConstants.COMPLETION_DOC_KIND_HTML.equals(docKind)) {
 			if (doc != null) {
 				if(doc.indexOf("\n") > -1){
 					doc="<b>"+doc.trim().replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
 				}
-				return doc;
+				return "<html><head><style>\n" + PDTUtils.getPlDocCss() + "\n</style></head><body>" + doc + "</body></html>";
 			} else {
 				return null;
 			}
