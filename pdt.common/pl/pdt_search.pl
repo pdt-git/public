@@ -68,7 +68,12 @@ find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefAr
 %% find_predicate_definitions(+Term, +ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -File, -Location, -Properties) is nondet.
 % 
 find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File, Location, PropertyList) :-
-	Term = predicate(DefiningModule, _, SearchFunctor, _, Arity),
+	Term = predicate(DefiningModule, _, SearchFunctor, Separator, Arity0),
+	(	Separator == (//),
+		nonvar(Arity0)
+	->	Arity is Arity0 + 2
+	;	Arity = Arity0
+	),
 	(	ExactMatch == true
 	->	Functor = SearchFunctor,
 		declared_in_module(DefiningModule, Functor, Arity, DefiningModule)
