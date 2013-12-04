@@ -148,15 +148,12 @@ find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 
 
 find_predicate_definitions(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
-	(	Term = predicate(Entity, _, SearchFunctor, Separator, SearchArity0),
-		(	Separator == (//),
-			nonvar(SearchArity0)
-		->	SearchArity is SearchArity0 + 2
-		;	SearchArity = SearchArity0
-		)
-	;	Term = entity(Entity)
+	Term = predicate(Entity, _, SearchFunctor, Separator, SearchArity0),
+	(	Separator == (//),
+		nonvar(SearchArity0)
+	->	SearchArity is SearchArity0 + 2
+	;	SearchArity = SearchArity0
 	),
-	!,
 	(	ExactMatch == true ->
 		any_predicate_declaration_or_definition(SearchFunctor, SearchArity, Entity, Kind, From, DeclOrDef, Properties),
 		Functor = SearchFunctor,
