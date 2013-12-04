@@ -441,7 +441,8 @@ find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 	),
 	atom_concat(Prefix, _, Name).
 
-find_completion(Prefix, _EnclosingFile, _Line, predicate, '', Name, Arity, private, true, _, lgt_help_file, FileName) :-
+find_completion(Prefix, EnclosingFile, _Line, predicate, '', Name, Arity, private, true, _, lgt_help_file, FileName) :-
+	nonvar(EnclosingFile),
 	atomic(Prefix),
 	help::completion(Prefix, Name/Arity-FileName).
 
