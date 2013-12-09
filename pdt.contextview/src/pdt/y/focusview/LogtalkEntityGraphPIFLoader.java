@@ -36,4 +36,9 @@ public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
 			return null;
 		}
 	}
+	
+	protected boolean ignoreExternalPrologFilesProject() {
+		return false;
+	}
+	
 }

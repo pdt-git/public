@@ -70,7 +70,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		try {			
 			IProject project = FileUtils.findFileForLocation(path).getProject();
 			
-			if (ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
+			if (ignoreExternalPrologFilesProject() && ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
 				return paths;
 			}
 			
@@ -101,4 +101,9 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	public boolean containsFilePath(String path) {
 		return paths.contains(path);
 	}
+	
+	protected boolean ignoreExternalPrologFilesProject() {
+		return true;
+	}
+	
 }
