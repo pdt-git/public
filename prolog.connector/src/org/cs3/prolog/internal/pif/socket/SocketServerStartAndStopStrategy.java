@@ -150,7 +150,6 @@ private static JackTheProcessRipper processRipper;
 				Debug.info("using environment: " + Util.prettyPrint(env));
 				ProcessBuilder processBuilder = new ProcessBuilder(commands);
 				Map<String, String> processEnvironment = processBuilder.environment();
-				processEnvironment.clear();
 				processEnvironment.putAll(env);
 				process = processBuilder.start();
 			}
