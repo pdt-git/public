@@ -96,7 +96,9 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	protected void refreshCurrentView() {
-		currentFocusView.reload();
+		if (currentFocusView != null) {
+			currentFocusView.reload();
+		}
 	}
 	
 	public void dispose() {
