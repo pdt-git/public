@@ -26,7 +26,7 @@
         </dependencies>
         <executions>
           <execution>
-            <phase>install</phase>
+            <phase>package</phase>
             <configuration>
               <tasks>
                 <property refid="maven.compile.classpath" name="mvn.classpath" />
