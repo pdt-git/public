@@ -44,7 +44,7 @@
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 % TODO: Why this import?
-:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
+%:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
 
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 

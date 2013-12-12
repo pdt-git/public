@@ -167,8 +167,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		setExecutable(executable);
 		setEnvironment(provider.getPreference(PrologRuntime.PREF_ENVIRONMENT));
 		setTimeout(provider.getPreference(PrologRuntime.PREF_TIMEOUT));
-		setAttribute(PrologRuntime.PREF_GENERATE_FACTBASE, provider.getPreference(PrologRuntime.PREF_GENERATE_FACTBASE));
-		setAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS, provider.getPreference(PrologRuntime.PREF_META_PRED_ANALYSIS));
 	}
 
 	private String getExecutable(PreferenceProvider provider) {
