@@ -270,7 +270,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	}
 	
 	private void updateExecuteablePreviewLabelText() {
-		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue());
+		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue()) + " -g [$ConnectorInitFile]";
 		executeablePreviewLabel.setText(newExecutable);
 	}
 
