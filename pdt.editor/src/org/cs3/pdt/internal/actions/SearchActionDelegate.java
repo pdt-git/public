@@ -47,7 +47,7 @@ public abstract class SearchActionDelegate extends TextEditorAction {
 				@Override
 				public void run() {
 					try {
-						PLEditor editor = (PLEditor) UIUtils.getActiveEditor();
+						PLEditor editor = (PLEditor) getTextEditor();
 						Goal data = editor.getSelectedPrologElement();
 						if(data == null){
 							Debug.warning("data is null");

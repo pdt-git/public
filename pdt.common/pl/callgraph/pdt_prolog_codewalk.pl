@@ -384,7 +384,7 @@ walk_called_by_body(subterm_positions, Body, Module, OTerm) :-
 		  missing(subterm_positions),
 		  walk_called_by_body(no_positions, Body, Module, OTerm))
 	;   set_source_of_walk_option(false, OTerm, OTerm2),
-	    forall(walk_called(Body, Module, BodyPos, OTerm2),
+	    forall(walk_called(Body, Module, _BodyPos, OTerm2),
 		   true)
 	).
 walk_called_by_body(no_positions, Body, Module, OTerm) :-
@@ -455,23 +455,23 @@ walk_called(Goal, Module, TermPos, OTerm) :-
 	fail.					% Continue search
 walk_called(Goal, Module, _, OTerm) :-
 	evaluate(Goal, Module, OTerm), !.
-walk_called(Goal, M, TermPos, OTerm) :-
+walk_called(Goal, Module, TermPos, OTerm) :-
 	prolog:called_by(Goal, Called),
 	Called \== [], !,
-	walk_called_by(Called, M, Goal, TermPos, OTerm).
-walk_called(Meta, M, term_position(_,_,_,_,ArgPosList), OTerm) :-
+	walk_called_by(Called, Module, Goal, TermPos, OTerm).
+walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	(   walk_option_autoload(OTerm, false)
 	->  nonvar(Module),
 	    '$get_predicate_attribute'(Module:Meta, defined, 1)
 	;   true
 	),
-	(   extended_meta_predicate(M:Meta, Head)
-	;   predicate_property(M:Meta, meta_predicate(Head))
-	;   inferred_meta(M:Meta, Head)
+	(   extended_meta_predicate(Module:Meta, Head)
+	;   predicate_property(Module:Meta, meta_predicate(Head))
+	;   inferred_meta(Module:Meta, Head)
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
 	register_possible_meta_clause(ClauseRef),
-	walk_meta_call(1, Head, Meta, M, ArgPosList, OTerm).
+	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm).
 walk_called(Goal, Module, _, _) :-
 	nonvar(Module),
 	'$get_predicate_attribute'(Module:Goal, defined, 1), !.
@@ -770,7 +770,7 @@ walk_called_by([H|T], M, Goal, TermPos, OTerm) :-
 	    ->	walk_called(G2, M, GPosEx, OTerm)
 	    ;	true
 	    )
-	;   subterm_pos(G, Goal, TermPos, GPos),
+	;   subterm_pos(H, Goal, TermPos, GPos),
 	    walk_called(H, M, GPos, OTerm)
 	),
 	walk_called_by(T, M, Goal, TermPos, OTerm).

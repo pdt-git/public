@@ -12,9 +12,9 @@
  ****************************************************************************/
 
 :- module( pdt_search,
-         [ find_reference_to/12                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind)
-         , find_definitions_categorized/13       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
-         , find_definitions_categorized/9
+         [ find_predicate_reference/10                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
+         , find_categorized_predicate_definitions/11       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
+         , find_predicate_definitions/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
          , find_definition_contained_in/10
@@ -29,8 +29,8 @@
 :- use_module( prolog_connector_pl(split_file_path),
              [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
              ] ).
-:- reexport(   'xref/pdt_xref', 
-             [ find_reference_to/12             % ...
+:- use_module( 'xref/pdt_xref', 
+             [ find_reference_to/10             % ...
              ] ).
 :- use_module( properties, 
              [ properties_for_predicate/4
@@ -44,12 +44,20 @@
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 
 % TODO: Why this import?
-:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
+%:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
 
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
+
+%% find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
+
+find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+	current_predicate(logtalk_load/1),
+	logtalk_adapter::find_reference_to(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
+find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+	find_reference_to(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
 
         /***********************************************************************
          * Find Definitions and Declarations and categorize them by visibility *
@@ -57,12 +65,14 @@
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
-%% find_definitions_categorized(+Term,+ ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -FullPath, -Line, -Properties) is nondet.
+%% find_predicate_definitions(+Term, +ExactMatch, -DefiningModule, -Functor, -Arity, -DeclOrDef, -File, -Location, -Properties) is nondet.
 % 
-find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Location, PropertyList):-
-	(	atom(Term)
-	->	SearchFunctor = Term
-	;	Term = SearchFunctor/Arity
+find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File, Location, PropertyList) :-
+	Term = predicate(DefiningModule, _, SearchFunctor, Separator, Arity0),
+	(	Separator == (//),
+		nonvar(Arity0)
+	->	Arity is Arity0 + 2
+	;	Arity = Arity0
 	),
 	(	ExactMatch == true
 	->	Functor = SearchFunctor,
@@ -82,25 +92,22 @@ find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, D
     	PropertyList = PropertyList0
     ).
 
-find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList) :-
+find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_definitions_categorized(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList).
+	logtalk_adapter::find_predicate_definitions(Term, ExactMatch, DefiningModule, Functor, Arity, DeclOrDef, File,Line, PropertyList).
 
 
-% find_definitions_categorized(+ReferencingFile,+-ReferencingLine,+ReferencingTerm,-Name,-Arity, 
-%                               ???ReferencingModule, -DefiningModule, -DeclOrDef, -Visibility, -File,-Line)
-%                                                      ^^^^^^^^^^^^^^ TODO: moved to this place (two arguments forward)
-% Logtalk
-find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility, _ExactMatch):-
+%% find_categorized_predicate_definitions(+Term, +EnclFile, +SelectionLine, Functor, Arity, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility)
+
+find_categorized_predicate_definitions(Term, EnclFile, SelectionLine, Functor, Arity, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility):-
     Term \= _:_,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
-    
-    
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, DeclOrDef, DefiningModule, File, Location, PropertyList, Visibility, _ExactMatch):-
+    logtalk_adapter::find_categorized_predicate_definitions(Term, EnclFile, SelectionLine, Functor, Arity, DeclOrDef, DefiningEntity, FullPath, Line, Properties, Visibility).
+
+find_categorized_predicate_definitions(Term, EnclFile, _SelectionLine, Functor, Arity, DeclOrDef, DefiningModule, File, Location, PropertyList, Visibility):-
     referenced_entity(EnclFile, ReferencedModule),    
-    search_term_to_predicate_indicator(Term, Functor/Arity),
+    Term = predicate(_, _, Functor, _, Arity),
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),              % Unique, grouped sources (--> setof)
     member(DeclOrDef-Visibility-DefiningModule-Locations,Sources),
     member(File-Lines,Locations),
@@ -287,9 +294,25 @@ retrieve_term_from_atom(EnclFile, TermString, Term) :-
 find_primary_definition_visible_in_(EnclFile, SelectedLine,Term,ReferencedModule,MainFile,FirstLine,single) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
+    current_predicate(logtalk_load/1),
     logtalk_adapter::find_primary_definition_visible_in(EnclFile, SelectedLine,Term,_Functor,_Arity,ReferencedModule,MainFile,FirstLine).
 
 % The second argument is just an atom contianing the string representation of the term:     
+find_primary_definition_visible_in_(_EnclFile,_SelectedLine,Term,_ReferencedModule,MainFile,FirstLine,single) :-
+	Term = Obj::Call,
+	!,
+    current_predicate(logtalk_load/1),
+    nonvar(Obj),
+    nonvar(Call),
+    functor(Call, Name, Arity),
+	(	object_property(Obj, defines(Name/Arity, Properties))
+	;	object_property(Obj, declares(Name/Arity, Properties))
+	),
+	memberchk(line_count(FirstLine), Properties),
+	object_property(Obj, file(FileName, Directory)),
+	atom_concat(Directory, FileName, MainFile),
+	!.
+    	
 find_primary_definition_visible_in_(EnclFile,_SelectedLine,Term,ReferencedModule,MainFile,FirstLine,ResultKind) :-
     extract_name_arity(Term, _,_Head,Name,Arity),
     find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine,ResultKind).
@@ -552,6 +575,7 @@ walk_clauses(_, _).
 
 first_argument_of_clause(Ref, first_argument(Arg)) :-
 	catch(clause(_:Head, _, Ref), _, fail),
+	compound(Head),
 	arg(1, Head, FirstArg),
 	(	var(FirstArg)
 	->	clause_info(Ref, _, _, Varnames), 
@@ -735,6 +759,7 @@ find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _
 	\+ current_predicate(Atom/_Arity).
 
 
+%% find_entity_definition(SearchString, ExactMatch, File, Line, Entity)
 
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	current_predicate(logtalk_load/1),
@@ -755,20 +780,36 @@ find_module_definition(SearchModule, ExactMatch, File, Line, Module) :-
 	module_property(Module, line_count(Line)).
 	
 
-find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, PropertyList) :-
+%% find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList)
+
+find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, [show_line(true)|PropertyList]) :-
 	once(properties_for_predicate(system, load_files, 2, PropertyList)),
 	find_use_module(Module, ExactMatch, _, _, File, Line). 
 
 find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	search_module_name(Module, ExactMatch, SearchModule),
-	find_reference_to(_, _, _, SearchModule, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, _, _, PropertyList).
+	find_reference_to(module(SearchModule), _, _, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, PropertyList).
+
+find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+	current_predicate(logtalk_load/1),
+	logtalk_adapter::find_entity_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
 
 search_module_name(Module, true, Module) :- !.
 search_module_name(ModulePart, false, Module) :-
 	current_module(Module),
 	once(sub_atom(Module, _, _, _, ModulePart)).
 
+%% loaded_by(LoadedFile, LoadingFile, Line, Directive)
+
 /* For Load File Dependency Graph: */
+loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
+	(	split_file_path(LoadedFile, _, _, _, lgt)
+	;	split_file_path(LoadedFile, _, _, _, logtalk)
+	),
+	% Logtalk source file
+	!,
+	logtalk_adapter::loaded_by(LoadedFile, LoadingFile, Line, Directive).
+
 loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
 	source_file(LoadedFile),
 	source_file_property(LoadedFile, load_context(_LoadingModule, LoadingFile:Line, _OptionList)),

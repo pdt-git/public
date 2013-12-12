@@ -30,7 +30,6 @@ public interface PrologRuntime {
 	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
 	public static final String PREF_SERVER_LOGDIR = "pif.server_log_dir";
 	
-	public static final String PREF_FILE_SEARCH_PATH = "pif.file_search_path";
 	public static final String PREF_INVOCATION = "pif.invocation";
 	public static final String PREF_EXECUTABLE = "prolog.connector.executable";
 	public static final String PREF_COMMAND_LINE_ARGUMENTS = "pif.command.line.arguments";
@@ -39,8 +38,6 @@ public interface PrologRuntime {
 	public static final String PREF_TIMEOUT = "pif.timeout";
 	public static final String PREF_HOST = "pif.host";
 	public static final String PREF_PORT = "pif.port";
-	public static final String PREF_GENERATE_FACTBASE = "pif.genfactbase";
-	public static final String PREF_META_PRED_ANALYSIS = "pif.metapred";
 
     
 }

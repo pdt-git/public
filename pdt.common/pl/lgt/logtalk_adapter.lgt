@@ -19,10 +19,12 @@
 :- object(logtalk_adapter).
 
 :- public([
-	%find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+	loaded_by/4,	% ?SourceFile, ?ParentSourceFile, -Line, -Directive
+	find_reference_to/10, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
+	find_entity_reference/8,
 	find_entity_definition/5,
-	find_definitions_categorized/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
-	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
+	find_predicate_definitions/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
+	find_categorized_predicate_definitions/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
 	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/10,
 	get_pred/7,
@@ -62,6 +64,73 @@
 %:- use_module(pdt_prolog_library(pdt_xref_experimental)).
 
 
+/* For Load File Dependency Graph: */
+loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
+	logtalk::loaded_file_property(LoadedFile, parent(LoadingFile)).
+
+
+%% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
+find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
+	(	Term = predicate(From, _, SearchFunctor, Separator, Arity0),
+		(	Separator == (//),
+			nonvar(Arity0)
+		->	Arity is Arity0 + 2
+		;	Arity = Arity0
+		)
+	;	Term = entity(From)
+	),
+	!,
+	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties)),
+		Kind = logtalk
+	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties)),
+		Kind = prolog
+	;	nonvar(SearchFunctor),
+		entity_property(Entity, _, calls(Functor/Arity, Properties)),
+		From = Entity,
+		Kind = logtalk
+	),
+	(	ExactMatch == true
+	->	SearchFunctor = Functor
+	;	once(sub_atom(Functor, _, _, _, SearchFunctor))
+	),
+	once(member(caller(CallerFunctor/CallerArity), Properties)),
+	once(member(line_count(Line), Properties)),
+	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
+	atom_concat(EntityDirectory, EntityBase, EntityFile),
+	(	Kind == logtalk ->
+		entity_property(From, _, file(FromBase, FromDirectory)),
+		atom_concat(FromDirectory, FromBase, FromFile)
+	;	% Kind = prolog
+		module_property(From, file(FromFile))
+	),
+	(	member(as(AliasFunctor/Arity), Properties),
+		Functor \== AliasFunctor
+	->	format(atom(AliasAtom), '~w aliased to ~w', [Functor/Arity, AliasFunctor/Arity]),
+		PropertyList0 = [is_alias(AliasAtom)]
+	;	PropertyList0 = []
+	),
+	(	From == Entity
+	->	(	Separator == (//)
+		->	format(atom(Called), '~w//~w', [Functor, Arity0])
+		;	format(atom(Called), '~w/~w', [Functor, Arity])
+		)
+	;	(	Separator == (//)
+		->	format(atom(Called), '~w::~w//~w', [From, Functor, Arity0])
+		;	format(atom(Called), '~w::~w/~w', [From, Functor, Arity])
+		)
+	),
+	PropertyList = [clause_line(Line), called(Called)|PropertyList0].
+
+find_entity_reference(Entity, ExactMatch, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
+	search_entity_name(Entity, ExactMatch, SearchEntity),
+	find_reference_to(entity(SearchEntity), _, _, ExactMatch, RefEntity, RefName, RefArity, File, Line, PropertyList).
+
+search_entity_name(Entity, true, Entity) :- !.
+search_entity_name(EntityPart, false, EntityName) :-
+	entity(Entity),
+	functor(Entity, EntityName, _),
+	once(sub_atom(EntityName, _, _, _, EntityPart)).
+
 find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	entity(Entity),
 	functor(Entity, Functor, _),
@@ -84,10 +153,12 @@ find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	module_property(Entity, line_count(Line)).
 
 
-find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
-	(	atom(Term) ->
-		Term = SearchFunctor
-	;	Term = SearchFunctor/SearchArity
+find_predicate_definitions(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
+	Term = predicate(Entity, _, SearchFunctor, Separator, SearchArity0),
+	(	Separator == (//),
+		nonvar(SearchArity0)
+	->	SearchArity is SearchArity0 + 2
+	;	SearchArity = SearchArity0
 	),
 	(	ExactMatch == true ->
 		any_predicate_declaration_or_definition(SearchFunctor, SearchArity, Entity, Kind, From, DeclOrDef, Properties),
@@ -100,6 +171,11 @@ find_definitions_categorized(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef
 	entity_property(From, _, file(File, Directory)),
 	atom_concat(Directory, File, FullPath),
 	memberchk(line_count(Line), Properties).
+
+split_search_pi(Module:Functor/Arity, Module, Functor, Arity) :- !.
+split_search_pi(       Functor/Arity, _     , Functor, Arity) :- !.
+split_search_pi(Module:Functor      , Module, Functor, _    ) :- !.
+split_search_pi(       Functor      , _     , Functor, _    ) :- atom(Functor).
 
 any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, Entity, declaration, Properties) :-
 	entity_property(Entity, Kind, declares(Functor/Arity, Properties)).
@@ -129,27 +205,28 @@ any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, From, defi
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/
 
-find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+find_categorized_predicate_definitions(Term, EnclFile, ClickedLine, Functor, Arity, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
 	source_file_entity(EnclFile, ClickedLine, This),
-	search_term_to_predicate_indicator(Term, Functor/Arity),
+	Term = predicate(_, _, Functor, _, Arity),
+	functor(Head, Functor, Arity),
 	findall(
-		item(Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility),
-		find_definitions_categorized0(Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility),
+		item(Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility),
+		find_categorized_predicate_definitions0(Head, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility),
 		Items0
 	),
 	% remove invisible items that are found as visible items
 	filter_categorized_definitions(Items0, Items),
-	member(item(Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility0), Items),
+	member(item(Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility0), Items),
 	% construct the actual text label that will be used by the Java side when showing the search results
 	visibility_text(DeclOrDef, Visibility0, Visibility).
 
 
-find_definitions_categorized0(Term, _Functor, _Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+find_categorized_predicate_definitions0(Term, _Functor, _Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
 	decode(Term, This, Entity, _Kind, _Template, Location, Properties, DeclOrDef, Visibility),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
 
-find_definitions_categorized0(_Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, [invisible| Properties], Visibility) :-
+find_categorized_predicate_definitions0(_Term, Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, [invisible| Properties], Visibility) :-
 	entity(Entity),
 	Entity \= This,
 	(	entity_property(Entity, _Kind, declares(Functor/Arity, Properties)),
@@ -296,7 +373,8 @@ find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functo
 	(	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
 		% we add a number_of_clauses/1 declaration property just to simplify coding in the Java side
-		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)) ->
+		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)),
+			DefinitionProperties \== [] ->
 			memberchk(number_of_clauses(N0), DefinitionProperties)
 		;	N0 = 0
 		),
@@ -378,6 +456,11 @@ find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 	;	functor(Entity, Name, _)
 	),
 	atom_concat(Prefix, _, Name).
+
+find_completion(Prefix, EnclosingFile, _Line, predicate, '', Name, Arity, private, true, _, lgt_help_file, FileName) :-
+	nonvar(EnclosingFile),
+	atomic(Prefix),
+	help::completion(Prefix, Name/Arity-FileName).
 
 
                /*************************************
@@ -474,7 +557,7 @@ predicate_name_with_property_(Module,Name,Property) :-
 make_duplicate_free_string(AllPredicateNames,Predicates) :-
 	setof(Name, member(Name,AllPredicateNames), UniqueNames),
 	format(string(S),'~w',[UniqueNames]),
-	string_to_atom(S,Predicates).
+	{string_to_atom(S,Predicates)}.
 
 
 
@@ -495,8 +578,8 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments) :-
 	findall(Arg,  member((_,Arg), PredArgList), AllArgs),
 	format(string(S1),'~w',[AllProps]),
 	format(string(S2),'~w',[AllArgs]),
-	string_to_atom(S1,Predicates),
-	string_to_atom(S2,PropertyArguments).
+	{string_to_atom(S1,Predicates)},
+	{string_to_atom(S2,PropertyArguments)}.
 
 % helper
 predicate_name_with_unary_property_(Name,Property,Arg) :-
@@ -508,6 +591,7 @@ predicate_name_with_unary_property_(Name,Property,Arg) :-
 
 % decode(Term, This, Entity, Kind, Template, Location, Properties).
 
+:- private(decode/9).
 decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	!,
 	nonvar(Object),
@@ -699,7 +783,11 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
-	entity_property(This, _, uses(Object, OriginalFunctor/Arity, Functor/Arity)),
+	(	entity_property(This, _, calls(Object::Functor/Arity, _)) ->
+		OriginalFunctor = Functor
+	;	entity_property(This, _, calls(Object::OriginalFunctor/Arity, Properties)),
+		member(as(Functor/Arity), Properties)
+	),
 	!,
 	functor(Template, OriginalFunctor, Arity),
 	decode(Object::Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).
@@ -707,7 +795,11 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
-	entity_property(This, _, use_module(Module, OriginalFunctor/Arity, Functor/Arity)),
+	(	entity_property(This, _, calls(Module:Functor/Arity, _)) ->
+		OriginalFunctor = Functor
+	;	entity_property(This, _, calls(Module:OriginalFunctor/Arity, Properties)),
+		member(as(Functor/Arity), Properties)
+	),
 	!,
 	functor(Template, OriginalFunctor, Arity),
 	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, DeclOrDef, Visibility).

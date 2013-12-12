@@ -21,14 +21,14 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.pdt.common.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
 public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
-	public GlobalDefinitionsSearchQuery(Goal goal) {
-		super(goal);
-		if (goal.isExactMatch()) {
+	
+	public GlobalDefinitionsSearchQuery(String goal, String searchGoalLabel, boolean isExactMatch) {
+		super(goal, searchGoalLabel);
+		if (isExactMatch) {
 			setSearchType("Definitions and declarations of");
 		} else {
 			setSearchType("Definitions and declarations containing");			
@@ -36,18 +36,22 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
-		String term;
-		
-		if (goal.getArity() == -1) {
-			term = goal.getFunctor();
-		} else {
-			term = goal.getSignature();
-		}
-		
-		String query = bT(PDTCommonPredicates.FIND_DEFINITIONS_CATEGORIZED,
-				term,
-				Boolean.toString(goal.isExactMatch()),
+	protected String buildSearchQuery() {
+//		String term;
+//		
+//		if (goal.getArity() == -1) {
+//			if (module == null || module.isEmpty()) {
+//				term = goal.getFunctor();
+//			} else {
+//				term = module + ":" + goal.getFunctor();
+//			}
+//		} else {
+//			term = goal.getSignature();
+//		}
+//		
+		String query = bT(PDTCommonPredicates.FIND_PREDICATE_DEFINITIONS,
+				getGoal(),
+				Boolean.toString(isExactMatch()),
 				"DefiningModule",
 				"Functor",
 				"Arity",

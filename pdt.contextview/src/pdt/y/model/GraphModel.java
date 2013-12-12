@@ -125,9 +125,9 @@ public class GraphModel {
 				LoadEdgeRealizer newLoadEdgeRealizer = new LoadEdgeRealizer(loadEdgeRealizer);
 				graph.setRealizer(edge, newLoadEdgeRealizer);
 				
-				String imports = dataHolder.getModuleImportedPredicates(edge);
-				if (!imports.equals("[]")) {
-					newLoadEdgeRealizer.setLabelText(imports.split(",").length + "");
+				String edgeLabel = dataHolder.getEdgeLabel(edge);
+				if (edgeLabel != null && !edgeLabel.isEmpty()) {
+					newLoadEdgeRealizer.setLabelText(edgeLabel);
 				}
 				
 			} else if (dataHolder.isCallEdge(edge)) {

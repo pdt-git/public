@@ -21,10 +21,9 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.ui.util.FileUtils;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -35,21 +34,20 @@ import org.eclipse.jface.text.IRegion;
 public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 
 	
-	public ModuleReferenceSearchQuery(Goal goal) {
-		super(goal);
-		if (goal.isExactMatch()) {
+	public ModuleReferenceSearchQuery(String goal, String searchGoalLabel, boolean isExactMatch) {
+		super(goal, searchGoalLabel, isExactMatch);
+		if (isExactMatch) {
 			setSearchType("References to module");
 		} else {
 			setSearchType("References to modules containing");			
 		}
 	}
 
-
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
+	protected String buildSearchQuery() {
 		String query = bT(PDTCommonPredicates.FIND_MODULE_REFERENCE,
-				module,
-				Boolean.toString(goal.isExactMatch()),
+				getGoal(),
+				Boolean.toString(isExactMatch()),
 				"RefFile",
 				"RefLine",
 				"RefModule",
@@ -86,7 +84,8 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 			try {
 				int line = Integer.parseInt(offsetOrLine);
 				match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
-				if (match != null) {
+				String property = PDTCommonUtil.getProperty("show_line", properties);
+				if (match != null && property != null && "true".equals(property)) {
 					IDocument document = UIUtils.getDocument(file);
 					IRegion lineInformation = document.getLineInformation(line - 1);
 					match.setLabel(document.get(lineInformation.getOffset(), lineInformation.getLength()));

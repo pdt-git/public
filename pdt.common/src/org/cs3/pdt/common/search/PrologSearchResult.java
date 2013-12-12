@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
@@ -48,16 +47,16 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorMatchAdapter, IFileMatchAdapter {
 
 	private PDTSearchQuery query;
-	private Goal goal;
+	private String searchGoalLabel;
 	private final Match[] EMPTY_ARR = new Match[0];
 
 	/**
 	 * @param query
 	 * @param queryString
 	 */
-	public PrologSearchResult(PDTSearchQuery query, Goal goal) {
+	public PrologSearchResult(PDTSearchQuery query, String searchGoalLabel) {
 		this.query = query;
-		this.goal = goal;
+		this.searchGoalLabel = searchGoalLabel;
 	}
 
 	@Override
@@ -75,7 +74,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public final String getLabel() {		
 		return searchType + " "
-		       + (goal==null ? "oops, goal is null?!" : goal.getTermString()/*goal.getModule()+":"+goal.getFunctor()+"/"+goal.getArity()*/ )
+		       + searchGoalLabel
 		       + " \u2013 "
 		       + getMatchCount() 
 		       + " matches in active Prolog Console";

@@ -27,41 +27,41 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
 public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
+
+	private String filePath;
+	private int line;
+	
 	public ContextAwareDefinitionsSearchQuery(Goal goal) {
-		super(goal);
-		if (goal.isExactMatch()) {
-			setSearchType("Definitions and declarations of");
-		} else {
-			setSearchType("Definitions and declarations containing");			
-		}
+		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
+		setSearchType("Definitions and declarations of");
+		filePath = Util.quoteAtomIfNeeded(goal.getFilePath());
+		line = goal.getLine();
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
-		String file = Util.quoteAtom(goal.getFilePath());
-		if (goal.getFilePath().isEmpty())
-			file = "OrigFile";
-
-		String module2 = module;
-		if (module.equals("''"))
-			module2 = "Module";
-		
-		String term = goal.getTermString();
-		
-		String query = bT(PDTCommonPredicates.FIND_DEFINITIONS_CATEGORIZED,
-				file,
-				goal.getLine(),
-				term,
+	protected String buildSearchQuery() {
+//		String file = Util.quoteAtom(goal.getFilePath());
+//		if (goal.getFilePath().isEmpty())
+//			file = "OrigFile";
+//
+//		String module2 = module;
+//		if (module.equals("''"))
+//			module2 = "Module";
+//		
+//		String term = goal.getTermString();
+//		
+		String query = bT(PDTCommonPredicates.FIND_CATEGORIZED_PREDICATE_DEFINITIONS,
+				getGoal(),
+				filePath,
+				line,
 				"Functor",
 				"Arity",
-				module2,
 				"DeclOrDef",
 				"DefiningModule",
 				"File",
 				"Line",
 				"PropertyList",
-				"Visibility",
-				Boolean.toString(goal.isExactMatch()));
+				"Visibility");
 		return query;
 	}
 

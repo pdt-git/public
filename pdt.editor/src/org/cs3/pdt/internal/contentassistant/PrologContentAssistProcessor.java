@@ -52,7 +52,7 @@ public abstract class PrologContentAssistProcessor {
 	}
 		
 	protected abstract void addPredicateProposals(IDocument document, int begin,
-			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals)
+			int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals)
 			throws PrologInterfaceException, CoreException;
 
 	protected abstract void addVariableProposals(IDocument document, int begin,
@@ -137,7 +137,8 @@ public abstract class PrologContentAssistProcessor {
 			if (splittingOperator != null) {
 				module = retrievePrefixedModule(document, pre.begin - splittingOperator.length());
 			}
-			String searchPrefix; 
+			String searchPrefix;
+			String searchPrefixForDefault = null;
 			
 			ArrayList<ComparableTemplateCompletionProposal> proposals = new ArrayList<ComparableTemplateCompletionProposal>();
 			if (module == null || module.equals("")) {
@@ -149,6 +150,7 @@ public abstract class PrologContentAssistProcessor {
 					searchPrefix = splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
 				} else {
 					searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
+					searchPrefixForDefault = pre.prefix;
 				}
 			} else {
 				if (Util.isVarPrefix(module)){
@@ -159,7 +161,7 @@ public abstract class PrologContentAssistProcessor {
 				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
 			}
 			if (!Util.isVarPrefix(pre.prefix)) {
-				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, proposals);
+				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, searchPrefixForDefault, proposals);
 			}
 	
 			if (proposals.size() == 0)

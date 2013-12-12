@@ -23,7 +23,6 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -48,7 +47,7 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	}
 	
 	public DeadPredicatesSearchQuery(boolean createMarkers, IProject root) {
-		super(new Goal("", "", "", -1, ""), createMarkers, DEAD_CODE_MARKER);
+		super(createMarkers, DEAD_CODE_MARKER);
 		this.root = root;
 		if (root == null) {
 			setSearchType("Dead predicates");
@@ -59,7 +58,7 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
+	protected String buildSearchQuery() {
 		return bT(PDTCommonPredicates.FIND_DEAD_PREDICATE,
 				rootPath == null ? "_" : rootPath,
 				"Module",

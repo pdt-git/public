@@ -22,8 +22,9 @@ public class PDTCommonPredicates {
 	public static final String REMOVE_ENTRY_POINTS = "remove_entry_points";
 	
 	// search
-	public static final String FIND_REFERENCE_TO = "pdt_search:find_reference_to";
-	public static final String FIND_DEFINITIONS_CATEGORIZED = "pdt_search:find_definitions_categorized";
+	public static final String FIND_PREDICATE_REFERENCE = "pdt_search:find_predicate_reference";
+	public static final String FIND_PREDICATE_DEFINITIONS = "pdt_search:find_predicate_definitions";
+	public static final String FIND_CATEGORIZED_PREDICATE_DEFINITIONS = "pdt_search:find_categorized_predicate_definitions";
 	public static final String FIND_PRIMARY_DEFINITION_VISIBLE_IN = "pdt_search:find_primary_definition_visible_in";
 	public static final String FIND_ALTERNATIVE_PREDICATES = "pdt_search:find_alternative_predicates";
 	public static final String FIND_DEFINITION_CONTAINED_IN = "pdt_search:find_definition_contained_in";

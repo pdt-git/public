@@ -74,6 +74,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	private boolean hidePlwin;
 
 	private String serverLogDir;
+	private String consultServerLocation;
 		
 
 	public void setPort(int port) {
@@ -112,6 +113,14 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 //		setUseSessionPooling(true);
 		setServerLogDir(provider.getPreference(PrologRuntime.PREF_SERVER_LOGDIR));		
 
+	}
+	
+	public String getConsultServerLocation() {
+		return consultServerLocation;
+	}
+	
+	public void setConsultServerLocation(String consultServerLocation) {
+		this.consultServerLocation = consultServerLocation; 
 	}
 	
 	

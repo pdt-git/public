@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
@@ -45,7 +44,7 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	}
 	
 	public MetaPredicatesSearchQuery(boolean createMarkers, IProject root) {
-		super(new Goal("", "", "", -1, ""), createMarkers, ATTRIBUTE, ATTRIBUTE);
+		super(createMarkers, ATTRIBUTE, ATTRIBUTE);
 		this.root = root;
 		if (root == null) {
 			setSearchType("Undeclared meta predicates");
@@ -56,7 +55,7 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
+	protected String buildSearchQuery() {
 		return bT("find_undeclared_meta_predicate",
 				rootPath == null ? "_" : rootPath,
 				"Module",

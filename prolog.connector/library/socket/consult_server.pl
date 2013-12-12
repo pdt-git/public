@@ -60,7 +60,7 @@ clear_options:-
 
 create_lock_file(Filename):-
 	(	exists_file(Filename)
-	->	debug(consult_server(init),"Found existing lock file ~w.~n Shutting down...~n",[Filename]),		
+	->	debug(consult_server(init), 'Found existing lock file ~w.~n Shutting down...~n', [Filename]),		
 		thread_signal(main,halt)
 	;	open(Filename, write, Stream),
 		call_cleanup(
@@ -91,21 +91,21 @@ call_shutdown_hook:-
     forall(pif_shutdown_hook,true).
     
 do_shutdown:-
-   	debug(consult_server(shutdown),"begin shutdown ~n",[]),
+   	debug(consult_server(shutdown), 'begin shutdown ~n', []),
    	call_shutdown_hook,
     %join any thread that is not main.
     (	current_thread(Id,_),
 	    do_shutdown_X(Id),
        	fail
-	;	debug(consult_server(shutdown),"shutdown complete~n",[]),
+	;	debug(consult_server(shutdown), 'shutdown complete~n',[]),
 		threads,
 		halt
 	).
 do_shutdown_X(Id):-
     Id\==main,
-    debug(consult_server(shutdown),"joining ~w~n",[Id]),
+    debug(consult_server(shutdown), 'joining ~w~n',[Id]),
     thread_join(Id,Status),
-    debug(consult_server(shutdown),"successfully joined ~w, status: ~w ~n",[Id,Status]).
+    debug(consult_server(shutdown), 'successfully joined ~w, status: ~w ~n', [Id,Status]).
     
 	
 consult_server(Port):- 
@@ -135,53 +135,53 @@ accept_loop(ServerSocket):-
 		accept_loop_impl(ServerSocket),
 		Error,
 		(
-			debug(consult_server(accept_loop),"accept loop encountered an error:~w~n. Shutting down...~n",[Error]),
+			debug(consult_server(accept_loop), 'accept loop encountered an error:~w~n. Shutting down...~n',[Error]),
 			thread_signal(main,halt)
 		)
 	),
-	debug(consult_server(shutdown),"signaling main to shutdown... ~n",[]),
+	debug(consult_server(shutdown), 'signaling main to shutdown... ~n',[]),
 	thread_signal(main,do_shutdown),
-	debug(consult_server(shutdown),"shutdown signal send, exit current thread. ~n",[]),
+	debug(consult_server(shutdown), 'shutdown signal send, exit current thread. ~n',[]),
 	thread_exit(0).
 
 
 accept_loop_impl(ServerSocket) :-
-	debug(consult_server(accept_loop),"enter accept_loop_impl~n",[]),
+	debug(consult_server(accept_loop), 'enter accept_loop_impl~n', []),
 	tcp_accept(ServerSocket, Slave, Peer),
-	debug(consult_server(accept_loop),"accepted inbound connection~n",[]),
+	debug(consult_server(accept_loop),'accepted inbound connection~n',[]),
 	term_to_atom(Peer, Host),
-	debug(consult_server(accept_loop),"connect from host ~w~n",[Host]),
+	debug(consult_server(accept_loop),'connect from host ~w~n',[Host]),
 	accept_loop_impl_X(ServerSocket,Slave).
 
 accept_loop_impl_X(ServerSocket,Slave):-
-    debug(consult_server(shutdown),"Checking for shutdown flag. ~n",[]),
+    debug(consult_server(shutdown),'Checking for shutdown flag. ~n',[]),
     recorded(pif_flag,shutdown,_),    
     !,
-    debug(consult_server(shutdown),"Shutdown flag is set. We are closing down. ~n",[]),
+    debug(consult_server(shutdown),'Shutdown flag is set. We are closing down. ~n',[]),
     tcp_close_socket(Slave),
     tcp_close_socket(ServerSocket).
 
 accept_loop_impl_X(ServerSocket,Slave):-	
-	debug(consult_server(accept_loop),"enter accept_loop_impl~n",[]),
+	debug(consult_server(accept_loop),'enter accept_loop_impl~n',[]),
 	tcp_open_socket(Slave, InStream, OutStream),	
-	debug(consult_server(accept_loop),"socket opened~n",[]),
+	debug(consult_server(accept_loop),'socket opened~n',[]),
 	unused_thread_name(handle_client,'',Alias),
-	debug(consult_server(accept_loop),"handler thread alias: ~w~n",[Alias]),		
+	debug(consult_server(accept_loop),'handler thread alias: ~w~n',[Alias]),		
 	garbage_collect,
-	debug(consult_server(accept_loop),"garbage collected~n",[]),
-	debug(consult_server(accept_loop),"creating thread ~w.~n",[Alias]),
+	debug(consult_server(accept_loop),'garbage collected~n',[]),
+	debug(consult_server(accept_loop),'creating thread ~w.~n',[Alias]),
 	thread_create(handle_client(InStream, OutStream), _ , [alias(Alias),detached(true)]),
-	debug(consult_server(accept_loop),"successfully created thread ~w.~n",[Alias]),	
+	debug(consult_server(accept_loop),'successfully created thread ~w.~n',[Alias]),	
 	accept_loop_impl(ServerSocket).
 
 handler_at_exit(InStream,OutStream):-
-	debug(consult_server(handler),"Thread is exiting. Trying to close the connection...~n",[]),
+	debug(consult_server(handler),'Thread is exiting. Trying to close the connection...~n',[]),
 	catch(
 		(	byebye(InStream,OutStream),
-			debug(consult_server(handler),"Connection closed successfully. ~n",[])
+			debug(consult_server(handler),'Connection closed successfully. ~n',[])
 		),
 		E,
-		debug(consult_server(handler),"Error encountered while closing the connection: ~w.~n",[E])
+		debug(consult_server(handler),'Error encountered while closing the connection: ~w.~n',[E])
 	).
 
     
@@ -191,7 +191,7 @@ handle_client(InStream, OutStream):-
     set_stream(InStream,encoding(utf8)),
     set_stream(OutStream,encoding(utf8)),
 	repeat,
-		debug(consult_server(handler),"start hanlde_client~n",[]),
+		debug(consult_server(handler),'start hanlde_client~n',[]),
 		catch(
 			handle_client_impl(InStream,OutStream),
 			Error,
@@ -201,7 +201,7 @@ handle_client(InStream, OutStream):-
 			)				
 		),
 	!,		
-	debug(consult_server(handler),"Thread exiting...~n",[]),
+	debug(consult_server(handler),'Thread exiting...~n',[]),
 	thread_exit(0).    
 	
 handle_client_impl(InStream, OutStream):-
@@ -234,9 +234,9 @@ handle_command(_,_,'',continue):-
 handle_command(_,OutStream,'PING',continue):-
 		current_prolog_flag(pid,Pid),
     thread_self(Alias),
-	my_format(OutStream,"PONG ~w:~w~n",[Pid,Alias]).
+	my_format(OutStream,'PONG ~w:~w~n',[Pid,Alias]).
 handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
-	my_format(OutStream,"GO_AHEAD~n",[]),
+	my_format(OutStream,'GO_AHEAD~n',[]),
 	repeat,
 		handle_batch_messages(OutStream),
 		my_read_command(InStream,Term),
@@ -244,7 +244,7 @@ handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 		Term=end_of_batch,!.
 handle_command(InStream,OutStream,'QUERY',continue):-
 	debug('handle_command', 'before my_format', []),
-	my_format(OutStream,"GIVE_TERM~n",[]),	
+	my_format(OutStream,'GIVE_TERM~n',[]),	
 	debug('handle_command', 'after my_format', []),
 	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
 	( 
@@ -254,7 +254,7 @@ handle_command(InStream,OutStream,'QUERY',continue):-
 	; true
 	).
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
-	my_format(OutStream,"GIVE_TERM~n",[]),
+	my_format(OutStream,'GIVE_TERM~n',[]),
 	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
 	(
 		all_solutions(OutStream,Term,Vars)
@@ -269,7 +269,7 @@ handle_command(InStream,OutStream,'GET_OPTION',continue):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	call_save(OutStream,
 		(	option(Symbol,Term),
-			my_format(OutStream,"~w~n",[Term])
+			my_format(OutStream,'~w~n',[Term])
 		)
 	).
 
@@ -284,16 +284,14 @@ my_read_goal(InStream,Term,Vars):-
 handle_batch_messages(OutStream):-
     repeat,    
     (	thread_peek_message(batch_message(Message)),
-    	debug(consult_server(handler),"recieved message: ~w~n",[Message]),
+    	debug(consult_server(handler),'recieved message: ~w~n',[Message]),
     	handle_batch_message(Message, OutStream)
     ->	thread_get_message(batch_message(Message)), 
-		debug(consult_server(handler),"dequeued message: ~w~n",[Message]),
+		debug(consult_server(handler),'dequeued message: ~w~n',[Message]),
     	fail
-    ;	(	var(Message)
-    	->	true
-    	;	debug(consult_server(handler),"could not handle message: ~w~n",[Message])
-	    )
-    ),!.
+    ;	true
+    ),
+    !.
     
 %note on aborts: an abort request is complete if BOTH the async abort message aswell as the
 %sync abort marker have been recieved. I originally assumed that the async message would always 
@@ -322,52 +320,52 @@ aborting:-
     abort_requested(async,_).
 
 send_abort_complete(Id,OutStream):-    
-   	my_format(OutStream, "ABORT_COMPLETE: ~w~n",[Id]).
+   	my_format(OutStream, 'ABORT_COMPLETE: ~w~n',[Id]).
     
 handle_batch_message(abort(Id),OutStream):-    
-	debug(consult_server,"recieved abort (async, id=~w)~n",[Id]),
+	debug(consult_server,'recieved abort (async, id=~w)~n',[Id]),
 	(	abort_requested(sync,Id)
 	->	erase_abort_request(sync,Id),
 		send_abort_complete(Id,OutStream)
 	;	record_abort_request(async,Id),
-		debug(consult_server(handler),"recorded abort (async, id=~w)~n",[Id])
+		debug(consult_server(handler),'recorded abort (async, id=~w)~n',[Id])
 	).
 handle_batch_command(set_option(Option,Value),_,OutStream):-
 	call_save(OutStream,set_option(Option,Value)).
 handle_batch_command(abort(Id),_,OutStream):-
-    debug(consult_server(handler),"recieved abort (sync, id=~w)~n",[Id]),
+    debug(consult_server(handler),'recieved abort (sync, id=~w)~n',[Id]),
 	(	abort_requested(async,Id)
 	->	erase_abort_request(async,Id),
 		send_abort_complete(Id,OutStream)
 	;	record_abort_request(sync,Id),
-	    debug(consult_server(handler),"recorded abort (sync, id=~w)~n",[Id])
+	    debug(consult_server(handler),'recorded abort (sync, id=~w)~n',[Id])
 	).
 handle_batch_command(join(Id),_,OutStream):-
-	my_format(OutStream, "JOIN_COMPLETE: ~w~n",[Id]).
+	my_format(OutStream, 'JOIN_COMPLETE: ~w~n',[Id]).
 handle_batch_command(end_of_batch,InStream,OutStream):-
 	forall(abort_requested(async,Id),handle_batch_command(abort(Id),InStream,OutStream)),
 	forall(abort_requested(sync,Id),handle_batch_message(abort(Id),OutStream)),
-	my_format(OutStream, "END_OF_BATCH_COMPLETE~n",[]).
+	my_format(OutStream, 'END_OF_BATCH_COMPLETE~n',[]).
 handle_batch_command(query_once(Id),InStream,OutStream):-
 	aborting,
     !,
     my_read_goal(InStream,_,_),    
-    my_format(OutStream, "SKIPPING_QUERY: ~w~n",[Id]).
+    my_format(OutStream, 'SKIPPING_QUERY: ~w~n',[Id]).
 handle_batch_command(query_all(Id),InStream,OutStream):-
     aborting,
     !,
     my_read_goal(InStream,_,_),
-    my_format(OutStream, "SKIPPING_QUERY: ~w~n",[Id]).
+    my_format(OutStream, 'SKIPPING_QUERY: ~w~n',[Id]).
     
 handle_batch_command(query_once(Id),InStream,OutStream):-
-    my_format(OutStream, "RESULTS_FOR_QUERY: ~w~n",[Id]),
+    my_format(OutStream, 'RESULTS_FOR_QUERY: ~w~n',[Id]),
     call_save(OutStream,(
     		my_read_goal(InStream,Goal,Vars),
     		one_solution(OutStream,Goal,Vars)
     		)
     	).
 handle_batch_command(query_all(Id),InStream,OutStream):-
-    my_format(OutStream, "RESULTS_FOR_QUERY: ~w~n",[Id]),
+    my_format(OutStream, 'RESULTS_FOR_QUERY: ~w~n',[Id]),
     call_save(OutStream,(
     		my_read_goal(InStream,Goal,Vars),
     		solutions_weak_until_cut(OutStream,Goal,Vars)
@@ -382,7 +380,7 @@ call_save(OutStream, Goal):-
 
 solutions_weak_until_cut(OutStream,Term,Vars):-
 	(	solutions_until_cut(OutStream,Term,Vars)
-	->	my_format(OutStream, "CUT~n",[])
+	->	my_format(OutStream, 'CUT~n',[])
 	;	solutions_yes_or_no(OutStream)
 	).
 
@@ -399,9 +397,9 @@ goal_was_cut(OutStream):-
 	
 solutions_yes_or_no(OutStream):-
 	(	nb_current(hasSolutions,1)
-	->	my_format(OutStream,"YES~n",[]),
+	->	my_format(OutStream,'YES~n',[]),
 		nb_delete(hasSolutions)
-	; 	my_format(OutStream,"NO~n",[])
+	; 	my_format(OutStream,'NO~n',[])
 	).
 
 	
@@ -411,8 +409,8 @@ solutions_yes_or_no(OutStream):-
 one_solution(OutStream,Term,Vars):-
 	( 	user:Term
 	->	consult_server:print_solution(OutStream,Vars),
-		my_format(OutStream,"YES~n",[])
-	; 	my_format(OutStream,"NO~n",[])
+		my_format(OutStream,'YES~n',[])
+	; 	my_format(OutStream,'NO~n',[])
 	).
 	
 	
@@ -425,9 +423,9 @@ all_solutions(OutStream,Term,Vars):-
 		)		
 	),
 	(	nb_current(hasSolutions,1)
-	->	my_format(OutStream,"YES~n",[]),
+	->	my_format(OutStream,'YES~n',[]),
 		nb_delete(hasSolutions)
-	;	my_format(OutStream,"NO~n",[])
+	;	my_format(OutStream,'NO~n',[])
 	).
 	
 	
@@ -439,8 +437,8 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 				consult_server:request_line(InStream,OutStream,'MORE?','YES')										
 			)
 		)
-	->my_format(OutStream,"NO~n",[])
-	; my_format(OutStream,"YES~n",[])
+	->my_format(OutStream,'NO~n',[])
+	; my_format(OutStream,'YES~n',[])
 	).
 	
 	
@@ -451,7 +449,7 @@ print_solution(OutStream,Vars):-
 		(member(Key=Val,Vars), nonvar(Val)),
 		print_binding(OutStream,Key,Val)
 	),
-	my_format(OutStream,"END_OF_SOLUTION~n",[]).
+	my_format(OutStream,'END_OF_SOLUTION~n',[]).
 	
 print_binding(Out,Key,Val):-
 		my_write(Out,'<'),
@@ -485,9 +483,9 @@ print_value(Out,Val):-
 
 
 handle_exception(InStream,OutStream,Error,Action):-
-    debug(consult_server(handler), "handle_excpetion (pre): Up:~w, Down:~w, Error:~w~n",[InStream,OutStream,Error]),
+    debug(consult_server(handler), 'handle_excpetion (pre): Up:~w, Down:~w, Error:~w~n',[InStream,OutStream,Error]),
     handle_exception_X(InStream,OutStream,Error,Action),
-    debug(consult_server(handler), "handle_excpetion (post): Action:~w~n",[Action]).	
+    debug(consult_server(handler), 'handle_excpetion (post): Action:~w~n',[Action]).	
     
 handle_exception_X(InStream,OutStream,Error,Action):-
 	var(Error),
@@ -499,7 +497,7 @@ handle_exception_X(InStream,OutStream,Error,Action):-
 handle_exception_X(_InStream,OutStream,peer_reset,continue):-
 	catch(
 		(
-			my_format(OutStream,"RESET~n",[]),
+			my_format(OutStream,'RESET~n',[]),
 			report_ok(OutStream)
 		),							
 		_,(
@@ -520,39 +518,39 @@ handle_exception_X(_InStream,OutStream,wrapped(Error),continue):-
 	!.
 	
 handle_exception_X(_InStream,_OutStream,Error,stop):-
-	debug(consult_server(handler),"Unhandled Exception :~w~n Trying to shut down...~n",[Error]).
+	debug(consult_server(handler),'Unhandled Exception :~w~n Trying to shut down...~n',[Error]).
 	
 	
 	
 report_ok(OutStream):-
-	my_format(OutStream,"OK~n",[]).	
+	my_format(OutStream,'OK~n',[]).	
 	
 report_error(OutStream, Error):-
 	(	var(Error)
-	->	my_format(OutStream,"ERROR: unbound error term~n",[])
-	;	my_format(OutStream,"ERROR: ~w~n",[Error])
+	->	my_format(OutStream,'ERROR: unbound error term~n',[])
+	;	my_format(OutStream,'ERROR: ~w~n',[Error])
 	).			
 	
 		
 byebye(InStream,OutStream):-
-	debug(consult_server,"byebye called~n",[]),
+	debug(consult_server,'byebye called~n',[]),
 	(	is_stream(OutStream)
-	->	debug(consult_server(handler),"Downstream is a stream: ~w~n",[OutStream]),
-		debug(consult_server(handler),"sending BYE downstream: ~w~n",[OutStream]),
-		my_format(OutStream,"BYE~n",[]),
-		debug(consult_server(handler),"closing downstream: ~w~n",[OutStream]),		
+	->	debug(consult_server(handler),'Downstream is a stream: ~w~n',[OutStream]),
+		debug(consult_server(handler),'sending BYE downstream: ~w~n',[OutStream]),
+		my_format(OutStream,'BYE~n',[]),
+		debug(consult_server(handler),'closing downstream: ~w~n',[OutStream]),		
 		catch(close(OutStream),E,
-			debug(consult_server(handler),"Problem closing downstream: ~w~n",[E])
+			debug(consult_server(handler),'Problem closing downstream: ~w~n',[E])
 		)
-	;	debug(consult_server(handler),"Downstream is no stream: ~w~n",[OutStream])
+	;	debug(consult_server(handler),'Downstream is no stream: ~w~n',[OutStream])
 	),
 	(	is_stream(InStream)	
-	->	debug(consult_server(handler),"Upstream is a stream: ~w~n",[InStream]),
-		debug(consult_server(handler),"closing upstream: ~w~n",[InStream]),		
+	->	debug(consult_server(handler),'Upstream is a stream: ~w~n',[InStream]),
+		debug(consult_server(handler),'closing upstream: ~w~n',[InStream]),		
 		catch(close(InStream),E,
-			debug(consult_server(handler),"Problem closing upstream: ~w~n",[E])
+			debug(consult_server(handler),'Problem closing upstream: ~w~n',[E])
 		)
-	;	debug(consult_server(handler),"Upstream is no stream: ~w~n",[InStream])
+	;	debug(consult_server(handler),'Upstream is no stream: ~w~n',[InStream])
 	).
 	
 	
@@ -571,7 +569,7 @@ count_thread(Prefix,Count):-
 	findall(A,
 		(	current_thread(A,_),
 			atom_concat(Prefix,_,A),
-			debug(consult_server(handler),"There is e.g. a thread named ~w~n",[A])
+			debug(consult_server(handler),'There is e.g. a thread named ~w~n',[A])
 		),
 		Bag
 	),	 
@@ -592,28 +590,28 @@ unused_thread_name(Prefix,Suffix,Try,Name):-
 	
 	
 request_line(InStream, OutStream, Prompt, Line):-
-	my_format(OutStream,"~w~n",[Prompt]),
+	my_format(OutStream,'~w~n',[Prompt]),
 	with_interrupts(5,read_line_to_codes(InStream,LineCodes)),
 	codes_or_eof_to_atom(LineCodes,Line),
-	debug(consult_server(traffic),"(Up:~w, read_line_to_codes)<<< ~w~n",[InStream,Line]).
+	debug(consult_server(traffic),'(Up:~w, read_line_to_codes)<<< ~w~n',[InStream,Line]).
 	
 	
 	
 my_read_term(InStream,Term,Options):-
 	with_interrupts(5,read_term(InStream,Term,Options)),
-	debug(consult_server(traffic),"(Up:~w read_term) <<<~w~n",[InStream,Term]).
+	debug(consult_server(traffic),'(Up:~w read_term) <<<~w~n',[InStream,Term]).
 	
 my_write_term(OutStream,Elm,Options):-
-	debug(consult_server(traffic),"(Down:~w write_term) >>>~w~n",[OutStream,Elm]),  
+	debug(consult_server(traffic),'(Down:~w write_term) >>>~w~n',[OutStream,Elm]),  
 	write_term(OutStream,Elm,Options),
 	nl(OutStream).
 my_write(OutStream,Term):-
-	debug(consult_server(traffic),"(Down:~w, write)>>>~w~n",[OutStream,Term]),
+	debug(consult_server(traffic),'(Down:~w, write)>>>~w~n',[OutStream,Term]),
 	write(OutStream,Term).	
 	
 my_format(OutStream,Format,Args):-
-	append("(Down:~w, format) >>>",Format,Format2),
-	append(Format2,"~n",Format3),
+	atom_concat('(Down:~w, format) >>>',Format,Format2),
+	atom_concat(Format2,'~n',Format3),
 	debug(consult_server(traffic),Format3,[OutStream|Args]),
 	format(OutStream,Format,Args),
 	flush_output(OutStream).

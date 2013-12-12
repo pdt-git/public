@@ -20,3 +20,4 @@
 :- [pdt_editor_edit_hook].
 :- [pdt_editor_highlighting].
 
+:- ['lgt/loader'].

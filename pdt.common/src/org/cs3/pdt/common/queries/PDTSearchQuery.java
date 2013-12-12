@@ -14,6 +14,8 @@
 
 package org.cs3.pdt.common.queries;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -51,14 +53,31 @@ import org.eclipse.search.ui.text.Match;
 
 public abstract class PDTSearchQuery implements ISearchQuery {
 
-	private Goal goal;
+	private String goal;
+	private String searchGoalLabel;
+	private boolean isExactMatch;
+
 	private PrologSearchResult result;
 	private LinkedHashSet<String> signatures = new LinkedHashSet<String>();
 	private LinkedHashMap<String, SearchPredicateElement> predicates = new LinkedHashMap<String, SearchPredicateElement>();
 
-	public PDTSearchQuery(Goal goal) {
+	public PDTSearchQuery(String goal, String searchGoalLabel) {
+		this(goal, searchGoalLabel, true);
+	}
+	
+	public PDTSearchQuery(String goal, String searchGoalLabel, boolean isExactMatch) {
 		this.goal = goal;
-		result = new PrologSearchResult(this, goal);
+		this.searchGoalLabel = searchGoalLabel;
+		this.isExactMatch = isExactMatch;
+		result = new PrologSearchResult(this, searchGoalLabel);
+	}
+	
+	public String getGoal() {
+		return goal;
+	}
+	
+	public boolean isExactMatch() {
+		return isExactMatch;
 	}
     
 	// Adapt the text in the header of the search result view:
@@ -115,14 +134,14 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			throws PrologException, PrologInterfaceException {
 		
 		monitor.beginTask("", 1);
-		String module;               
-		if (goal.getModule() != null && !goal.getModule().isEmpty()) {
-			module = Util.quoteAtomIfNeeded(goal.getModule());
-		} else {
-			module = "Module";                  // Modul is free variable
-		}
+//		String module;               
+//		if (goal.getModule() != null && !goal.getModule().isEmpty()) {
+//			module = Util.quoteAtomIfNeeded(goal.getModule());
+//		} else {
+//			module = "Module";                  // Modul is free variable
+//		}
 
-		String query = buildSearchQuery(goal, module);
+		String query = buildSearchQuery();
 		
 		List<Map<String, Object>> clauses = getResultForQuery(session, query);
 		
@@ -134,7 +153,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		return clauses;
 	}
 	
-	abstract protected String buildSearchQuery(Goal goal, String module);
+	abstract protected String buildSearchQuery();
 
 	protected List<Map<String, Object>> getResultForQuery(PrologSession session, String query) 
 			throws PrologInterfaceException {
@@ -217,7 +236,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	@Override
 	public String getLabel() {
-		return "Prolog Query: " + goal.getSignature();
+		return "Prolog Query: " + searchGoalLabel;
 	}
 
 	@Override
@@ -235,14 +254,14 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		return result;
 	}
 
-	protected void setGoal(Goal goal) {
-		this.goal = goal;
-	}
-
-	protected Goal getGoal() {
-		return goal;
-	}
-	
+//	protected void setGoal(Goal goal) {
+//		this.goal = goal;
+//	}
+//
+//	protected Goal getGoal() {
+//		return goal;
+//	}
+//	
 	protected IFile findFile(String fileName) throws IOException {
 		if (fileName == null || SearchConstants.RESULT_KIND_DYNAMIC.equals(fileName) || SearchConstants.RESULT_KIND_FOREIGN.equals(fileName)) {
 			return null;
@@ -251,6 +270,15 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		}
 	}
 	
+	protected static String toPredicateGoal(Goal goal) {
+		return bT(SearchConstants.PREDICATE_GOAL_FUNCTOR,
+				goal.getModule() != null ? Util.quoteAtomIfNeeded(goal.getModule()) : "_",
+				"_",
+				Util.quoteAtomIfNeeded(goal.getFunctor()),
+				"_",
+				goal.getArity() >= 0 ? goal.getArity() : "_");
+	}
+
 }
 
 

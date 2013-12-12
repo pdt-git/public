@@ -399,6 +399,10 @@ public class UMLClassNodeRealizer extends NodeRealizerBase {
 		GraphDataHolder dataHolder = model.getDataHolder();
 		setClassName(dataHolder.getLabelTextForNode(node));
 
+		String nodeStereoType = dataHolder.getNodeStereoType(node);
+		if (nodeStereoType != null && !nodeStereoType.isEmpty()) {
+			setStereotype(nodeStereoType);
+		}
 		String staticPredicates = dataHolder.getModulePublicStaticPredicates(node);
 		for (String i : staticPredicates.split("[\\[,\\]]")) {
 			if (i.length() > 0) {

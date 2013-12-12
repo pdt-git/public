@@ -36,4 +36,9 @@ public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 			return null;
 		}
 	}
+	
+	protected boolean ignoreExternalPrologFilesProject() {
+		return false;
+	}
+	
 }

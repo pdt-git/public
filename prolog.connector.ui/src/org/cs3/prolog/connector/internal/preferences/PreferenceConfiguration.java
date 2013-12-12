@@ -163,11 +163,9 @@ public class PreferenceConfiguration {
 	}
 	
 	public static void initWithSWIPreferences(IPreferenceStore store) {
-		store.setDefault(PrologRuntime.PREF_FILE_SEARCH_PATH, PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
-		
 		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
 		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
-		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getStackCommandLineParameters());
+		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getCommandLineArguments());
 		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, "");
 		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
 		
@@ -176,9 +174,6 @@ public class PreferenceConfiguration {
 		store.setDefault(PrologRuntime.PREF_TIMEOUT,15000 );
 		store.setDefault(PrologRuntime.PREF_PORT, 9944);
 		store.setDefault(PrologRuntime.PREF_HIDE_PLWIN, true);
-		
-		store.setDefault(PrologRuntime.PREF_GENERATE_FACTBASE, false);
-		store.setDefault(PrologRuntime.PREF_META_PRED_ANALYSIS, false);
 		
 		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
 	}

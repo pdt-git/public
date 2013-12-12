@@ -97,7 +97,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws PrologInterfaceException,
+	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals) throws PrologInterfaceException,
 			CoreException {
 
 		PrologSession session = null;
@@ -137,6 +137,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
 					
 					String module = result.get("Module").toString();
+					if (module.isEmpty()) {
+						module = null;
+					}
 					
 					String strArity = (String) result.get("Arity");
 					int arity = Integer.parseInt(strArity);
@@ -164,6 +167,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {
 					proposals.add(new AtomCompletionProposal(document, name, begin, len));
 				}
+			}
+			if (searchPrefixForDefault != null) {
+				DefaultCompletion.addDefaultCompletions(enclFile, document, begin, len, searchPrefixForDefault, proposals);
 			}
 			return;
 		} catch (Exception e) {

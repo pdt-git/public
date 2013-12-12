@@ -96,9 +96,14 @@ public class PrologMatch extends Match{
 					if (text != null) {
 						String line = PDTCommonUtil.getProperty("line", properties);
 						if (line != null) {
-							label = line + ": " + text.replaceAll("\n|\r", "");
+							setLabel(line + ": " + text.replaceAll("\n|\r", ""));
 						} else {
-							label = text.replaceAll("\n|\r", "");
+							String property = PDTCommonUtil.getProperty("prefix",	properties);
+							if (property != null) {
+								setLabel(Util.unquoteAtom(property) + text.replaceAll("\n|\r", ""));
+							} else {
+								setLabel(text.replaceAll("\n|\r", ""));
+							}
 						}
 					}
 				}
@@ -162,12 +167,21 @@ public class PrologMatch extends Match{
 //				if (firstArgument != null) {
 //					label = getLine() + ": " + Util.unquoteAtom(firstArgument);
 //				} else {
-					StringBuffer buf = new StringBuffer("Line ");
-					buf.append(Integer.toString(getLine()));
-					buf.append(" (");
-					buf.append(declOrDef);
-					buf.append(")");
-					label = buf.toString();
+					String property = PDTCommonUtil.getProperty("called", properties);
+					if (property != null) {
+						StringBuilder buf = new StringBuilder(Util.unquoteAtom(property));
+						buf.append(" (in clause starting at line ");
+						buf.append(Integer.toString(getLine()));
+						buf.append(")");
+						label = buf.toString();
+					} else {
+						StringBuilder buf = new StringBuilder("Line ");
+						buf.append(Integer.toString(getLine()));
+						buf.append(" (");
+						buf.append(declOrDef);
+						buf.append(")");
+						label = buf.toString();
+					}
 //				}
 				} else {
 					label = Util.unquoteAtom(PDTCommonUtil.getProperty("goal", properties));

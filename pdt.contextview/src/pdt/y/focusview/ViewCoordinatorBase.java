@@ -44,7 +44,7 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 		if (part instanceof IEditorPart) {
 			IEditorPart editorPart = (IEditorPart) part;
 			final String fileName = PDTCommonUtil.prologFileName(editorPart.getEditorInput());
-			if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro")) {
+			if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro") && !fileName.endsWith(".lgt") && !fileName.endsWith(".logtalk")) {
 				return;
 			}
 			if (currentFocusView == null 
@@ -96,7 +96,9 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	protected void refreshCurrentView() {
-		currentFocusView.reload();
+		if (currentFocusView != null) {
+			currentFocusView.reload();
+		}
 	}
 	
 	public void dispose() {
