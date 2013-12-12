@@ -282,7 +282,7 @@ private static JackTheProcessRipper processRipper;
 		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
 		tmpWriter.println(":- guitracer.");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":- doc_collect(false).");
+//		tmpWriter.println(":- doc_collect(false).");
 		if (socketPif.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(windows, true))" + "->win_window_pos([show(false)])" + ";true).");
 		}
