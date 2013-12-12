@@ -254,11 +254,6 @@ private static JackTheProcessRipper processRipper;
 
 	private static String[] getCommands(SocketPrologInterface socketPif) {
 		String executable = socketPif.getExecutable();
-		if (!executable.contains(" -L")) {
-			if(Util.getCommandLineArguments().length()>0) {
-				executable += " " + Util.getCommandLineArguments();// PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			}
-		}
 		String[] command = Util.split(executable, " ");
 		return command;
 	}
