@@ -970,7 +970,7 @@ public class Util {
 		} else {
 			pif.setExecutable(executable);
 		}
-		pif.setFileSearchPath("library=" + Util.normalizeOnWindows(tempDir));
+		pif.setConsultServerLocation(Util.prologFileName(new File(tempDir, "consult_server.pl")));
 		pif.setHost("localhost");
 		pif.setTimeout("15000");
 		pif.setStandAloneServer("false");

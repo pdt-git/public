@@ -187,7 +187,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		prologInterface.setAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE, configuration);
 		prologInterface.initOptions(new EclipsePreferenceProvider(this, configuration));
 		
-		prologInterface.setFileSearchPath(PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
 		return prologInterface;
 	}
 

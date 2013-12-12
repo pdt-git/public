@@ -163,8 +163,6 @@ public class PreferenceConfiguration {
 	}
 	
 	public static void initWithSWIPreferences(IPreferenceStore store) {
-		store.setDefault(PrologRuntime.PREF_FILE_SEARCH_PATH, PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
-		
 		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
 		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
 		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getCommandLineArguments());
