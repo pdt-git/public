@@ -22,6 +22,10 @@
 	source_file_entity/3, entity/1, entity_property/3
 ]).
 
+:- uses(help, [
+	built_in_directive/4, built_in_predicate/4, built_in_method/4, built_in_non_terminal/4
+]).
+
 :- public(predicates_with_property/3).
 
 %% predicates_with_property(+Property,+FileName,-Predicates) is det.
@@ -40,16 +44,27 @@ predicate_with_property(built_in, _FileName, Name) :-
 	iso_predicate(Name, _, _, _).
 
 predicate_with_property(built_in, _FileName, Name) :-
-	help::completion('', Name/_Arity-_HelpFile).
+	logtalk_built_in(Name, _).
 
 predicate_with_property(Property, _FileName, Name) :-
 	(	Property = (dynamic)
 	;	Property = meta_predicate(_)
 	),
-	help::completion('', Name/Arity-_HelpFile),
+	logtalk_built_in(Name, Arity),
 	functor(Head, Name, Arity),
 	catch(logtalk<<predicate_property(Head, Property),_,fail).
 
+:- private(logtalk_built_in/2).
+
+logtalk_built_in(Name, Arity) :-
+	built_in_directive(Name, Arity, _, _).
+logtalk_built_in(Name, Arity) :-
+	built_in_predicate(Name, Arity, _, _).
+logtalk_built_in(Name, Arity) :-
+	built_in_method(Name, Arity, _, _).
+logtalk_built_in(Name, Arity) :-
+	built_in_non_terminal(Name, Arity, _, _).
+	
 :- private(iso_predicate/4). % (Name, Arity, Head, MetaHead)
 :- dynamic(iso_predicate/4).
 
