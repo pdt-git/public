@@ -26,8 +26,6 @@ public class PDTConstants {
 
 	public static final String STACK_COMMMAND_LINE_ARGUMENTS = "-L4m -G4m -T4m";
 	
-	public static final String OTHER_COMMAND_LINE_ARGUMENTS = "--traditional";
-
 	// With or without graphic environment: First value is default!
 	public static final String UNIX_COMMAND_LINE_EXECUTABLES = "swipl,xpce";      // xpce deleted since 5.9.9
 

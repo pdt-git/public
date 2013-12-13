@@ -594,9 +594,9 @@ public class Util {
 	
 			if (bits.equals("64")) {
 				// no parameters for SWI-Prolog 64bit
-				commandLineArguments = PDTConstants.OTHER_COMMAND_LINE_ARGUMENTS;
+				commandLineArguments = "";
 			} else {
-				commandLineArguments = PDTConstants.OTHER_COMMAND_LINE_ARGUMENTS + " " + PDTConstants.STACK_COMMMAND_LINE_ARGUMENTS;
+				commandLineArguments = PDTConstants.STACK_COMMMAND_LINE_ARGUMENTS;
 			}
 
 		}
