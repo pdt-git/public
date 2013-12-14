@@ -217,7 +217,7 @@ possible_alias(Module, Name, Arity, ImportingModule, AliasName) :-
 collect_candidates(SearchModule, SearchFunctor, SearchArity, Candidates) :-
 	ensure_call_graph_generated,
 	setof(Module:Name/Arity, (
-		NumberOfCalls^calls(SearchModule, SearchFunctor, SearchArity, Module, Name, Arity, NumberOfCalls)
+		SearchModule^SearchFunctor^SearchArity^NumberOfCalls^calls(SearchModule, SearchFunctor, SearchArity, Module, Name, Arity, NumberOfCalls)
 	), Candidates).
 	
 %find_reference_to(Functor,Arity,DefFile, SearchMod, ExactMatch,
