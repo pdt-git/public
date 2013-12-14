@@ -14,11 +14,12 @@
 package org.cs3.pdt.internal.structureElements;
 
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 import org.cs3.prolog.common.Util;
 
 
 
-public class OutlineClauseElement implements PrologOutlineTreeElement{
+public class OutlineClauseElement implements PrologTreeElement{
 	
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private String label;
@@ -89,11 +90,6 @@ private String firstArgument;
 					&& label.equals(other.label)
 					&& getLine() == other.getLine());
 		}
-	}
-
-	@Override
-	public void addClause(PrologClause clause) {
-		this.clause = clause;
 	}
 
 	private String calculateOccuranceLabel() {

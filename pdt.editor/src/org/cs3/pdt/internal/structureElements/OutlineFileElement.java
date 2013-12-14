@@ -18,8 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cs3.pdt.common.metadata.PrologSourceLocation;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 
-public class OutlineFileElement extends PrologSourceLocation implements PrologOutlineTreeElement {
+public class OutlineFileElement extends PrologSourceLocation implements PrologTreeElement {
 
 	private String fullFileName;
 	private String fileName;
@@ -82,7 +83,6 @@ public class OutlineFileElement extends PrologSourceLocation implements PrologOu
 		return parent;
 	}
 
-	@Override
 	public void addClause(PrologClause clause) {
 		OutlineClauseElement clauseElement = new OutlineClauseElement(this, clause);
 		clauses.add(clauseElement);
