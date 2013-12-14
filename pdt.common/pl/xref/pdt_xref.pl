@@ -102,15 +102,15 @@ find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefAri
 	->	format(atom(Position), '~w-~w', [Start, End])
 	;	Position = Line
 	),
-	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
-	[clause_line(Line),goal(ReferencingGoalAsAtom)|PropertyList0] = PropertyList1,
+%	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
+	[line(Line)|PropertyList0] = PropertyList1,
 	(	functor(ReferencingGoal, N, A),
 		declared_in_module(M0, N, A, M)
 	->	(	Separator == (//)
-		->	format(atom(Called), '~w:~w//~w', [M, N, Arity0])
-		;	format(atom(Called), '~w:~w/~w', [M, N, A])
+		->	format(atom(Called), '~w//~w', [N, Arity0])
+		;	format(atom(Called), '~w/~w', [N, A])
 		),
-		CalledProperty = called(Called),
+		CalledProperty = label(Called),
 		(	M \== RefModule
 		->	format(atom(Prefix), '~w:', [M]),
 			PrefixProperty = prefix(Prefix)
@@ -119,8 +119,8 @@ find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefAri
 	;	true
 	),
 	(	nonvar(Alias)
-	->	format(atom(AliasAtom), 'alias for ~w', [Alias]),
-		PropertyList2 = [is_alias(AliasAtom)|PropertyList1]
+	->	format(atom(AliasAtom), ' [alias for ~w]', [Alias]),
+		PropertyList2 = [suffix(AliasAtom)|PropertyList1]
 	;	PropertyList2 = PropertyList1
 	),
 	(	nonvar(PrefixProperty)

@@ -38,6 +38,12 @@ public final class SearchConstants {
 	
 	// search goals
 	public static final String PREDICATE_GOAL_FUNCTOR = "predicate";
+	
+	public static final String PROPERTY_LABEL = "label";
+	public static final String PROPERTY_SHOW_LINE = "show_line";
+	public static final String PROPERTY_PREFIX = "prefix";
+	public static final String PROPERTY_SUFFIX = "suffix";
+	public static final String PROPERTY_LINE = "line";
 
 	private SearchConstants() {}
 }

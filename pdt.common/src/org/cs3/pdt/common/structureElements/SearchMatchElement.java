@@ -13,16 +13,17 @@
 
 package org.cs3.pdt.common.structureElements;
 
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.StyledString;
+
 public class SearchMatchElement implements PrologSearchTreeElement {
 
-	private PrologMatch match;
+	private ArrayList<PrologMatch> matches = new ArrayList<PrologMatch>();
 	private Object parent;
 	
 	public SearchMatchElement() {
-	}
-	
-	public void setMatch(PrologMatch match) {
-		this.match = match;
 	}
 	
 	public void setParent(Object parent) {
@@ -41,36 +42,61 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 
 	@Override
 	public String getLabel() {
-		return match.getLabel();
-	}
-
-	public PrologMatch getMatch() {
-		return match;
+		if (matches.isEmpty()) {
+			return null;
+		}
+		return matches.get(0).getLabel();
 	}
 	
-	@Override
-	public void removeMatch(PrologMatch match) {
-		if (match == this.match) {
-			this.match = null;
+	public StyledString getStyledString() {
+		if (matches.isEmpty()) {
+			return null;
 		}
+		StyledString str = new StyledString();
+		str.append(matches.get(0).getStyledString());
+		if (matches.size() > 1) {
+			str.append(" (", StyledString.COUNTER_STYLER);
+			str.append(Integer.toString(matches.size()), StyledString.COUNTER_STYLER);
+			str.append(" matches)", StyledString.COUNTER_STYLER);
+		}
+		return str;
 	}
 
-	@Override
+	public void removeMatch(PrologMatch match) {
+		matches.remove(match);
+	}
+
 	public void addMatch(PrologMatch match) {
-		setMatch(match);
+		matches.add(match);
 	}
 
 	@Override
 	public Object getParent() {
-		if (parent == null) {
-			if (match == null) {
-				return null;
-			} else {
-				return match.getFile();
-			}
-		} else {
-			return parent;
+		return parent;
+	}
+
+	public IFile getFile() {
+		if (matches.isEmpty()) {
+			return null;
 		}
+		return matches.get(0).getFile();
+	}
+
+	@Override
+	public int computeContainedMatches() {
+		return matches.size();
+	}
+
+	public PrologMatch getMatch() {
+		if (matches.isEmpty()) {
+			return null;
+		}
+		return matches.get(0);
+	}
+
+	@Override
+	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
+		matches.addAll(matches);
 	}
 
 }

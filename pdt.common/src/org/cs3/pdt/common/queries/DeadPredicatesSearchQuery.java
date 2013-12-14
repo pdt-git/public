@@ -23,6 +23,8 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.search.SearchConstants;
+import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -94,27 +96,31 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}	
-		Match match = null;
+		PrologMatch match = null;
 		if (offsetOrLine.indexOf("-") >= 0) {
 			String[] positions = offsetOrLine.split("-");
 			int offset = Integer.parseInt(positions[0]);
 			int end = Integer.parseInt(positions[1]);
-			match = createUniqueMatch(definingModule, functor, arity, file, offset, end - offset, properties, "", "definition");
+			match = createUniqueMatch(PROLOG_MATCH_KIND_DEFINITION, definingModule, functor, arity, file, offset, end - offset, properties, "", "definition");
 			if (createMarkers && match != null) {
 				try {
-					IDocument document = UIUtils.getDocument(file);
-					int clauseOffset = UIUtils.logicalToPhysicalOffset(document, Integer.parseInt(m.get("ClauseStart").toString()));
-					int clauseEnd = UIUtils.logicalToPhysicalOffset(document, Integer.parseInt(m.get("ClauseEnd").toString()));
-					IMarker marker = createMarker(file, "Dead predicate: " + definingModule + ":" + functor + "/" + arity, clauseOffset, clauseEnd);
-					int line = Integer.parseInt(PDTCommonUtil.getProperty("line", properties));
-					marker.setAttribute(IMarker.LINE_NUMBER, line);
+					int line = Integer.parseInt(PDTCommonUtil.getProperty(SearchConstants.PROPERTY_LINE, properties));
+					if (match.conversionSuccessful()) {
+						IDocument document = match.getDocument();
+						int clauseOffset = UIUtils.logicalToPhysicalOffset(document, Integer.parseInt(m.get("ClauseStart").toString()));
+						int clauseEnd = UIUtils.logicalToPhysicalOffset(document, Integer.parseInt(m.get("ClauseEnd").toString()));
+						IMarker marker = createMarker(file, "Dead predicate: " + definingModule + ":" + functor + "/" + arity, clauseOffset, clauseEnd);
+						marker.setAttribute(IMarker.LINE_NUMBER, line);
+					} else {
+						createMarker(file, "Dead predicate: " + definingModule + ":" + functor + "/" + arity, line);
+					}
 				} catch (CoreException e) {
 					Debug.report(e);
 				}
 			}
 		} else {
 			int line = Integer.parseInt(offsetOrLine);
-			match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", "definition");
+			match = createUniqueMatch(PROLOG_MATCH_KIND_DEFINITION, definingModule, functor, arity, file, line, properties, "", "definition");
 			if (createMarkers && match != null) {
 				try {
 					createMarker(file, "Dead predicate: " + definingModule + ":" + functor + "/" + arity, line);

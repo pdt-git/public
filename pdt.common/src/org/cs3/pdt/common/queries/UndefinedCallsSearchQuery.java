@@ -89,7 +89,7 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 
 		int offset = Integer.parseInt(m.get("Start").toString());
 		int end = Integer.parseInt(m.get("End").toString());
-		PrologMatch match = createUniqueMatch(module, name, arity, file, offset, end - offset, properties, null, "definition");
+		PrologMatch match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, offset, end - offset, properties, null, "definition");
 		if (createMarkers && match != null) {
 			try {
 				IDocument document = UIUtils.getDocument(file);

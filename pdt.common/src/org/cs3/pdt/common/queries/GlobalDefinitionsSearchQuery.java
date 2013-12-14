@@ -89,10 +89,10 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 				String[] positions = offsetOrLine.split("-");
 				int offset = Integer.parseInt(positions[0]);
 				int length = Integer.parseInt(positions[1]) - offset;
-				match = createUniqueMatch(definingModule, functor, arity, file, offset, length, properties, "", declOrDef);
+				match = createUniqueMatch(PROLOG_MATCH_KIND_DEFINITION, definingModule, functor, arity, file, offset, length, properties, "", declOrDef);
 			} else {
 				int line = Integer.parseInt(offsetOrLine);
-				match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", declOrDef);
+				match = createUniqueMatch(PROLOG_MATCH_KIND_DEFINITION, definingModule, functor, arity, file, line, properties, "", declOrDef);
 			}
 		}
 		

@@ -111,10 +111,10 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 			String[] positions = offsetOrLine.split("-");
 			int offset = Integer.parseInt(positions[0]);
 			int length = Integer.parseInt(positions[1]) - offset;
-			match = createUniqueMatch(module, name, arity, file, offset, length, properties, null, "definition");
+			match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, offset, length, properties, null, "definition");
 		} else {
 			int line = Integer.parseInt(offsetOrLine);
-			match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
+			match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, line, properties, null, "definition");
 		}
 		return match;
 	}

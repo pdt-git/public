@@ -15,7 +15,7 @@
 package org.cs3.pdt.common.search;
 
 import org.cs3.pdt.common.structureElements.PrologMatch;
-import org.cs3.pdt.common.structureElements.PrologSearchTreeElement;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -34,8 +34,8 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 	public Object getParent(Object child) {
 		if (child==null || getSearchResult() == null){
 			return null;
-		} else if (child instanceof PrologSearchTreeElement){
-			return ((PrologSearchTreeElement) child).getParent();
+		} else if (child instanceof PrologTreeElement){
+			return ((PrologTreeElement) child).getParent();
 		} else if (child instanceof PrologMatch){
 			return ((PrologMatch) child).getElement();
 		} else {
@@ -56,8 +56,8 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 			return new Object[0];
 		} else if (parentElement instanceof PrologSearchResult){
 			return ((PrologSearchResult) parentElement).getChildren();
-		} else if (parentElement instanceof PrologSearchTreeElement) {
-			return ((PrologSearchTreeElement) parentElement).getChildren();
+		} else if (parentElement instanceof PrologTreeElement) {
+			return ((PrologTreeElement) parentElement).getChildren();
 		} else {
 			return new Object[0];
 		}
@@ -67,8 +67,8 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 	public boolean hasChildren(Object element) {
 		if(element==null || getSearchResult() == null) {
 			return false;
-		} else if (element instanceof PrologSearchTreeElement) {
-			return ((PrologSearchTreeElement)element).hasChildren();
+		} else if (element instanceof PrologTreeElement) {
+			return ((PrologTreeElement)element).hasChildren();
 		} else {
 			return (element instanceof IFile) || (element instanceof PrologSearchResult);
 		}

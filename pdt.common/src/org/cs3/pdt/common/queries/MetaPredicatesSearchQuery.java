@@ -92,7 +92,7 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}	
-		Match match = createUniqueMatch(definingModule, functor, arity, file, line, properties, "", "definition");
+		Match match = createUniqueMatch(PROLOG_MATCH_KIND_DEFAULT, definingModule, functor, arity, file, line, properties, "", "definition");
 		
 		if (createMarkers && match != null) {
 			try {

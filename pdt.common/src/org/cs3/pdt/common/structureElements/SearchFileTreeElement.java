@@ -13,8 +13,8 @@
 
 package org.cs3.pdt.common.structureElements;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptable {
 	
-	private LinkedHashMap<PrologMatch, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<PrologMatch, SearchMatchElement>();
+	private LinkedHashMap<String, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<String, SearchMatchElement>();
 	private IFile file;
 	private Object parent;
 	
@@ -45,22 +45,14 @@ public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptabl
 		return matchesToSearchElements.values().toArray();
 	}
 	
-	public PrologMatch[] getOccurrences() {
-		Set<PrologMatch> keySet = matchesToSearchElements.keySet();
-		return keySet.toArray(new PrologMatch[keySet.size()]);
-	}
-	
-	public int getNumberOfChildren() {
-		return matchesToSearchElements.size();
-	}
-	
 	public PrologMatch getFirstMatch() {
 		if (matchesToSearchElements.isEmpty()) {
 			return null;
 		}
 		PrologMatch firstMatch = null;
 		int firstLine = Integer.MAX_VALUE;
-		for (PrologMatch occurence : matchesToSearchElements.keySet()) {
+		for (SearchMatchElement element : matchesToSearchElements.values()) {
+			PrologMatch occurence = element.getMatch();
 			int line = occurence.getLine();
 			if (firstMatch == null) {
 				firstMatch = occurence;
@@ -78,21 +70,18 @@ public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptabl
 		return file.getName();
 	}
 
-	@Override
 	public void removeMatch(PrologMatch match) {
-		SearchMatchElement removedElement = matchesToSearchElements.remove(match);
-		if (removedElement != null) {
-			removedElement.removeMatch(match);
-		}
+		matchesToSearchElements.remove(match);
 	}
 
-	@Override
 	public void addMatch(PrologMatch match) {
-		if (!matchesToSearchElements.containsKey(match)) {
-			SearchMatchElement searchMatchElement = (SearchMatchElement) match.getElement();
+		SearchMatchElement searchMatchElement = matchesToSearchElements.get(match.getSignature());
+		if (searchMatchElement == null) {
+			searchMatchElement = (SearchMatchElement) match.getElement();
 			searchMatchElement.setParent(this);
-			matchesToSearchElements.put(match, searchMatchElement);
+			matchesToSearchElements.put(match.getSignature(), searchMatchElement);
 		}
+		searchMatchElement.addMatch(match);
 	}
 
 	@Override
@@ -106,6 +95,24 @@ public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptabl
 			return file;
 		} else { 
 			return null;
+		}
+	}
+
+	@Override
+	public int computeContainedMatches() {
+		int count = 0;
+		for (SearchMatchElement element : matchesToSearchElements.values()) {
+			count += element.computeContainedMatches();
+		}
+		return count;
+	}
+
+	@Override
+	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
+		if (file.equals(this.file)) {
+			for (SearchMatchElement element : matchesToSearchElements.values()) {
+				element.collectContainedMatches(file, matches);
+			}
 		}
 	}
 

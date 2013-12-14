@@ -105,8 +105,8 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 	),
 	(	member(as(AliasFunctor/Arity), Properties),
 		Functor \== AliasFunctor
-	->	format(atom(AliasAtom), '~w aliased to ~w', [Functor/Arity, AliasFunctor/Arity]),
-		PropertyList0 = [is_alias(AliasAtom)]
+	->	format(atom(AliasAtom), ' [~w aliased to ~w]', [Functor/Arity, AliasFunctor/Arity]),
+		PropertyList0 = [suffix(AliasAtom)]
 	;	PropertyList0 = []
 	),
 	(	From == Entity
@@ -119,7 +119,7 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 		;	format(atom(Called), '~w::~w/~w', [From, Functor, Arity])
 		)
 	),
-	PropertyList = [clause_line(Line), called(Called)|PropertyList0].
+	PropertyList = [line(Line), label(Called)|PropertyList0].
 
 find_entity_reference(Entity, ExactMatch, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),

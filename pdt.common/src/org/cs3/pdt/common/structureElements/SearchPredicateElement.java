@@ -14,8 +14,6 @@
 package org.cs3.pdt.common.structureElements;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
@@ -60,18 +58,6 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 		return getFunctor() + "/" + getArity();
 	}
 	
-	public int numberOfOccurences() {
-		if (matches == null) {
-			int sum = 0;
-			for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
-				sum += e.getNumberOfChildren();
-			}
-			return sum;
-		} else {
-			return matches.size();
-		}
-	}
-	
 	public PrologMatch getFirstOccurrence() {
 		if (fileToFileTreeElement.values().isEmpty()) {
 			return null;
@@ -83,22 +69,6 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 		}
 	}
 	
-	public PrologMatch[] getOccurrences() {
-		HashSet<PrologMatch> matches = new HashSet<PrologMatch>();
-		for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
-			for (PrologMatch m : e.getOccurrences()) {
-				matches.add(m);
-			}
-		}
-		return matches.toArray(new PrologMatch[matches.size()]);
-	}
-	
-	public SearchFileTreeElement[] getFileTreeElements() {
-		Collection<SearchFileTreeElement> values = fileToFileTreeElement.values();
-		return values.toArray(new SearchFileTreeElement[values.size()]);
-	}
-
-	@Override
 	public void removeMatch(PrologMatch match) {
 		IFile file = match.getFile();
 		if (fileToFileTreeElement.containsKey(file)) {
@@ -110,7 +80,6 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 		}
 	}
 
-	@Override
 	public void addMatch(PrologMatch match) {
 		SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(match.getFile());
 		if (fileTreeElement == null) {
@@ -149,6 +118,22 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 
 	public boolean hasMatches() {
 		return (matches != null && !matches.isEmpty());
+	}
+
+	@Override
+	public int computeContainedMatches() {
+		int count = 0;
+		for (SearchFileTreeElement element : fileToFileTreeElement.values()) {
+			count += element.computeContainedMatches();
+		}
+		return count;
+	}
+
+	@Override
+	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
+		for (SearchFileTreeElement element : fileToFileTreeElement.values()) {
+			element.collectContainedMatches(file, matches);
+		}
 	}
 	
 }
