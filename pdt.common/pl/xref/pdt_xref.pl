@@ -80,7 +80,7 @@ find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefAri
 	->	RefFile = ClauseRefOrFile,
 		Line = 1,
 		once(module_of_file(RefFile, RefModule)),
-		RefName = (:-),
+		RefName = (initialization),
 		RefArity = 1
 	;	ClauseRef = ClauseRefOrFile,
 		clause_property(ClauseRef, predicate(RefModule:RefName/RefArity)),
