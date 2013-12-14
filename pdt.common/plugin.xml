@@ -228,20 +228,4 @@
             type="org.eclipse.core.resources.IResource">
       </propertyTester>
    </extension>
-   <extension
-         point="org.eclipse.ui.decorators">
-      <decorator
-            adaptable="true"
-            class="org.cs3.pdt.common.search.SearchResultDecorator"
-            id="pdt.common.search.decorator"
-            label="Prolog Search Result Decorator"
-            lightweight="true"
-            state="true">
-         <enablement>
-            <objectClass
-                  name="org.cs3.pdt.common.structureElements.PrologSearchTreeElement">
-            </objectClass>
-         </enablement>
-      </decorator>
-   </extension>
 </plugin>
