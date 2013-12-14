@@ -27,7 +27,7 @@ import org.eclipse.search.ui.text.Match;
 public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 	
 	public GlobalDefinitionsSearchQuery(String goal, String searchGoalLabel, boolean isExactMatch) {
-		super(goal, searchGoalLabel);
+		super(goal, searchGoalLabel, isExactMatch);
 		if (isExactMatch) {
 			setSearchType("Definitions and declarations of");
 		} else {
