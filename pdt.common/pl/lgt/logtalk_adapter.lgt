@@ -2,7 +2,7 @@
 % This file is part of the Prolog Development Tool (PDT) for Eclipse
 % http://roots.iai.uni-bonn.de/research/pdt
 %
-% Authors: Günter Kniesel, Paulo Moura (May 2011)
+% Authors: Günter Kniesel, Andreas Becker, Paulo Moura (May 2011)
 %          partly based on PDT code by Tobias Rho
 %
 % All rights reserved. This program is  made available under the terms
