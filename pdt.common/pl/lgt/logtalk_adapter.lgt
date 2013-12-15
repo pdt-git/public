@@ -81,13 +81,17 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 	),
 	!,
 	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties)),
-		Kind = logtalk
+		Kind = logtalk(object)
+	;	entity_property(Entity, _, calls(::Functor/Arity, Properties)),
+		Kind = logtalk(self)
+	;	entity_property(Entity, _, calls(^^Functor/Arity, Properties)),
+		Kind = logtalk(super)
 	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties)),
 		Kind = prolog
 	;	nonvar(SearchFunctor),
 		entity_property(Entity, _, calls(Functor/Arity, Properties)),
 		From = Entity,
-		Kind = logtalk
+		Kind = logtalk(local)
 	),
 	(	ExactMatch == true
 	->	SearchFunctor = Functor
@@ -97,26 +101,50 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),
-	(	Kind == logtalk ->
-		entity_property(From, _, file(FromBase, FromDirectory)),
-		atom_concat(FromDirectory, FromBase, FromFile)
-	;	% Kind = prolog
-		module_property(From, file(FromFile))
-	),
+%	(	Kind == logtalk(object) ->
+%		entity_property(From, _, file(FromBase, FromDirectory)),
+%		atom_concat(FromDirectory, FromBase, FromFile)
+%	;	% Kind = prolog
+%		module_property(From, file(FromFile))
+%	),
 	(	member(as(AliasFunctor/Arity), Properties),
 		Functor \== AliasFunctor
 	->	format(atom(AliasAtom), ' [~w aliased to ~w]', [Functor/Arity, AliasFunctor/Arity]),
 		PropertyList0 = [suffix(AliasAtom)]
 	;	PropertyList0 = []
 	),
-	(	From == Entity
+	(	Kind == logtalk(local)
 	->	(	Separator == (//)
 		->	format(atom(Called), '~w//~w', [Functor, Arity0])
-		;	format(atom(Called), '~w/~w', [Functor, Arity])
+		;	format(atom(Called), '~w/~w',  [Functor, Arity])
 		)
-	;	(	Separator == (//)
-		->	format(atom(Called), '~w::~w//~w', [From, Functor, Arity0])
-		;	format(atom(Called), '~w::~w/~w', [From, Functor, Arity])
+	;	Kind == logtalk(self)
+	->	(	Separator == (//)
+		->	format(atom(Called), '::~w//~w', [Functor, Arity0])
+		;	format(atom(Called), '::~w/~w',  [Functor, Arity])
+		)
+	;	Kind == logtalk(super)
+	->	(	Separator == (//)
+		->	format(atom(Called), '^^~w//~w', [Functor, Arity0])
+		;	format(atom(Called), '^^~w/~w',  [Functor, Arity])
+		)
+	;	Kind == logtalk(object)
+	->	(	nonvar(From)
+		->	FromPrint = From
+		;	FromPrint = 'Object'
+		),
+		(	Separator == (//)
+		->	format(atom(Called), '~w::~w//~w', [FromPrint, Functor, Arity0])
+		;	format(atom(Called), '~w::~w/~w',  [FromPrint, Functor, Arity])
+		)
+	;	% Kind == prolog
+		(	nonvar(From)
+		->	FromPrint = From
+		;	FromPrint = 'Module'
+		),
+		(	Separator == (//)
+		->	format(atom(Called), '~w:~w//~w', [FromPrint, Functor, Arity0])
+		;	format(atom(Called), '~w:~w/~w',  [FromPrint, Functor, Arity])
 		)
 	),
 	PropertyList = [line(Line), label(Called)|PropertyList0].
