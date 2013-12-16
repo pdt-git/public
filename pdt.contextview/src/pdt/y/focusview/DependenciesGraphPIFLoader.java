@@ -9,6 +9,7 @@ import org.cs3.prolog.common.Util;
 import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IProject;
 
+import pdt.y.PDTGraphPredicates;
 import pdt.y.main.PDTGraphView;
 
 public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
@@ -28,7 +29,7 @@ public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {
 			String projectPath = Util.normalizeOnWindows(project.getLocation().toString());
 			
 			String query;
-			query = bT("write_dependencies_to_graphML", paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
+			query = bT(PDTGraphPredicates.WRITE_DEPENDENCIES_TO_GRAPHML, paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
 			return query;
 			
 		} catch (IOException e) {

@@ -12,30 +12,28 @@
  * 
  ****************************************************************************/
 
-:- use_module(library(backcomp)).
 :- use_module(library(error)). 
 :- use_module(library(memfile)).  
 
 :- multifile test/1.
 
 /*
- * SWI Kompability
+ * SWI Compability
  * specific for SWI Prolog
  */
 
 :- dynamic outdir/1.
 :- dynamic file_output/1.
 :- dynamic output_to_file/0.
-%:- dynamic output_to_tmp/1.
 :- dynamic output_to_memory/3.
 :- dynamic output_to_memory_key/1.
 
 
+index_information(Predicate, I) :-
+	predicate_property(Predicate, indexed(I)).
+
 outdir(A):-
     project_option(_,output_project(A)).
-
-%outdir('out_faj/').
-%
 
 set_outdir(Dir):-
 	findall(Project,(
@@ -388,12 +386,13 @@ get_single_char(A) :-
  *
  * Disables tty control char-wise read on the windows platform.
  */
-
+:- if(pdt_support:pdt_support(tty_control)).
 disable_tty_control :- 
   current_prolog_flag(windows,_T) -> 
   set_prolog_flag(tty_control,false). 
 
 :- disable_tty_control.
+:- endif.
 
 
 read_term_atom(Atom,Term,Options):-

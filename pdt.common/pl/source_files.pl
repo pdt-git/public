@@ -34,5 +34,3 @@ pdt_source_file(File, State) :-
 		)
 	;	State = current
 	).
-
-

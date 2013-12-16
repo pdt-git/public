@@ -16,13 +16,10 @@
          , entity_property/3            % (+Entity, predicate|module, ?PropertyList)
          ]).
 
-/*
- * properties_for_predicate(+Module, +Name, +Arity, ?PropertyList) is det
- * 
- * Gives a  list of properties interest for the predicate that is referenced by Arg1:Arg2/Arg3 
- * 
- * Selected properties of the predicate are elements of list arg4.
- */ 
+%% properties_for_predicate(+Module, +Name, +Arity, ?PropertyList) is det
+% Gives a  list of properties interest for the predicate that is referenced by Arg1:Arg2/Arg3 
+% Selected properties of the predicate are elements of list arg4.
+% 
 properties_for_predicate(Module,Name,Arity,PropertyList):-
     functor(Head,Name,Arity),
     entity_property(Module:Head, predicate, PropertyList).

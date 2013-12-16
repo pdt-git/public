@@ -46,7 +46,8 @@
            ]
  ).
  
-:- doc_collect(true).
+:- use_module(pdt_support, [pdt_support/1]).
+
 
 %% hidden_module(M)
 %

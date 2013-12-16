@@ -44,15 +44,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.keys.KeySequence;
-import org.eclipse.ui.keys.SWTKeySupport;
 
 /**
  * Show outline in light-weight control.
@@ -72,7 +68,6 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	 */
 	public String fPattern;
 	private IDocument document;
-	private KeyAdapter fKeyAdapter;
 
 	/**
 	 * Creates a new Java outline information control.
@@ -82,8 +77,8 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	 * @param treeStyle
 	 * @param commandId
 	 */
-	public PrologOutlineInformationControl(IDocument document, Shell parent, int shellStyle, int treeStyle, String commandId) {
-		super(parent, shellStyle, treeStyle, commandId, true);
+	public PrologOutlineInformationControl(IDocument document, Shell parent, int shellStyle, int treeStyle) {
+		super(parent, shellStyle, treeStyle, true);
 		this.document = document;
 	}
 
@@ -93,7 +88,6 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	@Override
 	protected Text createFilterText(Composite parent) {
 		Text text= super.createFilterText(parent);
-		text.addKeyListener(getKeyAdapter());
 		return text;
 	}
 
@@ -118,10 +112,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter(this, this.getMatcher()));
 
-
 		fInnerLabelProvider = new OutlineLabelProvider();
-//		fInnerLabelProvider =  new DecoratingLabelProvider(new OutlineLabelProvider(), 
-//				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		treeViewer.setLabelProvider(fInnerLabelProvider);
 
 		fLexicalSortingAction= new LexicalSortingAction(/*this,*/ treeViewer);
@@ -130,10 +121,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		treeViewer.setContentProvider(fOutlineContentProvider);
 		fOutlineSorter= new ViewerComparator();
 		treeViewer.setComparator(fOutlineSorter);
-		//treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		treeViewer.setAutoExpandLevel(2);
-
-		treeViewer.getTree().addKeyListener(getKeyAdapter());
 
 		return treeViewer;
 	}
@@ -177,34 +165,6 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		inputChanged(fInput, information);
 
 	}
-
-	private KeyAdapter getKeyAdapter() {
-		if (fKeyAdapter == null) {
-			fKeyAdapter= new KeyAdapter() {
-				@Override
-				public void keyPressed(KeyEvent e) {
-					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
-					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
-					KeySequence[] sequences= getInvokingCommandKeySequences();
-					if (sequences == null){
-						if(accelerator==13){
-							gotoSelectedElement();
-						}
-						return;
-					}
-					for (int i= 0; i < sequences.length; i++) {
-						if (sequences[i].equals(keySequence)) {
-							e.doit= false;
-							return;
-						}
-					}
-				}
-			};
-		}
-		return fKeyAdapter;
-	}
-
-
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#fillViewMenu(org.eclipse.jface.action.IMenuManager)

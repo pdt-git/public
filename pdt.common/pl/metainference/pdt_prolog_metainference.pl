@@ -581,9 +581,9 @@ add_bottom(Meta,Value)     :- set_bottom(Meta, Value).
 
 merge_aliased(Value1, Value2, Value3)     :- eq_union(Value1, Value2, Value3).
 
-merge_metacalled(Value1, Value2, Value3)  :- union(Value1, Value2, Value3).
+merge_metacalled(Value1, Value2, Value3)  :- eq_union(Value1, Value2, Value3).
 
-merge_components(Value1, Value2, Value3)  :- union(Value1, Value2, Value3).
+merge_components(Value1, Value2, Value3)  :- eq_union(Value1, Value2, Value3).
 
 merge_existential(Value, Value, Value) :- !.
 merge_existential(_,     _,     ^    ).

@@ -16,8 +16,11 @@
 
 
 
-:- [pdt_editor_breakpoints].
-:- [pdt_editor_edit_hook].
-:- [pdt_editor_highlighting].
+:- use_module(pdt_editor_breakpoints, []).
+:- use_module(pdt_editor_highlighting, []).
 
 :- ['lgt/loader'].
+
+:- if(current_prolog_flag(dialect, swi)).
+:- use_module(pdt_editor_edit_hook, []).
+:- endif.

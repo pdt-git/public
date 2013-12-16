@@ -13,7 +13,26 @@
  ****************************************************************************/
 
 % Date: 21.11.2005
-
+ 
+:- if(pdt_support:pdt_support(remove_duplicates)).
+:- module( ctc_lists, [
+    nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
+    union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
+    ctc_intersection/3,           % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
+    union_sorted/3,           % (+Set1,+Set2,?Union)! 
+    union_order_preserving/3, % (+Set1,+Set2,?Union)!
+    remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
+    list_sum/2,               % (+Numbers,?Total)!
+    traverseList/3,           % (+List,+Stop,+Pred) is nondet
+    list_to_disjunction/2,    % (+List,?Disjunction) is det.
+    list_to_conjunction/2,    % (+List,?Conjunction) is det.
+    pretty_print_list/1,      % (+List)!io 
+    pretty_print_list/2,          % (+List,+Indent)!io 
+    pretty_print_list_body/2,     % (+List,+Indent)
+    list_2_comma_separated_list/2, % (+List,-Atom) is det.
+    list_2_separated_list/3 % (+List,-Atom) is det.
+] ).
+:- else.
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
@@ -33,9 +52,10 @@
     list_2_separated_list/3, % (+List,-Atom) is det.
     finite_length/2
 ] ).
+:- endif.
 
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
+:- use_module(pdt_support, [pdt_support/1]).
 
 /*
  * Check list membership without unifying.
@@ -199,6 +219,7 @@ remove_duplicates_sorted__([First|Rest], Previous, Result ) :-
    ).
 
 
+:- if(\+ pdt_support:pdt_support(remove_duplicates)).
 /*
  * remove_duplicates(+List, ?DuplicateFree) is det
  *
@@ -213,6 +234,7 @@ remove_duplicates([First|Rest],[First|NoDup]) :-
 remove_duplicates([First|Rest],[First|NoDup]) :-
    remove_duplicates(Rest,NoDup).
 remove_duplicates([],[]).
+:- endif.
 
 /*
  * split_unique(+List,+Elem,?BeforeNoDups,?AfterNoDups)
@@ -319,11 +341,11 @@ pretty_print_list_body__([]) .
  *  e.g. '   ' for 3 character indentation.
  */
 pretty_print_list(List, Indent) :-
-    concat_atom(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
+    atomic_list_concat(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
     pp_list(List, Formatstring).
 
 pretty_print_list_body(List, Indent) :-
-    concat_atom(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
+    atomic_list_concat(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
     pp_list_body(List, Formatstring).
     
     
@@ -331,7 +353,7 @@ pp_list([], Indent) :-
     atom_concat(Indent,'[]~n',Emptylist), 
     format(Emptylist).
 pp_list([A|B], Indent) :-
-    concat_atom([Indent,'[~n '], Liststart), % 
+    atomic_list_concat([Indent,'[~n '], Liststart), % 
     format(Liststart),
     pp_list_body([A|B], Indent),
     atom_concat(Indent,']~n',Listend), 
@@ -359,8 +381,7 @@ list_2_separated_list([Element|Rest],Separator,ElementSeparated) :-
 	
 
 aformat(Atom,FormatString,List):-
-	sformat(String,FormatString,List),
-	string_to_atom(String,Atom).
+	format(atom(Atom),FormatString,List).
 
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)]) .  
 test_PPL :- pretty_print_list([1,2,3,a,b,c,X,Y,Z,f(a),g(b,c),h(X,Y,Z)], 8) . 

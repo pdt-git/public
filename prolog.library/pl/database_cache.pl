@@ -30,7 +30,8 @@
    ]
 ).
 
-               
+:- use_module(general).       
+:- use_module(utils4modules).
 /*
  * generate_all_in_module(+Module,+Template,+Call)
  * generate_all_in_module(+Module,+Template,+Call,Options)

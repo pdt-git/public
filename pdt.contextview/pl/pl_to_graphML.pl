@@ -21,6 +21,8 @@
 :- use_module(util_for_graphML).
 :- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 :- use_module(pdt_common_pl(pdt_search)).
+:- use_module(pdt_prolog_library(utils4modules_visibility)).
+:- use_module(library(lists), [list_to_set/2, append/3, member/2]).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -145,7 +147,7 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
 	forall((
 		member(SourceModule:SourceName/SourceArity, Predicates),
 		calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, _NumberOfCalls),
-		memberchk(TargetModule:TargetName/TargetArity, Predicates)
+		once(member(TargetModule:TargetName/TargetArity, Predicates))
 	),(
 		write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, ProjectFiles)
 	)).

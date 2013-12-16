@@ -14,7 +14,6 @@
 :-module(junitadapter, []).
 
 :- use_module(library(plunit)).
-:- use_module(library(backcomp)).
 
 :- dynamic file_to_test/1.
 
@@ -78,7 +77,7 @@ file_information(TestName,File,Line):-
 	clause_property(Ref,line_count(Line)).
 
 file_information(TestName,__File,__Line):-
-    sformat(Msg, ' no test case ''~w'' defined in the factbase.',[TestName]),
+    format(string(Msg), ' no test case ''~w'' defined in the factbase.',[TestName]),
     throw(Msg). 
 
 

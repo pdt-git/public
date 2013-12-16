@@ -17,9 +17,9 @@ public class PDTCommonPredicates {
 
 	// entry points
 	public static final String MODULE_PDT_ENTRY_POINTS = "pdt_entry_points";
-	public static final String PDT_ENTRY_POINT = "pdt_entry_point";
-	public static final String ADD_ENTRY_POINT = "add_entry_point";
-	public static final String REMOVE_ENTRY_POINTS = "remove_entry_points";
+	public static final String PDT_ENTRY_POINT = "pdt_entry_points:pdt_entry_point";
+	public static final String ADD_ENTRY_POINT = "pdt_entry_points:add_entry_point";
+	public static final String REMOVE_ENTRY_POINTS = "pdt_entry_points:remove_entry_points";
 	
 	// search
 	public static final String FIND_PREDICATE_REFERENCE = "pdt_search:find_predicate_reference";
@@ -41,6 +41,9 @@ public class PDTCommonPredicates {
 	public static final String FIND_UNDEFINED_CALL = "pdt_call_analysis:find_undefined_call";
 	public static final String FIND_DEAD_PREDICATE = "pdt_call_analysis:find_dead_predicate";
 
+	// meta predicate search
+	public static final String FIND_UNDECLARED_META_PREDICATE = "pdt_call_analysis:find_undeclared_meta_predicate";
+	
 }
 
 

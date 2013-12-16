@@ -1,0 +1,86 @@
+^  Predicate  ^  Outline  (([pdt_search:find_definition_contained_in/10,pdt_search:loaded_file/1]))^  Search definitions  (([pdt_search:find_definitions_categorized/13,pdt_search:find_definitions_categorized/9,pdt_search:find_entity_definition/5,pdt_search:find_primary_definition_visible_in/7,pdt_search:find_alternative_predicates/7]))^  Search references  (([pdt_search:find_reference_to/13,pdt_search:find_module_reference/8]))^  Search meta predicates  (([pdt_call_analysis:find_undeclared_meta_predicate/10]))^  Search completions  (([pdt_search:find_completion/12]))^  Create graphs  (([pl_to_graphML:write_focus_to_graphML/3,pl_to_graphML:write_global_to_graphML/2,pl_to_graphML:write_dependencies_to_graphML/3]))^  File consult state  (([source_files:pdt_source_file/2]))^  Console  (([pdt_console_server:pdt_start_console_server/2,pdt_console_server:pdt_stop_console_server/0]))^
+| $apply:forall/2  |     |     |  x  |  x  |     |  x  |     |     |
+| $dcg:phrase/2  |     |     |     |     |  x  |     |     |     |
+| $dwim:dwim_predicate/2  |     |  x  |     |     |     |     |     |     |
+| $messages:print_message/2  |     |     |  x  |  x  |     |  x  |     |  x  |
+| $syspreds:clause_property/2  |  x  |  x  |  x  |  x  |     |  x  |     |     |
+| $syspreds:current_module/1  |  x  |  x  |  x  |  x  |  x  |  x  |     |     |
+| $syspreds:module_property/2  |  x  |  x  |  x  |  x  |  x  |  x  |     |     |
+| $syspreds:source_file/1  |  x  |     |     |     |     |  x  |  x  |     |
+| $syspreds:source_file_property/2  |     |  x  |  x  |     |     |  x  |  x  |     |
+| $toplevel:prolog/0  |     |     |     |     |     |     |     |  x  |
+| apply:maplist/2  |     |     |  x  |  x  |     |  x  |     |     |
+| apply:maplist/3  |     |     |  x  |  x  |     |  x  |     |     |
+| apply:maplist/4  |     |     |  x  |  x  |     |  x  |     |     |
+| charsio:open_chars_stream/2  |     |  x  |     |     |  x  |     |     |     |
+| error:must_be/2  |     |     |  x  |  x  |     |  x  |     |     |
+| gui_tracer:gtrace/0  |     |     |  x  |  x  |     |  x  |     |     |
+| html_write:html/3  |     |     |     |     |  x  |     |     |     |
+| html_write:print_html/1  |     |     |     |     |  x  |     |     |     |
+| lists:append/3  |     |     |  x  |  x  |     |  x  |     |     |
+| lists:list_to_set/2  |     |     |     |     |     |  x  |     |     |
+| lists:member/2  |  x  |  x  |  x  |  x  |  x  |  x  |     |  x  |
+| lists:min_list/2  |     |     |     |     |     |  x  |     |     |
+| lists:nth1/3  |     |     |  x  |  x  |     |  x  |     |     |
+| lists:union/3  |     |     |  x  |  x  |     |  x  |     |     |
+| pldoc_html:doc_file_objects/5  |     |     |     |     |  x  |     |     |     |
+| pldoc_html:objects/4  |     |     |     |     |  x  |     |     |     |
+| pldoc_process:doc_comment/4  |     |     |     |     |  x  |     |     |     |
+| prolog:called_by/2  |     |     |  x  |  x  |     |  x  |     |     |
+| prolog_clause:clause_info/4  |  x  |  x  |  x  |  x  |     |  x  |     |     |
+| prolog_clause:initialization_layout/4  |     |     |  x  |  x  |     |  x  |     |     |
+| prolog_debug:assertion/1  |     |     |  x  |  x  |     |  x  |     |     |
+| prolog_debug:debug/3  |     |     |  x  |  x  |     |  x  |     |     |
+| prolog_debug:debugging/1  |     |     |  x  |  x  |     |  x  |     |     |
+| prolog_listing:portray_clause/1  |     |     |  x  |  x  |     |  x  |     |     |
+| socket:tcp_accept/3  |     |     |     |     |     |     |     |  x  |
+| socket:tcp_bind/2  |     |     |     |     |     |     |     |  x  |
+| socket:tcp_close_socket/1  |     |     |     |     |     |     |     |  x  |
+| socket:tcp_listen/2  |     |     |     |     |     |     |     |  x  |
+| socket:tcp_open_socket/3  |     |     |     |     |     |     |     |  x  |
+| socket:tcp_setopt/2  |     |     |     |     |     |     |     |  x  |
+| socket:tcp_socket/1  |     |     |     |     |     |     |     |  x  |
+| swi_option:meta_options/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system: $atom_completions/2  |     |     |     |     |  x  |     |     |     |
+| system: $atom_references/2  |     |     |     |     |  x  |     |     |     |
+| system: $get_predicate_attribute/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system: $init_goal/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system: $skip_list/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system: (*->)/2  |     |     |     |     |     |     |     |  x  |
+| <nowiki>system: (=@=)/2</nowiki>  |     |     |  x  |  x  |     |  x  |     |     |
+| system:absolute_file_name/3  |     |  x  |     |     |     |     |     |     |
+| system:access_file/2  |     |  x  |     |     |     |     |     |     |
+| system:atom_to_term/3  |     |  x  |     |     |     |     |     |     |
+| system:atomic_list_concat/2  |     |     |     |     |     |     |     |  x  |
+| system:call_cleanup/2  |     |     |     |     |  x  |     |     |     |
+| system:clause/3  |  x  |     |  x  |  x  |     |  x  |     |     |
+| system:duplicate_term/2  |     |     |  x  |  x  |     |  x  |     |     |
+| system:erase/1  |     |     |     |     |     |     |     |  x  |
+| system:exists_file/1  |     |     |     |     |     |     |  x  |     |
+| system:file_base_name/2  |  x  |  x  |     |     |  x  |     |     |     |
+| system:file_directory_name/2  |  x  |  x  |     |     |  x  |     |     |     |
+| system:file_name_extension/3  |  x  |  x  |     |     |  x  |     |     |     |
+| system:flag/3  |     |     |     |     |     |     |     |  x  |
+| system:format/3  |  x  |  x  |  x  |  x  |  x  |  x  |     |  x  |
+| system:garbage_collect_atoms/0  |     |     |     |     |  x  |     |     |     |
+| system:get_attr/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system:ignore/1  |     |     |     |     |  x  |     |     |     |
+| system:is_list/1  |     |     |  x  |  x  |     |  x  |     |     |
+| system:memberchk/2  |  x  |     |     |     |     |  x  |     |     |
+| system:not/1  |     |     |     |     |     |  x  |     |     |
+| system:nth_clause/3  |  x  |  x  |  x  |     |     |  x  |     |     |
+| system:put_attr/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system:recorded/3  |     |     |     |     |     |     |     |  x  |
+| system:same_term/2  |     |     |  x  |  x  |     |  x  |     |     |
+| system:set_prolog_IO/3  |     |     |     |     |     |     |     |  x  |
+| system:set_stream/2  |     |     |     |     |     |     |     |  x  |
+| system:setarg/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system:setup_call_cleanup/3  |     |     |     |     |     |  x  |     |     |
+| system:source_file/2  |  x  |     |     |     |     |  x  |     |     |
+| system:statistics/2  |     |     |  x  |  x  |     |  x  |     |     |
+| system:strip_module/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system:succ/2  |  x  |     |  x  |  x  |     |  x  |     |     |
+| system:thread_exit/1  |     |     |     |     |     |     |     |  x  |
+| system:time_file/2  |     |     |     |     |     |     |  x  |     |
+| system:unifiable/3  |     |     |  x  |  x  |     |  x  |     |     |
+| system:with_output_to/2  |     |     |     |     |  x  |     |     |     |

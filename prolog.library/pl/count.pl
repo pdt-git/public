@@ -19,6 +19,15 @@
  *  - Semantic: Counting derivations (success) versus results.
  *  - Implementation: Based on nb_setargs/3, flag/3 or findall/3.
  * *********************************************************** */
+:- module(count, [
+	count_facts/2,
+	count_success/2,
+	count/2,
+	count_and_print/2,
+	count_unique/3,
+	count_all_and_unique/3
+]).
+
 :- use_module(library(lists)).
  
 count_facts(Goal, Nr) :-
@@ -39,24 +48,37 @@ count_success(Goal, Times) :-
 :- module_transparent count/2.
 
 count(Goal, _) :-
-  flag(successcounter,_,0),
-  catch(Goal,_Any,fail),     % turn exceptions into failures
-    flag(successcounter,N,N+1),
-  fail.
+	nb_setval(successcounter, 0),
+    catch(Goal,_Any,fail),     % turn exceptions into failures
+    nb_getval(successcounter, N),
+    N2 is N + 1,
+    nb_setval(successcounter,N2),
+    fail.
+    
 count(_, N) :-
-  flag(successcounter,N,N).
+	nb_getval(successcounter, N).
+  
+%count(Goal, _) :-
+%  flag(successcounter,_,0),
+%  catch(Goal,_Any,fail),     % turn exceptions into failures
+%    flag(successcounter,N,N+1),
+%  fail.
+%count(_, N) :-
+%  flag(successcounter,N,N).
 
 
 :- module_transparent count_and_print/2.
 
 count_and_print(Goal, _) :-
-  flag(successcounter,_,0),
+  nb_setval(successcounter,0),
   catch(Goal,_Any,fail),     % turn exceptions into failures
-    flag(successcounter,N,N+1),
+    nb_getval(successcounter,N),
+    N2 is N + 1,
+    nb_setval(successcounter,N2),
     format('~w.~n', [Goal]),
   fail.
 count_and_print(_, N) :-
-  flag(successcounter,N,N).
+  nb_getval(successcounter,N).
   
   
 :- module_transparent count_unique/2.

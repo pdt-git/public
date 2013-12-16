@@ -11,6 +11,16 @@
  * 
  ****************************************************************************/
 
+:- module(general, [
+	mgh/2,
+	built_in/1,
+	repeat_n_times/2,
+	repeat_n_times_loop/2,
+	all/1,
+	prolog_iteration_via_backtracking/1,
+	has_property/3
+]).
+
 :- use_module(library(apply)).
 :- use_module(library(charsio)).
 
@@ -44,15 +54,18 @@ built_in(Head) :-
  * repeat_n_times(+Goal,+N)
  */
 repeat_n_times(Goal,N) :-             % initialize loop counter
-  flag(repeat_counter,_,0),            
+  nb_setval(repeat_counter,0),            
   repeat_n_times_loop(Goal,N).
   
 repeat_n_times_loop(_,N) :-        % stop if counter = N
-  flag(repeat_counter,N,N),
+  nb_getval(repeat_counter,V),
+  V == N,
   !.
 repeat_n_times_loop(Goal,N) :-        % loop
   once(Goal),                           % execute Goal once
-  flag(repeat_counter,I,I+1),           % increment counter
+  nb_getval(repeat_counter, I),
+  I2 is I + 1,
+  nb_setval(repeat_counter,I2),           % increment counter
   repeat_n_times_loop(Goal,N).          % repeat
 
    

@@ -42,12 +42,10 @@
 %             , defined_in_files/4               % (Module,Name,Arity,Locations)
 %             ] ).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
-
-% TODO: Why this import?
-%:- user:consult(pdt_builder_analyzer('meta_pred_toplevel.pl')).
-
+:- use_module(pdt_manual_entry).
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
+:- use_module(library(prolog_clause)).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -417,6 +415,7 @@ primary_location(Locations,_,File,FirstLine) :-
     Sorted = [ NrOfClauses-File-FirstLine |_ ].
     
 
+:- if(current_prolog_flag(dialect, swi)).
 find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, RefFile, RefLine) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
 	extract_name_arity(Term,Module, Head,_Name,_Arity),
@@ -432,6 +431,10 @@ find_alternative_predicates(EnclFile, TermString, RefModule, RefName, RefArity, 
 	;	RefFile = foreign,
 		RefLine = -1
 	).
+:- else.
+find_alternative_predicates(_EnclFile, _TermString, _RefModule, _RefName, _RefArity, _RefFile, _RefLine) :-
+	fail.
+:- endif.
 
         /***********************************************************************
          * Find Definitions in File                                            *
@@ -508,8 +511,8 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
     ).
 
 find_definition_in_file(Options, ContextFile, Module, Name, Arity, Ref, File, Line) :-
-	memberchk(multifile(IsMultifile), Options),
-	memberchk(all_clauses(IsAllClauses), Options),
+	once(member(multifile(IsMultifile), Options)),
+	once(member(all_clauses(IsAllClauses), Options)),
 	find_definition_in_file(IsAllClauses, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line).
 
 find_definition_in_file(true, IsMultifile, ContextFile, Module, Name, Arity, Ref, File, Line) :-
@@ -597,6 +600,7 @@ first_argument_of_clause(Ref, first_argument(Arg)) :-
 %
 % Unlike the strip_module/3 of SWI-Prolog it does not add the module
 % in which it is called if the ModuleHead has no module prefix.
+pdt_strip_module(user:Head,user,1,Head) :- !.
 pdt_strip_module(Module:Head,Module,Line,Head) :- 
      atom(Module),                               % If we are in a proper module
      !,
@@ -748,6 +752,7 @@ find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, 
 	current_module(Name),
 	atom_concat(ModulePrefix,_,Name).
 
+:- if(current_prolog_flag(dialect, swi)).
 find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _) :- 
 	atomic(AtomPrefix),
 	garbage_collect_atoms,
@@ -757,7 +762,7 @@ find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _
 	ReferenceCount > 0, 
 %	Atom \= AtomPrefix,
 	\+ current_predicate(Atom/_Arity).
-
+:- endif.
 
 %% find_entity_definition(SearchString, ExactMatch, File, Line, Entity)
 

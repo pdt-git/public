@@ -23,6 +23,8 @@
 
 :- use_module(util_for_graphML).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
+:- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
+:- use_module(library(lists), [member/2]).
 
 prepare_for_writing(File,OutStream):-
 	reset_id_translation,
@@ -176,9 +178,9 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
 	;	calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, NumberOfCalls),
 		predicate_property(SourceModule:SourceHead, file(SourceFile))
 	),
-	memberchk(SourceFile, DependentFiles),
+	once(member(SourceFile, DependentFiles)),
 	file_of_predicate(TargetModule, TargetName, TargetArity, TargetFile),
-	memberchk(TargetFile, DependentFiles),
+	once(member(TargetFile, DependentFiles)),
 	has_id(SourceFile-SourceModule:SourceName/SourceArity, Source),
 	has_id(TargetFile-TargetModule:TargetName/TargetArity, Target),
     open_edge(Stream, Source, Target),

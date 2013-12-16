@@ -29,6 +29,11 @@ public class PDTPredicates {
 	
 	// smells
 	public static final String SMELL_MARKER_PDT = "pdt_smells:smell_marker_pdt";
+
+	// outline
+	public static final String MODULE_PROPERTY = "module_property";
+	public static final String ENTITY_PROPERTY = "utils4entities::entity_property";
+
 }
 
 

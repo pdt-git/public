@@ -11,11 +11,13 @@
  * 
  ****************************************************************************/
 
+:- module(contains, [contains/2]).
+
 :- use_module(library(lists)). 
 
-sublist(S, L) :-
-  append(_, L2, L),
-  append(S, _, L2).
+%sublist(S, L) :-
+%  append(_, L2, L),
+%  append(S, _, L2).
 
 contains(A, B) :-
   atom(A),

@@ -37,9 +37,10 @@
  ).
  
 :- use_module(library(lists)).
-:- use_module(library(listing)).
-
-:- doc_collect(true).
+:- use_module(pdt_support, [pdt_support/1]).
+:- use_module(logging).
+:- use_module(database).
+:- use_module(utils4modules_visibility).
 
 :- module_transparent(call_and_report_contex_module/1).
 call_and_report_contex_module(Goal) :- 
@@ -67,7 +68,7 @@ call_in_module(Module,Goal) :-
    ).
 
    
-/** 
+/*
  * assert_in_module(?Mod,?Head      ) is det
  *
  * Assert clauses in an explicitly specified module. 

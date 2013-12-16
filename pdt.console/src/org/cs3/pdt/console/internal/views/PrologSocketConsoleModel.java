@@ -306,7 +306,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			readerThread.setName("Console Reader Thread");
 			readerThread.start();
 
-			writer.write("pdt_install_console.\n");
+			writer.write("(current_predicate(pdt_install_console/0)->pdt_install_console;true).\n");
 			writer.flush();
 			Debug.debug("Connect complete");
 			fireAfterConnect();

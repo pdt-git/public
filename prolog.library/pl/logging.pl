@@ -15,8 +15,16 @@
 % Date: 13.02.2006, 04.02.2009
 
 % TODO: Move all logging primitives here.
+
+:- module(logging, [
+	ctc_warning/2,
+	ctc_error/2,
+	log_on_stdout/2,
+	do_if_logging_enabled/1
+]).
    
 :- use_module(library(lists)).
+:- use_module(files).
 
 consult_silent_if_logging_disabled(FileOrFiles) :-
     (  not(loggingEnabled) 
@@ -40,16 +48,25 @@ log_once_to_file(File,Goal) :-
  * ======================================================================== */
 :- dynamic loggingEnabled/0.
 
+:- if(pdt_support:pdt_support(last_call_optimisation)).
 enable_logging :- 
    retractall(loggingEnabled),                    % prevent accidental backtracking(!)
    set_prolog_flag(last_call_optimisation,false), % important for retrieval of parentmodule
    assert(loggingEnabled).
 
-:- enable_logging.                  % default: logging
-   
 disable_logging :- 
    set_prolog_flag(last_call_optimisation,true),
    retractall(loggingEnabled).
+:- else.
+enable_logging :- 
+   retractall(loggingEnabled),      % prevent accidental backtracking(!)
+   assert(loggingEnabled).
+
+disable_logging :- 
+   retractall(loggingEnabled).
+   
+:- endif.   
+:- enable_logging.                  % default: logging
 
 /*
  * Only call a goal (that produces console output) if logging is enabled.
@@ -110,7 +127,7 @@ enable_logging_in_module(Module):-
 	assert(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
-:- dynamic(mod_ignore_is_enabled).
+:- dynamic(mod_ignore_is_enabled/0).
 
 enable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled),
@@ -129,6 +146,7 @@ reset_logging_all_modules:-
 	retractall(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
+:- dynamic(showContextModules_enabled/0).
 /*
  *  Disables / Enables the out of the hierachie of the contextmodule 
  */

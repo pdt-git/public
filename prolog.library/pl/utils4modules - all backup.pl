@@ -41,8 +41,6 @@
            ]
  ).
  
-:- doc_collect(true).
-
 :- module_transparent(call_and_report_contex_module/1).
 call_and_report_contex_module(Goal) :- 
     context_module(M),
