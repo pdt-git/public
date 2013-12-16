@@ -101,7 +101,7 @@ manual_entry(Pred,-1,Content) :-
 
 :- else.
 
-predicate_manual_entry(_, _, _, _) :- fail.
+predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
 :- endif.
 
