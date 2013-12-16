@@ -82,15 +82,17 @@ call_in_module(Module,Goal) :-
  * invocation and all its parents on the stack were "module_transparent"
  * and the invoking module was loaded via use_module ...). 
  */
-assert_in_module(Mod,Head      ) :- assert( :(Mod,Head)            ).
-assert_in_module(Mod,Head,[]   ) :- assert( :(Mod,Head)            ).
+assert_in_module(Mod,Head      ) :- assert( :(Mod,Head) ).
 assert_in_module(Mod,Head,Body ) :- not(is_list(Body)), !, assert( :(Mod,':-'(Head,Body)) ).
 
-assert_in_module(Mod,Head,      [Opt]) :- 
+assert_in_module(Mod,Head, []) :- assert_in_module(Mod,Head ).
+    
+assert_in_module(Mod,Head, [Opt]) :- 
    (  Opt == unique
    -> assert_unique( :(Mod,Head))
    ;  assert(        :(Mod,Head))
    ).
+   
 assert_in_module(Mod,Head,Body, [Opt]) :- 
    (  Opt == unique
    -> assert_unique( :(Mod,':-'(Head,Body)))
