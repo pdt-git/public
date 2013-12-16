@@ -58,6 +58,7 @@
 :- use_module(library(record)).
 :- use_module(library(debug)).
 :- use_module(library(apply)).
+:- use_module(library(error)).
 :- use_module(library(lists)).
 :- use_module(pdt_common_pl('metainference/pdt_prolog_metainference')).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
