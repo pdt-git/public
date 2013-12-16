@@ -575,6 +575,7 @@ first_argument_of_clause(Ref, first_argument(Arg)) :-
 %
 % Unlike the strip_module/3 of SWI-Prolog it does not add the module
 % in which it is called if the ModuleHead has no module prefix.
+pdt_strip_module(user:Head,user,1,Head) :- !.
 pdt_strip_module(Module:Head,Module,Line,Head) :- 
      atom(Module),                               % If we are in a proper module
      !,
@@ -830,5 +831,3 @@ loaded_file(FullPath) :-
 	;	% assume Prolog source file
 		source_file(FullPath)
 	).
-
-source_file_property(_,_) :- fail.

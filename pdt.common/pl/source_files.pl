@@ -34,6 +34,3 @@ pdt_source_file(File, State) :-
 		)
 	;	State = current
 	).
-
-
-source_file_property(_,_) :- fail.
