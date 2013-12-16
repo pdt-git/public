@@ -194,14 +194,15 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		try {
-			initHighlighting();
-		} catch (CoreException e) {
-
+		if (event.getProperty().startsWith("pdt.editor.colors")) {
+			try {
+				initHighlighting();
+			} catch (CoreException e) {
+				Debug.report(e);
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+			}	
 		}
-		catch (PrologInterfaceException e) {
-
-		}	
 	}
 }
 
