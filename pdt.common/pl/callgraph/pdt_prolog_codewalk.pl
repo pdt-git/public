@@ -216,7 +216,7 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	       ),
 	       find_walk_from_module(M, OTerm)),
 	walk_from_multifile(OTerm),
-%	walk_from_initialization(OTerm),
+	walk_from_initialization(OTerm),
 	infer_new_meta_predicates(New, OTerm),
 	statistics(cputime, CPU1),
 	(   New \== []
@@ -259,6 +259,7 @@ scan_module_class(library).
 %
 %	@bug	Relies on private '$init_goal'/3 database.
 
+:- if(current_prolog_flag(dialect, swi)).
 walk_from_initialization(OTerm) :-
 	walk_option_caller(OTerm, '<initialization>'),
 	forall('$init_goal'(_File, Goal, SourceLocation),
@@ -270,6 +271,9 @@ walk_from_initialization(M:Goal, OTerm) :-
 	walk_called_by_body(Goal, M, OTerm).
 walk_from_initialization(_, _).
 
+:- else.
+walk_from_initialization(_OTerm).
+:- endif.
 
 %%	find_walk_from_module(+Module, +OTerm) is det.
 %
