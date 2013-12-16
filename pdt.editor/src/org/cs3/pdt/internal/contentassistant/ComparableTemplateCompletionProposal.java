@@ -22,6 +22,7 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateProposal;
+import org.eclipse.swt.graphics.Image;
 
 public abstract class ComparableTemplateCompletionProposal extends TemplateProposal implements Comparable<ComparableTemplateCompletionProposal> {
 

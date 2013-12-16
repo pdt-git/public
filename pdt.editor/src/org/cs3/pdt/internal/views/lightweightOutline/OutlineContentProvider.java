@@ -14,12 +14,10 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.common.structureElements.PrologTreeElement;
-import org.cs3.pdt.internal.structureElements.PrologOutlineTreeElement;
-//import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-class OutlineContentProvider implements ITreeContentProvider {//, IWorkingCopyProvider  {
+class OutlineContentProvider implements ITreeContentProvider {
 
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
@@ -34,10 +32,6 @@ class OutlineContentProvider implements ITreeContentProvider {//, IWorkingCopyPr
 
 	}
 
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object[] getChildren(Object element) {
 		if(element instanceof PrologSourceFileModel) {
@@ -49,28 +43,15 @@ class OutlineContentProvider implements ITreeContentProvider {//, IWorkingCopyPr
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 
 	}
-
-
-//	@Override
-//	public boolean providesWorkingCopies() {
-//		return false;
-//	}
-
 
 	@Override
 	public Object[] getElements(Object element) {

@@ -71,7 +71,14 @@ public class SearchFileTreeElement implements PrologSearchTreeElement, IAdaptabl
 	}
 
 	public void removeMatch(PrologMatch match) {
-		matchesToSearchElements.remove(match);
+		String signature = match.getSignature();
+		SearchMatchElement searchMatchElement = matchesToSearchElements.get(signature);
+		if (searchMatchElement != null) {
+			searchMatchElement.removeMatch(match);
+			if (searchMatchElement.computeContainedMatches() <= 0) {
+				matchesToSearchElements.remove(signature);
+			}
+		}
 	}
 
 	public void addMatch(PrologMatch match) {

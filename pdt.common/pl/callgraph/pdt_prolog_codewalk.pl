@@ -60,6 +60,7 @@
 :- use_module(library(apply)).
 :- use_module(library(error)).
 :- use_module(library(lists)).
+:- use_module(library(prolog_clause)).
 :- use_module(pdt_common_pl('metainference/pdt_prolog_metainference')).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
 
@@ -465,7 +466,7 @@ walk_called(Goal, Module, TermPos, OTerm) :-
 walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	(   walk_option_autoload(OTerm, false)
 	->  nonvar(Module),
-	    without_autoloading((functor(Meta,N,A), current_predicate(Module:N/A)))
+	    is_defined(Module:Meta)
 	;   true
 	),
 	(   extended_meta_predicate(Module:Meta, Head)
@@ -477,20 +478,22 @@ walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm).
 walk_called(Goal, Module, _, _) :-
 	nonvar(Module),
-	without_autoloading((functor(Goal,N,A), current_predicate(Module:N/A))), !.
+	is_defined(Module:Goal), !.
 walk_called(Goal, Module, TermPos, OTerm) :-
 	callable(Goal), !,
 	undefined(Module:Goal, TermPos, OTerm).
 walk_called(Goal, _Module, TermPos, OTerm) :-
 	not_callable(Goal, TermPos, OTerm).
 
-without_autoloading(Goal) :-
-	(	current_prolog_flag(autoload, Old)
-	->	set_prolog_flag(autoload, false),
-		call(Goal),
-		set_prolog_flag(autoload, Old)
-	;	call(Goal)
-	).
+:- if(current_prolog_flag(dialect, swi)).
+is_defined(Module:Goal) :-
+	'$get_predicate_attribute'(Module:Goal, defined, 1).
+:- else.
+is_defined(Module:Goal) :-
+	functor(Goal,N,A),
+	current_predicate(Module:N/A),
+	!.
+:- endif.
 
 %%	undecided(+Variable, +TermPos, +OTerm)
 
