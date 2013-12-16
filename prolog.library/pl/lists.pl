@@ -96,7 +96,7 @@ ctc_intersection(S1,S2,I) :-
 
 % Caution: This version unifies terms when compring them.
 % If this is not desired, the call site is responsible to
-% do pass copies of the relevant terms.
+% pass copies of the relevant terms.
 inters__unification_based([],_,[]).
 inters__unification_based(Set1,[],[]) :-
    Set1 \= [].
@@ -128,10 +128,9 @@ inters__identity_based([X|T1],[Y|T2], NewI):-
  *
  * Determines the union of two sets represented as dupliate-free lists.
  * Has no side-effects on free variables (free variables are not unified).
- * The result is sorted according to the standard order of terms.
- * Arg1 and arg2 are the input sets. 
+ * The result set is sorted according to the standard order of terms.
+ * Arg1 and Arg2 are the input sets. 
  * Arg3 is their union.
- * Arg4 is their intersection.
  */
  
 union_sorted(Set1,Set2,Set12):- 
@@ -155,8 +154,7 @@ union_sorted__([X|T1],[Y|T2],NewU):-
  * Does not change the relative order of terms. If duplicates are
  * encountered, the first occurence is retained.
  * Arg1 and arg2 are the input sets. 
- * Arg3 is their union. 
- * Arg4 is their intersection.
+ * Arg3 is their union.
  */
 union_order_preserving(S1,S2,Res) :-
    append(S1,S2,S3),

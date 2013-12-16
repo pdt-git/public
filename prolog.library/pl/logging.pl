@@ -41,7 +41,7 @@ log_once_to_file(File,Goal) :-
 :- dynamic loggingEnabled/0.
 
 enable_logging :- 
-   retractall(loggingEnabled),      % prevent accidental backtracking(!)
+   retractall(loggingEnabled),                    % prevent accidental backtracking(!)
    set_prolog_flag(last_call_optimisation,false), % important for retrieval of parentmodule
    assert(loggingEnabled).
 
@@ -69,7 +69,7 @@ verbose(Goal) :-
    
 do_with_logging_enabled(Goal) :-
    ( loggingEnabled 
-      -> (enable_ignore_logging_in_module,		call(Goal),disable_ignore_logging_in_module) 
+      -> (               enable_ignore_logging_in_module, call(Goal),                  disable_ignore_logging_in_module) 
        ; (enable_logging,enable_ignore_logging_in_module, call(Goal), disable_logging, disable_ignore_logging_in_module)
    ).
 
@@ -110,7 +110,7 @@ enable_logging_in_module(Module):-
 	assert(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
-
+:- dynamic(mod_ignore_is_enabled).
 
 enable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled),
