@@ -52,7 +52,7 @@ log_once_to_file(File,Goal) :-
 enable_logging :- 
    retractall(loggingEnabled),                    % prevent accidental backtracking(!)
    set_prolog_flag(last_call_optimisation,false), % important for retrieval of parentmodule
-   assert(loggingEnabled).
+   assertz(loggingEnabled).
 
 disable_logging :- 
    set_prolog_flag(last_call_optimisation,true),
@@ -115,7 +115,7 @@ do_with_logging_disabled(Goal) :-
 disable_logging_in_module(Module):- 
 	current_module(Module),
 	retractall(mod_is_enabled(Module)),
-	assert(mod_is_disabled(Module)).
+	assertz(mod_is_disabled(Module)).
 
 is_logging_in_module_disabled(Module):-
     current_module(Module),
@@ -124,14 +124,14 @@ is_logging_in_module_disabled(Module):-
 
 enable_logging_in_module(Module):-
 	current_module(Module),
-	assert(mod_is_enabled(Module)),
+	assertz(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
 :- dynamic(mod_ignore_is_enabled/0).
 
 enable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled),
-    assert(mod_ignore_is_enabled).
+    assertz(mod_ignore_is_enabled).
     
 disable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled).
@@ -152,7 +152,7 @@ reset_logging_all_modules:-
  */
 disable_showLoggingContextModules:-retractall(showContextModules_enabled).
 enable_showLoggingContextModules:-
-	assert(showContextModules_enabled),
+	assertz(showContextModules_enabled),
 	format('WARNING: === ShowContextModules enabled =========================~n'),
     format('WARNING: This function will double your output and will slow down your console~n'),
     format('WARNING: ==============================================~n').
@@ -231,7 +231,7 @@ ctc_info(Formatterm,Atomlist) :-
 
 assert_logging(Fact) :-
     log_on_stdout(' --- Asserting: ~k.~n', Fact ),
-    assert(Fact).
+    assertz(Fact).
 
 
 /*
