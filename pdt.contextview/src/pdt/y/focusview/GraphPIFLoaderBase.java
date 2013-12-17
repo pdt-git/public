@@ -16,13 +16,9 @@ package pdt.y.focusview;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.Set;
 
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
@@ -33,7 +29,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.progress.UIJob;
 
-import pdt.y.internal.FocusViewSubscription;
 import pdt.y.main.PDTGraphView;
 
 public abstract class GraphPIFLoaderBase {
@@ -57,7 +52,7 @@ public abstract class GraphPIFLoaderBase {
 
 		try {
 			helpFile.delete();
-			pif = getActivePifEnsuringFocusViewSubscription();
+			pif = getActivePif();
 			if (pif != null) {
 				String query = generateQuery(helpFile);
 				Map<String, Object> output = sendQueryToCurrentPiF(query);
@@ -101,32 +96,9 @@ public abstract class GraphPIFLoaderBase {
 		return result;
 	}
 
-	public PrologInterface getActivePifEnsuringFocusViewSubscription() {
+	public PrologInterface getActivePif() {
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
-		if (pif == null) {
-			return null;
-		}
-		PrologInterfaceRegistry pifRegistry = PrologRuntimePlugin.getDefault()
-				.getPrologInterfaceRegistry();
-		String pifKey = pifRegistry.getKey(pif);
-		Set<Subscription> subscriptions = pifRegistry
-				.getSubscriptionsForPif(pifKey);
-
-		if (ownSubscriptionMissing(subscriptions)) {
-			FocusViewSubscription mySubscription = FocusViewSubscription
-					.newInstance(pifKey);
-			pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(
-					mySubscription);
-		}
 		return pif;
-	}
-
-	private boolean ownSubscriptionMissing(Set<Subscription> subscriptions) {
-		for (Subscription subscription : subscriptions) {
-			if (subscription instanceof FocusViewSubscription)
-				return false;
-		}
-		return true;
 	}
 
 	public abstract void setCurrentPath(String currentPath);

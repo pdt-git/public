@@ -81,7 +81,6 @@
          point="org.cs3.prolog.connector.bootstrapContribution">
       <fileContribution
             id="pdt.contextview.fileContribution"
-            key="yworks.contribution.key"
             path="pl/load.pl">
          <dependency
                contribution="pdt.builder.analyzer">
