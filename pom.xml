@@ -84,6 +84,5 @@
     <module>prolog.library</module>
     <module>prolog.connector</module>
     <module>prolog.connector.ui</module>
-    <module>org.cs3.lp.extension</module>
   </modules>
 </project>
