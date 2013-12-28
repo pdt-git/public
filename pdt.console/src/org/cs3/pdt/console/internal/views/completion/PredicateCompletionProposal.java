@@ -13,20 +13,11 @@
 
 package org.cs3.pdt.console.internal.views.completion;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.parser.ParserDelegator;
-
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 
@@ -126,21 +117,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	@Override
 	public String getDescription() {
 		if (!descriptionSet) {
-			if (SearchConstants.COMPLETION_DOC_KIND_TEXT.equals(docKind)) {
-				description = doc;
-			} else if (SearchConstants.COMPLETION_DOC_KIND_HTML.equals(docKind)) {
-				description = extractTextFromHtml(doc.trim());
-			} else if (SearchConstants.COMPLETION_DOC_KIND_FILE.equals(docKind)) {
-				String fileContent = Util.readFromFile(new File(doc));
-				if (fileContent != null && !fileContent.isEmpty()) {
-					description = fileContent;
-				}
-			} else if (SearchConstants.COMPLETION_DOC_KIND_LGT_HELP_FILE.equals(docKind)) {
-				String fileContent = Util.readFromFile(new File(doc));
-				if (fileContent != null && !fileContent.isEmpty()) {
-					return extractTextFromHtml(fileContent.substring(fileContent.indexOf("<body>") + 6, fileContent.indexOf("</body>")));
-				}
-			}
+			description = PDTCommonUtil.getHtmlDocumentation(docKind, doc);
 			descriptionSet = true;
 		}
 		return description;
@@ -177,39 +154,6 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		}
 	}
 	
-	private String extractTextFromHtml(final String html) {
-		final StringBuilder sb = new StringBuilder();
-		HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
-		    public boolean readyForNewline;
-
-		    @Override
-		    public void handleText(final char[] data, final int pos) {
-		        String s = new String(data);
-		        sb.append(s);
-		        readyForNewline = true;
-		    }
-
-		    @Override
-		    public void handleStartTag(final HTML.Tag t, final MutableAttributeSet a, final int pos) {
-		        if (readyForNewline && (t == HTML.Tag.DIV || t == HTML.Tag.BR || t == HTML.Tag.P || t == HTML.Tag.DD || t == HTML.Tag.DT)) {
-		            sb.append("\n");
-		            readyForNewline = false;
-		        }
-		    }
-
-		    @Override
-		    public void handleSimpleTag(final HTML.Tag t, final MutableAttributeSet a, final int pos) {
-		        handleStartTag(t, a, pos);
-		    }
-		};
-		try {
-			new ParserDelegator().parse(new StringReader(html), parserCallback, false);
-		} catch (IOException e) {
-			Debug.report(e);
-		}
-		return sb.toString();
-	}
-
 }
 
 

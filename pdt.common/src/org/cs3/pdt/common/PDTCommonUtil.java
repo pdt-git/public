@@ -14,16 +14,19 @@
 
 package org.cs3.pdt.common;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
 import org.cs3.pdt.common.metadata.SourceLocation;
+import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.ui.util.FileUtils;
@@ -374,6 +377,56 @@ public class PDTCommonUtil {
 		} else {
 	    throw new IllegalStateException("HTTP response: " + responseCode);
 	}
+	}
+	
+	public static String getHtmlDocumentation(String docKind, String doc) {
+		if (SearchConstants.COMPLETION_DOC_KIND_NODOC.equals(docKind)) {
+			return null;
+		} else if (SearchConstants.COMPLETION_DOC_KIND_TEXT.equals(docKind)) {
+			return "<html><head><style>\n" + getPlDocCss() + "\n</style></head><body>" + doc + "</body></html>";
+		} else if (SearchConstants.COMPLETION_DOC_KIND_HTML.equals(docKind)) {
+			if (doc != null) {
+//				if(doc.indexOf("\n") > -1){
+//					doc="<b>"+doc.trim().replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
+//				}
+				return "<html><head><style>\n" + getPlDocCss() + "\n</style></head><body>" + doc.trim() + "</body></html>";
+			} else {
+				return null;
+			}
+		} else if (SearchConstants.COMPLETION_DOC_KIND_FILE.equals(docKind)) {
+			String fileContent = Util.readFromFile(new File(doc));
+			if (fileContent != null && !fileContent.isEmpty()) {
+				return fileContent;
+			}
+		} else if (SearchConstants.COMPLETION_DOC_KIND_LGT_HELP_FILE.equals(docKind)) {
+			String fileContent = Util.readFromFile(new File(doc));
+			if (fileContent != null && !fileContent.isEmpty()) {
+				return fileContent.substring(fileContent.indexOf("<html"));
+			}
+		}
+		return null;
+	}
+
+	private static String plDocCss;
+	
+	private static String getPlDocCss() {
+		if (plDocCss == null) {
+			URL url = PDTCommonPlugin.getDefault().getBundle().getEntry("/css/pldoc.css");
+			StringBuilder buf = new StringBuilder();
+			try {
+				InputStream inputStream = url.openConnection().getInputStream();
+				BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+				String inputLine;
+				while ((inputLine = in.readLine()) != null) {
+					buf.append(inputLine);
+				}
+				in.close();
+			} catch (IOException e) {
+				Debug.report(e);
+			}
+			plDocCss = buf.toString();
+		}
+		return plDocCss;
 	}
 
 }

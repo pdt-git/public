@@ -18,15 +18,17 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.PopupDialog;
+import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.OpenWindowListener;
+import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -37,13 +39,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 
 /**
  * ContentProposalAdapter can be used to attach content proposal behavior to a
@@ -416,7 +419,8 @@ public class ContentProposalAdapter {
 			/*
 			 * The text control that displays the text.
 			 */
-			private Text text;
+//			private Text text;
+			private Browser fBrowser;
 
 			/*
 			 * The String shown in the popup.
@@ -435,24 +439,40 @@ public class ContentProposalAdapter {
 			 * Create a text control for showing the info about a proposal.
 			 */
 			protected Control createDialogArea(Composite parent) {
-				text = new Text(parent, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP
-						| SWT.NO_FOCUS);
+//				text = new Text(parent, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP
+//						| SWT.NO_FOCUS);
+				fBrowser= new Browser(parent, SWT.NONE);
+				fBrowser.setJavascriptEnabled(false);
+				Display display= getShell().getDisplay();
+				fBrowser.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+				fBrowser.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 
-				// Use the compact margins employed by PopupDialog.
-				GridData gd = new GridData(GridData.BEGINNING
-						| GridData.FILL_BOTH);
-				gd.horizontalIndent = PopupDialog.POPUP_HORIZONTALSPACING;
-				gd.verticalIndent = PopupDialog.POPUP_VERTICALSPACING;
-				text.setLayoutData(gd);
-				text.setText(contents);
-
-				// since SWT.NO_FOCUS is only a hint...
-				text.addFocusListener(new FocusAdapter() {
-					public void focusGained(FocusEvent event) {
-						ContentProposalPopup.this.close();
+				fBrowser.addOpenWindowListener(new OpenWindowListener() {
+					public void open(WindowEvent event) {
+						event.required= true; // Cancel opening of new windows
 					}
 				});
-				return text;
+
+				// Replace browser's built-in context menu with none
+				fBrowser.setMenu(new Menu(getShell(), SWT.NONE));
+
+//				// Use the compact margins employed by PopupDialog.
+//				GridData gd = new GridData(GridData.BEGINNING
+//						| GridData.FILL_BOTH);
+//				gd.horizontalIndent = PopupDialog.POPUP_HORIZONTALSPACING;
+//				gd.verticalIndent = PopupDialog.POPUP_VERTICALSPACING;
+//				text.setLayoutData(gd);
+//				text.setText(contents);
+//
+//				// since SWT.NO_FOCUS is only a hint...
+//				text.addFocusListener(new FocusAdapter() {
+//					public void focusGained(FocusEvent event) {
+//						ContentProposalPopup.this.close();
+//					}
+//				});
+//				return text;
+				fBrowser.setText(contents);
+				return fBrowser;
 			}
 
 			/*
@@ -527,8 +547,11 @@ public class ContentProposalAdapter {
 					newContents = EMPTY;
 				}
 				this.contents = newContents;
-				if (text != null && !text.isDisposed()) {
-					text.setText(contents);
+//				if (text != null && !text.isDisposed()) {
+//					text.setText(contents);
+//				}
+				if (fBrowser != null && !fBrowser.isDisposed()) {
+					fBrowser.setText(contents);
 				}
 			}
 
@@ -536,11 +559,16 @@ public class ContentProposalAdapter {
 			 * Return whether the popup has focus.
 			 */
 			boolean hasFocus() {
-				if (text == null || text.isDisposed()) {
+//				if (text == null || text.isDisposed()) {
+//					return false;
+//				}
+//				return text.getShell().isFocusControl()
+//						|| text.isFocusControl();
+				if (fBrowser == null || fBrowser.isDisposed()) {
 					return false;
 				}
-				return text.getShell().isFocusControl()
-						|| text.isFocusControl();
+				return fBrowser.getShell().isFocusControl()
+						|| fBrowser.isFocusControl();
 			}
 		}
 
