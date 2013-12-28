@@ -342,7 +342,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		return ((IStructuredSelection) fTreeViewer.getSelection()).getFirstElement();
 	}
 
-	private void gotoSelectedElement() {
+	protected void gotoSelectedElement() {
 //		Object selectedElement= getSelectedElement();
 		//TODO
 //		if (selectedElement != null) {

@@ -198,7 +198,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 
 	}
 
-	public void gotoSelectedElement() {
+	protected void gotoSelectedElement() {
 		Object selection = getSelectedElement();
 		int line = -1;
 		if (selection instanceof OutlinePredicateElement) {
