@@ -84,7 +84,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		initHighlighting();
 	}
 
-	private void initHighlighting()
+	void initHighlighting()
 			throws PrologInterfaceException, CoreException {
 		// "Tokens" indicate the desired highlighting
 		IToken variableToken    = tokenFor(manager.getVariableColor());

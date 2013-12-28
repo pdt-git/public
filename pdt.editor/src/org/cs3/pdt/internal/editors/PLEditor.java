@@ -92,7 +92,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -1423,7 +1422,15 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					updateTitleImage(getEditorInput());
+					PLEditor.this.updateTitleImage(getEditorInput());
+					try {
+						PLEditor.this.configuration.getPLScanner().initHighlighting();
+						PLEditor.this.getSourceViewer().invalidateTextPresentation();
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+					} catch (CoreException e) {
+						Debug.report(e);
+					};
 				}
 			});
 		}
@@ -1436,7 +1443,15 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				updateTitleImage(getEditorInput());
+				PLEditor.this.updateTitleImage(getEditorInput());
+				try {
+					PLEditor.this.configuration.getPLScanner().initHighlighting();
+					PLEditor.this.getSourceViewer().invalidateTextPresentation();
+				} catch (PrologInterfaceException e) {
+					Debug.report(e);
+				} catch (CoreException e) {
+					Debug.report(e);
+				};
 			}
 		});
 	}
