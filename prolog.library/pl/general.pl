@@ -18,7 +18,8 @@
 	repeat_n_times_loop/2,
 	all/1,
 	prolog_iteration_via_backtracking/1,
-	has_property/3
+	has_property/3,
+	iso_predicate/4
 ]).
 
 :- use_module(library(apply)).
@@ -105,7 +106,27 @@ has_property(_Pred,_Prop,0).
 %extract_var_name(=(VarName, _), VarName) :- !.
 %extract_var_name(VarName, VarName) :- !.
     
+iso_predicate(Name, Arity, Head, MetaHead) :-
+	iso_predicate_(Name, Arity, Head, MetaHead).
 
+:- dynamic(iso_predicate_/4). % (Name, Arity, Head, MetaHead)
 
+collect_iso_predicates :-
+	retractall(iso_predicate_(_, _, _, _)),
+	current_predicate(Name/Arity),
+	Name \== (:),
+	functor(Head, Name, Arity),
+	predicate_property(Head, iso),
+	(	predicate_property(Head, meta_predicate(MetaHead))
+	->	true
+	;	MetaHead = []
+	),
+	(	iso_predicate_(Name, Arity, _, _)
+	->	true
+	;	assertz(iso_predicate_(Name, Arity, Head, MetaHead))
+	),
+	fail.
+collect_iso_predicates.
 
+:- initialization(collect_iso_predicates).
 

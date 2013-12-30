@@ -12,19 +12,19 @@
 
 :- object(logtalk_editor_adapter).
 
-:- uses(list, [
-	length/2, member/2, memberchk/2, selectchk/3
-]).
-:- uses(numberlist, [
-	sum/2
-]).
 :- uses(utils4entities, [
 	source_file_entity/3, entity/1, entity_property/3
+]).
+
+:- uses(list, [
+	memberchk/2
 ]).
 
 :- uses(help, [
 	built_in_directive/4, built_in_predicate/4, built_in_method/4, built_in_non_terminal/4
 ]).
+
+:- use_module(pdt_prolog_library(general), [iso_predicate/4]).
 
 :- public(predicates_with_property/3).
 
@@ -53,6 +53,12 @@ predicate_with_property(Property, _FileName, Name) :-
 	logtalk_built_in(Name, Arity),
 	functor(Head, Name, Arity),
 	catch(logtalk<<predicate_property(Head, Property),_,fail).
+predicate_with_property(Property, FileName, Name) :-
+	(	Property = (dynamic)
+	;	Property = meta_predicate(_)
+	),
+	source_file_entity(FileName, _, Entity),
+	possibly_visible_predicate(Entity, _NonPrivate, Name, _Arity, Property).
 
 :- private(logtalk_built_in/2).
 
@@ -64,30 +70,41 @@ logtalk_built_in(Name, Arity) :-
 	built_in_method(Name, Arity, _, _).
 logtalk_built_in(Name, Arity) :-
 	built_in_non_terminal(Name, Arity, _, _).
-	
-:- private(iso_predicate/4). % (Name, Arity, Head, MetaHead)
-:- dynamic(iso_predicate/4).
 
-:- initialization(collect_iso_predicates).
 
-:- private(collect_iso_predicates/0).
-
-collect_iso_predicates :-
-	retractall(iso_predicate(_, _, _, _)),
-	user::current_predicate(Name/Arity),
-	Name \== (:),
+:- private(possibly_visible_predicate/5).
+possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
+	entity_property(Entity, _, declares(Name/Arity, Properties)),
+	memberchk(Property, Properties),
+	(	NonPrivate == true
+	->	memberchk(scope(Scope), Properties),
+		(	Scope == (public)
+		;	Scope == (protected)
+		)
+	;	true
+	).
+possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
+	NonPrivate \== true,
+	entity_property(Entity, _, calls(Object::Name/Arity, _)),
 	functor(Head, Name, Arity),
-	user::predicate_property(Head, iso),
-	(	user::predicate_property(Head, meta_predicate(MetaHead))
-	->	true
-	;	MetaHead = []
-	),
-	(	iso_predicate(Name, Arity, _, _)
-	->	true
-	;	assertz(iso_predicate(Name, Arity, Head, MetaHead))
-	),
-	fail.
+	catch(Object::predicate_property(Head, Property), _, fail).
+possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
+	NonPrivate \== true,
+	entity_property(Entity, _, calls(Module:Name/Arity, _)),
+	nonvar(Module),
+	functor(Head, Name, Arity),
+	catch(user::predicate_property(Module:Head, Property), _, fail).
+possibly_visible_predicate(Entity, _NonPrivate, Name, Arity, Property) :-
+	parent_entity(Entity, ParentEntity),
+	possibly_visible_predicate(ParentEntity, true, Name, Arity, Property).
 
-collect_iso_predicates.
+:- private(parent_entity/2).
+parent_entity(Entity, ParentEntity) :- extends_object(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- extends_category(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- extends_protocol(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- imports_category(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- implements_protocol(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- specializes_class(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- instantiates_class(Entity, ParentEntity).
 
 :- end_object.
