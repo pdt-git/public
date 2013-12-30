@@ -419,7 +419,6 @@ public class ContentProposalAdapter {
 			/*
 			 * The text control that displays the text.
 			 */
-//			private Text text;
 			private Browser fBrowser;
 
 			/*
@@ -439,8 +438,6 @@ public class ContentProposalAdapter {
 			 * Create a text control for showing the info about a proposal.
 			 */
 			protected Control createDialogArea(Composite parent) {
-//				text = new Text(parent, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP
-//						| SWT.NO_FOCUS);
 				fBrowser= new Browser(parent, SWT.NONE);
 				fBrowser.setJavascriptEnabled(false);
 				Display display= getShell().getDisplay();
@@ -456,21 +453,6 @@ public class ContentProposalAdapter {
 				// Replace browser's built-in context menu with none
 				fBrowser.setMenu(new Menu(getShell(), SWT.NONE));
 
-//				// Use the compact margins employed by PopupDialog.
-//				GridData gd = new GridData(GridData.BEGINNING
-//						| GridData.FILL_BOTH);
-//				gd.horizontalIndent = PopupDialog.POPUP_HORIZONTALSPACING;
-//				gd.verticalIndent = PopupDialog.POPUP_VERTICALSPACING;
-//				text.setLayoutData(gd);
-//				text.setText(contents);
-//
-//				// since SWT.NO_FOCUS is only a hint...
-//				text.addFocusListener(new FocusAdapter() {
-//					public void focusGained(FocusEvent event) {
-//						ContentProposalPopup.this.close();
-//					}
-//				});
-//				return text;
 				fBrowser.setText(contents);
 				return fBrowser;
 			}
@@ -547,9 +529,6 @@ public class ContentProposalAdapter {
 					newContents = EMPTY;
 				}
 				this.contents = newContents;
-//				if (text != null && !text.isDisposed()) {
-//					text.setText(contents);
-//				}
 				if (fBrowser != null && !fBrowser.isDisposed()) {
 					fBrowser.setText(contents);
 				}
@@ -559,11 +538,6 @@ public class ContentProposalAdapter {
 			 * Return whether the popup has focus.
 			 */
 			boolean hasFocus() {
-//				if (text == null || text.isDisposed()) {
-//					return false;
-//				}
-//				return text.getShell().isFocusControl()
-//						|| text.isFocusControl();
 				if (fBrowser == null || fBrowser.isDisposed()) {
 					return false;
 				}
