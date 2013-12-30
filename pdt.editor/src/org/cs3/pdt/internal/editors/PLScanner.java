@@ -28,6 +28,7 @@ import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.FileUtils;
+import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -173,7 +174,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		try {
 			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
 			Map<String, Object> solutions = session
-					.queryOnce(bT(PDTPredicates.PREDICATES_WITH_PROPERTY, property, Util.quoteAtom(file.getName()), "Predicates")); 
+					.queryOnce(bT(PDTPredicates.PREDICATES_WITH_PROPERTY, property, Util.quoteAtom(UIUtils.prologFileName(file)), "Predicates")); 
 
 			if (solutions == null)
 				return null;
