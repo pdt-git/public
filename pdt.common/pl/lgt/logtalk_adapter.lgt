@@ -49,6 +49,12 @@
 	source_file_entity/3, entity/1, entity_property/3
 ]).
 
+:- uses(help, [
+	built_in_directive/4, built_in_predicate/4, built_in_method/4, built_in_non_terminal/4, completion/2
+]).
+
+:- use_module(pdt_prolog_library(general), [iso_predicate/4]).
+
 %:- use_module(library(pldoc/doc_library)).
 %:- use_module(library(explain)).
 %:- use_module(library(help)).
@@ -456,9 +462,7 @@ find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functo
 %% find_completion(?EnclosingFile, ?LineInFile, +Prefix, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
 % 
 :- public(find_completion/12).
-find_completion(SearchEntity::PredicatePrefix, EnclosingFile, _, predicate, DefiningOrDeclaringEntity, Name, Arity, Visibility, false, _, nodoc, _) :-
-	var(EnclosingFile),
-	!,
+find_completion(SearchEntity::PredicatePrefix, _EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, ArgNames, DocKind, Documentation) :-
 	(	var(SearchEntity)
 	->	true
 	;	Entity = SearchEntity
@@ -468,13 +472,35 @@ find_completion(SearchEntity::PredicatePrefix, EnclosingFile, _, predicate, Defi
 	atom_concat(PredicatePrefix, _, Name),
 	functor(Head, Name, Arity),
 	Entity::predicate_property(Head, scope(Visibility)),
+%	(	var(SearchEntity)
+%	->	DefiningOrDeclaringEntity = Entity
+%	;	(	Entity::predicate_property(Head, defined_in(DefiningOrDeclaringEntity))
+%		->	true
+%		;	Entity = DefiningOrDeclaringEntity
+%		)
+%	),
+	decode(Head, Entity, DeclaringEntity, _, _, _, DeclarationProperties, declaration, _),
+	predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Documentation).
+
+find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, ArgNames, DocKind, Documentation) :-
 	(	var(SearchEntity)
-	->	DefiningOrDeclaringEntity = Entity
-	;	(	Entity::predicate_property(Head, defined_in(DefiningOrDeclaringEntity))
-		->	true
-		;	Entity = DefiningOrDeclaringEntity
-		)
-	).
+	->	true
+	;	Entity = SearchEntity
+	),
+	current_object(Entity),
+	Entity<<current_predicate(Name/Arity),
+	atom_concat(PredicatePrefix, _, Name),
+	functor(Head, Name, Arity),
+	Entity<<predicate_property(Head, scope(Visibility)),
+%	(	var(SearchEntity)
+%	->	DefiningOrDeclaringEntity = Entity
+%	;	(	Entity<<predicate_property(Head, defined_in(DefiningOrDeclaringEntity))
+%		->	true
+%		;	Entity = DefiningOrDeclaringEntity
+%		)
+%	),
+	decode(Head, Entity, DeclaringEntity, _, _, _, DeclarationProperties, declaration, _),
+	predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Documentation).
 
 find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 	atomic(Prefix),
@@ -488,8 +514,97 @@ find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 find_completion(Prefix, EnclosingFile, _Line, predicate, '', Name, Arity, private, true, _, lgt_help_file, FileName) :-
 	nonvar(EnclosingFile),
 	atomic(Prefix),
-	help::completion(Prefix, Name/Arity-FileName).
+	completion(Prefix, Name/Arity-FileName).
 
+find_completion(Prefix, EnclosingFile, _Line, predicate, '', Name, Arity, private, true, _, nodoc, _) :-
+	nonvar(EnclosingFile),
+	atomic(Prefix),
+	iso_predicate(Name, Arity, _, _),
+	atom_concat(Prefix, _, Name),
+	\+ logtalk_built_in(Name, Arity).
+
+find_completion(Prefix, EnclosingFile, Line, predicate, Entity, Name, Arity, Scope, false, ArgNames, DocKind, Documentation) :-
+	nonvar(EnclosingFile),
+	atomic(Prefix),
+	source_file_entity(EnclosingFile, Line, Entity),
+	possibly_visible_predicate(Entity, local, Name, Arity, Properties),
+	atom_concat(Prefix, _, Name),
+	memberchk(scope(Scope), Properties),
+	functor(Head, Name, Arity),
+	predicate_documentation(Head, Properties, ArgNames, DocKind, Documentation).
+
+find_completion(PrefixTerm, EnclosingFile, Line, predicate, DeclaringEntity, Name, Arity, Scope, false, ArgNames, DocKind, Documentation) :-
+	nonvar(EnclosingFile),
+	compound(PrefixTerm),
+	source_file_entity(EnclosingFile, Line, Entity),
+	possibly_visible_predicate(Entity, non_private, Name, Arity, Properties),
+	functor(Head, Name, Arity),
+	prefix_term_exchange(PrefixTerm, Head, Prefix, NewTerm),
+	atom_concat(Prefix, _, Name),
+	decode(NewTerm, Entity, DeclaringEntity, _, _, _, DeclarationProperties, declaration, _),
+	memberchk(scope(Scope), Properties),
+	predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Documentation).
+
+:- private(possibly_visible_predicate/5).
+possibly_visible_predicate(Entity, Filter, Name, Arity, Properties) :-
+	entity_property(Entity, _, declares(Name/Arity, Properties)),
+	(	Filter == non_private
+	->	memberchk(scope(Scope), Properties),
+		(	Scope == (public)
+		;	Scope == (protected)
+		)
+	;	true
+	).
+possibly_visible_predicate(Entity, Filter, Name, Arity, [scope(local)|Properties]) :-
+	Filter \== non_private,
+	entity_property(Entity, _, defines(Name/Arity, Properties)),
+	\+ entity_property(Entity, _, declares(Name/Arity, _)).
+possibly_visible_predicate(Entity, Filter, Name, Arity, Property) :-
+	Filter \== local,
+	parent_entity(Entity, ParentEntity),
+	possibly_visible_predicate(ParentEntity, non_private, Name, Arity, Property).
+
+:- private(parent_entity/2).
+parent_entity(Entity, ParentEntity) :- extends_object(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- extends_category(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- extends_protocol(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- imports_category(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- implements_protocol(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- specializes_class(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- instantiates_class(Entity, ParentEntity).
+
+:- private(prefix_term_exchange/4).
+prefix_term_exchange(::Prefix, Term, Prefix, ::Term).
+prefix_term_exchange(^^Prefix, Term, Prefix, ^^Term).
+prefix_term_exchange(:Prefix, Term, Prefix, :Term).
+
+:- private(predicate_documentation/5).
+predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Documentation) :-
+	member(info(Info), DeclarationProperties),
+	!,
+	ignore(member(argnames(ArgNames), Info)),
+	(	member(comment(Comment), Info)
+	->	functor(Head, Functor, Arity),
+		(	var(ArgNames)
+		->	DocHead = Functor/Arity
+		;	DocHead =.. [Functor|ArgNames]
+		),
+		format(atom(Documentation), '~w</br></br>~w', [DocHead, Comment]),
+		DocKind = text
+	;	DocKind = nodoc
+	).
+predicate_documentation(_Head, _DeclarationProperties, _ArgNames, nodoc, _Documentation).	
+
+
+:- private(logtalk_built_in/2).
+logtalk_built_in(Name, Arity) :-
+	built_in_directive(Name, Arity, _, _).
+logtalk_built_in(Name, Arity) :-
+	built_in_predicate(Name, Arity, _, _).
+logtalk_built_in(Name, Arity) :-
+	built_in_method(Name, Arity, _, _).
+logtalk_built_in(Name, Arity) :-
+	built_in_non_terminal(Name, Arity, _, _).
 
                /*************************************
                 * PROLOG ERROR MESSAGE HOOK         *
