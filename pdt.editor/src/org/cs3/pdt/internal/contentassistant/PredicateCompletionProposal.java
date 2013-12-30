@@ -112,6 +112,8 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 				return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 			} else if (SearchConstants.VISIBILITY_PRIVATE.equals(visibility)) {
 				return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
+			} else if (SearchConstants.VISIBILITY_LOCAL.equals(visibility)) {
+				return ImageRepository.getImage(ImageRepository.PE_LOCAL);
 			}
 		}
 		return null;
