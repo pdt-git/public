@@ -101,7 +101,7 @@ possibly_visible_predicate(Entity, _NonPrivate, Name, Arity, Property) :-
 :- private(parent_entity/2).
 parent_entity(Entity, ParentEntity) :- extends_object(Entity, ParentEntity).
 parent_entity(Entity, ParentEntity) :- extends_category(Entity, ParentEntity).
-parent_entity(Entity, ParentEntity) :- extends_protocol(Entity, ParentEntity).
+parent_entity(Entity, ParentEntity) :- atomic(Entity), extends_protocol(Entity, ParentEntity).
 parent_entity(Entity, ParentEntity) :- imports_category(Entity, ParentEntity).
 parent_entity(Entity, ParentEntity) :- implements_protocol(Entity, ParentEntity).
 parent_entity(Entity, ParentEntity) :- specializes_class(Entity, ParentEntity).
