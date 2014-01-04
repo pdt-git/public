@@ -95,4 +95,40 @@
             path="pl/">
       </fileSearchPathContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.cs3.pdt.perspective">
+         <view
+               id="pdt.view.focus"
+               minimized="false"
+               relationship="stack"
+               relative="prolog.perspective.views.folder">
+         </view>
+         <view
+               id="pdt.view.global"
+               minimized="false"
+               relationship="stack"
+               relative="prolog.perspective.views.folder">
+         </view>
+         <view
+               id="pdt.view.dependencies"
+               minimized="false"
+               relationship="stack"
+               relative="prolog.perspective.views.folder">
+         </view>
+         <viewShortcut
+               id="pdt.view.focus">
+         </viewShortcut>
+         <viewShortcut
+               id="pdt.view.global">
+         </viewShortcut>
+         <viewShortcut
+               id="pdt.view.dependencies">
+         </viewShortcut>
+         <viewShortcut
+               id="pdt.view.logtalk.entity">
+         </viewShortcut>
+      </perspectiveExtension>
+   </extension>
 </plugin>

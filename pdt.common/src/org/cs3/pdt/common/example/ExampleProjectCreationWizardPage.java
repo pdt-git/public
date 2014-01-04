@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.example;
+package org.cs3.pdt.common.example;
 
 import java.util.ArrayList;
 

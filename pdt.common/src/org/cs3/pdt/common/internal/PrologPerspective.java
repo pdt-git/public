@@ -11,18 +11,21 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt;
+package org.cs3.pdt.common.internal;
 
-import org.cs3.pdt.console.internal.views.PrologConsoleView;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.IViewRegistry;
 
 public class PrologPerspective implements IPerspectiveFactory {
 	
 	public static final String CONSOLE_FOLDER = "prolog.perspective.console.folder";
 	public static final String VIEWS_FOLDER = "prolog.perspective.views.folder";
+	
+	private static final String PACKAGE_EXPLORER = "org.eclipse.jdt.ui.PackageExplorer";
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
@@ -34,10 +37,6 @@ public class PrologPerspective implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");
 		layout.addNewWizardShortcut("pdt.module.wizard");
-		layout.addShowViewShortcut(PrologConsoleView.HOOK_ID);
-		layout.addShowViewShortcut("pdt.view.global");
-		layout.addShowViewShortcut("pdt.view.focus");
-		layout.addShowViewShortcut("pdt.view.dependencies");
 	}
 
 	public void defineLayout(IPageLayout layout) {
@@ -49,16 +48,18 @@ public class PrologPerspective implements IPerspectiveFactory {
 		
 //		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
 		IFolderLayout bottomFolder = layout.createFolder(CONSOLE_FOLDER, IPageLayout.BOTTOM, 0.65f, editorArea);
-		bottomFolder.addView(PrologConsoleView.HOOK_ID);
 		bottomFolder.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottomFolder.addView(NewSearchUI.SEARCH_VIEW_ID);
 //		layout.addView(NewSearchUI.SEARCH_VIEW_ID, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
-		IFolderLayout viewsFolder = layout.createFolder(VIEWS_FOLDER, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
-		viewsFolder.addView("pdt.view.focus");
-		viewsFolder.addView("pdt.view.global");
-		viewsFolder.addView("pdt.view.dependencies");
+//		IFolderLayout viewsFolder =
+		layout.createFolder(VIEWS_FOLDER, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
 		
-		layout.addView(IPageLayout.ID_PROJECT_EXPLORER, IPageLayout.LEFT, 0.2f, editorArea);
+		IViewRegistry viewRegistry = PlatformUI.getWorkbench().getViewRegistry();
+		if (viewRegistry.find(PACKAGE_EXPLORER) != null) {
+			layout.addView(PACKAGE_EXPLORER, IPageLayout.LEFT, 0.2f, editorArea);
+		} else {
+			layout.addView(IPageLayout.ID_PROJECT_EXPLORER, IPageLayout.LEFT, 0.2f, editorArea);
+		}
 //		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, 0.2f, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, 0.8f, editorArea);
 	}

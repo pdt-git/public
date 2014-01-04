@@ -72,7 +72,6 @@
     </plugins>
   </build>
   <modules>
-    <module>pdt</module>
     <module>pdt.builder</module>
     <module>pdt.common</module>
     <module>pdt.console</module>

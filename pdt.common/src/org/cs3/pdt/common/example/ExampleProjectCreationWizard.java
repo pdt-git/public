@@ -12,14 +12,14 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.example;
+package org.cs3.pdt.common.example;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -59,7 +59,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 
     public ExampleProjectCreationWizard() {
         super ();
-        setDialogSettings(PDTPlugin.getDefault().getDialogSettings());
+        setDialogSettings(PDTCommonPlugin.getDefault().getDialogSettings());
         setWindowTitle("PDT Tutorial Project");
         setNeedsProgressMonitor(true);
     }

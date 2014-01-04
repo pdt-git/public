@@ -84,12 +84,6 @@ and/or distributed.
    </requires>
 
    <plugin
-         id="org.cs3.pdt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.cs3.pdt.console"
          download-size="0"
          install-size="0"
