@@ -153,7 +153,8 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 		;	format(atom(Called), '~w:~w/~w',  [FromPrint, Functor, Arity])
 		)
 	),
-	PropertyList = [line(Line), label(Called)|PropertyList0].
+	format(atom(Label), '~w (in clause starting at line ~w)', [Called, Line]),
+	PropertyList = [line(Line), label(Label)|PropertyList0].
 
 find_entity_reference(Entity, ExactMatch, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
