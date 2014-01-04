@@ -86,13 +86,25 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 	;	Term = entity(From)
 	),
 	!,
-	(	entity_property(Entity, _, calls(From::Functor/Arity, Properties)),
+	(	(	nonvar(SearchFunctor)
+		->	entity_property(Entity, _, calls(From::Functor/Arity, Properties))
+		;	entity_property(Entity, _, calls(From0::Functor/Arity, Properties)),
+			nonvar(From0),
+			From0 = From
+		),
 		Kind = logtalk(object)
-	;	entity_property(Entity, _, calls(::Functor/Arity, Properties)),
+	;	nonvar(SearchFunctor),
+		entity_property(Entity, _, calls(::Functor/Arity, Properties)),
 		Kind = logtalk(self)
-	;	entity_property(Entity, _, calls(^^Functor/Arity, Properties)),
+	;	nonvar(SearchFunctor),
+		entity_property(Entity, _, calls(^^Functor/Arity, Properties)),
 		Kind = logtalk(super)
-	;	entity_property(Entity, _, calls(From:Functor/Arity, Properties)),
+	;	(	nonvar(SearchFunctor)
+		->	entity_property(Entity, _, calls(From:Functor/Arity, Properties))
+		;	entity_property(Entity, _, calls(From0:Functor/Arity, Properties)),
+			nonvar(From0),
+			From0 = From
+		),
 		Kind = prolog
 	;	nonvar(SearchFunctor),
 		entity_property(Entity, _, calls(Functor/Arity, Properties)),
