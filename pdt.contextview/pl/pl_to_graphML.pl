@@ -15,7 +15,7 @@
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
 								write_dependencies_to_graphML/3,
-								write_logtalk_entities_to_graphML/3]).
+								write_logtalk_entities_to_graphML/4]).
 
 :- use_module(graphML_api).
 :- use_module(util_for_graphML).
@@ -23,6 +23,9 @@
 :- use_module(pdt_common_pl(pdt_search)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 :- use_module(library(lists), [list_to_set/2, append/3, member/2]).
+:- use_module( prolog_connector_pl(split_file_path), [
+	split_file_path/5 % (File,Folder,FileName,BaseName,Extension)
+]).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -61,11 +64,15 @@ write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
 
-write_logtalk_entities_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
+write_logtalk_entities_to_graphML(DiagramType, ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     (	current_predicate(logtalk_load/1)
     ->	filter_logtalk(ConsultedFilePaths, _, ConsultedLogtalkFilePaths),
-    	write_to_graphML(GraphFile, write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths))
+    	split_file_path(GraphFile, Directory, FileName, _, _),
+    	graphML_writer::set_file_name(FileName),
+    	DiagramObject =.. [DiagramType, graphml],
+    	DiagramObject::files(ProjectPath, ConsultedLogtalkFilePaths, [output_directory(Directory)])
+%    	write_to_graphML(GraphFile, write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths))
     ;	true
     ).
 

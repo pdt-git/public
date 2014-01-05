@@ -17,8 +17,11 @@ import java.util.Arrays;
 
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
+import pdt.y.model.realizer.edges.LogtalkEdgeRealizer;
 import pdt.y.model.realizer.groups.FileGroupNodeRealizer;
+import pdt.y.model.realizer.groups.LogtalkGroupNodeRealizer;
 import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
+import pdt.y.model.realizer.nodes.LogtalkNodeRealizer;
 import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
 import pdt.y.model.realizer.nodes.UMLClassNodeRealizer;
@@ -111,6 +114,14 @@ public class GraphModel {
 				UMLClassNodeRealizer newNodeRealizer = new UMLClassNodeRealizer(fileNodeRealizer);
 				graph.setRealizer(node, newNodeRealizer);
 				newNodeRealizer.initialize();
+			} else if (dataHolder.isLogtalkGraphGroup(node)) {
+				LogtalkGroupNodeRealizer logtalkGroupNodeRealizer = new LogtalkGroupNodeRealizer();
+				graph.setRealizer(node, logtalkGroupNodeRealizer);
+				logtalkGroupNodeRealizer.init(this);
+			} else if (dataHolder.isLogtalkGraphNode(node)) {
+				LogtalkNodeRealizer logtalkNodeRealizer = new LogtalkNodeRealizer();
+				graph.setRealizer(node, logtalkNodeRealizer);
+				logtalkNodeRealizer.init(this);
 			} else {
 				PredicateNodeRealizer newNodeRealizer = new PredicateNodeRealizer(predicateNodeRealizer);
 				graph.setRealizer(node, newNodeRealizer);
@@ -134,6 +145,10 @@ public class GraphModel {
 				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
 				graph.setRealizer(edge, newCallEdgeRealizer);
 				newCallEdgeRealizer.adjustLineWidth(this);
+			} else if (dataHolder.isLogtalkGraphEdge(edge)){
+				LogtalkEdgeRealizer logtalkEdgeRealizer = new LogtalkEdgeRealizer();
+				graph.setRealizer(edge, logtalkEdgeRealizer);
+				logtalkEdgeRealizer.init(this);
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}

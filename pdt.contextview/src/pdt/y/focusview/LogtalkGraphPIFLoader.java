@@ -26,12 +26,14 @@ import org.eclipse.core.resources.IProject;
 import pdt.y.PDTGraphPredicates;
 import pdt.y.main.PDTGraphView;
 
-public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
+public class LogtalkGraphPIFLoader extends GlobalGraphPIFLoader {
 	
 	private static final String NAME_OF_DEPENDENCIES_HELPING_FILE = "pdt-logtalk-entity-help.graphml";
+	private LogtalkView focusView;
 	
-	public LogtalkEntityGraphPIFLoader(PDTGraphView view) {
+	public LogtalkGraphPIFLoader(PDTGraphView view, LogtalkView focusView) {
 		super(view, NAME_OF_DEPENDENCIES_HELPING_FILE);
+		this.focusView = focusView;
 	}
 	
 	@Override
@@ -40,10 +42,12 @@ public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
 			loadPaths(currentPath);
 
 			IProject project = FileUtils.findFileForLocation(currentPath).getProject();
-			String projectPath = Util.normalizeOnWindows(project.getLocation().toString());
+			String projectName = Util.normalizeOnWindows(project.getName());
+			
+			String activeDiagram = focusView.getActiveDiagram();
 			
 			String query;
-			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
+			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, activeDiagram, paths.toString(), Util.quoteAtom(projectName), Util.quoteAtom(Util.prologFileName(helpFile)));
 			return query;
 			
 		} catch (IOException e) {

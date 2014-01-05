@@ -22,7 +22,8 @@ logtalk_library_path(pdt_contextview_pl_lgt, Library) :-
 load_lgt_graphml :-
     (current_predicate(user:logtalk_load/1)
     -> logtalk_load([
-			pdt_contextview_pl_lgt(lgt_to_graphml)
+    		diagrams(loader),
+			pdt_contextview_pl_lgt(graphml_writer)
        ])
 	;  true
 	).
