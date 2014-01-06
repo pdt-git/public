@@ -53,18 +53,18 @@ public class LogtalkStyles {
 	}
 	
 	private static final String KEY_COLOR = "color";
-	private Color color = Color.WHITE;
+	private Color color;
 	
 	private static final String KEY_MARGIN = "margin";
-	private double margin = 5.0;
+	private double margin = -1.0;
 	
 	private static final String KEY_STYLE = "style";
 	private static final String KEY_SHAPE = "shape";
-	private byte shapeType = ShapeNodeRealizer.RECT;
-	private LineType lineType = LineType.LINE_1;
+	private byte shapeType = -1;
+	private LineType lineType;
 	
 	private static final String KEY_TARGET_ARROW = "arrowhead";
-	private Arrow targetArrow = Arrow.STANDARD;
+	private Arrow sourceArrow;
 
 	public LogtalkStyles(String styles) {
 		for (String keyValuePair : styles.split(";")) {
@@ -91,7 +91,7 @@ public class LogtalkStyles {
 		} else if (KEY_SHAPE.equals(key)) {
 			// XXX: do something
 		} else if (KEY_TARGET_ARROW.equals(key)) {
-			targetArrow = targetArrows.get(value);
+			sourceArrow = targetArrows.get(value);
 		}
 	}
 	
@@ -111,8 +111,8 @@ public class LogtalkStyles {
 		return lineType;
 	}
 	
-	public Arrow getTargetArrow() {
-		return targetArrow;
+	public Arrow getSourceArrow() {
+		return sourceArrow;
 	}
 
 }

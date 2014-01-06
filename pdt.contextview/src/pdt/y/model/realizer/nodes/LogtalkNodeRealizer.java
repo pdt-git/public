@@ -1,11 +1,13 @@
 package pdt.y.model.realizer.nodes;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
 import pdt.y.model.GraphModel;
 import pdt.y.utils.LogtalkStyles;
 import y.base.Node;
+import y.view.LineType;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 import y.view.YLabel;
@@ -52,9 +54,18 @@ public class LogtalkNodeRealizer extends NodeRealizerBase {
 		String nodeStyle = graphModel.getDataHolder().getNodeStyle(node);
 		LogtalkStyles logtalkStyles = new LogtalkStyles(nodeStyle);
 		
-		setFillColor(logtalkStyles.getColor());
-		setLineType(logtalkStyles.getLineType());
-		setShapeType(logtalkStyles.getShapeType());
+		Color color = logtalkStyles.getColor();
+		if (color != null) {
+			setFillColor(color);
+		}
+		LineType lineType = logtalkStyles.getLineType();
+		if (lineType != null) {
+			setLineType(lineType);
+		}
+		byte shapeType = logtalkStyles.getShapeType();
+		if (shapeType >= 0) {
+			setShapeType(shapeType);
+		}
 		
 		String nodeLabel = graphModel.getDataHolder().getNodeLabel(node);
 		setLabelText(nodeLabel);

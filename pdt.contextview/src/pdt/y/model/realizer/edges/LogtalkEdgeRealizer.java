@@ -3,6 +3,7 @@ package pdt.y.model.realizer.edges;
 import pdt.y.model.GraphModel;
 import pdt.y.utils.LogtalkStyles;
 import y.base.Edge;
+import y.view.Arrow;
 import y.view.EdgeRealizer;
 
 public class LogtalkEdgeRealizer extends EdgeRealizerBase {
@@ -19,7 +20,10 @@ public class LogtalkEdgeRealizer extends EdgeRealizerBase {
 		setLabelText(graphModel.getDataHolder().getEdgeLabel(edge));
 		String edgeStyle = graphModel.getDataHolder().getEdgeStyle(edge);
 		LogtalkStyles logtalkStyles = new LogtalkStyles(edgeStyle);
-		setSourceArrow(logtalkStyles.getTargetArrow());
+		Arrow sourceArrow = logtalkStyles.getSourceArrow();
+		if (sourceArrow != null) {
+			setSourceArrow(sourceArrow);
+		}
 	}
 	
 	@Override

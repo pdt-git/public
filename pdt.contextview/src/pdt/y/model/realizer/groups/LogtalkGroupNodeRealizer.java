@@ -33,12 +33,21 @@ public class LogtalkGroupNodeRealizer extends GroupNodeRealizer {
 		LogtalkStyles logtalkStyles = new LogtalkStyles(nodeStyle);
 		
 		double m = logtalkStyles.getMargin();
+		if (m <= 0) {
+			m = 5.0;
+		}
 		YInsets minInsets = new YInsets(m, m, m, m);
 		setMinimalInsets(minInsets);
 		
-		setFillColor(logtalkStyles.getColor());
+		Color color = logtalkStyles.getColor();
+		if (color != null) {
+			setFillColor(color);
+		}
 		
-		setShapeType(logtalkStyles.getShapeType());
+		byte shapeType = logtalkStyles.getShapeType();
+		if (shapeType >= 0) {
+			setShapeType(shapeType);
+		}
 	}
 
 }
