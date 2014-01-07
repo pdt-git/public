@@ -42,7 +42,7 @@ public class LogtalkGraphPIFLoader extends GlobalGraphPIFLoader {
 			loadPaths(currentPath);
 
 			IProject project = FileUtils.findFileForLocation(currentPath).getProject();
-			String projectName = Util.normalizeOnWindows(project.getName());
+			String projectName = project.getName();
 			
 			String activeDiagram = focusView.getActiveDiagram();
 			
