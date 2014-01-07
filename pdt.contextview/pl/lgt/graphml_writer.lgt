@@ -19,7 +19,7 @@
 		;	atom_concat(Name, '.graphml', File)
 		).
 
-	output_file_header(Stream, _Options) :-
+	file_header(Stream, _Identifier, _Options) :-
 	    graphML_api:write_graphML_header(Stream),
 	    graphML_api:write_graphML_ast_keys(Stream),
 	    graphML_api:start_graph_element(Stream).
@@ -41,7 +41,7 @@
 %		output_date(Stream, Options),
 %		nl(Stream).
 
-	output_file_footer(Stream, _Options) :-
+	file_footer(Stream, _Identifier, _Options) :-
 		graphML_api:close_graph_element(Stream),
     	graphML_api:write_graphML_footer(Stream).
 
