@@ -11,11 +11,14 @@
  * 
  ****************************************************************************/
 
-:- module(pl_to_graphML, [	%write_project_graph_to_file/2,
-								write_focus_to_graphML/3,
-								write_global_to_graphML/2,
-								write_dependencies_to_graphML/3,
-								write_logtalk_entities_to_graphML/4]).
+:- module(pl_to_graphML, [
+	write_focus_to_graphML/3,
+	write_global_to_graphML/2,
+	write_dependencies_to_graphML/3,
+	write_logtalk_project_files_to_graphML/4,
+	write_logtalk_library_to_graphML/3,
+	write_logtalk_recursive_library_to_graphML/3
+]).
 
 :- use_module(graphML_api).
 :- use_module(util_for_graphML).
@@ -64,15 +67,32 @@ write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
 
-write_logtalk_entities_to_graphML(DiagramType, ProjectFilePaths, ProjectPath, GraphFile):-
-    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+write_logtalk_project_files_to_graphML(DiagramType, ProjectFilePaths, ProjectPath, GraphFile):-
     (	current_predicate(logtalk_load/1)
-    ->	filter_logtalk(ConsultedFilePaths, _, ConsultedLogtalkFilePaths),
+    ->	filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+    	filter_logtalk(ConsultedFilePaths, _, ConsultedLogtalkFilePaths),
     	split_file_path(GraphFile, Directory, FileName, _, _),
     	graphML_writer::set_file_name(FileName),
     	DiagramObject =.. [DiagramType, graphml],
     	DiagramObject::files(ProjectPath, ConsultedLogtalkFilePaths, [output_directory(Directory)])
-%    	write_to_graphML(GraphFile, write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths))
+    ;	true
+    ).
+
+write_logtalk_library_to_graphML(DiagramType, Library, GraphFile):-
+    (	current_predicate(logtalk_load/1)
+    ->	split_file_path(GraphFile, Directory, FileName, _, _),
+    	graphML_writer::set_file_name(FileName),
+    	DiagramObject =.. [DiagramType, graphml],
+    	DiagramObject::library(Library, [output_directory(Directory)])
+    ;	true
+    ).
+
+write_logtalk_recursive_library_to_graphML(DiagramType, Library, GraphFile):-
+    (	current_predicate(logtalk_load/1)
+    ->	split_file_path(GraphFile, Directory, FileName, _, _),
+    	graphML_writer::set_file_name(FileName),
+    	DiagramObject =.. [DiagramType, graphml],
+    	DiagramObject::rlibrary(Library, [output_directory(Directory)])
     ;	true
     ).
 

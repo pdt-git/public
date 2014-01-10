@@ -39,15 +39,25 @@ public class LogtalkGraphPIFLoader extends GlobalGraphPIFLoader {
 	@Override
 	protected String generateQuery(File helpFile) {
 		try {
-			loadPaths(currentPath);
-
-			IProject project = FileUtils.findFileForLocation(currentPath).getProject();
-			String projectName = project.getName();
-			
-			String activeDiagram = focusView.getActiveDiagram();
-			
 			String query;
-			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, activeDiagram, paths.toString(), Util.quoteAtom(projectName), Util.quoteAtom(Util.prologFileName(helpFile)));
+			
+			String diagramEntity = focusView.getDiagramType().getDiagramEntity();
+			switch (focusView.getInputType()) {
+			case PROJECT:
+				IProject project = FileUtils.findFileForLocation(currentPath).getProject();
+				String projectName = project.getName();
+				loadPaths(currentPath);
+				query = bT(PDTGraphPredicates.WRITE_LOGTALK_PROJECT_FILES_TO_GRAPHML, diagramEntity, paths.toString(), Util.quoteAtom(projectName), Util.quoteAtom(Util.prologFileName(helpFile)));
+				break;
+			case LIBRARY:
+				query = bT(PDTGraphPredicates.WRITE_LOGTALK_LIBRARY_TO_GRAPHML, diagramEntity, Util.quoteAtom(focusView.getCurrentLibrary()), Util.quoteAtom(Util.prologFileName(helpFile)));
+				break;
+			case RECURSIVE_LIBRARY:
+				query = bT(PDTGraphPredicates.WRITE_LOGTALK_RECURSIVE_LIBRARY_TO_GRAPHML, diagramEntity, Util.quoteAtom(focusView.getCurrentLibrary()), Util.quoteAtom(Util.prologFileName(helpFile)));
+				break;
+			default:
+				return "true";
+			}
 			return query;
 			
 		} catch (IOException e) {
@@ -56,6 +66,7 @@ public class LogtalkGraphPIFLoader extends GlobalGraphPIFLoader {
 		}
 	}
 	
+	@Override
 	protected boolean ignoreExternalPrologFilesProject() {
 		return false;
 	}
