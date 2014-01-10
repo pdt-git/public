@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -160,6 +161,8 @@ public abstract class ViewBase extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 		
+		toolBarManager.add(new Separator("control"));
+		
 		toolBarManager.add(new ToolBarAction("Navigation", 
 				ImageRepository.getImageDescriptor(ImageRepository.MOVE)) {
 
@@ -185,6 +188,8 @@ public abstract class ViewBase extends ViewPart {
 				}
 			});
 		
+		toolBarManager.add(new Separator("layout"));
+		
 		toolBarManager.add(new ToolBarAction("Hierarchical layout", 
 				pdt.y.internal.ImageRepository.getImageDescriptor(
 						pdt.y.internal.ImageRepository.HIERARCHY)) {
@@ -206,6 +211,8 @@ public abstract class ViewBase extends ViewPart {
 					updateCurrentFocusViewLayout();
 				}
 			});
+		
+		toolBarManager.add(new Separator("preferences"));
 		
 		toolBarManager.add(new ToolBarAction("Preferences", 
 				ImageRepository.getImageDescriptor(ImageRepository.PREFERENCES)) {
