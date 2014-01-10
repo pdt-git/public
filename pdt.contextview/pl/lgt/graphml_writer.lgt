@@ -59,9 +59,9 @@
 		graphML_api:close_graph_element(Stream),
 		graphML_api:close_node(Stream).	
 
-%	graph_style_margin_color(rlibrary, rounded, 10, snow3).
-%	graph_style_margin_color(libraries, rounded, 10, snow3).
-%	graph_style_margin_color(library, rounded, 10, snow2).
+	graph_style_margin_color(rlibrary, rounded, 10, snow3).
+	graph_style_margin_color(libraries, rounded, 10, snow3).
+	graph_style_margin_color(library, rounded, 10, snow2).
 	graph_style_margin_color(files, rounded, 10, snow2).
 	graph_style_margin_color(file, rounded, 10, snow).
 	graph_style_margin_color(external, rounded, 10, white).

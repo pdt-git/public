@@ -17,6 +17,7 @@ public class LogtalkStyles {
 		x11Colors.put("white", Color.WHITE);
 		x11Colors.put("snow1", new Color(255, 250, 250));
 		x11Colors.put("snow2", new Color(238, 233, 233));
+		x11Colors.put("snow3", new Color(205, 201, 201));
 		x11Colors.put("beige", new Color(245, 245, 220));
 		x11Colors.put("yellow", Color.YELLOW);
 		x11Colors.put("aquamarine", new Color(127, 255, 212));
