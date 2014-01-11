@@ -115,7 +115,9 @@
 	edge_arrow(implements_protocol, dot).
 	edge_arrow(imports_category, box).
 	edge_arrow(complements_object, obox).
+	edge_arrow(provides_clauses, inv).
 	edge_arrow(calls_predicate, rdiamond).
+	edge_arrow(depends_on_file, normal).
 	edge_arrow(loads_file, normal).
 
 	write_lines([], []).

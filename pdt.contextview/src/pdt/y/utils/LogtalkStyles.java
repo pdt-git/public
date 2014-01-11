@@ -51,6 +51,13 @@ public class LogtalkStyles {
 		generalPath.lineTo(-14F, 0.0F);
 		generalPath.closePath();
 		targetArrows.put("rdiamond", Arrow.addCustomArrow("rdiamond", generalPath, Color.BLACK, LineType.LINE_1, Color.BLACK));
+		generalPath = new GeneralPath(1, 6);
+		generalPath.moveTo(0.0F, 0.0F);
+		generalPath.lineTo(0.0F, 5F);
+		generalPath.lineTo(-14F, 0F);
+		generalPath.lineTo(0.0F, -5F);
+		generalPath.closePath();
+		targetArrows.put("inv", Arrow.addCustomArrow("inv", generalPath, Color.BLACK, LineType.LINE_1, Color.BLACK));
 	}
 	
 	private static final String KEY_COLOR = "color";
