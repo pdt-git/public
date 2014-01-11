@@ -72,7 +72,7 @@ write_logtalk_project_files_to_graphML(DiagramType, ProjectFilePaths, ProjectPat
     ->	filter_consulted(ProjectFilePaths, ConsultedFilePaths),
     	filter_logtalk(ConsultedFilePaths, _, ConsultedLogtalkFilePaths),
     	split_file_path(GraphFile, Directory, FileName, _, _),
-    	graphML_writer::set_file_name(FileName),
+    	graphml_writer::set_file_name(FileName),
     	DiagramObject =.. [DiagramType, graphml],
     	DiagramObject::files(ProjectPath, ConsultedLogtalkFilePaths, [output_directory(Directory)])
     ;	true
@@ -81,7 +81,7 @@ write_logtalk_project_files_to_graphML(DiagramType, ProjectFilePaths, ProjectPat
 write_logtalk_library_to_graphML(DiagramType, Library, GraphFile):-
     (	current_predicate(logtalk_load/1)
     ->	split_file_path(GraphFile, Directory, FileName, _, _),
-    	graphML_writer::set_file_name(FileName),
+    	graphml_writer::set_file_name(FileName),
     	DiagramObject =.. [DiagramType, graphml],
     	DiagramObject::library(Library, [output_directory(Directory)])
     ;	true
@@ -90,7 +90,7 @@ write_logtalk_library_to_graphML(DiagramType, Library, GraphFile):-
 write_logtalk_recursive_library_to_graphML(DiagramType, Library, GraphFile):-
     (	current_predicate(logtalk_load/1)
     ->	split_file_path(GraphFile, Directory, FileName, _, _),
-    	graphML_writer::set_file_name(FileName),
+    	graphml_writer::set_file_name(FileName),
     	DiagramObject =.. [DiagramType, graphml],
     	DiagramObject::rlibrary(Library, [output_directory(Directory)])
     ;	true

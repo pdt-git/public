@@ -1,4 +1,4 @@
-:- object(graphML_writer, implements(graphp)).
+:- object(graphml_writer, implements(graphp)).
 	
 	:- public(set_file_name/1).
 	set_file_name(FileName) :-
@@ -11,7 +11,7 @@
 	:- uses( list, [member/2]).
 
  	:- multifile(diagram(_)::format_object/2).
-	diagram(_)::format_object(graphml, graphML_writer).
+	diagram(_)::format_object(graphml, graphml_writer).
 
 	output_file_name(Name, File) :-
 		(	file_name_(File)
