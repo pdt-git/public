@@ -135,7 +135,12 @@ find_reference_to(Term, _File, _FileLine, ExactMatch, RefModule, RefName, RefAri
 
 perform_search(Functor, Arity, Module, ExactMatch) :-
 	(	nonvar(Functor)
-	->	search_predicate_indicator(Module, Functor, Arity, ExactMatch, SearchModule, SearchFunctor, SearchArity, IsAlias)
+	->	setof(
+			p(SearchModule, SearchFunctor, SearchArity, IsAlias),
+			Module^Functor^Arity^ExactMatch^search_predicate_indicator(Module, Functor, Arity, ExactMatch, SearchModule, SearchFunctor, SearchArity, IsAlias),
+			Predicates
+			),
+		member(p(SearchModule, SearchFunctor, SearchArity, IsAlias), Predicates)
 	;	Module = SearchModule
 	),
 	(	nonvar(SearchFunctor),

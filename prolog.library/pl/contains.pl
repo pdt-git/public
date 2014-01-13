@@ -13,11 +13,17 @@
 
 :- module(contains, [contains/2]).
 
-:- use_module(library(lists)). 
+:- if(current_prolog_flag(dialect, yap)).
 
-%sublist(S, L) :-
-%  append(_, L2, L),
-%  append(S, _, L2).
+:- use_module(library(lists), [sublist/2]). 
+
+:- else.
+
+sublist(S, L) :-
+  append(_, L2, L),
+  append(S, _, L2).
+
+:- endif.
 
 contains(A, B) :-
   atom(A),

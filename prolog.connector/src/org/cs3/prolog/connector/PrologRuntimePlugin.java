@@ -16,7 +16,6 @@ package org.cs3.prolog.connector;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -496,9 +495,7 @@ public class PrologRuntimePlugin extends Plugin {
 			}
 			File file;
 			try {
-				file = new File(FileLocator.toFileURL(url).toURI());
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
+				file = new File(FileLocator.toFileURL(url).getFile());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

@@ -151,29 +151,3 @@ count_list_elements(All,SortedUnique,LengthAll,LengthSortedUnique) :-
 group_by(Other, Goal, OtherVals) :-
     bagof(Other, call(Goal), OtherVals ).
 
-non_singular_groups(Other, Goal, Groups) :-
-   findall( OtherVals, ( group_by(Other, Goal, OtherVals), 
-                         length(OtherVals,N),
-                         N>1
-                       ),
-            Groups ).
-
-non_singular_groups__(Groups) :-
-   findall( OtherVals, 
-            ( bagof(packCls(Pkg,Id), 
-                    class_in_package(_PkgN,_N,Pkg,Id), 
-                    OtherVals ), 
-              length(OtherVals,L), 
-              L>1
-             ),
-             Groups ).             
-
-all_external_groups :- 
-   non_singular_groups__(Groups),
-   forall( ( member(List,Groups),
-             member(packCls(_Pkg,Class),List)
-            ),
-            externT(Class)
-   ).
-   
-
