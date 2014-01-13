@@ -52,11 +52,6 @@ time(Goal0,time(UsedInf, UsedTime, Wall, Lips)) :-
 	).
 	
 
-demo_time_measurement :-
-   startStopwatch, 
-   allclasses(_NR),
-   reportRuntime('Counting of all classes took ').  
-
 /*
  * Helper predicates for reporting time spent.
  *   - performance(Goal, Time, Count)

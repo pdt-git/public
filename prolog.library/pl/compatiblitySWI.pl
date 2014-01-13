@@ -32,16 +32,6 @@
 index_information(Predicate, I) :-
 	predicate_property(Predicate, indexed(I)).
 
-outdir(A):-
-    project_option(_,output_project(A)).
-
-set_outdir(Dir):-
-	findall(Project,(
-	          project_option(Project,output_project(_)),
-			  retractall(project_option(Project,output_project(_))), 
-		      assert(project_option(Project,output_project(Dir)))
-		      ),_).
-
 output_to_file.
 
 toggle_out :-
@@ -80,17 +70,6 @@ open_printf_to_memory(Key) :-
     open_memory_file(Handle, write, Stream),
     asserta(output_to_memory(Key,Handle,Stream)),
 	select_printf(Key).
-
-/*
- * openUniqueMemoryStream(+Prefix,-Stream):-
- *
- * 
- */
-
-open_unique_memory_stream(Prefix,Stream):-
-    new_id(StreamID),     	
-    concat(Prefix,StreamID,Stream),
-   	open_printf_to_memory(Stream). 
 
 /*
  * close_printf_to_memory(+Key,-Content) 
@@ -407,20 +386,3 @@ read_term_atom(Atom,Term,Options):-
 	   true
 	).
 	
-test(read_term_atom):-
-	catch(read_term_atom('asdf("asdf)', _Term, [variable_names(_Vars)]),
-	      Exception,
-	      true),
-	assert_true(nonvar(Exception)),
-	assert_true((Exception = error(syntax_error(end_of_file_in_string),_))). 
-	
-test(read_term_atom2):-
-	catch(read_term_atom('asdf(Var,asdf).', _Term, [variable_names(_Vars)]),
-	      _Exception,
-	      true),
-	writeln(Vars),
-	assert_true(Vars==[_=_]).
-	
-
-
-
