@@ -20,8 +20,8 @@ extended_meta_predicate(Module:Head, MetaSpec) :-
 
 :- dynamic(extended_meta_spec/3).
 
-:- meta_predicate(user:extended_meta_predicate(:)).
-user:extended_meta_predicate(Module:MetaSpec) :-
+:- meta_predicate(extended_meta_predicate(:)).
+extended_meta_predicate(Module:MetaSpec) :-
 	(	valid_meta_spec(MetaSpec)
 	->	store_meta_spec(Module, MetaSpec)
 	;	throw(invalid_extended_meta_predicate_specification(Module:MetaSpec))

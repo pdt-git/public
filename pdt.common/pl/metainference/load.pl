@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- use_module(pdt_meta_specification, []).
+:- use_module(pdt_meta_specification, [extended_meta_predicate/2]).
 :- use_module(pdt_prolog_metainference, []).
 %:- [meta_inference_examples].
 %:- [meta_inference_test].
