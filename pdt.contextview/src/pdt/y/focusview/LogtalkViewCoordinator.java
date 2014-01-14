@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.cs3.prolog.ui.util.FileUtils;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,9 +45,18 @@ public class LogtalkViewCoordinator extends ViewCoordinatorBase {
 	public void swichFocusView(String path) {
 		lastPath = path;
 		try {
-			IProject project = FileUtils.findFileForLocation(path).getProject();
+			if (path == null && focusView.getInputType() == InputType.PROJECT) {
+				return;
+			}
+			String projectName = null;
+			if (path != null) {
+				IFile fileForLocation = FileUtils.findFileForLocation(path);
+				if (fileForLocation != null) {
+					projectName= fileForLocation.getProject().getName();
+				}
+			}
 		
-			String signature = getSignature(project.getName(), focusView.getDiagramType(), focusView.getInputType(), focusView.getCurrentLibrary());
+			String signature = getSignature(projectName, focusView.getDiagramType(), focusView.getInputType(), focusView.getCurrentLibrary());
 			currentFocusView = views.get(signature);
 			
 			if (currentFocusView == null) {
