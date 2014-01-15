@@ -212,8 +212,10 @@ handle_client_impl(InStream, OutStream):-
 		
 
 		
-handle_command(_,_,'BYE',stop).	
+handle_command(_,_,'BYE',stop) :-	
+	!.
 handle_command(_,_,'SHUTDOWN',stop):-	
+	!,
 	% stop accept loop:
 	% we set the shutdown flag (which is read by the accept loop)
 	% then we have to kick the accept loop out of the tcp_accept/3 call.
@@ -225,12 +227,15 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	tcp_connect(Socket,localhost:Port),
 	tcp_close_socket(Socket).
 handle_command(_,_,'',continue):-
+	!,
 	clear_options.
 handle_command(_,OutStream,'PING',continue):-
+	!,
 	current_prolog_flag(pid,Pid),
     thread_self(Alias),
 	my_format(OutStream,'PONG ~w:~w~n',[Pid,Alias]).
 handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
+	!,
 	my_format(OutStream,'GO_AHEAD~n',[]),
 	repeat,
 		handle_batch_messages(OutStream),
@@ -238,6 +243,7 @@ handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 		handle_batch_command(Term,InStream,OutStream),
 		Term=end_of_batch,!.
 handle_command(InStream,OutStream,'QUERY',continue):-
+	!,
 	debug('handle_command', 'before my_format', []),
 	my_format(OutStream,'GIVE_TERM~n',[]),	
 	debug('handle_command', 'after my_format', []),
@@ -249,6 +255,7 @@ handle_command(InStream,OutStream,'QUERY',continue):-
 	; true
 	).
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
+	!,
 	my_format(OutStream,'GIVE_TERM~n',[]),
 	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
 	(
@@ -257,16 +264,21 @@ handle_command(InStream,OutStream,'QUERY_ALL',continue):-
 		true
 	).
 handle_command(InStream,OutStream,'SET_OPTION',continue):-
+	!,
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	request_line(InStream,OutStream,'GIVE_TERM',Term),
 	call_save(OutStream,set_option(Symbol,Term)).
 handle_command(InStream,OutStream,'GET_OPTION',continue):-
+	!,
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	call_save(OutStream,
 		(	option(Symbol,Term),
 			my_format(OutStream,'~w~n',[Term])
 		)
 	).
+handle_command(_,_,Unknown,continue):-
+	debug('handle_command', 'Unknown command: ~w', [Unknown]),
+	clear_options.
 
 
 my_read_command(InStream,Term):-
