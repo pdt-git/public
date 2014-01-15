@@ -78,11 +78,11 @@ public class LogtalkView extends ViewBase {
 	
 	public enum DiagramType {
 		ENTITY("entity_diagram", "Entity diagram"),
-		CALL("call_diagram", "Call diagram"),
+		CALL("xref_diagram", "Cross reference diagram"),
 		INHERITANCE("inheritance_diagram", "Inheritance diagram"),
 		USES("uses_diagram", "Uses diagram"),
 		FILE_LOAD("file_load_diagram", "File load diagram"),
-		FILE_DEPENDS("file_depends_diagram", "File dependency diagram");
+		FILE_DEPENDS("file_dependency_diagram", "File dependency diagram");
 		
 		public String getDiagramEntity() {
 			return diagramEntity;
