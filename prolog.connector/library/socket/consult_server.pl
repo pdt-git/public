@@ -204,7 +204,7 @@ handle_client_impl(InStream, OutStream):-
 		request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 		( handle_command(InStream,OutStream,Command,Next)
 		->report_ok(OutStream)
-		;	report_error(OutStream, 'failed, sorry.'),
+		;	%report_error(OutStream, 'failed, sorry.'),
 			Next=continue
 		),
 	Next==stop,
@@ -276,9 +276,6 @@ handle_command(InStream,OutStream,'GET_OPTION',continue):-
 			my_format(OutStream,'~w~n',[Term])
 		)
 	).
-handle_command(_,_,Unknown,continue):-
-	debug('handle_command', 'Unknown command: ~w', [Unknown]),
-	clear_options.
 
 
 my_read_command(InStream,Term):-
