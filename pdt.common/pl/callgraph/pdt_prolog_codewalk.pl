@@ -707,26 +707,26 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	->  arg(I, Meta, MA),
 	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall, OTerm),
+	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
 	    	walk_called(Goal, M, ArgPosEx, OTerm)
 	    )
 	;   AS == (^)
 	->  arg(I, Meta, MA),
 	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall, OTerm),
+	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
 	    	walk_called(Goal, MG, ArgPosEx, OTerm)
 	    )
 	;   AS == (//)
 	->  arg(I, Meta, DCG),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall, OTerm),
+	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
 		    walk_dcg_body(DCG, M, ArgPos, OTerm)
 		)
 	;   AS == database
 	->	arg(I, Meta, MA),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(database, OTerm),
+	    	set_call_kind_of_walk_option(database(Meta, I), OTerm),
 			walk_called(MA, M, ArgPos, OTerm)
 		)
 	;	arg(I, Meta, Arg),
