@@ -36,7 +36,6 @@ import java.util.Map;
 import org.cs3.prolog.common.InputStreamPump;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntime;
 import org.cs3.prolog.internal.pif.ServerStartAndStopStrategy;
 import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
@@ -150,7 +149,6 @@ private static JackTheProcessRipper processRipper;
 				Debug.info("using environment: " + Util.prettyPrint(env));
 				ProcessBuilder processBuilder = new ProcessBuilder(commands);
 				Map<String, String> processEnvironment = processBuilder.environment();
-				processEnvironment.clear();
 				processEnvironment.putAll(env);
 				process = processBuilder.start();
 			}
@@ -254,11 +252,6 @@ private static JackTheProcessRipper processRipper;
 
 	private static String[] getCommands(SocketPrologInterface socketPif) {
 		String executable = socketPif.getExecutable();
-		if (!executable.contains(" -L")) {
-			if(Util.getStackCommandLineParameters().length()>0) {
-				executable += " " + Util.getStackCommandLineParameters();// PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			}
-		}
 		String[] command = Util.split(executable, " ");
 		return command;
 	}
@@ -284,20 +277,15 @@ private static JackTheProcessRipper processRipper;
 		if (socketPif.getExecutable().contains("logtalk")) {
 			tmpWriter.print(STARTUP_ERROR_LOG_LOGTALK_CODE);
 		}
-		tmpWriter.println(":- set_prolog_flag(xpce_threaded, true).");
-		tmpWriter.println(":- guitracer.");
+		tmpWriter.println(":- (current_prolog_flag(xpce_threaded, _) -> set_prolog_flag(xpce_threaded, true) ; true).");
+		tmpWriter.println(":- (current_prolog_flag(dialect, swi) -> guitracer ; true).");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":- doc_collect(false).");
 		if (socketPif.isHidePlwin()) {
-			tmpWriter.println(":- (  (current_prolog_flag(windows, true))" + "->win_window_pos([show(false)])" + ";true).");
+			tmpWriter.println(":- (  (current_prolog_flag(dialect, swi), current_prolog_flag(windows, true))  -> win_window_pos([show(false)]) ; true).");
 		}
-		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
+		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false) ; true).");
 
-		String value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_GENERATE_FACTBASE)) ? "true" : "false");
-		tmpWriter.println(":- flag(pdt_generate_factbase, _, " + value + ").");
-		value = ("true".equals(socketPif.getAttribute(PrologRuntime.PREF_META_PRED_ANALYSIS)) ? "true" : "false");
-		tmpWriter.println(":- flag(pdt_meta_pred_analysis, _, " + value + ").");
-		tmpWriter.println(":- [library(consult_server)].");
+		tmpWriter.println(":- ['" + socketPif.getConsultServerLocation() + "'].");
 		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
 		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
 			BootstrapPrologContribution contribution = it.next();
@@ -305,7 +293,7 @@ private static JackTheProcessRipper processRipper;
 		}
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker2.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
+		tmpWriter.println(":- consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
 		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + Util.prologFileName(socketPif.getErrorLogFile()) + "').");
 //		tmpWriter.println(":- FileName='/tmp/dbg_marker4.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.close();

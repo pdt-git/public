@@ -12,27 +12,32 @@
  ****************************************************************************/
 
 
+ %:- use_module(pdt_support, [pdt_support/1]).
+ :- use_module(pdt_support).  % <- NO! THIS BE FIRST!
 
- :- consult(logging).       % <- THIS BE FIRST!
+
+ :- use_module('logging.pl', []).       % <- THIS BE FIRST!
   
  :- consult(compatiblitySWI).
   
- :- consult(database).      % Assert, retract, ...
- :- consult(files).         % File handling
- :- consult(database_cache). 	    % Caching
- :- consult(contains). 	    % Contains for Strings
+ :- use_module(database, []).      % Assert, retract, ...
+ :- use_module(files, []).         % File handling
+ :- use_module(database_cache, []). 	    % Caching
+ :- use_module(contains, []). 	    % Contains for Strings
 
- :- consult(general).       % Various
- :- consult(listing).       % Print clauses of preds
- :- consult(lists).         % List handling
- :- consult(count).         % Counting
- :- consult(time).          % Runtime measurement
- :- consult(utils4modules). % Module handling
+ :- use_module(general, []).       % Various
+ :- use_module(listing, []).       % Print clauses of preds
+ :- use_module(lists, []).         % List handling
+ :- use_module(count, []).         % Counting
+ :- use_module(time, []).          % Runtime measurement
+ :- use_module(utils4modules, []). % Module handling
 
- :- consult(utils4modules_visibility). % Visibility handling
- 
- :- use_module(junitadapter).
- 
+ :- use_module(utils4modules_visibility, []). % Visibility handling
+
+:- if(current_prolog_flag(dialect, swi)). 
+ :- use_module(junitadapter, []).
+:- endif.
+
 % :- consult(pdt_xref_experimental).     % find_references, ...
 
 

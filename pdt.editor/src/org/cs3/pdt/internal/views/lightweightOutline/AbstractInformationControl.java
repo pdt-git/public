@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import java.util.List;
-
-import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -51,14 +48,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IWorkbenchCommandConstants;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ActionHandler;
-import org.eclipse.ui.commands.HandlerSubmission;
-import org.eclipse.ui.commands.ICommand;
-import org.eclipse.ui.commands.ICommandManager;
-import org.eclipse.ui.commands.IKeySequenceBinding;
-import org.eclipse.ui.commands.Priority;
-import org.eclipse.ui.keys.KeySequence;
 
 
 /**
@@ -74,9 +63,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private TreeViewer fTreeViewer;
 	/** The current string matcher */
 	private StringMatcher fStringMatcher;
-	private ICommand fInvokingCommand;
-//	private Command fInvokingCommand;
-	private KeySequence[] fInvokingCommandKeySequences;
 
 	/**
 	 * Fields that support the dialog menu
@@ -85,10 +71,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 */
 	private Composite fViewMenuButtonComposite;
 
-	private CustomFiltersActionGroup fCustomFiltersActionGroup;
-
 	private IAction fShowViewMenuAction;
-	private HandlerSubmission fShowViewMenuHandlerSubmission;
 
 	/**
 	 * Field for tree style since it must be remembered by the instance.
@@ -110,19 +93,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @param invokingCommandId the id of the command that invoked this control or <code>null</code>
 	 * @param showStatusField <code>true</code> iff the control has a status field at the bottom
 	 */
-	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle, String invokingCommandId, boolean showStatusField) {
+	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle, boolean showStatusField) {
 		super(parent, shellStyle, true, true, false, true, true, null, null);
-		if (invokingCommandId != null) {
-//			ICommandService commandService = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-//			fInvokingCommand = commandService.getCommand(invokingCommandId);
-			ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-			fInvokingCommand= commandManager.getCommand(invokingCommandId);
-			if (fInvokingCommand != null && !fInvokingCommand.isDefined())
-				fInvokingCommand= null;
-			else
-				// Pre-fetch key sequence - do not change because scope will change later.
-				getInvokingCommandKeySequences();
-		}
 		fTreeStyle= treeStyle;
 		// Title and status text must be set to get the title label created, so force empty values here.
 		if (hasHeader())
@@ -137,18 +109,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	/**
-	 * Creates a tree information control with the given shell as parent. The given
-	 * styles are applied to the shell and the tree widget.
-	 *
-	 * @param parent the parent shell
-	 * @param shellStyle the additional styles for the shell
-	 * @param treeStyle the additional styles for the tree widget
-	 */
-	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle) {
-		this(parent, shellStyle, treeStyle, null, false);
-	}
-
-	/**
 	 * Create the main content for this information control.
 	 *
 	 * @param parent The parent composite
@@ -158,8 +118,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		fTreeViewer= createTreeViewer(parent, fTreeStyle);
-
-		fCustomFiltersActionGroup= new CustomFiltersActionGroup(getId(), fTreeViewer);
 
 		final Tree tree= fTreeViewer.getTree();
 		tree.addKeyListener(new KeyListener() {
@@ -384,7 +342,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		return ((IStructuredSelection) fTreeViewer.getSelection()).getFirstElement();
 	}
 
-	private void gotoSelectedElement() {
+	protected void gotoSelectedElement() {
 //		Object selectedElement= getSelectedElement();
 		//TODO
 //		if (selectedElement != null) {
@@ -512,7 +470,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.0
 	 */
 	protected void fillViewMenu(IMenuManager viewMenu) {
-		fCustomFiltersActionGroup.fillViewMenu(viewMenu);
 	}
 
 	/*
@@ -543,7 +500,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (visible) {
 			open();
 		} else {
-			removeHandlerAndKeyBindingSupport();
 			saveDialogBounds(getShell());
 			getShell().setVisible(false);
 		}
@@ -555,7 +511,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 */
 	@Override
 	public int open() {
-		addHandlerAndKeyBindingSupport();
 		return super.open();
 	}
 
@@ -576,34 +531,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 */
 	@Override
 	public void widgetDisposed(DisposeEvent event) {
-		removeHandlerAndKeyBindingSupport();
 		fTreeViewer= null;
 		fFilterText= null;
-	}
-
-	/**
-	 * Adds handler and key binding support.
-	 *
-	 * @since 3.2
-	 */
-	protected void addHandlerAndKeyBindingSupport() {
-		// Register action with command support
-		if (fShowViewMenuHandlerSubmission == null) {
-			fShowViewMenuHandlerSubmission= new HandlerSubmission(null, getShell(), null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
-			PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
-		}
-	}
-
-	/**
-	 * Removes handler and key binding support.
-	 *
-	 * @since 3.2
-	 */
-	protected void removeHandlerAndKeyBindingSupport() {
-		// Remove handler submission
-		if (fShowViewMenuHandlerSubmission != null)
-			PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
-
 	}
 
 	/**
@@ -723,34 +652,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	@Override
 	public void removeFocusListener(FocusListener listener) {
 		getShell().removeFocusListener(listener);
-	}
-
-	final protected ICommand getInvokingCommand() {
-		return fInvokingCommand;
-	}
-
-	final protected KeySequence[] getInvokingCommandKeySequences() {
-		if (fInvokingCommandKeySequences == null) {
-			if (getInvokingCommand() != null) {
-				
-			
-//				IBindingService bindingService = (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-				//bindingService.getBestActiveBindingFormattedFor(CMDID);
-				
-				
-				
-				List<?> list= getInvokingCommand().getKeySequenceBindings();
-				if (!list.isEmpty()) {
-					fInvokingCommandKeySequences= new KeySequence[list.size()];
-					for (int i= 0; i < fInvokingCommandKeySequences.length; i++) {
-						
-						fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-					}
-					return fInvokingCommandKeySequences;
-				}
-			}
-		}
-		return fInvokingCommandKeySequences;
 	}
 
 	/*

@@ -14,11 +14,12 @@
 package org.cs3.pdt.internal.structureElements;
 
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 import org.cs3.prolog.common.Util;
 
 
 
-public class OutlineClauseElement implements PrologOutlineTreeElement{
+public class OutlineClauseElement implements PrologTreeElement{
 	
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private String label;
@@ -27,6 +28,7 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 	private Object parent;
 //	private String file;
 	private PrologClause clause;
+private String firstArgument;
 	
 //	public OutlineClauseElement(String label, String file, int line, String type, PrologTreeElement parent) {
 //		this.label = label;
@@ -90,13 +92,8 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 		}
 	}
 
-	@Override
-	public void addClause(PrologClause clause) {
-		this.clause = clause;
-	}
-
 	private String calculateOccuranceLabel() {
-		String firstArgument = PDTCommonUtil.getProperty("first_argument", clause.getProperties());
+		firstArgument = PDTCommonUtil.getProperty("first_argument", clause.getProperties());
 		if (firstArgument != null) {
 			return clause.getLine() + ": " + Util.unquoteAtom(firstArgument);
 		} else {
@@ -116,6 +113,11 @@ public class OutlineClauseElement implements PrologOutlineTreeElement{
 	public int getArity() {
 		return clause.getArity();
 	}
+	
+	public String getFirstArgument() {
+		return firstArgument;
+	}
+	
 }
 
 

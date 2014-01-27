@@ -15,8 +15,16 @@
 % Date: 13.02.2006, 04.02.2009
 
 % TODO: Move all logging primitives here.
+
+:- module(logging, [
+	ctc_warning/2,
+	ctc_error/2,
+	log_on_stdout/2,
+	do_if_logging_enabled/1
+]).
    
 :- use_module(library(lists)).
+:- use_module(files).
 
 consult_silent_if_logging_disabled(FileOrFiles) :-
     (  not(loggingEnabled) 
@@ -40,16 +48,25 @@ log_once_to_file(File,Goal) :-
  * ======================================================================== */
 :- dynamic loggingEnabled/0.
 
+:- if(pdt_support:pdt_support(last_call_optimisation)).
 enable_logging :- 
-   retractall(loggingEnabled),      % prevent accidental backtracking(!)
+   retractall(loggingEnabled),                    % prevent accidental backtracking(!)
    set_prolog_flag(last_call_optimisation,false), % important for retrieval of parentmodule
-   assert(loggingEnabled).
+   assertz(loggingEnabled).
 
-:- enable_logging.                  % default: logging
-   
 disable_logging :- 
    set_prolog_flag(last_call_optimisation,true),
    retractall(loggingEnabled).
+:- else.
+enable_logging :- 
+   retractall(loggingEnabled),      % prevent accidental backtracking(!)
+   assert(loggingEnabled).
+
+disable_logging :- 
+   retractall(loggingEnabled).
+   
+:- endif.   
+:- enable_logging.                  % default: logging
 
 /*
  * Only call a goal (that produces console output) if logging is enabled.
@@ -69,7 +86,7 @@ verbose(Goal) :-
    
 do_with_logging_enabled(Goal) :-
    ( loggingEnabled 
-      -> (enable_ignore_logging_in_module,		call(Goal),disable_ignore_logging_in_module) 
+      -> (               enable_ignore_logging_in_module, call(Goal),                  disable_ignore_logging_in_module) 
        ; (enable_logging,enable_ignore_logging_in_module, call(Goal), disable_logging, disable_ignore_logging_in_module)
    ).
 
@@ -98,7 +115,7 @@ do_with_logging_disabled(Goal) :-
 disable_logging_in_module(Module):- 
 	current_module(Module),
 	retractall(mod_is_enabled(Module)),
-	assert(mod_is_disabled(Module)).
+	assertz(mod_is_disabled(Module)).
 
 is_logging_in_module_disabled(Module):-
     current_module(Module),
@@ -107,14 +124,14 @@ is_logging_in_module_disabled(Module):-
 
 enable_logging_in_module(Module):-
 	current_module(Module),
-	assert(mod_is_enabled(Module)),
+	assertz(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
-
+:- dynamic(mod_ignore_is_enabled/0).
 
 enable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled),
-    assert(mod_ignore_is_enabled).
+    assertz(mod_ignore_is_enabled).
     
 disable_ignore_logging_in_module:-
     retractall(mod_ignore_is_enabled).
@@ -129,12 +146,13 @@ reset_logging_all_modules:-
 	retractall(mod_is_enabled(Module)),
 	retractall(mod_is_disabled(Module)).
 
+:- dynamic(showContextModules_enabled/0).
 /*
  *  Disables / Enables the out of the hierachie of the contextmodule 
  */
 disable_showLoggingContextModules:-retractall(showContextModules_enabled).
 enable_showLoggingContextModules:-
-	assert(showContextModules_enabled),
+	assertz(showContextModules_enabled),
 	format('WARNING: === ShowContextModules enabled =========================~n'),
     format('WARNING: This function will double your output and will slow down your console~n'),
     format('WARNING: ==============================================~n').
@@ -213,7 +231,7 @@ ctc_info(Formatterm,Atomlist) :-
 
 assert_logging(Fact) :-
     log_on_stdout(' --- Asserting: ~k.~n', Fact ),
-    assert(Fact).
+    assertz(Fact).
 
 
 /*

@@ -22,12 +22,15 @@ import org.cs3.pdt.console.ConsoleModelEvent;
 import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.console.internal.views.completion.ConsoleCompletionLabelProvider;
+import org.cs3.pdt.console.internal.views.completion.ContentProposalAdapter;
+import org.cs3.pdt.console.internal.views.completion.IContentProposal;
+import org.cs3.pdt.console.internal.views.completion.IContentProposalProvider;
+import org.cs3.pdt.console.internal.views.completion.IControlContentAdapter;
+import org.cs3.pdt.console.internal.views.completion.IControlContentAdapter2;
+import org.cs3.pdt.console.internal.views.completion.PrologCompletionProvider;
 import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.jface.fieldassist.IContentProposal;
-import org.eclipse.jface.fieldassist.IContentProposalProvider;
-import org.eclipse.jface.fieldassist.IControlContentAdapter;
-import org.eclipse.jface.fieldassist.IControlContentAdapter2;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.ITextSelection;
@@ -1045,9 +1048,11 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	public void clearOutput() {
 		thatWasMe = true;
-		int c = control.getCaretOffset() - startOfInput;
-		control.getContent().replaceTextRange(0, startOfInput, "");
-		startOfInput = 0;
+		int inputLine = control.getLineAtOffset(startOfInput);
+		int inputLineOffset = control.getOffsetAtLine(inputLine);
+		int c = control.getCaretOffset() - inputLineOffset;
+		control.getContent().replaceTextRange(0, inputLineOffset, "");
+		startOfInput -= inputLineOffset;
 		control.setCaretOffset(c);
 		thatWasMe = false;
 

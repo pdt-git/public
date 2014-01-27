@@ -24,9 +24,7 @@
 				true
 			;	logtalk_load_context(term_position, StartLine-_EndLine)
 			),
-			logtalk_load_context(file, File),
-			logtalk_load_context(directory, Directory),
-			atom_concat(Directory, File, Path),
+			logtalk_load_context(source, Path),
 			functor(Kind, Level, _),
 			{pdt_reload:assertz(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
 			{pdt_reload:trace_reload(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
@@ -72,24 +70,39 @@
 %
 % wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
 
-% Logtalk
-pdt_reload(FullPath) :-
-	write(FullPath), nl,
-	split_file_path:split_file_path(FullPath, Directory, File, BaseName, lgt),
-	setup_call_cleanup(
-		working_directory(Current, Directory),     % SWI-Prolog
-		logtalk_reload(Directory, File, BaseName),
-		working_directory(_, Current)              % SWI-Prolog
-   ).
+:- if(current_logtalk_flag(version, version(3, _, _))).
+	pdt_reload(FullPath) :-
+		write(FullPath), nl,
+		% ensure that the argument is a path to a Logtalk source file
+		(	sub_atom(FullPath, _, 4, 0, '.lgt') ->
+			true
+		;	sub_atom(FullPath, _, 8, 0, '.logtalk')
+		),
+		(	logtalk::loaded_file_property(FullPath, flags(Flags)) ->
+			% we're reloading a source file; use the same explicit flags as before
+			logtalk_load(FullPath, Flags)
+		;	% first time; assume only implicit compilation options
+			logtalk_load(FullPath)
+		).
+:- else.
+	% Logtalk
+	pdt_reload(FullPath) :-
+		write(FullPath), nl,
+		split_file_path:split_file_path(FullPath, Directory, File, BaseName, lgt),
+		setup_call_cleanup(
+			working_directory(Current, Directory),     % SWI-Prolog
+			logtalk_reload(Directory, File, BaseName),
+			working_directory(_, Current)              % SWI-Prolog
+	   ).
 
-:- private(logtalk_reload/3).
-logtalk_reload(Directory, File, BaseName) :-
-	(	logtalk::loaded_file(File, Directory, Options) ->
-		% we're reloading a source file; use the same explicit compilation options as before
-		logtalk_load(BaseName, Options)
-	;	% first time; assume only implicit compilation options
-		logtalk_load(BaseName)
-	).
-
+	:- private(logtalk_reload/3).
+	logtalk_reload(Directory, File, BaseName) :-
+		(	logtalk::loaded_file(File, Directory, Flags) ->
+			% we're reloading a source file; use the same explicit flags as before
+			logtalk_load(BaseName, Flags)
+		;	% first time; assume only implicit compilation options
+			logtalk_load(BaseName)
+		).
+:- endif.
 
 :- end_object.

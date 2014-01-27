@@ -13,6 +13,8 @@
 
 package org.cs3.pdt.common.structureElements;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IFile;
@@ -75,7 +77,6 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 		}
 	}
 
-	@Override
 	public void removeMatch(PrologMatch match) {
 		String signature = getSignatureForMatch(match);
 		if (predForSignature.containsKey(signature)) {
@@ -87,7 +88,6 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 		}
 	}
 
-	@Override
 	public void addMatch(PrologMatch match) {
 		String signature = getSignatureForMatch(match);
 		SearchPredicateElement searchPredicateElement = predForSignature.get(signature); 
@@ -157,6 +157,22 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	
 	public ModuleMatch getMatch() {
 		return match;
+	}
+
+	@Override
+	public int computeContainedMatches() {
+		int count = 0;
+		for (SearchPredicateElement element : predForSignature.values()) {
+			count += element.computeContainedMatches();
+		}
+		return count;
+	}
+
+	@Override
+	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
+		for (SearchPredicateElement element : predForSignature.values()) {
+			element.collectContainedMatches(file, matches);
+		}
 	}
 
 }

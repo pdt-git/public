@@ -14,12 +14,11 @@
 
 package org.cs3.pdt.common.search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
@@ -27,7 +26,6 @@ import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
-import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
@@ -48,16 +46,16 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorMatchAdapter, IFileMatchAdapter {
 
 	private PDTSearchQuery query;
-	private Goal goal;
+	private String searchGoalLabel;
 	private final Match[] EMPTY_ARR = new Match[0];
 
 	/**
 	 * @param query
 	 * @param queryString
 	 */
-	public PrologSearchResult(PDTSearchQuery query, Goal goal) {
+	public PrologSearchResult(PDTSearchQuery query, String searchGoalLabel) {
 		this.query = query;
-		this.goal = goal;
+		this.searchGoalLabel = searchGoalLabel;
 	}
 
 	@Override
@@ -75,7 +73,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public final String getLabel() {		
 		return searchType + " "
-		       + (goal==null ? "oops, goal is null?!" : goal.getTermString()/*goal.getModule()+":"+goal.getFunctor()+"/"+goal.getArity()*/ )
+		       + searchGoalLabel
 		       + " \u2013 "
 		       + getMatchCount() 
 		       + " matches in active Prolog Console";
@@ -143,21 +141,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 	
 	private Match[] computeContainedMatches(IFile file) {
-		HashSet<Match> result = new HashSet<Match>();
+		ArrayList<PrologMatch> result = new ArrayList<PrologMatch>();
 		for (SearchModuleElement module : modules.values()) {
-			for (Object obj : module.getChildren()) {
-				if (obj instanceof SearchPredicateElement) {
-					SearchPredicateElement predicate = (SearchPredicateElement) obj;
-					for (SearchFileTreeElement fileTreeElement : predicate.getFileTreeElements()) {
-						IFile fileForTreeElement = fileTreeElement.getFile();
-						if (fileForTreeElement != null && fileForTreeElement.equals(file)) {
-							for (PrologMatch match : fileTreeElement.getOccurrences()) {
-								result.add(match);
-							}
-						}
-					}
-				}
-			}
+			module.collectContainedMatches(file, result);
 		}
 		return result.toArray(new Match[result.size()]);
 	}
@@ -174,7 +160,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		} else if (element instanceof SearchFileTreeElement) {
 			return ((SearchFileTreeElement) element).getFile();
 		} else if (element instanceof SearchMatchElement){
-			return ((SearchMatchElement) element).getMatch().getFile();
+			return ((SearchMatchElement) element).getFile();
 		} else if (element instanceof PrologMatch) {
 			return ((PrologMatch) element).getFile();
 		} else {

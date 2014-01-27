@@ -14,12 +14,17 @@
 :- module(pl_to_graphML, [	%write_project_graph_to_file/2,
 								write_focus_to_graphML/3,
 								write_global_to_graphML/2,
-								write_dependencies_to_graphML/3]).
+								write_dependencies_to_graphML/3,
+								write_logtalk_entities_to_graphML/3]).
 
 :- use_module(graphML_api).
 :- use_module(util_for_graphML).
 :- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
 :- use_module(pdt_common_pl(pdt_search)).
+:- use_module(pdt_prolog_library(utils4modules_visibility)).
+:- use_module(library(lists), [list_to_set/2, append/3, member/2]).
+
+:- op(600, xfy, ::).   % Logtalk message sending operator
 
 %write_project_graph_to_file(Project, OutputFile):-
 %	parse_util:generate_facts(Project),
@@ -54,8 +59,15 @@ write_global_to_graphML(ProjectFilePaths, GraphFile):-
 
 write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
-    %relative_paths(ProjectPath, ConsultedFilePaths, FormattedPaths),
     write_to_graphML(GraphFile, write_dependencies_facts_to_graphML(ProjectPath, ConsultedFilePaths)).
+
+write_logtalk_entities_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
+    filter_consulted(ProjectFilePaths, ConsultedFilePaths),
+    (	current_predicate(logtalk_load/1)
+    ->	filter_logtalk(ConsultedFilePaths, _, ConsultedLogtalkFilePaths),
+    	write_to_graphML(GraphFile, write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths))
+    ;	true
+    ).
 
 relative_paths(_, [], []).
 relative_paths(BasePath, [H|T], [FormattedH|FormattedT]) :-
@@ -72,6 +84,16 @@ relative_path(BasePath, Path, RelativePath) :-
 relative_path_([], Head, Head).
 relative_path_([H|T], [H|T2], Result) :-
     relative_path_(T, T2, Result).
+
+filter_logtalk([], [], []) :- !.
+filter_logtalk([F|Fs], Ps, [F|Ls]) :-
+	(	atom_concat(_, lgt, F)
+	;	atom_concat(_, logtalk, F)
+	),
+	!,
+	filter_logtalk(Fs, Ps, Ls).
+filter_logtalk([F|Fs], [F|Ps], Ls) :-
+	filter_logtalk(Fs, Ps, Ls).
 
 :- meta_predicate(write_to_graphML(+, 1)).
 write_to_graphML(GraphFile, CALL) :-
@@ -125,7 +147,7 @@ write_global_facts_to_graphML(ProjectFiles, OutStream) :-
 	forall((
 		member(SourceModule:SourceName/SourceArity, Predicates),
 		calls(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, _NumberOfCalls),
-		memberchk(TargetModule:TargetName/TargetArity, Predicates)
+		once(member(TargetModule:TargetName/TargetArity, Predicates))
 	),(
 		write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, ProjectFiles)
 	)).
@@ -156,9 +178,13 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     		member((S, T), FoundDependencies),
     		nth1(SId, ProjectFilePaths, S),
     		nth1(TId, ProjectFilePaths, T),
-    		file_imports(S, T, Imports)
+    		file_imports(S, T, Imports),
+    		length(Imports, NImports)
     	),
-		write_load_edge(OutStream, SId, TId, Imports)
+		(	NImports > 0
+		->	write_load_edge(OutStream, SId, TId, Imports, NImports)
+		;	write_load_edge(OutStream, SId, TId, Imports)
+		)
     ).
    
 file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates) :-
@@ -176,8 +202,8 @@ exports_classification([E|Tail], [E|STail], D) :-
 exports_classification([], [], []) :- !.
 
 file_imports(File1, File2, PredNames) :-
-    module_of_file(File1,M1),
-    module_of_file(File2,M2), 
+    once(module_of_file(File1,M1)),
+    once(module_of_file(File2,M2)), 
     module_imports_from(M1,M2,Preds),
     findall(Name/Arity,
     	(
@@ -189,7 +215,9 @@ file_imports(File1, File2, PredNames) :-
 module_imports_from(M1,M2,Preds) :-   
     setof( Head,
            predicate_property(M1:Head, imported_from(M2)),
-           Preds).
+           Preds),
+    !.
+module_imports_from(_M1,_M2,[]).
 
 % Module consults all Preds from File:
 module_consults_from(Module,File,Preds) :-
@@ -231,7 +259,10 @@ file_node_type(FilePath, Dependencies, 'bottom') :-
     not(member((FilePath, _), Dependencies)), !.
     
 file_node_type(_, _, 'intermediate') :- !.
-    
+
+write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths, OutStream) :-
+	lgt_to_graphML::write_logtalk_entity_facts_to_graphML(ProjectPath, ConsultedLogtalkFilePaths, OutStream).
+	
 collect_ids_for_focus_file(FocusFile, Files, CalledPredicates, Calls):-
     findall(
     	Module:Name/Arity,

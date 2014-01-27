@@ -36,4 +36,7 @@ public final class PDTCommon {
 	
 	public static final String PREF_FILE_SIZE_LIMIT = "pdt.file.size.limit";
 	
+	public static final String PERSPECTIVE_CONSOLE_FOLDER = "prolog.perspective.console.folder";
+	public static final String PERSPECTIVE_VIEWS_FOLDER = "prolog.perspective.views.folder";
+
 }

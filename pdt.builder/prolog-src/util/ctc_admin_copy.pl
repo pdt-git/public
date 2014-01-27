@@ -29,7 +29,7 @@
      new_node_id_pdt/1                    % (-NewId)
 ]).
 
-
+:- use_module(pdt_prolog_library(logging)).
 /*****************************************************************
  * Predefined predicates: prev_ctc_id/1, ctc_id_init/0, new_node_id/1
  */
@@ -50,7 +50,7 @@ ctc_id_init_pdt :-
  */
 new_node_id_pdt(NewId) :-
    clause(user:new_id(_),_) % If new_id is defined (=JT is running)
-    -> new_id(NewId)        % ... use new_id to ensure consistency
+    -> user:new_id(NewId)        % ... use new_id to ensure consistency
      ; ( var(NewId)         % ... otherwise use own implementation
          -> ( prev_ctc_id(Last),
               NewId is Last+1,

@@ -20,6 +20,8 @@
 :- use_module(pdt_common_pl('metainference/pdt_prolog_metainference')).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
 :- use_module(pdt_common_pl(pdt_entry_points)).
+:- use_module(pdt_common_pl(properties)).
+:- use_module(library(prolog_clause)).
 
 :- dynamic(result/4).
 

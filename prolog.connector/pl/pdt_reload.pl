@@ -28,9 +28,8 @@
                 *************************************/
 
 :- use_module(split_file_path).
-:- use_module(library(make)).
+%:- use_module(library(make)).
 
-:- use_module(library(make)).
 :- use_module(library(lists)).
 :- use_module(library(memfile)).
 :- use_module(library(debug)).
@@ -72,7 +71,8 @@ pdt_reload__(File):-
 	
 	% we have to continiue, even if reload_file fails
 	% normally failing means: the file has errors
-	(make:reload_file(File) -> true ; true).
+	(user:consult(File) -> true ; true).
+%	(make:reload_file(File) -> true ; true).
 
 :- multifile(pdt_reload_listener/1).
 
@@ -85,7 +85,7 @@ notify_reload_listeners(Files) :-
 notify_reload_listeners(_).
 
 pdt_reload_listener(Files) :-
-    list_2_separated_list(Files, '<>', FileList),
+    atomic_list_concat(Files, '<>', FileList),
     catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
 
                /*************************************

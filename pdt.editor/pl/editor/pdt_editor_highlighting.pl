@@ -16,8 +16,12 @@
 :- module( pdt_editor_highlighting,
          [ predicates_with_property/3  
          ]).
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
+:- use_module( prolog_connector_pl(split_file_path),
+             [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
+             ] ).
+
+:- op(600, xfy, ::).   % Logtalk message sending operator
 
                /************************************************
                 * PREDICATE PROPERTIES FOR SYNTAX HIGHLIGHTING *
@@ -49,6 +53,14 @@
 %	findall(Name, predicate_name_with_property_(Module,Name,undefined), AllPredicateNames),
 %	make_duplicate_free_string(AllPredicateNames,Predicates).
 
+predicates_with_property(Property, FileName, Predicates) :-
+	(	split_file_path(FileName, _, _, _, lgt)
+	;	split_file_path(FileName, _, _, _, logtalk)
+	),
+	!,
+	current_predicate(logtalk_load/1),
+	logtalk_editor_adapter::predicates_with_property(Property, FileName, AllPredicateNames),
+	make_duplicate_free_string(AllPredicateNames,Predicates).
 predicates_with_property(Property, _FileName, Predicates) :-
     findall(Name, predicate_name_with_property_(_Module,Name,Property), AllPredicateNames),
 	make_duplicate_free_string(AllPredicateNames,Predicates).
@@ -58,14 +70,15 @@ predicates_with_property(Property, _FileName, Predicates) :-
 predicate_name_with_property_(Module,Name,Property) :-
     current_module(Module),
     current_predicate(Module:Name/Arity),
-	Name \= '[]',
+	Name \== [],
+	Name \== (:),
+	\+ atom_concat('$', _, Name),
 	functor(Head,Name,Arity),
 	predicate_property(Module:Head,Property).
 	
 make_duplicate_free_string(AllPredicateNames,Predicates) :-
     setof(Name, member(Name,AllPredicateNames), UniqueNames),
-	sformat(S,'~w',[UniqueNames]),
-	string_to_atom(S,Predicates).
+	format(atom(Predicates),'~w',[UniqueNames]).
 
 
 % Below this line is apparently dead code. 
@@ -89,10 +102,8 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments) :-
 	   PredArgList),
 	findall(Pred, member((Pred,_),PredArgList), AllProps),
 	findall(Arg,  member((_,Arg), PredArgList), AllArgs),
-	sformat(S1,'~w',[AllProps]),
-	sformat(S2,'~w',[AllArgs]),
-	string_to_atom(S1,Predicates),
-	string_to_atom(S2,PropertyArguments).
+	format(atom(Predicates),'~w',[AllProps]),
+	format(atom(PropertyArguments),'~w',[AllArgs]).
 	   	  
 % helper
 predicate_name_with_unary_property_(Name,Property,Arg) :-

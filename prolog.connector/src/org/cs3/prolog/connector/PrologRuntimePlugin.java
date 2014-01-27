@@ -15,6 +15,7 @@
 package org.cs3.prolog.connector;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -479,7 +480,28 @@ public class PrologRuntimePlugin extends Plugin {
 	}
 	
 	public static PrologInterface newPrologInterface(String name) {
-		return new SocketPrologInterface(name);
+		SocketPrologInterface socketPrologInterface = new SocketPrologInterface(name);
+		socketPrologInterface.setConsultServerLocation(getDefault().getConsultServerLocation());
+		return socketPrologInterface;
+	}
+	
+	private String consultServerLocation;
+	
+	private String getConsultServerLocation() {
+		if (consultServerLocation == null) {
+			URL url = getBundle().getEntry("library/socket/consult_server.pl");
+			if (url == null) {
+				throw new RuntimeException("consult_server not found!");
+			}
+			File file;
+			try {
+				file = new File(FileLocator.toFileURL(url).getFile());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			consultServerLocation = Util.prologFileName(file);
+		}
+		return consultServerLocation;
 	}
 
 }

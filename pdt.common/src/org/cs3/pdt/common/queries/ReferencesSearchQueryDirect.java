@@ -32,52 +32,63 @@ import org.eclipse.core.resources.IFile;
  */
 public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
+	private String filePath;
+	private int line = -1;
 	
-	public ReferencesSearchQueryDirect(Goal goal) {
-		super(goal);
-		if (goal.isExactMatch()) {
+	public ReferencesSearchQueryDirect(String goal, String searchGoalLabel, boolean isExactMatch) {
+		super(goal, searchGoalLabel, isExactMatch);
+		if (isExactMatch) {
 			setSearchType("References to");
 		} else {
 			setSearchType("References to predicates containing");			
 		}
 	}
+	
+	public ReferencesSearchQueryDirect(Goal goal) {
+		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
+		setSearchType("References to");
+		filePath = Util.quoteAtomIfNeeded(goal.getFilePath());
+		line = goal.getLine();
+	}
 
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
-		String arity = Integer.toString(goal.getArity());
-		if (goal.getArity() < 0) 
-			arity = "Arity";
-		
-		String file = Util.quoteAtom(goal.getFilePath());
-		if (goal.getFilePath().isEmpty())
-			file = "File";
-
-		String name = Util.quoteAtomIfNeeded(goal.getFunctor());
-		if (goal.getFunctor().isEmpty())
-			name = "Predicate";
-		
-		String module2 = module;
-		if (module.equals("''"))
-			module2 = "Module";
-		
-		String query = bT(PDTCommonPredicates.FIND_REFERENCE_TO,
-				name,
-				arity,
-				file,
-				module2,
-				Boolean.toString(goal.isExactMatch()),
+	protected String buildSearchQuery() {
+//		String arity = Integer.toString(goal.getArity());
+//		if (goal.getArity() < 0) 
+//			arity = "Arity";
+//		
+//		String file = Util.quoteAtom(goal.getFilePath());
+//		if (goal.getFilePath().isEmpty())
+//			file = "File";
+//
+//		String name = Util.quoteAtomIfNeeded(goal.getFunctor());
+//		if (goal.getFunctor().isEmpty())
+//			name = "Predicate";
+//		
+//		String module2 = module;
+//		if (module.equals("''"))
+//			module2 = "Module";
+//		
+		String query = bT(PDTCommonPredicates.FIND_PREDICATE_REFERENCE,
+				getGoal(),
+				filePath != null ? filePath : "_",
+				Integer.toString(line),
+//				name,
+//				arity,
+//				file,
+//				module2,
+				Boolean.toString(isExactMatch()),
 				"RefModule",
 				"RefName",
 				"RefArity",
 				"RefFile",
 				"RefLine",
-				"Nth",
-				"Kind",
 				"PropertyList");
 		return query;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
@@ -100,10 +111,10 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 			String[] positions = offsetOrLine.split("-");
 			int offset = Integer.parseInt(positions[0]);
 			int length = Integer.parseInt(positions[1]) - offset;
-			match = createUniqueMatch(module, name, arity, file, offset, length, properties, null, "definition");
+			match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, offset, length, properties, null, "definition");
 		} else {
 			int line = Integer.parseInt(offsetOrLine);
-			match = createUniqueMatch(module, name, arity, file, line, properties, null, "definition");
+			match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, line, properties, null, "definition");
 		}
 		return match;
 	}

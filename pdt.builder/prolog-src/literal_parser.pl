@@ -11,7 +11,7 @@
  * 
  ****************************************************************************/
 
-:- module(literal_parser, [parse_bodies]).
+:- module(literal_parser, [parse_bodies/0]).
 
 :- use_module('analyzer/metafile_referencer').
 :- use_module(library(lists)).

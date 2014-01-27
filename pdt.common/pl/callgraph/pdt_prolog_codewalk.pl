@@ -58,7 +58,9 @@
 :- use_module(library(record)).
 :- use_module(library(debug)).
 :- use_module(library(apply)).
+:- use_module(library(error)).
 :- use_module(library(lists)).
+:- use_module(library(prolog_clause)).
 :- use_module(pdt_common_pl('metainference/pdt_prolog_metainference')).
 :- use_module(pdt_common_pl('metainference/pdt_meta_specification')).
 
@@ -257,6 +259,7 @@ scan_module_class(library).
 %
 %	@bug	Relies on private '$init_goal'/3 database.
 
+:- if(current_prolog_flag(dialect, swi)).
 walk_from_initialization(OTerm) :-
 	walk_option_caller(OTerm, '<initialization>'),
 	forall('$init_goal'(_File, Goal, SourceLocation),
@@ -268,6 +271,9 @@ walk_from_initialization(M:Goal, OTerm) :-
 	walk_called_by_body(Goal, M, OTerm).
 walk_from_initialization(_, _).
 
+:- else.
+walk_from_initialization(_OTerm).
+:- endif.
 
 %%	find_walk_from_module(+Module, +OTerm) is det.
 %
@@ -351,7 +357,7 @@ walk_called_by_body(Body, Module, OTerm) :-
 	format(user_error, 'Failed to analyse:~n', []),
 	portray_clause(('<head>' :- Body)),
 	(   debugging(autoload(trace))
-	->  gtrace,
+	->  trace, %gtrace,
 	    walk_called_by_body(Body, Module, OTerm)
 	;   true
 	).
@@ -384,7 +390,7 @@ walk_called_by_body(subterm_positions, Body, Module, OTerm) :-
 		  missing(subterm_positions),
 		  walk_called_by_body(no_positions, Body, Module, OTerm))
 	;   set_source_of_walk_option(false, OTerm, OTerm2),
-	    forall(walk_called(Body, Module, BodyPos, OTerm2),
+	    forall(walk_called(Body, Module, _BodyPos, OTerm2),
 		   true)
 	).
 walk_called_by_body(no_positions, Body, Module, OTerm) :-
@@ -455,31 +461,43 @@ walk_called(Goal, Module, TermPos, OTerm) :-
 	fail.					% Continue search
 walk_called(Goal, Module, _, OTerm) :-
 	evaluate(Goal, Module, OTerm), !.
-walk_called(Goal, M, TermPos, OTerm) :-
+:- if(current_prolog_flag(dialect, swi)).
+walk_called(Goal, Module, TermPos, OTerm) :-
 	prolog:called_by(Goal, Called),
 	Called \== [], !,
-	walk_called_by(Called, M, Goal, TermPos, OTerm).
-walk_called(Meta, M, term_position(_,_,_,_,ArgPosList), OTerm) :-
+	walk_called_by(Called, Module, Goal, TermPos, OTerm).
+:- endif.
+walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	(   walk_option_autoload(OTerm, false)
 	->  nonvar(Module),
-	    '$get_predicate_attribute'(Module:Meta, defined, 1)
+	    is_defined(Module:Meta)
 	;   true
 	),
-	(   extended_meta_predicate(M:Meta, Head)
-	;   predicate_property(M:Meta, meta_predicate(Head))
-	;   inferred_meta(M:Meta, Head)
+	(   extended_meta_predicate(Module:Meta, Head)
+	;   predicate_property(Module:Meta, meta_predicate(Head))
+	;   inferred_meta(Module:Meta, Head)
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
 	register_possible_meta_clause(ClauseRef),
-	walk_meta_call(1, Head, Meta, M, ArgPosList, OTerm).
+	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm).
 walk_called(Goal, Module, _, _) :-
 	nonvar(Module),
-	'$get_predicate_attribute'(Module:Goal, defined, 1), !.
+	is_defined(Module:Goal), !.
 walk_called(Goal, Module, TermPos, OTerm) :-
 	callable(Goal), !,
 	undefined(Module:Goal, TermPos, OTerm).
 walk_called(Goal, _Module, TermPos, OTerm) :-
 	not_callable(Goal, TermPos, OTerm).
+
+:- if(current_prolog_flag(dialect, swi)).
+is_defined(Module:Goal) :-
+	'$get_predicate_attribute'(Module:Goal, defined, 1).
+:- else.
+is_defined(Module:Goal) :-
+	functor(Goal,N,A),
+	current_predicate(Module:N/A),
+	!.
+:- endif.
 
 %%	undecided(+Variable, +TermPos, +OTerm)
 
@@ -689,26 +707,26 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	->  arg(I, Meta, MA),
 	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall, OTerm),
+	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
 	    	walk_called(Goal, M, ArgPosEx, OTerm)
 	    )
 	;   AS == (^)
 	->  arg(I, Meta, MA),
 	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall, OTerm),
+	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
 	    	walk_called(Goal, MG, ArgPosEx, OTerm)
 	    )
 	;   AS == (//)
 	->  arg(I, Meta, DCG),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall, OTerm),
+	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
 		    walk_dcg_body(DCG, M, ArgPos, OTerm)
 		)
 	;   AS == database
 	->	arg(I, Meta, MA),
 	    \+ \+ (
-	    	set_call_kind_of_walk_option(database, OTerm),
+	    	set_call_kind_of_walk_option(database(Meta, I), OTerm),
 			walk_called(MA, M, ArgPos, OTerm)
 		)
 	;	arg(I, Meta, Arg),
@@ -756,7 +774,7 @@ remove_quantifier(M1:Goal0, Goal,
 	remove_quantifier(Goal0, Goal, GPos, TermPos, M1, M, OTerm).
 remove_quantifier(Goal, Goal, TermPos, TermPos, M, M, _).
 
-
+:- if(current_prolog_flag(dialect, swi)).
 %%	walk_called_by(+Called:list, +Module, +Goal, +TermPos, +OTerm)
 %
 %	Walk code explicitly mentioned to  be   called  through the hook
@@ -770,13 +788,16 @@ walk_called_by([H|T], M, Goal, TermPos, OTerm) :-
 	    ->	walk_called(G2, M, GPosEx, OTerm)
 	    ;	true
 	    )
-	;   subterm_pos(G, Goal, TermPos, GPos),
+	;   subterm_pos(H, Goal, TermPos, GPos),
 	    walk_called(H, M, GPos, OTerm)
 	),
 	walk_called_by(T, M, Goal, TermPos, OTerm).
+:- endif.
 
+:- if(current_prolog_flag(dialect, swi)).
 subterm_pos(Sub, Term, TermPos, SubTermPos) :-
 	subterm_pos(Sub, Term, same_term, TermPos, SubTermPos), !.
+:- endif.
 subterm_pos(Sub, Term, TermPos, SubTermPos) :-
 	subterm_pos(Sub, Term, ==, TermPos, SubTermPos), !.
 subterm_pos(Sub, Term, TermPos, SubTermPos) :-

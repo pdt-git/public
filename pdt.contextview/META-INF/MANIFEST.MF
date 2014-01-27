@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Contextview
 Bundle-SymbolicName: org.cs3.pdt.contextview;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.junit4,
+ org.junit,
  org.eclipse.core.resources,
  org.eclipse.ui.forms,
  org.eclipse.jface.text,
@@ -14,9 +15,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/org.eclipse.albireo.core_0.0.3.v20081031.jar,
- lib/y.jar,
- lib/hamcrest-core-1.2.jar,
- lib/hamcrest-library-1.2.jar
+ lib/y.jar
 Bundle-Activator: pdt.y.main.PluginActivator
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.albireo.core;
@@ -31,15 +30,6 @@ Export-Package: org.eclipse.albireo.core;
    org.eclipse.swt.events,
    org.eclipse.swt.widgets,
    org.eclipse.albireo.core",
- org.hamcrest;uses:="org.hamcrest.internal,org.hamcrest.core",
- org.hamcrest.beans;uses:="org.hamcrest",
- org.hamcrest.collection;uses:="org.hamcrest",
- org.hamcrest.core;uses:="org.hamcrest",
- org.hamcrest.internal;uses:="org.hamcrest",
- org.hamcrest.number;uses:="org.hamcrest",
- org.hamcrest.object;uses:="org.hamcrest",
- org.hamcrest.text;uses:="org.hamcrest",
- org.hamcrest.xml;uses:="org.w3c.dom,org.hamcrest,javax.xml.namespace",
  pdt.y.graphml;x-internal:=true,
  pdt.y.main;
   uses:="org.eclipse.jface.resource,

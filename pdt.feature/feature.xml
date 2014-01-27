@@ -2,7 +2,7 @@
 <feature
       id="PDTFeature"
       label="Prolog Development Tools"
-      version="2.1.0.qualifier"
+      version="2.2.0.qualifier"
       provider-name="http://roots.iai.uni-bonn.de">
 
    <description url="http://roots.iai.uni-bonn.de/research/pdt/">
@@ -84,12 +84,6 @@ and/or distributed.
    </requires>
 
    <plugin
-         id="org.cs3.pdt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.cs3.pdt.console"
          download-size="0"
          install-size="0"
@@ -103,12 +97,6 @@ and/or distributed.
 
    <plugin
          id="org.cs3.prolog.connector.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.cs3.lp.extension"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

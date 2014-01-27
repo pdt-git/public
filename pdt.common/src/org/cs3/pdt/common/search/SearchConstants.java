@@ -33,6 +33,17 @@ public final class SearchConstants {
 	public static final String COMPLETION_DOC_KIND_NODOC = "nodoc";
 	public static final String COMPLETION_DOC_KIND_TEXT = "text";
 	public static final String COMPLETION_DOC_KIND_HTML = "html";
+	public static final String COMPLETION_DOC_KIND_FILE = "file";
+	public static final String COMPLETION_DOC_KIND_LGT_HELP_FILE = "lgt_help_file";
+	
+	// search goals
+	public static final String PREDICATE_GOAL_FUNCTOR = "predicate";
+	
+	public static final String PROPERTY_LABEL = "label";
+	public static final String PROPERTY_SHOW_LINE = "show_line";
+	public static final String PROPERTY_PREFIX = "prefix";
+	public static final String PROPERTY_SUFFIX = "suffix";
+	public static final String PROPERTY_LINE = "line";
 
 	private SearchConstants() {}
 }

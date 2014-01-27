@@ -53,10 +53,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
@@ -83,12 +81,10 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	private MyStringFieldEditor commandLineArguments;
 	private MyStringFieldEditor startupFiles;
 	private MyLabelFieldEditor executeablePreviewLabel;
-	private MyBooleanFieldEditor metaPred;
 	private MyStringFieldEditor extraEnvironmentVariables;
 	private MyDirectoryFieldEditor serverLogDir;
 	private MyIntegerFieldEditor timeoutFieldEditor;
 	private MyBooleanFieldEditor hidePrologWindow;
-	private MyBooleanFieldEditor genFactbase;
 	
 	private ArrayList<FieldEditor> editors = new ArrayList<FieldEditor>();
 
@@ -178,30 +174,6 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		hidePrologWindow = new MyBooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent());
 		addField(hidePrologWindow);
 		
-		genFactbase = new MyBooleanFieldEditor(PrologRuntime.PREF_GENERATE_FACTBASE, "Create prolog metadata (Experimental)", getFieldEditorParent()){
-			@Override
-			public void doLoad(){
-				super.doLoad();
-				metaPred.setEnabled(getBooleanValue(), getFieldEditorParent());
-			}
-			
-			@Override
-			public void doLoadDefault(){
-				super.doLoadDefault();
-				metaPred.setEnabled(getBooleanValue(), getFieldEditorParent());
-			}
-		};
-		genFactbase.getDescriptionControl(getFieldEditorParent()).setToolTipText("This may take a while on large files");
-		metaPred = new MyBooleanFieldEditor(PrologRuntime.PREF_META_PRED_ANALYSIS, "Run meta predicate analysis after loading a prolog file (Experimental)", getFieldEditorParent());
-		genFactbase.getDescriptionControl(getFieldEditorParent()).addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				metaPred.setEnabled(genFactbase.getBooleanValue(), getFieldEditorParent());
-			}
-		});
-		addField(genFactbase);
-		addField(metaPred);
-		
 		adjustLayoutForElement(configurationSelector);
 		adjustLayoutForElement(executableGroup);
 	}
@@ -270,7 +242,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	}
 	
 	private void updateExecuteablePreviewLabelText() {
-		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue());
+		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue()) + " -g [$ConnectorInitFile]";
 		executeablePreviewLabel.setText(newExecutable);
 	}
 

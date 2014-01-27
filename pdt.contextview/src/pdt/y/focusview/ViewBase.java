@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.albireo.core.SwingControl;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -53,8 +54,6 @@ import pdt.y.internal.ImageRepository;
 import pdt.y.internal.ui.PredicatesListDialog;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
-import pdt.y.main.PluginActivator;
-import pdt.y.main.PreferencesUpdateListener;
 import pdt.y.model.realizer.edges.EdgeRealizerBase;
 import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.preferences.EdgeAppearancePreferences;
@@ -82,12 +81,6 @@ public abstract class ViewBase extends ViewPart {
 	private boolean navigationEnabled = false;
 	
 	public ViewBase() {
-		PluginActivator.getDefault().addPreferencesUpdateListener(new PreferencesUpdateListener() {
-			@Override
-			public void preferencesUpdated() {
-				updateCurrentFocusView();	
-			}
-		});
 	}
 
 	protected abstract ViewCoordinatorBase createViewCoordinator();
@@ -96,31 +89,34 @@ public abstract class ViewBase extends ViewPart {
 	
 	@Override
 	public void createPartControl(final Composite parent) {
-		
-		FormLayout layout = new FormLayout();
-		parent.setLayout(layout);
-		
-		// View container initialization
-		viewContainer = new Composite(parent, SWT.NONE);
-		viewContainer.setLayout(new StackLayout());
-		
-		FormData viewContainerLD = new FormData();
-		viewContainerLD.left = new FormAttachment(0, 0);
-		viewContainerLD.right = new FormAttachment(100, 0);
-		viewContainerLD.top = new FormAttachment(0, 0);
-		viewContainerLD.bottom = new FormAttachment(100, -25);
-		viewContainer.setLayoutData(viewContainerLD);
-		
-		initGraphNotLoadedLabel();
-		
-		initInfoLabel(parent);
-		
-		initButtons(parent);
-		
-		focusViewCoordinator = createViewCoordinator();
-		String currentPath = getCurrentFilePath();
-		if (currentPath != null) {
-			focusViewCoordinator.swichFocusView(currentPath);
+		try {
+			FormLayout layout = new FormLayout();
+			parent.setLayout(layout);
+			
+			// View container initialization
+			viewContainer = new Composite(parent, SWT.NONE);
+			viewContainer.setLayout(new StackLayout());
+			
+			FormData viewContainerLD = new FormData();
+			viewContainerLD.left = new FormAttachment(0, 0);
+			viewContainerLD.right = new FormAttachment(100, 0);
+			viewContainerLD.top = new FormAttachment(0, 0);
+			viewContainerLD.bottom = new FormAttachment(100, -25);
+			viewContainer.setLayoutData(viewContainerLD);
+			
+			initGraphNotLoadedLabel();
+			
+			initInfoLabel(parent);
+			
+			initButtons(parent);
+			
+			focusViewCoordinator = createViewCoordinator();
+			String currentPath = getCurrentFilePath();
+			if (currentPath != null) {
+				focusViewCoordinator.swichFocusView(currentPath);
+			}
+		} catch (Throwable e) {
+			Debug.report(e);
 		}
 	}
 

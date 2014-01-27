@@ -14,15 +14,10 @@
 
 :- module( pdt_manual_entry,
          [ predicate_manual_entry/4    % (_Module,Pred,Arity,Content)
-         , manual_entry/3              % Preferably use predicate_manual_entry/4 
-           % Duplicates most of the above and a predicate from 
-           % pdt.runtime.ui/library/pdt/facade/pdt_content_assistant.pl
-           % Called only from 
-           % pdt.core/src/org/cs3/pl/metadata/internal/classic/DefaultMetainfoProvider.java
          ]).
          
+:- if(current_prolog_flag(dialect, swi)).
 
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
 :- use_module(library(helpidx)).
 :- use_module(library(memfile)).
@@ -53,11 +48,6 @@ predicate_manual_entry(Module, Pred,Arity,Content) :-
     pldoc_process:doc_comment(Module:Pred/Arity,File:_,_Summary,_Content),
 	gen_html_for_pred_(File,Pred/Arity,Content),
     !.
-	
-predicate_manual_entry(_Module, Pred,Arity,Content) :-
-	catch(ast_node_signature_doc(_Language, Pred, Arity, Doc), _, fail),
-	sformat(Content,'~w',[Doc]),
-	!.
 	
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
@@ -104,7 +94,11 @@ manual_entry(Pred,-1,Content) :-
     string_to_atom(ContentString,Content).
 */
 
+:- else.
 
+predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
+
+:- endif.
 
 
 

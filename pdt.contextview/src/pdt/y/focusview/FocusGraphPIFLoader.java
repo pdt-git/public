@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Andreas Becker, Ilshat Aliev
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2013, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package pdt.y.focusview;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -10,6 +24,7 @@ import java.util.Vector;
 
 import org.cs3.prolog.common.Util;
 
+import pdt.y.PDTGraphPredicates;
 import pdt.y.main.PDTGraphView;
 
 public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
@@ -39,7 +54,7 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
 	protected String generateQuery(File helpFile) {
 		String query;
-		query = bT("write_focus_to_graphML", Util.quoteAtom(focusFile), Util.quoteAtom(Util.prologFileName(helpFile)), "Dependencies");
+		query = bT(PDTGraphPredicates.WRITE_FOCUS_TO_GRAPHML, Util.quoteAtom(focusFile), Util.quoteAtom(Util.prologFileName(helpFile)), "Dependencies");
 		return query;
 	}
 

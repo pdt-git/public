@@ -16,5 +16,5 @@
 %:- consult('lgt/loader.pl').                   % Search, outline etc. for Logtalk
 
 :- ['editor/load'].
-:- use_module(pdt_smells).
+:- use_module(pdt_smells, []).
 

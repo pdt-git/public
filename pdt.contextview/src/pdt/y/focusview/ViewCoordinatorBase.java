@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Andreas Becker, Ilshat Aliev
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2013, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package pdt.y.focusview;
 
 import java.util.List;
@@ -44,7 +58,7 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 		if (part instanceof IEditorPart) {
 			IEditorPart editorPart = (IEditorPart) part;
 			final String fileName = PDTCommonUtil.prologFileName(editorPart.getEditorInput());
-			if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro")) {
+			if (!fileName.endsWith(".pl") && !fileName.endsWith(".pro") && !fileName.endsWith(".lgt") && !fileName.endsWith(".logtalk")) {
 				return;
 			}
 			if (currentFocusView == null 
@@ -96,7 +110,9 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	protected void refreshCurrentView() {
-		currentFocusView.reload();
+		if (currentFocusView != null) {
+			currentFocusView.reload();
+		}
 	}
 	
 	public void dispose() {

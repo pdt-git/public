@@ -18,8 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.cs3.pdt.common.metadata.Predicate;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 
-public class OutlinePredicateElement extends Predicate implements PrologOutlineTreeElement{
+public class OutlinePredicateElement extends Predicate implements PrologTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
 	
 	private String fileName;
@@ -114,7 +115,6 @@ public class OutlinePredicateElement extends Predicate implements PrologOutlineT
 		return parent;
 	}
 
-	@Override
 	public void addClause(PrologClause clause) {
 		if (clause.isFromOtherFile()) {
 			String occuranceFile = clause.getOccuranceFile();

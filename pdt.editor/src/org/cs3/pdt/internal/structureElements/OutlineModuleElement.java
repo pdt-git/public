@@ -18,8 +18,9 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.PrologSourceLocation;
+import org.cs3.pdt.common.structureElements.PrologTreeElement;
 
-public class OutlineModuleElement extends PrologSourceLocation implements PrologOutlineTreeElement{
+public class OutlineModuleElement extends PrologSourceLocation implements PrologTreeElement{
 	private String name;  
 	private String kind;   // Legal values are "module" (Prolog) or "entity" (Logtalk)
 	private Map<String, OutlinePredicateElement> predicates= new HashMap<String,OutlinePredicateElement>();
@@ -96,7 +97,6 @@ public class OutlineModuleElement extends PrologSourceLocation implements Prolog
 		return parent;
 	}
 
-	@Override
 	public void addClause(PrologClause clause) {
 		String signature = getSignature(clause);
 		OutlinePredicateElement predicateElement = predicates.get(signature);

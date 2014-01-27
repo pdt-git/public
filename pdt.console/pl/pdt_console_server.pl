@@ -68,7 +68,6 @@
 	console_thread_name/1
 ]).
 :- use_module(library(socket)).
-:- use_module(library(backcomp)).
 :- use_module(library(lists)).
  
 
@@ -76,6 +75,18 @@ console_thread_name(Name) :-
 	console_thread_name__(Name).
 
 :- dynamic(console_thread_name__/1).
+
+:- dynamic(pdt_console_client_id/1).
+
+reset_pdt_console_client_id :-
+	retractall(pdt_console_client_id(_)),
+	assertz(pdt_console_client_id(0)).
+
+next_pdt_console_client_id(Id) :-
+	retract(pdt_console_client_id(Id)),
+	!,
+	Next is Id + 1,
+	asserta(pdt_console_client_id(Next)).
 
 prolog_server(Port, Name, Options) :-
 	tcp_socket(ServerSocket),
@@ -106,8 +117,8 @@ server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer):-
 	set_stream(InStream,encoding(utf8)),
     set_stream(OutStream,encoding(utf8)),
 %	tcp_host_to_address(Host, Peer),
-	flag(pdt_console_client_id,Id,Id+1),
-	concat_atom(['pdt_console_client_',Id,'_',Name],Alias),
+    next_pdt_console_client_id(Id),
+	atomic_list_concat(['pdt_console_client_',Id,'_',Name],Alias),
 	thread_create(service_client(InStream, OutStream, Peer, Options),
 		      ID,
 		      [ alias(Alias)
@@ -190,17 +201,18 @@ consult_server:pif_shutdown_hook:-
 
 start_server(Port, Name) :-
     \+ thread_property(_, alias(pdt_console_server)),
+    reset_pdt_console_client_id,
     prolog_server(Port, Name, []),
     assertz(server(Port)).
 
 stop_server :-
 	server(Port),
 	!,
-	do_stop_server(Port,_LockFile).
+	do_stop_server(Port).
 stop_server.
 
 do_stop_server(Port) :-
-	recordz(pdt_console_server_flag, shutdown),
+	recordz(pdt_console_server_flag, shutdown, _),
 	tcp_socket(Socket),
 	tcp_connect(Socket, localhost:Port),
 	tcp_close_socket(Socket),

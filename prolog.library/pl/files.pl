@@ -28,8 +28,9 @@
 
 % Conditional loading:
 
-:- use_module(library(backcomp)).
 :- use_module(library(memfile)).
+:- use_module(logging).
+:- use_module(count).
 
 :- module_transparent consult_if_not_yet/2.
 
@@ -163,7 +164,7 @@ with_output_to_folder(Folder,Call) :-
   
 with_output_to_folder(Folder,File,Call) :-
    functor(Call,Functor,_),
-   concat_atom([Functor,'-'],Prefix),
+   atomic_list_concat([Functor,'-'],Prefix),
    create_timestamped_file_path(Folder,Prefix,'.txt',File),
    export_all_results(File, Call),            
    log_on_stdout('Report written to file~n~a~n',[File]).
@@ -175,9 +176,9 @@ report_to_file(Folder,Call) :- with_output_to_folder(Folder,Call).
 /*
  * export_all_results(+File, +Goal)
  *   Open an output stream for File and redirect the  output
- *   of the goal to that stream. Find all solution for Goal
- *   and report the number of solutions at the end.
- *   Close the stream afterwards.
+ *   of the goal to that stream. Find all solution for Goal,
+ *   report the number of solutions and print each solution on 
+ *   a separate line. Close the stream afterwards.
  *
  *   +File is a file in Unix notation (with slashes "/" as 
  *   separators). On Windows, the path may start with the 
@@ -189,7 +190,9 @@ report_to_file(Folder,Call) :- with_output_to_folder(Folder,Call).
 export_all_results(File, Goal) :-
    with_output_to_file(File, 
        ( count(Goal,N),  % enforces calculating all results
-         format('Found ~a results.~n',[N])
+         format('Found ~a results.~n',[N]),
+         forall(Goal, writeln(Goal)),
+         nl
        )
     ).
  
@@ -234,11 +237,11 @@ export_goal_output(File,Goal)  :-  with_output_to_file(File,write,Goal).
  */
 create_timestamped_file_path(Directory,Prefix,Suffix,FilePath) :-
     create_timestamp(Timestamp),
-    concat_atom([Directory,'/',Prefix,Timestamp,Suffix],FilePath).
+    atomic_list_concat([Directory,'/',Prefix,Timestamp,Suffix],FilePath).
 
 create_timestamped_folder_path(Directory,Timestamped) :-
     create_timestamp(Timestamp),
-    concat_atom([Directory,Timestamp],Timestamped).    
+    atomic_list_concat([Directory,Timestamp],Timestamped).    
 /*
  * create_timestamp(?TimeStampAtom)
  *   Return in Arg1 an atom representing the time of the 
@@ -259,7 +262,7 @@ create_timestamp_2(TimeStampAtom) :-
     Seconds is truncate(S), 
     format(atom(TimeStampAtom), '~a.~a.~a ~a:~a:~d', [D,M,Y,H,Mn,Seconds]).
     
-/** 
+/*
  * Determine the absolute path to the root directory of the current 
  * workspace ASSUNIMG that this file is three levels deeper:
  *  --> WorkspaceDirPath/ProjectDir/FileDir/thisfile

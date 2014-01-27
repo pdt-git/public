@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.internal.ImageRepository;
@@ -344,8 +345,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 			if ("module".equals(module.getKind())) {
 				try {
-					Map<String, Object> result = pif.queryOnce(bT("module_property", Util.quoteAtom(module.getName()), "file(File)"),
-							bT("module_property", Util.quoteAtom(module.getName()), "line_count(Line)"));
+					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, Util.quoteAtom(module.getName()), "file(File)"),
+							bT(PDTPredicates.MODULE_PROPERTY, Util.quoteAtom(module.getName()), "line_count(Line)"));
 					if (result == null) {
 						return;
 					} else {
@@ -356,10 +357,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 					Debug.report(e);
 					return;
 				}
-			} else {
+			} else { // logtalk (no modules, but entities)
 				try {
-					Map<String, Object> result = pif.queryOnce(bT("utils4entities::entity_property", Util.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
-							bT("utils4entities::entity_property", Util.quoteAtom(module.getName()), "_", "lines(Line, _)"));
+					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.ENTITY_PROPERTY, Util.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
+							bT(PDTPredicates.ENTITY_PROPERTY, Util.quoteAtom(module.getName()), "_", "lines(Line, _)"));
 					if (result == null) {
 						return;
 					} else {

@@ -25,7 +25,6 @@
 	pif_dispatch/3
 ]).
 
-:- use_module(library(backcomp)).
 :- use_module(library(debug)).
 
 :-dynamic pif_observe_hook/3,pif_unobserve_hook/3.
@@ -79,14 +78,14 @@ pif_observe(Thread,Subject):-
 % 		for. 
 % 
 pif_observe(Thread,Subject,Key) :-
-  recorded(pif_observer,observation(Thread,OtherSubject,Key)),
+  recorded(pif_observer,observation(Thread,OtherSubject,Key), _),
   OtherSubject =@= Subject,
   !.
 
 pif_observe(Thread,Subject,Key) :-
 %  sync:init_idb(Subject),
   call_observe_hook(Thread,Subject,Key),
-  recordz(pif_observer,observation(Thread,Subject,Key)).
+  recordz(pif_observer,observation(Thread,Subject,Key), _).
 
 
 
@@ -138,7 +137,7 @@ pif_notify(Subject,Event) :-
 	     	thread_get_message(notify(Subject,Event)),
 	     	(	Subject='$abort'
 	     	->	!
-	     	;	recorded(pif_observer,observation(Me,Subject,Key))
+	     	;	recorded(pif_observer,observation(Me,Subject,Key), _)
 	     	).
 	     	
 	     	

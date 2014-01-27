@@ -33,7 +33,34 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 
 	@Override
 	public StyledString getStyledText(Object element) {
+		if (element instanceof SearchModuleElement) {
+			return new StyledString(((SearchModuleElement) element).getLabel());
+		} else if (element instanceof SearchPredicateElement){
+			SearchPredicateElement pe = ((SearchPredicateElement) element);
+			String label = pe.getLabel();
+			int count = pe.computeContainedMatches();
+			return getStyledTextWithCount(label, count);
+		} else if (element instanceof SearchFileTreeElement){
+			SearchFileTreeElement fileTreeElement = ((SearchFileTreeElement) element);
+			String label = fileTreeElement.getLabel();
+			int count = fileTreeElement.computeContainedMatches();
+			return getStyledTextWithCount(label, count);
+		} else if (element instanceof SearchMatchElement) {
+			return ((SearchMatchElement) element).getStyledString();
+		}
 		return new StyledString(getText(element));
+	}
+	
+	private StyledString getStyledTextWithCount(String label, int count) {
+		StyledString str = new StyledString(label);
+		str.append(" (", StyledString.COUNTER_STYLER);
+		str.append(Integer.toString(count), StyledString.COUNTER_STYLER);
+		str.append(" match", StyledString.COUNTER_STYLER);
+		if (count > 1) {
+			str.append("es", StyledString.COUNTER_STYLER);
+		}
+		str.append(")", StyledString.COUNTER_STYLER);
+		return str;
 	}
 
 	@Override
@@ -72,27 +99,11 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 
 	@Override
 	public String getText(Object element) {
-		if(element instanceof SearchPredicateElement){
-			SearchPredicateElement pe = ((SearchPredicateElement)element);
-			String label = pe.getLabel();
-			int count = pe.numberOfOccurences();
-//			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
-			String plural = (count==1)?"":"es";
-			return label+ " (" + count +" match"+plural+")";
-		} else if (element instanceof SearchFileTreeElement){
-			SearchFileTreeElement fileTreeElement = ((SearchFileTreeElement) element);
-			String label = fileTreeElement.getLabel();
-			int count = fileTreeElement.getNumberOfChildren();
-			String plural = ((count==1) ? "" : "es");
-			return label + " (" + count + " match" + plural + ")";
-		} else if(element instanceof PrologTreeElement){
+		if (element instanceof PrologTreeElement){
 			return ((PrologTreeElement)element).getLabel();
-//		} else if (element instanceof ModuleSearchElement) {
-//			return ((ModuleSearchElement)element).getLabel();
-//		} else if(element instanceof PrologMatch) {
-//			return (((PrologMatch)element).getLabel());
+		} else {
+			return super.getText(element);
 		}
-		return "no label";
 	}
 
 }

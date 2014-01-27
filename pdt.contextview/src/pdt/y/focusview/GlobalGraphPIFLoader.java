@@ -1,3 +1,17 @@
+/*****************************************************************************
+ * This file is part of the Prolog Development Tool (PDT)
+ * 
+ * Author: Andreas Becker, Ilshat Aliev
+ * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
+ * Mail: pdt@lists.iai.uni-bonn.de
+ * Copyright (C): 2013, CS Dept. III, University of Bonn
+ * 
+ * All rights reserved. This program is  made available under the terms
+ * of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ ****************************************************************************/
+
 package pdt.y.focusview;
 
 import static org.cs3.prolog.common.QueryUtils.bT;
@@ -17,11 +31,20 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 
+import pdt.y.PDTGraphPredicates;
 import pdt.y.main.PDTGraphView;
 
 public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	
 	private static final String NAME_OF_GLOBAL_HELPING_FILE = "pdt-global-help.graphml";
+	
+	private static final ArrayList<String> extensions = new ArrayList<String>();
+	static {
+		extensions.add("pl");
+		extensions.add("prolog");
+		extensions.add("lgt");
+		extensions.add("logtalk");
+	}
 	
 	protected List<String> paths = new ArrayList<String>();
 	protected String currentPath;
@@ -49,7 +72,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		loadPaths(currentPath);
 		
 		String query;
-		query = bT("write_global_to_graphML", paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)));
+		query = bT(PDTGraphPredicates.WRITE_GLOBAL_TO_GRAPHML, paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)));
 		return query;
 	}
 
@@ -62,7 +85,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		try {			
 			IProject project = FileUtils.findFileForLocation(path).getProject();
 			
-			if (ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
+			if (ignoreExternalPrologFilesProject() && ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
 				return paths;
 			}
 			
@@ -73,7 +96,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 					if (!(resource instanceof IFile)) 
 						return true;
 					IFile file = (IFile)resource;
-					if (file.getFileExtension() != null && file.getFileExtension().equals("pl")) {
+					if (file.getFileExtension() != null && extensions.contains(file.getFileExtension())) {
 						try {
 							paths.add(Util.quoteAtom(UIUtils.prologFileName(file)));
 						} catch (IOException e) {
@@ -93,4 +116,9 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	public boolean containsFilePath(String path) {
 		return paths.contains(path);
 	}
+	
+	protected boolean ignoreExternalPrologFilesProject() {
+		return true;
+	}
+	
 }

@@ -13,11 +13,15 @@
 
 package org.cs3.pdt.common.structureElements;
 
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IFile;
+
 public interface PrologSearchTreeElement extends PrologTreeElement{
 	
-	void addMatch(PrologMatch match);
+	int computeContainedMatches();
 	
-	void removeMatch(PrologMatch match);
+	void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches);
 	
 }
 

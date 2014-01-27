@@ -55,7 +55,7 @@ public abstract class PreferencePageBase
 	public boolean performOk() {
 		boolean res = super.performOk();
 		if (res) {
-			//PluginActivator.getDefault().preferencesUpdated();
+			PluginActivator.getDefault().preferencesUpdated();
 		}
 		return res;
 	}

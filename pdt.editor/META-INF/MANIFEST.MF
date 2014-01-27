@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Editor
 Bundle-SymbolicName: org.cs3.pdt.editor;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Bundle-ClassPath: PDT.jar
 Bundle-Activator: org.cs3.pdt.PDTPlugin
 Bundle-Vendor: http://roots.iai.uni-bonn.de
@@ -23,10 +23,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.core.resources,
- org.eclipse.jdt.ui,
  org.eclipse.ui.views,
  org.junit,
- org.eclipse.jdt.core,
  org.eclipse.ui.ide,
  org.eclipse.search,
  org.eclipse.core.filesystem,

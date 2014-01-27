@@ -61,7 +61,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -93,7 +92,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -105,18 +103,24 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener {
 
-	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
+	public static final String COMMAND_OPEN_PRIMARY_DEFINITION = "org.eclipse.pdt.ui.open.primary.definition";
+	
+	public static final String COMMAND_FIND_ALL_DEFINITIONS = "org.eclipse.pdt.ui.find.all.definitions";
+	
+	public static final String COMMAND_FIND_REFERENCES = "org.eclipse.pdt.ui.find.references";
+	
+	public static final String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
 
-	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
+	public static final String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
-	public static String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
+	public static final String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
-	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
+	public static final String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
-	public static String COMMAND_RUN_UNIT_TEST = "org.eclipse.pdt.ui.edit.run.unit.test";
+	public static final String COMMAND_RUN_UNIT_TEST = "org.eclipse.pdt.ui.edit.run.unit.test";
 
-	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
-
+	public static final String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
+	
 	private ColorManager colorManager;
 
 	private NonNaturePrologOutline fOutlinePage;
@@ -385,17 +389,24 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	 * @param menuMgr
 	 */
 	private void createInspectionMenu(MenuManager menuMgr) {
+		
 		addAction(menuMgr, new FindPredicateActionDelegate(this),
 				"Open Primary Definition or Declaration", SEP_PDT_SEARCH,
-				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
+				COMMAND_OPEN_PRIMARY_DEFINITION);
+//				"org.eclipse.pdt.ui.open.primary.definition");
+//				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 
 		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
 				"Find all Definitions and Declarations", SEP_PDT_SEARCH,
-				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
+				COMMAND_FIND_ALL_DEFINITIONS);
+//				"org.cs3.pdt.find.definitions");
+//				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
 		addAction(menuMgr, new FindReferencesActionDelegate(this),
 				"Find References", SEP_PDT_SEARCH,
-				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
+				COMMAND_FIND_REFERENCES);
+//				"org.cs3.pdt.find.references");
+//				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
 
 		// addAction(menuMgr, new SpyPointActionDelegate(this),
 		// "Toggle Spy Point", SEP_PDT_INSPECT,
@@ -527,8 +538,8 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		action.setActionDefinitionId(id);
 		action.setText(name);
 		menuMgr.appendToGroup(separator, action);
-		setAction(
-				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE,
+		setAction(id,
+//				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE,
 				action);
 	}
 
@@ -875,11 +886,11 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {
-		 if(input instanceof FileStoreEditorInput){
+//		 if(input instanceof FileStoreEditorInput){
              return new ExternalDocumentProvider();
-		 } else{
-			 return new PLDocumentProvider();
-		 }
+//		 } else{
+//			 return new PLDocumentProvider();
+//		 }
 	}
 
 	private boolean isExternalInput() {
@@ -1411,7 +1422,15 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					updateTitleImage(getEditorInput());
+					PLEditor.this.updateTitleImage(getEditorInput());
+					try {
+						PLEditor.this.configuration.getPLScanner().initHighlighting();
+						PLEditor.this.getSourceViewer().invalidateTextPresentation();
+					} catch (PrologInterfaceException e) {
+						Debug.report(e);
+					} catch (CoreException e) {
+						Debug.report(e);
+					};
 				}
 			});
 		}
@@ -1424,7 +1443,15 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				updateTitleImage(getEditorInput());
+				PLEditor.this.updateTitleImage(getEditorInput());
+				try {
+					PLEditor.this.configuration.getPLScanner().initHighlighting();
+					PLEditor.this.getSourceViewer().invalidateTextPresentation();
+				} catch (PrologInterfaceException e) {
+					Debug.report(e);
+				} catch (CoreException e) {
+					Debug.report(e);
+				};
 			}
 		});
 	}

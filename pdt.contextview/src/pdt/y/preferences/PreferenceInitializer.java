@@ -30,6 +30,7 @@ import static pdt.y.preferences.PreferenceConstants.BASE_TEMPLATES_STORAGE;
 import static pdt.y.preferences.PreferenceConstants.BASE_TEMPLATE_DEFAULT;
 import static pdt.y.preferences.PreferenceConstants.LAYOUT;
 import static pdt.y.preferences.PreferenceConstants.LAYOUT_HIERARCHY;
+import static pdt.y.preferences.PreferenceConstants.LAYOUT_COMPACTNESS;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING;
 import static pdt.y.preferences.PreferenceConstants.NAME_CROPPING_BRACKET;
 import static pdt.y.preferences.PreferenceConstants.NODE_SIZE;
@@ -72,6 +73,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 			{ NODE_SIZE_NUMBER_OF_LINES, "2" },
 			{ NODE_SIZE_FIXED_WIDTH, "100" },
 			{ LAYOUT, LAYOUT_HIERARCHY },
+			{ LAYOUT_COMPACTNESS, "500" },
 			{ APPEARANCE_NONMODULE_HEADER_COLOR, ColorUtils.getColorString(Color.WHITE) },
 			{ APPEARANCE_MODULE_HEADER_COLOR, ColorUtils.getColorString(new Color(203, 215, 226)) },
 			{ APPEARANCE_MODULE_FILE_BACKGROUND_COLOR, ColorUtils.getColorString(new Color(240, 240, 240)) },

@@ -13,12 +13,15 @@
 
 package org.cs3.pdt.common.search;
 
+import static org.cs3.prolog.common.QueryUtils.bT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.queries.DeadPredicatesSearchQuery;
 import org.cs3.pdt.common.queries.GlobalDefinitionsSearchQuery;
 import org.cs3.pdt.common.queries.MetaPredicatesSearchQuery;
@@ -33,7 +36,6 @@ import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -59,8 +61,8 @@ import org.eclipse.swt.widgets.Label;
 
 public class PrologSearchPage extends DialogPage implements ISearchPage {
 
-    private static final String PREDICATE_DEF_HINT = "Search for predicates declarations and definitions (e.g. \"member\" or \"member/2\")";
-    private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\")";
+    private static final String PREDICATE_DEF_HINT = "Search for predicates declarations and definitions (e.g. \"member\" or \"member/2\") or DCG non-terminals (e.g. \"token//1\")";
+    private static final String PREDICATE_REF_HINT = "Search for references to predicates (e.g. \"member\" or \"member/2\") or DCG non-terminals (e.g. \"token//1\")";
     private static final String ENTITY_DEF_HINT = "Search for entities (e.g. module \"lists\")";
     private static final String ENTITY_REF_HINT = "Search for references to entities (e.g. module \"lists\")";
     private static final String UNDEFINED_HINT = "Search for all undefined calls";
@@ -169,7 +171,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     // limit to
     private final static int DECLARATIONS = 0;
     private final static int REFERENCES = 1;
-
+    
     public static final String EXTENSION_POINT_ID = "org.cs3.pdt.prologSearchPage";
 
     private static final int HISTORY_SIZE = 12;
@@ -215,35 +217,25 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         PDTSearchQuery searchQuery = null;
 
-        Goal goal;
+//        Goal goal;
         if (searchFor == PREDICATE) {
-            String functor = "";
-            int arity = 0;
-            int lastSlash = data.pattern.lastIndexOf("/");
-            if (lastSlash == -1) {
-                functor = data.pattern;
-                arity = -1;
-            } else {
-                try {
-                    arity = Integer.parseInt(data.pattern.substring(lastSlash + 1));
-                } catch (NumberFormatException e) {}
-                functor = data.pattern.substring(0, lastSlash);
-            }
-            goal = new Goal("", null, Util.quoteAtom(functor), arity, null, data.isExactMatch());
+        	SearchPattern searchPattern = SearchPattern.createSearchPattern(data.pattern);
+        	String searchGoal = searchPattern.toSearchGoal();
+//            goal = new Goal("", searchPattern.module, Util.quoteAtom(searchPattern.name), searchPattern.arity, null, data.isExactMatch());
             
             if (limitTo == REFERENCES) {
-            	searchQuery = new ReferencesSearchQueryDirect(goal);
+            	searchQuery = new ReferencesSearchQueryDirect(searchGoal, data.pattern, data.isExactMatch());
             } else {
-            	searchQuery = new GlobalDefinitionsSearchQuery(goal);
+            	searchQuery = new GlobalDefinitionsSearchQuery(searchGoal, data.pattern, data.isExactMatch());
             }
         } else if (searchFor == MODULE) {
-        	boolean exactMatch = data.isExactMatch();
-			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
-            
+//        	boolean exactMatch = data.isExactMatch();
+//			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
+//            
             if (limitTo == REFERENCES) {
-            	searchQuery = new ModuleReferenceSearchQuery(goal);
+            	searchQuery = new ModuleReferenceSearchQuery(Util.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             } else {
-            	searchQuery = new ModuleDefinitionsSearchQuery(goal);
+            	searchQuery = new ModuleDefinitionsSearchQuery(Util.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             }
         } else if (searchFor == UNDEFINED_CALL) {
 //        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
@@ -252,7 +244,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		if (project.isAccessible()) {
         			searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers(), project);
         		} else {
-        			Debug.error(project.getName() + " is not accessable.");
+        			Debug.error(project.getName() + " is not accessible.");
         		}
         	} else {
         		searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
@@ -263,7 +255,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		if (project.isAccessible()) {
         			searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers(), project);
         		} else {
-        			Debug.error(project.getName() + " is not accessable.");
+        			Debug.error(project.getName() + " is not accessible.");
         		}
         	} else {
         		searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
@@ -274,7 +266,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		if (project.isAccessible()) {
         			searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers(), project);
         		} else {
-        			Debug.error(project.getName() + " is not accessable.");
+        			Debug.error(project.getName() + " is not accessible.");
         		}
         	} else {
         		searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
@@ -329,28 +321,105 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	return projectScopeCheckBox.getSelection();
     }
    
-    private Object[] getFunctorAndArity(String pattern) {
-        if (pattern == null || pattern.isEmpty()) {
-            return null;
-        }
-        String functor = "";
-        int arity = 0;
-        int lastSlash = pattern.lastIndexOf("/");
-        if (lastSlash == -1) {
-            functor = pattern;
-            arity = -1;
-        } else {
-            try {
-                arity = Integer.parseInt(pattern.substring(lastSlash + 1));
-            } catch (NumberFormatException e) {
-                return null;
-            }
-            if (arity < 0) {
-                return null;
-            }
-            functor = pattern.substring(0, lastSlash);
-        }
-        return new Object[]{functor, arity};
+//    private SearchPattern getSearchPattern(String pattern) {
+//        if (pattern == null || pattern.isEmpty()) {
+//            return null;
+//        }
+//        String module = null;
+//        String mSeparator;
+//        String functor = "";
+//        String aSeparator = null;
+//        int arity = 0;
+//        
+//        String beforeArity;
+//        int lastSlash = pattern.lastIndexOf("//");
+//        if (lastSlash == -1) {
+//        	lastSlash = pattern.lastIndexOf("/");
+//        	if (lastSlash != -1) {
+//        		aSeparator = "/";
+//        	}
+//        } else {
+//        	aSeparator = "//";
+//        }
+//        if (lastSlash == -1) {
+//        	beforeArity = pattern;
+//            arity = -1;
+//        } else {
+//            try {
+//                arity = Integer.parseInt(pattern.substring(lastSlash + aSeparator.length()));
+//            } catch (NumberFormatException e) {
+//                return null;
+//            }
+//            if (arity < 0) {
+//                return null;
+//            }
+//            beforeArity = pattern.substring(0, lastSlash);
+//        }
+//        if (beforeArity.isEmpty()) {
+//        	return null;
+//        }
+//        int firstSplitter = beforeArity.indexOf("::");
+//        int splitterLength = 2;
+//        if (firstSplitter == -1) {
+//        	firstSplitter = beforeArity.indexOf(":");
+//        	splitterLength = 1;
+//        }
+//        if (firstSplitter == -1) {
+//        	functor = beforeArity;
+//        } else {
+//        	module = beforeArity.substring(0, firstSplitter);
+//        	functor = beforeArity.substring(firstSplitter + splitterLength);
+//        	if (module.isEmpty() || functor.isEmpty()) {
+//        		return null;
+//        	}
+//        }
+//        return new Object[]{module, functor, arity};
+//    }
+    
+    private static class SearchPattern {
+    	private static final Pattern p = Pattern.compile("(([^:]+)(:|::))?([^:/]+)((/|//)(\\d+))?");
+    	
+    	private static SearchPattern createSearchPattern(String pattern) {
+    		Matcher matcher = p.matcher(pattern);
+    		if (matcher.matches()) {
+    			return new SearchPattern(matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(6), matcher.group(7));
+    		}
+    		return null;
+    	}
+    	
+    	final String module;
+    	final String mSeparator;
+    	final String name;
+    	final String aSeparator;
+    	final int arity;
+    	
+    	private SearchPattern(String module, String mSeparator, String name, String aSeparator, String arity) {
+			super();
+			this.module = module;
+			this.mSeparator = mSeparator;
+			this.name = name;
+			this.aSeparator = aSeparator;
+			if (arity == null) {
+				this.arity = -1;
+			} else {
+				int parseInt = -1;
+				try {
+					parseInt = Integer.parseInt(arity);
+				} catch (NumberFormatException e) {
+				}
+				this.arity = parseInt;
+			}
+		}
+    	
+    	public String toSearchGoal() {
+    		return bT(SearchConstants.PREDICATE_GOAL_FUNCTOR, 
+    				module != null ? Util.quoteAtomIfNeeded(module) : "_",
+    				mSeparator != null ? mSeparator : "_",
+    				Util.quoteAtomIfNeeded(name),
+    				aSeparator != null ? aSeparator : "_",
+    				arity >= 0 ? arity : "_");
+    	}
+    	
     }
 
     private void setPattern(String pattern) {
@@ -687,7 +756,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         } else if (getSearchFor() == MODULE) {
         	return true;
         }
-        return getFunctorAndArity(pattern) != null;
+        return SearchPattern.createSearchPattern(pattern) != null;
     }
 
 
@@ -740,7 +809,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         String selectedText = selection.getText();
         if (selectedText != null && selectedText.length() > 0) {
             int i = 0;
-            while (i < selectedText.length() && !IndentManipulation.isLineDelimiterChar(selectedText.charAt(i))) {
+            while (i < selectedText.length() && selectedText.charAt(i) != '\n' && selectedText.charAt(i) != '\r') {
                 i++;
             }
             if (i > 0) {
