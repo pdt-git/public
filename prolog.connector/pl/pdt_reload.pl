@@ -65,14 +65,23 @@ pdt_reload__(File):-
     logtalk_reload_adapter::pdt_reload(File),
     assertz(reloaded_file__(File)).
 
+:- if(current_prolog_flag(dialect, swi)).
 % SWI-Prolog
+:- use_module(library(make)).
+pdt_reload__(File):-
+	debug(pdt_reload, 'pdt_reload(~w)', [File]),
+	
+	% we have to continiue, even if reload_file fails
+	% normally failing means: the file has errors
+	(make:reload_file(File) -> true ; true).
+:- else.
 pdt_reload__(File):-
 	debug(pdt_reload, 'pdt_reload(~w)', [File]),
 	
 	% we have to continiue, even if reload_file fails
 	% normally failing means: the file has errors
 	(user:consult(File) -> true ; true).
-%	(make:reload_file(File) -> true ; true).
+:- endif.
 
 :- multifile(pdt_reload_listener/1).
 
