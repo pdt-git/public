@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, calls_multifile/8, pdt_walk_code/1]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_location/7, calls_multifile/8, pdt_walk_code/1]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -35,12 +35,16 @@ ensure_call_graph_generated.
 calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls) :-
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls).
 
+call_location(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
+	call_location_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition).
+
 %% calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls)
 calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls) :-
 	calls_multifile_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls).
 
 :- dynamic(calls_/7).
 :- dynamic(calls_multifile_/8).
+:- dynamic(call_location_/7).
 
 clear([]).
 clear([Module:Name/Arity|Predicates]) :-
@@ -52,9 +56,9 @@ clear([Module:Name/Arity|Predicates]) :-
 
 generate_call_graph :-
 	pdt_prolog_walk_code([ trace_reference(_),
-			on_trace(pdt_call_graph:assert_edge),
+			on_trace(pdt_call_graph:assert_edge_location),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			source(false),
+			%source(false),
 			reiterate(false)
 			]),
 	(	predicates_to_walk(NewPredicates)
@@ -66,9 +70,9 @@ generate_call_graph :-
 
 generate_call_graph(Predicates) :-
 	pdt_prolog_walk_code([ trace_reference(_),
-			on_trace(pdt_call_graph:assert_edge),
+			on_trace(pdt_call_graph:assert_edge_location),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			source(false),
+			%source(false),
 			reiterate(false),
 			predicates(Predicates)
 			]),
@@ -92,7 +96,19 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	;	true
 	).
 
+assert_edge(_, '<initialization>', _, _) :- !.
+
+assert_edge(M1:Callee, M2:Caller, ClauseInfo) :-
+	assert_edge(M1:Callee, M2:Caller, ClauseInfo, _).
+
 assert_edge(M1:Callee, M2:Caller, clause(Ref), _) :-
+	\+ analized_clause(Ref),
+	assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, undefined), _).
+	
+assert_edge_location(M1:Callee, M2:Caller, ClauseInfo) :-
+	assert_edge_location(M1:Callee, M2:Caller, ClauseInfo, _).
+	
+assert_edge_location(M1:Callee, M2:Caller, clause_term_position(Ref, TermPosition), _) :-
 	functor(Callee,F1,N1),
 	(	predicate_property(M1:Callee, imported_from(M0))
 	->	M = M0
@@ -100,12 +116,17 @@ assert_edge(M1:Callee, M2:Caller, clause(Ref), _) :-
 	),
 	functor(Caller,F2,N2), 
 	assert_edge_(M,F1,N1, M2,F2,N2),
+	(
+		TermPosition \= undefined
+	->	assertz(call_location_(M, F1, N1, M2, F2, N2, TermPosition))
+	;	true
+	),
 	(	predicate_property(M2:Caller, multifile),
 		clause_property(Ref, file(File))
 	->	assert_multifile_edge(M,F1,N1, M2,F2,N2, File)
 	;	true
 	).
-assert_edge(_, '<initialization>', _, _) :- !.
+assert_edge_location(_, '<initialization>', _, _) :- !.
 
 assert_edge_(M1,F1,N1, M2,F2,N2) :-
 	retract( calls_(M1,F1,N1, M2,F2,N2, Counter) ), 

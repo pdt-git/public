@@ -13,7 +13,14 @@
 
 package pdt.y.model;
 
+import java.io.File;
 import java.util.Arrays;
+
+import org.cs3.prolog.ui.util.UIUtils;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
@@ -134,12 +141,128 @@ public class GraphModel {
 				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
 				graph.setRealizer(edge, newCallEdgeRealizer);
 				newCallEdgeRealizer.adjustLineWidth(this);
+				
+				String label = calculateLabel(edge);
+				
+				newCallEdgeRealizer.setLabelText(label);
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}
 		}
 	}
-	
+
+	private String calculateLabel(Edge edge) {
+		try {
+			String filename = dataHolder.getFileName(edge);
+			String offset = dataHolder.getOffset(edge);
+			IDocument doc = UIUtils.getDocument(new File(filename));
+			
+			String[] parts = offset.split("-");
+			int start = Integer.parseInt(parts[0]);
+			int end = Integer.parseInt(parts[1]);
+			
+			int physicalstart = UIUtils.logicalToPhysicalOffset(doc, start);
+			int physicalend = UIUtils.logicalToPhysicalOffset(doc, end);
+			
+			String literal = doc.get(physicalstart, physicalend-physicalstart);
+			String parentLiteral = getParentLiteral(doc, physicalstart, physicalend, literal);
+			return literal.compareTo(parentLiteral) == 0 ? "" : parentLiteral;
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return "";
+	}
+
+	private String getParentLiteral(IDocument doc, int physicalstart, int physicalend, String literal) throws BadLocationException {
+		String res = literal;
+		
+		// right side
+		char c;
+		int inside_parenthesis = 0;
+		boolean inside_atom = false;
+		int rightoffset = physicalend;
+		right_side: while (true)
+		{
+			c = doc.getChar(rightoffset);
+			boolean ignore = inside_parenthesis > 0 || inside_atom;
+			
+			switch (c)
+			{
+			case '.':
+				if (!ignore) return literal;
+				break;
+				
+			case ')':
+				if (!inside_atom) {
+					if (inside_parenthesis > 0) inside_parenthesis--;
+					else {
+						res = res + ")";
+						break right_side;
+					}
+				}
+				break;
+				
+			case '(':
+				if (!inside_atom) inside_parenthesis++;
+				break;
+				
+			case '\'':
+				inside_atom = !inside_atom;
+				break;
+				
+			case ',':
+				if (!ignore) res = res + ", ... ";
+				break;
+			}
+			rightoffset++;
+		}
+		
+		// left side
+		inside_parenthesis = 0;
+		inside_atom = false;
+		int leftoffset = physicalstart - 1;
+		left_side: while (true)
+		{
+			c = doc.getChar(leftoffset);
+			boolean ignore = inside_parenthesis > 0 || inside_atom;
+			
+			switch (c)
+			{
+			case ':':
+				if (!ignore && doc.getChar(leftoffset + 1) == '-') return literal;
+				break;
+				
+			case '(':
+				if (!inside_atom) {
+					if (inside_parenthesis > 0) inside_parenthesis--;
+					else {
+						String name = "";
+						char ci;
+						while (Character.isLetterOrDigit(ci = doc.getChar(--leftoffset)) || ci == '_') name = ci + name;
+						res = name + "(" + res;
+						break left_side;
+					}
+				}
+				break;
+				
+			case ')':
+				if (!inside_atom) inside_parenthesis++;
+				break;
+				
+			case '\'':
+				inside_atom = !inside_atom;
+				break;
+				
+			case ',':
+				if (!ignore) res = " ... ," + res;
+				break;
+			}
+			leftoffset--;
+		}
+		return getParentLiteral(doc, leftoffset, rightoffset, res);
+	}
+
 	public Graph2D getGraph() {
 		return graph;
 	}

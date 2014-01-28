@@ -37,6 +37,7 @@ public class GraphDataHolder {
 	private DataMap moduleMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
 	private DataMap lineNumberMap = Maps.createHashedDataMap();
+	private DataMap offsetMap = Maps.createHashedDataMap();
 	private DataMap fileNodeNameMap = Maps.createHashedDataMap();
 	private DataMap fileNodePathMap = Maps.createHashedDataMap();
 	private DataMap fileTypeMap = Maps.createHashedDataMap();
@@ -75,6 +76,10 @@ public class GraphDataHolder {
 	}
 	public DataMap getFileNodeNameMap() {
 		return fileNodeNameMap;
+	}
+	
+	public DataMap getOffsetMap() {
+		return offsetMap;
 	}
 	
 	public DataMap getFileNodePathMap() {
@@ -144,6 +149,22 @@ public class GraphDataHolder {
 	
 	public DataMap getEdgeLabelMap() {
 		return edgeLabelMap;
+	}
+	
+	public String getFileName(Node node) {
+		return getFileNameMap().get(node).toString();
+	}
+	
+	public String getFileName(Edge edge) {
+		return getFileNameMap().get(edge).toString();
+	}
+	
+	public String getOffset(Node node) {
+		return getOffsetMap().get(node).toString();
+	}
+	
+	public String getOffset(Edge edge) {
+		return getOffsetMap().get(edge).toString();
 	}
 
 	public boolean isPredicate(Node node) {
@@ -278,9 +299,6 @@ public class GraphDataHolder {
 		return functorMap.get(node) + " / " + arityMap.get(node);
 	}
 
-	public String getFileName(Node node) {
-		return fileNameMap.get(node).toString();
-	}
 	public String getNodeText(Node node) {
 		return nodeMap.get(node).toString();
 	}

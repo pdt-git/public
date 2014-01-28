@@ -51,8 +51,9 @@ public class GraphMLReader {
 		GraphDataHolder dataHolder = model.getDataHolder();
 		core.addInputDataAcceptor("id", dataHolder.getNodeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", dataHolder.getModuleMap(), KeyScope.NODE,KeyType.STRING);
-		core.addInputDataAcceptor("description", dataHolder.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
-		core.addInputDataAcceptor("lineNumber", dataHolder.getLineNumberMap(), KeyScope.NODE, KeyType.INT);
+		core.addInputDataAcceptor("fileName", dataHolder.getFileNameMap(), KeyScope.ALL, KeyType.STRING);
+		core.addInputDataAcceptor("lineNumber", dataHolder.getLineNumberMap(), KeyScope.ALL, KeyType.INT);
+		core.addInputDataAcceptor("offset", dataHolder.getOffsetMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("kind", dataHolder.getKindMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("functor", dataHolder.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("arity", dataHolder.getArityMap(), KeyScope.NODE, KeyType.INT);

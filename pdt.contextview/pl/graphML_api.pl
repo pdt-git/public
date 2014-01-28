@@ -39,8 +39,7 @@ finish_writing(OutStream):-
     write_graphML_footer(OutStream),
     close(OutStream).
     
-    
-write_file(Stream, RelativePath, Predicates, File, Module):-
+write_file(Stream, RelativePath, Filters, File, Module) :-
 	get_id(File, Id),
 	open_node(Stream, Id),
 	write_data(Stream, 'id', Id),
@@ -59,41 +58,23 @@ write_file(Stream, RelativePath, Predicates, File, Module):-
 	;	write_data(Stream,'kind','module')
 	),
 	start_graph_element(Stream),
-	write_predicates(Stream, File, Predicates),
+	write_predicates(Stream, File, Filters),
 	close_graph_element(Stream),
 	close_node(Stream).	
 
 		
-write_predicates(Stream, File, all_preds):-
-    !,
+write_predicates(Stream, File, Filters):-
 	forall(	(	predicate_in_file(File, Module, Name, Arity),
+	
+				/* Filtering */
+				forall(member(M:F, Filters), (C =.. [F, Module:Name/Arity], call(M:C))),
+				 
 				first_line_of_predicate_in_file(Module, Name, Arity, File, Line)
 			),
 			(	write_predicate(Stream, File, Module, Name, Arity, Line),
 				flush_output(Stream)
 			)
 	).	
-write_predicates(Stream, File, PredicatesToWrite):-
-	forall(	(	member(Module:Name/Arity,PredicatesToWrite),
-				once((file_of_predicate(Module, Name, Arity, File2), File2 == File)),
-				first_line_of_predicate_in_file(Module, Name, Arity, File, Line)
-			),
-			(
-				write_predicate(Stream, File, Module, Name, Arity, Line),
-				flush_output(Stream)
-			)
-	).
-
-%write_load_edges(Stream):-
-%    forall(load_edge(LoadingFileId,FileId,_,_),
-%    	(	(	fileT(LoadingFileId,_,_),
-%    			fileT(FileId,_,_)
-%    		)
-%    	->	write_load_edge(Stream,LoadingFileId,FileId)
-%    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
-%    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
-%	    )
-%	).
     
 write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates) :-
 	write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates, _).
@@ -186,6 +167,12 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
     open_edge(Stream, Source, Target),
     write_data(Stream, 'kind', 'call'),
     write_data(Stream, 'frequency', NumberOfCalls),
+    (
+    	call_location(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)),
+    	Offset = Start-End, !; Offset=undefined
+    ),
+    write_data(Stream, 'fileName', SourceFile),
+    write_data(Stream, 'offset', Offset),
 	close_edge(Stream),
 	fail.
 write_call_edge(_, _, _, _, _, _, _, _).
@@ -203,13 +190,15 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
     nl(OutStream),
-    write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
+    write(OutStream, '<key id="fileName" for="all" attr.name="fileName" attr.type="string"/>'),
     nl(OutStream),
-    write(OutStream, '<key id="lineNumber" for="node" attr.name="lineNumber" attr.type="int">'),
+    write(OutStream, '<key id="lineNumber" for="all" attr.name="lineNumber" attr.type="int">'),
     nl(OutStream),
   	write(OutStream, '    <default>-1</default>'),
   	nl(OutStream),
   	write(OutStream, '</key>'),
+    nl(OutStream),
+    write(OutStream, '<key id="offset" for="all" attr.name="offset" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="file_node_name" for="node" attr.name="file_node_name" attr.type="string"/>'),
     nl(OutStream),
