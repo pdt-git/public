@@ -55,7 +55,7 @@ import pdt.y.internal.ImageRepository;
 import pdt.y.internal.ui.PredicatesListDialog;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
-import pdt.y.model.realizer.edges.EdgeRealizerBase;
+import pdt.y.model.realizer.edges.InfoTextProvider;
 import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.preferences.EdgeAppearancePreferences;
 import pdt.y.preferences.FileAppearancePreferences;
@@ -67,6 +67,7 @@ import pdt.y.preferences.SkinsPreferencePage;
 import pdt.y.view.modes.OpenInEditorViewMode;
 import y.base.Edge;
 import y.base.Node;
+import y.view.EdgeRealizer;
 import y.view.HitInfo;
 import y.view.NodeRealizer;
 import y.view.ViewMode;
@@ -430,16 +431,19 @@ public abstract class ViewBase extends ViewPart {
 				HitInfo hitInfo = getHitInfo(e);
 				if (hitInfo.hasHitEdgeLabels()) {
 					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
-					final String text = realizer.getInfoText();
-					
-					new UIJob("Predicates List") {
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							new PredicatesListDialog(getShell(), text).open();
-							return Status.OK_STATUS;
-						}
-					}.schedule();
+					EdgeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(edge);
+					if (realizer instanceof InfoTextProvider) {
+						InfoTextProvider infoProvider = (InfoTextProvider)realizer;
+						final String text = infoProvider.getInfoText();
+						
+						new UIJob("Predicates List") {
+							@Override
+							public IStatus runInUIThread(IProgressMonitor monitor) {
+								new PredicatesListDialog(getShell(), text).open();
+								return Status.OK_STATUS;
+							}
+						}.schedule();
+					}
 				}
 			}
 			
@@ -465,8 +469,11 @@ public abstract class ViewBase extends ViewPart {
 				}
 				else if (hitInfo.hasHitEdgeLabels()) {
 					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
-					text = realizer.getInfoText();
+					EdgeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(edge);
+					if (realizer instanceof InfoTextProvider) {
+						InfoTextProvider infoProvider = (InfoTextProvider)realizer;
+						text = infoProvider.getInfoText();
+					}
 				}
 
 				if (!infoText.equals(text))

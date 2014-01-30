@@ -18,9 +18,10 @@ import pdt.y.preferences.EdgeAppearancePreferences;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
+import y.view.GenericEdgeRealizer;
 import y.view.LineType;
 
-public class CallEdgeRealizer extends EdgeRealizerBase {
+public class CallEdgeRealizer extends GenericEdgeRealizer implements InfoTextProvider {
 
 	private static final float METER_LIMIT = (float)1.45;
 	private static final float DASH_PHASE = (float)0.0;
@@ -68,6 +69,11 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 		width = calculateLineWidth(model);
 		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
 		setLineType(myLineType);
+	}
+
+	@Override
+	public String getInfoText() {
+		return "";
 	}
 }
 

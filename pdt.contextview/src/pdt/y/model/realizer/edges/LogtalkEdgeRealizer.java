@@ -5,8 +5,9 @@ import pdt.y.utils.LogtalkStyles;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
+import y.view.SplineEdgeRealizer;
 
-public class LogtalkEdgeRealizer extends EdgeRealizerBase {
+public class LogtalkEdgeRealizer extends GenericEdgeRealizer implements InfoTextProvider {
 
 	public LogtalkEdgeRealizer() {
 	}

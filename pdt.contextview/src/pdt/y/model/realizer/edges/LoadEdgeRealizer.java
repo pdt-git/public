@@ -18,8 +18,9 @@ import java.awt.Color;
 import pdt.y.model.GraphModel;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
+import y.view.GenericEdgeRealizer;
 
-public class LoadEdgeRealizer extends EdgeRealizerBase {
+public class LoadEdgeRealizer extends GenericEdgeRealizer implements InfoTextProvider {
 	private GraphModel model;
 	
 	public LoadEdgeRealizer() {
