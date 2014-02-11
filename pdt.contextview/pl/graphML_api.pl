@@ -167,17 +167,47 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
     open_edge(Stream, Source, Target),
     write_data(Stream, 'kind', 'call'),
     write_data(Stream, 'frequency', NumberOfCalls),
-    (
-    	call_location(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)),
-    	Offset = Start-End, !; Offset=undefined
-    ),
     write_data(Stream, 'fileName', SourceFile),
-    write_data(Stream, 'offset', Offset),
+    write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity),
+    write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity),
 	close_edge(Stream),
 	fail.
 write_call_edge(_, _, _, _, _, _, _, _).
     
+write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity)  :-
+	call_location(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)), !,
+    write_data(Stream, 'offset', Start-End), !.
+write_call_location(_, _, _, _, _, _, _).
 
+write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity) :-
+	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Type), !,
+    write_call_metadata(Stream, Type), !.
+write_call_metadata(_, _, _, _, _, _, _).
+    
+write_call_metadata(_Stream, call).
+write_call_metadata(Stream, database(Meta, I)) :-
+	write_data(Stream, 'metadata', database),
+	write_edge_label(Stream, Meta, I).
+	
+write_call_metadata(Stream, metacall(Meta, I)) :-
+	write_data(Stream, 'metadata', metacall),
+	write_edge_label(Stream, Meta, I).
+	
+write_edge_label(Stream, Meta, I) :-
+	Meta =.. [F|Args],
+	format_arg_terms(Args, I, NewArgs),
+	Label =.. [F|NewArgs],
+	write_data(Stream, 'edge_label', Label).
+	
+format_arg_terms([], _, []).
+format_arg_terms([H|T], 1, [R|T2]) :- !, 
+	H =.. [F|Args],
+	format_arg_terms(Args, 0, NewArgs),
+	R =.. [F|NewArgs],
+	format_arg_terms(T, 0, T2).
+format_arg_terms([_|T], 0, ['...'|T2]) :- format_arg_terms(T, 0, T2).
+format_arg_terms([_|T], I, ['...'|T2]) :- I2 is I - 1, format_arg_terms(T, I2, T2).	
+	
 write_graphML_header(OutStream):-
 	write(OutStream,'<?xml version="1.0" encoding="UTF-8"?>'), nl(OutStream),
 	write(OutStream,'<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
@@ -190,6 +220,8 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
     nl(OutStream),
+  	write(OutStream, '<key id="metadata" for="all" attr.name="metadata" attr.type="string" />'),
+  	nl(OutStream),
     write(OutStream, '<key id="fileName" for="all" attr.name="fileName" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="lineNumber" for="all" attr.name="lineNumber" attr.type="int">'),

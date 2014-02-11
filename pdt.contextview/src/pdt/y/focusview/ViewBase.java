@@ -47,6 +47,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
@@ -56,13 +57,9 @@ import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.realizer.edges.EdgeRealizerBase;
 import pdt.y.model.realizer.nodes.NodeRealizerBase;
-import pdt.y.preferences.EdgeAppearancePreferences;
-import pdt.y.preferences.FileAppearancePreferences;
 import pdt.y.preferences.MainPreferencePage;
-import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
 import pdt.y.preferences.PreferenceConstants;
-import pdt.y.preferences.SkinsPreferencePage;
 import pdt.y.view.modes.OpenInEditorViewMode;
 import y.base.Edge;
 import y.base.Node;
@@ -212,33 +209,15 @@ public abstract class ViewBase extends ViewPart {
 
 				@Override
 				public void performAction() {
-					PreferenceManager mgr = new PreferenceManager();
+					PreferenceManager globalmgr = PlatformUI.getWorkbench().getPreferenceManager();
+					IPreferenceNode node = globalmgr.find("org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage/pdt.y.preferences.MainPreferencePage");
 					
 					IPreferencePage page = new MainPreferencePage();
 					page.setTitle("Context View");
+					IPreferenceNode root = new PreferenceNode("PreferencePage", page);
+					root.add(node);
 					
-					IPreferenceNode node = new PreferenceNode("PreferencePage", page);
-					mgr.addToRoot(node);
-					
-					IPreferencePage edgePrefs = new EdgeAppearancePreferences();
-					edgePrefs.setTitle("Edge Appearance");
-					node.add(new PreferenceNode("EdgeAppearancePreferences", edgePrefs));
-					
-					IPreferencePage filePrefs = new FileAppearancePreferences();
-					filePrefs.setTitle("File Appearance");
-					node.add(new PreferenceNode("FileAppearancePreferences", filePrefs));
-					
-					IPreferencePage predicatePrefs = new PredicateAppearancePreferences();
-					predicatePrefs.setTitle("Predicate Appearance");
-					node.add(new PreferenceNode("PredicateAppearancePreferences", predicatePrefs));
-					
-					IPreferencePage predicateLayoutPrefs = new PredicateLayoutPreferences();
-					predicateLayoutPrefs.setTitle("Predicate Layout");
-					node.add(new PreferenceNode("PredicateLayoutPreferences", predicateLayoutPrefs));
-					
-					IPreferencePage skinsPrefs = new SkinsPreferencePage();
-					skinsPrefs.setTitle("Skins");
-					node.add(new PreferenceNode("FocusViewSkinsPreferences", skinsPrefs));
+					PreferenceManager mgr = new PreferenceManager('.', (PreferenceNode)root);
 					
 					PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
 					dialog.create();

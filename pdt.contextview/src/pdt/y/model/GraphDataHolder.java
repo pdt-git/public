@@ -26,6 +26,8 @@ public class GraphDataHolder {
 	private static final String FILE_NODE = "file_node";
 	private static final String PREDICATE = "predicate";
 	private static final String CALL = "call";
+	private static final String METADATA_DATABASE = "database";
+	private static final String METADATA_METACALL = "metacall";
 	private static final String LOADING = "loading";
 	private static final String TOP_FILE = "top";
 	@SuppressWarnings("unused")
@@ -42,6 +44,7 @@ public class GraphDataHolder {
 	private DataMap fileNodePathMap = Maps.createHashedDataMap();
 	private DataMap fileTypeMap = Maps.createHashedDataMap();
 	private DataMap kindMap = Maps.createHashedDataMap();
+	private DataMap metadataMap = Maps.createHashedDataMap();
 	private DataMap functorMap = Maps.createHashedDataMap();
 	private DataMap arityMap = Maps.createHashedDataMap();
 	private DataMap callFrequencyMap = Maps.createHashedDataMap();
@@ -88,6 +91,10 @@ public class GraphDataHolder {
 
 	public DataMap getKindMap() {
 		return kindMap;
+	}
+	
+	public DataMap getMetadataMap() {
+		return metadataMap;
 	}
 
 	public DataMap getFunctorMap() {
@@ -195,6 +202,12 @@ public class GraphDataHolder {
 		DataMap kindMap = getKindMap();
 		String kind = kindMap.get(edge).toString();
 		return kind.equals(CALL);
+	}
+	
+	public boolean isMetaCall(Edge edge) {
+		DataMap metadataMap = getMetadataMap();
+		String metadata = String.valueOf(metadataMap.get(edge));
+		return METADATA_DATABASE.equals(metadata) || METADATA_METACALL.equals(metadata); 
 	}
 	
 	public String getModulePublicStaticPredicates(Node node) {
