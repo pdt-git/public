@@ -22,7 +22,9 @@ import org.eclipse.ui.PartInitException;
 import pdt.y.focusview.GraphPIFLoaderBase;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.GraphDataHolder;
+import y.base.Edge;
 import y.base.Node;
+import y.view.EdgeLabel;
 import y.view.ViewMode;
 
 public class OpenInEditorViewMode extends ViewMode {
@@ -42,40 +44,23 @@ public class OpenInEditorViewMode extends ViewMode {
 			// Retrieve the node that has been hit at the location.
 			Node node = getHitInfo(event).getHitNode();
 
-			if (node == null)
+			if (node != null) {
+				selectNode(node);
 				return;
-			GraphDataHolder dataHolder = view.getDataHolder();
-			if (dataHolder.isFile(node) || dataHolder.isModule(node)) {
-				try {
-					final String fileName = dataHolder.getFileName(node);
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								PDTCommonUtil.selectInEditor(1, fileName, true);
-							} catch (PartInitException e) {
-								e.printStackTrace();
-							}
-						}
-					});
-				} catch (NullPointerException e) {}
-			} else if (dataHolder.isPredicate(node)) {
-				try {
-					final String fileName = dataHolder.getFileName(node);
-					int line = dataHolder.getLineNumber(node);
-					final int lineToSelect = (line >= 1 ? line : 1);
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								PDTCommonUtil.selectInEditor(lineToSelect, fileName, true);
-							} catch (PartInitException e) {
-								e.printStackTrace();
-							}
-						}
-					});
-				} catch (NullPointerException e) {}
 			}
+			
+			Edge edge = getHitInfo(event).getHitEdge();
+			if (edge != null) {
+				selectEdge(edge);
+				return;
+			}
+			
+			EdgeLabel label = getHitInfo(event).getHitEdgeLabel();
+			if (label != null) {
+				selectEdge(label.getEdge());
+				return;
+			}
+			
 //			String idInt = dataHolder.getNodeText(node);
 //
 //			String query = "parse_util:predicateT("+idInt+",FileId,_,_,_),parse_util:fileT(FileId,FileName,_),parse_util:filePosT("+idInt+",Pos,Len).";
@@ -120,5 +105,64 @@ public class OpenInEditorViewMode extends ViewMode {
 //				}
 //			});
 		}
+	}
+
+	private void selectNode(Node node) {
+		GraphDataHolder dataHolder = view.getDataHolder();
+		if (dataHolder.isFile(node) || dataHolder.isModule(node)) {
+			try {
+				final String fileName = dataHolder.getFileName(node);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							PDTCommonUtil.selectInEditor(1, fileName, true);
+						} catch (PartInitException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			} catch (NullPointerException e) {}
+		} else if (dataHolder.isPredicate(node)) {
+			try {
+				final String fileName = dataHolder.getFileName(node);
+				int line = dataHolder.getLineNumber(node);
+				final int lineToSelect = (line >= 1 ? line : 1);
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							PDTCommonUtil.selectInEditor(lineToSelect, fileName, true);
+						} catch (PartInitException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			} catch (NullPointerException e) {}
+		}
+	}
+
+	private void selectEdge(Edge edge) {
+		GraphDataHolder dataHolder = view.getDataHolder();
+		try {
+			final String fileName = dataHolder.getFileName(edge);
+			String offset = dataHolder.getOffset(edge);
+			if (offset == null)
+				return;
+			String[] parts = offset.split("-");
+			final int start = Integer.parseInt(parts[0]);
+			final int length = Integer.parseInt(parts[1]) - start;
+				
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						PDTCommonUtil.selectInEditor(start, length, fileName, true);
+					} catch (PartInitException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		} catch (NullPointerException e) {}
 	}
 }
