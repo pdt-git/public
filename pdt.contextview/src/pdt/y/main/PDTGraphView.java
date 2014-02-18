@@ -87,7 +87,7 @@ public class PDTGraphView extends  JPanel {
 		editMode = new EditMode();
 		editMode.allowNodeCreation(false);
 		editMode.allowEdgeCreation(false);
-		editMode.setPopupMode(new HierarchicPopupMode());
+		//editMode.setPopupMode(new HierarchicPopupMode());
 		editMode.setMoveSelectionMode(new MoveSelectedSelectionMode(new OrthogonalEdgeRouter()));
 		
 		view.addViewMode(editMode);
