@@ -647,7 +647,8 @@ my_format(Format,Args):-
 	
 
 write_escaped(Out,Term,Vars):-
-    write_term_to_memfile(Term,Memfile,Vars),
+/*  This is just an outdated simulation of term_to_atom:  
+    write_term_to_memfile(Term,Memfile),
     new_memory_file(TmpFile),
     open_memory_file(Memfile,read,In),
     open_memory_file(TmpFile,write,Tmp),
@@ -657,8 +658,55 @@ write_escaped(Out,Term,Vars):-
     memory_file_to_atom(TmpFile,Atom),
     free_memory_file(TmpFile),
     free_memory_file(Memfile),
-    my_write(Out,Atom).
+*/
+	% !!! workaround for bug in SWI 7.1.6
+	(	atomic(Term)
+	->	Term = Atom
+	;	term_to_atom(Term,Atom)
+	),
+    escape_chars_in_atom(Atom, EscapedAtom),
+    my_write(Out,EscapedAtom).
+    
+escape_chars_in_atom(Atom, EscapedAtom) :-
+	atom_chars(Atom, List),
+	escape_chars_impl(List, EscapedList),
+	atom_chars(EscapedAtom, EscapedList).
+	
+escape_chars_impl([], []) :- !.
 
+% '<' --> '&lt;'
+escape_chars_impl(['<'|Tail], ['&', 'l', 't', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '>' --> '&gt;'
+escape_chars_impl(['>'|Tail], ['&', 'g', 't', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '{' --> '&cbo;'
+escape_chars_impl(['{'|Tail], ['&', 'c', 'b', 'o', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '}' --> '&cbc;'
+escape_chars_impl(['}'|Tail], ['&', 'c', 'b', 'c', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '&' --> '&amp;'
+escape_chars_impl(['&'|Tail], ['&', 'a', 'm', 'p', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '"' --> '&quot;'
+escape_chars_impl(['"'|Tail], ['&', 'q', 'u', 'o', 't', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '\'' --> '&apos;'
+escape_chars_impl(['\''|Tail], ['&', 'a', 'p', 'o', 's', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+
+% other chars don't need to be translated
+escape_chars_impl([Char|Tail], [Char|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+	
 write_term_to_memfile(Term,Memfile,Vars):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
