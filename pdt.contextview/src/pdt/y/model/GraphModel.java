@@ -13,12 +13,7 @@
 
 package pdt.y.model;
 
-import java.io.File;
 import java.util.Arrays;
-
-import org.cs3.prolog.ui.util.UIUtils;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import pdt.y.model.realizer.edges.CallEdgeRealizer;
 import pdt.y.model.realizer.edges.LoadEdgeRealizer;
@@ -136,7 +131,7 @@ public class GraphModel {
 				}
 				
 			} else if (dataHolder.isCallEdge(edge)) {
-				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer, dataHolder.isMetaCall(edge));
+				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer, dataHolder.isMetaCall(edge), dataHolder.isDatabaseCall(edge));
 				graph.setRealizer(edge, newCallEdgeRealizer);
 				newCallEdgeRealizer.adjustLineWidth(this);
 				

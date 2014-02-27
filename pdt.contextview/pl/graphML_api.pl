@@ -117,10 +117,14 @@ write_predicate(Stream, File, Module, Name, Arity, Line):-
 	->	write_data(Stream, 'isMultifile', 'true')
 	;	true
 	),		
-	(	(	predicate_property(Module:Head, meta_predicate(_))
-		;	extended_meta_predicate(Module:Head, _)
-		)	
-	->	write_data(Stream, 'isMetaPredicate', 'true')
+	(	(	predicate_property(Module:Head, meta_predicate(_)), MetaType = meta
+		;	extended_meta_predicate(Module:Head, _), MetaType = extended
+		;	pdt_prolog_metainference:inferred_meta_pred(Head, Module, _), MetaType = inferred
+		)
+	->	(
+			write_data(Stream, 'isMetaPredicate', 'true'),
+			write_data(Stream, 'metaPredicateType', MetaType)
+		)
 	;	true
 	),	
 	(	exported_predicate(Module, Head)
@@ -180,7 +184,7 @@ write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule,
 write_call_location(_, _, _, _, _, _, _).
 
 write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity) :-
-	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Type), !,
+	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Type),
     write_call_metadata(Stream, Type), !.
 write_call_metadata(_, _, _, _, _, _, _).
     
@@ -192,6 +196,9 @@ write_call_metadata(Stream, database(Meta, I)) :-
 write_call_metadata(Stream, metacall(Meta, I)) :-
 	write_data(Stream, 'metadata', metacall),
 	write_edge_label(Stream, Meta, I).
+	
+write_call_metadata(Stream, has_arity(_Arity, _I)) :-
+	write_data(Stream, 'metadata', metacall).
 	
 write_edge_label(Stream, Meta, I) :-
 	Meta =.. [F|Args],
@@ -271,6 +278,11 @@ write_graphML_ast_keys(OutStream):-
     write(OutStream, '<key id="isMetaPredicate" for="node" attr.name="isMetaPredicate" attr.type="boolean">'),
     nl(OutStream),
     write(OutStream, '    <default>false</default>'),
+  	nl(OutStream),
+  	write(OutStream, '</key>'),
+  	write(OutStream, '<key id="metaPredicateType" for="node" attr.name="metaPredicateType" attr.type="string">'),
+  	nl(OutStream),
+  	write(OutStream, '    <default>none</default>'),
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),

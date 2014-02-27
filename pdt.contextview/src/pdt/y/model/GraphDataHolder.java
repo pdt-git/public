@@ -51,6 +51,7 @@ public class GraphDataHolder {
 	private DataMap dynamicMap = Maps.createHashedDataMap();
 	private DataMap transparentMap = Maps.createHashedDataMap();
 	private DataMap metaPredMap = Maps.createHashedDataMap();
+	private DataMap metaPredTypeMap = Maps.createHashedDataMap();
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
 	private DataMap unusedLocal = Maps.createHashedDataMap();
@@ -119,6 +120,10 @@ public class GraphDataHolder {
 
 	public DataMap getMetaPredMap() {
 		return metaPredMap;
+	}
+	
+	public DataMap getMetaPredTypeMap() {
+		return metaPredTypeMap;
 	}
 
 	public DataMap getMultifileMap() {
@@ -207,7 +212,13 @@ public class GraphDataHolder {
 	public boolean isMetaCall(Edge edge) {
 		DataMap metadataMap = getMetadataMap();
 		String metadata = String.valueOf(metadataMap.get(edge));
-		return METADATA_DATABASE.equals(metadata) || METADATA_METACALL.equals(metadata); 
+		return METADATA_METACALL.equals(metadata); 
+	}
+	
+	public boolean isDatabaseCall(Edge edge) {
+		DataMap metadataMap = getMetadataMap();
+		String metadata = String.valueOf(metadataMap.get(edge));
+		return METADATA_DATABASE.equals(metadata); 
 	}
 	
 	public String getModulePublicStaticPredicates(Node node) {
@@ -247,6 +258,10 @@ public class GraphDataHolder {
 		if(returnNode == null)
 			return false;
 		return (Boolean)returnNode;
+	}
+	
+	public String getMetaPredType(Node node) {
+		return (String)metaPredTypeMap.get(node);
 	}
 
 	public boolean isMultifile(Node node) {

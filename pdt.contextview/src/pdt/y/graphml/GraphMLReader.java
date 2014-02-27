@@ -63,6 +63,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("isTransparent", dataHolder.getTransparentMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isMultifile", dataHolder.getMultifileMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("metaPredicateType", dataHolder.getMetaPredTypeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("isExported", dataHolder.getExportedMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isUnusedLocal", dataHolder.getUnusedLocalMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("exported_static_predicates", dataHolder.getModulePublicStaticPredicatesMap(), KeyScope.NODE, KeyType.STRING);

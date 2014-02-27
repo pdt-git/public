@@ -37,11 +37,15 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 		init();
 	}
 	
-	public CallEdgeRealizer(EdgeRealizer realizer, boolean isMetacall) {
+	public CallEdgeRealizer(EdgeRealizer realizer, boolean isMetacall, boolean isDatabaseCall) {
 		super(realizer);
-		if (isMetacall) {
-			dash = LineType.DASHED_1.getDashArray();
-			phase = LineType.DASHED_1.getDashPhase();
+		if (isDatabaseCall) {
+			dash = new float[] { 14, 8, 1, 8 };
+			phase = 0;
+		}
+		else if (isMetacall) {
+			dash = new float[] { 16, 10 };
+			phase = 0;
 		}
 		init();
 	}
