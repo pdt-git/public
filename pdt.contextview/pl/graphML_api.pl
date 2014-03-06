@@ -184,8 +184,8 @@ write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule,
 write_call_location(_, _, _, _, _, _, _).
 
 write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity) :-
-	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Type),
-    write_call_metadata(Stream, Type), !.
+	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Info),
+    write_call_metadata(Stream, Info), !.
 write_call_metadata(_, _, _, _, _, _, _).
     
 write_call_metadata(_Stream, call).
@@ -197,8 +197,9 @@ write_call_metadata(Stream, metacall(Meta, I)) :-
 	write_data(Stream, 'metadata', metacall),
 	write_edge_label(Stream, Meta, I).
 	
-write_call_metadata(Stream, has_arity(_Arity, _I)) :-
-	write_data(Stream, 'metadata', metacall).
+write_call_metadata(Stream, metacall(Meta, I, _)) :-
+	write_data(Stream, 'metadata', metacall),
+	write_edge_label(Stream, Meta, I).
 	
 write_edge_label(Stream, Meta, I) :-
 	Meta =.. [F|Args],

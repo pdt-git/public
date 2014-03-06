@@ -56,6 +56,7 @@ import pdt.y.internal.ui.PredicatesListDialog;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.realizer.edges.EdgeRealizerBase;
+import pdt.y.model.realizer.edges.LoadEdgeRealizer;
 import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.preferences.MainPreferencePage;
 import pdt.y.preferences.PredicateLayoutPreferences;
@@ -386,34 +387,42 @@ public abstract class ViewBase extends ViewPart {
 		private final class MouseHandler extends ViewMode {
 
 			private final ToolTip t;
+			private final NavigationToolTip nav;
 			
 			public MouseHandler(Shell parent) {
 				t = new ToolTip(parent, SWT.NONE);
 				t.setVisible(false);
+				nav = new NavigationToolTip(FocusViewControl.this);
 			}
 			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				super.mouseClicked(e);
-				
-				if (e.getClickCount() != 2)
-					return;
-
-				HitInfo hitInfo = getHitInfo(e);
-				if (hitInfo.hasHitEdgeLabels()) {
-					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
-					final String text = realizer.getInfoText();
-					
-					new UIJob("Predicates List") {
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							new PredicatesListDialog(getShell(), text).open();
-							return Status.OK_STATUS;
-						}
-					}.schedule();
-				}
-			}
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				super.mouseClicked(e);
+//				
+//				if (e.getClickCount() != 2)
+//					return;
+//
+//				HitInfo hitInfo = getHitInfo(e);
+//				if (hitInfo.hasHitEdgeLabels()) {
+//					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
+//					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
+//					if (!(realizer instanceof LoadEdgeRealizer)) {
+//						return;
+//					}
+//					final String text = realizer.getInfoText();
+//					
+//					new UIJob("Predicates List") {
+//						@Override
+//						public IStatus runInUIThread(IProgressMonitor monitor) {
+////							new PredicatesListDialog(getShell(), text).open();
+//							ToolTip t = new ToolTip(getShell(), 0);
+//							t.setText(text);
+//							t.setVisible(true);
+//							return Status.OK_STATUS;
+//						}
+//					}.schedule();
+//				}
+//			}
 			
 			@Override
 			public void mouseMoved(final double x, final double y) {
@@ -439,6 +448,19 @@ public abstract class ViewBase extends ViewPart {
 					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
 					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
 					text = realizer.getInfoText();
+					
+					if (realizer instanceof LoadEdgeRealizer)
+					{
+						final String content = text;
+						new UIJob("Updating status") {
+							@Override
+							public IStatus runInUIThread(IProgressMonitor monitor) {
+								nav.setContent(content);
+								nav.activate();
+								return Status.OK_STATUS;
+							}
+						}.schedule();
+					}
 				}
 
 				if (!infoText.equals(text))

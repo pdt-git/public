@@ -33,27 +33,26 @@ ensure_call_graph_generated.
 
 %% calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls)
 calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls) :-
-	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls).
+	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls, _TermPosition, _Info).
+	
 
 call_location(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
-	call_location_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition).
+	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, [TermPosition|_], _Info).
 
-call_type(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Type) :-
-	call_type_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Type).
+call_type(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Info) :-
+	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, _TermPosition, [Info|_]).
 
 %% calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls)
 calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls) :-
 	calls_multifile_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls).
 
-:- dynamic(calls_/7).
+:- dynamic(calls_/9).
 :- dynamic(calls_multifile_/8).
-:- dynamic(call_location_/7).
-:- dynamic(call_type_/7).
 
 
 clear([]).
 clear([Module:Name/Arity|Predicates]) :-
-	retractall(calls_(_,_,_,Module,Name,Arity,_)),
+	retractall(calls_(_,_,_,Module,Name,Arity,_, _, _)),
 	retractall(calls_multifile_(_,_,_,Module,Name,Arity,_,_)),
 	clear(Predicates).
 
@@ -93,7 +92,7 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	findall(Module:Name/Arity, (
 		member(MetaSpec, MetaSpecs),
 		pi_of_head(MetaSpec, M, N, A),
-		calls_(M, N, A, Module, Name, Arity, _)
+		calls_(M, N, A, Module, Name, Arity, _, _, _)
 	), Predicates),
 	(	Predicates \== []
 	->	sort(Predicates, PredicatesUnique),
@@ -130,13 +129,13 @@ assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, TermPosition), Info)
 	).
 assert_edge(_, '<initialization>', _, _) :- !.
 
-assert_edge_(M1,F1,N1, M2,F2,N2) :-
-	retract( calls_(M1,F1,N1, M2,F2,N2, Counter) ), 
+assert_edge_(M1,F1,N1, M2,F2,N2, TermPos, Info) :-
+	retract( calls_(M1,F1,N1, M2,F2,N2, Counter, TermPos, Info) ), 
 	!,
 	Cnt_plus_1 is Counter + 1,
 	assertz(calls_(M1,F1,N1, M2,F2,N2, Cnt_plus_1)).
-assert_edge_(M1,F1,N1, M2,F2,N2) :-
-	assertz(calls_(M1,F1,N1, M2,F2,N2, 1)).
+assert_edge_(M1,F1,N1, M2,F2,N2, TermPos, Info) :-
+	assertz(calls_(M1,F1,N1, M2,F2,N2, 1, TermPos, Info)).
 
 assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
 	retract( calls_multifile_(M1,F1,N1, M2,F2,N2, File, Counter) ), 
