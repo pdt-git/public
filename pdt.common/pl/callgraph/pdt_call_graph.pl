@@ -62,7 +62,6 @@ generate_call_graph :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			%source(false),
 			reiterate(false)
 			]),
 	(	predicates_to_walk(NewPredicates)
@@ -76,7 +75,6 @@ generate_call_graph(Predicates) :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			%source(false),
 			reiterate(false),
 			predicates(Predicates)
 			]),
@@ -115,13 +113,7 @@ assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, TermPosition), Info)
 	;	M = M1
 	),
 	functor(Caller,F2,N2), 
-	assert_edge_(M,F1,N1, M2,F2,N2),
-	(
-		TermPosition \= undefined
-	->	asserta(call_location_(M, F1, N1, M2, F2, N2, TermPosition))
-	;	true
-	),
-	asserta(call_type_(M, F1, N1, M2, F2, N2, Info)),
+	assert_edge_(M,F1,N1, M2,F2,N2,TermPosition,Info),
 	(	predicate_property(M2:Caller, multifile),
 		clause_property(Ref, file(File))
 	->	assert_multifile_edge(M,F1,N1, M2,F2,N2, File)
@@ -129,13 +121,13 @@ assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, TermPosition), Info)
 	).
 assert_edge(_, '<initialization>', _, _) :- !.
 
-assert_edge_(M1,F1,N1, M2,F2,N2, TermPos, Info) :-
-	retract( calls_(M1,F1,N1, M2,F2,N2, Counter, TermPos, Info) ), 
+assert_edge_(M1,F1,N1, M2,F2,N2,TermPos,Info) :-
+	retract( calls_(M1,F1,N1, M2,F2,N2, Counter, TermPosTail, InfoTail) ), 
 	!,
 	Cnt_plus_1 is Counter + 1,
-	assertz(calls_(M1,F1,N1, M2,F2,N2, Cnt_plus_1)).
+	assertz(calls_(M1,F1,N1, M2,F2,N2, Cnt_plus_1, [TermPos|TermPosTail], [Info|InfoTail])).
 assert_edge_(M1,F1,N1, M2,F2,N2, TermPos, Info) :-
-	assertz(calls_(M1,F1,N1, M2,F2,N2, 1, TermPos, Info)).
+	assertz(calls_(M1,F1,N1, M2,F2,N2, 1, [TermPos], [Info])).
 
 assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
 	retract( calls_multifile_(M1,F1,N1, M2,F2,N2, File, Counter) ), 
