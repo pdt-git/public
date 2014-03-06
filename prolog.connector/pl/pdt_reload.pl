@@ -47,11 +47,12 @@ pdt_reload(FileOrFiles) :-
 	with_mutex('reloadMutex',(
 		setup_call_cleanup(
 			activate_warning_and_error_tracing,
-			pdt_reload__(FileOrFiles),
+			(	pdt_reload__(FileOrFiles),
+				notify_reload_listeners(FileOrFiles)
+			),
 			deactivate_warning_and_error_tracing
 		)
-	)),
-	notify_reload_listeners(FileOrFiles).
+	)).
 
 pdt_reload__(Files):-
     is_list(Files),
