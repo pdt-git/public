@@ -425,6 +425,9 @@ public class Util {
 		case '\\':
 			sb.append('\\');
 			return 2;
+		case '\'':
+			sb.append('\'');
+			return 2;
 		default:
 			sb.append('\\');
 			return 1;
