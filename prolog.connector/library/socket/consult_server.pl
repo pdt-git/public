@@ -647,22 +647,11 @@ my_format(Format,Args):-
 	
 
 write_escaped(Out,Term,Vars):-
-/*  This is just an outdated simulation of term_to_atom:  
-    write_term_to_memfile(Term,Memfile),
-    new_memory_file(TmpFile),
-    open_memory_file(Memfile,read,In),
-    open_memory_file(TmpFile,write,Tmp),
-    escape_stream(In,Tmp),    
-    close(In),
-    close(Tmp),
-    memory_file_to_atom(TmpFile,Atom),
-    free_memory_file(TmpFile),
-    free_memory_file(Memfile),
-*/
-	% !!! workaround for bug in SWI 7.1.6
-	(	atomic(Term)
-	->	Term = Atom
-	;	term_to_atom(Term,Atom)
+	with_output_to(
+		atom(Atom),
+		(	current_output(O),
+			write_term(O, Term, [ignore_ops(true),quoted(true),variable_names(Vars)])
+		)
 	),
     escape_chars_in_atom(Atom, EscapedAtom),
     my_write(Out,EscapedAtom).
