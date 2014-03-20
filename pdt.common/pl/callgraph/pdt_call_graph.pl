@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, calls_multifile/8, pdt_walk_code/1]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_location/7, call_type/7, calls_multifile/8, pdt_walk_code/1]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -33,18 +33,26 @@ ensure_call_graph_generated.
 
 %% calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls)
 calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls) :-
-	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls).
+	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls, _TermPosition, _Info).
+	
+
+call_location(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
+	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, [TermPosition|_], _Info).
+
+call_type(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Info) :-
+	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, _TermPosition, [Info|_]).
 
 %% calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls)
 calls_multifile(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls) :-
 	calls_multifile_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, File, NumberOfCalls).
 
-:- dynamic(calls_/7).
+:- dynamic(calls_/9).
 :- dynamic(calls_multifile_/8).
+
 
 clear([]).
 clear([Module:Name/Arity|Predicates]) :-
-	retractall(calls_(_,_,_,Module,Name,Arity,_)),
+	retractall(calls_(_,_,_,Module,Name,Arity,_, _, _)),
 	retractall(calls_multifile_(_,_,_,Module,Name,Arity,_,_)),
 	clear(Predicates).
 
@@ -54,7 +62,6 @@ generate_call_graph :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			source(false),
 			reiterate(false)
 			]),
 	(	predicates_to_walk(NewPredicates)
@@ -68,7 +75,6 @@ generate_call_graph(Predicates) :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			source(false),
 			reiterate(false),
 			predicates(Predicates)
 			]),
@@ -84,7 +90,7 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	findall(Module:Name/Arity, (
 		member(MetaSpec, MetaSpecs),
 		pi_of_head(MetaSpec, M, N, A),
-		calls_(M, N, A, Module, Name, Arity, _)
+		calls_(M, N, A, Module, Name, Arity, _, _, _)
 	), Predicates),
 	(	Predicates \== []
 	->	sort(Predicates, PredicatesUnique),
@@ -92,14 +98,22 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	;	true
 	).
 
-assert_edge(M1:Callee, M2:Caller, clause(Ref), _) :-
+assert_edge(_, '<initialization>', _, _) :- !.
+
+assert_edge(M1:Callee, M2:Caller, ClauseInfo) :-
+	assert_edge(M1:Callee, M2:Caller, ClauseInfo, _).
+
+assert_edge(M1:Callee, M2:Caller, clause(Ref), Info) :-
+	assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, undefined), Info).
+	
+assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, TermPosition), Info) :-
 	functor(Callee,F1,N1),
 	(	predicate_property(M1:Callee, imported_from(M0))
 	->	M = M0
 	;	M = M1
 	),
 	functor(Caller,F2,N2), 
-	assert_edge_(M,F1,N1, M2,F2,N2),
+	assert_edge_(M,F1,N1, M2,F2,N2,TermPosition,Info),
 	(	predicate_property(M2:Caller, multifile),
 		clause_property(Ref, file(File))
 	->	assert_multifile_edge(M,F1,N1, M2,F2,N2, File)
@@ -107,13 +121,13 @@ assert_edge(M1:Callee, M2:Caller, clause(Ref), _) :-
 	).
 assert_edge(_, '<initialization>', _, _) :- !.
 
-assert_edge_(M1,F1,N1, M2,F2,N2) :-
-	retract( calls_(M1,F1,N1, M2,F2,N2, Counter) ), 
+assert_edge_(M1,F1,N1, M2,F2,N2,TermPos,Info) :-
+	retract( calls_(M1,F1,N1, M2,F2,N2, Counter, TermPosTail, InfoTail) ), 
 	!,
 	Cnt_plus_1 is Counter + 1,
-	assertz(calls_(M1,F1,N1, M2,F2,N2, Cnt_plus_1)).
-assert_edge_(M1,F1,N1, M2,F2,N2) :-
-	assertz(calls_(M1,F1,N1, M2,F2,N2, 1)).
+	assertz(calls_(M1,F1,N1, M2,F2,N2, Cnt_plus_1, [TermPos|TermPosTail], [Info|InfoTail])).
+assert_edge_(M1,F1,N1, M2,F2,N2, TermPos, Info) :-
+	assertz(calls_(M1,F1,N1, M2,F2,N2, 1, [TermPos], [Info])).
 
 assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
 	retract( calls_multifile_(M1,F1,N1, M2,F2,N2, File, Counter) ), 

@@ -15,6 +15,8 @@ package pdt.y.focusview;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.common.ResourceFileLocator;
@@ -30,6 +32,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.main.PDTGraphView;
+import pdt.y.preferences.PredicateVisibilityPreferences;
 
 public abstract class GraphPIFLoaderBase {
 
@@ -82,6 +85,37 @@ public abstract class GraphPIFLoaderBase {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	protected String getSettings() {
+		List<String> settings = new LinkedList<String>();
+
+		if (!PredicateVisibilityPreferences.showPDTPredicates())
+			settings.add("hide_pdt_predicates");
+
+		if (!PredicateVisibilityPreferences.showPDTMetapredicates())
+			settings.add("hide_pdt_metapredicates");
+
+		if (!PredicateVisibilityPreferences.showSWIPredicates())
+			settings.add("hide_swi_predicates");
+
+		if (!PredicateVisibilityPreferences.showSWIMetapredicates())
+			settings.add("hide_swi_metapredicates");
+
+		if (settings.size() == 0)
+			return "[]";
+
+		StringBuilder sb = new StringBuilder(200);
+		sb.append("[");
+
+		for (int i = 0; i < settings.size() - 1; i++) {
+			sb.append(settings.get(i));
+			sb.append(", ");
+		}
+		sb.append(settings.get(settings.size() - 1));
+
+		sb.append("]");
+		return sb.toString();
 	}
 
 	protected void doLoadFile() throws MalformedURLException {

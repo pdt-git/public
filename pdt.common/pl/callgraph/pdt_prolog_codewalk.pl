@@ -738,7 +738,7 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	->	(	functor_arity_for(AS, Arg, Functor, Arity)
 		->	extend(Functor, Arity, Goal, ArgPos, ArgPosEx, OTerm),
 		    \+ \+ (
-		    	set_call_kind_of_walk_option(AS, OTerm),
+		    	set_call_kind_of_walk_option(metacall(Meta, I, AS), OTerm),
 				walk_called(Goal, M, ArgPosEx, OTerm)
 			)
 		;	true

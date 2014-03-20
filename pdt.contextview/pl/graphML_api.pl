@@ -39,8 +39,7 @@ finish_writing(OutStream):-
     write_graphML_footer(OutStream),
     close(OutStream).
     
-    
-write_file(Stream, RelativePath, Predicates, File, Module):-
+write_file(Stream, RelativePath, Filters, File, Module) :-
 	get_id(File, Id),
 	open_node(Stream, Id),
 	write_data(Stream, 'id', Id),
@@ -59,41 +58,23 @@ write_file(Stream, RelativePath, Predicates, File, Module):-
 	;	write_data(Stream,'kind','module')
 	),
 	start_graph_element(Stream),
-	write_predicates(Stream, File, Predicates),
+	write_predicates(Stream, File, Filters),
 	close_graph_element(Stream),
 	close_node(Stream).	
 
 		
-write_predicates(Stream, File, all_preds):-
-    !,
+write_predicates(Stream, File, Filters):-
 	forall(	(	predicate_in_file(File, Module, Name, Arity),
+	
+				/* Filtering */
+				forall(member(M:F, Filters), (C =.. [F, Module:Name/Arity], call(M:C))),
+				 
 				first_line_of_predicate_in_file(Module, Name, Arity, File, Line)
 			),
 			(	write_predicate(Stream, File, Module, Name, Arity, Line),
 				flush_output(Stream)
 			)
 	).	
-write_predicates(Stream, File, PredicatesToWrite):-
-	forall(	(	member(Module:Name/Arity,PredicatesToWrite),
-				once((file_of_predicate(Module, Name, Arity, File2), File2 == File)),
-				first_line_of_predicate_in_file(Module, Name, Arity, File, Line)
-			),
-			(
-				write_predicate(Stream, File, Module, Name, Arity, Line),
-				flush_output(Stream)
-			)
-	).
-
-%write_load_edges(Stream):-
-%    forall(load_edge(LoadingFileId,FileId,_,_),
-%    	(	(	fileT(LoadingFileId,_,_),
-%    			fileT(FileId,_,_)
-%    		)
-%    	->	write_load_edge(Stream,LoadingFileId,FileId)
-%    		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
-%    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
-%	    )
-%	).
     
 write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates) :-
 	write_file_as_element(Stream, FileId, FilePath, ModuleName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates, _).
@@ -136,10 +117,14 @@ write_predicate(Stream, File, Module, Name, Arity, Line):-
 	->	write_data(Stream, 'isMultifile', 'true')
 	;	true
 	),		
-	(	(	predicate_property(Module:Head, meta_predicate(_))
-		;	extended_meta_predicate(Module:Head, _)
-		)	
-	->	write_data(Stream, 'isMetaPredicate', 'true')
+	(	(	predicate_property(Module:Head, meta_predicate(_)), MetaType = meta
+		;	extended_meta_predicate(Module:Head, _), MetaType = extended
+		;	pdt_prolog_metainference:inferred_meta_pred(Head, Module, _), MetaType = inferred
+		)
+	->	(
+			write_data(Stream, 'isMetaPredicate', 'true'),
+			write_data(Stream, 'metaPredicateType', MetaType)
+		)
 	;	true
 	),	
 	(	exported_predicate(Module, Head)
@@ -186,11 +171,51 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
     open_edge(Stream, Source, Target),
     write_data(Stream, 'kind', 'call'),
     write_data(Stream, 'frequency', NumberOfCalls),
+    write_data(Stream, 'fileName', SourceFile),
+    write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity),
+    write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity),
 	close_edge(Stream),
 	fail.
 write_call_edge(_, _, _, _, _, _, _, _).
     
+write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity)  :-
+	call_location(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)), !,
+    write_data(Stream, 'offset', Start-End), !.
+write_call_location(_, _, _, _, _, _, _).
 
+write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity) :-
+	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Info),
+    write_call_metadata(Stream, Info), !.
+write_call_metadata(_, _, _, _, _, _, _).
+    
+write_call_metadata(_Stream, call).
+write_call_metadata(Stream, database(Meta, I)) :-
+	write_data(Stream, 'metadata', database),
+	write_edge_label(Stream, Meta, I).
+	
+write_call_metadata(Stream, metacall(Meta, I)) :-
+	write_data(Stream, 'metadata', metacall),
+	write_edge_label(Stream, Meta, I).
+	
+write_call_metadata(Stream, metacall(Meta, I, _)) :-
+	write_data(Stream, 'metadata', metacall),
+	write_edge_label(Stream, Meta, I).
+	
+write_edge_label(Stream, Meta, I) :-
+	Meta =.. [F|Args],
+	format_arg_terms(Args, I, NewArgs),
+	Label =.. [F|NewArgs],
+	write_data(Stream, 'edge_label', Label).
+	
+format_arg_terms([], _, []).
+format_arg_terms([H|T], 1, [R|T2]) :- !, 
+	H =.. [F|Args],
+	format_arg_terms(Args, 0, NewArgs),
+	R =.. [F|NewArgs],
+	format_arg_terms(T, 0, T2).
+format_arg_terms([_|T], 0, ['...'|T2]) :- format_arg_terms(T, 0, T2).
+format_arg_terms([_|T], I, ['...'|T2]) :- I2 is I - 1, format_arg_terms(T, I2, T2).	
+	
 write_graphML_header(OutStream):-
 	write(OutStream,'<?xml version="1.0" encoding="UTF-8"?>'), nl(OutStream),
 	write(OutStream,'<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
@@ -203,13 +228,17 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
     nl(OutStream),
-    write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
+  	write(OutStream, '<key id="metadata" for="all" attr.name="metadata" attr.type="string" />'),
+  	nl(OutStream),
+    write(OutStream, '<key id="fileName" for="all" attr.name="fileName" attr.type="string"/>'),
     nl(OutStream),
-    write(OutStream, '<key id="lineNumber" for="node" attr.name="lineNumber" attr.type="int">'),
+    write(OutStream, '<key id="lineNumber" for="all" attr.name="lineNumber" attr.type="int">'),
     nl(OutStream),
   	write(OutStream, '    <default>-1</default>'),
   	nl(OutStream),
   	write(OutStream, '</key>'),
+    nl(OutStream),
+    write(OutStream, '<key id="offset" for="all" attr.name="offset" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="file_node_name" for="node" attr.name="file_node_name" attr.type="string"/>'),
     nl(OutStream),
@@ -250,6 +279,11 @@ write_graphML_ast_keys(OutStream):-
     write(OutStream, '<key id="isMetaPredicate" for="node" attr.name="isMetaPredicate" attr.type="boolean">'),
     nl(OutStream),
     write(OutStream, '    <default>false</default>'),
+  	nl(OutStream),
+  	write(OutStream, '</key>'),
+  	write(OutStream, '<key id="metaPredicateType" for="node" attr.name="metaPredicateType" attr.type="string">'),
+  	nl(OutStream),
+  	write(OutStream, '    <default>none</default>'),
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),

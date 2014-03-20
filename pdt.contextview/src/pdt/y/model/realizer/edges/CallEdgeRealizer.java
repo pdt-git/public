@@ -23,8 +23,9 @@ import y.view.LineType;
 public class CallEdgeRealizer extends EdgeRealizerBase {
 
 	private static final float METER_LIMIT = (float)1.45;
-	private static final float DASH_PHASE = (float)0.0;
 	private float width;
+	private float[] dash;
+	private float phase;
 
 	public CallEdgeRealizer() {
 		super();
@@ -36,10 +37,24 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 		init();
 	}
 	
+	public CallEdgeRealizer(EdgeRealizer realizer, boolean isMetacall, boolean isDatabaseCall) {		
+		super(realizer);
+		if (isDatabaseCall) {
+			dash = new float[] { 14, 8, 1, 8 };
+			phase = 0;
+		}
+		else if (isMetacall) {
+			dash = new float[] { 16, 10 };
+			phase = 0;
+		}
+		
+		init();
+	}
+
 	private void init() {
 		setTargetArrow(Arrow.PLAIN);
 		setLineColor(EdgeAppearancePreferences.getLineColor());
-		LineType myLineType = LineType.createLineType(1, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
+		LineType myLineType = LineType.createLineType(1, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, dash, phase);
 		setLineType(myLineType);
 	}
 	
@@ -66,7 +81,7 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 	
 	public void adjustLineWidth(GraphModel model) {
 		width = calculateLineWidth(model);
-		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, null, DASH_PHASE);
+		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, dash, phase);
 		setLineType(myLineType);
 	}
 }

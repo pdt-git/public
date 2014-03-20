@@ -87,7 +87,7 @@ public class PDTGraphView extends  JPanel {
 		editMode = new EditMode();
 		editMode.allowNodeCreation(false);
 		editMode.allowEdgeCreation(false);
-		editMode.setPopupMode(new HierarchicPopupMode());
+		//editMode.setPopupMode(new HierarchicPopupMode());
 		editMode.setMoveSelectionMode(new MoveSelectedSelectionMode(new OrthogonalEdgeRouter()));
 		
 		view.addViewMode(editMode);
@@ -185,17 +185,15 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	public void loadGraph(URL resource) {
-		graphModel = reader.readFile(resource);
-		graphModel.categorizeData();
-		graphModel.assignPortsToEdges();
-		graph = graphModel.getGraph();
-		view.setGraph2D(graph);
-
-		updateView();
+		loadGraph(reader.readFile(resource));
 	}
 	
 	public void loadGraph(GraphModel model) {
 		graphModel = model;
+		graphModel.setMetapredicateCallsVisisble(focusView.isMetapredicateCallsVisible());
+		graphModel.setInferredCallsVisible(focusView.isInferredCallsVisible());
+		graphModel.categorizeData();
+		graphModel.assignPortsToEdges();
 		graph = graphModel.getGraph();
 		view.setGraph2D(graph);
 
