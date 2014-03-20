@@ -60,7 +60,7 @@ public class PredicateAppearancePreferences
 		LineType.LINE_2,
 		LineType.DASHED_2,
 		LineType.DOTTED_2,
-		LineType.DASHED_DOTTED_2
+		LineType.DASHED_DOTTED_3
 	};
 	
 	private GridLayout groupLayout;

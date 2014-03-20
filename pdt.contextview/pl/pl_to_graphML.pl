@@ -12,8 +12,8 @@
  ****************************************************************************/
 
 :- module(pl_to_graphML, [	%write_project_graph_to_file/2,
-								write_focus_to_graphML/3,
-								write_global_to_graphML/2,
+								write_focus_to_graphML/4,
+								write_global_to_graphML/3,
 								write_dependencies_to_graphML/3,
 								write_logtalk_entities_to_graphML/3]).
 
@@ -49,13 +49,12 @@
 % 	finish_writing(OutStream).
 
 
-write_focus_to_graphML(FocusFile, GraphFile, DependentFiles):-
-    write_to_graphML(GraphFile, write_focus_facts_to_graphML(FocusFile, DependentFiles)).  
+write_focus_to_graphML(FocusFile, GraphFile, DependentFiles, Settings):-
+    write_to_graphML(GraphFile, write_focus_facts_to_graphML(FocusFile, DependentFiles, Settings)).  
 
-write_global_to_graphML(ProjectFilePaths, GraphFile):-
+write_global_to_graphML(ProjectFilePaths, GraphFile, Settings):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
-%    file_paths(ProjectFiles, ConsultedFilePaths),
-    write_to_graphML(GraphFile, write_global_facts_to_graphML(ConsultedFilePaths)).
+    write_to_graphML(GraphFile, write_global_facts_to_graphML(ConsultedFilePaths, Settings)).
 
 write_dependencies_to_graphML(ProjectFilePaths, ProjectPath, GraphFile):-
     filter_consulted(ProjectFilePaths, ConsultedFilePaths),
@@ -112,27 +111,51 @@ filter_consulted(ProjectFilePaths, ConsultedFilePaths) :-
     		member(Path, ProjectFilePaths), source_file(Path)
     	), ConsultedFilePaths).
 
-write_focus_facts_to_graphML(FocusFile, DependentFiles, OutStream):-
+pdt_location(Location) :-
+	predicate_property(pl_to_graphML:pdt_location(_), file(F)),
+	atom_concat(Location, 'pdt.contextview/pl/pl_to_graphml.pl', F).
+
+hide_swi_predicates(M:F/A) :- functor(H, F, A), not(predicate_property(M:H, built_in)).
+hide_swi_metapredicates(M:F/A) :- functor(H, F, A), not((predicate_property(M:H, built_in), predicate_property(M:H, (meta_predicate _)))).
+
+hide_pdt_predicates(M:F/A) :- functor(H, F, A), not((predicate_property(M:H, file(File)), pdt_location(Location), atom_concat(Location, _, File))).
+hide_pdt_metapredicates(M:F/A) :- functor(H, F, A), not((predicate_property(M:H, file(File)), pdt_location(Location), atom_concat(Location, _, File), predicate_property(M:H, (meta_predicate _)))).
+
+filter(Setting,  pl_to_graphML:Setting).
+
+init_filters(Settings, Filters) :- 
+	findall(F, (member(S, Settings), filter(S, F)), Filters).
+
+:- dynamic focus_facts_filter/1.
+
+write_focus_facts_to_graphML(FocusFile, DependentFiles, Settings, OutStream):-
     source_file(FocusFile),
     !,
 	
 	ensure_call_graph_generated,
 	collect_ids_for_focus_file(FocusFile, DependentFiles, ReferencedPredicates, Calls),
 	
-   	write_files(FocusFile, DependentFiles, ReferencedPredicates, OutStream),
+	retractall(focus_facts_filter(_)),
+	assert(focus_facts_filter(X) :- member(X, ReferencedPredicates)),
+	
+	init_filters(Settings, Filters),
+	
+   	write_files(FocusFile, DependentFiles, [pl_to_graphML:focus_facts_filter|Filters], OutStream),
     forall(
     	member((SourceModule:SourceName/SourceArity, TargetModule:TargetName/TargetArity), Calls),
     	write_call_edge(OutStream, SourceModule, SourceName, SourceArity, TargetModule, TargetName, TargetArity, DependentFiles)
     ).
     
-write_global_facts_to_graphML(ProjectFiles, OutStream) :-
+write_global_facts_to_graphML(ProjectFiles, Settings, OutStream) :-
     
     ensure_call_graph_generated,
+    
+    init_filters(Settings, Filters),
     
     forall(member(File, ProjectFiles),
 		(	
 			main_module_of_file(File, Module),
-			write_file(OutStream, File, all_preds, File, Module),
+			write_file(OutStream, File, Filters, File, Module),
     		flush_output(OutStream)
     	)
     ),
@@ -348,11 +371,11 @@ collect_called_predicates_and_files([(_Caller,TargetModule:TargetName/TargetArit
 %    	  ).
 		
 
-write_files(RelativePath, Files, PredicatesToWrite, Stream):-
+write_files(RelativePath, Files, Filters, Stream):-
 	forall(	
 		member(File,Files),
 		(	main_module_of_file(File,Module),
-			write_file(Stream,RelativePath,PredicatesToWrite,File,Module),
+			write_file(Stream, RelativePath, Filters, File, Module),
     		flush_output(Stream)
     	)
     ).	
@@ -385,5 +408,4 @@ write_files(RelativePath, Files, PredicatesToWrite, Stream):-
 %pl_test_graph(Project, OutputFile):-
 %	write_project_graph_to_file(Project, OutputFile).
     
-
 

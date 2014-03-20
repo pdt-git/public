@@ -20,9 +20,11 @@ import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import pdt.y.main.PluginActivator;
@@ -34,6 +36,9 @@ public abstract class PreferencePageBase
 
 	private List<FieldEditor> editors = new LinkedList<FieldEditor>();
 	private GridData parentData;
+	
+	protected static GridLayout groupLayout;
+	protected static GridData cellData;
 	protected static GridData defaultAligmentData;
 	
 	public PreferencePageBase() {
@@ -49,6 +54,19 @@ public abstract class PreferencePageBase
         defaultAligmentData.horizontalSpan = 2;
         defaultAligmentData.horizontalIndent = 9;
         defaultAligmentData.verticalIndent = 5;
+
+		groupLayout = new GridLayout();
+		groupLayout.marginWidth = 10;
+        groupLayout.marginHeight = 10;
+        groupLayout.numColumns = 2;
+        
+        cellData = new GridData();
+        cellData.widthHint = 200;
+        cellData.heightHint = 32;
+	}
+	
+	@Override
+	public void init(IWorkbench workbench) {
 	}
 	
 	@Override
