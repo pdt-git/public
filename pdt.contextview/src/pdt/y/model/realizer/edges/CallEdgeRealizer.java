@@ -37,7 +37,7 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 		init();
 	}
 	
-	public CallEdgeRealizer(EdgeRealizer realizer, boolean isMetacall, boolean isDatabaseCall) {
+	public CallEdgeRealizer(EdgeRealizer realizer, boolean isMetacall, boolean isDatabaseCall) {		
 		super(realizer);
 		if (isDatabaseCall) {
 			dash = new float[] { 14, 8, 1, 8 };
@@ -47,6 +47,7 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 			dash = new float[] { 16, 10 };
 			phase = 0;
 		}
+		
 		init();
 	}
 

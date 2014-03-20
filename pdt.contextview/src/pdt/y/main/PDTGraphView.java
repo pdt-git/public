@@ -185,17 +185,15 @@ public class PDTGraphView extends  JPanel {
 	}
 
 	public void loadGraph(URL resource) {
-		graphModel = reader.readFile(resource);
-		graphModel.categorizeData();
-		graphModel.assignPortsToEdges();
-		graph = graphModel.getGraph();
-		view.setGraph2D(graph);
-
-		updateView();
+		loadGraph(reader.readFile(resource));
 	}
 	
 	public void loadGraph(GraphModel model) {
 		graphModel = model;
+		graphModel.setMetapredicateCallsVisisble(focusView.isMetapredicateCallsVisible());
+		graphModel.setInferredCallsVisible(focusView.isInferredCallsVisible());
+		graphModel.categorizeData();
+		graphModel.assignPortsToEdges();
 		graph = graphModel.getGraph();
 		view.setGraph2D(graph);
 

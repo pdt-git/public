@@ -13,8 +13,6 @@
 
 package pdt.y.focusview;
 
-import java.awt.event.MouseEvent;
-
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -33,6 +31,7 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -52,7 +51,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.ImageRepository;
-import pdt.y.internal.ui.PredicatesListDialog;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.realizer.edges.EdgeRealizerBase;
@@ -77,6 +75,8 @@ public abstract class ViewBase extends ViewPart {
 	private String infoText = "", statusText = "";
 	private ViewCoordinatorBase focusViewCoordinator;
 	private boolean navigationEnabled = false;
+	private boolean metapredicateCallsVisible = true;
+	private boolean inferredCallsVisible = true;
 	
 	public ViewBase() {
 	}
@@ -157,19 +157,54 @@ public abstract class ViewBase extends ViewPart {
 	protected void initButtons(final Composite parent) {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
+
+		toolBarManager.add(new ToolBarAction("Show Metapredicates",
+				ImageRepository.getImageDescriptor(ImageRepository.M)) {
+				{
+					setChecked(metapredicateCallsVisible);
+				}
+			
+				@Override
+				public int getStyle() {
+					return IAction.AS_CHECK_BOX;
+				}
+				
+				@Override
+				public void performAction() {
+					metapredicateCallsVisible = !metapredicateCallsVisible;
+					updateCurrentFocusView();	
+				}
+			});
+		
+		toolBarManager.add(new ToolBarAction("Show Inferred Calls",
+				ImageRepository.getImageDescriptor(ImageRepository.I)) {
+				{
+					setChecked(inferredCallsVisible);
+				}
+				
+				@Override
+				public int getStyle() {
+					return IAction.AS_CHECK_BOX;
+				}
+			
+				@Override
+				public void performAction() {
+					inferredCallsVisible = !inferredCallsVisible;
+					updateCurrentFocusView();	
+				}
+			});
 		
 		toolBarManager.add(new ToolBarAction("Navigation", 
 				ImageRepository.getImageDescriptor(ImageRepository.MOVE)) {
 
 				@Override
-					public int getStyle() {
-						return IAction.AS_CHECK_BOX;
-					}
+				public int getStyle() {
+					return IAction.AS_CHECK_BOX;
+				}
 			
 				@Override
 				public void performAction() {
 					navigationEnabled = !navigationEnabled;
-					setChecked(navigationEnabled);
 					focusViewCoordinator.currentFocusView.recalculateMode();
 				}
 			});
@@ -304,6 +339,14 @@ public abstract class ViewBase extends ViewPart {
 		return navigationEnabled;
 	}
 	
+	public boolean isMetapredicateCallsVisible() {
+		return metapredicateCallsVisible;
+	}
+	
+	public boolean isInferredCallsVisible() {
+		return inferredCallsVisible;
+	}
+	
 	@Override
 	public void dispose() {
 		focusViewCoordinator.dispose();
@@ -395,10 +438,27 @@ public abstract class ViewBase extends ViewPart {
 				nav = new NavigationToolTip(FocusViewControl.this);
 			}
 			
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				super.mouseClicked(e);
-//				
+			@Override
+			public void mouseClicked(double x, double y) {
+				super.mouseClicked(x, y);	
+				
+				HitInfo hitInfo = getHitInfo(x, y);
+				
+				if (hitInfo.hasHitEdgeLabels()) {
+					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
+					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
+					
+					final EdgeRealizerBase r = realizer;
+					realizer.setSelected(true);
+//					new UIJob("Updating status") {
+//						@Override
+//						public IStatus runInUIThread(IProgressMonitor monitor) {
+//							r.setSelected(true);
+//							return Status.OK_STATUS;
+//						}
+//					}.schedule();
+				}
+				
 //				if (e.getClickCount() != 2)
 //					return;
 //
@@ -422,7 +482,7 @@ public abstract class ViewBase extends ViewPart {
 //						}
 //					}.schedule();
 //				}
-//			}
+			}
 			
 			@Override
 			public void mouseMoved(final double x, final double y) {
