@@ -31,7 +31,6 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -62,6 +61,7 @@ import pdt.y.preferences.PreferenceConstants;
 import pdt.y.view.modes.OpenInEditorViewMode;
 import y.base.Edge;
 import y.base.Node;
+import y.view.EdgeLabel;
 import y.view.HitInfo;
 import y.view.NodeRealizer;
 import y.view.ViewMode;
@@ -442,46 +442,23 @@ public abstract class ViewBase extends ViewPart {
 			public void mouseClicked(double x, double y) {
 				super.mouseClicked(x, y);	
 				
+				if (navigationEnabled) return;
+				
 				HitInfo hitInfo = getHitInfo(x, y);
+				
+				if (hitInfo.hasHitEdges()) {
+					Edge edge = hitInfo.getHitEdge();
+					EdgeLabel label = pdtGraphView.getGraph2D().getRealizer(edge).getLabel();
+					pdtGraphView.getGraph2D().setSelected(label, true);
+				}
 				
 				if (hitInfo.hasHitEdgeLabels()) {
 					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
-					
-					final EdgeRealizerBase r = realizer;
-					realizer.setSelected(true);
-//					new UIJob("Updating status") {
-//						@Override
-//						public IStatus runInUIThread(IProgressMonitor monitor) {
-//							r.setSelected(true);
-//							return Status.OK_STATUS;
-//						}
-//					}.schedule();
+					pdtGraphView.getGraph2D().setSelected(edge, true);
 				}
 				
-//				if (e.getClickCount() != 2)
-//					return;
-//
-//				HitInfo hitInfo = getHitInfo(e);
-//				if (hitInfo.hasHitEdgeLabels()) {
-//					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-//					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
-//					if (!(realizer instanceof LoadEdgeRealizer)) {
-//						return;
-//					}
-//					final String text = realizer.getInfoText();
-//					
-//					new UIJob("Predicates List") {
-//						@Override
-//						public IStatus runInUIThread(IProgressMonitor monitor) {
-////							new PredicatesListDialog(getShell(), text).open();
-//							ToolTip t = new ToolTip(getShell(), 0);
-//							t.setText(text);
-//							t.setVisible(true);
-//							return Status.OK_STATUS;
-//						}
-//					}.schedule();
-//				}
+				if (hitInfo.hasHits())
+					showToolTip("Double click to show in editor");
 			}
 			
 			@Override
@@ -523,30 +500,34 @@ public abstract class ViewBase extends ViewPart {
 					}
 				}
 
-				if (!infoText.equals(text))
+				if (!infoText.equals(text) && text.startsWith("Predicate"))
 				{
-					final String finalText = text;
-					new UIJob("Updating status") {
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							setInfoText(finalText);
-							
-							if (PredicateLayoutPreferences.isShowToolTip() && finalText.startsWith("Predicate")) {
-								Point location = Display.getCurrent().getCursorLocation();
-								location.x += 10;
-								location.y += 10;
-								t.setLocation(location);
-								t.setMessage(finalText.substring(11));
-								t.setVisible(true);
-							}
-							else {
-								t.setVisible(false);
-							}
-							
-							return Status.OK_STATUS;
-						}
-					}.schedule();
+					setInfoText(text);
+					showToolTip(text.substring(11));
 				}
+			}
+
+			private void showToolTip(final String finalText) {
+				new UIJob("Updating status") {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						
+						if (PredicateLayoutPreferences.isShowToolTip()) {
+							t.setVisible(false);
+							Point location = Display.getCurrent().getCursorLocation();
+							location.x += 10;
+							location.y += 10;
+							t.setLocation(location);
+							t.setMessage(finalText);
+							t.setVisible(true);
+						}
+						else {
+							t.setVisible(false);
+						}
+						
+						return Status.OK_STATUS;
+					}
+				}.schedule();
 			}
 		}
 	}
