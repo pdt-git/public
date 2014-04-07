@@ -116,6 +116,7 @@ server_loop_impl_X(ServerSocket,Name,Options,Slave,Peer):-
 	tcp_open_socket(Slave, InStream, OutStream),
 	set_stream(InStream,encoding(utf8)),
     set_stream(OutStream,encoding(utf8)),
+    set_stream(user_error,encoding(utf8)),
 %	tcp_host_to_address(Host, Peer),
     next_pdt_console_client_id(Id),
 	atomic_list_concat(['pdt_console_client_',Id,'_',Name],Alias),
