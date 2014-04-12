@@ -25,10 +25,12 @@ pdt_walk_code(Options) :-
 first_run.
 
 ensure_call_graph_generated :-
-	first_run,
-	!,
-	generate_call_graph,
-	retractall(first_run).
+	with_mutex(pdt_call_graph, (
+		first_run,
+		!,
+		generate_call_graph,
+		retractall(first_run)
+	)).
 ensure_call_graph_generated.
 
 %% calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls)
@@ -59,6 +61,9 @@ clear([Module:Name/Arity|Predicates]) :-
 :- dynamic(predicates_to_walk/1).
 
 generate_call_graph :-
+	with_mutex(pdt_call_graph, generate_call_graph__).
+
+generate_call_graph__ :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
@@ -67,11 +72,14 @@ generate_call_graph :-
 	(	predicates_to_walk(NewPredicates)
 	->	retractall(predicates_to_walk(_)),
 		clear(NewPredicates),
-		generate_call_graph(NewPredicates)
+		generate_call_graph__(NewPredicates)
 	;	true
 	).
 
 generate_call_graph(Predicates) :-
+	with_mutex(pdt_call_graph, generate_call_graph__(Predicates)).
+
+generate_call_graph__(Predicates) :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
@@ -81,7 +89,7 @@ generate_call_graph(Predicates) :-
 	(	predicates_to_walk(NewPredicates)
 	->	retractall(predicates_to_walk(_)),
 		clear(NewPredicates),
-		generate_call_graph(NewPredicates)
+		generate_call_graph__(NewPredicates)
 	;	true
 	).
 
