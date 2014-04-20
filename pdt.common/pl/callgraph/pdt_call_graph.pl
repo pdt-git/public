@@ -62,7 +62,8 @@ generate_call_graph :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			reiterate(false)
+			reiterate(false),
+			source(false)
 			]),
 	(	predicates_to_walk(NewPredicates)
 	->	retractall(predicates_to_walk(_)),
@@ -76,6 +77,7 @@ generate_call_graph(Predicates) :-
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
 			reiterate(false),
+			source(false),
 			predicates(Predicates)
 			]),
 	(	predicates_to_walk(NewPredicates)
