@@ -446,17 +446,6 @@ public abstract class ViewBase extends ViewPart {
 				
 				HitInfo hitInfo = getHitInfo(x, y);
 				
-				if (hitInfo.hasHitEdges()) {
-					Edge edge = hitInfo.getHitEdge();
-					EdgeLabel label = pdtGraphView.getGraph2D().getRealizer(edge).getLabel();
-					pdtGraphView.getGraph2D().setSelected(label, true);
-				}
-				
-				if (hitInfo.hasHitEdgeLabels()) {
-					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					pdtGraphView.getGraph2D().setSelected(edge, true);
-				}
-				
 				if (hitInfo.hasHits())
 					showToolTip("Double click to show in editor");
 			}
@@ -481,6 +470,10 @@ public abstract class ViewBase extends ViewPart {
 						text = ((NodeRealizerBase)realizer).getInfoText();
 					}
 				}
+				else if (hitInfo.hasHitEdges()) {
+					Edge edge = hitInfo.getHitEdge();
+					text = pdtGraphView.getDataHolder().getEdgeLabel(edge);
+				}
 				else if (hitInfo.hasHitEdgeLabels()) {
 					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
 					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
@@ -499,11 +492,19 @@ public abstract class ViewBase extends ViewPart {
 						}.schedule();
 					}
 				}
-
-				if (!infoText.equals(text) && text.startsWith("Predicate"))
+				
+				if (text == null)
+					text = "";
+				
+				if (text.startsWith("Predicate"))
+				{
+					text = text.substring(11);
+				}
+				
+				if (!text.equals(infoText))
 				{
 					setInfoText(text);
-					showToolTip(text.substring(11));
+					showToolTip(text);
 				}
 			}
 
@@ -512,7 +513,7 @@ public abstract class ViewBase extends ViewPart {
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						
-						if (PredicateLayoutPreferences.isShowToolTip()) {
+						if (PredicateLayoutPreferences.isShowToolTip() && finalText != null && finalText.length() > 0) {
 							t.setVisible(false);
 							Point location = Display.getCurrent().getCursorLocation();
 							location.x += 10;
