@@ -52,7 +52,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		registerPDTReloadExecutor(new DefaultReloadExecutor());
 	}
 	
-	private PrologInterface activePrologInterface;
+	private PrologInterface activePrologInterface = getDefaultPrologInterface();
 	
 	private static final ISchedulingRule activePifChangedRule = new ISchedulingRule() {
 		@Override

@@ -962,8 +962,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		//		toolBarManager.add(contextSelector);
 		//		setPrologInterface(contextSelector.getCurrentPrologInterface());
-		setPrologInterface(automatedSelector.getCurrentPrologInterface());
-
+		setPrologInterface(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface());
+		automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 	}
 
 	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey, String configuration) {
@@ -972,8 +972,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription, configuration);
 
 		if (automatedSelector.getActiveTrackers().isEmpty()){
-			PrologConsoleView.this.setPrologInterface(pif);
-			PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+			setPrologInterface(pif);
+			automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 		}
 		return pif;
 	}
