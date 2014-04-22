@@ -162,8 +162,18 @@ public interface PrologInterface {
 	public void setStandAloneServer(boolean standAloneServer);
 
 	public boolean isStandAloneServer();
+	@Deprecated
 	public String getExecutable();
+	@Deprecated
 	public void setExecutable(String executable);
+	public String getOSInvocation();
+	public void setOSInvocation(String osInvocation);
+	public String getExecutablePath();
+	public void setExecutablePath(String executablePath);
+	public String getCommandLineArguments();
+	public void setCommandLineArguments(String commandLineArguments);
+	public String getAdditionalStartupFile();
+	public void setAdditionalStartupFile(String additionalStartupFile);
 	public String getEnvironment() ;
 	public void setEnvironment(String executable) ;
 	public String getHost();
