@@ -444,7 +444,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	@Override
-	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
+	public void afterInit(final PrologInterface pif) throws PrologInterfaceException {
 		if (markerBackup == null || markerBackup.isEmpty()) {
 			return;
 		}
@@ -465,7 +465,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 					//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 				}
 				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-				PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+//				PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 				try {
 					pif.queryOnce(buf.toString());
 				} catch (PrologInterfaceException e) {
@@ -537,8 +537,10 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
-		Debug.debug("update marker");
-		updateMarkers();
+		if (pif.equals(currentPif)) {
+			Debug.debug("update marker");
+			updateMarkers();
+		}
 		monitor.done();
 	}
 

@@ -199,7 +199,9 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 
 	@Override
 	public void prologInterfaceStarted(PrologInterface pif) {
-    	fireLabelProviderChanged();
+    	if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+    		fireLabelProviderChanged();
+    	}
 	}
 
 	@Override
@@ -213,7 +215,9 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
-    	fireLabelProviderChanged();
+    	if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+    		fireLabelProviderChanged();
+    	}
 	}
 	
 	@Override
