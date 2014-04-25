@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.cs3.pdt.PDTPredicates;
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -89,7 +90,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	private void checkForPif() {
 		if (currentPif == null) {
-			currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			currentPif = PDTCommonUtil.getActivePrologInterface();
 			addPifListener();
 		}
 	}
@@ -329,7 +330,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) throws PrologInterfaceException {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
 		String query = bT(PDTPredicates.PDT_SET_BREAKPOINT, prologFileName, line, offset, "_");
-		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 		pif.queryOnce(query);
 	}
 
@@ -468,7 +469,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 					//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
 				}
 				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-				PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+				PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 				try {
 					pif.queryOnce(buf.toString());
 				} catch (PrologInterfaceException e) {

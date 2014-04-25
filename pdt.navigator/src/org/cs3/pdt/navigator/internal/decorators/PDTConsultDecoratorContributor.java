@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.navigator.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
@@ -60,7 +61,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 
 		try {
 			// get active pif from console
-			PrologInterface currentPif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			PrologInterface currentPif = PDTCommonUtil.getActivePrologInterface();
 			
 			if (currentPif == null) {
 				if (element instanceof IFile) {
@@ -168,7 +169,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 			filesInCurrentState = new HashSet<String>();
 			filesInOldState = new HashSet<String>();
 			directories = new HashSet<String>();
-			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 			List<Map<String, Object>> results;
 			try {
 				results = pif.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State"));

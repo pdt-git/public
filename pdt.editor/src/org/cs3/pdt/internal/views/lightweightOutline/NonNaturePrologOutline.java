@@ -306,7 +306,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 
-		if (pif.equals(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface())) {
+		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
 			String editorFile = editor.getPrologFileName();
 			if (allConsultedFiles.contains(editorFile)) {
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
@@ -335,7 +335,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 	@Override
 	public void prologInterfaceStarted(PrologInterface pif) {
-		if (pif.equals(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface())) {
+		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -360,7 +360,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 		if (elem instanceof OutlineModuleElement) { 
 			OutlineModuleElement module = (OutlineModuleElement)elem;
-			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 			if ("module".equals(module.getKind())) {
 				try {
 					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, Util.quoteAtom(module.getName()), "file(File)"),

@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.swing.text.BadLocationException;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.search.PrologSearchResult;
 import org.cs3.pdt.common.search.SearchConstants;
@@ -36,7 +37,6 @@ import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
@@ -115,7 +115,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws NumberFormatException
 	 */
 	private IStatus doSearch(IProgressMonitor monitor) throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
-		PrologSession session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+		PrologSession session = PDTCommonUtil.getActivePrologInterface().getSession();
 		monitor.beginTask("Searching...", 2);
 		monitor.subTask("Running Prolog query");
 		List<Map<String, Object>> results = findReferencedClauses(session, new SubProgressMonitor(monitor, 1));

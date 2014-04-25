@@ -17,6 +17,7 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.session.PrologSession;
@@ -83,7 +84,7 @@ public class RunUnitTestAction extends Action {
 		}
 		PrologSession session = null;
 		try {
-			PrologInterface pif = PDTUtils.getActivePif();
+			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 			session = pif.getSession();
 			String prologFileName = PDTUtils.getPrologFileName(f);
 			String query = "junitadapter:unit_test(UnitName,Test,'"

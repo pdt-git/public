@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -854,7 +853,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		if (input instanceof IFileEditorInput) {
 			Map<String, Object> result = null;
 			try {
-				result = PDTUtils.getActivePif().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, Util.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
+				result = PDTCommonUtil.getActivePrologInterface().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, Util.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -1418,7 +1417,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
-		if (pif.equals(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface())) {
+		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
 			String editorFile = getPrologFileName();
 			if (allConsultedFiles.contains(editorFile)) {
 				updateState();
@@ -1434,7 +1433,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	
 	@Override
 	public void prologInterfaceStarted(PrologInterface pif) {
-		if (pif.equals(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface())) {
+		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
 			updateState();
 		}
 	}

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.PrologSearchPage;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
@@ -954,7 +955,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		//		toolBarManager.add(contextSelector);
 		//		setPrologInterface(contextSelector.getCurrentPrologInterface());
-		setPrologInterface(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface());
+		setPrologInterface(PDTCommonUtil.getActivePrologInterface());
 		automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 	}
 

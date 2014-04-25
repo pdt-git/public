@@ -29,6 +29,8 @@ import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.ui.util.FileUtils;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.filesystem.EFS;
@@ -427,6 +429,10 @@ public class PDTCommonUtil {
 			plDocCss = buf.toString();
 		}
 		return plDocCss;
+	}
+	
+	public static PrologInterface getActivePrologInterface() {
+		return PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 	}
 
 }

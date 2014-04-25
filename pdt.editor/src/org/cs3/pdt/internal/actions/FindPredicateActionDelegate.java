@@ -31,7 +31,6 @@ import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -132,7 +131,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	private void run_impl(final Goal goal, IFile file) throws CoreException {
 		PrologSession session = null;
 		try {
-			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+			session = PDTCommonUtil.getActivePrologInterface().getSession();
 			SourceLocationAndResultKind res = findFirstClauseLocation(goal, session);
 			if (res != null) {
 				if (res.location != null) {
