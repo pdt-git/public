@@ -53,7 +53,6 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		for (String s : parts) {
 			currentPif.addConsultedFile(s);
 		}
-		PDTCommonPlugin.getDefault().notifyDecorators();
 	}
 
 	public void openFileInEditor(String event) {
@@ -130,8 +129,6 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		if (currentPif == pif) {
 			return;
 		}
-		
-		PDTCommonPlugin.getDefault().notifyDecorators();
 		
 		removePifListener();
 		

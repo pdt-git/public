@@ -16,13 +16,12 @@ package org.cs3.pdt.navigator.internal.decorators;
 import static org.cs3.prolog.common.QueryUtils.bT;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.navigator.internal.ImageRepository;
 import org.cs3.prolog.common.OptionProviderEvent;
 import org.cs3.prolog.common.OptionProviderListener;
@@ -31,28 +30,33 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
+import org.cs3.prolog.pif.service.ConsultListener;
 import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class PDTConsultDecoratorContributor extends BaseLabelProvider implements ILightweightLabelDecorator, OptionProviderListener {
+public class PDTConsultDecoratorContributor extends BaseLabelProvider implements OptionProviderListener, ILightweightLabelDecorator, ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
 
-	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
-
+	public PDTConsultDecoratorContributor() {
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PDTCommonPlugin.getDefault().registerPifStartListener(this);
+		PDTCommonPlugin.getDefault().addDecorator(this);
+	}
+	
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		if(!(element instanceof IFile) && !(element instanceof IFolder)){
 			return;
 		}
-		
-		PDTCommonPlugin.getDefault().addDecorator(this);
 
 		try {
 			// get active pif from console
@@ -121,27 +125,20 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 		return Util.prologFileName(filepath.toFile());
 	}
 
-	@Override
-	public void valuesChanged(OptionProviderEvent e) {
-		fireLabelProviderChanged();
-	}
-
-	private void fireLabelProviderChanged() {
-		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
-		Vector<ILabelProviderListener> clone=new Vector<ILabelProviderListener>();
-		synchronized(listeners){
-			clone.addAll(listeners);
-		}
-		for (Iterator<ILabelProviderListener> it = clone.iterator(); it.hasNext();) {
-			final ILabelProviderListener l = (ILabelProviderListener) it.next();
-			UIUtils.getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					l.labelProviderChanged(e);
-				}
-			});
-		}
-	}
+    @Override
+    public void valuesChanged(OptionProviderEvent e) {
+    	fireLabelProviderChanged();
+    }
+    
+    private void fireLabelProviderChanged() {
+    	final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
+        UIUtils.getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                fireLabelProviderChanged(e);
+            }
+        });
+    }
 
 	private HashSet<String> filesInCurrentState;
 	private HashSet<String> filesInOldState;
@@ -197,6 +194,34 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 			}
 			lastFill = System.currentTimeMillis();
 		}
+	}
+
+	@Override
+	public void prologInterfaceStarted(PrologInterface pif) {
+    	fireLabelProviderChanged();
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologInterface pif) {
+    	fireLabelProviderChanged();
+	}
+
+	@Override
+	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	}
+
+	@Override
+	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+    	fireLabelProviderChanged();
+	}
+	
+	@Override
+	public void dispose() {
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
+		PDTCommonPlugin.getDefault().removeDecorator(this);
+		super.dispose();
 	}
 
 }

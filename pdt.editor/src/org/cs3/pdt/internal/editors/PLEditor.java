@@ -29,6 +29,7 @@ import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
@@ -101,7 +102,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener {
+public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
 
 	public static final String COMMAND_OPEN_PRIMARY_DEFINITION = "org.eclipse.pdt.ui.open.primary.definition";
 	
@@ -382,7 +383,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
-
+		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 	}
 
 	/**
@@ -1417,29 +1418,28 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
-		String editorFile = getPrologFileName();
-		if (allConsultedFiles.contains(editorFile)) {
-			getSite().getShell().getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					PLEditor.this.updateTitleImage(getEditorInput());
-					try {
-						PLEditor.this.configuration.getPLScanner().initHighlighting();
-						PLEditor.this.getSourceViewer().invalidateTextPresentation();
-					} catch (PrologInterfaceException e) {
-						Debug.report(e);
-					} catch (CoreException e) {
-						Debug.report(e);
-					};
-				}
-			});
+		if (pif.equals(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface())) {
+			String editorFile = getPrologFileName();
+			if (allConsultedFiles.contains(editorFile)) {
+				updateState();
+			}
 		}
-
 		monitor.done();
 	}
 
 	@Override
 	public void activePrologInterfaceChanged(PrologInterface pif) {
+		updateState();
+	}
+	
+	@Override
+	public void prologInterfaceStarted(PrologInterface pif) {
+		if (pif.equals(PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface())) {
+			updateState();
+		}
+	}
+	
+	private void updateState() {
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -1461,6 +1461,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		super.dispose();
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 	}
 
 }

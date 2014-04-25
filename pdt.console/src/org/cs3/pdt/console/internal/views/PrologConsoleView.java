@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.search.PrologSearchPage;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
@@ -200,27 +199,20 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 						try {
 							monitor.beginTask("initializing...", 2);
 
+							PrologInterface pif = getPrologInterface();
 							try {
-								if (getPrologInterface() != null) {
-									getPrologInterface().stop();
+								if (pif != null) {
+									pif.stop();
 									monitor.worked(1);
 								}
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
-								if (getPrologInterface() != null) {
-									if (!getPrologInterface().isDown()){
-										getPrologInterface().reset();
+								if (pif != null) {
+									if (!pif.isDown()){
+										pif.reset();
 										Thread.sleep(1000);
 									}
-									final String reconsultFiles = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_NONE);
-									
-									getPrologInterface().start();
-									if (reconsultFiles.equals(PDTConsole.RECONSULT_NONE)) {
-										getPrologInterface().clearConsultedFiles();
-									} else {
-										PDTCommonPlugin.getDefault().reconsultFiles(getPrologInterface(), reconsultFiles.equals(PDTConsole.RECONSULT_ENTRY));
-									}
-
+									pif.start();
 									Display.getDefault().asyncExec(new Runnable() {
 										@Override
 										public void run() {
