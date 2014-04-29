@@ -152,8 +152,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			if(EXPERIMENTAL_ADD_TASKS){
 				addTasks(((FileEditorInput)getEditorInput()).getFile(),document);
 			}
-			breakpointHandler.backupMarkers(getCurrentIFile(), document);
-			
 			PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", true);
 			
 			IFile currentIFile = getCurrentIFile();

@@ -53,7 +53,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -67,9 +67,10 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	private static final String DELETE_BREAKPOINT = "delete_breakpoint";
 	private static final String BREAKPOINT_PROPERTY = "pdt_editor_breakpoints:pdt_breakpoint_property";
 
-	private static final String PDT_BREAKPOINT_MARKER = "org.cs3.pdt.PDTBreakpointMarker";
+	private static final String PDT_BREAKPOINT_MARKER = "org.cs3.pdt.editor.PDTBreakpointMarker";
 	private static final String BREAKPOINT_ID = "pdt.breakpoint.id";
 	private static final String BREAKPOINT_OFFSET = "pdt.breakpoint.offset";
+	private static final String BREAKPOINT_OFFSET_PHYSICAL = "pdt.breakpoint.offset.physical";
 
 	private static PDTBreakpointHandler instance;
 
@@ -98,22 +99,23 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 
 	List<MarkerBackup> markerBackup = null;
-	IFile currentIFile;
-	Document document;
 
-	public void backupMarkers(IFile currentIFile, Document document) {
-		this.currentIFile = currentIFile;
-		this.document = document;
-
+	public void backupMarkers() {
 		markerBackup = new ArrayList<MarkerBackup>();
 
 		try {
 			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDT_BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 			for (IMarker marker : markers) {
 				int line = marker.getAttribute(IMarker.LINE_NUMBER, 0);
-				int offset = marker.getAttribute(BREAKPOINT_OFFSET, 0);
+				int currentOffset = marker.getAttribute(IMarker.CHAR_START, -1);
+				int offsetWhenSetting = marker.getAttribute(BREAKPOINT_OFFSET_PHYSICAL, -1);
+				int logicOffset = marker.getAttribute(BREAKPOINT_OFFSET, -1);
 				String id = marker.getAttribute(BREAKPOINT_ID, "");
-				markerBackup.add(new MarkerBackup(marker.getResource(), line, id, offset));	
+				if (currentOffset == -1 || offsetWhenSetting == -1 || currentOffset != offsetWhenSetting) {
+					markerBackup.add(new MarkerBackup(marker.getResource(), line, id, -1));
+				} else {
+					markerBackup.add(new MarkerBackup(marker.getResource(), line, id, logicOffset));	
+				}
 			}
 		} catch (CoreException e) {
 			Debug.report(e);
@@ -138,23 +140,22 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 					public void run() {
 						// only recreate the marker if it was deleted
 						if (deletedIds.contains(m.getId())) {
-							if (m.getFile().equals(currentIFile)) {
-								// if the marker is in the current file, recreate information from the document (the marker could be moved)
-								try {
-									int offset = document.getLineInformation(m.getLineNumber() - 1).getOffset();
-									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(currentIFile), m.getLineNumber(), offset, "Id"));
-								} catch (PrologInterfaceException e) {
-									Debug.report(e);
-								} catch (BadLocationException e) {
-									Debug.report(e);
+							int offset = m.getOffset();
+							try {
+								if (offset == -1) {
+									IDocument document2;
+									document2 = UIUtils.getDocument(m.getFile());
+									offset = UIUtils.physicalToLogicalOffset(document2, document2.getLineInformation(m.getLineNumber() - 1).getOffset());
 								}
-							} else {
-								// else, just reset the marker with the same information as before
 								try {
-									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "Id"));
+									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), offset, "Id"));
 								} catch (PrologInterfaceException e) {
 									Debug.report(e);
 								}
+							} catch (CoreException e) {
+								Debug.report(e);
+							} catch (BadLocationException e) {
+								Debug.report(e);
 							}
 						}						
 					}
@@ -170,8 +171,6 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 					// disable logging of deleted ids
 					deletedIds = null;
 					markerBackup = null;
-					currentIFile = null;
-					document = null;
 				}
 			});
 	}
@@ -204,11 +203,11 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		return null;
 	}
 
-	private void addMarker(String fileName, int line, int offset, String id) throws CoreException {
+	private void addMarker(String fileName, int line, int offset, int length, String id) throws CoreException {
 		// called when a breakpoint was added in prolog
 		try {
 			IFile file = FileUtils.findFileForLocation(fileName);
-			addMarker(file, line, offset, id);
+			addMarker(file, line, offset, length, id);
 		} catch (IOException e) {
 			Debug.report(e);
 		} catch (IllegalArgumentException e) {
@@ -220,8 +219,8 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		}
 	}
 
-	private void addMarker(final IFile file, final int line, final int offset, final String id) throws CoreException {
-		runAsJob("Remove all breakpoints", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
+	private void addMarker(final IFile file, final int line, final int offset, final int length, final String id) throws CoreException {
+		runAsJob("Add breakpoint", ResourcesPlugin.getWorkspace().getRoot(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -231,6 +230,16 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 				attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
 				attributes.put(BREAKPOINT_ID, id);
 				attributes.put(BREAKPOINT_OFFSET, offset);
+				try {
+					IDocument document2 = UIUtils.getDocument(file);
+					int start = UIUtils.logicalToPhysicalOffset(document2, offset);
+					int end = UIUtils.logicalToPhysicalOffset(document2, offset + length);
+					attributes.put(BREAKPOINT_OFFSET_PHYSICAL, start);
+					attributes.put(IMarker.CHAR_START, start);
+					attributes.put(IMarker.CHAR_END, end);
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
 				try {
 					MarkerUtilities.createMarker(file, attributes, PDT_BREAKPOINT_MARKER);
 				} catch (CoreException e) {
@@ -340,13 +349,14 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		try {
 			results = currentPif.queryAll(bT(BREAKPOINT_PROPERTY, "Id" , "file(File)"),
 					bT(BREAKPOINT_PROPERTY, "Id" , "line_count(Line)"),
-					bT(BREAKPOINT_PROPERTY, "Id" , "character_range(Offset, _)"));
+					bT(BREAKPOINT_PROPERTY, "Id" , "character_range(Offset, Length)"));
 			for (Map<String, Object> result : results) {
 				int line = Integer.parseInt(result.get("Line").toString());
 				int offset = Integer.parseInt(result.get("Offset").toString());
+				int length = Integer.parseInt(result.get("Length").toString());
 				String id = result.get("Id").toString();
 				try {
-					addMarker(result.get("File").toString(), line, offset, id);
+					addMarker(result.get("File").toString(), line, offset, length, id);
 				} catch (IllegalArgumentException e) {
 					Debug.report(e);
 				}
@@ -394,11 +404,12 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		if (e.getSubject().equals(ADD_BREAKPOINT)) {
 			String id = e.getEvent();
 			try {
-				Map<String, Object> result = currentPif.queryOnce(bT(PDTPredicates.PDT_BREAKPOINT_PROPERTIES, id, "File", "Line", "Offset"));
+				Map<String, Object> result = currentPif.queryOnce(bT(PDTPredicates.PDT_BREAKPOINT_PROPERTIES, id, "File", "Line", "Offset", "Length"));
 				String file = result.get("File").toString();
 				int line = Integer.parseInt(result.get("Line").toString());
 				int offset = Integer.parseInt(result.get("Offset").toString());
-				addMarker(file, line, offset, id);
+				int length = Integer.parseInt(result.get("Length").toString());
+				addMarker(file, line, offset, length, id);
 			} catch (PrologInterfaceException e1) {
 				Debug.report(e1);
 			} catch (CoreException e1) {
@@ -484,7 +495,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {
 		if (currentPif.equals(pif)) {
 			shouldUpdateMarkers = false;
-			backupMarkers(null, null);
+			backupMarkers();
 			removeAllBreakpointMarkers();
 		}
 	}
@@ -493,7 +504,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	public void onError(PrologInterface pif) {
 		if (currentPif.equals(pif)) {
 			shouldUpdateMarkers = false;
-			backupMarkers(null, null);
+			backupMarkers();
 		}
 	}
 
@@ -533,6 +544,9 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	@Override
 	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+		if (pif.equals(currentPif) && markerBackup == null) {
+			backupMarkers();
+		}
 	}
 
 	@Override
