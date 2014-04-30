@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_location/7, call_type/7, calls_multifile/8, pdt_walk_code/1]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_location/7, call_type/7, calls_multifile/8, pdt_walk_code/1, generate_call_info/6]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -99,6 +99,10 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 		assertz(predicates_to_walk(PredicatesUnique))
 	;	true
 	).
+	
+generate_call_info(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity) :-
+	functor(Target, TargetFunctor, TargetArity),
+	pdt_walk_code([trace_reference(TargetModule:Target), predicates([SourceModule:SourceFunctor/SourceArity]), on_trace(pdt_call_graph:assert_edge)]).
 
 assert_edge(_, '<initialization>', _, _) :- !.
 

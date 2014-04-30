@@ -37,6 +37,7 @@ public class GraphDataHolder {
 	// Addition data:
 	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
+	private DataMap moduleOfPredicateMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
 	private DataMap lineNumberMap = Maps.createHashedDataMap();
 	private DataMap offsetMap = Maps.createHashedDataMap();
@@ -69,6 +70,10 @@ public class GraphDataHolder {
 
 	public DataMap getModuleMap() {
 		return moduleMap;
+	}
+	
+	public DataMap getModuleOfPredicateMap() {
+		return moduleOfPredicateMap;
 	}
 
 	public DataMap getFileNameMap() {
@@ -164,48 +169,48 @@ public class GraphDataHolder {
 	}
 	
 	public String getFileName(Node node) {
-		return getFileNameMap().get(node).toString();
+		return (String)getFileNameMap().get(node);
 	}
 	
 	public String getFileName(Edge edge) {
-		return getFileNameMap().get(edge).toString();
+		return (String)getFileNameMap().get(edge);
 	}
 	
 	public String getOffset(Node node) {
-		return getOffsetMap().get(node).toString();
+		return (String)getOffsetMap().get(node);
 	}
 	
 	public String getOffset(Edge edge) {
-		return getOffsetMap().get(edge).toString();
+		return (String)getOffsetMap().get(edge);
 	}
 
 	public boolean isPredicate(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(PREDICATE);
 	}
 
 	public boolean isModule(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(MODULE);
 	}
 
 	public boolean isFile(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(FILE);
 	}
 	
 	public boolean isFileNode(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(FILE_NODE);
 	}
 
 	public boolean isCallEdge(Edge edge) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(edge).toString();
+		String kind = (String)kindMap.get(edge);
 		return kind.equals(CALL);
 	}
 	
