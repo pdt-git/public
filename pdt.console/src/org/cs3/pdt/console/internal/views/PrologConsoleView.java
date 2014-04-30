@@ -1301,13 +1301,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				.get(pif);
 		if (savedState == null) {
 			viewer.clearOutput();
+			ConsoleHistory history = new ConsoleHistory(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif));
+			viewer.setHistory(history);
+			loadHistory(history);
 			viewer.setModel(models.get(pif));
 			PrologCompletionProvider completionProvider = new PrologCompletionProvider();
 			completionProvider.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
-			ConsoleHistory history = new ConsoleHistory();
-			viewer.setHistory(history);
-			loadHistory(history);
 		} else {
 			viewer.loadState(savedState);
 		}
