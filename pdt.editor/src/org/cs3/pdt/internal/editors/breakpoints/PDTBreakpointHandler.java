@@ -456,7 +456,9 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	@Override
 	public void afterInit(final PrologInterface pif) throws PrologInterfaceException {
+		shouldUpdateMarkers = true;
 		if (markerBackup == null || markerBackup.isEmpty()) {
+			markerBackup = null;
 			return;
 		}
 		Thread t = new Thread(new Runnable() {
