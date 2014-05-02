@@ -14,18 +14,17 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.Vector;
 
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.ConsoleModelEvent;
 import org.cs3.pdt.console.ConsoleModelListener;
+import org.cs3.pdt.console.PrologConsolePlugin;
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 
 /*
@@ -50,12 +49,25 @@ import org.cs3.pdt.console.ConsoleModelListener;
  *  0<=pointer<=history.size()
  */
 public class ConsoleHistory implements ConsoleModelListener {
-	Vector<String> history = new Vector<String>();
-	int pointer=0;
-	String lastLine;
+	
+	private static final int MAX_HISTORY_SIZE = 50;
+
+	private static final String HISTORY_SECTION = "history";
+	
+	private Vector<String> history = new Vector<String>();
+	private int pointer = 0;
+	private String lastLine;
 	
 	private ConsoleModel model;
+	private final String key;
+
+	private IDialogSettings section;
 	
+	public ConsoleHistory(String key) {
+		this.key = key;
+		loadHistory();
+	}
+
 	public void setConsoleModel(ConsoleModel consoleModel) {
 		if (model == consoleModel) {
 			return;
@@ -122,6 +134,8 @@ public class ConsoleHistory implements ConsoleModelListener {
 				|| value.startsWith("pdt_reload:pdt_reload("))
 				) {
 			history.add(e.getCommitText());
+			limitHistory();
+			saveHistory();
 		}
 		pointer = history.size();
 	}
@@ -142,22 +156,51 @@ public class ConsoleHistory implements ConsoleModelListener {
 	public void beforeDisconnect(ConsoleModelEvent e) {}
 	
 	public void saveHistory(OutputStream os) throws IOException{
-		PrintStream ps = new PrintStream(os);
-		for (Iterator<String> iter = history.iterator(); iter.hasNext();) {
-			String line = iter.next();
-			ps.println(line);
-		}
+//		PrintStream ps = new PrintStream(os);
+//		for (Iterator<String> iter = history.iterator(); iter.hasNext();) {
+//			String line = iter.next();
+//			ps.println(line);
+//		}
 	}
 
 	public void loadHistory(InputStream is) throws IOException{
-		clearHistory();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		String line = reader.readLine();
-		while(line!=null){
-			history.add(line);
-			line = reader.readLine();
+//		clearHistory();
+//		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+//		String line = reader.readLine();
+//		while(line!=null){
+//			history.add(line);
+//			line = reader.readLine();
+//		}
+//		pointer=history.size();
+	}
+	
+	private void loadHistory() {
+		String[] array = getSettings().getArray(key);
+		if (array != null) {
+			Collections.addAll(history, array);
+			pointer = history.size();
 		}
-		pointer=history.size();
+	}
+
+	private void saveHistory() {
+		getSettings().put(key, history.toArray(new String[history.size()]));
+	}
+	
+	private void limitHistory() {
+		while (history.size() > MAX_HISTORY_SIZE) {
+			history.remove(0);
+		}
+	}
+
+	private IDialogSettings getSettings() {
+		if (section == null) {
+			IDialogSettings dialogSettings = PrologConsolePlugin.getDefault().getDialogSettings();
+			section = dialogSettings.getSection(HISTORY_SECTION);
+			if (section == null) {
+				section = dialogSettings.addNewSection(HISTORY_SECTION);
+			}
+		}
+		return section;
 	}
 	
 }

@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -131,7 +132,7 @@ public abstract class GraphPIFLoaderBase {
 	}
 
 	public PrologInterface getActivePif() {
-		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 		return pif;
 	}
 
