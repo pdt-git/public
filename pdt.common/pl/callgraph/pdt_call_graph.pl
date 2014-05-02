@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_location/7, call_type/7, calls_multifile/8, pdt_walk_code/1, generate_call_info/6]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_term_position/7, call_type/7, calls_multifile/8, pdt_walk_code/1, generate_call_info/6]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -38,7 +38,7 @@ calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerAri
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls, _TermPosition, _Info).
 	
 
-call_location(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
+call_term_position(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, [TermPosition|_], _Info).
 
 call_type(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Info) :-
