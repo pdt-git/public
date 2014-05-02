@@ -94,14 +94,14 @@ public abstract class GraphPIFLoaderBase {
 		if (!PredicateVisibilityPreferences.showPDTPredicates())
 			settings.add("hide_pdt_predicates");
 
-		if (!PredicateVisibilityPreferences.showPDTMetapredicates())
-			settings.add("hide_pdt_metapredicates");
+//		if (!PredicateVisibilityPreferences.showPDTMetapredicates())
+//			settings.add("hide_pdt_metapredicates");
 
 		if (!PredicateVisibilityPreferences.showSWIPredicates())
 			settings.add("hide_swi_predicates");
 
-		if (!PredicateVisibilityPreferences.showSWIMetapredicates())
-			settings.add("hide_swi_metapredicates");
+//		if (!PredicateVisibilityPreferences.showSWIMetapredicates())
+//			settings.add("hide_swi_metapredicates");
 
 		if (settings.size() == 0)
 			return "[]";

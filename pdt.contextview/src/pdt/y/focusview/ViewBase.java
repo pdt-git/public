@@ -50,6 +50,7 @@ import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
 import pdt.y.preferences.MainPreferencePage;
 import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.preferences.PredicateVisibilityPreferences;
 import pdt.y.preferences.PreferenceConstants;
 import pdt.y.view.modes.MouseHandler;
 import pdt.y.view.modes.OpenInEditorViewMode;
@@ -146,6 +147,42 @@ public abstract class ViewBase extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
+		toolBarManager.add(new ToolBarAction("Show PDT Predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.P)) {
+			{
+				setChecked(PredicateVisibilityPreferences.showPDTPredicates());
+			}
+
+			@Override
+			public int getStyle() {
+				return IAction.AS_CHECK_BOX;
+			}
+			
+			@Override
+			public void performAction() {
+				PredicateVisibilityPreferences.setShowPDTPredicates(isChecked());
+				updateCurrentFocusView();	
+			}
+		});
+		
+		toolBarManager.add(new ToolBarAction("Show SWI Predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.S)) {
+			{
+				setChecked(PredicateVisibilityPreferences.showSWIPredicates());
+			}
+
+			@Override
+			public int getStyle() {
+				return IAction.AS_CHECK_BOX;
+			}
+			
+			@Override
+			public void performAction() {
+				PredicateVisibilityPreferences.setShowSWIPredicates(isChecked());
+				updateCurrentFocusView();	
+			}
+		});
+		
 		toolBarManager.add(new ToolBarAction("Show Metapredicates",
 				ImageRepository.getImageDescriptor(ImageRepository.M)) {
 				{
