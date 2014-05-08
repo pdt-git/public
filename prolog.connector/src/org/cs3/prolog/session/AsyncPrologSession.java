@@ -168,23 +168,22 @@ public interface AsyncPrologSession extends  Disposable {
 	 * 
 	 * While the batch is disposing, it is still possible to call join() and
 	 * abort(), Once the batch has been closed, this calls will have no effect.
-	 * @throws PrologInterfaceException 
 	 */
 	@Override
 	public void dispose();
 
 	/**
 	 * Check if the batch is disposed.
+	 * See: {@link #dispose()}
 	 * 
 	 * @return true if the batch is disposed or in the proceess of beeing
 	 *         disposed.
-	 * @see dispose()
 	 */
 	@Override
 	public boolean isDisposed();
 
 	/**
-	 * retrieve the thread alias of the processor.
+	 * @return the thread alias of the processor.
 	 */
 	public String getProcessorThreadAlias();
 }

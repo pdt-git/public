@@ -41,6 +41,7 @@ import org.cs3.prolog.pif.PrologInterface;
  * contains static methods that do not quite fit anywhere else :-)=
  */
 public class Util {
+	
 	/**
 	 * converts a logical character offset to a physical character offset. E.g.
 	 * prolog uses logical offsets in the sense that it counts any line
@@ -49,7 +50,9 @@ public class Util {
 	 * Eclipse documents and views however seem to count physical characters,
 	 * i.e. the CRLF line delimiter would count as two characters.
 	 * 
-	 * 
+	 * @param data the text
+	 * @param logical the logical offset
+	 * @return the physical offset
 	 */
 	public static int logicalToPhysicalOffset(String data, int logical) {
 		int physical = 0;
@@ -63,6 +66,14 @@ public class Util {
 		return physical + logical;
 	}
 	
+	
+	/**
+	 * @see logicalToPhysicalOffset(String data, int logical)
+	 * 
+	 * @param data the text
+	 * @param physical the physical offset
+	 * @return the logical offset
+	 */
 	public static int physicalToLogicalOffset(String data, int physical) {
 		int logical = 0;
 		int nextPos = data.indexOf("\r\n");
@@ -75,17 +86,28 @@ public class Util {
 		return physical + logical;
 	}
 
+	/**
+	 * getting the lock file for starting a socket server
+	 * 
+	 * @return the lock file
+	 */
 	public static File getLockFile() {
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		return new File(tmpdir, generateFingerPrint());
 	}
-	
-	public static String generateFingerPrint() {
+
+	private static String generateFingerPrint() {
 		long l = System.currentTimeMillis();
 		double m = Math.random();
 		return "fp_" + l + "_" + m;
 	}
 
+	/**
+	 * pretty print of a Map
+	 * 
+	 * @param input the map that should be printed
+	 * @return the String representation
+	 */
 	public static String prettyPrint(Map<String, ?> input) {
 		if (input != null) {
 			boolean first = true;
@@ -107,7 +129,13 @@ public class Util {
 		}
 		return "";
 	}
-
+	
+	/**
+	 * pretty print of an array
+	 *  
+	 * @param a the array that should be printed
+	 * @return the String representation
+	 */
 	public static String prettyPrint(Object[] a) {
 		if (a == null) {
 			return "";
@@ -122,6 +150,12 @@ public class Util {
 		return sb.toString();
 	}
 	
+	/**
+	 * pretty print of a collection
+	 *  
+	 * @param input the collection that should be printed
+	 * @return the String representation
+	 */
 	public static String prettyPrint(Collection<?> input) {
 		if (input != null && !input.isEmpty()) {
 			Iterator<?> it = input.iterator();
@@ -146,6 +180,14 @@ public class Util {
 		return sb.toString();
 	}
 
+	/**
+	 * get the logfile (create if necessary)
+	 * 
+	 * @param dir path to the directory
+	 * @param name filename
+	 * @return the logFile
+	 * @throws IOException
+	 */
 	public static File getLogFile(String dir, String name) throws IOException {
 		File logFile = new File(dir,name);
 				
@@ -156,6 +198,13 @@ public class Util {
 		return logFile.getCanonicalFile();
 	}
 
+	/**
+	 * copy an InputStream to an OutputStream
+	 * 
+	 * @param in
+	 * @param out
+	 * @throws IOException
+	 */
 	public static void copy(InputStream in, OutputStream out)
 			throws IOException {
 		BufferedInputStream bIn = null;
@@ -173,8 +222,13 @@ public class Util {
 		}
 	}
 
-	
 
+	/**
+	 * normalize String for Windows system
+	 *  
+	 * @param s the String
+	 * @return normalized String
+	 */
 	public static String normalizeOnWindows(String s) {
 		boolean windowsPlattform = isWindows();
 		if (windowsPlattform) {
@@ -184,7 +238,9 @@ public class Util {
 	}
 
 	/**
-	 * @return
+	 * checks if current OS is Windows
+	 * 
+	 * @return true if current OS is Windows
 	 */
 	public static boolean isWindows() {
 		boolean windowsPlattform = System.getProperty("os.name").indexOf(
@@ -193,13 +249,20 @@ public class Util {
 	}
 
 	/**
-	 * @return
+	 * checks if current OS is MacOS
+	 * 
+	 * @return true if current OS is MacOS
 	 */
 	public static boolean isMacOS() {
 		boolean mac = System.getProperty("os.name").indexOf("Mac") > -1;
 		return mac;
 	}
 
+	/**
+	 * normalize a Prolog filename
+	 * @param f the file
+	 * @return normalized path to the file
+	 */
 	public static String prologFileName(File f) {
 		try {
 			return normalizeOnWindows(f.getCanonicalPath());
@@ -208,6 +271,13 @@ public class Util {
 		}
 	}
 
+	/**
+	 * Read InputStream to String
+	 * 
+	 * @param in the InputStream
+	 * @return String representation
+	 * @throws IOException
+	 */
 	public static String toString(InputStream in) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024];
@@ -222,6 +292,11 @@ public class Util {
 	// specify buffer size for extraction
 	static final int BUFFER = 2048;
 
+	/**
+	 * escapes special characters in a String
+	 * @param s the input string
+	 * @return the output String
+	 */
 	public static String escape(String s) {
 		StringBuffer result = new StringBuffer(s.length() + 10);
 		for (int i = 0; i < s.length(); ++i) {
@@ -260,13 +335,7 @@ public class Util {
 		return unescape(line.toString(),0,line.length());
 	}
 	
-	/**
-	 * @param line
-	 * @param start
-	 * @param end
-	 * @return
-	 */
-	public static String unescape(String line, int start, int end) {
+	private static String unescape(String line, int start, int end) {
 		StringBuffer sb = new StringBuffer();
 		boolean escape = false;
 		StringBuffer escBuf = new StringBuffer();
@@ -312,6 +381,12 @@ public class Util {
 		return sb.toString();
 	}
 
+	/**
+	 * find a free port for communication with Prolog
+	 * 
+	 * @return free port number
+	 * @throws IOException
+	 */
 	public static int findFreePort() throws IOException {
 		ServerSocket ss = new ServerSocket(0);
 		int port = ss.getLocalPort();
@@ -319,6 +394,12 @@ public class Util {
 		return port;
 	}
 
+	/**
+	 * quote atom
+	 * 
+	 * @param term unquoted atom
+	 * @return quoted atom
+	 */
 	public static String quoteAtom(String term) {
 
 		return "'" + term.replace("'", "\\'") + "'";
@@ -339,19 +420,25 @@ public class Util {
 		return "";
 
 	}
-
-	public static String unquoteAtom(String image) {
-		image = image.trim();
-		if (image.length() == 0 || image.charAt(0) != '\'') {
-			return image;
+	
+	/**
+	 * unquote atom (replace ' at the start and end)
+	 * 
+	 * @param atom quoted atom
+	 * @return unquoted atom
+	 */
+	public static String unquoteAtom(String atom) {
+		atom = atom.trim();
+		if (atom.length() == 0 || atom.charAt(0) != '\'') {
+			return atom;
 		}
-		image = image.substring(1, image.length() - 1);
+		atom = atom.substring(1, atom.length() - 1);
 		StringBuffer sb = new StringBuffer();
 
-		for (int i = 0; i < image.length(); i++) {
-			char c = image.charAt(i);
+		for (int i = 0; i < atom.length(); i++) {
+			char c = atom.charAt(i);
 			if (c == '\\') {
-				int len = appendUnescapedChar(image, i, sb);
+				int len = appendUnescapedChar(atom, i, sb);
 				i += len - 1;
 			} else {
 				sb.append(c);
@@ -359,22 +446,27 @@ public class Util {
 		}
 		return sb.toString();
 	}
-
-	public static String unquoteStringOrAtom(String image) {
-
-		image = image.trim();
-		if (image.length() == 0){
-			return image;
+	
+	/**
+	 * unquote String or atom (replace " or ' at the start and end)
+	 * 
+	 * @param atom quoted atom
+	 * @return unquoted atom
+	 */
+	public static String unquoteStringOrAtom(String atom) {
+		atom = atom.trim();
+		if (atom.length() == 0){
+			return atom;
 		}
-		if( image.charAt(0) == '\"' || image.charAt(0) == '\'') {
-			image = image.substring(1, image.length() - 1);
+		if( atom.charAt(0) == '\"' || atom.charAt(0) == '\'') {
+			atom = atom.substring(1, atom.length() - 1);
 		}
 		StringBuffer sb = new StringBuffer();
 
-		for (int i = 0; i < image.length(); i++) {
-			char c = image.charAt(i);
+		for (int i = 0; i < atom.length(); i++) {
+			char c = atom.charAt(i);
 			if (c == '\\') {
-				int len = appendUnescapedChar(image, i, sb);
+				int len = appendUnescapedChar(atom, i, sb);
 				i += len - 1;
 			} else {
 				sb.append(c);
@@ -489,13 +581,6 @@ public class Util {
 
 	}
 
-	/**
-	 * fascilate testing by replacing things like $stream(1760696) with
-	 * <replace>
-	 * 
-	 * @param message
-	 * @return
-	 */
 	public static String hideStreamHandles(String string, String replace) {
 		int i = -1;
 		String search = "$stream(";
@@ -541,6 +626,11 @@ public class Util {
 		return "";
 	}
 
+	
+	/**
+	 * guess executable name for SWI Prolog depending on the OS
+	 * @return executable name for SWI Prolog
+	 */
 	public static String guessExecutableName() {
 
 		String guessedExecutable = guessExecutableName__();
@@ -605,36 +695,6 @@ public class Util {
 		return commandLineArguments;
 	}
 
-	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
-//		return "51118_64";// TEMPversion +"_"+bits;
-		
-			String swiExecutable;
-			if (isWindows()) {
-				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
-			} else {
-				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-			}
-			
-			String bits = "";
-			String version ="";
-			Process p = Runtime.getRuntime().exec(new String[]{
-					swiExecutable,
-					"-g",
-					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			version = reader.readLine();
-			bits = reader.readLine();
-			try {
-				p.waitFor();
-			} catch (InterruptedException e) {
-				// TR: fatal anyway:
-				throw new RuntimeException(e);
-			}
-	
-
-		return version +"_"+bits;
-	}
-
 	private static String guessExecutableName__() {
 
 		if (isWindows()) {
@@ -646,6 +706,10 @@ public class Util {
 
 	}
 	
+	/**
+	 * 
+	 * @return the OS specific invocation command
+	 */
 	public static String getInvocationCommand() {
 		if (isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min ";
@@ -674,8 +738,6 @@ public class Util {
 	}
 
 	/**
-	 * @author Hasan Abdel Halim
-	 * 
 	 * Finds the current SWI-Prolog executable for UNIX/BSD-BASED OS
 	 * @param unixCommandLineExecutables 
 	 * @return the complete path of the executable otherwise it will return xpce
@@ -721,12 +783,9 @@ public class Util {
 	}
 
 	/**
-	 * @author Hasan Abdel Halim
-	 * 
-	 * Finds the current SWI-Prolog executable for Windoze OS
+	 * Finds the current SWI-Prolog executable for Windows OS
 	 * @param executables 
-	 * @return the complete path of the executable otherwise it will return
-	 *         plwin
+	 * @return the complete path of the executable otherwise it will return plwin
 	 */
 	private static String findWindowsExecutable(String executables) {
 		String[] default_exec = executables.split(",");
@@ -782,7 +841,7 @@ public class Util {
 	}
 
 	/**
-	 * @param prefix
+	 * @param c
 	 * @return
 	 */
 	public static boolean isVarChar(char c) {
@@ -798,8 +857,8 @@ public class Util {
 	}
 
 	/**
-	 * @param prefix
-	 * @return
+	 * @param c
+	 * @return true if prefix is a variable prefix (upper case letter or underscore)
 	 */
 	public static boolean isVarPrefix(char c) {
 		return (Character.isUpperCase(c) || c == '_');
@@ -807,7 +866,7 @@ public class Util {
 	
 	/**
 	 * @param prefix
-	 * @return
+	 * @return true if prefix is a functor prefix (lower case letter)
 	 */
 	public static boolean isFunctorPrefix(String prefix) {
 		if (prefix == null | prefix.length() == 0)
@@ -867,15 +926,15 @@ public class Util {
 	 * @param c character in question
 	 * @return 
 	 */
-	static public boolean isPredicateNameChar(char c) {
+	public static boolean isPredicateNameChar(char c) {
 		return (isNormalPredicateNameChar(c) || isSpecialPredicateNameChar(c));
 	}
 
-	static public boolean isNonQualifiedPredicateNameChar(char c) {
+	public static boolean isNonQualifiedPredicateNameChar(char c) {
 		return isPredicateNameChar(c) && c != ':';
 	}
 
-	static public boolean isFunctorChar(char c) {
+	public static boolean isFunctorChar(char c) {
 		if (c >= 'a' && c <= 'z')
 			return true;
 		if (c >= '0' && c <= '9')
@@ -889,7 +948,6 @@ public class Util {
 	}
 
 
-
 	public static boolean isSingleSecondChar(char c) {
 		if (c >= '0' && c <= '9')
 			return true;
@@ -897,7 +955,14 @@ public class Util {
 			return true;
 		return false;
 	}
-	
+
+
+	/** 
+	 * read text from file to String
+	 * 
+	 * @param f
+	 * @return content of the file
+	 */
 	public static String readFromFile(File f) {
 		StringBuffer buf = new StringBuffer();
 		BufferedReader bufferedReader = null;
@@ -941,6 +1006,12 @@ public class Util {
 		return executable.toString();
 	}
 
+	/**
+	 * quote atom if it isn't already quoted
+	 * @param term atom (quoted or unquoted)
+	 * @return quoted atom
+	 */
+
 	public static String quoteAtomIfNeeded(String term) {
 		if (term.startsWith("'") && term.endsWith("'")) {
 			return term;
@@ -949,18 +1020,21 @@ public class Util {
 		}
 	}
 
-	public static PrologInterface newPrologInterface() {
-		return newPrologInterface(null);
-	}
-	
-	public static PrologInterface newPrologInterface(String name) {
-		return new SocketPrologInterface(name);
-	}
-	
+	/**
+	 * 
+	 * @return a new standalone Prolog Interface
+	 * @throws IOException
+	 */
 	public static PrologInterface newStandalonePrologInterface() throws IOException {
 		return newStandalonePrologInterface(null);
 	}
 	
+	/**
+	 * 
+	 * @param executable
+	 * @return a new standalone Prolog Interface
+	 * @throws IOException
+	 */
 	public static PrologInterface newStandalonePrologInterface(String executable) throws IOException {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		copyConsultServerToTempDir(tempDir);

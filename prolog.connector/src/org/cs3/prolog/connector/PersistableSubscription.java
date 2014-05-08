@@ -20,7 +20,7 @@ import java.util.Map;
  * A Subscription that can be persisted.
  * 
  * PersistableSubscriptions can store/restore their complete state to/from a
- * key->value map. It is the responsibility of the implementing class to supply
+ * key{@literal ->}value map. It is the responsibility of the implementing class to supply
  * adaequat implementations to saveState() and restoreState(Map).
  * 
  * implementing classes MUST be default-constructable.

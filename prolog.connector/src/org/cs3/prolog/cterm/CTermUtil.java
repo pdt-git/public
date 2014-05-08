@@ -69,9 +69,7 @@ public class CTermUtil {
 	 * encountered more than once, the returned map will reflect only the last
 	 * occurrence.
 	 * 
-	 * @see listAsMultiMap(CTerm)
-	 * @param term
-	 *            a term with functor "./2"
+	 * @param term a term with functor "./2"
 	 * 
 	 * @return a map with key-type string, value type CTerm
 	 */

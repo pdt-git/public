@@ -21,15 +21,33 @@ import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterfaceException;
 
 public interface PrologSession extends Disposable{
+	
 	/**
-	 * FIXME: Documentation 
+	 * See: {@link org.cs3.prolog.pif.PrologInterface#queryOnce(String...)}  
 	 * @param query
-	 * @return null if query failed otherwise a map containing bindings for all variables
+	 * @return
 	 * @throws PrologException
 	 * @throws PrologInterfaceException
 	 */
     public Map<String,Object> queryOnce(String query) throws PrologException, PrologInterfaceException;
+
+	/**
+	 * See: {@link org.cs3.prolog.pif.PrologInterface#queryAll(String...)}  
+	 * @param query
+	 * @return
+	 * @throws PrologException
+	 * @throws PrologInterfaceException
+	 */
     public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologInterfaceException;
+
+	/**
+	 * See: {@link org.cs3.prolog.pif.PrologInterface#queryAll(String...)}  
+	 * @param query
+	 * @param flag
+	 * @return
+	 * @throws PrologException
+	 * @throws PrologInterfaceException
+	 */
     public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologInterfaceException;
 	
 }

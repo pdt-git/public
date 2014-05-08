@@ -41,12 +41,11 @@ public interface ServerStartAndStopStrategy {
      * stop the server process
      * 
      * @param pif the IPrologInterface for which the server should be stopped.
-     * @throws Throwable 
      */
     public void stopServer(PrologInterface pif);
 
     /**
-     * @param interface1
+     * @param pif
      * @return
      */
     public boolean isRunning(PrologInterface pif);
