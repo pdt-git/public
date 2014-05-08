@@ -132,11 +132,14 @@ deactivate_warning_and_error_tracing :-
 :- multifile(user:message_hook/3).
 :- dynamic(user:message_hook/3).
 
-user:message_hook(_Term, Level,Lines) :-
+user:message_hook(Term, Level,Lines) :-
     with_mutex('reloadMutex', (
 		warning_and_error_tracing,
-		prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
-		prolog_load_context(source, File),
+		(	Term = error(_, file(File, Line, _, _))
+		->	true
+		;	prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
+			prolog_load_context(source, File)
+		),
 		assertz(traced_messages(swi, Level, Line,Lines, File)),
 		trace_reload(traced_messages(swi, Level, Line,Lines, File)),
 	%	assertz(user:am(_Term, Level,Lines)),
