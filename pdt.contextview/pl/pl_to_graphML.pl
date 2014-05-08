@@ -15,7 +15,8 @@
 								write_focus_to_graphML/4,
 								write_global_to_graphML/3,
 								write_dependencies_to_graphML/3,
-								write_logtalk_entities_to_graphML/3]).
+								write_logtalk_entities_to_graphML/3,
+								call_term_position/7]).
 
 :- use_module(graphML_api).
 :- use_module(util_for_graphML).
@@ -379,7 +380,24 @@ write_files(RelativePath, Files, Filters, Stream):-
     		flush_output(Stream)
     	)
     ).	
-    
+
+call_term_position(TermPosition, Position) :-
+	(
+		TermPosition = term_position(Start, End, _, _, _);
+		TermPosition = Start-End
+	),
+	format(atom(Position), '~w-~w', [Start, End]).
+
+call_term_position(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity, Position) :-
+	pdt_call_graph:call_term_position(TargetModule, TargetFunctor, TargetArity, SourceModule, SourceFunctor, SourceArity, TermPosition),
+	call_term_position(TermPosition, Position), !.
+
+call_term_position(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity, Position) :-
+	pdt_call_graph:generate_call_info(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity), !,
+	pdt_call_graph:call_term_position(TargetModule, TargetFunctor, TargetArity, SourceModule, SourceFunctor, SourceArity, TermPosition),
+	call_term_position(TermPosition, Position).
+		
+	
 
 %write_load_edges(Stream):-
 %    forall(load_edge(LoadingFileId,FileId,_,_),

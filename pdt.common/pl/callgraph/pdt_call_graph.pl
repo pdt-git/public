@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_location/7, call_type/7, calls_multifile/8, pdt_walk_code/1]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_term_position/7, call_type/7, calls_multifile/8, pdt_walk_code/1, generate_call_info/6]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -38,7 +38,7 @@ calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerAri
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls, _TermPosition, _Info).
 	
 
-call_location(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
+call_term_position(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, [TermPosition|_], _Info).
 
 call_type(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Info) :-
@@ -67,7 +67,8 @@ generate_call_graph__ :-
 	pdt_prolog_walk_code([ trace_reference(_),
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
-			reiterate(false)
+			reiterate(false),
+			source(false)
 			]),
 	(	predicates_to_walk(NewPredicates)
 	->	retractall(predicates_to_walk(_)),
@@ -84,6 +85,7 @@ generate_call_graph__(Predicates) :-
 			on_trace(pdt_call_graph:assert_edge),
 			new_meta_specs(pdt_call_graph:generate_call_graph_new_meta_specs),
 			reiterate(false),
+			source(false),
 			predicates(Predicates)
 			]),
 	(	predicates_to_walk(NewPredicates)
@@ -105,6 +107,10 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 		assertz(predicates_to_walk(PredicatesUnique))
 	;	true
 	).
+	
+generate_call_info(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity) :-
+	functor(Target, TargetFunctor, TargetArity),
+	pdt_walk_code([trace_reference(TargetModule:Target), predicates([SourceModule:SourceFunctor/SourceArity]), on_trace(pdt_call_graph:assert_edge)]).
 
 assert_edge(_, '<initialization>', _, _) :- !.
 
