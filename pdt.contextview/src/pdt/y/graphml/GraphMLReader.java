@@ -51,9 +51,12 @@ public class GraphMLReader {
 		GraphDataHolder dataHolder = model.getDataHolder();
 		core.addInputDataAcceptor("id", dataHolder.getNodeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", dataHolder.getModuleMap(), KeyScope.NODE,KeyType.STRING);
-		core.addInputDataAcceptor("description", dataHolder.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
-		core.addInputDataAcceptor("lineNumber", dataHolder.getLineNumberMap(), KeyScope.NODE, KeyType.INT);
+		core.addInputDataAcceptor("moduleOfPredicate", dataHolder.getModuleOfPredicateMap(), KeyScope.NODE,KeyType.STRING);
+		core.addInputDataAcceptor("fileName", dataHolder.getFileNameMap(), KeyScope.ALL, KeyType.STRING);
+		core.addInputDataAcceptor("lineNumber", dataHolder.getLineNumberMap(), KeyScope.ALL, KeyType.INT);
+		core.addInputDataAcceptor("offset", dataHolder.getOffsetMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("kind", dataHolder.getKindMap(), KeyScope.ALL, KeyType.STRING);
+		core.addInputDataAcceptor("metadata", dataHolder.getMetadataMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("functor", dataHolder.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("arity", dataHolder.getArityMap(), KeyScope.NODE, KeyType.INT);
 		core.addInputDataAcceptor("frequency", dataHolder.getCallFrequencyMap(), KeyScope.EDGE, KeyType.INT);
@@ -61,6 +64,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("isTransparent", dataHolder.getTransparentMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isMultifile", dataHolder.getMultifileMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isMetaPredicate", dataHolder.getMetaPredMap(), KeyScope.NODE, KeyType.BOOLEAN);
+		core.addInputDataAcceptor("metaPredicateType", dataHolder.getMetaPredTypeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("isExported", dataHolder.getExportedMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("isUnusedLocal", dataHolder.getUnusedLocalMap(), KeyScope.NODE, KeyType.BOOLEAN);
 		core.addInputDataAcceptor("exported_static_predicates", dataHolder.getModulePublicStaticPredicatesMap(), KeyScope.NODE, KeyType.STRING);

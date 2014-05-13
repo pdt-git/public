@@ -126,7 +126,7 @@ public interface Subscription {
 	 * Implementation should make no assumptions on the state of the pif
 	 * argument: It may be up and running. It may be not. Best is to check the
 	 * state. If the pif is down, there is typically not much to clean up anyway.
-	 * @param prologInterface
+	 * @param pif
 	 */
 	public abstract void deconfigure(PrologInterface pif);
 	

@@ -85,13 +85,19 @@ public class PredicateNodeRealizer extends NodeRealizerBase {
 	
 	@Override
 	protected void paintNode(Graphics2D gfx) {
-		
 		byte myStyle;
 		if (model.getDataHolder().isDynamicNode(getNode())) {
 			myStyle = PredicateAppearancePreferences.getDynamicPredicateBorderStyle().getLineStyle();
+		} else if ("inferred".equals(model.getDataHolder().getMetaPredType(getNode()))) {
+			myStyle = LineType.DASHED_2.getLineStyle();
 		} else {
 			myStyle = PredicateAppearancePreferences.getBorderStyle().getLineStyle();
 		}
+		
+//		if ("inferred".equals(model.getDataHolder().getMetaPredType(getNode()))) {
+//			setLabelText(model.getLabelTextForNode(getNode()) + " [i]");
+//		}
+		
 		LineType myLineType = LineType.getLineType(1, myStyle);
 		setLineType(myLineType);
 

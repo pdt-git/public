@@ -41,7 +41,7 @@ public class QueryUtils {
 	/**
 	 * Returns the version of SWI-Prolog which is currently used by a given Factbase 
 	 * 
-	 * @param PrologInterface 
+	 * @param pif 
 	 * @return String - Version of SWI-Prolog
 	 * @throws PrologInterfaceException 
 	 */
@@ -76,18 +76,18 @@ public class QueryUtils {
 	 ****************************************************************************************************/	
 	
 	/**
-	 * Shortcut for:
-	 * public static String buildTerm(String functor, Object...args)
+	 * Shortcut for buildTerm(String functor, Object...args)
+	 * @see buildTerm(String functor, Object...args)
 	 */
 	public static String bT(String functor, Object...args) {
 		return buildTerm(functor, args);
 	}
 	
 	/**
-	 * 
-	 * @param functor - String
-	 * @param args - Object[]
-	 * @return String - query String ready to handover to the queryOnce or queryAll
+	 * Build a term with the given functor and args
+	 * @param functor
+	 * @param args
+	 * @return query String ready to handover to the queryOnce or queryAll
 	 */
 	public static String buildTerm(String functor, Object...args) {
 		

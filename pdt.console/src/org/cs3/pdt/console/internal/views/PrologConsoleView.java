@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.PrologSearchPage;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
@@ -200,27 +200,20 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 						try {
 							monitor.beginTask("initializing...", 2);
 
+							PrologInterface pif = getPrologInterface();
 							try {
-								if (getPrologInterface() != null) {
-									getPrologInterface().stop();
+								if (pif != null) {
+									pif.stop();
 									monitor.worked(1);
 								}
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
-								if (getPrologInterface() != null) {
-									if (!getPrologInterface().isDown()){
-										getPrologInterface().reset();
+								if (pif != null) {
+									if (!pif.isDown()){
+										pif.reset();
 										Thread.sleep(1000);
 									}
-									final String reconsultFiles = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_NONE);
-									
-									getPrologInterface().start();
-									if (reconsultFiles.equals(PDTConsole.RECONSULT_NONE)) {
-										getPrologInterface().clearConsultedFiles();
-									} else {
-										PDTCommonPlugin.getDefault().reconsultFiles(getPrologInterface(), reconsultFiles.equals(PDTConsole.RECONSULT_ENTRY));
-									}
-
+									pif.start();
 									Display.getDefault().asyncExec(new Runnable() {
 										@Override
 										public void run() {
@@ -962,8 +955,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		//		toolBarManager.add(contextSelector);
 		//		setPrologInterface(contextSelector.getCurrentPrologInterface());
-		setPrologInterface(automatedSelector.getCurrentPrologInterface());
-
+		setPrologInterface(PDTCommonUtil.getActivePrologInterface());
+		automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 	}
 
 	public PrologInterface activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey, String configuration) {
@@ -972,8 +965,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription, configuration);
 
 		if (automatedSelector.getActiveTrackers().isEmpty()){
-			PrologConsoleView.this.setPrologInterface(pif);
-			PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+			setPrologInterface(pif);
+			automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 		}
 		return pif;
 	}
@@ -1308,13 +1301,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				.get(pif);
 		if (savedState == null) {
 			viewer.clearOutput();
+			ConsoleHistory history = new ConsoleHistory(PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif));
+			viewer.setHistory(history);
+			loadHistory(history);
 			viewer.setModel(models.get(pif));
 			PrologCompletionProvider completionProvider = new PrologCompletionProvider();
 			completionProvider.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
-			ConsoleHistory history = new ConsoleHistory();
-			viewer.setHistory(history);
-			loadHistory(history);
 		} else {
 			viewer.loadState(savedState);
 		}

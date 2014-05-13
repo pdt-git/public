@@ -293,7 +293,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	/**
 	 * @param hook
 	 * @param id
-	 * @param dependsOn
+	 * @param dependencies
 	 */
 	@Override
 	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies) {
@@ -451,8 +451,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * all current sessions.
 	 * 
 	 * @throws PrologInterfaceException
-	 * 
-	 * @throws IOException
 	 */
 	@Override
 	public void restart() throws PrologInterfaceException {
@@ -472,8 +470,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * all current sessions.
 	 * 
 	 * @throws PrologInterfaceException
-	 * 
-	 * @throws IOException
 	 */
 	@Override
 	public void reset() throws PrologInterfaceException {

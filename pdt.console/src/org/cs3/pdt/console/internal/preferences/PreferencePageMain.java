@@ -23,11 +23,9 @@ import org.cs3.prolog.ui.util.preferences.MyBooleanFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyColorFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyFileFieldEditor;
 import org.cs3.prolog.ui.util.preferences.MyFontFieldEditor;
-import org.cs3.prolog.ui.util.preferences.MyRadioGroupFieldEditor;
 import org.cs3.prolog.ui.util.preferences.StructuredFieldEditorPreferencePage;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -65,14 +63,6 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 	 */
 	@Override
 	public void createFieldEditors() {
-		
-		
-		RadioGroupFieldEditor rgfeReconsult = new MyRadioGroupFieldEditor(PDTConsole.PREF_RECONSULT_ON_RESTART, "Handling consulted files on restart", 3, new String[][] {
-				{ "no reconsulting", PDTConsole.RECONSULT_NONE }, { "reconsult entry points", PDTConsole.RECONSULT_ENTRY }, { "reconsult all files", PDTConsole.RECONSULT_ALL }},
-				getFieldEditorParent());
-		addField(rgfeReconsult);
-		
-
 		Group fontGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		fontGroup.setText("Console font");
 		addField(new MyFontFieldEditor(PDTConsole.PREF_CONSOLE_FONT, "Console font:", fontGroup));

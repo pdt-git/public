@@ -40,7 +40,7 @@ public class SocketSessionThrowTest extends TestCase {
     }
 	
 	/**
-	 * @see http://roots.iai.uni-bonn.de/jira/browse/PDT-10
+	 * http://roots.iai.uni-bonn.de/jira/browse/PDT-10
 	 * @throws PrologException
 	 * @throws PrologInterfaceException 
 	 */

@@ -16,18 +16,12 @@ package org.cs3.pdt;
 
 
 import org.cs3.prolog.common.Util;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.pif.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 public final class PDTUtils {
 
-	public static PrologInterface getActivePif() {
-		return PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
-	}
-	
 	public static String getPrologFileName(IFile file) {
 		String enclFile = file.getRawLocation().toPortableString();
 		if (Util.isWindows()) {

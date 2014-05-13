@@ -83,7 +83,9 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] { IDocument.DEFAULT_CONTENT_TYPE,
 				PLPartitionScanner.PL_COMMENT,
-				PLPartitionScanner.PL_MULTI_COMMENT };
+				PLPartitionScanner.PL_MULTI_COMMENT,
+				PLPartitionScanner.PL_SINGLE_QUOTED_STRING,
+				PLPartitionScanner.PL_DOUBLE_QUOTED_STRING};
 	}
 
 	@Override

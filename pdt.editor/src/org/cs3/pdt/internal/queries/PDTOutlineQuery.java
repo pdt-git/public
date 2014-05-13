@@ -29,7 +29,6 @@ import org.cs3.pdt.internal.structureElements.PrologClause;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -41,7 +40,7 @@ public class PDTOutlineQuery {
 	public static Map<String, OutlineModuleElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {	
 		PrologSession session=null;
 		try {
-			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+			session = PDTCommonUtil.getActivePrologInterface().getSession();
 			
 			session.queryOnce(PrologConnectorPredicates.WAIT_FOR_RELOAD_FINISHED);
 
@@ -181,7 +180,7 @@ public class PDTOutlineQuery {
 //	}
 	
 	public static boolean isFileLoaded(String fileName) {
-		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 		Map<String, Object> result = null;
 		try {
 			result = pif.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, Util.quoteAtom(fileName)));
