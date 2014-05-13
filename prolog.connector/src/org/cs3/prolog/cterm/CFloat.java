@@ -14,12 +14,30 @@
 
 package org.cs3.prolog.cterm;
 
+import java.math.BigDecimal;
+
 import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 
 public class CFloat extends CTerm {
+	
+	private BigDecimal bigDec;
+	
 	public CFloat(ASTNode node) {
 		super(node);
+		bigDec = new BigDecimal(getFunctorValue());
+	}
+	
+	public float getFloatValue() {
+		return bigDec.floatValue();
+	}
+	
+	public double getDoubleValue() {
+		return bigDec.doubleValue();
+	}
+	
+	public BigDecimal getBigDecimalValue() {
+		return new BigDecimal(getFunctorValue());
 	}
 }
 

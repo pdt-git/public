@@ -179,7 +179,7 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
 write_call_edge(_, _, _, _, _, _, _, _).
     
 write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity)  :-
-	call_location(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)), !,
+	call_term_position(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)), !,
     write_data(Stream, 'offset', Start-End), !.
 write_call_location(_, _, _, _, _, _, _).
 

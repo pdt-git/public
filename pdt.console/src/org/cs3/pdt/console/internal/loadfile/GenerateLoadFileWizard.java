@@ -21,9 +21,9 @@ import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -83,7 +83,7 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 			
 			PDTCommonPlugin.getDefault().addEntryPoint(file);
 			
-			PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 
 			if (pif != null) {
 				try {

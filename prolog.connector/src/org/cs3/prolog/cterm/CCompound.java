@@ -15,6 +15,8 @@
 package org.cs3.prolog.cterm;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.cs3.prolog.internal.cterm.parser.ASTAtom;
 import org.cs3.prolog.internal.cterm.parser.ASTNode;
@@ -49,6 +51,23 @@ public class CCompound extends CTerm implements Iterable<CTerm> {
 			getArgument(i);
 		}
 		return new ArrayIterator<CTerm>(args);
+	}
+
+	@Override
+	public void rename(Map<String, String> dictionary) {
+		super.rename(dictionary);
+		for (int i = 0;i<args.length;i++) {
+			CTerm arg = getArgument(i);
+			arg.rename(dictionary);
+		}
+	}
+	
+	@Override
+	public void filterAnonymousVariables(Set<String> variableSet) {
+		for (int i = 0;i<args.length;i++) {
+			CTerm arg = getArgument(i);
+			arg.filterAnonymousVariables(variableSet);
+		}
 	}
 
 }

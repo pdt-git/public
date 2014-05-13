@@ -23,7 +23,7 @@ import java.io.Writer;
 import org.cs3.prolog.common.logging.Debug;
 /**
  * A thread that exhaustes InputStream objects.
- * <p/>
+ *
  * Actualy not very exiting, but it was needed on several places, so 
  * i put it here as a public class.  
  */

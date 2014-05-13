@@ -371,18 +371,31 @@
  
   <extension point="org.eclipse.ui.editors.annotationTypes">
      <type
-        super="org.eclipse.ui.workbench.texteditor.warning"
-        markerType="org.cs3.pdt.PDTBreakpointMarker"
+        markerType="org.cs3.pdt.editor.PDTBreakpointMarker"
         name="org.cs3.pdt.PDTBreakpointAnnotation"
         markerSeverity="0"/>
   </extension>
 
   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
      <specification
-        annotationType="org.cs3.pdt.PDTBreakpointAnnotation"
-        icon="icons/brkpoint.gif"
-        verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
-        verticalRulerPreferenceValue="true"/>
+           annotationType="org.cs3.pdt.PDTBreakpointAnnotation"
+           colorPreferenceKey="org.cs3.pdt.breakpoint.color"
+           colorPreferenceValue="127,127,255"
+           contributesToHeader="false"
+           highlightPreferenceKey="org.cs3.pdt.breakpoint.highlight"
+           highlightPreferenceValue="false"
+           icon="icons/brkpoint.gif"
+           includeOnPreferencePage="true"
+           label="PDT Breakpoint"
+           overviewRulerPreferenceKey="org.cs3.pdt.breakpoint.overview"
+           overviewRulerPreferenceValue="false"
+           presentationLayer="0"
+           textPreferenceKey="org.cs3.pdt.breakpoint.text"
+           textPreferenceValue="true"
+           textStylePreferenceKey="org.cs3.pdt.breakpoint.textStyle"
+           textStylePreferenceValue="UNDERLINE"
+           verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
+           verticalRulerPreferenceValue="true"/>
   </extension>
   <extension
         point="org.cs3.prolog.connector.bootstrapContribution">

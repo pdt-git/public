@@ -13,12 +13,17 @@
 
 package pdt.y.view.modes;
 
+
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.prolog.common.QueryUtils;
+import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
+import pdt.y.PDTGraphPredicates;
 import pdt.y.focusview.GraphPIFLoaderBase;
 import pdt.y.main.PDTGraphView;
 import pdt.y.model.GraphDataHolder;
@@ -27,8 +32,8 @@ import y.base.Node;
 import y.view.EdgeLabel;
 import y.view.ViewMode;
 
-public class OpenInEditorViewMode extends ViewMode {
-
+public class OpenInEditorViewMode extends ViewMode { 
+	
 	private PDTGraphView view;
 	private GraphPIFLoaderBase pifLoader;
 
@@ -60,50 +65,6 @@ public class OpenInEditorViewMode extends ViewMode {
 				selectEdge(label.getEdge());
 				return;
 			}
-			
-//			String idInt = dataHolder.getNodeText(node);
-//
-//			String query = "parse_util:predicateT("+idInt+",FileId,_,_,_),parse_util:fileT(FileId,FileName,_),parse_util:filePosT("+idInt+",Pos,Len).";
-//			Map<String,Object> result = null;
-//			try {
-//				result = pifLoader.sendQueryToCurrentPiF(query);
-//			} catch (PrologInterfaceException e1) {
-//				e1.printStackTrace();
-//			}
-//
-//			if(result==null)
-//				return;
-//
-//			final String filename = result.get("FileName").toString();
-//			final int start = Integer.parseInt(result.get("Pos").toString());
-//			final int length = Integer.parseInt(result.get("Len").toString());
-//
-//			//			ExecutorService executor = Executors.newCachedThreadPool();
-//			//			FutureTask<String> futureParser = new FutureTask<String>(new Runnable() {
-//			//				@Override
-//			//				public void run() {
-//			//					try {
-//			//						//Display.getDefault().
-//			//						PDTCoreUtils.selectInEditor(start, length, filename);
-//			//					} catch (Exception e) {
-//			//
-//			//					}
-//			//				}
-//			//			},null);
-//			//
-//			//
-//			//			executor.execute(futureParser);
-//			//
-//			Display.getDefault().asyncExec(new Runnable() {
-//				@Override
-//				public void run() {
-//					try {
-//						PDTCommonUtil.selectInEditor(start, length, filename, true);
-//					} catch (PartInitException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			});
 		}
 	}
 
@@ -146,10 +107,20 @@ public class OpenInEditorViewMode extends ViewMode {
 		GraphDataHolder dataHolder = view.getDataHolder();
 		try {
 			final String fileName = dataHolder.getFileName(edge);
+			
 			String offset = dataHolder.getOffset(edge);
 			if (offset == null)
+			{
+				offset = findOffset(edge);
+			}
+			if (offset == null)
+			{
 				return;
+			}
+			
 			String[] parts = offset.split("-");
+			if (parts.length != 2)
+				return;
 			final int start = Integer.parseInt(parts[0]);
 			final int length = Integer.parseInt(parts[1]) - start;
 				
@@ -164,5 +135,32 @@ public class OpenInEditorViewMode extends ViewMode {
 				}
 			});
 		} catch (NullPointerException e) {}
+	}
+
+	private String findOffset(Edge edge) {
+		try {
+			GraphDataHolder dataHolder = view.getDataHolder();
+			Node source = edge.source();
+			Node target = edge.target();
+			
+			String sourceModule = (String)dataHolder.getModuleOfPredicateMap().get(source);
+			String sourceFunctor = (String)dataHolder.getFunctorMap().get(source);
+			Integer sourceArity = (Integer)dataHolder.getArityMap().get(source);
+			
+			String targetModule = (String)dataHolder.getModuleOfPredicateMap().get(target);
+			String targetFunctor = (String)dataHolder.getFunctorMap().get(target);
+			Integer targetArity = (Integer)dataHolder.getArityMap().get(target);
+			
+			String LocationArgument = "TermPosition";
+			Map<String, Object> res = pifLoader.sendQueryToCurrentPiF(QueryUtils.bT(PDTGraphPredicates.CALL_LOCATION_PREDICATE, sourceModule, sourceFunctor, sourceArity, targetModule, targetFunctor, targetArity, LocationArgument));
+			if (res != null && res.containsKey(LocationArgument))
+				return (String)res.get(LocationArgument);
+			
+			return null;
+		
+		} catch (PrologInterfaceException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

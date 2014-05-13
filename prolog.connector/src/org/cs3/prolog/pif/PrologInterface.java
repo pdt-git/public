@@ -77,13 +77,34 @@ public interface PrologInterface {
 	 */
 	public final static int CTERMS = 4;
 
+	
+	/**
+	 * session flag.
+	 * 
+	 * If this flag is set, all variables will be part of the result, even
+	 * the variables which are not bound (you will have entries like A=A)
+	 * 
+	 */
+	public final static int UNBOUND_VARIABLES = 8;
+	
 	/**
 	 * 
 	 * session flag.
+	 * 
 	 * This is what will be used by the legacy PrologInterface.getSession()
 	 * method.
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
+	
+	/**
+	 * 
+	 * session flag.
+	 * 
+	 * This is what should be used by JPC. It creates CTerms and create
+	 * result entries for unbound variables.
+	 * 
+	 */
+	public final static int JPC = CTERMS | UNBOUND_VARIABLES;
 	
 	
 	
@@ -98,6 +119,7 @@ public interface PrologInterface {
 	 * Uses flag=LEGACY
 	 * 
 	 * @return a new Session Object
+	 * @throws PrologInterfaceException
 	 */
 	public abstract PrologSession getSession() throws PrologInterfaceException;
 
@@ -111,6 +133,7 @@ public interface PrologInterface {
 	 * Flag sets the kind of objects returned by the queries.
 	 * 
 	 * @return a new Session Object
+	 * @throws PrologInterfaceException
 	 */
 	public abstract PrologSession getSession(int flags) throws PrologInterfaceException;
 	
@@ -118,19 +141,29 @@ public interface PrologInterface {
 	 * Stop the prolog system (if it is up). This will terminate all running
 	 * sessions and shut down the prolog process.
 	 * 
-	 * @throws IOException
+	 * @throws PrologInterfaceException
 	 */
 	public abstract void stop() throws PrologInterfaceException;
 
 	/**
 	 * Starts the prolog system (if it is down).
 	 * 
-	 * @throws IOException
+	 * @throws PrologInterfaceException
 	 */
 	public abstract void start() throws PrologInterfaceException;
 
+	/**
+	 * Restarts the prolog system.
+	 * 
+	 * @throws PrologInterfaceException
+	 */
 	public abstract void restart() throws PrologInterfaceException;
 
+	/**
+	 * Stops and resets the prolog system.
+	 * 
+	 * @throws PrologInterfaceException
+	 */
 	public abstract void reset() throws PrologInterfaceException;
 
 	/**
@@ -154,8 +187,6 @@ public interface PrologInterface {
 
 	/**
 	 * initializes options of this prolog interface from preference_store
-	 * 
-	 * @see PrologInterfaceFactory.getOptions()
 	 */
 	public void initOptions(PreferenceProvider provider);	
 	
@@ -197,7 +228,7 @@ public interface PrologInterface {
 	public List<BootstrapPrologContribution> getBootstrapLibraries();
 
 	/**
-	 * @see getBootStrapLibraries()
+	 * See {@link #getBootstrapLibraries()}
 	 * @param l
 	 */
 	public void setBootstrapLibraries(List<BootstrapPrologContribution> l);
@@ -208,7 +239,7 @@ public interface PrologInterface {
 	 * 
 	 * this will remove ALL hooks registered for this id.
 	 * 
-	 * @param reconfigureHookId
+	 * @param hookId
 	 */
 	public abstract void removeLifeCycleHook(String hookId);
 	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
@@ -225,8 +256,29 @@ public interface PrologInterface {
 	 */
 	public boolean hasError();
 	
+	/**
+	 * Executes the given query and returns all results. The query is created
+	 * by connecting the given goals conjunctively. The result is always a list of maps. Each map
+	 * represents one result of the query containing the bindings for all variables. 
+	 * The variables are the keys of each map.
+	 * If the query fails the returned list is empty.
+	 * 
+	 * @param predicates a number of goals
+	 * @return all results of the query or an empty list if the query fails
+	 * @throws PrologInterfaceException
+	 */
 	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException;
 	
+	/**
+	 * Executes the given query and returns the first result. The query is created
+	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
+	 * containing the bindings for all variables. The variables are the keys of the map.
+	 * If the query fails this method returns null.
+	 * 
+	 * @param predicates a number of goals
+	 * @return the first result as of the query or null if the query fails
+	 * @throws PrologInterfaceException
+	 */
 	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
 	
 	public List<String> getConsultedFiles();

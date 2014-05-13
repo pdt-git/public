@@ -15,6 +15,7 @@ package org.cs3.pdt.common.internal.preferences;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.prolog.ui.util.preferences.MyRadioGroupFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
@@ -82,6 +83,10 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		fileSizeLimit.getTextControl(getFieldEditorParent()).setToolTipText(toolTip);
 		addField(fileSizeLimit);
 
+		RadioGroupFieldEditor rgfeReconsult = new MyRadioGroupFieldEditor(PDTCommon.PREF_RECONSULT_ON_RESTART, "Handling consulted files on restart", 3, new String[][] {
+				{ "no reconsulting", PDTCommon.RECONSULT_NONE }, { "reconsult entry points", PDTCommon.RECONSULT_ENTRY }, { "reconsult all files", PDTCommon.RECONSULT_ALL }},
+				getFieldEditorParent());
+		addField(rgfeReconsult);
 	}
 
 	/*

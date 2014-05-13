@@ -117,7 +117,6 @@ public interface PrologInterfaceRegistry {
 	 * the user data and will be registered with the prolog interface instance.
 	 * @param key
 	 * @param pif
-	 * @throws PrologInterfaceException 
 	 */
 	public void addPrologInterface(String key, PrologInterface pif) ;
 
@@ -157,7 +156,6 @@ public interface PrologInterfaceRegistry {
 	 * workbench shutdown and restore it on the next startup.
 	 * 
 	 * @param s
-	 * @throws PrologInterfaceException 
 	 */
 	public void addSubscription(Subscription s) ;
 
@@ -172,7 +170,6 @@ public interface PrologInterfaceRegistry {
 	 * required because of some other registered subscription.
 	 * 
 	 * @param s
-	 * @throws PrologInterfaceException 
 	 */
 	public void removeSubscription(Subscription s);
 
@@ -183,7 +180,6 @@ public interface PrologInterfaceRegistry {
 	 * 
 	 * @see removeSubscription(Subscription)
 	 * @param id
-	 * @throws PrologInterfaceException 
 	 */
 	public void removeSubscription(String id);
 	

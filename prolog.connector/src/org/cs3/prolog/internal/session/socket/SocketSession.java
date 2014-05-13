@@ -348,6 +348,9 @@ public class SocketSession implements PrologSession {
 		 */
 		boolean processLists = (flags & PrologInterface.PROCESS_LISTS) > 0;
 		setProtocolOption("interprete_lists", Boolean.toString(processLists));
+		
+		boolean showUnboundResults = (flags & PrologInterface.UNBOUND_VARIABLES) > 0;
+		setProtocolOption("unbound_variables", Boolean.toString(showUnboundResults));
 	}
 
 	public SocketClient getClient() {

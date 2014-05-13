@@ -18,7 +18,7 @@
 	consult_server/1,
 	consult_server/2,
 	get_var_names/2
-	]). 
+	]).
 
 
 %:-debug(consult_server(startup)).
@@ -247,7 +247,7 @@ handle_command(InStream,OutStream,'QUERY',continue):-
 	debug('handle_command', 'before my_format', []),
 	my_format(OutStream,'GIVE_TERM~n',[]),	
 	debug('handle_command', 'after my_format', []),
-	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
+	call_save(OutStream,my_read_term2(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
 	( 
 	(debug('handle_command', 'before iterate_solutions ~w', [Term]),
 	iterate_solutions(InStream,OutStream,Term,Vars),
@@ -257,7 +257,7 @@ handle_command(InStream,OutStream,'QUERY',continue):-
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
 	!,
 	my_format(OutStream,'GIVE_TERM~n',[]),
-	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
+	call_save(OutStream,my_read_term2(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
 	(
 		all_solutions(OutStream,Term,Vars)
 	;
@@ -450,37 +450,43 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	
 print_solution(OutStream,Vars):-
 	forall(
-		(member(Key=Val,Vars), nonvar(Val)),
-		print_binding(OutStream,Key,Val)
+		(member(Key=Val,Vars), filter_variable(Val)),
+		print_binding(OutStream,Key,Val,Vars)
 	),
 	my_format(OutStream,'END_OF_SOLUTION~n',[]).
 	
-print_binding(Out,Key,Val):-
+filter_variable(_) :-
+	option(unbound_variables,true), !.
+	
+filter_variable(Val) :-
+	nonvar(Val).
+	
+print_binding(Out,Key,Val,Vars):-
 		my_write(Out,'<'),
 		write(Out,Key),
 		my_write(Out, '>'),		
-		print_value(Out,Val),		
+		print_value(Out,Val,Vars),		
 		nl(Out).
 
-print_values([],_). 
-print_values([Head|Tail],Out):-
-	print_value(Out,Head),		
-	print_values(Tail,Out).
+print_values([],_,_). 
+print_values([Head|Tail],Out,Vars):-
+	print_value(Out,Head,Vars),		
+	print_values(Tail,Out,Vars).
 	
 
-print_value(Out,Val):-    	
+print_value(Out,Val,Vars):-    	
 	option(canonical,true),
 	!,
 	my_write(Out,'<'),
-	(write_escaped(Out,Val);true),
+	(write_escaped(Out,Val,Vars);true),
 	my_write(Out, '>').
-print_value(Out,Val):-    	
+print_value(Out,Val,Vars):-    	
 	( 	is_list(Val), option(interprete_lists,true)
  	->	my_write(Out,'{'),
-		print_values(Val,Out),
+		print_values(Val,Out,Vars),
 		my_write(Out, '}')		
 	;	my_write(Out,'<'),
-		write_escaped(Out,Val),
+		write_escaped(Out,Val,Vars),
 		my_write(Out, '>')
 	).
 
@@ -512,6 +518,16 @@ handle_exception_X(_InStream,OutStream,peer_reset,continue):-
 	!.
 	
 handle_exception_X(_InStream,OutStream,wrapped(Error),continue):-
+	catch(		
+		report_error(OutStream,Error),					
+		_,(
+%			shut_down(InStream,OutStream),
+			fail
+			)
+	),
+	!.
+	
+handle_exception_X(_InStream,OutStream,fatal_read_term_error(Error),stop):-
 	catch(		
 		report_error(OutStream,Error),					
 		_,(
@@ -606,6 +622,10 @@ request_line(InStream, OutStream, Prompt, Line):-
 my_read_term(InStream,Term,Options):-
 	with_interrupts(5,read_term(InStream,Term,Options)),
 	debug(consult_server(traffic),'(Up:~w read_term) <<<~w~n',[InStream,Term]).
+:- use_module(library(time)).
+my_read_term2(InStream,Term,Options):-
+	catch(call_with_time_limit(5,read_term(InStream,Term,Options)), E, throw(fatal_read_term_error(E))),
+	debug(consult_server(traffic),'(Up:~w read_term) <<<~w~n',[InStream,Term]).
 	
 my_write_term(OutStream,Elm,Options):-
 	debug(consult_server(traffic),'(Down:~w write_term) >>>~w~n',[OutStream,Elm]),  
@@ -626,20 +646,57 @@ my_format(Format,Args):-
     debug(consult_server,Format,Args).
 	
 
-write_escaped(Out,Term):-
-    write_term_to_memfile(Term,Memfile),
-    new_memory_file(TmpFile),
-    open_memory_file(Memfile,read,In),
-    open_memory_file(TmpFile,write,Tmp),
-    escape_stream(In,Tmp),    
-    close(In),
-    close(Tmp),
-    memory_file_to_atom(TmpFile,Atom),
-    free_memory_file(TmpFile),
-    free_memory_file(Memfile),
-    my_write(Out,Atom).
+write_escaped(Out,Term,Vars):-
+	with_output_to(
+		atom(Atom),
+		(	current_output(O),
+			write_term(O, Term, [ignore_ops(true),quoted(true),variable_names(Vars)])
+		)
+	),
+    escape_chars_in_atom(Atom, EscapedAtom),
+    my_write(Out,EscapedAtom).
+    
+escape_chars_in_atom(Atom, EscapedAtom) :-
+	atom_chars(Atom, List),
+	escape_chars_impl(List, EscapedList),
+	atom_chars(EscapedAtom, EscapedList).
+	
+escape_chars_impl([], []) :- !.
 
-write_term_to_memfile(Term,Memfile):-
+% '<' --> '&lt;'
+escape_chars_impl(['<'|Tail], ['&', 'l', 't', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '>' --> '&gt;'
+escape_chars_impl(['>'|Tail], ['&', 'g', 't', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '{' --> '&cbo;'
+escape_chars_impl(['{'|Tail], ['&', 'c', 'b', 'o', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '}' --> '&cbc;'
+escape_chars_impl(['}'|Tail], ['&', 'c', 'b', 'c', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '&' --> '&amp;'
+escape_chars_impl(['&'|Tail], ['&', 'a', 'm', 'p', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '"' --> '&quot;'
+escape_chars_impl(['"'|Tail], ['&', 'q', 'u', 'o', 't', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+% '\'' --> '&apos;'
+escape_chars_impl(['\''|Tail], ['&', 'a', 'p', 'o', 's', ';'|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+
+% other chars don't need to be translated
+escape_chars_impl([Char|Tail], [Char|NewTail]) :-
+	escape_chars_impl(Tail, NewTail).
+	
+	
+write_term_to_memfile(Term,Memfile,Vars):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
 	call_cleanup(
@@ -647,7 +704,7 @@ write_term_to_memfile(Term,Memfile):-
 		->	write_canonical(Stream,Term)
 		;	write(Stream,Term)
 		),*/
-		write_canonical(Stream,Term),
+		write_term(Stream,Term,[ignore_ops(true),quoted(true),variable_names(Vars)]),
 		close(Stream)
 	).
 

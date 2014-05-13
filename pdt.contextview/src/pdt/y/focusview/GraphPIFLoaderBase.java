@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.common.ResourceFileLocator;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
@@ -93,14 +94,14 @@ public abstract class GraphPIFLoaderBase {
 		if (!PredicateVisibilityPreferences.showPDTPredicates())
 			settings.add("hide_pdt_predicates");
 
-		if (!PredicateVisibilityPreferences.showPDTMetapredicates())
-			settings.add("hide_pdt_metapredicates");
+//		if (!PredicateVisibilityPreferences.showPDTMetapredicates())
+//			settings.add("hide_pdt_metapredicates");
 
 		if (!PredicateVisibilityPreferences.showSWIPredicates())
 			settings.add("hide_swi_predicates");
 
-		if (!PredicateVisibilityPreferences.showSWIMetapredicates())
-			settings.add("hide_swi_metapredicates");
+//		if (!PredicateVisibilityPreferences.showSWIMetapredicates())
+//			settings.add("hide_swi_metapredicates");
 
 		if (settings.size() == 0)
 			return "[]";
@@ -131,7 +132,7 @@ public abstract class GraphPIFLoaderBase {
 	}
 
 	public PrologInterface getActivePif() {
-		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 		return pif;
 	}
 

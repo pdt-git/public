@@ -344,7 +344,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * Wrapper for {@link PrologSession#queryOnce(String)}
 	 * Executes queryOnce for every predicate given in predicates.
 	 * 
-	 * @param pif
 	 * @param predicates
 	 * @return result Map of the last predicate queried 
 	 * @throws PrologInterfaceException
@@ -379,7 +378,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * Wrapper for {@link PrologSession#queryAll(String)}
 	 * Executes queryAll for every predicate given in predicates.
 	 * 
-	 * @param pif
 	 * @param predicates
 	 * @return result List contains a result map for each predicate queried 
 	 * @throws PrologInterfaceException

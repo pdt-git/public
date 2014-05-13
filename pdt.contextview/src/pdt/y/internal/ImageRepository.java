@@ -32,6 +32,8 @@ public class ImageRepository {
 	public static final String MOVE = "move.png";
 	public static final String M = "m.png";
 	public static final String I = "i.png";
+	public static final String P = "p.png";
+	public static final String S = "s.png";
 	
 	public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PluginActivator.getDefault().getBundle().getEntry("/icons/" + icon);

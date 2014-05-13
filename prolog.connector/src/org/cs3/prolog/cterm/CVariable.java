@@ -14,6 +14,9 @@
 
 package org.cs3.prolog.cterm;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.cs3.prolog.internal.cterm.parser.ASTNode;
 
 
@@ -23,6 +26,23 @@ public class CVariable extends CTerm {
 	}
 	public String getVariableName() {
 		return getFunctorValue();			
+	}
+	
+	@Override
+	public void rename(Map<String, String> dictionary) {
+		String newName = dictionary.get(getFunctorValue());
+		if (newName != null) {
+			functorValue = newName;
+		} else {
+			functorValue = "_";
+		}
+	}
+
+	@Override
+	public void filterAnonymousVariables(Set<String> variableSet) {
+		if (!variableSet.contains(getFunctorValue())) {
+			functorValue = "_";
+		}
 	}
 }
 
