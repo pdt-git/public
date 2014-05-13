@@ -19,15 +19,13 @@ package org.cs3.prolog.common;
 public class PDTConstants {
 	
 	// with graphic environment: First value is default!
-	public static final String WINDOWS_EXECUTABLES = "swipl-win,plwin";           // plwin -> swipl-win since 5.9.9
+	public static final String WINDOWS_EXECUTABLES = "swipl-win";           // plwin -> swipl-win since 5.9.9
 
 	// without graphic environment: First value is default!
-	public static final String WINDOWS_COMMAND_LINE_EXECUTABLES = "swipl,plcon";  // plcon -> swipl since 5.9.9
+	public static final String WINDOWS_COMMAND_LINE_EXECUTABLES = "swipl";  // plcon -> swipl since 5.9.9
 
-	public static final String STACK_COMMMAND_LINE_ARGUMENTS = "-L4m -G4m -T4m";
-	
 	// With or without graphic environment: First value is default!
-	public static final String UNIX_COMMAND_LINE_EXECUTABLES = "swipl,xpce";      // xpce deleted since 5.9.9
+	public static final String UNIX_COMMAND_LINE_EXECUTABLES = "swipl";      // xpce deleted since 5.9.9
 
 }
 

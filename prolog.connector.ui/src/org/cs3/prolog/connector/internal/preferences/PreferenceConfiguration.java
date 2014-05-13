@@ -24,7 +24,6 @@ import java.util.List;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntime;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.ui.PrologRuntimeUI;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -178,7 +177,7 @@ public class PreferenceConfiguration {
 	public static void initWithSWIPreferences(IPreferenceStore store) {
 		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
 		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
-		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getCommandLineArguments());
+		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "");
 		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, "");
 		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
 		
