@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.cs3.prolog.common.PDTConstants;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologRuntime;
@@ -50,14 +51,16 @@ public class PreferenceConfiguration {
 	private static final String DEFAULT_CONFIGURATION_PREFIX = "pif.configuration.default.";
 	
 	
-	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK});
+	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK, PrologRuntimeUI.CONFIGURATION_YAP, PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK});
 	private ArrayList<String> configurations;
 
 	public static void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(PREF_CONFIGURATIONS, PrologRuntimeUI.CONFIGURATION_SWI + ";" + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK);
+		store.setDefault(PREF_CONFIGURATIONS, PrologRuntimeUI.CONFIGURATION_SWI + ";" + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK + ";" + PrologRuntimeUI.CONFIGURATION_YAP + ";" + PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK);
 		
 		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI);
 		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_YAP, PrologRuntimeUI.CONFIGURATION_YAP);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK, PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK);
 	}
 
 	private HashMap<String, PreferenceStore> stores = new HashMap<String, PreferenceStore>();
@@ -86,6 +89,10 @@ public class PreferenceConfiguration {
 			initWithSWIPreferences(store);
 		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK)) {
 			initWithSWILogtalkPreferences(store);
+		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_YAP)) {
+			initWithYAPPreferences(store);
+		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK)) {
+			initWithYAPLogtalkPreferences(store);
 		} else {
 			Debug.error("Invalid default configuration " + defaultConfiguration + " of " + configuration);
 		}
@@ -174,9 +181,8 @@ public class PreferenceConfiguration {
 		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PREF_CONFIGURATIONS, buf.toString());
 	}
 	
-	public static void initWithSWIPreferences(IPreferenceStore store) {
+	private static void initPreferences(IPreferenceStore store) {
 		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
-		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
 		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "");
 		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, "");
 		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
@@ -189,9 +195,26 @@ public class PreferenceConfiguration {
 		
 		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
 	}
+	
+	public static void initWithSWIPreferences(IPreferenceStore store) {
+		initPreferences(store);
+		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference(PDTConstants.DIALECT_SWI));
+	}
 
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {
 		initWithSWIPreferences(store);
+
+		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
+		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
+	}
+
+	public static void initWithYAPPreferences(IPreferenceStore store) {
+		initPreferences(store);
+		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference(PDTConstants.DIALECT_YAP));
+	}
+
+	public static void initWithYAPLogtalkPreferences(IPreferenceStore store) {
+		initWithYAPPreferences(store);
 
 		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
 		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());

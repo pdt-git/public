@@ -19,14 +19,25 @@ package org.cs3.prolog.common;
 public class PDTConstants {
 	
 	// with graphic environment: First value is default!
-	public static final String WINDOWS_EXECUTABLES = "swipl-win";           // plwin -> swipl-win since 5.9.9
+	public static final String WINDOWS_EXECUTABLES_SWI = "swipl-win";           // plwin -> swipl-win since 5.9.9
+	public static final String WINDOWS_EXECUTABLES_YAP = "yap";
 
+	@Deprecated
+	public static final String WINDOWS_EXECUTABLES = WINDOWS_EXECUTABLES_SWI;
+	
 	// without graphic environment: First value is default!
 	public static final String WINDOWS_COMMAND_LINE_EXECUTABLES = "swipl";  // plcon -> swipl since 5.9.9
 
 	// With or without graphic environment: First value is default!
-	public static final String UNIX_COMMAND_LINE_EXECUTABLES = "swipl";      // xpce deleted since 5.9.9
+	public static final String UNIX_COMMAND_LINE_EXECUTABLES_SWI = "swipl";      // xpce deleted since 5.9.9
+	public static final String UNIX_COMMAND_LINE_EXECUTABLES_YAP = "yap";
 
+	@Deprecated
+	public static final String UNIX_COMMAND_LINE_EXECUTABLES = UNIX_COMMAND_LINE_EXECUTABLES_SWI;
+	
+	public static final String DIALECT_SWI = "dialect.swi";
+	public static final String DIALECT_YAP = "dialect.yap";
+	
 }
 
 /*

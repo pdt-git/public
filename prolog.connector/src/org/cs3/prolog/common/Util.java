@@ -646,10 +646,24 @@ public class Util {
 
 	
 	public static String getExecutablePreference() {
-		if (isWindows()) {
-			return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES);
+		return getExecutablePreference(PDTConstants.DIALECT_SWI);
+	}
+	
+	public static String getExecutablePreference(String dialect) {
+		if (PDTConstants.DIALECT_SWI.equals(dialect)) {
+			if (isWindows()) {
+				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
+			} else {
+				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
+			}
+		} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
+			if (isWindows()) {
+				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
+			} else {
+				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
+			}
 		} else {
-			return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			return "";
 		}
 	}
 	
