@@ -278,7 +278,7 @@ private static JackTheProcessRipper processRipper;
 //      Don't set the encoding globally because it 
 //		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
 		tmpWriter.println(STARTUP_ERROR_LOG_PROLOG_CODE);
-		if (socketPif.getAdditionalStartupFile().contains("logtalk")) {
+		if (socketPif.getAdditionalStartupFile() != null && socketPif.getAdditionalStartupFile().contains("logtalk")) {
 			tmpWriter.print(STARTUP_ERROR_LOG_LOGTALK_CODE);
 		}
 		tmpWriter.println(":- (current_prolog_flag(xpce_threaded, _) -> set_prolog_flag(xpce_threaded, true) ; true).");
