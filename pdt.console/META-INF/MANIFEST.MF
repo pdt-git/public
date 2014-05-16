@@ -20,4 +20,3 @@ Require-Bundle: org.eclipse.swt,
  org.eclipse.search
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.eclipse.jdt.junit.model
