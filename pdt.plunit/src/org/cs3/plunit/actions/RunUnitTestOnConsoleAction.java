@@ -11,32 +11,38 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.actions;
+package org.cs3.plunit.actions;
 
-import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.console.ConsoleModel;
+import org.cs3.pdt.console.PrologConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-public class OpenJUnitWrapperAction implements IObjectActionDelegate {
+public class RunUnitTestOnConsoleAction  implements IObjectActionDelegate {
+	
 
-	private String fileName;
-	private int lineNumber;
+	private String unitName;
+	private String testName;
 
 
 
 	@Override
 	public void run(IAction action) {
-		IEditorPart editorPart = PDTCommonUtil.openInEditor(fileName);
-		if (editorPart != null && editorPart instanceof PLEditor){
-			((PLEditor) editorPart).gotoLine(lineNumber);
-		}
+//		String[] fileNum= args[1].split(";");
+//		fileName = fileNum[0];
+		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+		ConsoleModel model = console.getModel();
+		model.setLineBuffer(" ");
+		model.commitLineBuffer();
+		model.setLineBuffer("run_tests(" + unitName +":"+ testName + ").");
+		model.commitLineBuffer();
+
 	}
 
 	@Override
@@ -48,25 +54,8 @@ public class OpenJUnitWrapperAction implements IObjectActionDelegate {
 		ITreeSelection tree = (ITreeSelection)selection;
 		
 		ITestCaseElement tc = (ITestCaseElement)tree.getFirstElement();
-		fileName = ((ITestSuiteElement)tc.getParentContainer().getParentContainer()).getSuiteTypeName();
-		String[] args= tc.getTestMethodName().substring(6,tc.getTestMethodName().length()-1).split(":");
-//		String[] fileNum= args[1].split(";");
-//		fileName = fileNum[0];
-		if(tc.getFailureTrace()!=null && tc.getFailureTrace().getTrace().startsWith("java.lang.AssertionError: Failed assertion in line ")){
-			String trace = tc.getFailureTrace().getTrace();
-			trace = trace.substring("java.lang.AssertionError: Failed Assertion in Line ".length(),trace.length());
-			StringBuffer buf = new StringBuffer();
-			int i = 0;
-			while(trace.charAt(i) >='0' && trace.charAt(i) <='9' ){
-				buf.append(trace.charAt(i));
-				i++;
-			}
-			lineNumber = Integer.parseInt(buf.toString());
-						
-		} else
-
-		lineNumber = Integer.parseInt(args[1]);
-		
+		unitName = ((ITestSuiteElement)tc.getParentContainer()).getSuiteTypeName();
+		testName = tc.getTestMethodName().substring(2,tc.getTestMethodName().length()-1).split(":")[0];
 	}
 
 	@Override

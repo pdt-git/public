@@ -14,7 +14,7 @@
 
 /*
  */
-package org.cs3.pdt.internal.actions;
+package org.cs3.plunit.actions;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -31,17 +31,22 @@ public class ExternalPrologFilesProjectUtils {
 	private static IProject externalPrologFilesProject;
 	private static final String name = "External Prolog Files";
 	
-	public static IProject getExternalPrologFilesProject() throws CoreException {
+	public static synchronized IProject getExternalPrologFilesProject() throws CoreException {
 		if (externalPrologFilesProject == null) {
 			externalPrologFilesProject = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 		}
-		if (!externalPrologFilesProject.exists()) {
-			externalPrologFilesProject.create(null);
-		}
-		if (!externalPrologFilesProject.isOpen()) {
-			externalPrologFilesProject.open(null);
-		}
 		return externalPrologFilesProject;
+	}
+
+	public static IProject getExternalPrologFilesProjectEnsureAccessible() throws CoreException {
+		IProject project = getExternalPrologFilesProject();
+		if (!project.exists()) {
+			project.create(null);
+		}
+		if (!project.isOpen()) {
+			project.open(null);
+		}
+		return project;
 	}
 	
 	public static IFile linkFile(String fileName) throws CoreException {
@@ -52,7 +57,7 @@ public class ExternalPrologFilesProjectUtils {
 		if (!path.toFile().exists()) {
 			return null;
 		}
-		IProject project = getExternalPrologFilesProject();
+		IProject project = getExternalPrologFilesProjectEnsureAccessible();
 		IPath pathWithoutDevice;
 		try {
 			pathWithoutDevice = new Path(path.toFile().getCanonicalPath()).setDevice(null);
@@ -94,7 +99,7 @@ public class ExternalPrologFilesProjectUtils {
 		} catch (CoreException e) {
 			return false;
 		}
-		return project.equals(file.getProject());
+		return project.isAccessible() && project.equals(file.getProject());
 	}
 }
 

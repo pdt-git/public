@@ -11,17 +11,17 @@
  * 
  ****************************************************************************/
 
-package org.cs3.pdt.internal.actions;
+package org.cs3.plunit.actions;
 
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.prolog.common.logging.Debug;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
 
 public class OpenJUnitWrapperTest implements IObjectActionDelegate {
 
@@ -32,9 +32,10 @@ public class OpenJUnitWrapperTest implements IObjectActionDelegate {
 
 	@Override
 	public void run(IAction action) {
-		IEditorPart editorPart = PDTCommonUtil.openInEditor(fileName);
-		if (editorPart != null && editorPart instanceof PLEditor){
-			((PLEditor) editorPart).gotoLine(lineNumber);
+		try {
+			PDTCommonUtil.selectInEditor(lineNumber, fileName, false);
+		} catch (PartInitException e) {
+			Debug.report(e);
 		}
 	}
 

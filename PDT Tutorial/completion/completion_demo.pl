@@ -19,7 +19,7 @@
 
 %% my_predicate_with_documentation(+Value) is det.
 % 
-% True if Value can is an atom.
+% True if Value is an atom.
 my_predicate_with_documentation(Value) :-
 	atom(Value).
 

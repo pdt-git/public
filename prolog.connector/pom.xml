@@ -11,4 +11,69 @@
   <artifactId>org.cs3.prolog.connector</artifactId>
   <version>2.3.0.qualifier</version>
   <packaging>eclipse-plugin</packaging>
+  <build>
+  <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <property refid="maven.compile.classpath" name="mvn.classpath" />
+                <zip file="target/org.cs3.prolog.connector_2.3.0.jar">
+                  <zipfileset src="target/${project.build.finalName}.jar">
+                    <exclude name="org/cs3/prolog/connector/DefaultSAXPrologInterfaceRegistry*" />
+                    <exclude name="org/cs3/prolog/connector/PrologRuntimePlugin*" />
+                  </zipfileset>
+                </zip>
+              </tasks>
+            </configuration>
+            <goals>
+                <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <excludes>
+            <exclude>**/PrologRuntimePlugin.java</exclude>
+            <exclude>**/DefaultSAXPrologInterfaceRegistry.java</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>plugin-source</id>
+            <goals>
+              <goal>plugin-source</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <excludePackageNames>*.internal.*;*.test.*</excludePackageNames>
+          <failOnError>false</failOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <id>maven-javadoc-plugin</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
+  </plugins>
+  </build>
 </project>

@@ -723,7 +723,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			Debug.report(e);
 		}
     	for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-    		if (project.isAccessible() && !project.equals(externalPrologFiles)) {
+    		if (project.isAccessible() && (!(externalPrologFiles.isAccessible() && project.equals(externalPrologFiles)))) {
     			projectNames.add(project.getName());
     		}
     	}

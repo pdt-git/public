@@ -85,7 +85,9 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		try {			
 			IProject project = FileUtils.findFileForLocation(path).getProject();
 			
-			if (ignoreExternalPrologFilesProject() && ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
+			if (ignoreExternalPrologFilesProject()
+					&& ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().isAccessible() 
+					&& ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
 				return paths;
 			}
 			
