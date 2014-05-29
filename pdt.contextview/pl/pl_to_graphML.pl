@@ -137,7 +137,7 @@ write_focus_facts_to_graphML(FocusFile, DependentFiles, Settings, OutStream):-
 	collect_ids_for_focus_file(FocusFile, DependentFiles, ReferencedPredicates, Calls),
 	
 	retractall(focus_facts_filter(_)),
-	assert(focus_facts_filter(X) :- member(X, ReferencedPredicates)),
+	assert((focus_facts_filter(X) :- member(X, ReferencedPredicates))),
 	
 	init_filters(Settings, Filters),
 	
