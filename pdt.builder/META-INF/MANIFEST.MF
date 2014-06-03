@@ -4,6 +4,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Builder
 Bundle-SymbolicName: org.cs3.pdt.builder;singleton:=true
 Bundle-Version: 2.3.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.cs3.prolog.connector,
  org.cs3.prolog.library

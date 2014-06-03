@@ -18,4 +18,4 @@ Require-Bundle: org.eclipse.swt,
  org.cs3.pdt.common,
  org.eclipse.search
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
