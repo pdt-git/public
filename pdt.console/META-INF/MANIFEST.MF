@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Console
 Bundle-SymbolicName: org.cs3.pdt.console; singleton:=true
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.1.qualifier
 Bundle-Activator: org.cs3.pdt.console.PrologConsolePlugin
 Export-Package: org.cs3.pdt.console,
  org.cs3.pdt.console.internal,
