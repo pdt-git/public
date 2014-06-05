@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Prolog Connector Interface
 Bundle-SymbolicName: org.cs3.prolog.connector;singleton:=true
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.1.qualifier
 Bundle-ClassPath: .
 Require-Bundle: org.eclipse.core.runtime
 Export-Package: org.cs3.prolog.common,
@@ -21,5 +21,5 @@ Export-Package: org.cs3.prolog.common,
  org.cs3.prolog.session
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.cs3.prolog.connector.PrologRuntimePlugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 
