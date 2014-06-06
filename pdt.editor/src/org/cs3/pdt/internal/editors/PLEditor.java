@@ -34,7 +34,6 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
-import org.cs3.pdt.internal.actions.RunUnitTestAction;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
@@ -112,8 +111,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	public static final String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
 	public static final String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
-
-	public static final String COMMAND_RUN_UNIT_TEST = "org.eclipse.pdt.ui.edit.run.unit.test";
 
 	public static final String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 	
@@ -332,7 +329,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 
 		createMenuEntryForReconsult(bundle);
 		createMenuEntryForSaveWithoutReconsult(bundle);
-		createMenuEntryForRunUnitTest(bundle);
 
 		createMenuEntryForToggleComments(bundle);
 
@@ -467,12 +463,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		addAction(action, "Save without consult", COMMAND_SAVE_NO_CONSULT);
 	}
 
-	private void createMenuEntryForRunUnitTest(ResourceBundle bundle) {
-		Action action;
-		action = new RunUnitTestAction();
-		addAction(action, "Run Unit Test", COMMAND_RUN_UNIT_TEST);
-	}
-	
 	/**
 	 * @param menuMgr
 	 */
@@ -501,7 +491,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		
 		addAction(menu, SEP_PDT_INFO, COMMAND_CONSULT);
 		addAction(menu, SEP_PDT_INFO, COMMAND_SAVE_NO_CONSULT);
-		addAction(menu, SEP_PDT_INFO, COMMAND_RUN_UNIT_TEST);
 	}
 
 	/**
