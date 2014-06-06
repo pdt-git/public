@@ -81,6 +81,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -97,7 +98,9 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -701,31 +704,56 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	private void createActions() {
+		ISharedImages sharedImages = getSite().getWorkbenchWindow().getWorkbench().getSharedImages();
 		cutAction = new Action() {
 			@Override
 			public void run() {
 				viewer.cut();
 			}
+//			@Override
+//			public boolean isEnabled() {
+//				return ((StyledText)viewer.getControl()).getSelectionRange().y > 0;
+//			}
 		};
+		cutAction.setText("Cut");
+		cutAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
+		cutAction.setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT));
+		cutAction.setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT_DISABLED));
 
 		copyAction = new Action() {
 			@Override
 			public void run() {
 				viewer.copy();
 			}
+//			@Override
+//			public boolean isEnabled() {
+//				return ((StyledText)viewer.getControl()).getSelectionRange().y > 0;
+//			}
 		};
+		copyAction.setText("Copy");
+		copyAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
+		copyAction.setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		copyAction.setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
+
 		pasteAction = new Action() {
 			@Override
 			public void run() {
 				viewer.paste();
 			}
 		};
+		pasteAction.setText("Paste");
+		pasteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
+		pasteAction.setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE));
+		
 		selectAllAction = new Action() {
 			@Override
 			public void run() {
 				viewer.selectAll();
 			}
 		};
+		selectAllAction.setText("Select All");
+		selectAllAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_SELECT_ALL);
+		
 		clearAction = new ClearAction("Clear", "Clear console output",
 				ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
 		searchAction = new Action("Open Search Dialog") {
@@ -831,16 +859,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.add(new Separator("#Clipboard"));
-
-				IWorkbenchWindow window = getSite().getWorkbenchWindow();
-				IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
-				sall.setImageDescriptor(ImageRepository
-						.getImageDescriptor(ImageRepository.SELECT_ALL));
-				manager.add(sall);
-				
-				manager.add(ActionFactory.CUT.create(window));
-				manager.add(ActionFactory.COPY.create(window));
-				manager.add(ActionFactory.PASTE.create(window));
+				manager.add(selectAllAction);
+				manager.add(cutAction);
+				manager.add(copyAction);
+				manager.add(pasteAction);
 				manager.add(pasteFileNameAction);
 				manager.add(clearAction);
 				manager.add(new Separator("#Clipboard-end"));
