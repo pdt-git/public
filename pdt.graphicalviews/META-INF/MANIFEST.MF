@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
-Bundle-Name: PDT Contextview
-Bundle-SymbolicName: org.cs3.pdt.contextview;singleton:=true
+Bundle-Name: PDT Graphical Views
+Bundle-SymbolicName: org.cs3.pdt.graphicalviews;singleton:=true
 Bundle-Version: 2.3.1.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
