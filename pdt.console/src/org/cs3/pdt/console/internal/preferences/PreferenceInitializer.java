@@ -15,10 +15,10 @@ package org.cs3.pdt.console.internal.preferences;
 
 import java.io.File;
 
+import org.cs3.pdt.connector.PrologContextTracker;
+import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.prolog.connector.ui.PrologContextTracker;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;

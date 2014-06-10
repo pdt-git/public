@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.connector.service.PDTReloadExecutor;
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
@@ -27,8 +29,6 @@ import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.service.PDTReloadExecutor;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;

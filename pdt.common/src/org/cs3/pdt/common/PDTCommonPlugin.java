@@ -19,13 +19,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.cs3.pdt.common.internal.ConsultManager;
+import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologInterfaceRegistryEvent;
 import org.cs3.prolog.connector.PrologInterfaceRegistryListener;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;

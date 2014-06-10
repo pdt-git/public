@@ -17,14 +17,14 @@ package org.cs3.pdt.editor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.service.IPrologInterfaceService;
+import org.cs3.pdt.connector.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.connector.util.ErrorMessageProvider;
 import org.cs3.pdt.editor.internal.editors.ColorManager;
 import org.cs3.pdt.editor.internal.editors.CurrentPifListener;
 import org.cs3.pdt.editor.internal.editors.EditorConsultListener;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.pif.service.IPrologInterfaceService;
-import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
-import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.viewers.ISelection;

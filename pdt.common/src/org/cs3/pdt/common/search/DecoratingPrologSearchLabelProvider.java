@@ -14,7 +14,7 @@
 package org.cs3.pdt.common.search;
 
 import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
-import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
+import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.ui.PlatformUI;

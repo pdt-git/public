@@ -19,10 +19,10 @@ import static org.cs3.prolog.common.QueryUtils.bT;
 import java.io.File;
 import java.io.IOException;
 
+import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.prolog.common.Util;
-import org.cs3.prolog.ui.util.FileUtils;
 import org.eclipse.core.resources.IProject;
 
 public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {

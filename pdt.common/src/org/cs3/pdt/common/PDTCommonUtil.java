@@ -27,12 +27,12 @@ import java.util.List;
 
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.common.search.SearchConstants;
+import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.ui.util.FileUtils;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;

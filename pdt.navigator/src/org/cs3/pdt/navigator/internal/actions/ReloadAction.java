@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;

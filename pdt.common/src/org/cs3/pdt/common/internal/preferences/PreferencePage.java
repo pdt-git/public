@@ -15,7 +15,7 @@ package org.cs3.pdt.common.internal.preferences;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.prolog.ui.util.preferences.MyRadioGroupFieldEditor;
+import org.cs3.pdt.connector.util.preferences.MyRadioGroupFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;

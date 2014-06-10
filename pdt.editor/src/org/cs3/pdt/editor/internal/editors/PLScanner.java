@@ -21,14 +21,14 @@ import java.net.URI;
 import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
-import org.cs3.prolog.ui.util.FileUtils;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;

@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.prolog.common.Util;
-import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
-import org.cs3.prolog.ui.util.FileUtils;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;

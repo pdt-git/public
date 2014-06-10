@@ -16,8 +16,8 @@ package org.cs3.prolog.connector.ui.test;
 
 import junit.framework.TestCase;
 
+import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;

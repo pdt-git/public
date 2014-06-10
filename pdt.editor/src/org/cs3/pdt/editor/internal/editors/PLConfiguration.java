@@ -14,11 +14,11 @@
 
 package org.cs3.pdt.editor.internal.editors;
 
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.internal.contentassistant.NaivPrologContentAssistProcessor;
 import org.cs3.pdt.editor.internal.views.lightweightOutline.PrologOutlineInformationControl;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.AbstractInformationControlManager;

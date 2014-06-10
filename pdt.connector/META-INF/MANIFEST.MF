@@ -4,12 +4,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: PDT Connector
 Bundle-SymbolicName: org.cs3.pdt.connector;singleton:=true
 Bundle-Version: 2.3.1.qualifier
-Bundle-Activator: org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin
-Export-Package: org.cs3.prolog.connector.ui,
- org.cs3.prolog.internal.pif.service.ext;x-friends:="org.cs3.pdt.common",
- org.cs3.prolog.pif.service,
- org.cs3.prolog.ui.util,
- org.cs3.prolog.ui.util.preferences
+Bundle-Activator: org.cs3.pdt.connector.PrologRuntimeUIPlugin
+Export-Package: org.cs3.pdt.connector,
+ org.cs3.pdt.connector.internal.service.ext;x-friends:="org.cs3.pdt.common",
+ org.cs3.pdt.connector.service,
+ org.cs3.pdt.connector.util,
+ org.cs3.pdt.connector.util.preferences
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.core.resources,

@@ -22,12 +22,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
 
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.session.PrologSession;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;
