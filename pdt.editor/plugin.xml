@@ -179,7 +179,7 @@
          parentId="org.eclipse.ui.textEditorScope"/>
 </extension>
 <extension
-      point="org.cs3.prolog.connector.ui.prologContextTracker">
+      point="org.cs3.pdt.connector.prologContextTracker">
    <tracker
          class="org.cs3.pdt.internal.editors.PLEditorTracker"
          id="pdt.track.pleditor"
