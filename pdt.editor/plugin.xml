@@ -12,7 +12,7 @@
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="org.cs3.pdt.internal.preferences.PreferenceInitializer">
+          class="org.cs3.pdt.editor.internal.preferences.PreferenceInitializer">
     </initializer>
  </extension>
  
@@ -20,13 +20,13 @@
        point="org.eclipse.ui.preferencePages">
     <page
           category="org.cs3.pdt.preferences.PreferencePageEditor"
-          class="org.cs3.pdt.internal.preferences.PreferencePageEditorColors"
+          class="org.cs3.pdt.editor.internal.preferences.PreferencePageEditorColors"
           id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
     </page>
     <page
           category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
-          class="org.cs3.pdt.internal.preferences.PreferencePageEditor"
+          class="org.cs3.pdt.editor.internal.preferences.PreferencePageEditor"
           id="org.cs3.pdt.preferences.PreferencePageEditor"
           name="Editor">
     </page>
@@ -37,7 +37,7 @@
             name="PL Editor"
             icon="icons/prolog_file_transparent.png"
             extensions="pl , plt, lgt, pro, yap"
-            class="org.cs3.pdt.internal.editors.PLEditor"
+            class="org.cs3.pdt.editor.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
       </editor>
@@ -45,8 +45,8 @@
             name="QLF Editor"
             icon="icons/qlf_file.png"
             extensions="qlf"
-            class="org.cs3.pdt.internal.editors.QLFEditor"
-            contributorClass="org.cs3.pdt.internal.editors.QLFEditorContributor"
+            class="org.cs3.pdt.editor.internal.editors.QLFEditor"
+            contributorClass="org.cs3.pdt.editor.internal.editors.QLFEditorContributor"
             id="org.cs3.pdt.internal.editors.QLFEditor">
       </editor>
    </extension>
@@ -181,7 +181,7 @@
 <extension
       point="org.cs3.pdt.connector.prologContextTracker">
    <tracker
-         class="org.cs3.pdt.internal.editors.PLEditorTracker"
+         class="org.cs3.pdt.editor.internal.editors.PLEditorTracker"
          id="pdt.track.pleditor"
          label="Follow PL Editor"/>
 </extension>
@@ -302,7 +302,7 @@
       
             <wizard
                   category="org.cs3.pdt.wizards"
-                  class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard"
+                  class="org.cs3.pdt.editor.internal.wizards.NewModuleCreationWizard"
                   icon="icons/module_2.png"
                   id="pdt.module.wizard"
                   name="Prolog Module">
@@ -338,7 +338,7 @@
  <extension
        point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
-          class="org.cs3.pdt.quickfix.PDTMarker"
+          class="org.cs3.pdt.editor.quickfix.PDTMarker"
           markerType="org.eclipse.core.resources.problemmarker">
     </markerResolutionGenerator>
  </extension>
