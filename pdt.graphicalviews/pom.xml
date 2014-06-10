@@ -41,7 +41,7 @@
 					  <keep>
 						<class classes="private" methods="private" fields="private">
 						  <patternset>
-						    <include name="pdt.y.**"/>
+						    <include name="org.cs3.pdt.graphicalviews.**"/>
 						  </patternset>
 						</class>
 					  </keep>

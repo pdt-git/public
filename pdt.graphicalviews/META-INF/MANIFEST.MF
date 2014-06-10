@@ -15,9 +15,26 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/org.eclipse.albireo.core_0.0.3.v20081031.jar,
  lib/y.jar
-Bundle-Activator: pdt.y.main.PluginActivator
+Bundle-Activator: org.cs3.pdt.graphicalviews.main.PluginActivator
 Bundle-ActivationPolicy: lazy
-Export-Package: org.eclipse.albireo.core;
+Export-Package: org.cs3.pdt.graphicalviews.graphml;x-internal:=true,
+ org.cs3.pdt.graphicalviews.main;
+  uses:="org.eclipse.jface.resource,
+   org.cs3.pl.prolog,
+   org.eclipse.ui.plugin,
+   org.eclipse.ui.part,
+   org.cs3.prolog.connector,
+   javax.swing,
+   org.osgi.framework,
+   org.eclipse.swt.widgets,
+   pdt.y.model",
+ org.cs3.pdt.graphicalviews.model;
+  uses:="y.layout.hierarchic.incremental,
+   y.view,
+   y.base,
+   y.layout,
+   y.view.hierarchy",
+ org.eclipse.albireo.core;
   uses:="new org.eclipse.albireo.core,
    javax.swing,
    org.eclipse.swt.events,
@@ -29,22 +46,5 @@ Export-Package: org.eclipse.albireo.core;
    org.eclipse.swt.events,
    org.eclipse.swt.widgets,
    org.eclipse.albireo.core",
- pdt.y.graphml;x-internal:=true,
- pdt.y.main;
-  uses:="org.eclipse.jface.resource,
-   org.cs3.pl.prolog,
-   org.eclipse.ui.plugin,
-   org.eclipse.ui.part,
-   org.cs3.prolog.connector,
-   javax.swing,
-   org.osgi.framework,
-   org.eclipse.swt.widgets,
-   pdt.y.model",
- pdt.y.model;
-  uses:="y.layout.hierarchic.incremental,
-   y.view,
-   y.base,
-   y.layout,
-   y.view.hierarchy",
  y.base,
  y.view;x-friends:="pdt.yworks.focusview"

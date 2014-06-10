@@ -8,26 +8,26 @@
       <view
             name="PDT Context View"
             category="org.cs3.pdt"
-            class="pdt.y.focusview.FocusView"
+            class="org.cs3.pdt.graphicalviews.focusview.FocusView"
             id="pdt.view.focus">
       </view>
       
       <view
             name="PDT Global View"
             category="org.cs3.pdt"
-            class="pdt.y.focusview.GlobalView"
+            class="org.cs3.pdt.graphicalviews.focusview.GlobalView"
             id="pdt.view.global">
       </view>
       
       <view
             name="PDT Load Graph"
             category="org.cs3.pdt"
-            class="pdt.y.focusview.DependenciesView"
+            class="org.cs3.pdt.graphicalviews.focusview.DependenciesView"
             id="pdt.view.dependencies">
       </view>
       <view
             category="org.cs3.pdt"
-            class="pdt.y.focusview.LogtalkEntityView"
+            class="org.cs3.pdt.graphicalviews.focusview.LogtalkEntityView"
             id="pdt.view.logtalk.entity"
             name="Logtalk Entity Graph">
       </view>
@@ -35,44 +35,44 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="pdt.y.preferences.PreferenceInitializer">
+            class="org.cs3.pdt.graphicalviews.preferences.PreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
-            class="pdt.y.preferences.MainPreferencePage"
+            class="org.cs3.pdt.graphicalviews.preferences.MainPreferencePage"
             id="pdt.y.preferences.MainPreferencePage"
             name="Context View">
       </page>
       <page
             category="pdt.y.preferences.MainPreferencePage"
-            class="pdt.y.preferences.FileAppearancePreferences"
+            class="org.cs3.pdt.graphicalviews.preferences.FileAppearancePreferences"
             id="pdt.y.preferences.FileAppearancePreferences"
             name="File Appearance">
       </page>
       <page
             category="pdt.y.preferences.MainPreferencePage"
-            class="pdt.y.preferences.PredicateAppearancePreferences"
+            class="org.cs3.pdt.graphicalviews.preferences.PredicateAppearancePreferences"
             id="pdt.y.preferences.PredicateAppearancePreferences"
             name="Predicate Appearance">
       </page>
       <page
             category="pdt.y.preferences.MainPreferencePage"
-            class="pdt.y.preferences.PredicateLayoutPreferences"
+            class="org.cs3.pdt.graphicalviews.preferences.PredicateLayoutPreferences"
             id="pdt.y.preferences.PredicateLayoutPreferences"
             name="Predicate Layout">
       </page>
       <page
             category="pdt.y.preferences.MainPreferencePage"
-            class="pdt.y.preferences.EdgeAppearancePreferences"
+            class="org.cs3.pdt.graphicalviews.preferences.EdgeAppearancePreferences"
             id="pdt.y.preferences.EdgeAppearancePreferences"
             name="Edge Appearance">
       </page>
       <page
             category="pdt.y.preferences.MainPreferencePage"
-            class="pdt.y.preferences.SkinsPreferencePage"
+            class="org.cs3.pdt.graphicalviews.preferences.SkinsPreferencePage"
             id="pdt.y.preferences.SkinsPreferencePage"
             name="Skins">
       </page>
