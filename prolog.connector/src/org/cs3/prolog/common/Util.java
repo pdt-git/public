@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.internal.pif.socket.SocketPrologInterface;
 import org.cs3.prolog.pif.PrologInterface;
 
@@ -243,8 +242,7 @@ public class Util {
 	 * @return true if current OS is Windows
 	 */
 	public static boolean isWindows() {
-		boolean windowsPlattform = System.getProperty("os.name").indexOf(
-				"Windows") > -1;
+		boolean windowsPlattform = System.getProperty("os.name").indexOf("Windows") > -1;
 		return windowsPlattform;
 	}
 
@@ -625,7 +623,6 @@ public class Util {
 	}
 
 	public static boolean flagsSet(int flags, int set) {
-
 		return (flags & set) == set;
 	}
 	
@@ -639,119 +636,6 @@ public class Util {
 	}
 
 	
-	/**
-	 * guess executable name for SWI Prolog depending on the OS
-	 * @return executable name for SWI Prolog
-	 */
-	public static String guessExecutableName() {
-
-		String guessedExecutable = guessExecutableName__();
-		Debug.info("Guessed Prolog executable with GUI: " + guessedExecutable);
-		return guessedExecutable;
-
-	}
-	
-	public static String getExecutablePreference() {
-		if (isWindows()) {
-			String exec = findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES);
-			if (exec.startsWith("\"")) {
-				exec = exec.substring(1);
-			}
-			if (exec.endsWith("\"")) {
-				exec = exec.substring(0, exec.length() - 1);
-			}
-			return exec;
-		} else {
-			return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-		}
-	}
-
-
-	private static String commandLineArguments = null;
-	
-	public static String getCommandLineArguments() {
-		Debug.debug("getCommandLineArguments start");
-		if (commandLineArguments == null) {
-		
-			String swiExecutable;
-			
-			if (isWindows()) {
-				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
-			} else {
-				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-			}
-			
-			String bits = "";
-			try {
-				Process p = Runtime.getRuntime().exec(new String[]{
-						swiExecutable,
-						"-g",
-						"current_prolog_flag(address_bits,A),writeln(A),halt."});
-				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				bits = reader.readLine();
-				p.waitFor();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	
-			if (bits.equals("64")) {
-				// no parameters for SWI-Prolog 64bit
-				commandLineArguments = "";
-			} else {
-				commandLineArguments = PDTConstants.STACK_COMMMAND_LINE_ARGUMENTS;
-			}
-
-		}
-		Debug.debug("getCommandLineArguments end: '" + commandLineArguments+ "'");
-		
-		return commandLineArguments;
-	}
-
-	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
-//		return "51118_64";// TEMPversion +"_"+bits;
-		
-			String swiExecutable;
-			if (isWindows()) {
-				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
-			} else {
-				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-			}
-			
-			String bits = "";
-			String version ="";
-			Process p = Runtime.getRuntime().exec(new String[]{
-					swiExecutable,
-					"-g",
-					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			version = reader.readLine();
-			bits = reader.readLine();
-			try {
-				p.waitFor();
-			} catch (InterruptedException e) {
-				// TR: fatal anyway:
-				throw new RuntimeException(e);
-			}
-	
-
-		return version +"_"+bits;
-	}
-	
-	private static String guessExecutableName__() {
-
-		if (isWindows()) {
-			return "cmd.exe /c start \"cmdwindow\" /min "
-				+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getCommandLineArguments();
-		}
-		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getCommandLineArguments();
-
-	}
-	
-	/**
-	 * 
-	 * @return the OS specific invocation command
-	 */
 	public static String getInvocationCommand() {
 		if (isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min ";
@@ -760,31 +644,35 @@ public class Util {
 		}
 	}
 
-	public static String guessCommandLineExecutableName() {
-
-		String guessedExecutable = guessCommandLineExecutableName__();
-		Debug.info("Guessed Prolog executable WITHOUT GUI: " + guessedExecutable);
-		return guessedExecutable;
-
+	
+	public static String getExecutablePreference() {
+		return getExecutablePreference(PDTConstants.DIALECT_SWI);
 	}
 	
-	private static String guessCommandLineExecutableName__() {
-
-		if (isWindows()) {
-			return //"cmd.exe /c start \"cmdwindow\" /min "
-			findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + getCommandLineArguments();
+	public static String getExecutablePreference(String dialect) {
+		if (PDTConstants.DIALECT_SWI.equals(dialect)) {
+			if (isWindows()) {
+				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
+			} else {
+				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
+			}
+		} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
+			if (isWindows()) {
+				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
+			} else {
+				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
+			}
+		} else {
+			return "";
 		}
-		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getCommandLineArguments();
-
 	}
-
+	
 	/**
 	 * Finds the current SWI-Prolog executable for UNIX/BSD-BASED OS
 	 * @param unixCommandLineExecutables 
 	 * @return the complete path of the executable otherwise it will return xpce
 	 */
-	private static String findUnixExecutable(String unixCommandLineExecutables) {
+	public static String getUnixExecutable(String unixCommandLineExecutables) {
 		String[] default_exec = unixCommandLineExecutables.split(",");
 		
 		// TODO shall we look for the env. variables as we do for Windows ?
@@ -825,11 +713,13 @@ public class Util {
 	}
 
 	/**
+	 * @author Hasan Abdel Halim
+	 * 
 	 * Finds the current SWI-Prolog executable for Windows OS
 	 * @param executables 
 	 * @return the complete path of the executable otherwise it will return plwin
 	 */
-	private static String findWindowsExecutable(String executables) {
+	public static String getWindowsExecutable(String executables) {
 		String[] default_exec = executables.split(",");
 		String plwin = null;
 
@@ -863,7 +753,7 @@ public class Util {
 					exeFile = new File(currPath);
 
 					if (exeFile.exists()) {
-						plwin = "\"" + currPath + "\"";
+						plwin = currPath;
 						break;
 					}
 				}
@@ -1027,8 +917,11 @@ public class Util {
 	}
 
 	public static String createExecutable(String invocation, String execution, String commandLineArguments, String startupFiles) {
-		StringBuffer executable = new StringBuffer(invocation);
-		executable.append(" ");
+		StringBuilder executable = new StringBuilder();
+		if (invocation != null) {
+			executable.append(invocation);
+			executable.append(" ");
+		}
 		if (isWindows()) {
 			executable.append("\"");
 		}
@@ -1081,10 +974,11 @@ public class Util {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		copyConsultServerToTempDir(tempDir);
 		SocketPrologInterface pif = new SocketPrologInterface(null);
+		pif.setOSInvocation(getInvocationCommand());
 		if (executable == null) {
-			pif.setExecutable(Util.guessExecutableName());
+			pif.setExecutablePath(getExecutablePreference());
 		} else {
-			pif.setExecutable(executable);
+			pif.setExecutablePath(executable);
 		}
 		pif.setConsultServerLocation(Util.prologFileName(new File(tempDir, "consult_server.pl")));
 		pif.setHost("localhost");

@@ -58,6 +58,10 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	private boolean standAloneServer = false;
 	private String host;
 	private String executable;
+	private String osInvocation;
+	private String executablePath;
+	private String commandLineArguments;
+	private String additionalStartupFile;
 	private String environment;
 	private int timeout;
 	private String fileSearchPath;
@@ -130,16 +134,54 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return timeout;
 	}
 
+	@Deprecated
 	@Override
 	public void setExecutable(String executable) {
 		this.executable = executable;
 	}
 
+	@Deprecated
 	@Override
 	public String getExecutable() {
-		return executable;
+		if (executable != null) {
+			return executable;
+		} else {
+			return Util.createExecutable(osInvocation, executablePath, commandLineArguments, additionalStartupFile);
+		}
 	}
 
+	public String getOSInvocation() {
+		return osInvocation;
+	}
+	
+	public void setOSInvocation(String osInvocation) {
+		this.osInvocation = osInvocation;
+	}
+	
+	public String getExecutablePath() {
+		return executablePath;
+	}
+	
+	public void setExecutablePath(String executablePath) {
+		this.executablePath = executablePath;
+	}
+	
+	public String getCommandLineArguments() {
+		return commandLineArguments;
+	}
+	
+	public void setCommandLineArguments(String commandLineArguments) {
+		this.commandLineArguments = commandLineArguments;
+	}
+	
+	public String getAdditionalStartupFile() {
+		return additionalStartupFile;
+	}
+	
+	public void setAdditionalStartupFile(String additionalStartupFile) {
+		this.additionalStartupFile = additionalStartupFile;
+	}
+	
 	@Override
 	public void setEnvironment(String environment) {
 		this.environment = environment;
@@ -163,17 +205,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	@Override
 	public void initOptions(PreferenceProvider provider) {
 		setHost(provider.getPreference(PrologRuntime.PREF_HOST));
-		String executable = getExecutable(provider);
-		setExecutable(executable);
+		setOSInvocation(provider.getPreference(PrologRuntime.PREF_INVOCATION));
+		setExecutablePath(provider.getPreference(PrologRuntime.PREF_EXECUTABLE));
+		setCommandLineArguments(provider.getPreference(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS));
+		setAdditionalStartupFile(provider.getPreference(PrologRuntime.PREF_ADDITIONAL_STARTUP));
 		setEnvironment(provider.getPreference(PrologRuntime.PREF_ENVIRONMENT));
 		setTimeout(provider.getPreference(PrologRuntime.PREF_TIMEOUT));
-	}
-
-	private String getExecutable(PreferenceProvider provider) {
-		return Util.createExecutable(provider.getPreference(PrologRuntime.PREF_INVOCATION),
-						      provider.getPreference(PrologRuntime.PREF_EXECUTABLE),
-						      provider.getPreference(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS),
-							  provider.getPreference(PrologRuntime.PREF_ADDITIONAL_STARTUP));
 	}
 
 	/************************************************/
