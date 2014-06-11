@@ -17,7 +17,7 @@ import java.io.IOException;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 

@@ -16,8 +16,8 @@ package org.cs3.pdt.connector.util;
 import org.cs3.pdt.connector.PrologRuntimeUI;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.pdt.connector.internal.preferences.PreferenceConfiguration;
-import org.cs3.prolog.common.PreferenceProvider;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.PreferenceProvider;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 

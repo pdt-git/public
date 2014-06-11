@@ -14,8 +14,8 @@
 
 package org.cs3.pdt.connector;
 
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.ui.IWorkbench;
 
 /**

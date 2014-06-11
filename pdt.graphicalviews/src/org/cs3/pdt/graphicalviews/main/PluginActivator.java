@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.cs3.pdt.graphicalviews.model.labels.NodeLabelConfigurationsInitializer;
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.Util;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

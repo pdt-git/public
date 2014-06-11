@@ -15,7 +15,7 @@
 package org.cs3.pdt.editor.internal.editors;
 
 import org.cs3.pdt.connector.AbstractPrologContextTracker;
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;

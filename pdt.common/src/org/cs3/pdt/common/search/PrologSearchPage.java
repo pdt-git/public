@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.common.search;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,8 @@ import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.queries.ReferencesSearchQueryDirect;
 import org.cs3.pdt.common.queries.UndefinedCallsSearchQuery;
 import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;

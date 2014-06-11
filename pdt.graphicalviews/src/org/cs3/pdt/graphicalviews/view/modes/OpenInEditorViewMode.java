@@ -22,8 +22,8 @@ import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.focusview.GraphPIFLoaderBase;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.model.GraphDataHolder;
-import org.cs3.prolog.common.QueryUtils;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.common.QueryUtils;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 

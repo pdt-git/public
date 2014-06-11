@@ -26,11 +26,10 @@ import org.cs3.pdt.graphicalviews.graphml.GraphMLReader;
 import org.cs3.pdt.graphicalviews.model.GraphDataHolder;
 import org.cs3.pdt.graphicalviews.model.GraphLayout;
 import org.cs3.pdt.graphicalviews.model.GraphModel;
-import org.cs3.pdt.graphicalviews.view.modes.HierarchicPopupMode;
 import org.cs3.pdt.graphicalviews.view.modes.MoveSelectedSelectionMode;
 import org.cs3.pdt.graphicalviews.view.modes.ToggleOpenClosedStateViewMode;
 import org.cs3.pdt.graphicalviews.view.modes.WheelScroller;
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.Util;
 
 import y.base.Node;
 import y.layout.router.OrthogonalEdgeRouter;

@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.console;
 
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 public interface PrologConsole {
 	public ConsoleModel getModel();

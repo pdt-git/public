@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.common.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -36,11 +36,11 @@ import org.cs3.pdt.common.structureElements.PrologReferenceMatch;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.pdt.connector.util.FileUtils;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

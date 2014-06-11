@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.editor.internal.contentassistant;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,10 +25,10 @@ import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;

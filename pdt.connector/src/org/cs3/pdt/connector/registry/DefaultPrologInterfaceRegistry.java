@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.connector.subscription.Subscription;
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 

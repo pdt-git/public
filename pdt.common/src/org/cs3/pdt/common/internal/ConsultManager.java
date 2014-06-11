@@ -12,9 +12,9 @@ import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtensi
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

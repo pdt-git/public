@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;

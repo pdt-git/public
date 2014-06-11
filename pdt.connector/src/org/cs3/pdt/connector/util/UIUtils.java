@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;

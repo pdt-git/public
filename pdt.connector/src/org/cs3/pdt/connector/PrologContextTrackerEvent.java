@@ -16,7 +16,7 @@ package org.cs3.pdt.connector;
 
 import java.util.EventObject;
 
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 public class PrologContextTrackerEvent extends EventObject {
 

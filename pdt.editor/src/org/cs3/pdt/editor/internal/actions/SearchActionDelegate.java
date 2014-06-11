@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;

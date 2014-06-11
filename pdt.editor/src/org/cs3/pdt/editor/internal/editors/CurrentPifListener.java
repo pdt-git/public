@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.editor.internal.editors;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 
@@ -22,13 +22,13 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.editor.PDTPredicates;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.lifecycle.PrologEventDispatcher;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceEvent;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.PrologInterfaceListener;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceEvent;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologInterfaceListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;

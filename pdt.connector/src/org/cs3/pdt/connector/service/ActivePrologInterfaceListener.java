@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.connector.service;
 
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 /**
  * This interface is used to listen to the active {@link PrologInterface}

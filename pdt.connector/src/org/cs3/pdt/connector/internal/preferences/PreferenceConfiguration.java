@@ -23,10 +23,10 @@ import java.util.List;
 
 import org.cs3.pdt.connector.PrologRuntimeUI;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
-import org.cs3.prolog.common.PDTConstants;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.PDTConstants;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 

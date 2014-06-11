@@ -17,7 +17,7 @@ package org.cs3.pdt.connector;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 /**
  * Convenience class for implementing PrologContextTracker.

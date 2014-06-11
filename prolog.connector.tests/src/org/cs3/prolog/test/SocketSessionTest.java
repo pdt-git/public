@@ -28,15 +28,15 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.cterm.CCompound;
-import org.cs3.prolog.cterm.CNil;
-import org.cs3.prolog.internal.pif.AbstractPrologInterface;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.cterm.CCompound;
+import org.cs3.prolog.connector.cterm.CNil;
+import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.session.PrologSession;
 
 /**
  * @author Lukas Degener

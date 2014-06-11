@@ -27,8 +27,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.cs3.pdt.connector.subscription.PersistableSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;

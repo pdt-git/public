@@ -18,9 +18,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.session.PrologSession;
 
 public class FileSearchPathConfigurator {
 

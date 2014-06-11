@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 
 import org.cs3.pdt.connector.load.PrologLibrary;
 import org.cs3.pdt.connector.load.PrologLibraryManager;
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.Util;
 
 /*
  * each test precedes a diagram spec that you can run through dot to

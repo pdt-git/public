@@ -24,7 +24,7 @@ import org.cs3.pdt.connector.util.ErrorMessageProvider;
 import org.cs3.pdt.editor.internal.editors.ColorManager;
 import org.cs3.pdt.editor.internal.editors.CurrentPifListener;
 import org.cs3.pdt.editor.internal.editors.EditorConsultListener;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.viewers.ISelection;

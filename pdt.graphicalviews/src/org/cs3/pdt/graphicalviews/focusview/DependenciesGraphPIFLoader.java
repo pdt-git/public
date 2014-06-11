@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.graphicalviews.focusview;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.Util;
 import org.eclipse.core.resources.IProject;
 
 public class DependenciesGraphPIFLoader extends GlobalGraphPIFLoader {

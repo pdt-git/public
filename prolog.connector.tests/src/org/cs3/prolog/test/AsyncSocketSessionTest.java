@@ -21,20 +21,20 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.cterm.CCompound;
-import org.cs3.prolog.cterm.CNil;
-import org.cs3.prolog.cterm.CTerm;
-import org.cs3.prolog.cterm.CTermUtil;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.AsyncPrologSession;
-import org.cs3.prolog.session.AsyncPrologSessionEvent;
-import org.cs3.prolog.session.AsyncPrologSessionListener;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.cterm.CCompound;
+import org.cs3.prolog.connector.cterm.CNil;
+import org.cs3.prolog.connector.cterm.CTerm;
+import org.cs3.prolog.connector.cterm.CTermUtil;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.session.AsyncPrologSession;
+import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
+import org.cs3.prolog.connector.session.AsyncPrologSessionListener;
+import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSessionTest extends TestCase {
 

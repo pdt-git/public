@@ -2,9 +2,9 @@ package org.cs3.prolog.connector;
 
 import java.io.IOException;
 
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.internal.pif.socket.SocketPrologInterface;
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.internal.process.socket.SocketPrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 public class Connector {
 

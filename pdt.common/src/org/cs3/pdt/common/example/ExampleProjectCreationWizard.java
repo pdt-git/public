@@ -20,7 +20,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;

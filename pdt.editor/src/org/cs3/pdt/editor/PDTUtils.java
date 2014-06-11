@@ -15,7 +15,7 @@
 package org.cs3.pdt.editor;
 
 
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;

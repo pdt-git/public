@@ -17,13 +17,13 @@ package org.cs3.prolog.connector.ui.test;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.lifecycle.PrologEventDispatcher;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceEvent;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.PrologInterfaceListener;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceEvent;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologInterfaceListener;
+import org.cs3.prolog.connector.session.PrologSession;
 
 
 /**

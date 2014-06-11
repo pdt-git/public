@@ -20,8 +20,8 @@ import java.io.Writer;
 import java.util.Set;
 
 import org.cs3.pdt.connector.subscription.Subscription;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 /**
  * Central registry for managing PrologInterface instances and Subscriptions.

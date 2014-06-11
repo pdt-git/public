@@ -17,11 +17,11 @@ package org.cs3.prolog.internal.socket.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.internal.pif.socket.JackTheProcessRipper;
-import org.cs3.prolog.internal.session.socket.SocketSession;
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.internal.process.socket.JackTheProcessRipper;
+import org.cs3.prolog.connector.internal.session.socket.SocketSession;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {

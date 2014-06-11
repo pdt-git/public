@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.editor.internal.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,12 +27,12 @@ import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.editor.internal.structureElements.PrologClause;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.session.PrologSession;
 
 
 public class PDTOutlineQuery {

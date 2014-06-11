@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.cs3.pdt.connector.load.PrologLibrary;
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.Util;
 
 class DummyPrologLibrary implements PrologLibrary{
 	String id;

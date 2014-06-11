@@ -29,7 +29,7 @@ import org.cs3.pdt.console.internal.views.completion.IContentProposalProvider;
 import org.cs3.pdt.console.internal.views.completion.IControlContentAdapter;
 import org.cs3.pdt.console.internal.views.completion.IControlContentAdapter2;
 import org.cs3.pdt.console.internal.views.completion.PrologCompletionProvider;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;

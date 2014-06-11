@@ -16,7 +16,7 @@ package org.cs3.pdt.connector.subscription;
 
 import java.util.List;
 
-import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.connector.process.PrologInterface;
 
 /**
  * Subscription for a PrologInterface instance.
