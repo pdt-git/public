@@ -14,11 +14,7 @@
 
 package org.cs3.pdt.connector;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,8 +42,6 @@ import org.cs3.pdt.connector.subscription.DefaultSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.connector.common.DefaultResourceFileLocator;
-import org.cs3.prolog.connector.common.ResourceFileLocator;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -75,7 +69,6 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	private static PDTConnectorPlugin plugin;
 	// Resource bundle.
 
-	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
 	private final static Object contextTrackerMux = new Object();
 	private static final Object preferencesMux = new Object();
@@ -109,34 +102,6 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 		return PLUGIN_ID;
 	}
 
-	public ResourceFileLocator getResourceLocator() {
-		if (resourceLocator == null){
-			resourceLocator = new DefaultResourceFileLocator(new File(System.getProperty("java.io.tmpdir")));			
-		}
-		return resourceLocator;
-	}
-	
-	public File ensureInstalled(String res, Class<?> clazz) {
-		File f = getResourceLocator().resolve(res);
-		if (f.exists()) {
-			f.delete();
-		}
-		if (!f.exists()) {
-			f.getParentFile().mkdirs();
-			try {
-				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-				InputStream in = clazz.getResourceAsStream(res);
-				Util.copy(in, out);
-				in.close();
-				out.close();
-			} catch (IOException e) {
-				Debug.rethrow(e);
-			}
-		}
-		return f;
-	}
-
-	
 	public PrologContextTrackerService getContextTrackerService() {
 		synchronized (contextTrackerMux) {
 			if (contextTrackerService == null) {
