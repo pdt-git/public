@@ -14,13 +14,11 @@
 
 package org.cs3.prolog.pif;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.common.PreferenceProvider;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
-import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.session.AsyncPrologSession;
 import org.cs3.prolog.session.PrologSession;
 
@@ -216,23 +214,9 @@ public interface PrologInterface {
 	public void setAttribute(String attribute, Object value);
 	public void setFileSearchPath(String fileSearchPath);
 	
-
-	/**
-	 * get the life list of bootstrap libraries. <br>
-	 * "life" means, that any modification will affect the next startup of the
-	 * pif. The list contains path strings (the "prolog kind" of paths) to
-	 * prolog files that will be consulted during startup of the pif.
-	 * 
-	 * @return the life list of bootstrap libraries
-	 */
-	public List<BootstrapPrologContribution> getBootstrapLibraries();
-
-	/**
-	 * See {@link #getBootstrapLibraries()}
-	 * @param l
-	 */
-	public void setBootstrapLibraries(List<BootstrapPrologContribution> l);
-
+	
+	public StartupStrategy getStartupStrategy();
+	public void setStartupStrategy(StartupStrategy startupStrategy);
 
 	/**
 	 * unregister a lifeCycleHook.

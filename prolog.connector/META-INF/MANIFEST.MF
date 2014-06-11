@@ -5,7 +5,6 @@ Bundle-Name: Prolog Connector Interface
 Bundle-SymbolicName: org.cs3.prolog.connector;singleton:=true
 Bundle-Version: 2.3.1.qualifier
 Bundle-ClassPath: .
-Require-Bundle: org.eclipse.core.runtime
 Export-Package: org.cs3.prolog.common,
  org.cs3.prolog.common.logging,
  org.cs3.prolog.connector,
@@ -16,10 +15,7 @@ Export-Package: org.cs3.prolog.common,
  org.cs3.prolog.internal.pif.socket;x-friends:="org.cs3.prolog.connector.tests",
  org.cs3.prolog.internal.session.socket;x-friends:="org.cs3.prolog.connector.tests",
  org.cs3.prolog.lifecycle,
- org.cs3.prolog.load,
  org.cs3.prolog.pif,
  org.cs3.prolog.session
-Bundle-ActivationPolicy: lazy
-Bundle-Activator: org.cs3.prolog.connector.PrologRuntimePlugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 

@@ -16,7 +16,7 @@ package org.cs3.pdt.connector;
 
 public class PrologRuntimeUI {
 	
-	public static final String PLUGIN_ID = "org.cs3.prolog.connector.ui";
+	public static final String PLUGIN_ID = "org.cs3.pdt.connector";
 	public static final String LIB_COMMON = "pdt.runtime.library.common";
 	public static final String LIB_ATTIC = "pdt.runtime.library.attic";
 	public static final String LIB_PDT = "pdt.runtime.library.pdt";
@@ -28,6 +28,10 @@ public class PrologRuntimeUI {
 	public static final String CONFIGURATION_SWI_LOGTALK = "SWI Prolog & Logtalk";
 	public static final String CONFIGURATION_YAP = "YAProlog";
 	public static final String CONFIGURATION_YAP_LOGTALK = "YAProlog & Logtalk";
+
+	public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
+	public static final String EP_PROLOG_LIBRARY = "prologLibrary";
+	public static final String EP_HOOKS = "hooks";
     
 }
 

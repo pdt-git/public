@@ -18,7 +18,7 @@ import java.io.StringReader;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.connector.DefaultSAXPrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.DefaultSAXPrologInterfaceRegistry;
 
 public class RegistryHandlerTest extends TestCase {
 	public void testHandler() throws Exception {

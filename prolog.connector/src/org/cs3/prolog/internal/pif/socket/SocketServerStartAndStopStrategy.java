@@ -29,7 +29,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +36,8 @@ import org.cs3.prolog.common.InputStreamPump;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.internal.pif.ServerStartAndStopStrategy;
-import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
+import org.cs3.prolog.pif.StartupStrategy;
 
 public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrategy {
 private static JackTheProcessRipper processRipper;
@@ -275,7 +274,7 @@ private static JackTheProcessRipper processRipper;
 	private static void writeInitialisationToTempFile(SocketPrologInterface socketPif,
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-//      Don't set the encoding globally because it 
+//      Don't set the encoding globally because it breaks something
 //		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
 		tmpWriter.println(STARTUP_ERROR_LOG_PROLOG_CODE);
 		if (socketPif.getAdditionalStartupFile() != null && socketPif.getAdditionalStartupFile().contains("logtalk")) {
@@ -283,23 +282,21 @@ private static JackTheProcessRipper processRipper;
 		}
 		tmpWriter.println(":- (current_prolog_flag(xpce_threaded, _) -> set_prolog_flag(xpce_threaded, true) ; true).");
 		tmpWriter.println(":- (current_prolog_flag(dialect, swi) -> guitracer ; true).");
-//		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		if (socketPif.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(dialect, swi), current_prolog_flag(windows, true))  -> win_window_pos([show(false)]) ; true).");
 		}
 		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false) ; true).");
 
 		tmpWriter.println(":- ['" + socketPif.getConsultServerLocation() + "'].");
-		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
-		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
-			BootstrapPrologContribution contribution = it.next();
-			tmpWriter.println(":- "+contribution.getPrologInitStatement()+".");
+		StartupStrategy startupStrategy = socketPif.getStartupStrategy();
+		for (String fspInit : startupStrategy.getFileSearchPathInitStatements()) {
+			tmpWriter.println(":- " + fspInit + ".");
 		}
-//		tmpWriter.println(":- FileName='/tmp/dbg_marker2.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
-//		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
+		for (String lfInit : startupStrategy.getLoadFileInitStatements()) {
+			tmpWriter.println(":- " + lfInit + ".");
+		}
 		tmpWriter.println(":- consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
 		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + Util.prologFileName(socketPif.getErrorLogFile()) + "').");
-//		tmpWriter.println(":- FileName='/tmp/dbg_marker4.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.close();
 	}
 

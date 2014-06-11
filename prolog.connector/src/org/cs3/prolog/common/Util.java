@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.prolog.internal.pif.socket.SocketPrologInterface;
+import org.cs3.prolog.pif.DefaultStartupStrategy;
 import org.cs3.prolog.pif.PrologInterface;
 
 /**
@@ -971,16 +972,15 @@ public class Util {
 	 * @throws IOException
 	 */
 	public static PrologInterface newStandalonePrologInterface(String executable) throws IOException {
-		String tempDir = System.getProperty("java.io.tmpdir");
-		copyConsultServerToTempDir(tempDir);
 		SocketPrologInterface pif = new SocketPrologInterface(null);
+		pif.setStartupStrategy(new DefaultStartupStrategy());
 		pif.setOSInvocation(getInvocationCommand());
 		if (executable == null) {
 			pif.setExecutablePath(getExecutablePreference());
 		} else {
 			pif.setExecutablePath(executable);
 		}
-		pif.setConsultServerLocation(Util.prologFileName(new File(tempDir, "consult_server.pl")));
+		pif.setConsultServerLocation(Util.prologFileName(getConsultServerFile()));
 		pif.setHost("localhost");
 		pif.setTimeout("15000");
 		pif.setStandAloneServer("false");
@@ -989,20 +989,23 @@ public class Util {
 		return pif;
 	}
 	
-	private static void copyConsultServerToTempDir(String tempDir) throws IOException {
-		InputStream resourceAsStream;
-		resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("library/socket/consult_server.pl");
-		if (resourceAsStream == null) {
-			resourceAsStream = PrologInterface.class.getClassLoader().getResourceAsStream("consult_server.pl");
+	private static File consultServerFile = null;
+	
+	public static File getConsultServerFile() throws IOException {
+		if (consultServerFile == null) {
+			String tempDir = System.getProperty("java.io.tmpdir");
+			InputStream resourceAsStream;
+			resourceAsStream = SocketPrologInterface.class.getResourceAsStream("consult_server.pl");
+			if (resourceAsStream == null) {
+				throw new RuntimeException("Cannot find consult_server.pl!");
+			}
+			consultServerFile = new File(tempDir, "consult_server.pl");
+			if (consultServerFile.exists()) {
+				consultServerFile.delete();
+			}
+			copy(resourceAsStream, new FileOutputStream(consultServerFile));
 		}
-		if (resourceAsStream == null) {
-			throw new RuntimeException("Cannot find consult_server.pl!");
-		}
-		File consultServerPl = new File(tempDir, "consult_server.pl");
-		if (consultServerPl.exists()) {
-			consultServerPl.delete();
-		}
-		copy(resourceAsStream, new FileOutputStream(consultServerPl));
+		return consultServerFile;
 	}
 
 	private static Set<File> tempFiles = new HashSet<File>();

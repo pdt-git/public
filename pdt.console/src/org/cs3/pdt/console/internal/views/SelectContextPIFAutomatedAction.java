@@ -26,13 +26,12 @@ import org.cs3.pdt.connector.PrologContextTrackerListener;
 import org.cs3.pdt.connector.PrologContextTrackerService;
 import org.cs3.pdt.connector.PrologRuntimeUI;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
+import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.prolog.common.Util;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.pif.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -174,7 +173,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	// PIF Selection part
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
 		List<String> sortedKeys = new ArrayList<String>();
 		
@@ -387,7 +386,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
 			setToolTipText("no pif selected");

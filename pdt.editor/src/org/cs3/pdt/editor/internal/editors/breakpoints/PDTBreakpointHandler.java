@@ -374,7 +374,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		if (currentPif != null) {
 			Debug.debug("add listener for pif " + currentPif.toString());
 
-			currentDispatcher = new PrologEventDispatcher(currentPif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
+			currentDispatcher = new PrologEventDispatcher(currentPif);
 			currentPif.addLifeCycleHook(this, BREAKPOINT_LIFECYCLE_HOOK, DEPENDENCIES);
 			try {
 				currentDispatcher.addPrologInterfaceListener(ADD_BREAKPOINT, this);

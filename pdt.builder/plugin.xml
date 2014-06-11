@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.cs3.prolog.connector.bootstrapContribution">
+         point="org.cs3.pdt.connector.bootstrapContribution">
       <fileSearchPathContribution
             alias="pdt_builder_analyzer"
             id="pdt.builder.analyzer"

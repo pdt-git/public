@@ -16,8 +16,7 @@ package org.cs3.prolog.connector.ui.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
@@ -99,7 +98,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:notify/2))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:thread_get_message/1))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:cleanup_thread/1))))");
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif);
 		dispatcher.addPrologInterfaceListener("localisation:company_nearby(MAC, Other, Distance, 1000)",locationListener);
 
 		session.queryOnce("sync:deleteAll(magicmap:location('00-09-2D-53-27-3A', _,_,_))");
@@ -164,7 +163,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 			public void update(PrologInterfaceEvent e) {
 			}
 		};
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif);
 		try {
 			
 			dispatcher.addPrologInterfaceListener("aha(",nullListener);
@@ -183,7 +182,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
 //		PrologInterface pif = factory.create();
 		
-        pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+        pif = Connector.newPrologInterface();
 		pif.setStandAloneServer(true);		
 		pif.start();
 		return pif;

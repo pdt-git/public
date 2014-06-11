@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.pdt.editor.quickfix.PDTMarker;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;

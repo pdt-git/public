@@ -126,45 +126,45 @@
       point="org.eclipse.ui.bindings">
    <key
          commandId="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+O"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+C"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.save.no.reconsult"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+ALT+S"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.consult"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F9"/>
 
    <key
          commandId="org.eclipse.pdt.ui.edit.run.unit.test"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+U"/>
    <key
          commandId="org.eclipse.pdt.ui.open.primary.definition"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F3">
    </key>
    <key
          commandId="org.eclipse.pdt.ui.find.all.definitions"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+G">
    </key>
    <key
          commandId="org.eclipse.pdt.ui.find.references"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+G">
    </key>
@@ -174,7 +174,7 @@
       point="org.eclipse.ui.contexts">
    <context
          description="oh well, what will that be... editing giggling goblins i suppose?"
-         id="org.cs3.pdt.editingProlog"
+         id="org.cs3.pdt.editor.editingProlog"
          name="Editing Prolog Code"
          parentId="org.eclipse.ui.textEditorScope"/>
 </extension>
@@ -306,7 +306,7 @@
                   icon="icons/module_2.png"
                   id="pdt.module.wizard"
                   name="Prolog Module">
-         <class class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard">
+         <class class="org.cs3.pdt.editor.internal.wizards.NewModuleCreationWizard">
             <parameter
                 name="javatype"
                 value="true">
@@ -379,7 +379,7 @@
            verticalRulerPreferenceValue="true"/>
   </extension>
   <extension
-        point="org.cs3.prolog.connector.bootstrapContribution">
+        point="org.cs3.pdt.connector.bootstrapContribution">
      <fileContribution
            id="org.cs3.pdt.fileContribution"
            path="pl/load.pl">

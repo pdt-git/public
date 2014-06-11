@@ -20,12 +20,11 @@ import java.util.Set;
 
 import org.cs3.pdt.common.internal.ConsultManager;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistryEvent;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistryListener;
 import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologInterfaceRegistryEvent;
-import org.cs3.prolog.connector.PrologInterfaceRegistryListener;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -115,7 +114,7 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 				PDTCommonPlugin.this.notifyPifStartHooks(pif);
 			}
 		};
-		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
 		registry.addPrologInterfaceRegistryListener(new PrologInterfaceRegistryListener() {
 			@Override public void subscriptionRemoved(PrologInterfaceRegistryEvent e) {}
 			@Override public void subscriptionAdded(PrologInterfaceRegistryEvent e) {}

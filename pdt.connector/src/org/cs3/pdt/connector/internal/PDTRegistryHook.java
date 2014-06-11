@@ -23,10 +23,9 @@ import java.io.Reader;
 import java.io.Writer;
 
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.RegistryHook;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.connector.RegistryHook;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
@@ -64,7 +63,7 @@ public class PDTRegistryHook implements RegistryHook {
 				if (file.canRead()) {
 					Debug.info("Reading registry file " + file.getCanonicalPath());
 					Reader r = new BufferedReader(new FileReader(file));
-					PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().load(r);
+					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry().load(r);
 				} else {
 					Debug.warning("Registry file " + file.getCanonicalPath() + " could not be read. A new file will be created on exit.");
 				}
@@ -92,7 +91,7 @@ public class PDTRegistryHook implements RegistryHook {
 				try {
 					Debug.info("writing registry to " + f.getCanonicalPath());
 					w = new BufferedWriter(new FileWriter(f));
-					PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().save(w);
+					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry().save(w);
 					w.close();
 				} catch (IOException e) {
 					Debug.rethrow(e);

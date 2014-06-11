@@ -29,7 +29,7 @@ import java.util.Vector;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.cterm.CCompound;
 import org.cs3.prolog.cterm.CNil;
 import org.cs3.prolog.internal.pif.AbstractPrologInterface;
@@ -54,7 +54,7 @@ public class SocketSessionTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel("DEBUG");
-		pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+		pif = Connector.newPrologInterface();
 		pif.start();
 	}
 

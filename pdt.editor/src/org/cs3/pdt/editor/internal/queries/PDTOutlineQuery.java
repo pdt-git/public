@@ -22,13 +22,13 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.editor.internal.structureElements.PrologClause;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologConnectorPredicates;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;

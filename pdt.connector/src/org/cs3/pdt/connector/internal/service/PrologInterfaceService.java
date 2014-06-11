@@ -23,19 +23,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtension;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.service.IPrologInterfaceService;
 import org.cs3.pdt.connector.service.PDTReloadExecutor;
+import org.cs3.pdt.connector.subscription.DefaultSubscription;
+import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.DefaultSubscription;
-import org.cs3.prolog.connector.PrologConnectorPredicates;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -136,7 +135,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	private static final String DEFAULT_PROCESS = "Default Process";
 	
 	private PrologInterface getDefaultPrologInterface() {
-		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
 		Subscription subscription = registry.getSubscription(DEFAULT_PROCESS);
 		if (subscription == null) {
 			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", "Prolog");

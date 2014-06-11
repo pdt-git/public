@@ -16,7 +16,7 @@ package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -30,7 +30,7 @@ public class SocketSessionThrowTest extends TestCase {
 
     @Override
 	protected void setUp() throws Exception {
-      pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+      pif = Connector.newPrologInterface();
       pif.start();
     }
     

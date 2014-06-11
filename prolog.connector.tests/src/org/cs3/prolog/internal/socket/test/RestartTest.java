@@ -18,7 +18,7 @@ package org.cs3.prolog.internal.socket.test;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.internal.pif.socket.JackTheProcessRipper;
 import org.cs3.prolog.internal.session.socket.SocketSession;
 import org.cs3.prolog.pif.PrologInterface;
@@ -27,7 +27,7 @@ public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		PrologInterface pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+		PrologInterface pif = Connector.newPrologInterface();
 		
 		pif.start();
 
@@ -50,7 +50,7 @@ public class RestartTest extends TestCase {
 	
 	public void testRecover_lazy() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+		PrologInterface pif = Connector.newPrologInterface();
 		
 		SocketSession session = (SocketSession) pif.getSession(PrologInterface.LEGACY);
 		long pid = session.getClient().getServerPid();

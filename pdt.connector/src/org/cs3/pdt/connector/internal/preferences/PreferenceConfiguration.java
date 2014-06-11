@@ -26,7 +26,7 @@ import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.prolog.common.PDTConstants;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntime;
+import org.cs3.prolog.connector.Connector;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 
@@ -182,42 +182,42 @@ public class PreferenceConfiguration {
 	}
 	
 	private static void initPreferences(IPreferenceStore store) {
-		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
-		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "");
-		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, "");
-		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
+		store.setDefault(Connector.PREF_INVOCATION, Util.getInvocationCommand());
+		store.setDefault(Connector.PREF_COMMAND_LINE_ARGUMENTS, "");
+		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, "");
+		store.setDefault(Connector.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
 		
-		store.setDefault(PrologRuntime.PREF_HOST, "localhost");
+		store.setDefault(Connector.PREF_HOST, "localhost");
 		
-		store.setDefault(PrologRuntime.PREF_TIMEOUT,15000 );
-		store.setDefault(PrologRuntime.PREF_PORT, 9944);
-		store.setDefault(PrologRuntime.PREF_HIDE_PLWIN, true);
+		store.setDefault(Connector.PREF_TIMEOUT,15000 );
+		store.setDefault(Connector.PREF_PORT, 9944);
+		store.setDefault(Connector.PREF_HIDE_PLWIN, true);
 		
-		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
+		store.setDefault(Connector.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
 	}
 	
 	public static void initWithSWIPreferences(IPreferenceStore store) {
 		initPreferences(store);
-		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference(PDTConstants.DIALECT_SWI));
+		store.setDefault(Connector.PREF_EXECUTABLE, Util.getExecutablePreference(PDTConstants.DIALECT_SWI));
 	}
 
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {
 		initWithSWIPreferences(store);
 
-		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
-		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
+		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
+		store.setDefault(Connector.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
 	}
 
 	public static void initWithYAPPreferences(IPreferenceStore store) {
 		initPreferences(store);
-		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference(PDTConstants.DIALECT_YAP));
+		store.setDefault(Connector.PREF_EXECUTABLE, Util.getExecutablePreference(PDTConstants.DIALECT_YAP));
 	}
 
 	public static void initWithYAPLogtalkPreferences(IPreferenceStore store) {
 		initWithYAPPreferences(store);
 
-		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
-		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
+		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, Util.getLogtalkStartupFile());
+		store.setDefault(Connector.PREF_ENVIRONMENT, Util.getLogtalkEnvironmentVariables());
 	}
 
 }

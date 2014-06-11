@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.cs3.pdt.connector.PrologRuntimeUI;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
 import org.cs3.pdt.connector.util.preferences.MyBooleanFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyDirectoryFieldEditor;
@@ -29,9 +30,7 @@ import org.cs3.pdt.connector.util.preferences.MyStringFieldEditor;
 import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePage;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologRuntime;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.pif.PrologInterface;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -114,19 +113,19 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		Group executableGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		executableGroup.setText("Executable");
 		
-		invocation = new MyStringFieldEditor(PrologRuntime.PREF_INVOCATION, "OS invocation", executableGroup);
+		invocation = new MyStringFieldEditor(Connector.PREF_INVOCATION, "OS invocation", executableGroup);
 		addField(invocation);
 		
 		// eg. xpce or /usr/bin/xpce
-		executable = new MyFileFieldEditor(PrologRuntime.PREF_EXECUTABLE, "Prolog executable", executableGroup);
+		executable = new MyFileFieldEditor(Connector.PREF_EXECUTABLE, "Prolog executable", executableGroup);
 		executable.getLabelControl(executableGroup).setToolTipText("Don't enter quotes, they will be added automatically.");
 		addField(executable);
 		
-		commandLineArguments = new MyStringFieldEditor(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);
+		commandLineArguments = new MyStringFieldEditor(Connector.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);
 		commandLineArguments.getLabelControl(executableGroup).setToolTipText("See SWI-Prolog manual for a list of possible command line arguments.");
 		addField(commandLineArguments);
 		
-		startupFiles = new MyStringFieldEditor(PrologRuntime.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup) {
+		startupFiles = new MyStringFieldEditor(Connector.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup) {
 			@Override
 			protected boolean doCheckState() {
 				String value = getStringValue();
@@ -150,28 +149,28 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		executeablePreviewLabel = new MyLabelFieldEditor(executableGroup, "Executable preview");
 		addField(executeablePreviewLabel);
 		
-		extraEnvironmentVariables = new MyStringFieldEditor(PrologRuntime.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent());
+		extraEnvironmentVariables = new MyStringFieldEditor(Connector.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent());
 		addField(extraEnvironmentVariables);
 		
-		serverLogDir = new MyDirectoryFieldEditor(PrologRuntime.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
+		serverLogDir = new MyDirectoryFieldEditor(Connector.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
 		addField(serverLogDir);
 		
-		timeoutFieldEditor = new MyIntegerFieldEditor(PrologRuntime.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
+		timeoutFieldEditor = new MyIntegerFieldEditor(Connector.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
 		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		addField(timeoutFieldEditor);
 
 		// The host the PIF server is listening on
-		StringFieldEditor host = new MyStringFieldEditor(PrologRuntime.PREF_HOST, "Server host", getFieldEditorParent());
+		StringFieldEditor host = new MyStringFieldEditor(Connector.PREF_HOST, "Server host", getFieldEditorParent());
 		host.setEnabled(false, getFieldEditorParent());
 		addField(host);
 
 		// The port the PIF server is listening on
-		IntegerFieldEditor port = new MyIntegerFieldEditor(PrologRuntime.PREF_PORT, "Server port", getFieldEditorParent());
+		IntegerFieldEditor port = new MyIntegerFieldEditor(Connector.PREF_PORT, "Server port", getFieldEditorParent());
 		port.setEnabled(false, getFieldEditorParent());
 		addField(port);
 		
-		hidePrologWindow = new MyBooleanFieldEditor(PrologRuntime.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent());
+		hidePrologWindow = new MyBooleanFieldEditor(Connector.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent());
 		addField(hidePrologWindow);
 		
 		adjustLayoutForElement(configurationSelector);
@@ -201,10 +200,10 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		super.propertyChange(event);
 		
 		String prefName = ((FieldEditor)event.getSource()).getPreferenceName();
-		if (prefName.equals(PrologRuntime.PREF_INVOCATION) 
-				|| prefName.equals(PrologRuntime.PREF_EXECUTABLE)
-				|| prefName.equals(PrologRuntime.PREF_ADDITIONAL_STARTUP)
-				|| prefName.equals(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS)) {
+		if (prefName.equals(Connector.PREF_INVOCATION) 
+				|| prefName.equals(Connector.PREF_EXECUTABLE)
+				|| prefName.equals(Connector.PREF_ADDITIONAL_STARTUP)
+				|| prefName.equals(Connector.PREF_COMMAND_LINE_ARGUMENTS)) {
 			
 			updateExecuteablePreviewLabelText();
 		}
@@ -248,7 +247,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 
 	private void updatePrologInterfaceExecutables() {
 		String configuration = configurationList.getText();
-		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
 			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());

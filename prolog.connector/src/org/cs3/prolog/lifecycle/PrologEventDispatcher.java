@@ -14,15 +14,19 @@
 
 package org.cs3.prolog.lifecycle;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.prolog.common.QueryUtils;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.load.PrologLibraryManager;
 import org.cs3.prolog.pif.PrologException;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceEvent;
@@ -49,21 +53,22 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	Object eventTicket = new Object();
 
 	private PrologInterface pif;
-
-	protected PrologLibraryManager libraryManager;
 	
 	private HashSet<String> subjects = new HashSet<String>();
 
-	public PrologEventDispatcher(PrologInterface pif,PrologLibraryManager libManager){
+	public PrologEventDispatcher(PrologInterface pif) {
 		this.pif = pif;
-		this.libraryManager = libManager;
 		//make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			@Override
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
-//				FileSearchPathConfigurator.configureFileSearchPath(libraryManager,initSession,new String[]{"pdt.runtime.library.pif"});
-				initSession.queryOnce("use_module(library(pif_observe))");				
+				try {
+					String query = QueryUtils.bT("use_module", Util.quoteAtom(Util.prologFileName(getObserveFile())));
+					initSession.queryOnce(query);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 
 			@Override
@@ -303,13 +308,32 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		String event = (String) e.getBindings().get("Event");
 		fireUpdate(subject, key, event);
 	}
-	
+
 	public Set<String> getSubjects(){
 		Set<String> res = new HashSet<String>();
 		synchronized (subjects) {
 			res.addAll(subjects);
 		}
 		return res;
+	}
+
+	private static File observeFile = null;
+
+	public static File getObserveFile() throws IOException {
+		if (observeFile == null) {
+			String tempDir = System.getProperty("java.io.tmpdir");
+			InputStream resourceAsStream;
+			resourceAsStream = PrologEventDispatcher.class.getResourceAsStream("pif_observe.pl");
+			if (resourceAsStream == null) {
+				throw new RuntimeException("Cannot find pif_observe.pl!");
+			}
+			observeFile = new File(tempDir, "pif_observe.pl");
+			if (observeFile.exists()) {
+				observeFile.delete();
+			}
+			Util.copy(resourceAsStream, new FileOutputStream(observeFile));
+		}
+		return observeFile;
 	}
 
 }

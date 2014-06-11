@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.cs3.prolog.common.PreferenceProvider;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntime;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.internal.pif.AbstractPrologInterface;
 import org.cs3.prolog.internal.pif.ServerStartAndStopStrategy;
 import org.cs3.prolog.internal.session.socket.AsyncSocketSession;
@@ -109,9 +109,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public void initOptions(PreferenceProvider provider) {
 		super.initOptions(provider);
 //		setServerPort(provider.getPreference(PrologRuntime.PREF_PORT));
-		setHidePlwin(provider.getPreference(PrologRuntime.PREF_HIDE_PLWIN));
+		setHidePlwin(provider.getPreference(Connector.PREF_HIDE_PLWIN));
 //		setUseSessionPooling(true);
-		setServerLogDir(provider.getPreference(PrologRuntime.PREF_SERVER_LOGDIR));		
+		setServerLogDir(provider.getPreference(Connector.PREF_SERVER_LOGDIR));		
 
 	}
 	

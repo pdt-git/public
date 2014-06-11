@@ -17,14 +17,14 @@ package org.cs3.prolog.test;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 
 public class XpceTest extends TestCase {
 	public void testXpce() throws  PrologInterfaceException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface plInterface = PrologRuntimePlugin.getDefault().newPrologInterface();
+		PrologInterface plInterface = Connector.newPrologInterface();
 		plInterface.start();
 		try{			
 			plInterface.getSession().queryOnce("help");

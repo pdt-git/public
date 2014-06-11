@@ -17,7 +17,7 @@ package org.cs3.prolog.test;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
@@ -89,7 +89,7 @@ public class LifeCycleHookTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 //		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();
-		this.pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+		this.pif = Connector.newPrologInterface();
 		
 	}
 

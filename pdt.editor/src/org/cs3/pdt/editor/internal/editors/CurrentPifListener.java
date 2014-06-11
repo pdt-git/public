@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.common.Util;
@@ -72,7 +71,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 	private void addPifListener() {
 		if (currentPif != null) {
 			Debug.debug("add edit registry listener for pif " + currentPif.toString());
-			currentDispatcher = new PrologEventDispatcher(currentPif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
+			currentDispatcher = new PrologEventDispatcher(currentPif);
 			try {
 				currentDispatcher.addPrologInterfaceListener(PDTPredicates.PDT_EDIT_HOOK, this);
 			} catch (PrologInterfaceException e) {

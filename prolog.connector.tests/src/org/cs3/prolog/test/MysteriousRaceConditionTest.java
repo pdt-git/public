@@ -17,7 +17,7 @@ package org.cs3.prolog.test;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
@@ -30,7 +30,7 @@ public class MysteriousRaceConditionTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+		pif = Connector.newPrologInterface();
 
 	}
 

@@ -78,7 +78,7 @@
       </page>
    </extension>
    <extension
-         point="org.cs3.prolog.connector.bootstrapContribution">
+         point="org.cs3.pdt.connector.bootstrapContribution">
       <fileContribution
             id="pdt.contextview.fileContribution"
             path="pl/load.pl">

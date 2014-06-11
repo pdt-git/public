@@ -16,26 +16,24 @@
  */
 package org.cs3.prolog.internal.pif;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.cs3.prolog.common.PreferenceProvider;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntime;
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.cterm.CTermUtil;
 import org.cs3.prolog.internal.lifecycle.LifeCycle;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
-import org.cs3.prolog.load.BootstrapPrologContribution;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.pif.StartupStrategy;
 import org.cs3.prolog.session.AsyncPrologSession;
 import org.cs3.prolog.session.Disposable;
 import org.cs3.prolog.session.PrologSession;
@@ -48,7 +46,7 @@ import org.cs3.prolog.session.PrologSession;
 public abstract class AbstractPrologInterface implements PrologInterface {
 
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
-	private List<BootstrapPrologContribution> bootstrapLibraries = new Vector<BootstrapPrologContribution>();
+	private StartupStrategy startupStrategy;
 	private final MyLifeCycle lifecycle;
 
 	/************************************************/
@@ -204,13 +202,13 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	@Override
 	public void initOptions(PreferenceProvider provider) {
-		setHost(provider.getPreference(PrologRuntime.PREF_HOST));
-		setOSInvocation(provider.getPreference(PrologRuntime.PREF_INVOCATION));
-		setExecutablePath(provider.getPreference(PrologRuntime.PREF_EXECUTABLE));
-		setCommandLineArguments(provider.getPreference(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS));
-		setAdditionalStartupFile(provider.getPreference(PrologRuntime.PREF_ADDITIONAL_STARTUP));
-		setEnvironment(provider.getPreference(PrologRuntime.PREF_ENVIRONMENT));
-		setTimeout(provider.getPreference(PrologRuntime.PREF_TIMEOUT));
+		setHost(provider.getPreference(Connector.PREF_HOST));
+		setOSInvocation(provider.getPreference(Connector.PREF_INVOCATION));
+		setExecutablePath(provider.getPreference(Connector.PREF_EXECUTABLE));
+		setCommandLineArguments(provider.getPreference(Connector.PREF_COMMAND_LINE_ARGUMENTS));
+		setAdditionalStartupFile(provider.getPreference(Connector.PREF_ADDITIONAL_STARTUP));
+		setEnvironment(provider.getPreference(Connector.PREF_ENVIRONMENT));
+		setTimeout(provider.getPreference(Connector.PREF_TIMEOUT));
 	}
 
 	/************************************************/
@@ -309,16 +307,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			}
 		}
 
-	}
-
-	@Override
-	public List<BootstrapPrologContribution> getBootstrapLibraries() {
-		return bootstrapLibraries;
-	}
-
-	@Override
-	public void setBootstrapLibraries(List<BootstrapPrologContribution> l) {
-		this.bootstrapLibraries = l;
 	}
 
 	@Override
@@ -649,6 +637,16 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			}
 			consultedFiles.add(fileName);
 		}
+	}
+	
+	@Override
+	public StartupStrategy getStartupStrategy() {
+		return startupStrategy;
+	}
+	
+	@Override
+	public void setStartupStrategy(StartupStrategy startupStrategy) {
+		this.startupStrategy = startupStrategy;
 	}
 
 }
