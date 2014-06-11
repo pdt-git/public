@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.cs3.pdt.connector.PrologRuntimeUI;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnector;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.PDTConstants;
 import org.cs3.prolog.connector.common.Util;
@@ -51,16 +51,16 @@ public class PreferenceConfiguration {
 	private static final String DEFAULT_CONFIGURATION_PREFIX = "pif.configuration.default.";
 	
 	
-	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK, PrologRuntimeUI.CONFIGURATION_YAP, PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK});
+	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PDTConnector.CONFIGURATION_SWI, PDTConnector.CONFIGURATION_SWI_LOGTALK, PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP_LOGTALK});
 	private ArrayList<String> configurations;
 
 	public static void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(PREF_CONFIGURATIONS, PrologRuntimeUI.CONFIGURATION_SWI + ";" + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK + ";" + PrologRuntimeUI.CONFIGURATION_YAP + ";" + PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK);
+		store.setDefault(PREF_CONFIGURATIONS, PDTConnector.CONFIGURATION_SWI + ";" + PDTConnector.CONFIGURATION_SWI_LOGTALK + ";" + PDTConnector.CONFIGURATION_YAP + ";" + PDTConnector.CONFIGURATION_YAP_LOGTALK);
 		
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_SWI, PrologRuntimeUI.CONFIGURATION_SWI);
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK, PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK);
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_YAP, PrologRuntimeUI.CONFIGURATION_YAP);
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK, PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_SWI, PDTConnector.CONFIGURATION_SWI);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_SWI_LOGTALK, PDTConnector.CONFIGURATION_SWI_LOGTALK);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP);
+		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_YAP_LOGTALK, PDTConnector.CONFIGURATION_YAP_LOGTALK);
 	}
 
 	private HashMap<String, PreferenceStore> stores = new HashMap<String, PreferenceStore>();
@@ -85,13 +85,13 @@ public class PreferenceConfiguration {
 	private PreferenceStore createStore(String configuration) {
 		PreferenceStore store = new PreferenceStore(getConfigurationFileName(configuration));
 		String defaultConfiguration = getDefaultConfiguration(configuration);
-		if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_SWI)) {
+		if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_SWI)) {
 			initWithSWIPreferences(store);
-		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_SWI_LOGTALK)) {
+		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_SWI_LOGTALK)) {
 			initWithSWILogtalkPreferences(store);
-		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_YAP)) {
+		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_YAP)) {
 			initWithYAPPreferences(store);
-		} else if (defaultConfiguration.equals(PrologRuntimeUI.CONFIGURATION_YAP_LOGTALK)) {
+		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_YAP_LOGTALK)) {
 			initWithYAPLogtalkPreferences(store);
 		} else {
 			Debug.error("Invalid default configuration " + defaultConfiguration + " of " + configuration);
@@ -104,11 +104,11 @@ public class PreferenceConfiguration {
 	}
 
 	private String getConfigurationFileName(String configuration) {
-		return PrologRuntimeUIPlugin.getDefault().getStateLocation().append(configuration).toString();
+		return PDTConnectorPlugin.getDefault().getStateLocation().append(configuration).toString();
 	}
 	
 	public String getDefaultConfiguration(String configuration) {
-		return PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(DEFAULT_CONFIGURATION_PREFIX + configuration);
+		return PDTConnectorPlugin.getDefault().getPreferenceStore().getString(DEFAULT_CONFIGURATION_PREFIX + configuration);
 	}
 	
 	public List<String> getConfigurations() {
@@ -135,7 +135,7 @@ public class PreferenceConfiguration {
 			}
 			saveConfigurations();
 		}
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(DEFAULT_CONFIGURATION_PREFIX + configuration, defaultConfiguration);
+		PDTConnectorPlugin.getDefault().getPreferenceStore().setValue(DEFAULT_CONFIGURATION_PREFIX + configuration, defaultConfiguration);
 		return true;
 	}
 	
@@ -159,7 +159,7 @@ public class PreferenceConfiguration {
 	
 	private void loadConfigurations() {
 		synchronized (configurations) {
-			for (String configurationId : PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PREF_CONFIGURATIONS).split(";")) {
+			for (String configurationId : PDTConnectorPlugin.getDefault().getPreferenceStore().getString(PREF_CONFIGURATIONS).split(";")) {
 				configurations.add(configurationId);
 			}
 		}
@@ -178,7 +178,7 @@ public class PreferenceConfiguration {
 				buf.append(configuration);
 			}
 		}
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PREF_CONFIGURATIONS, buf.toString());
+		PDTConnectorPlugin.getDefault().getPreferenceStore().setValue(PREF_CONFIGURATIONS, buf.toString());
 	}
 	
 	private static void initPreferences(IPreferenceStore store) {
@@ -193,7 +193,7 @@ public class PreferenceConfiguration {
 		store.setDefault(Connector.PREF_PORT, 9944);
 		store.setDefault(Connector.PREF_HIDE_PLWIN, true);
 		
-		store.setDefault(Connector.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
+		store.setDefault(Connector.PREF_SERVER_LOGDIR, PDTConnectorPlugin.getDefault().getStateLocation().toOSString());
 	}
 	
 	public static void initWithSWIPreferences(IPreferenceStore store) {

@@ -33,7 +33,7 @@ import org.eclipse.ui.IWorkbench;
  * 
  * Clients can overide this Interface to contribute their own
  * PrologContextTracker strategy and make it available to other clients by
- * registering it at the PrologRuntimePlugin's ContextTrackerService. Typically
+ * registering it at the PDTConnector's ContextTrackerService. Typically
  * this is done by extending the extension point prologContextTracker of the
  * pdt.runtime plugin. 
  * 

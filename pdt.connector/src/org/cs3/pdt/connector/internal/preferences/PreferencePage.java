@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.cs3.pdt.connector.PrologRuntimeUI;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnector;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
 import org.cs3.pdt.connector.util.preferences.MyBooleanFieldEditor;
@@ -97,7 +97,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 
 	public PreferencePage() {
 		super(GRID);
-		setPreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION)));
+		setPreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(PDTConnectorPlugin.getDefault().getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION)));
 		setDescription("Select a predefined configuration or define a new one. Each configuration affects all settings on this page.");
 	}
 
@@ -182,7 +182,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		super.initialize();
 		updateExecuteablePreviewLabelText();
 		fillConfigurationList();
-		selectConfiguration(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+		selectConfiguration(PDTConnectorPlugin.getDefault().getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
 	}
 
 	/*
@@ -227,7 +227,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	
 	@Override
 	public boolean performOk() {
-		PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, configurationList.getText());
+		PDTConnectorPlugin.getDefault().getPreferenceStore().setValue(PDTConnector.PREF_CONFIGURATION, configurationList.getText());
 		boolean result = super.performOk();
 		try {
 			((PreferenceStore)getPreferenceStore()).save();
@@ -247,12 +247,12 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 
 	private void updatePrologInterfaceExecutables() {
 		String configuration = configurationList.getText();
-		PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
 			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());
-			if (pif != null && configuration.equals(pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
-				pif.initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault(), configuration));
+			if (pif != null && configuration.equals(pif.getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
+				pif.initOptions(new EclipsePreferenceProvider(PDTConnectorPlugin.getDefault(), configuration));
 			}
 		}
 	}
@@ -314,7 +314,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 					fillConfigurationList();
 					selectConfiguration(defaultId);
 					changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(defaultId));
-					PrologRuntimeUIPlugin.getDefault().getPreferenceStore().setValue(PrologRuntimeUI.PREF_CONFIGURATION, defaultId);
+					PDTConnectorPlugin.getDefault().getPreferenceStore().setValue(PDTConnector.PREF_CONFIGURATION, defaultId);
 				}
 			}
 		});

@@ -13,8 +13,8 @@
 
 package org.cs3.pdt.connector.util;
 
-import org.cs3.pdt.connector.PrologRuntimeUI;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnector;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.preferences.PreferenceConfiguration;
 import org.cs3.prolog.connector.common.PreferenceProvider;
 import org.cs3.prolog.connector.common.logging.Debug;
@@ -30,7 +30,7 @@ public class EclipsePreferenceProvider implements PreferenceProvider {
 		this.plugin = plugin;
 		PreferenceStore preferenceStore = PreferenceConfiguration.getInstance().getPreferenceStore(configurationId);
 		if (preferenceStore == null) {
-			this.store = PreferenceConfiguration.getInstance().getPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+			this.store = PreferenceConfiguration.getInstance().getPreferenceStore(PDTConnectorPlugin.getDefault().getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
 		} else {
 			this.store = preferenceStore;
 		}

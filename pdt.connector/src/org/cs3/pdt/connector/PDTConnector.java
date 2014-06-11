@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.connector;
 
-public class PrologRuntimeUI {
+public class PDTConnector {
 	
 	public static final String PLUGIN_ID = "org.cs3.pdt.connector";
 	public static final String LIB_COMMON = "pdt.runtime.library.common";

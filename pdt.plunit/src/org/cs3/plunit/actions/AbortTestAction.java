@@ -22,7 +22,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
 
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
@@ -48,7 +48,7 @@ public class AbortTestAction implements IObjectActionDelegate {
 		}
 		PrologSession s = null;
 		try {
-			PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
+			PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 			Set<String> keys = registry.getAllKeys();
 			for (String key : keys) {
 				PrologInterface pif = registry.getPrologInterface(key);

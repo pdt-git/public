@@ -17,7 +17,7 @@ package org.cs3.pdt.graphicalviews.focusview;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.eclipse.core.resources.IProject;
@@ -30,7 +30,7 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase {
 	{
 		super(focusView);
 		
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService()
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService()
 			.registerConsultListener(this);
 	}
 	

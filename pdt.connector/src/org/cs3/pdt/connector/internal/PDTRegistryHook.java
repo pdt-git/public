@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.registry.RegistryHook;
 import org.cs3.prolog.connector.common.logging.Debug;
@@ -51,8 +51,8 @@ public class PDTRegistryHook implements RegistryHook {
 	@Override
 	public void addSubscriptions(PrologInterfaceRegistry registry) {
 		try {
-			PrologRuntimeUIPlugin runtimeUIPlugin = PrologRuntimeUIPlugin.getDefault();
-			String pluginID = PrologRuntimeUIPlugin.getPluginId();
+			PDTConnectorPlugin runtimeUIPlugin = PDTConnectorPlugin.getDefault();
+			String pluginID = PDTConnectorPlugin.getPluginId();
 			ISavedState lastState =null;
 			lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(pluginID, new _SaveParticipant());
 
@@ -63,7 +63,7 @@ public class PDTRegistryHook implements RegistryHook {
 				if (file.canRead()) {
 					Debug.info("Reading registry file " + file.getCanonicalPath());
 					Reader r = new BufferedReader(new FileReader(file));
-					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry().load(r);
+					PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().load(r);
 				} else {
 					Debug.warning("Registry file " + file.getCanonicalPath() + " could not be read. A new file will be created on exit.");
 				}
@@ -80,7 +80,7 @@ public class PDTRegistryHook implements RegistryHook {
 		public void saving(ISaveContext context) throws CoreException {
 			switch (context.getKind()) {
 			case ISaveContext.FULL_SAVE:
-				PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
+				PDTConnectorPlugin myPluginInstance = PDTConnectorPlugin.getDefault();
 				// save the plug-in state
 				int saveNumber = context.getSaveNumber();
 				String saveFileName = "registry-" + Integer.toString(saveNumber);
@@ -91,7 +91,7 @@ public class PDTRegistryHook implements RegistryHook {
 				try {
 					Debug.info("writing registry to " + f.getCanonicalPath());
 					w = new BufferedWriter(new FileWriter(f));
-					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry().save(w);
+					PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().save(w);
 					w.close();
 				} catch (IOException e) {
 					Debug.rethrow(e);
@@ -109,7 +109,7 @@ public class PDTRegistryHook implements RegistryHook {
 
 		@Override
 		public void rollback(ISaveContext context) {
-			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
+			PDTConnectorPlugin myPluginInstance = PDTConnectorPlugin.getDefault();
 
 			// since the save operation has failed, delete
 			// the saved state we have just written
@@ -127,7 +127,7 @@ public class PDTRegistryHook implements RegistryHook {
 
 		@Override
 		public void doneSaving(ISaveContext context) {
-			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
+			PDTConnectorPlugin myPluginInstance = PDTConnectorPlugin.getDefault();
 
 			// delete the old saved state since it is not
 			// necessary anymore

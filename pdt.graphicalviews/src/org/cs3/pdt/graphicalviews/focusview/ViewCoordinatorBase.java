@@ -17,7 +17,7 @@ package org.cs3.pdt.graphicalviews.focusview;
 import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -42,7 +42,7 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 		
 		focusView.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 		
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService()
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService()
 			.registerConsultListener(this);
 	}
 	
@@ -118,6 +118,6 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	public void dispose() {
 		focusView.getSite().getWorkbenchWindow().getPartService().removePartListener(this);
 		
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
 	}
 }

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.cs3.pdt.connector.PrologConnectorPredicates;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtension;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
@@ -135,13 +135,13 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	private static final String DEFAULT_PROCESS = "Default Process";
 	
 	private PrologInterface getDefaultPrologInterface() {
-		PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		Subscription subscription = registry.getSubscription(DEFAULT_PROCESS);
 		if (subscription == null) {
 			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", "Prolog");
 			registry.addSubscription(subscription);
 		}
-		PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+		PrologInterface pif = PDTConnectorPlugin.getDefault().getPrologInterface(subscription);
 		return pif;
 	}
 	

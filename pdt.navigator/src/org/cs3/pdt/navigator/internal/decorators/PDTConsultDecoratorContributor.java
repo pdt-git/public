@@ -24,7 +24,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.PDTDecorator;
 import org.cs3.pdt.common.PrologInterfaceStartListener;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.UIUtils;
@@ -46,8 +46,8 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 public class PDTConsultDecoratorContributor extends BaseLabelProvider implements PDTDecorator, ILightweightLabelDecorator, ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
 
 	public PDTConsultDecoratorContributor() {
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
 		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 		PDTCommonPlugin.getDefault().addDecorator(this);
 	}
@@ -221,8 +221,8 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	
 	@Override
 	public void dispose() {
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
 		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 		PDTCommonPlugin.getDefault().removeDecorator(this);
 		super.dispose();

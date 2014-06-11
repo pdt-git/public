@@ -17,7 +17,7 @@ package org.cs3.pdt.editor.internal.editors;
 import java.io.File;
 
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.editor.internal.ImageRepository;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
@@ -108,7 +108,7 @@ public class QLFEditor extends MultiPageEditorPart {
 					@Override
 					public void handleEvent(Event event) {
 
-						PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+						PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
 					}
 					
 				});

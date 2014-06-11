@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.cs3.pdt.connector.internal.DefaultPrologContextTrackerService;
@@ -70,13 +68,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup {
+public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	private final static String PLUGIN_ID = "org.cs3.prolog.connector.ui";
 
 	// The shared instance.
-	private static PrologRuntimeUIPlugin plugin;
+	private static PDTConnectorPlugin plugin;
 	// Resource bundle.
-	private ResourceBundle resourceBundle;
 
 	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
@@ -92,45 +89,25 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	private final static Object registryMux = new Object();
 
 	
-	public PrologRuntimeUIPlugin() {
+	public PDTConnectorPlugin() {
 		super();
 		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.runtime.PrologRuntimePluginResources");
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
 	}
 	
 	/**
 	 * Returns the shared instance.
 	 */
-	public static PrologRuntimeUIPlugin getDefault() {
+	public static PDTConnectorPlugin getDefault() {
 		return plugin;
 	}
 	
 	/**
-	 * Returns the id of the PrologRuntimeUIPlugin
-	 * @return id of the PrologRuntimeUIPlugin
+	 * Returns the id of the PDTConnectorPlugin
+	 * @return id of the PDTConnectorPlugin
 	 */
 	public static String getPluginId() {
 		return PLUGIN_ID;
 	}
-
-	/**
-	 * Returns the string from the plugin's resource bundle, or 'key' if not
-	 * found.
-	 */
-	public static String getResourceString(String key) {
-		ResourceBundle bundle = getDefault().getResourceBundle();
-		try {
-			return (bundle != null) ? bundle.getString(key) : key;
-		} catch (MissingResourceException e) {
-			return key;
-		}
-	}
-
-
 
 	public ResourceFileLocator getResourceLocator() {
 		if (resourceLocator == null){
@@ -201,18 +178,11 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		PrologInterface prologInterface = null;
 		
 		prologInterface = Connector.newPrologInterface(name);
-		prologInterface.setAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE, configuration);
+		prologInterface.setAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE, configuration);
 		prologInterface.initOptions(new EclipsePreferenceProvider(this, configuration));
 		prologInterface.setStartupStrategy(new BootstrapStartupStrategy());
 		
 		return prologInterface;
-	}
-
-	/**
-	 * Returns the plugin's resource bundle,
-	 */
-	public ResourceBundle getResourceBundle() {
-		return resourceBundle;
 	}
 
 	/**
@@ -243,7 +213,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	 */
 	protected void registerStaticTrackers() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, Connector.EP_TRACKERS);
+		IExtensionPoint point = registry.getExtensionPoint(PDTConnector.PLUGIN_ID, Connector.EP_TRACKERS);
 		if (point == null) {
 			Debug.error("could not find the extension point " + Connector.EP_TRACKERS);
 			throw new RuntimeException("could not find the extension point " + Connector.EP_TRACKERS);
@@ -319,7 +289,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	 * @throws PrologInterfaceException
 	 */
 	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(key, getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+		return getPrologInterface(key, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
 	}
 	
 	public PrologInterface getPrologInterface(String key, String configuration) {
@@ -340,7 +310,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	 * @throws PrologInterfaceException
 	 */
 	public PrologInterface getPrologInterface(Subscription s) {
-		return getPrologInterface(s, getPreferenceStore().getString(PrologRuntimeUI.PREF_CONFIGURATION));
+		return getPrologInterface(s, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
 	}
 	
 	public PrologInterface getPrologInterface(Subscription s, String configuration) {
@@ -458,10 +428,10 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	
 	private static void registerStaticLibraries() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, PrologRuntimeUI.EP_PROLOG_LIBRARY);
+		IExtensionPoint point = registry.getExtensionPoint(PDTConnector.PLUGIN_ID, PDTConnector.EP_PROLOG_LIBRARY);
 		if (point == null) {
-			Debug.error("could not find the extension point " + PrologRuntimeUI.EP_PROLOG_LIBRARY);
-			throw new RuntimeException("could not find the extension point " + PrologRuntimeUI.EP_PROLOG_LIBRARY);
+			Debug.error("could not find the extension point " + PDTConnector.EP_PROLOG_LIBRARY);
+			throw new RuntimeException("could not find the extension point " + PDTConnector.EP_PROLOG_LIBRARY);
 		}
 		IExtension[] extensions = point.getExtensions();
 
@@ -576,10 +546,10 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 //	}
 	protected void registerStaticHooks() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, PrologRuntimeUI.EP_HOOKS);
+		IExtensionPoint point = registry.getExtensionPoint(PDTConnector.PLUGIN_ID, PDTConnector.EP_HOOKS);
 		if (point == null) {
-			Debug.error("could not find the extension point " + PrologRuntimeUI.EP_HOOKS);
-			throw new RuntimeException("could not find the extension point " + PrologRuntimeUI.EP_HOOKS);
+			Debug.error("could not find the extension point " + PDTConnector.EP_HOOKS);
+			throw new RuntimeException("could not find the extension point " + PDTConnector.EP_HOOKS);
 		}
 		IExtension[] extensions = point.getExtensions();
 		try {
@@ -614,11 +584,11 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 	private void registerStaticBootstrapContributions() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, PrologRuntimeUI.EP_BOOTSTRAP_CONTRIBUTION);
+		IExtensionPoint point = registry.getExtensionPoint(PDTConnector.PLUGIN_ID, PDTConnector.EP_BOOTSTRAP_CONTRIBUTION);
 
 		if (point == null) {
-			Debug.error("could not find the extension point " + PrologRuntimeUI.EP_BOOTSTRAP_CONTRIBUTION);
-			throw new RuntimeException("could not find the extension point " + PrologRuntimeUI.EP_BOOTSTRAP_CONTRIBUTION);
+			Debug.error("could not find the extension point " + PDTConnector.EP_BOOTSTRAP_CONTRIBUTION);
+			throw new RuntimeException("could not find the extension point " + PDTConnector.EP_BOOTSTRAP_CONTRIBUTION);
 		}
 
 		for (IExtension extension : point.getExtensions()) {

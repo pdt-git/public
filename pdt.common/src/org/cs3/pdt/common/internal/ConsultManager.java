@@ -7,7 +7,7 @@ import java.util.List;
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PrologInterfaceStartListener;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtension;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
@@ -60,7 +60,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 				ArrayList<IFile> files = new ArrayList<IFile>();
 				ArrayList<IFile> entryPointFiles = new ArrayList<IFile>();
 				collectFiles(consultedFiles, files);
-				IPrologInterfaceServiceExtension service = (IPrologInterfaceServiceExtension) PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService();
+				IPrologInterfaceServiceExtension service = (IPrologInterfaceServiceExtension) PDTConnectorPlugin.getDefault().getPrologInterfaceService();
 				if (onlyEntryPoints) {
 					filterEntryPoints(files, entryPointFiles);
 					service.consultFilesSilent(entryPointFiles, pif);

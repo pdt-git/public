@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.cs3.pdt.common.internal.ConsultManager;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistryListener;
@@ -113,7 +113,7 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 				PDTCommonPlugin.this.notifyPifStartHooks(pif);
 			}
 		};
-		PrologInterfaceRegistry registry = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		registry.addPrologInterfaceRegistryListener(new PrologInterfaceRegistryListener() {
 			@Override public void subscriptionRemoved(PrologInterfaceRegistryEvent e) {}
 			@Override public void subscriptionAdded(PrologInterfaceRegistryEvent e) {}
@@ -129,7 +129,7 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		}
 		ConsultManager consultManager = new ConsultManager();
 		registerPifStartListener(consultManager);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(consultManager);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(consultManager);
 	}
 	
 	private void reconfigureDebugOutput() throws FileNotFoundException {

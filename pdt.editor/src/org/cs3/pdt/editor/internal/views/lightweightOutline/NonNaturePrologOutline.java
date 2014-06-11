@@ -31,7 +31,7 @@ import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.common.metadata.SourceLocation;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
@@ -157,8 +157,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		hookContextMenu(parent);
 		setInput(editor.getEditorInput());
 
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 	}
 
@@ -289,8 +289,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	@Override
 	public void dispose() {
 		super.dispose();
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
 		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 		contentProvider.dispose();
 		model.dispose();

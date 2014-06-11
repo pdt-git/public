@@ -17,7 +17,7 @@ package org.cs3.pdt.editor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.IPrologInterfaceService;
 import org.cs3.pdt.connector.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.connector.util.ErrorMessageProvider;
@@ -101,7 +101,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 		try {
 			super.start(context);
 			
-			IPrologInterfaceService prologInterfaceService = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService();
+			IPrologInterfaceService prologInterfaceService = PDTConnectorPlugin.getDefault().getPrologInterfaceService();
 			CurrentPifListener pifListener = new CurrentPifListener();
 			prologInterfaceService.registerActivePrologInterfaceListener(pifListener);
 			pifListener.activePrologInterfaceChanged(prologInterfaceService.getActivePrologInterface());

@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.editor.quickfix;
 
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
@@ -120,7 +120,7 @@ public class PDTQuickFix implements IMarkerResolution {
 					if (op.run(shell, "") != IDialogConstants.CANCEL_ID){
 						// changes are already performed by the dialog
 						file.refreshLocal(IResource.DEPTH_INFINITE, null);
-						PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(file);
+						PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(file);
 //						PLMarkerUtils.updateFileMarkers(file);
 					}
 				} catch (InterruptedException e) {
@@ -129,7 +129,7 @@ public class PDTQuickFix implements IMarkerResolution {
 				textFileChange.perform(new NullProgressMonitor());
 
 				file.refreshLocal(IResource.DEPTH_INFINITE, null);
-				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(file);
+				PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(file);
 //				PLMarkerUtils.updateFileMarkers(file);
 			}
 		} catch (NumberFormatException e1) {

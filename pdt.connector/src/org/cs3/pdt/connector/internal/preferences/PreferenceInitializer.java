@@ -13,8 +13,8 @@
 
 package org.cs3.pdt.connector.internal.preferences;
 
-import org.cs3.pdt.connector.PrologRuntimeUI;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnector;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -23,7 +23,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-	protected PrologRuntimeUIPlugin plugin;
+	protected PDTConnectorPlugin plugin;
 	protected IPreferenceStore store;
 	
 	
@@ -35,34 +35,13 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	@Override
 	public void initializeDefaultPreferences() {
-		plugin = PrologRuntimeUIPlugin.getDefault();
+		plugin = PDTConnectorPlugin.getDefault();
 		store = plugin.getPreferenceStore();
 
-		store.setDefault(PrologRuntimeUI.PREF_CONFIGURATION, PrologRuntimeUI.CONFIGURATION_SWI);
+		store.setDefault(PDTConnector.PREF_CONFIGURATION, PDTConnector.CONFIGURATION_SWI);
 		PreferenceConfiguration.initializeDefaultPreferences(store);
 		
 		PreferenceConfiguration.initWithSWIPreferences(store);
-		
-		// TODO: replace configuration of file_search_path for consult_server with bootstrap contribution, the library manager is an unnecessary complex concept for the purpose
-//		store.setDefault(PrologRuntime.PREF_FILE_SEARCH_PATH, PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
-//		
-//		store.setDefault(PrologRuntime.PREF_INVOCATION, Util.getInvocationCommand());
-//		store.setDefault(PrologRuntime.PREF_EXECUTABLE, Util.getExecutablePreference());
-//		store.setDefault(PrologRuntime.PREF_COMMAND_LINE_ARGUMENTS, Util.getStackCommandLineParameters());
-//		store.setDefault(PrologRuntime.PREF_ADDITIONAL_STARTUP, "");
-//		store.setDefault(PrologRuntime.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());
-//		
-//		store.setDefault(PrologRuntime.PREF_HOST, "localhost");
-//		
-//		store.setDefault(PrologRuntime.PREF_TIMEOUT,15000 );
-//		store.setDefault(PrologRuntime.PREF_PORT, 9944);
-//		store.setDefault(PrologRuntime.PREF_HIDE_PLWIN, true);
-//		
-//		store.setDefault(PrologRuntime.PREF_GENERATE_FACTBASE, false);
-//		store.setDefault(PrologRuntime.PREF_META_PRED_ANALYSIS, false);
-//		
-//		store.setDefault(PrologRuntime.PREF_SERVER_LOGDIR, PrologRuntimeUIPlugin.getDefault().getStateLocation().toOSString());
-
 	}
 
 	

@@ -24,8 +24,8 @@ import java.util.Set;
 import org.cs3.pdt.connector.PrologContextTracker;
 import org.cs3.pdt.connector.PrologContextTrackerListener;
 import org.cs3.pdt.connector.PrologContextTrackerService;
-import org.cs3.pdt.connector.PrologRuntimeUI;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnector;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.console.PDTConsole;
@@ -116,7 +116,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			getCreatedMenu().dispose();
 		}
 		setCreatedMenu(new Menu(parent));
-		PrologContextTracker[] trackers = PrologRuntimeUIPlugin.getDefault()
+		PrologContextTracker[] trackers = PDTConnectorPlugin.getDefault()
 				.getContextTrackerService().getContextTrackers();
 
 		createContextUnifiedAction(getCreatedMenu(), trackers);
@@ -140,7 +140,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			getCreatedMenu().dispose();
 		}
 		setCreatedMenu(new Menu(parent));
-		PrologContextTracker[] trackers = PrologRuntimeUIPlugin.getDefault()
+		PrologContextTracker[] trackers = PDTConnectorPlugin.getDefault()
 				.getContextTrackerService().getContextTrackers();
 
 		createContextUnifiedAction(getCreatedMenu(), trackers);
@@ -173,7 +173,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	// PIF Selection part
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
 		List<String> sortedKeys = new ArrayList<String>();
 		
@@ -267,7 +267,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			@Override
 			public void run() {
 				if (this.isChecked())
-					setPrologInterface(PrologRuntimeUIPlugin.getDefault()
+					setPrologInterface(PDTConnectorPlugin.getDefault()
 							.getPrologInterface(key));
 				if(!unifiedTrackerEnabled) SelectContextPIFAutomatedAction.this.setImageDescriptor(ImageRepository
 						.getImageDescriptor(ImageRepository.MANUAL_MODE));
@@ -296,7 +296,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			activeTrackers = new HashSet<String>();
 			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(
 					PDTConsole.PREF_CONTEXT_TRACKERS, ""), ",", activeTrackers);
-			PrologContextTrackerService trackerService = PrologRuntimeUIPlugin
+			PrologContextTrackerService trackerService = PDTConnectorPlugin
 					.getDefault().getContextTrackerService();
 			for (Iterator<String> iter = activeTrackers.iterator(); iter.hasNext();) {
 				String id = iter.next();
@@ -355,7 +355,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 		for (Iterator<String> it = getActiveTrackers().iterator(); it.hasNext();) {
 			String trackerId = it.next();
-			PrologContextTracker tracker = PrologRuntimeUIPlugin.getDefault()
+			PrologContextTracker tracker = PDTConnectorPlugin.getDefault()
 					.getContextTrackerService().getContextTracker(trackerId);
 			if (tracker == null) {
 				return null;
@@ -386,7 +386,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
 			setToolTipText("no pif selected");
@@ -414,7 +414,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		
 		StringBuffer buf = new StringBuffer();
 
-		Object configuration = reg.getPrologInterface(key).getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);
+		Object configuration = reg.getPrologInterface(key).getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE);
 		if (configuration != null) {
 			buf.append(configuration.toString().replaceAll("&", "&&"));
 			buf.append(": ");

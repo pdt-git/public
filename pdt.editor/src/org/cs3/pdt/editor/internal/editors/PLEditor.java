@@ -28,7 +28,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
@@ -147,9 +147,9 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			
 			IFile currentIFile = getCurrentIFile();
 			if (currentIFile != null) {
-				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
+				PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
 			} else {
-				PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
+				PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
 			}
 		}
 		
@@ -361,8 +361,8 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			}
 		});
 		
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
 		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 	}
 
@@ -427,9 +427,9 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			public void run() {
 				IFile currentIFile = getCurrentIFile();
 				if (currentIFile != null) {
-					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
+					PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(currentIFile);
 				} else {
-					PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
+					PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(getPrologFileName());
 				}
 //				new ConsultAction().consultFromActiveEditor();
 ////				addProblemMarkers();
@@ -1390,8 +1390,8 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	@Override
 	public void dispose() {
 		super.dispose();
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
-		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
 		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 	}
 

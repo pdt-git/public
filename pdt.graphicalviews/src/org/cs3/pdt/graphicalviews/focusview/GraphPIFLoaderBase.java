@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.preferences.PredicateVisibilityPreferences;
 import org.cs3.prolog.connector.common.ResourceFileLocator;
@@ -44,7 +44,7 @@ public abstract class GraphPIFLoaderBase {
 	public GraphPIFLoaderBase(PDTGraphView view, String helpFileName) {
 		this.view = view;
 		
-		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
+		PDTConnectorPlugin plugin = PDTConnectorPlugin.getDefault();
 		ResourceFileLocator locator = plugin.getResourceLocator();
 		helpFile = locator.resolve(helpFileName);
 	}

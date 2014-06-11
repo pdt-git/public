@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.common.search.SearchConstants;
-import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.Util;
@@ -432,7 +432,7 @@ public class PDTCommonUtil {
 	}
 	
 	public static PrologInterface getActivePrologInterface() {
-		return PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+		return PDTConnectorPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
 	}
 
 }
