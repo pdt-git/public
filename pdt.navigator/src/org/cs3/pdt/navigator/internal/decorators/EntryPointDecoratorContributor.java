@@ -17,10 +17,9 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTDecorator;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.navigator.internal.ImageRepository;
-import org.cs3.prolog.common.OptionProviderEvent;
-import org.cs3.prolog.common.OptionProviderListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.IDecoration;
@@ -28,7 +27,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class EntryPointDecoratorContributor implements ILightweightLabelDecorator, OptionProviderListener {
+public class EntryPointDecoratorContributor implements ILightweightLabelDecorator, PDTDecorator {
 
 	private static final String ENTRY_POINT_SUFFIX = " [entry point]";
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
@@ -88,11 +87,6 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 		
 		
 	}
-	
-	@Override
-	public void valuesChanged(OptionProviderEvent e) {
-		fireLabelProviderChanged();
-	}
 
 	private void fireLabelProviderChanged() {
 		final LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
@@ -109,6 +103,11 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 				}
 			});
 		}
+	}
+
+	@Override
+	public void updateDecorator() {
+		fireLabelProviderChanged();
 	}
 
 }

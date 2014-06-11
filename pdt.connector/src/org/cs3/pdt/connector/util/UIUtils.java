@@ -103,7 +103,6 @@ public final class UIUtils {
 	}
 
 	public static IFile getFileInActiveEditor() {
-		// Modified by Mark Schmatz - added try-catch block
 		try {
 			return (IFile) new _SyncReturn() {
 				@Override

@@ -22,14 +22,13 @@ import java.util.Map;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.PDTDecorator;
 import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.navigator.internal.ImageRepository;
-import org.cs3.prolog.common.OptionProviderEvent;
-import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.pif.PrologInterface;
@@ -44,7 +43,7 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class PDTConsultDecoratorContributor extends BaseLabelProvider implements OptionProviderListener, ILightweightLabelDecorator, ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
+public class PDTConsultDecoratorContributor extends BaseLabelProvider implements PDTDecorator, ILightweightLabelDecorator, ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
 
 	public PDTConsultDecoratorContributor() {
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
@@ -127,7 +126,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	}
 
     @Override
-    public void valuesChanged(OptionProviderEvent e) {
+    public void updateDecorator() {
     	fireLabelProviderChanged();
     }
     

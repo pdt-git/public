@@ -23,7 +23,6 @@ import org.cs3.pdt.connector.PrologRuntimeUIPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistryListener;
-import org.cs3.prolog.common.OptionProviderListener;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.lifecycle.LifeCycleHook;
 import org.cs3.prolog.pif.PrologInterface;
@@ -219,19 +218,19 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		}
 	}
 
-	private Set<OptionProviderListener> decorators = new HashSet<OptionProviderListener>();
+	private Set<PDTDecorator> decorators = new HashSet<>();
 	
-	public void addDecorator(OptionProviderListener decorator) {
+	public void addDecorator(PDTDecorator decorator) {
 		decorators.add(decorator);
 	}
 	
-	public void removeDecorator(OptionProviderListener decorator) {
+	public void removeDecorator(PDTDecorator decorator) {
 		decorators.remove(decorator);
 	}
 	
 	public void notifyDecorators() {
-		for (OptionProviderListener d : decorators) {
-			d.valuesChanged(null);
+		for (PDTDecorator d : decorators) {
+			d.updateDecorator();
 		}
 	}
 	
