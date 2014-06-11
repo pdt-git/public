@@ -29,7 +29,7 @@ public class LazyStartupRaceTest extends TestCase {
          Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 	     
 //	       pif=PrologInterfaceFactory.newInstance().create();
-	      pif=Connector.newPrologInterface();
+	      pif=Connector.newUninitializedPrologProcess();
 	      
 	    }
 	    

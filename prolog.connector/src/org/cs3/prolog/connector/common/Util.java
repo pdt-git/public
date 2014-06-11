@@ -19,11 +19,9 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.util.Collection;
@@ -32,10 +30,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
-import org.cs3.prolog.connector.internal.process.socket.SocketPrologInterface;
-import org.cs3.prolog.connector.process.DefaultStartupStrategy;
-import org.cs3.prolog.connector.process.PrologInterface;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -222,21 +216,6 @@ public class Util {
 		}
 	}
 
-
-	/**
-	 * normalize String for Windows system
-	 *  
-	 * @param s the String
-	 * @return normalized String
-	 */
-	public static String normalizeOnWindows(String s) {
-		boolean windowsPlattform = isWindows();
-		if (windowsPlattform) {
-			s = s.replace('\\', '/').toLowerCase();
-		}
-		return s;
-	}
-
 	/**
 	 * checks if current OS is Windows
 	 * 
@@ -258,26 +237,13 @@ public class Util {
 	}
 
 	/**
-	 * normalize a Prolog filename
-	 * @param f the file
-	 * @return normalized path to the file
-	 */
-	public static String prologFileName(File f) {
-		try {
-			return normalizeOnWindows(f.getCanonicalPath());
-		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-	}
-
-	/**
 	 * Read InputStream to String
 	 * 
 	 * @param in the InputStream
 	 * @return String representation
 	 * @throws IOException
 	 */
-	public static String toString(InputStream in) throws IOException {
+	public static String readInputStreamToString(InputStream in) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024];
 		int read = in.read(buf);
@@ -287,9 +253,6 @@ public class Util {
 		}
 		return out.toString();
 	}
-
-	// specify buffer size for extraction
-	static final int BUFFER = 2048;
 
 	/**
 	 * escapes special characters in a String
@@ -393,17 +356,6 @@ public class Util {
 		return port;
 	}
 
-	/**
-	 * quote atom
-	 * 
-	 * @param term unquoted atom
-	 * @return quoted atom
-	 */
-	public static String quoteAtom(String term) {
-
-		return "'" + term.replace("'", "\\'") + "'";
-	}
-
 	public static String splice(Collection<String> c, String delim) {
 		if (c != null && !c.isEmpty()) {
 			StringBuffer sb = new StringBuffer();
@@ -416,8 +368,8 @@ public class Util {
 			}
 			return sb.toString();
 		}
+		
 		return "";
-
 	}
 	
 	/**
@@ -570,6 +522,7 @@ public class Util {
 	}
 
 	public static void split(String string, String search, Collection<String> results) {
+		// this method can NOT be replaced by String.split because the results differ (empty strings, trim)  
 		if (string == null) {
 			return;
 		}
@@ -586,27 +539,13 @@ public class Util {
 	}
 
 	public static String[] split(String string, String search) {
+		// this method can NOT be replaced by String.split because the results differ (empty strings, trim)
 		Vector<String> v = new Vector<String>();
 		split(string, search, v);
 		return v.toArray(new String[v.size()]);
 
 	}
-
-	public static String hideStreamHandles(String string, String replace) {
-		int i = -1;
-		String search = "$stream(";
-		StringBuffer sb = new StringBuffer();
-		while ((i = string.indexOf(search, 0)) >= 0) {
-			sb.append(string.substring(0, i));
-			sb.append(replace);
-			int j = string.indexOf(')', i + search.length());
-			string = string.substring(j + 1);
-		}
-		sb.append(string);
-		return sb.toString();
-
-	}
-
+	
 	public static String splice(Object[] c, String delim) {
 		if (c != null && c.length > 0) {
 			StringBuffer sb = new StringBuffer();
@@ -627,269 +566,6 @@ public class Util {
 		return (flags & set) == set;
 	}
 	
-	
-	public static String guessEnvironmentVariables() {
-		if (isMacOS()) {
-			String home = System.getProperty("user.home");
-			return "DISPLAY=:0.0, HOME=" + home;
-		}
-		return "";
-	}
-
-	
-	public static String getInvocationCommand() {
-		if (isWindows()) {
-			return "cmd.exe /c start \"cmdwindow\" /min ";
-		} else {
-			return "";
-		}
-	}
-
-	
-	public static String getExecutablePreference() {
-		return getExecutablePreference(PDTConstants.DIALECT_SWI);
-	}
-	
-	public static String getExecutablePreference(String dialect) {
-		if (PDTConstants.DIALECT_SWI.equals(dialect)) {
-			if (isWindows()) {
-				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
-			} else {
-				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
-			}
-		} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
-			if (isWindows()) {
-				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
-			} else {
-				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
-			}
-		} else {
-			return "";
-		}
-	}
-	
-	/**
-	 * Finds the current SWI-Prolog executable for UNIX/BSD-BASED OS
-	 * @param unixCommandLineExecutables 
-	 * @return the complete path of the executable otherwise it will return xpce
-	 */
-	public static String getUnixExecutable(String unixCommandLineExecutables) {
-		String[] default_exec = unixCommandLineExecutables.split(",");
-		
-		// TODO shall we look for the env. variables as we do for Windows ?
-		String[] appendPath = null;
-
-		// Hack to resolve the issue of locating xpce in MacOS
-		if (isMacOS()) {
-			appendPath = new String[1];
-			appendPath[0] = "PATH=$PATH:" + System.getProperty("user.home") + "/bin:/opt/local/bin";
-		}
-
-		try {
-			
-			for (String exec : default_exec) {
-
-				Process process = Runtime.getRuntime().exec(
-						"which " + exec, appendPath);
-	
-				if (process == null)
-					return null;
-	
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						process.getInputStream()));
-				String path = br.readLine();
-	
-				if (path == null || path.startsWith("no " + default_exec))
-					continue;
-				else {
-					return path;
-				}
-			}
-			return default_exec[0];
-
-		} catch (IOException e) {
-
-			return default_exec[0];
-		}
-	}
-
-	/**
-	 * @author Hasan Abdel Halim
-	 * 
-	 * Finds the current SWI-Prolog executable for Windows OS
-	 * @param executables 
-	 * @return the complete path of the executable otherwise it will return plwin
-	 */
-	public static String getWindowsExecutable(String executables) {
-		String[] default_exec = executables.split(",");
-		String plwin = null;
-
-		String path;
-		try {
-
-			Process process = Runtime.getRuntime().exec(
-					"cmd.exe /c echo %PATH%");
-
-			if (process == null)
-				return default_exec[0];
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					process.getInputStream()));
-			path = br.readLine();
-
-			if (path == null)
-				return default_exec[0];
-
-			// TODO just search in case of executable was not found.
-			String[] paths = split(path, ";");
-			File exeFile = null;
-
-			for (int i = 0; i < paths.length; i++) {
-				
-				for (String exec : default_exec) {
-					if (exec.indexOf(".exe") == -1)
-						exec += ".exe";
-
-					String currPath = paths[i] + "\\" + exec;
-					exeFile = new File(currPath);
-
-					if (exeFile.exists()) {
-						plwin = currPath;
-						break;
-					}
-				}
-				if(plwin!=null){
-					break;
-				}
-			}
-			if(plwin== null){
-				return default_exec[0];
-			}
-			return plwin;
-
-		} catch (IOException e) {
-
-			return default_exec[0];
-		}
-	}
-
-	/**
-	 * @param c
-	 * @return
-	 */
-	public static boolean isVarChar(char c) {
-		if (c == '_')
-			return true;
-		if (c >= 'A' && c <= 'Z')
-			return true;
-		if (c >= 'a' && c <= 'z')
-			return true;
-		if (c >= '0' && c <= '9')
-			return true;
-		return false;
-	}
-
-	/**
-	 * @param c
-	 * @return true if prefix is a variable prefix (upper case letter or underscore)
-	 */
-	public static boolean isVarPrefix(char c) {
-		return (Character.isUpperCase(c) || c == '_');
-	}
-	
-	/**
-	 * @param prefix
-	 * @return true if prefix is a functor prefix (lower case letter)
-	 */
-	public static boolean isFunctorPrefix(String prefix) {
-		if (prefix == null | prefix.length() == 0)
-			return false;
-		if (prefix.charAt(0) >= 'a' && prefix.charAt(0) <= 'z')
-			return true;
-	
-		return false;
-	}
-
-	/**
-	 * @param prefix
-	 * @return
-	 */
-	public static boolean isVarPrefix(String prefix) {
-		if (prefix.length() == 0)
-			return false;
-		return isVarPrefix(prefix.charAt(0));
-	}
-
-	/**
-	 * Returns true if c is a valid character as part of a Prolog
-	 * predicate name that is NOT enclosed in simple quotes.
-	 * @param c character in question
-	 * @return 
-	 */
-	static public boolean isNormalPredicateNameChar(char c) {
-		if (c >= 'a' && c <= 'z') return true;
-		if (c >= '0' && c <= '9') return true;
-		if (c >= 'A' && c <= 'Z') return true;
-		if (c == '_' || c == ':')  return true;
-		return false;
-	}
-
-	/**
-	 * Returns true if c is a character that may be contained in a Prolog
-	 * predicate name that IS enclosed in simple quotes.
-	 * @param c character in question
-	 * @return 
-	 */
-	static public boolean isSpecialPredicateNameChar(char c) {
-		return (c == '\''  
-			 || c == '\\'
-			 || c == '.' 
-			 || c == '+' 
-			 || c == '-' 
-			 || c == '*' 
-             || c == '$'
-        // TODO: add all the other special characters!
-		);
-	}
-
-	
-	/**
-	 * Returns true if c is a valid character as part of a Prolog
-	 * predicate name (including module definition).
-	 * @param c character in question
-	 * @return 
-	 */
-	public static boolean isPredicateNameChar(char c) {
-		return (isNormalPredicateNameChar(c) || isSpecialPredicateNameChar(c));
-	}
-
-	public static boolean isNonQualifiedPredicateNameChar(char c) {
-		return isPredicateNameChar(c) && c != ':';
-	}
-
-	public static boolean isFunctorChar(char c) {
-		if (c >= 'a' && c <= 'z')
-			return true;
-		if (c >= '0' && c <= '9')
-			return true;
-		if (c >= 'A' && c <= 'Z')
-			return true;
-		if (c == '_')
-			return true;
-	
-		return false;
-	}
-
-
-	public static boolean isSingleSecondChar(char c) {
-		if (c >= '0' && c <= '9')
-			return true;
-		if (c >= 'A' && c <= 'Z')
-			return true;
-		return false;
-	}
-
-
 	/** 
 	 * read text from file to String
 	 * 
@@ -916,98 +592,7 @@ public class Util {
 		}
 		return buf.toString();
 	}
-
-	public static String createExecutable(String invocation, String execution, String commandLineArguments, String startupFiles) {
-		StringBuilder executable = new StringBuilder();
-		if (invocation != null) {
-			executable.append(invocation);
-			executable.append(" ");
-		}
-		if (isWindows()) {
-			executable.append("\"");
-		}
-		executable.append(execution);
-		if (isWindows()) {
-			executable.append("\"");
-		}
-		
-		if (commandLineArguments != null && !commandLineArguments.isEmpty() && !commandLineArguments.trim().isEmpty()) {
-			executable.append(" ");
-			executable.append(commandLineArguments);
-		}
-		if (startupFiles != null && !startupFiles.isEmpty() && !startupFiles.trim().isEmpty()) {
-			executable.append(" -s ");
-			executable.append(startupFiles);
-		}
-		return executable.toString();
-	}
-
-	/**
-	 * quote atom if it isn't already quoted
-	 * @param term atom (quoted or unquoted)
-	 * @return quoted atom
-	 */
-
-	public static String quoteAtomIfNeeded(String term) {
-		if (term.startsWith("'") && term.endsWith("'")) {
-			return term;
-		} else {
-			return "'" + term.replace("'", "\\'") + "'";
-		}
-	}
-
-	/**
-	 * 
-	 * @return a new standalone Prolog Interface
-	 * @throws IOException
-	 */
-	public static PrologInterface newStandalonePrologInterface() throws IOException {
-		return newStandalonePrologInterface(null);
-	}
 	
-	/**
-	 * 
-	 * @param executable
-	 * @return a new standalone Prolog Interface
-	 * @throws IOException
-	 */
-	public static PrologInterface newStandalonePrologInterface(String executable) throws IOException {
-		SocketPrologInterface pif = new SocketPrologInterface(null);
-		pif.setStartupStrategy(new DefaultStartupStrategy());
-		pif.setOSInvocation(getInvocationCommand());
-		if (executable == null) {
-			pif.setExecutablePath(getExecutablePreference());
-		} else {
-			pif.setExecutablePath(executable);
-		}
-		pif.setConsultServerLocation(Util.prologFileName(getConsultServerFile()));
-		pif.setHost("localhost");
-		pif.setTimeout("15000");
-		pif.setStandAloneServer("false");
-		pif.setHidePlwin(true);
-		pif.setUseSessionPooling(true);
-		return pif;
-	}
-	
-	private static File consultServerFile = null;
-	
-	public static File getConsultServerFile() throws IOException {
-		if (consultServerFile == null) {
-			String tempDir = System.getProperty("java.io.tmpdir");
-			InputStream resourceAsStream;
-			resourceAsStream = SocketPrologInterface.class.getResourceAsStream("consult_server.pl");
-			if (resourceAsStream == null) {
-				throw new RuntimeException("Cannot find consult_server.pl!");
-			}
-			consultServerFile = new File(tempDir, "consult_server.pl");
-			if (consultServerFile.exists()) {
-				consultServerFile.delete();
-			}
-			copy(resourceAsStream, new FileOutputStream(consultServerFile));
-		}
-		return consultServerFile;
-	}
-
 	private static Set<File> tempFiles = new HashSet<File>();
 	
 	public static void addTempFile(File tempFile) {
@@ -1018,38 +603,6 @@ public class Util {
 	
 	public static Set<File> getTempFiles() {
 		return new HashSet<File>(tempFiles);
-	}
-
-	public static String getLogtalkStartupFile() {
-		if (Util.isWindows()) {
-			return "\"%LOGTALKHOME%\\integration\\logtalk_swi.pl\"";
-		} else {
-			String logtalkHome = System.getenv("LOGTALKHOME");
-			if (logtalkHome != null) {
-				return new File(logtalkHome, "integration/logtalk_swi.pl").getAbsolutePath();
-			} else {
-				return "";
-			}
-		}
-	}
-	
-	public static String getLogtalkEnvironmentVariables() {
-		if (Util.isWindows()) {
-			return "";
-		} else {
-			StringBuffer buf = new StringBuffer();
-			String guessedEnvironmentVariables = Util.guessEnvironmentVariables();
-			if (!guessedEnvironmentVariables.isEmpty()) {
-				buf.append(guessedEnvironmentVariables);
-				buf.append(", ");
-			}
-			buf.append("LOGTALKHOME=");
-			buf.append(System.getenv("LOGTALKHOME"));
-			buf.append(", ");
-			buf.append("LOGTALKUSER=");
-			buf.append(System.getenv("LOGTALKUSER"));
-			return buf.toString();
-		}
 	}
 }
 

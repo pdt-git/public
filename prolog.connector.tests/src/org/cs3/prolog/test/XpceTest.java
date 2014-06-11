@@ -24,7 +24,7 @@ import org.cs3.prolog.connector.process.PrologInterfaceException;
 public class XpceTest extends TestCase {
 	public void testXpce() throws  PrologInterfaceException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface plInterface = Connector.newPrologInterface();
+		PrologInterface plInterface = Connector.newUninitializedPrologProcess();
 		plInterface.start();
 		try{			
 			plInterface.getSession().queryOnce("help");

@@ -25,7 +25,7 @@ import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.pdt.editor.quickfix.PDTMarker;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -133,7 +133,7 @@ public class PLMarkerUtils {
 		monitor.beginTask("Update Prolog Smells Detectors", fileNameToIFiles.size());
 
 		for (String fileName : fileNameToIFiles.keySet()) {
-			String query = bT(PDTPredicates.SMELL_MARKER_PDT, "Name", "Description", "QuickfixDescription", "QuickfixAction", Util.quoteAtom(fileName), "Start", "Length");
+			String query = bT(PDTPredicates.SMELL_MARKER_PDT, "Name", "Description", "QuickfixDescription", "QuickfixAction", QueryUtils.quoteAtom(fileName), "Start", "Length");
 			List<Map<String, Object>> msgsSmells = session.queryAll(query);
 			
 			if(msgsSmells!=null) {

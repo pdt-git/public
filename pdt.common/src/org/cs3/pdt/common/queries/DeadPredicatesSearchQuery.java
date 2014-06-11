@@ -26,7 +26,7 @@ import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.connector.util.UIUtils;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -55,7 +55,7 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 			setSearchType("Dead predicates");
 		} else {
 			setSearchType("Dead predicates in project " + root.getName());
-			rootPath = Util.quoteAtom(Util.prologFileName(root.getLocation().toFile()));
+			rootPath = QueryUtils.quoteAtom(QueryUtils.prologFileName(root.getLocation().toFile()));
 		}
 	}
 

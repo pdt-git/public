@@ -31,6 +31,7 @@ import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPredicates;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
@@ -182,7 +183,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 		}
 
 		IPath filepath = new Path(enclFile);
-		return "'" + Util.prologFileName(filepath.toFile()) + "'";
+		return "'" + QueryUtils.prologFileName(filepath.toFile()) + "'";
 	}
 
 

@@ -135,7 +135,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		setId(params.get("id"));
 		setPersistent(params.get("persistent"));
 		if(params.get("tags")!= null) {
-			setTags(Util.split(params.get("tags"),","));
+			setTags(Util.split(params.get("tags"), ","));
 		}
 	}
 

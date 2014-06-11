@@ -42,6 +42,7 @@ import org.cs3.pdt.connector.subscription.DefaultSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
 import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -142,7 +143,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	private PrologInterface createPrologInterface(String name, String configuration) {
 		PrologInterface prologInterface = null;
 		
-		prologInterface = Connector.newPrologInterface(name);
+		prologInterface = Connector.newUninitializedPrologProcess(name);
 		prologInterface.setAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE, configuration);
 		prologInterface.initOptions(new EclipsePreferenceProvider(this, configuration));
 		prologInterface.setStartupStrategy(new BootstrapStartupStrategy());
@@ -423,7 +424,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 					Debug.rethrow("Problem resolving url: " + url.toString(), e);
 				}
 				File file = new File(url.getFile());
-				String path = Util.prologFileName(file);
+				String path = QueryUtils.prologFileName(file);
 
 				IConfigurationElement[] childElms = elm.getChildren();
 				Map<String, String> libAttrs = new HashMap<String, String>();
@@ -740,9 +741,9 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 		File file = new File(url.getFile());
 		BootstrapPrologContribution contrib;
 		if(alias != null){
-			contrib = new BootstrapPrologContributionAlias(contributionId, alias, Util.prologFileName(file), dependencies);
+			contrib = new BootstrapPrologContributionAlias(contributionId, alias, QueryUtils.prologFileName(file), dependencies);
 		} else {
-			contrib = new BootstrapPrologContributionFile(contributionId, Util.prologFileName(file), dependencies);
+			contrib = new BootstrapPrologContributionFile(contributionId, QueryUtils.prologFileName(file), dependencies);
 		}
 		contribs.add(contrib);
 		allBootStrapLists.put(contributionId, contrib);

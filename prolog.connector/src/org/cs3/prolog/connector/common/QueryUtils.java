@@ -14,6 +14,8 @@
 
 package org.cs3.prolog.connector.common;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,21 +24,7 @@ import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 public class QueryUtils {
 	
-	/*
-	/****************************************************************************************************
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 *									  -= Global Constants =-
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 ****************************************************************************************************/	
-	
 	public final static String USER_MODULE = "user";
-	
-	/*
-	/****************************************************************************************************
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 *									 	 -= SWI-Prolog =-
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 ****************************************************************************************************/		
 	
 	/**
 	 * Returns the version of SWI-Prolog which is currently used by a given Factbase 
@@ -50,14 +38,6 @@ public class QueryUtils {
 		return (String) pif.queryOnce("current_prolog_flag(version,B)").get("B");
 	}
 	
-	
-	/*
-	/****************************************************************************************************
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 *									  	-= Modules =-
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 ****************************************************************************************************/	
-	
 	/**
 	 * Tests if the module name equals the default user name
 	 * 
@@ -68,12 +48,6 @@ public class QueryUtils {
 		return (moduleName == null) || ("".equals(moduleName)) || (USER_MODULE.equals(moduleName));
 	}
 	
-	/*
-	/****************************************************************************************************
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 *								 	-= Predicate Builder =-
-	 *.-~:~-..-~:~-..-~:~-..-~:~-...-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-..-~:~-.
-	 ****************************************************************************************************/	
 	
 	/**
 	 * Shortcut for buildTerm(String functor, Object...args)
@@ -162,6 +136,58 @@ public class QueryUtils {
 		}
 		
 		return listToArgList(temp);
+	}
+
+	/**
+	 * normalize String for Windows system
+	 *  
+	 * @param s the String
+	 * @return normalized String
+	 */
+	public static String normalizeOnWindows(String s) {
+		boolean windowsPlattform = Util.isWindows();
+		if (windowsPlattform) {
+			s = s.replace('\\', '/').toLowerCase();
+		}
+		return s;
+	}
+
+	/**
+	 * normalize a Prolog filename
+	 * @param f the file
+	 * @return normalized path to the file
+	 */
+	public static String prologFileName(File f) {
+		try {
+			return normalizeOnWindows(f.getCanonicalPath());
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	/**
+	 * quote atom
+	 * 
+	 * @param term unquoted atom
+	 * @return quoted atom
+	 */
+	public static String quoteAtom(String term) {
+	
+		return "'" + term.replace("'", "\\'") + "'";
+	}
+
+	/**
+	 * quote atom if it isn't already quoted
+	 * @param term atom (quoted or unquoted)
+	 * @return quoted atom
+	 */
+	
+	public static String quoteAtomIfNeeded(String term) {
+		if (term.startsWith("'") && term.endsWith("'")) {
+			return term;
+		} else {
+			return "'" + term.replace("'", "\\'") + "'";
+		}
 	}
 
 

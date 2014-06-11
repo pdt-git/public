@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 
 public class DefaultStartupStrategy implements StartupStrategy {
 	
@@ -24,7 +24,7 @@ public class DefaultStartupStrategy implements StartupStrategy {
 	}
 	
 	private String createConsultCommand(File loadFile) {
-		return "['" + Util.prologFileName(loadFile) + "']";
+		return "['" + QueryUtils.prologFileName(loadFile) + "']";
 	}
 
 	public void addFileSearchPath(String alias, File fsp) {
@@ -38,7 +38,7 @@ public class DefaultStartupStrategy implements StartupStrategy {
 	}
 	
 	private String createFileSearchPathCommand(String alias, File fsp) {
-		String term = bT("user:file_search_path", alias, Util.quoteAtom(Util.prologFileName(fsp)));
+		String term = bT("user:file_search_path", alias, QueryUtils.quoteAtom(QueryUtils.prologFileName(fsp)));
 		return bT("assertz", term);
 	}
 

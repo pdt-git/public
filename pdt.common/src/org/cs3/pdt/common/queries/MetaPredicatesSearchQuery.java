@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -51,7 +51,7 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 			setSearchType("Undeclared meta predicates");
 		} else {
 			setSearchType("Undeclared meta predicates in project " + root.getName());
-			rootPath = Util.quoteAtom(Util.prologFileName(root.getLocation().toFile()));
+			rootPath = QueryUtils.quoteAtom(QueryUtils.prologFileName(root.getLocation().toFile()));
 		}
 	}
 

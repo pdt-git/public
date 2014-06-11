@@ -23,7 +23,8 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.search.SearchConstants;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ParserUtils;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -55,14 +56,14 @@ public class PrologCompletionProvider {
 			module = retrievePrefixedModule(line, prefix.begin - splittingOperator.length());
 		}
 		if (module == null || module.isEmpty()) {
-			searchPrefix = Util.quoteAtomIfNeeded(prefix.prefix);
+			searchPrefix = QueryUtils.quoteAtomIfNeeded(prefix.prefix);
 		} else {
-			if (Util.isVarPrefix(module)){
+			if (ParserUtils.isVarPrefix(module)){
 				module = "_";
 			} else {
-				module = Util.quoteAtomIfNeeded(module);
+				module = QueryUtils.quoteAtomIfNeeded(module);
 			}
-			searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(prefix.prefix);
+			searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(prefix.prefix);
 		}
 		
 		if (prefix.length <= 0) {
@@ -136,7 +137,7 @@ public class PrologCompletionProvider {
 		if (c == '\'') {
 			return new Prefix(offset, "", false);
 		}
-		boolean isPredChar = Util.isNonQualifiedPredicateNameChar(c);
+		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
 		
 		while (isPredChar){
 			length++;
@@ -146,7 +147,7 @@ public class PrologCompletionProvider {
 				if (c == '\'') {
 					return new Prefix(begin - 1, line.substring(begin, begin + length), true);
 				}
-				isPredChar = Util.isNonQualifiedPredicateNameChar(c);
+				isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
 				if(!isPredChar){
 					break;
 				}
@@ -185,7 +186,7 @@ public class PrologCompletionProvider {
 	private String retrievePrefixedModule(String line, int begin) {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
+		while (moduleBegin >= 0 && ParserUtils.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
 			moduleBegin--;
 		String moduleName = line.substring(moduleBegin + 1, moduleEnd);
 //		if(!Util.isVarPrefix(moduleName)){

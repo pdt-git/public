@@ -26,7 +26,7 @@ import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -71,7 +71,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		loadPaths(currentPath);
 		
 		String query;
-		query = bT(PDTGraphPredicates.WRITE_GLOBAL_TO_GRAPHML, paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)), getSettings());
+		query = bT(PDTGraphPredicates.WRITE_GLOBAL_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(QueryUtils.prologFileName(helpFile)), getSettings());
 		return query;
 	}
 
@@ -99,7 +99,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 					IFile file = (IFile)resource;
 					if (file.getFileExtension() != null && extensions.contains(file.getFileExtension())) {
 						try {
-							paths.add(Util.quoteAtom(UIUtils.prologFileName(file)));
+							paths.add(QueryUtils.quoteAtom(UIUtils.prologFileName(file)));
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

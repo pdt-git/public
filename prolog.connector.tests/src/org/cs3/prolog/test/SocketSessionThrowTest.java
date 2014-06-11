@@ -30,7 +30,7 @@ public class SocketSessionThrowTest extends TestCase {
 
     @Override
 	protected void setUp() throws Exception {
-      pif = Connector.newPrologInterface();
+      pif = Connector.newUninitializedPrologProcess();
       pif.start();
     }
     

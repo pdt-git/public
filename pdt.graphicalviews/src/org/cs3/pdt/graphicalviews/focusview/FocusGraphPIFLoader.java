@@ -24,7 +24,7 @@ import java.util.Vector;
 
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 
 public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
@@ -53,7 +53,7 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
 	protected String generateQuery(File helpFile) {
 		String query;
-		query = bT(PDTGraphPredicates.WRITE_FOCUS_TO_GRAPHML, Util.quoteAtom(focusFile), Util.quoteAtom(Util.prologFileName(helpFile)), "Dependencies", getSettings());
+		query = bT(PDTGraphPredicates.WRITE_FOCUS_TO_GRAPHML, QueryUtils.quoteAtom(focusFile), QueryUtils.quoteAtom(QueryUtils.prologFileName(helpFile)), "Dependencies", getSettings());
 		return query;
 	}
 

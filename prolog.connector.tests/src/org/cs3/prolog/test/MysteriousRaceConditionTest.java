@@ -30,7 +30,7 @@ public class MysteriousRaceConditionTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		pif = Connector.newPrologInterface();
+		pif = Connector.newUninitializedPrologProcess();
 
 	}
 

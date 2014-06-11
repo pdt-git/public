@@ -29,6 +29,7 @@ import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.navigator.internal.ImageRepository;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -102,7 +103,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 				}
 			} else {
 				IFolder folder = (IFolder) element;
-				String dirName = Util.prologFileName(folder.getRawLocation().toFile());
+				String dirName = QueryUtils.prologFileName(folder.getRawLocation().toFile());
 				
 				if (isContainingFolder(dirName)) {
 					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FOLDER_CONSULTED), IDecoration.TOP_LEFT);
@@ -122,7 +123,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 		}
 
 		IPath filepath = new Path(enclFile);
-		return Util.prologFileName(filepath.toFile());
+		return QueryUtils.prologFileName(filepath.toFile());
 	}
 
     @Override

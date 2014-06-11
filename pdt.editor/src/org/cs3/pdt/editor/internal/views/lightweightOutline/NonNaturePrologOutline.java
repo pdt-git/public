@@ -45,7 +45,7 @@ import org.cs3.pdt.editor.internal.structureElements.OutlineClauseElement;
 import org.cs3.pdt.editor.internal.structureElements.OutlineFileElement;
 import org.cs3.pdt.editor.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.editor.internal.structureElements.OutlinePredicateElement;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -363,8 +363,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 			if ("module".equals(module.getKind())) {
 				try {
-					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, Util.quoteAtom(module.getName()), "file(File)"),
-							bT(PDTPredicates.MODULE_PROPERTY, Util.quoteAtom(module.getName()), "line_count(Line)"));
+					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, QueryUtils.quoteAtom(module.getName()), "file(File)"),
+							bT(PDTPredicates.MODULE_PROPERTY, QueryUtils.quoteAtom(module.getName()), "line_count(Line)"));
 					if (result == null) {
 						return;
 					} else {
@@ -377,8 +377,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				}
 			} else { // logtalk (no modules, but entities)
 				try {
-					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.ENTITY_PROPERTY, Util.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
-							bT(PDTPredicates.ENTITY_PROPERTY, Util.quoteAtom(module.getName()), "_", "lines(Line, _)"));
+					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.ENTITY_PROPERTY, QueryUtils.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
+							bT(PDTPredicates.ENTITY_PROPERTY, QueryUtils.quoteAtom(module.getName()), "_", "lines(Line, _)"));
 					if (result == null) {
 						return;
 					} else {

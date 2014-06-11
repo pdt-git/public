@@ -47,7 +47,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		pif = Connector.newPrologInterface();
+		pif = Connector.newUninitializedPrologProcess();
 
 		pif.start();
 		rec = new Recorder();
@@ -102,7 +102,7 @@ public class AsyncSocketSessionTest extends TestCase {
 				sb.append(event.ticket == null ? "null" : "dummy");
 			}
 			sb.append(',');
-			sb.append(event.message == null ? "null" : Util.hideStreamHandles(
+			sb.append(event.message == null ? "null" : hideStreamHandles(
 					event.message, "$stream(_)"));
 			sb.append(',');
 			sb.append(event.getBindings() == null ? "null" : "("
@@ -110,8 +110,24 @@ public class AsyncSocketSessionTest extends TestCase {
 			sb.append(')');
 			return sb.toString();
 		}
-	}
 
+		private String hideStreamHandles(String string, String replace) {
+			int i = -1;
+			String search = "$stream(";
+			StringBuffer sb = new StringBuffer();
+			while ((i = string.indexOf(search, 0)) >= 0) {
+				sb.append(string.substring(0, i));
+				sb.append(replace);
+				int j = string.indexOf(')', i + search.length());
+				string = string.substring(j + 1);
+			}
+			sb.append(string);
+			return sb.toString();
+
+		}
+	}
+	
+	
 	class Recorder implements AsyncPrologSessionListener {
 		public void clear() {
 			records.clear();

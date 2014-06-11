@@ -14,7 +14,7 @@
 package org.cs3.pdt.editor.metadata;
 
 import org.cs3.pdt.editor.internal.editors.PLPartitionScanner;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -120,7 +120,7 @@ public class PredicateReadingUtilities {
 	public static int findBeginOfPredicateName(IDocument document, int begin)
 			throws BadLocationException {
 		int start = begin;
-		while (start >= 0 && Util.isPredicateNameChar(document.getChar(start))) {
+		while (start >= 0 && ParserUtils.isPredicateNameChar(document.getChar(start))) {
 			start--; // scan left until first non-predicate-name  char
 		}
 		start++; // start is now the position of the first predicate char
@@ -148,7 +148,7 @@ public class PredicateReadingUtilities {
 			return partition.getOffset() + partition.getLength();
 		} else {
 			// Do not accept special characters that may only occur within quotes:
-			while (Util.isNormalPredicateNameChar(document.getChar(end)) 
+			while (ParserUtils.isNormalPredicateNameChar(document.getChar(end)) 
 					&& end < document.getLength()) {
 				end++;
 			}

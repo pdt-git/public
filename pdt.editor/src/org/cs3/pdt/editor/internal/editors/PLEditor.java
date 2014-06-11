@@ -44,7 +44,8 @@ import org.cs3.pdt.editor.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.editor.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.editor.metadata.GoalProvider;
 import org.cs3.pdt.editor.metadata.PredicateReadingUtilities;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ParserUtils;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -683,7 +684,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	public String getPrologFileName() {
-		return Util.prologFileName(filepath.toFile());
+		return QueryUtils.prologFileName(filepath.toFile());
 	}
 
 	public TextSelection getSelection() {
@@ -785,7 +786,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		if (input instanceof IFileEditorInput) {
 			Map<String, Object> result = null;
 			try {
-				result = PDTCommonUtil.getActivePrologInterface().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, Util.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
+				result = PDTCommonUtil.getActivePrologInterface().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, QueryUtils.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -1169,7 +1170,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 
 			}
 
-			if (Util.isVarPrefix(varName)) {
+			if (ParserUtils.isVarPrefix(varName)) {
 				if (locationList.size() > 0) {
 					locationList.add(new OccurrenceLocation(var.getOffset(),
 							var.getLength(), 0, "desc"));
@@ -1195,7 +1196,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			int l, boolean up, String proposal) throws BadLocationException {
 		char c = getSourceViewer().getDocument().getChar(l);
 
-		if (Util.isVarChar(c)) {
+		if (ParserUtils.isVarChar(c)) {
 			if (proposal == null)
 				proposal = "";
 			if (up) {
@@ -1208,7 +1209,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			if (var.getText().equals(proposal)) {
 				locationList.add(new OccurrenceLocation(l + (up ? 1 : -length),
 						length, 0, "desc"));
-			} else if (Util.isVarPrefix(proposal) && !proposal.equals("_")) {
+			} else if (ParserUtils.isVarPrefix(proposal) && !proposal.equals("_")) {
 				List<OccurrenceLocation> probOccs;
 				int kind = 2;
 				if (isSingletonName(proposal) == VAR_KIND_SINGLETON) {
@@ -1251,7 +1252,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			return VAR_KIND_NORMAL;
 		}
 		if (proposal.charAt(0) == '_'
-				&& Util.isSingleSecondChar(proposal.charAt(1))) {
+				&& ParserUtils.isSingleSecondChar(proposal.charAt(1))) {
 			return VAR_KIND_SINGLETON;
 		}
 		return VAR_KIND_NORMAL;
@@ -1321,17 +1322,17 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	private TextSelection getVariableAtOffset(IDocument document, int offset)
 			throws BadLocationException {
 		int begin = offset;
-		if (!Util.isNonQualifiedPredicateNameChar(document.getChar(begin))
+		if (!ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin))
 				&& begin > 0) {
 			begin--;
 		}
-		while (Util.isNonQualifiedPredicateNameChar(document.getChar(begin))
+		while (ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin))
 				&& begin > 0)
 			begin--;
 		if (begin < offset)
 			begin++;
 		int end = offset;
-		while (Util.isNonQualifiedPredicateNameChar(document.getChar(end))
+		while (ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(end))
 				&& begin > 0)
 			end++;
 		int length = end - begin;

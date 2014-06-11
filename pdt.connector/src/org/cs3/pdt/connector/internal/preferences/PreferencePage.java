@@ -29,7 +29,7 @@ import org.cs3.pdt.connector.util.preferences.MyLabelFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyStringFieldEditor;
 import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePage;
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ProcessUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.eclipse.jface.dialogs.Dialog;
@@ -241,7 +241,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	}
 	
 	private void updateExecuteablePreviewLabelText() {
-		String newExecutable = Util.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue()) + " -g [$ConnectorInitFile]";
+		String newExecutable = ProcessUtils.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue()) + " -g [$ConnectorInitFile]";
 		executeablePreviewLabel.setText(newExecutable);
 	}
 

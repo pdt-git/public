@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -480,7 +481,7 @@ public final class UIUtils {
 			} else {
 				buffer.append(", ");
 			}
-			buffer.append(Util.quoteAtom(prologFileName(f)));
+			buffer.append(QueryUtils.quoteAtom(prologFileName(f)));
 		}
 		;
 		buffer.append("]");
@@ -488,7 +489,7 @@ public final class UIUtils {
 	}
 
 	public static String prologFileName(IFile file) throws IOException {
-		return Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+		return QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
 	}
 
 }

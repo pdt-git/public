@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.connector.common.InputStreamPump;
+import org.cs3.prolog.connector.common.ProcessUtils;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
@@ -206,7 +208,7 @@ private static JackTheProcessRipper processRipper;
 	private String getErrorLogFileContent(SocketPrologInterface socketPif) {
 		String errorLogFileContent = null;
 		try {
-			errorLogFileContent = Util.toString(new FileInputStream(socketPif.getErrorLogFile()));
+			errorLogFileContent = Util.readInputStreamToString(new FileInputStream(socketPif.getErrorLogFile()));
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
 		}
@@ -250,7 +252,7 @@ private static JackTheProcessRipper processRipper;
 	}
 
 	private static String[] getCommands(SocketPrologInterface socketPif) {
-		String executable = Util.createExecutable(
+		String executable = ProcessUtils.createExecutable(
 				socketPif.getOSInvocation(),
 				socketPif.getExecutablePath(),
 				socketPif.getCommandLineArguments(),
@@ -264,9 +266,9 @@ private static JackTheProcessRipper processRipper;
 		String fileSearchPath = socketPif.getFileSearchPath();
 		String[] args;
 		if (fileSearchPath != null && !(fileSearchPath.trim().length() == 0)) {
-			args = new String[] { "-p", fileSearchPath, "-g", "['" + Util.prologFileName(tmpFile) + "']" };
+			args = new String[] { "-p", fileSearchPath, "-g", "['" + QueryUtils.prologFileName(tmpFile) + "']" };
 		} else {
-			args = new String[] { "-g", "['" + Util.prologFileName(tmpFile) + "']" };
+			args = new String[] { "-g", "['" + QueryUtils.prologFileName(tmpFile) + "']" };
 		}
 		return args;
 	}
@@ -295,8 +297,8 @@ private static JackTheProcessRipper processRipper;
 		for (String lfInit : startupStrategy.getLoadFileInitStatements()) {
 			tmpWriter.println(":- " + lfInit + ".");
 		}
-		tmpWriter.println(":- consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
-		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + Util.prologFileName(socketPif.getErrorLogFile()) + "').");
+		tmpWriter.println(":- consult_server(" + port + ",'" + QueryUtils.prologFileName(socketPif.getLockFile()) + "').");
+		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + QueryUtils.prologFileName(socketPif.getErrorLogFile()) + "').");
 		tmpWriter.close();
 	}
 

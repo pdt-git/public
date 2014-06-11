@@ -22,7 +22,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.editor.PDTPredicates;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -97,8 +97,8 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 			
 			for (IFile file : PDTCommonPlugin.getDefault().getEntryPoints()) {
 				try {
-					String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
-					currentPif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, Util.quoteAtom(prologFileName)));
+					String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
+					currentPif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

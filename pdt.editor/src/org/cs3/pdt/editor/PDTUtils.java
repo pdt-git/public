@@ -15,6 +15,7 @@
 package org.cs3.pdt.editor;
 
 
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
@@ -29,7 +30,7 @@ public final class PDTUtils {
 		}
 
 		IPath filepath = new Path(enclFile);
-		return Util.prologFileName(filepath.toFile());
+		return QueryUtils.prologFileName(filepath.toFile());
 	}
 
 }

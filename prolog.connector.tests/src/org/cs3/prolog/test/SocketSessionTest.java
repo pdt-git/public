@@ -54,7 +54,7 @@ public class SocketSessionTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel("DEBUG");
-		pif = Connector.newPrologInterface();
+		pif = Connector.newUninitializedPrologProcess();
 		pif.start();
 	}
 

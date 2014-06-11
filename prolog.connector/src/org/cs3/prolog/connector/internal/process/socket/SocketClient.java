@@ -66,7 +66,7 @@ public class SocketClient {
 
 		Debug.debug("got ping reply:"+pong);
 		Debug.debug("after skipping:"+sb.toString());
-		String[] strings = Util.split(pong,":");
+		String[] strings = Util.split(pong, ":");
 		this.pid=Long.parseLong(strings[0]);
 		this.processorThread=strings[1];
 		readUntil(SocketCommunicationConstants.OK);

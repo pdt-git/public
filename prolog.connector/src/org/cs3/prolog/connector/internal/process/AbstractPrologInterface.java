@@ -26,7 +26,7 @@ import java.util.WeakHashMap;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.PreferenceProvider;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ProcessUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
@@ -144,7 +144,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		if (executable != null) {
 			return executable;
 		} else {
-			return Util.createExecutable(osInvocation, executablePath, commandLineArguments, additionalStartupFile);
+			return ProcessUtils.createExecutable(osInvocation, executablePath, commandLineArguments, additionalStartupFile);
 		}
 	}
 

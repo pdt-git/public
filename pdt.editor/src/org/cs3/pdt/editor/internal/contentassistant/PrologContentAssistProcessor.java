@@ -18,7 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.cs3.pdt.editor.internal.editors.PLPartitionScanner;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ParserUtils;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -62,13 +63,13 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 		int begin=offset;
 		int length=0;
-		boolean isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(begin));
+		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin));
 		
 		while (isPredChar){
 			length++;
 			int test = begin-1;
 			if(test >=0){
-				isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(test));
+				isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(test));
 				if(!isPredChar){
 					break;
 				}
@@ -115,7 +116,7 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(document.getChar(moduleBegin)))
+		while (moduleBegin >= 0 && ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(moduleBegin)))
 			moduleBegin--;
 		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
 		return moduleName;
@@ -147,20 +148,20 @@ public abstract class PrologContentAssistProcessor {
 				}
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
 				if (splittingOperator != null) {
-					searchPrefix = splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
+					searchPrefix = splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
 				} else {
-					searchPrefix = Util.quoteAtomIfNeeded(pre.prefix);
+					searchPrefix = QueryUtils.quoteAtomIfNeeded(pre.prefix);
 					searchPrefixForDefault = pre.prefix;
 				}
 			} else {
-				if (Util.isVarPrefix(module)){
+				if (ParserUtils.isVarPrefix(module)){
 					module = "_";
 				} else {
-					module = Util.quoteAtomIfNeeded(module);
+					module = QueryUtils.quoteAtomIfNeeded(module);
 				}
-				searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(pre.prefix);
+				searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
 			}
-			if (!Util.isVarPrefix(pre.prefix)) {
+			if (!ParserUtils.isVarPrefix(pre.prefix)) {
 				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, searchPrefixForDefault, proposals);
 			}
 	

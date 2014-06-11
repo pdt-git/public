@@ -64,7 +64,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			@Override
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
 				try {
-					String query = QueryUtils.bT("use_module", Util.quoteAtom(Util.prologFileName(getObserveFile())));
+					String query = QueryUtils.bT("use_module", QueryUtils.quoteAtom(QueryUtils.prologFileName(getObserveFile())));
 					initSession.queryOnce(query);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -201,7 +201,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
 			String query = "pif_observe('" + session.getProcessorThreadAlias() + "',"
-			+ subject + ","+Util.quoteAtom(subject) +")";
+			+ subject + ","+QueryUtils.quoteAtom(subject) +")";
 			s.queryOnce(query);
 			synchronized (subjects) {
 				subjects.add(subject);

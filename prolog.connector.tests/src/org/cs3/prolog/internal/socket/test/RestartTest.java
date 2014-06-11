@@ -27,7 +27,7 @@ public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		PrologInterface pif = Connector.newPrologInterface();
+		PrologInterface pif = Connector.newUninitializedPrologProcess();
 		
 		pif.start();
 
@@ -50,7 +50,7 @@ public class RestartTest extends TestCase {
 	
 	public void testRecover_lazy() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface pif = Connector.newPrologInterface();
+		PrologInterface pif = Connector.newUninitializedPrologProcess();
 		
 		SocketSession session = (SocketSession) pif.getSession(PrologInterface.LEGACY);
 		long pid = session.getClient().getServerPid();

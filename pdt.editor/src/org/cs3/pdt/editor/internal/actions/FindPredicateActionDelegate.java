@@ -30,7 +30,7 @@ import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
@@ -156,7 +156,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				}
 			} else {
 				if (!"lgt".equals(file.getFileExtension())) {
-					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, Util.quoteAtom(UIUtils.prologFileName(file)), Util.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, QueryUtils.quoteAtom(UIUtils.prologFileName(file)), QueryUtils.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
 					if (result.isEmpty()) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),
@@ -220,13 +220,13 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 		String module = "_";
 		if (goal.getModule() != null) {
-			module = Util.quoteAtomIfNeeded(goal.getModule());
+			module = QueryUtils.quoteAtomIfNeeded(goal.getModule());
 		}
 
 		String term = goal.getTermString();
-		String quotedTerm = Util.quoteAtom(term);
+		String quotedTerm = QueryUtils.quoteAtom(term);
 
-		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, Util.quoteAtom(enclFile), goal.getLine(), quotedTerm, module, "File", "Line", "ResultKind");
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, QueryUtils.quoteAtom(enclFile), goal.getLine(), quotedTerm, module, "File", "Line", "ResultKind");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {

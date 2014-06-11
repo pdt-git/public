@@ -25,7 +25,8 @@ import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.ParserUtils;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
@@ -43,7 +44,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		Set<String> unique = new HashSet<String>();
 //		Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 
-		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
+		if (ParserUtils.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == 0 ? begin : begin - 1;
 			String proposal = null;
 			while (l > 0 && !PLEditor.predicateDelimiter(document, l)) {
@@ -52,12 +53,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					l = region.getOffset();
 				else {
 					char c = document.getChar(l);
-					if (Util.isVarChar(c)) {
+					if (ParserUtils.isVarChar(c)) {
 						if (proposal == null)
 							proposal = "";
 						proposal = c + proposal;
 					} else if (proposal != null) {
-						if (Util.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /* && !proposal.equals("_")*/) {
+						if (ParserUtils.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /* && !proposal.equals("_")*/) {
 							unique.add(proposal);
 //							int cursorPos = proposal.length();
 							proposals.add(new VariableCompletionProposal(document, proposal, begin, len));
@@ -68,7 +69,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				l--;
 			}
 		}
-		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
+		if (ParserUtils.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == document.getLength() ? begin : begin + 1;
 			String proposal = null;
 			while (l < document.getLength() && !PLEditor.predicateDelimiter(document, l)) {
@@ -77,12 +78,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					l = region.getOffset() + region.getLength();
 				} else {
 					char c = document.getChar(l);
-					if (Util.isVarChar(c)) {
+					if (ParserUtils.isVarChar(c)) {
 						if (proposal == null)
 							proposal = "";
 						proposal = proposal + c;
 					} else if (proposal != null) {
-						if (Util.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /*&& !proposal.equals("_")*/) {
+						if (ParserUtils.isVarPrefix(proposal.charAt(0)) && proposal.regionMatches(true, 0, prefix, 0, prefix.length()) && !unique.contains(proposal) /*&& !proposal.equals("_")*/) {
 							unique.add(proposal);
 //							int cursorPos = proposal.length();
 							proposals.add(new VariableCompletionProposal(document, proposal, begin, len));
@@ -117,7 +118,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 //					"Kind");
 			String query = bT(PDTCommonPredicates.FIND_COMPLETION,
 					prefix,
-					Util.quoteAtom(enclFile),
+					QueryUtils.quoteAtom(enclFile),
 					document.getLineOfOffset(begin) + 1,
 					"Kind",
 					"Module",

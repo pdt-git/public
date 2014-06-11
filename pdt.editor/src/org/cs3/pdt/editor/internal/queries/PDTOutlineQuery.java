@@ -27,7 +27,7 @@ import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.editor.internal.structureElements.PrologClause;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -45,7 +45,7 @@ public class PDTOutlineQuery {
 			session.queryOnce(PrologConnectorPredicates.WAIT_FOR_RELOAD_FINISHED);
 
 			String query = bT(PDTCommonPredicates.FIND_DEFINITION_CONTAINED_IN,
-					Util.quoteAtom(fileName),
+					QueryUtils.quoteAtom(fileName),
 					getOptions(),
 					"Entity",
 					"EntityLine",
@@ -183,7 +183,7 @@ public class PDTOutlineQuery {
 		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
 		Map<String, Object> result = null;
 		try {
-			result = pif.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, Util.quoteAtom(fileName)));
+			result = pif.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, QueryUtils.quoteAtom(fileName)));
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
 		}

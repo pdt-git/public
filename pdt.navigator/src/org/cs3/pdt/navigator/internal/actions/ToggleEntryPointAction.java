@@ -23,7 +23,7 @@ import java.util.Set;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -117,12 +117,12 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		
 		if (pif != null) {
 			try {
-				String prologFileName = Util.prologFileName(file.getLocation().toFile().getCanonicalFile());
+				String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
 				
 				if (b) {
-					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, Util.quoteAtom(prologFileName)));
+					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
 				} else {
-					pif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, Util.quoteAtom(prologFileName)));
+					pif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, QueryUtils.quoteAtom(prologFileName)));
 				}
 			} catch (IOException e) {
 				Debug.report(e);

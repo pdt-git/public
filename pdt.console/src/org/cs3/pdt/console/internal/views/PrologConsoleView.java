@@ -50,7 +50,7 @@ import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
 import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.console.internal.views.completion.PrologCompletionProvider;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -805,7 +805,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				if (fileName == null) {
 					return null;
 				}
-				return Util.quoteAtom(Util.prologFileName(new File(fileName)));
+				return QueryUtils.quoteAtom(QueryUtils.prologFileName(new File(fileName)));
 			}
 
 		};
@@ -1073,7 +1073,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		try {
 			String queryString = bT(PDTConsolePredicates.PDT_START_CONSOLE_SERVER,
 					"Port",
-					Util.quoteAtom(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)));
+					QueryUtils.quoteAtom(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)));
 			Debug.info("starting console server using: " + queryString);
 
 			Map<String,?> result = session.queryOnce(queryString);
@@ -1251,7 +1251,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 //			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
 			result = session.queryOnce(bT(PDTConsolePredicates.PDT_START_CONSOLE_SERVER,
 					"Port",
-					Util.quoteAtom(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif))));
+					QueryUtils.quoteAtom(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif))));
 			if (result == null) {
 				startServer(pif, session);
 				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));

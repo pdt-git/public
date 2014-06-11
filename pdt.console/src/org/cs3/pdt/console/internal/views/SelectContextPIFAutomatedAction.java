@@ -21,11 +21,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.cs3.pdt.connector.PDTConnector;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.PrologContextTracker;
 import org.cs3.pdt.connector.PrologContextTrackerListener;
 import org.cs3.pdt.connector.PrologContextTrackerService;
-import org.cs3.pdt.connector.PDTConnector;
-import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.console.PDTConsole;
@@ -293,15 +293,14 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	
 	Set<String> getActiveTrackers() {
 		if (activeTrackers == null) {
+			String trackers = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS, "");
 			activeTrackers = new HashSet<String>();
-			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(
-					PDTConsole.PREF_CONTEXT_TRACKERS, ""), ",", activeTrackers);
-			PrologContextTrackerService trackerService = PDTConnectorPlugin
-					.getDefault().getContextTrackerService();
+			Util.split(trackers, ",", activeTrackers);
+			
+			PrologContextTrackerService trackerService = PDTConnectorPlugin.getDefault().getContextTrackerService();
 			for (Iterator<String> iter = activeTrackers.iterator(); iter.hasNext();) {
 				String id = iter.next();
-				PrologContextTracker contextTracker = trackerService
-						.getContextTracker(id);
+				PrologContextTracker contextTracker = trackerService.getContextTracker(id);
 				if (contextTracker != null) {
 					contextTracker.addPrologContextTrackerListener(this);
 				}

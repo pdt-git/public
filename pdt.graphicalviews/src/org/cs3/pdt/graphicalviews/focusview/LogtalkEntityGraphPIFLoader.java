@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IProject;
 
 public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
@@ -39,10 +39,10 @@ public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
 			loadPaths(currentPath);
 
 			IProject project = FileUtils.findFileForLocation(currentPath).getProject();
-			String projectPath = Util.normalizeOnWindows(project.getLocation().toString());
+			String projectPath = QueryUtils.normalizeOnWindows(project.getLocation().toString());
 			
 			String query;
-			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), Util.quoteAtom(projectPath), Util.quoteAtom(Util.prologFileName(helpFile)));
+			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(projectPath), QueryUtils.quoteAtom(QueryUtils.prologFileName(helpFile)));
 			return query;
 			
 		} catch (IOException e) {

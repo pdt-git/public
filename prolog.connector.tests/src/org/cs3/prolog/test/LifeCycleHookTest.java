@@ -89,7 +89,7 @@ public class LifeCycleHookTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 //		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();
-		this.pif = Connector.newPrologInterface();
+		this.pif = Connector.newUninitializedPrologProcess();
 		
 	}
 

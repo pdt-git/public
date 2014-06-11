@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.process.PrologInterface;
@@ -150,7 +151,7 @@ public class CTermUtil {
 
 	
 	public static CTerm parseNonCanonicalTerm(String query) throws IOException, PrologInterfaceException {
-		PrologInterface pif = Util.newStandalonePrologInterface();
+		PrologInterface pif = Connector.newPrologProcess();
 		CTerm returnTerm = parseNonCanonicalTerm(query, pif);
 		pif.stop();
 		return returnTerm;
@@ -160,7 +161,7 @@ public class CTermUtil {
 
 		PrologSession session = pif.getSession(PrologInterface.CTERMS|PrologInterface.UNBOUND_VARIABLES);
 		
-		String query = QueryUtils.bT("atom_to_term", Util.quoteAtom(term), "Term", "D");
+		String query = QueryUtils.bT("atom_to_term", QueryUtils.quoteAtom(term), "Term", "D");
 
 		Map<String, Object> result = session.queryOnce(query);
 		session.dispose();
