@@ -26,7 +26,7 @@ import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
@@ -126,7 +126,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 				}
 			} catch (IOException e) {
 				Debug.report(e);
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 			

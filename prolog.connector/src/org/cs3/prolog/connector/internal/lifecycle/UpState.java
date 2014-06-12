@@ -15,7 +15,7 @@
 package org.cs3.prolog.connector.internal.lifecycle;
 
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class UpState extends AbstractState {
 
@@ -34,7 +34,7 @@ public class UpState extends AbstractState {
 		if (isNewHook(hook,id)) {
 			context.enqueueWork(new NamedWorkRunnable("lateInit_on_"+id) {
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					hook.lateInit(context.getPrologProcess());
 				}
 			});

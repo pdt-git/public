@@ -28,7 +28,7 @@ import org.cs3.pdt.editor.internal.editors.PLEditor;
 import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
@@ -98,7 +98,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals) throws PrologInterfaceException,
+	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals) throws PrologProcessException,
 			CoreException {
 
 		PrologSession session = null;

@@ -26,17 +26,17 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceEvent;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
-import org.cs3.prolog.connector.process.PrologInterfaceListener;
+import org.cs3.prolog.connector.process.PrologEvent;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.process.PrologEventListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 
-public class CurrentPifListener implements PrologInterfaceListener, ActivePrologInterfaceListener {
+public class CurrentPifListener implements PrologEventListener, ActivePrologInterfaceListener {
 
 	@Override
-	public void update(PrologInterfaceEvent e) {
+	public void update(PrologEvent e) {
 		if (e.getSubject().equals(PDTPredicates.PDT_EDIT_HOOK)) {
 			openFileInEditor(e.getEvent());
 		}
@@ -73,8 +73,8 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 			Debug.debug("add edit registry listener for pif " + currentPif.toString());
 			currentDispatcher = new PrologEventDispatcher(currentPif);
 			try {
-				currentDispatcher.addPrologInterfaceListener(PDTPredicates.PDT_EDIT_HOOK, this);
-			} catch (PrologInterfaceException e) {
+				currentDispatcher.addPrologEventListener(PDTPredicates.PDT_EDIT_HOOK, this);
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 			
@@ -84,8 +84,8 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		if (currentPif != null && currentDispatcher != null) {
 			Debug.debug("remove edit registry listener for pif " + currentPif.toString());
 			try {
-				currentDispatcher.removePrologInterfaceListener(PDTPredicates.PDT_EDIT_HOOK, this);
-			} catch (PrologInterfaceException e) {
+				currentDispatcher.removePrologEventListener(PDTPredicates.PDT_EDIT_HOOK, this);
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 		}
@@ -103,7 +103,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 					e.printStackTrace();
 				}
 			}
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			e.printStackTrace();
 		}
 		

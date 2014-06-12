@@ -19,10 +19,10 @@ import junit.framework.TestCase;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class XpceTest extends TestCase {
-	public void testXpce() throws  PrologInterfaceException {
+	public void testXpce() throws  PrologProcessException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologProcess plInterface = Connector.newUninitializedPrologProcess();
 		plInterface.start();

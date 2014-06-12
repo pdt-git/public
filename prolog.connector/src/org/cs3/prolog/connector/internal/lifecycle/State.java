@@ -15,11 +15,11 @@
 package org.cs3.prolog.connector.internal.lifecycle;
 
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public interface State{
 	public void enter();
-	public PrologInterfaceException getError();
+	public PrologProcessException getError();
 	public boolean isUp();
 	public boolean isDown();
 	

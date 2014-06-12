@@ -23,7 +23,7 @@ import org.cs3.pdt.connector.service.PDTReloadExecutor;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -35,7 +35,7 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	}
 
 	@Override
-	public boolean executePDTReload(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public boolean executePDTReload(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		if (files.isEmpty()) {
 			monitor.done();

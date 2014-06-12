@@ -17,20 +17,20 @@ import java.util.List;
 
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 public class EditorConsultListener implements ConsultListener {
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
 		PLMarkerUtils.addMarkers(pif, allConsultedFiles, monitor);
 	}
 	

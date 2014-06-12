@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 public abstract class LifeCycle {
@@ -73,7 +73,7 @@ public abstract class LifeCycle {
 
 				
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					shouldBeRunning = false;
 
 				}
@@ -114,7 +114,7 @@ public abstract class LifeCycle {
 	}
 
 	public synchronized void waitUntilUp() throws InterruptedException,
-			PrologInterfaceException {
+			PrologProcessException {
 		if (Thread.currentThread() == workThread
 				|| Thread.currentThread() == transitionThread) {
 			throw new IllegalMonitorStateException(
@@ -128,12 +128,12 @@ public abstract class LifeCycle {
 			}
 		}
 		if (getError() != null) {
-			throw new PrologInterfaceException(getError());
+			throw new PrologProcessException(getError());
 		}
 	}
 
 	public synchronized void waitUntilDown(boolean ignoreErrors) throws InterruptedException,
-			PrologInterfaceException {
+			PrologProcessException {
 
 		if (Thread.currentThread() == workThread
 				|| Thread.currentThread() == transitionThread) {
@@ -148,7 +148,7 @@ public abstract class LifeCycle {
 
 		}
 		if (null != getError()) {
-			throw new PrologInterfaceException(getError());
+			throw new PrologProcessException(getError());
 		}
 	}
 
@@ -175,7 +175,7 @@ public abstract class LifeCycle {
 		return state.isDown();
 	}
 
-	public synchronized PrologInterfaceException getError() {
+	public synchronized PrologProcessException getError() {
 		return state.getError();
 	}
 
@@ -199,7 +199,7 @@ public abstract class LifeCycle {
 		transitionThread.enqueue(new NamedWorkRunnable("start") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 
 				setState(state.start());
 
@@ -212,7 +212,7 @@ public abstract class LifeCycle {
 		transitionThread.enqueue(new NamedWorkRunnable("stop") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				setState(state.stop());
 			}
 		});
@@ -222,7 +222,7 @@ public abstract class LifeCycle {
 		transitionThread.enqueue(new NamedWorkRunnable("error") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				setState(state.error(e));
 
 			}
@@ -233,7 +233,7 @@ public abstract class LifeCycle {
 		transitionThread.enqueue(new NamedWorkRunnable("workDone") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				setState(state.workDone());
 
 			}
@@ -245,7 +245,7 @@ public abstract class LifeCycle {
 		transitionThread.enqueue(new NamedWorkRunnable("addLifeCycleHook/3") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				setState(state.addLifeCycleHook(hook, id, dependencies));
 
 			}
@@ -257,7 +257,7 @@ public abstract class LifeCycle {
 				.enqueue(new NamedWorkRunnable("removeLifeCycleHook/1") {
 					
 					@Override
-					public void run() throws PrologInterfaceException {
+					public void run() throws PrologProcessException {
 						setState(state.removeLifeCycleHook(hookId));
 
 					}
@@ -271,7 +271,7 @@ public abstract class LifeCycle {
 				.enqueue(new NamedWorkRunnable("removeLifeCycleHook/2") {
 					
 					@Override
-					public void run() throws PrologInterfaceException {
+					public void run() throws PrologProcessException {
 						setState(state.removeLifeCycleHook(hook, hookId));
 
 					}
@@ -282,7 +282,7 @@ public abstract class LifeCycle {
 		transitionThread.enqueue(new NamedWorkRunnable("reset") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				setState(state.reset());
 
 			}
@@ -305,10 +305,10 @@ public abstract class LifeCycle {
 	public abstract PrologProcess getPrologProcess();
 
 	public abstract PrologSession getShutdownSession()
-			throws PrologInterfaceException;
+			throws PrologProcessException;
 
 	public abstract PrologSession getInitialSession()
-			throws PrologInterfaceException;
+			throws PrologProcessException;
 
 	public abstract void startServer() throws Throwable;
 

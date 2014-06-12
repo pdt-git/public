@@ -19,14 +19,14 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 public class FileSearchPathConfigurator {
 
 	public static void configureFileSearchPath(PrologLibraryManager mgr,
 			PrologSession session, String[] libIds) throws PrologException,
-			PrologInterfaceException {
+			PrologProcessException {
 	
 		StringBuffer sb = new StringBuffer();
 		PrologLibrary[] required = FileSearchPathConfigurator.getRequiredLibs(mgr, libIds);

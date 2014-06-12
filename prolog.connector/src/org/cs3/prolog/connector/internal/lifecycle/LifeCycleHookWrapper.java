@@ -17,7 +17,7 @@ package org.cs3.prolog.connector.internal.lifecycle;
 import java.util.HashSet;
 
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class LifeCycleHookWrapper {
 
@@ -64,7 +64,7 @@ public class LifeCycleHookWrapper {
 			context.enqueueWork(new NamedWorkRunnable("onInit_on_"+id) {
 				
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					hook.onInit(context.getPrologProcess(), context.getInitialSession());
 				}
 
@@ -91,7 +91,7 @@ public class LifeCycleHookWrapper {
 			context.enqueueWork(new NamedWorkRunnable("afterInit_on_"+id) {
 				
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					hook.afterInit(context.getPrologProcess());
 				}
 
@@ -113,7 +113,7 @@ public class LifeCycleHookWrapper {
 			context.enqueueWork(new NamedWorkRunnable("beforeShutdown_on_"+id) {
 				
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					hook.beforeShutdown(context.getPrologProcess(),context.getShutdownSession());
 				}
 
@@ -126,7 +126,7 @@ public class LifeCycleHookWrapper {
 		for (final LifeCycleHook hook : hooks) {
 			context.enqueueWork(new NamedWorkRunnable("onError_on_"+id) {
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					hook.onError(context.getPrologProcess());
 				}
 			});

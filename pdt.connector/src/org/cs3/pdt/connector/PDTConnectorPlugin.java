@@ -46,7 +46,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -252,7 +252,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 * 
 	 * @param key
 	 * @return
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	public PrologProcess getPrologProcess(String key) {
 		return getPrologProcess(key, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
@@ -273,7 +273,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 *            exists, it is replaced. Must not be null.
 	 * @return the ProlotInterface instance, either from registry, or freshly
 	 *         created.
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	public PrologProcess getPrologProcess(Subscription s) {
 		return getPrologProcess(s, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
@@ -315,7 +315,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 							String consult = library.getPrologInitStatement();
 							Debug.debug("consult " + consult + ", from " + library);
 							session.queryOnce(consult);
-						} catch (PrologInterfaceException e) {
+						} catch (PrologProcessException e) {
 							Debug.report(e);
 							if (session != null)
 								session.dispose();

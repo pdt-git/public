@@ -14,13 +14,13 @@
 
 package org.cs3.prolog.connector.lifecycle;
 
-import org.cs3.prolog.connector.process.PrologInterfaceException;
-import org.cs3.prolog.connector.process.PrologInterfaceListener;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.process.PrologEventListener;
 
 public interface IPrologEventDispatcher {
 
-	public void addPrologInterfaceListener(String subject,
-			PrologInterfaceListener l) throws PrologInterfaceException;
+	public void addPrologEventListener(String subject,
+			PrologEventListener l) throws PrologProcessException;
 
 	/*
 	 * (non-Javadoc)
@@ -28,8 +28,8 @@ public interface IPrologEventDispatcher {
 	 * @see org.cs3.pl.prolog.IPrologInterface#removePrologInterfaceListener(java.lang.String,
 	 *      org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
-	public void removePrologInterfaceListener(String subject,
-			PrologInterfaceListener l) throws PrologInterfaceException;
+	public void removePrologEventListener(String subject,
+			PrologEventListener l) throws PrologProcessException;
 
 }
 

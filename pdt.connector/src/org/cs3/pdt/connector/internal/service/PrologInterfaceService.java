@@ -36,7 +36,7 @@ import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -230,7 +230,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					consultFilesImpl(files, pif, silent, monitor);
-				} catch (PrologInterfaceException e) {
+				} catch (PrologProcessException e) {
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
 				} finally {
@@ -244,7 +244,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void consultFilesImpl(List<IFile> files, PrologProcess pif, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
+	private void consultFilesImpl(List<IFile> files, PrologProcess pif, boolean silent, IProgressMonitor monitor) throws PrologProcessException {
 		HashSet<ConsultListener> consultListenersClone;
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
@@ -272,7 +272,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 		monitor.done();
 	}
 	
-	private List<String> collectConsultedFiles(PrologProcess pif, IProgressMonitor monitor) throws PrologInterfaceException {
+	private List<String> collectConsultedFiles(PrologProcess pif, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		
 		List<String> result = new ArrayList<String>();
@@ -288,7 +288,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean executeReload(PrologProcess pif, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
+	private boolean executeReload(PrologProcess pif, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologProcessException {
 		TreeSet<PDTReloadExecutor> executorsClone;
 		synchronized (pdtReloadExecutors) {
 			executorsClone = (TreeSet<PDTReloadExecutor>) pdtReloadExecutors.clone();

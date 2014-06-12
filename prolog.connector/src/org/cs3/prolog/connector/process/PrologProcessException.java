@@ -18,28 +18,28 @@ package org.cs3.prolog.connector.process;
 
 
 /**
- * A PrologInterfaceException is thrown when a PrologProcess looses
+ * A PrologProcessException is thrown when a PrologProcess looses
  * the connection to the prolog process due to an error.
  */
-public class PrologInterfaceException extends Exception {
+public class PrologProcessException extends Exception {
 
 	private static final long serialVersionUID = 1298404946804072338L;
 
 
-    public PrologInterfaceException() {
+    public PrologProcessException() {
         super();
     }
 
 
-    public PrologInterfaceException(String message) {
+    public PrologProcessException(String message) {
         super(message);
     }
     
-    public PrologInterfaceException(Throwable cause) {
+    public PrologProcessException(Throwable cause) {
         super(cause);
     }
 
-    public PrologInterfaceException(String message, Throwable cause) {
+    public PrologProcessException(String message, Throwable cause) {
         super(message, cause);
      }
 

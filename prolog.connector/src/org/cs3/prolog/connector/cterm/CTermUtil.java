@@ -23,7 +23,7 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 /**
@@ -150,14 +150,14 @@ public class CTermUtil {
 	
 
 	
-	public static CTerm parseNonCanonicalTerm(String query) throws IOException, PrologInterfaceException {
+	public static CTerm parseNonCanonicalTerm(String query) throws IOException, PrologProcessException {
 		PrologProcess pif = Connector.newPrologProcess();
 		CTerm returnTerm = parseNonCanonicalTerm(query, pif);
 		pif.stop();
 		return returnTerm;
 	}
 
-	public static CTerm parseNonCanonicalTerm(String term, PrologProcess pif) throws PrologInterfaceException {
+	public static CTerm parseNonCanonicalTerm(String term, PrologProcess pif) throws PrologProcessException {
 
 		PrologSession session = pif.getSession(PrologProcess.CTERMS|PrologProcess.UNBOUND_VARIABLES);
 		

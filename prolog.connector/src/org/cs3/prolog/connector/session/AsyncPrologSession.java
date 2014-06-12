@@ -14,7 +14,7 @@
 
 package org.cs3.prolog.connector.session;
 
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 
 /**
@@ -57,8 +57,8 @@ public interface AsyncPrologSession extends  Disposable {
 	 *            the query goal
 	 * @see AsyncPrologSessionListener
 	 */
-	public void queryAll(Object ticket, String query) throws PrologInterfaceException;
-	public void queryAll(Object ticket, String query,int flags) throws PrologInterfaceException;
+	public void queryAll(Object ticket, String query) throws PrologProcessException;
+	public void queryAll(Object ticket, String query,int flags) throws PrologProcessException;
 
 	/**
 	 * Enque a request for the first solution to a goal.
@@ -74,8 +74,8 @@ public interface AsyncPrologSession extends  Disposable {
 	 *            the query goal
 	 * @see AsyncPrologSessionListener
 	 */
-	public void queryOnce(Object ticket, String query) throws PrologInterfaceException;
-	public void queryOnce(Object ticket, String query,int flags) throws PrologInterfaceException;
+	public void queryOnce(Object ticket, String query) throws PrologProcessException;
+	public void queryOnce(Object ticket, String query,int flags) throws PrologProcessException;
 
 	/**
 	 * Wait for pending queries.
@@ -90,7 +90,7 @@ public interface AsyncPrologSession extends  Disposable {
 	 * thread is waiting. Also note that another thread may abort the batch -
 	 * the marker will be processed nevertheless.
 	 */
-	public void join() throws PrologInterfaceException;
+	public void join() throws PrologProcessException;
 
 	/**
 	 * Abort the batch.
@@ -106,7 +106,7 @@ public interface AsyncPrologSession extends  Disposable {
 	 * application-specific manner.
 	 * 
 	 */
-	public void abort() throws PrologInterfaceException;
+	public void abort() throws PrologProcessException;
 
 	/**
 	 * Abort the batch, using a sepcific monitor as ticket.
@@ -136,7 +136,7 @@ public interface AsyncPrologSession extends  Disposable {
 	 * things happen in a certain order. You should overuse it in your
 	 * application. 
 	 */
-	public void abort(Object monitor) throws PrologInterfaceException;
+	public void abort(Object monitor) throws PrologProcessException;
 
 	
 	

@@ -26,7 +26,7 @@ import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -51,7 +51,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	private IFile file;
 
 	public PLScanner(PLEditor editor, ColorManager manager) 
-	throws CoreException, PrologInterfaceException {
+	throws CoreException, PrologProcessException {
 
 		this.manager = manager;
 		
@@ -85,7 +85,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	}
 
 	void initHighlighting()
-			throws PrologInterfaceException, CoreException {
+			throws PrologProcessException, CoreException {
 		// "Tokens" indicate the desired highlighting
 		IToken variableToken    = tokenFor(manager.getVariableColor());
 		IToken stringToken      = tokenFor(manager.getStringColor());
@@ -117,9 +117,9 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
      * @param wordRule -- The WordRule to which we add words.
 	 * @param manager -- The ColorManager 
 	 * @param plProject -- The PDT Metadata process.
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	private void addWordsTo(WordRule wordRule) throws PrologInterfaceException, CoreException {
+	private void addWordsTo(WordRule wordRule) throws PrologProcessException, CoreException {
 		
 		// The order of the following definitions is important!
 		// The latter ones overrule the previous ones. E.g. a predicate
@@ -150,10 +150,10 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	 * @param keywordToken -- The desired highlighting for words with that property
 	 * @param wordRule -- The WordRule to which to add the words.
 	 * @param plProject -- The PDT Metadata process.
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 * @throws CoreException 
 	 */
-	private void addWordsWithProperty(String property, IToken keywordToken, WordRule wordRule) throws PrologInterfaceException, CoreException {
+	private void addWordsWithProperty(String property, IToken keywordToken, WordRule wordRule) throws PrologProcessException, CoreException {
 		String[] plBuiltInPredicates = getPredicatesWithProperty(property);
 		for (int i = 0; plBuiltInPredicates!=null&&i < plBuiltInPredicates.length; i++){
 			wordRule.addWord(plBuiltInPredicates[i], keywordToken);
@@ -168,7 +168,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	 * (by Tobias Rho) is for projects that DO NOT have the PDT nature.
 	 * 
 	 */
-	private String[] getPredicatesWithProperty(String property) throws PrologInterfaceException, CoreException {
+	private String[] getPredicatesWithProperty(String property) throws PrologProcessException, CoreException {
 		PrologSession session = null;
 		try {
 			session = PDTCommonUtil.getActivePrologProcess().getSession();
@@ -199,7 +199,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 				initHighlighting();
 			} catch (CoreException e) {
 				Debug.report(e);
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}	
 		}

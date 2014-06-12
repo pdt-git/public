@@ -20,11 +20,11 @@ import java.util.EventListener;
 
 /**
  */
-public interface PrologInterfaceListener extends EventListener{
+public interface PrologEventListener extends EventListener{
     /**
      * @param e
      */
-    void update(PrologInterfaceEvent e);
+    void update(PrologEvent e);
 
 	
 }

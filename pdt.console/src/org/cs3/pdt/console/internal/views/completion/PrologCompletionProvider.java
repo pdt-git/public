@@ -27,7 +27,7 @@ import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class PrologCompletionProvider {
 
@@ -109,7 +109,7 @@ public class PrologCompletionProvider {
 					proposals.add(new AtomCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
 				}
 			}
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			Debug.report(e);
 		}
 		Collections.sort(proposals);

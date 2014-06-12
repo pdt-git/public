@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public interface PrologSession extends Disposable{
 	
@@ -27,18 +27,18 @@ public interface PrologSession extends Disposable{
 	 * @param query
 	 * @return
 	 * @throws PrologException
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-    public Map<String,Object> queryOnce(String query) throws PrologException, PrologInterfaceException;
+    public Map<String,Object> queryOnce(String query) throws PrologException, PrologProcessException;
 
 	/**
 	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryAll(String...)}  
 	 * @param query
 	 * @return
 	 * @throws PrologException
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-    public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologInterfaceException;
+    public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologProcessException;
 
 	/**
 	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryAll(String...)}  
@@ -46,9 +46,9 @@ public interface PrologSession extends Disposable{
 	 * @param flag
 	 * @return
 	 * @throws PrologException
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-    public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologInterfaceException;
+    public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologProcessException;
 	
 }
 

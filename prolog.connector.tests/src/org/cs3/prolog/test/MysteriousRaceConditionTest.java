@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 public class MysteriousRaceConditionTest extends TestCase {
@@ -44,7 +44,7 @@ public class MysteriousRaceConditionTest extends TestCase {
 		pif.stop();
 	}
 
-	public void testMyteriousRaceCondition() throws PrologInterfaceException {
+	public void testMyteriousRaceCondition() throws PrologProcessException {
 		
 		PrologSession session = pif.getSession();
 		

@@ -23,7 +23,7 @@ import org.cs3.pdt.graphicalviews.focusview.GraphPIFLoaderBase;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.model.GraphDataHolder;
 import org.cs3.prolog.connector.common.QueryUtils;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
@@ -158,7 +158,7 @@ public class OpenInEditorViewMode extends ViewMode {
 			
 			return null;
 		
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			e.printStackTrace();
 			return null;
 		}

@@ -33,7 +33,7 @@ import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -203,7 +203,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 	}
 
-	private SourceLocationAndResultKind findFirstClauseLocation(Goal goal, PrologSession session) throws PrologInterfaceException {
+	private SourceLocationAndResultKind findFirstClauseLocation(Goal goal, PrologSession session) throws PrologProcessException {
 		// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
 		String enclFile = UIUtils.getFileFromActiveEditor();
 		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...

@@ -18,7 +18,7 @@ import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.internal.contentassistant.NaivPrologContentAssistProcessor;
 import org.cs3.pdt.editor.internal.views.lightweightOutline.PrologOutlineInformationControl;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.AbstractInformationControlManager;
@@ -109,7 +109,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 			scanner = new PLScanner(editor, colorManager);
 		} catch (CoreException e) {
 			Debug.report(e);
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 		}
 		scanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager
 				.getColor(colorManager.getDefaultColor()))));

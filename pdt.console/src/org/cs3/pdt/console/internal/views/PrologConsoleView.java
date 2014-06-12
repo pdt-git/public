@@ -55,7 +55,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -590,7 +590,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		public void run(){
 			try {
 				getPrologProcess().queryOnce(getQuery());
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 		}
@@ -787,7 +787,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 							}
 							try {
 								connect(currentPif);
-							} catch (PrologInterfaceException e) {
+							} catch (PrologProcessException e) {
 							}
 						}
 					}).start();
@@ -1106,7 +1106,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	public void afterInit(PrologProcess pif) {
 		try {
 			connect(pif);
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			Debug.report(e);
 		}
 
@@ -1174,7 +1174,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			addHooks(currentPif);
 			try {
 				connect(currentPif);
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 			reconfigureViewer(currentPif);
@@ -1208,7 +1208,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	public void ensureConnectionForCurrentPrologInterface() {
 		try {
 			connect(currentPif);
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			Debug.report(e);
 		}
 	}
@@ -1223,7 +1223,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	 * 
 	 */
 	synchronized private void connect(final PrologProcess pif)
-			throws PrologInterfaceException {
+			throws PrologProcessException {
 
 		PrologSocketConsoleModel model = getConsoleModel(pif);
 		ensureConnection(pif, model);
@@ -1239,7 +1239,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 
 	private void ensureConnection(final PrologProcess pif,
-			PrologSocketConsoleModel model) throws PrologInterfaceException {
+			PrologSocketConsoleModel model) throws PrologProcessException {
 		if (model.isConnected()) {
 			return;
 		}

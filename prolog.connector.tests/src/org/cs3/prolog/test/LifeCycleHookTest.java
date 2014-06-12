@@ -20,7 +20,7 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 public class LifeCycleHookTest extends TestCase {
@@ -58,7 +58,7 @@ public class LifeCycleHookTest extends TestCase {
 
 		@Override
 		public void afterInit(PrologProcess pif)
-				throws PrologInterfaceException {
+				throws PrologProcessException {
 			Debug.debug("afterInit");
 			afterInit++;
 			
@@ -66,7 +66,7 @@ public class LifeCycleHookTest extends TestCase {
 
 		@Override
 		public void beforeShutdown(PrologProcess pif, PrologSession session)
-				throws PrologInterfaceException {
+				throws PrologProcessException {
 			Debug.debug("beforeShutdown");
 			beforeShutdown++;
 			
@@ -74,7 +74,7 @@ public class LifeCycleHookTest extends TestCase {
 
 		@Override
 		public void onInit(PrologProcess pif, PrologSession initSession)
-				throws PrologInterfaceException {
+				throws PrologProcessException {
 			Debug.debug("onInit");
 			onInit++;
 			

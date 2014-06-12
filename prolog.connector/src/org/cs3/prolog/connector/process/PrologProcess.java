@@ -118,9 +118,9 @@ public interface PrologProcess {
 	 * Uses default flag
 	 * 
 	 * @return a new Session Object
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public abstract PrologSession getSession() throws PrologInterfaceException;
+	public abstract PrologSession getSession() throws PrologProcessException;
 
 	/**
 	 * Returns a prolog session.<br>
@@ -132,38 +132,38 @@ public interface PrologProcess {
 	 * Flag sets the kind of objects returned by the queries.
 	 * 
 	 * @return a new Session Object
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public abstract PrologSession getSession(int flags) throws PrologInterfaceException;
+	public abstract PrologSession getSession(int flags) throws PrologProcessException;
 	
 	/**
 	 * Stop the prolog system (if it is up). This will terminate all running
 	 * sessions and shut down the prolog process.
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public abstract void stop() throws PrologInterfaceException;
+	public abstract void stop() throws PrologProcessException;
 
 	/**
 	 * Starts the prolog system (if it is down).
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public abstract void start() throws PrologInterfaceException;
+	public abstract void start() throws PrologProcessException;
 
 	/**
 	 * Restarts the prolog system.
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public abstract void restart() throws PrologInterfaceException;
+	public abstract void restart() throws PrologProcessException;
 
 	/**
 	 * Stops and resets the prolog system.
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public abstract void reset() throws PrologInterfaceException;
+	public abstract void reset() throws PrologProcessException;
 
 	/**
 	 * checks whether the prologInterface is up and running.
@@ -228,8 +228,8 @@ public interface PrologProcess {
 	/**
 	 * Uses the default flag
 	 */
-	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
-	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
+	public AsyncPrologSession getAsyncSession() throws PrologProcessException;
+	public AsyncPrologSession getAsyncSession(int flags) throws PrologProcessException;
 	
 	/**
 	 * Is the {@link PrologProcess} in an error state, e.g. the corresponding process has been killed externally.  
@@ -248,9 +248,9 @@ public interface PrologProcess {
 	 * 
 	 * @param predicates a number of goals
 	 * @return all results of the query or an empty list if the query fails
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException;
+	public List<Map<String, Object>> queryAll(String... predicates) throws PrologProcessException;
 	
 	/**
 	 * Executes the given query and returns all results. The query is created
@@ -264,9 +264,9 @@ public interface PrologProcess {
 	 * @param flag kind of objects returned by the query
 	 * @param predicates a number of goals
 	 * @return all results of the query or an empty list if the query fails
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologInterfaceException;
+	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologProcessException;
 	
 	/**
 	 * Executes the given query and returns the first result. The query is created
@@ -278,9 +278,9 @@ public interface PrologProcess {
 	 * 
 	 * @param predicates a number of goals
 	 * @return the first result as of the query or null if the query fails
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
+	public Map<String, Object> queryOnce(String... predicates) throws PrologProcessException;
 	
 	/**
 	 * Executes the given query and returns the first result. The query is created
@@ -293,15 +293,15 @@ public interface PrologProcess {
 	 * @param flag kind of objects returned by the query
 	 * @param predicates a number of goals
 	 * @return the first result as of the query or null if the query fails
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologInterfaceException;
+	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologProcessException;
 	
 	public int getDefaultSessionFlag();
 
 	public void setDefaultSessionFlag(int flag);
 	
-	public void consult(File file) throws PrologInterfaceException;
+	public void consult(File file) throws PrologProcessException;
 }
 
 

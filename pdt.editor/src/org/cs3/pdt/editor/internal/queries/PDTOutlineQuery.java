@@ -31,7 +31,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 
@@ -78,7 +78,7 @@ public class PDTOutlineQuery {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName, PrologSession session) throws PrologException, PrologInterfaceException {
+	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName, PrologSession session) throws PrologException, PrologProcessException {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		for (Map<String, Object> predicate : result) {
 			String module = predicate.get("Entity").toString();
@@ -184,7 +184,7 @@ public class PDTOutlineQuery {
 		Map<String, Object> result = null;
 		try {
 			result = pif.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, QueryUtils.quoteAtom(fileName)));
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			Debug.report(e);
 		}
 		return result != null;

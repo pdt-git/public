@@ -21,7 +21,7 @@ import org.cs3.pdt.editor.internal.editors.PLPartitionScanner;
 import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
@@ -54,10 +54,10 @@ public abstract class PrologContentAssistProcessor {
 		
 	protected abstract void addPredicateProposals(IDocument document, int begin,
 			int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals)
-			throws PrologInterfaceException, CoreException;
+			throws PrologProcessException, CoreException;
 
 	protected abstract void addVariableProposals(IDocument document, int begin,
-			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws BadLocationException, PrologInterfaceException, CoreException;
+			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws BadLocationException, PrologProcessException, CoreException;
 
 	private Prefix calculatePrefix(IDocument document, int offset)
 			throws BadLocationException {
@@ -177,7 +177,7 @@ public abstract class PrologContentAssistProcessor {
 //					.getShell(), PDT.ERR_COMPLETION_BAD_LOCATION,
 //					PDT.CX_COMPLETION, e);
 			return null;
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			Debug.report(e);
 //			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
 //					.getErrorMessageProvider(), viewer.getTextWidget()

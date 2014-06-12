@@ -14,10 +14,10 @@
 
 package org.cs3.prolog.connector.internal.lifecycle;
 
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public interface WorkRunnable {	
-	public void run() throws PrologInterfaceException;
+	public void run() throws PrologProcessException;
 }
 
 

@@ -33,7 +33,7 @@ import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.process.StartupStrategy;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.Disposable;
@@ -44,7 +44,7 @@ import org.cs3.prolog.connector.session.PrologSession;
  * <p>
  * Subclasses have to implement getSession().
  */
-public abstract class AbstractPrologInterface implements PrologProcess {
+public abstract class AbstractPrologProcess implements PrologProcess {
 
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
 	private StartupStrategy startupStrategy;
@@ -65,11 +65,11 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 
-	public AbstractPrologInterface() {
+	public AbstractPrologProcess() {
 		this(null);
 	}
 	
-	public AbstractPrologInterface(String string) {
+	public AbstractPrologProcess(String string) {
 		PifShutdownHook.getInstance().add(this);
 		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
 	}
@@ -221,7 +221,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 				if (pif != null) {
 					try {
 						pif.stop();
-					} catch (PrologInterfaceException e) {
+					} catch (PrologProcessException e) {
 						;
 					}
 				}
@@ -240,33 +240,33 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 		}
 
 		@Override
-		public PrologSession getInitialSession() throws PrologInterfaceException {
-			return AbstractPrologInterface.this.getInitialSession();
+		public PrologSession getInitialSession() throws PrologProcessException {
+			return AbstractPrologProcess.this.getInitialSession();
 		}
 
 		@Override
 		public PrologProcess getPrologProcess() {
-			return AbstractPrologInterface.this;
+			return AbstractPrologProcess.this;
 		}
 
 		@Override
-		public PrologSession getShutdownSession() throws PrologInterfaceException {
-			return AbstractPrologInterface.this.getShutdownSession();
+		public PrologSession getShutdownSession() throws PrologProcessException {
+			return AbstractPrologProcess.this.getShutdownSession();
 		}
 
 		@Override
 		public void startServer() throws Throwable {
-			getStartAndStopStrategy().startServer(AbstractPrologInterface.this);
+			getStartAndStopStrategy().startServer(AbstractPrologProcess.this);
 		}
 
 		@Override
 		public void stopServer() throws Throwable {
-			getStartAndStopStrategy().stopServer(AbstractPrologInterface.this);
+			getStartAndStopStrategy().stopServer(AbstractPrologProcess.this);
 		}
 
 		@Override
 		public boolean isServerRunning() throws Throwable {
-			return getStartAndStopStrategy().isRunning(AbstractPrologInterface.this);
+			return getStartAndStopStrategy().isRunning(AbstractPrologProcess.this);
 		}
 
 		@Override
@@ -348,14 +348,14 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	 * override this if your subclass needs special initial Sessions
 	 * 
 	 * @return
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	protected PrologSession getInitialSession() throws PrologInterfaceException {
+	protected PrologSession getInitialSession() throws PrologProcessException {
 
 		try {
 			return getSession_internal(defaultSessionFlag);// FIXME: a temporary solution.
 		} catch (Throwable t) {
-			throw new PrologInterfaceException(t);
+			throw new PrologProcessException(t);
 		}
 
 	}
@@ -372,19 +372,19 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	public abstract PrologSession getSession_impl(int flags) throws Throwable;
 
 	@Override
-	public PrologSession getSession() throws PrologInterfaceException {
+	public PrologSession getSession() throws PrologProcessException {
 		return getSession(defaultSessionFlag);
 	}
 
 	@Override
-	public PrologSession getSession(int flags) throws PrologInterfaceException {
+	public PrologSession getSession(int flags) throws PrologProcessException {
 
 		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
 				restart();
 				if (getError() != null) {
-					throw new PrologInterfaceException(getError());
+					throw new PrologProcessException(getError());
 				}
 			}
 			if (!isUp()) {
@@ -398,7 +398,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 			try {
 				return getSession_internal(flags);
 			} catch (Throwable t) {
-				throw new PrologInterfaceException("Failed to obtain session", t);
+				throw new PrologProcessException("Failed to obtain session", t);
 			}
 
 		}
@@ -412,7 +412,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 
 	}
 
-	protected void waitUntilUp() throws InterruptedException, PrologInterfaceException {
+	protected void waitUntilUp() throws InterruptedException, PrologProcessException {
 		lifecycle.waitUntilUp();
 	}
 
@@ -420,13 +420,13 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	 * overide this if your subclass needs special shutdown sessions.
 	 * 
 	 * @return
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	protected PrologSession getShutdownSession() throws PrologInterfaceException {
+	protected PrologSession getShutdownSession() throws PrologProcessException {
 		try {
 			return getSession_internal(defaultSessionFlag); // FIXME: a temporary solution
 		} catch (Throwable t) {
-			throw new PrologInterfaceException(t);
+			throw new PrologProcessException(t);
 		}
 	}
 
@@ -448,7 +448,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 		return lifecycle.isUp();
 	}
 
-	public PrologInterfaceException getError() {
+	public PrologProcessException getError() {
 		return lifecycle.getError();
 	}
 
@@ -456,10 +456,10 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	 * causes complete re-initialization of the Prolog system, and invalidates
 	 * all current sessions.
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	@Override
-	public void restart() throws PrologInterfaceException {
+	public void restart() throws PrologProcessException {
 		synchronized (lifecycle) {
 			if (getError() != null) {
 				reset();
@@ -475,10 +475,10 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	 * causes complete re-initialization of the Prolog system, and invalidates
 	 * all current sessions.
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	@Override
-	public void reset() throws PrologInterfaceException {
+	public void reset() throws PrologProcessException {
 		synchronized (lifecycle) {
 			lifecycle.reset();
 			try {
@@ -499,17 +499,17 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	}
 
 	@Override
-	public void start() throws PrologInterfaceException {
+	public void start() throws PrologProcessException {
 
 		synchronized (lifecycle) {
 			if (getError() != null) {
-				throw new PrologInterfaceException(getError());
+				throw new PrologProcessException(getError());
 			}
 			lifecycle.start();
 			try {
 				lifecycle.waitUntilUp();
 			} catch (InterruptedException e) {
-				throw new PrologInterfaceException(e);
+				throw new PrologProcessException(e);
 			}
 
 			//			reconsultFiles();
@@ -518,23 +518,23 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	}
 
 	@Override
-	public void stop() throws PrologInterfaceException {
+	public void stop() throws PrologProcessException {
 		synchronized (lifecycle) {
 			if (getError() != null) {
-				throw new PrologInterfaceException(getError());
+				throw new PrologProcessException(getError());
 			}
 			lifecycle.stop();
 			try {
 				lifecycle.waitUntilDown(false);
 			} catch (InterruptedException e) {
-				throw new PrologInterfaceException(e);
+				throw new PrologProcessException(e);
 			}
 
 		}
 
 	}
 
-	public PrologInterfaceException error(Throwable e) {
+	public PrologProcessException error(Throwable e) {
 
 		synchronized (lifecycle) {
 			if (getError() != null) {
@@ -557,16 +557,16 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable;
 
 	@Override
-	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
+	public AsyncPrologSession getAsyncSession() throws PrologProcessException {
 		return getAsyncSession(defaultSessionFlag);
 	}
 
 	@Override
-	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException {
+	public AsyncPrologSession getAsyncSession(int flags) throws PrologProcessException {
 		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
-				throw new PrologInterfaceException(getError());
+				throw new PrologProcessException(getError());
 			}
 			if (!isUp()) {
 				try {
@@ -579,7 +579,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 			try {
 				return getAsyncSession_internal(flags);
 			} catch (Throwable t) {
-				throw new PrologInterfaceException("Failed to obtain session", t);
+				throw new PrologProcessException("Failed to obtain session", t);
 			}
 		}
 	}
@@ -611,7 +611,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	}
 	
 	@Override
-	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException {
+	public List<Map<String, Object>> queryAll(String... predicates) throws PrologProcessException {
 		return queryAll(getDefaultSessionFlag(), predicates);
 	}
 	
@@ -621,10 +621,10 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	 * 
 	 * @param predicates
 	 * @return result List contains a result map for each predicate queried 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	@Override
-	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologInterfaceException {
+	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologProcessException {
 		
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
@@ -650,7 +650,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	
 
 	@Override
-	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException {
+	public Map<String, Object> queryOnce(String... predicates) throws PrologProcessException {
 		return queryOnce(getDefaultSessionFlag(), predicates);
 	}
 	
@@ -660,10 +660,10 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	 * 
 	 * @param predicates
 	 * @return result Map of the last predicate queried 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	@Override
-	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologInterfaceException {
+	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologProcessException {
 		
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
@@ -689,7 +689,7 @@ public abstract class AbstractPrologInterface implements PrologProcess {
 	}
 
 	@Override
-	public void consult(File file) throws PrologInterfaceException {
+	public void consult(File file) throws PrologProcessException {
 		String fileName = QueryUtils.prologFileNameQuoted(file);
 		String query = QueryUtils.bT("consult", fileName);
 		queryOnce(query);

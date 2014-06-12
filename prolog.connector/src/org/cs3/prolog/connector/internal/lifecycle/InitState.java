@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class InitState extends AbstractState {
 
@@ -33,11 +33,11 @@ public class InitState extends AbstractState {
 		
 		context.enqueueWork(new NamedWorkRunnable("startServer"){
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				try {
 					context.startServer();
 				} catch (Throwable e) {
-					throw new PrologInterfaceException(e);
+					throw new PrologProcessException(e);
 				}
 			}	
 		});
@@ -48,7 +48,7 @@ public class InitState extends AbstractState {
 
 		context.enqueueWork(new NamedWorkRunnable("workDoneInit") {	
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				context.workDone();
 			}
 		});
@@ -67,7 +67,7 @@ public class InitState extends AbstractState {
 		if (isNewHook(hook,id)) {
 			context.enqueueWork(new NamedWorkRunnable("lateInit on"+id) {
 				@Override
-				public void run() throws PrologInterfaceException {
+				public void run() throws PrologProcessException {
 					hook.lateInit(context.getPrologProcess());
 				}
 			});

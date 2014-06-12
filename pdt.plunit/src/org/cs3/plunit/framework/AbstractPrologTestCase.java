@@ -162,7 +162,7 @@ public abstract class AbstractPrologTestCase {
 	 * @param sourceFolderName
 	 * @return
 	 * @throws PrologException
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	protected static String fullFilename(String filenameInSourcefolder) throws PrologException, PrologInterfaceException {
 		return fullFilename(filenameInSourcefolder,null);
@@ -211,7 +211,7 @@ public abstract class AbstractPrologTestCase {
 	 * @param offset
 	 * @param length
 	 * @return
-	 * @throws PrologInterfaceException 
+	 * @throws PrologProcessException 
 	 * @throws PrologException 
 	 */
 	public static String idOfSourceLocation(String fullFilename, int offset, int length) throws PrologException, PrologInterfaceException {
@@ -304,7 +304,7 @@ public abstract class AbstractPrologTestCase {
 	/**
 	 * *Deprecated*: Derived Facts are already included in the persistent factbase.
 	 * @throws IOException
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	@Deprecated
 	public void createDerivedFacts() throws IOException, PrologInterfaceException {

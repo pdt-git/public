@@ -8,7 +8,7 @@ import java.io.InputStream;
 import org.cs3.prolog.connector.common.ProcessUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.internal.process.socket.SocketPrologInterface;
+import org.cs3.prolog.connector.internal.process.socket.SocketPrologProcess;
 import org.cs3.prolog.connector.process.DefaultStartupStrategy;
 import org.cs3.prolog.connector.process.PrologProcess;
 
@@ -33,13 +33,13 @@ public class Connector {
 	}
 
 	public static PrologProcess newUninitializedPrologProcess(String name) {
-		SocketPrologInterface socketPrologInterface = new SocketPrologInterface(name);
+		SocketPrologProcess socketPrologProcess = new SocketPrologProcess(name);
 		try {
-			socketPrologInterface.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
+			socketPrologProcess.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return socketPrologInterface;
+		return socketPrologProcess;
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class Connector {
 	 * @throws IOException
 	 */
 	public static PrologProcess newPrologProcess(String executable) throws IOException {
-		SocketPrologInterface pif = new SocketPrologInterface(null);
+		SocketPrologProcess pif = new SocketPrologProcess(null);
 		pif.setStartupStrategy(new DefaultStartupStrategy());
 		pif.setOSInvocation(ProcessUtils.getInvocationCommand());
 		if (executable == null) {
@@ -81,7 +81,7 @@ public class Connector {
 		if (consultServerFile == null) {
 			String tempDir = System.getProperty("java.io.tmpdir");
 			InputStream resourceAsStream;
-			resourceAsStream = SocketPrologInterface.class.getResourceAsStream("consult_server.pl");
+			resourceAsStream = SocketPrologProcess.class.getResourceAsStream("consult_server.pl");
 			if (resourceAsStream == null) {
 				throw new RuntimeException("Cannot find consult_server.pl!");
 			}

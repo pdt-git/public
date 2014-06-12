@@ -32,10 +32,10 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CCompound;
 import org.cs3.prolog.connector.cterm.CNil;
-import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
+import org.cs3.prolog.connector.internal.process.AbstractPrologProcess;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 /**
@@ -68,7 +68,7 @@ public class SocketSessionTest extends TestCase {
 		pif.stop();
 	}
 
-	public void testCreation() throws PrologInterfaceException {
+	public void testCreation() throws PrologProcessException {
 		PrologSession ss = pif.getSession();
 
 		assertNotNull(ss);
@@ -86,7 +86,7 @@ public class SocketSessionTest extends TestCase {
 					try {
 						pif.stop();
 						pif.start();
-					} catch (PrologInterfaceException e) {
+					} catch (PrologProcessException e) {
 						this.e = e;
 					}
 
@@ -104,7 +104,7 @@ public class SocketSessionTest extends TestCase {
 		assertNull(t.e);
 	}
 
-	public void testQueries() throws PrologException, PrologInterfaceException {
+	public void testQueries() throws PrologException, PrologProcessException {
 		PrologSession ss = pif.getSession();
 
 		assertNotNull(ss.queryOnce("assert(a(b))"));
@@ -124,7 +124,7 @@ public class SocketSessionTest extends TestCase {
 		ss.dispose();
 	}
 
-	public void testCTerm() throws PrologException, PrologInterfaceException {
+	public void testCTerm() throws PrologException, PrologProcessException {
 		PrologSession s = pif.getSession(PrologProcess.CTERMS);		
 		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
@@ -134,7 +134,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testListProcessingDisabled() throws PrologException,
-			PrologInterfaceException {
+			PrologProcessException {
 		PrologSession s =  pif.getSession(PrologProcess.NONE);
 		
 		Map<String,Object> map = s.queryOnce("A=[1,2]");
@@ -148,7 +148,7 @@ public class SocketSessionTest extends TestCase {
 
 		
 
-	public void testDispose() throws PrologException, PrologInterfaceException {
+	public void testDispose() throws PrologException, PrologProcessException {
 		PrologSession ss = pif.getSession();
 
 		ss.dispose();
@@ -163,7 +163,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testMultipleQuery() throws PrologException,
-			PrologInterfaceException {
+			PrologProcessException {
 		PrologSession server = pif.getSession();
 
 		// ClientConnection connection= new ClientConnectionStub();
@@ -190,9 +190,9 @@ public class SocketSessionTest extends TestCase {
 	/**
 	 * PDT-205
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public void testSyntaxError() throws PrologInterfaceException {
+	public void testSyntaxError() throws PrologProcessException {
 		PrologSession s = pif.getSession();
 		try {
 			s.queryAll("test(''asdf'')");
@@ -213,27 +213,27 @@ public class SocketSessionTest extends TestCase {
 					t[0] = null;
 				} catch (PrologException e) {
 					t[0] = e;
-				} catch (PrologInterfaceException e) {
+				} catch (PrologProcessException e) {
 					t[0] = e;
 				}
 			}
 		};
 		thread.start();
 
-		((AbstractPrologInterface) pif).getStartAndStopStrategy().stopServer(
+		((AbstractPrologProcess) pif).getStartAndStopStrategy().stopServer(
 				pif);
 		thread.join();
 		assertNotNull(t[0]);
-		assertEquals(PrologInterfaceException.class, t[0].getClass());
+		assertEquals(PrologProcessException.class, t[0].getClass());
 		pif.restart();
 	}
 
 	/**
 	 * this one fails if the pif impl does not support lists
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public void testList() throws PrologInterfaceException {
+	public void testList() throws PrologProcessException {
 		PrologSession s = pif.getSession();
 		Map<String,Object> map = s.queryOnce("A=[1,2,3,[[a,b,['{}']]],[b,c]]");
 

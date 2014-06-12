@@ -20,7 +20,7 @@ import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -99,12 +99,12 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	
 	@Override
 	public void beforeConsult(PrologProcess pif, List<IFile> files,
-			IProgressMonitor monitor) throws PrologInterfaceException { }
+			IProgressMonitor monitor) throws PrologProcessException { }
 
 	@Override
 	public void afterConsult(PrologProcess pif, List<IFile> files,
 			List<String> allConsultedFiles, IProgressMonitor monitor)
-			throws PrologInterfaceException {
+			throws PrologProcessException {
 		
 		refreshCurrentView();
 	}

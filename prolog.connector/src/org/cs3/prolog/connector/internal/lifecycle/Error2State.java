@@ -14,14 +14,14 @@
 
 package org.cs3.prolog.connector.internal.lifecycle;
 
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class Error2State extends AbstractState{
 
-	private PrologInterfaceException error;
+	private PrologProcessException error;
 
 
-	protected Error2State(LifeCycle context,PrologInterfaceException error) {
+	protected Error2State(LifeCycle context,PrologProcessException error) {
 		super(context);
 		this.error=error;
 	}
@@ -35,7 +35,7 @@ public class Error2State extends AbstractState{
 	
 	
 	@Override
-	public PrologInterfaceException getError() {	
+	public PrologProcessException getError() {	
 		return error;
 	}
 	

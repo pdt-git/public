@@ -29,9 +29,9 @@ import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceEvent;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
-import org.cs3.prolog.connector.process.PrologInterfaceListener;
+import org.cs3.prolog.connector.process.PrologEvent;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.process.PrologEventListener;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
 import org.cs3.prolog.connector.session.DefaultAsyncPrologSessionListener;
@@ -39,7 +39,7 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener implements IPrologEventDispatcher {
 
-	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
+	private HashMap<String, Vector<PrologEventListener>> listenerLists = new HashMap<String, Vector<PrologEventListener>>();
 
 	/*
 	 * XXX i don't like the idea of keeping a reference to this session on the
@@ -62,7 +62,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			@Override
-			public void onInit(PrologProcess pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
+			public void onInit(PrologProcess pif, PrologSession initSession) throws PrologException, PrologProcessException {				
 				try {
 					String query = QueryUtils.bT("use_module", QueryUtils.prologFileNameQuoted(getObserveFile()));
 					initSession.queryOnce(query);
@@ -72,7 +72,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void afterInit(PrologProcess pif) throws PrologInterfaceException {
+			public void afterInit(PrologProcess pif) throws PrologProcessException {
 				synchronized (listenerLists) {
 					Set<String> subjects = listenerLists.keySet();
 					for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
@@ -83,7 +83,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologException, PrologInterfaceException {
+			public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologException, PrologProcessException {
 				synchronized (subjects) {
 					subjects.clear();
 				}
@@ -117,7 +117,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				s= pif.getSession(PrologProcess.NONE);
 				hook.onInit(pif,s);
 
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.rethrow(e);
 			}
 			finally{
@@ -141,12 +141,12 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
 	@Override
-	public void addPrologInterfaceListener(String subject,
-			PrologInterfaceListener l) throws PrologInterfaceException {
+	public void addPrologEventListener(String subject,
+			PrologEventListener l) throws PrologProcessException {
 		synchronized (listenerLists) {
-			Vector<PrologInterfaceListener> list = listenerLists.get(subject);
+			Vector<PrologEventListener> list = listenerLists.get(subject);
 			if (list == null) {
-				list = new Vector<PrologInterfaceListener>();
+				list = new Vector<PrologEventListener>();
 				listenerLists.put(subject, list);
 				enableSubject(subject);
 			}
@@ -167,10 +167,10 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
 	@Override
-	public void removePrologInterfaceListener(String subject,
-			PrologInterfaceListener l) throws PrologInterfaceException {
+	public void removePrologEventListener(String subject,
+			PrologEventListener l) throws PrologProcessException {
 		synchronized (listenerLists) {
-			Vector<PrologInterfaceListener> list = listenerLists.get(subject);
+			Vector<PrologEventListener> list = listenerLists.get(subject);
 			if (list == null) {
 				return;
 			}
@@ -185,7 +185,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	}
 
-	private synchronized void enableSubject(String subject) throws PrologInterfaceException {
+	private synchronized void enableSubject(String subject) throws PrologProcessException {
 		synchronized (subjects) {
 			if (subjects.contains(subject)) {
 				Debug.info("Aborted enableSubject: " + subject + " is already active");
@@ -213,7 +213,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		dispatch();
 	}
 
-	private void disableSubject(String subject) throws PrologInterfaceException {
+	private void disableSubject(String subject) throws PrologProcessException {
 		if (session == null) {
 			return;
 		}
@@ -229,11 +229,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		}
 	}
 
-	private void dispatch() throws PrologInterfaceException {
+	private void dispatch() throws PrologProcessException {
 		session.queryAll(eventTicket, "pif_dispatch(Subject,Key,Event)");
 	}
 
-	private void abort() throws PrologInterfaceException {
+	private void abort() throws PrologProcessException {
 		PrologSession s = pif.getSession(PrologProcess.NONE);
 		try {
 			abort(s);
@@ -245,14 +245,14 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	}
 
-	private void abort(PrologSession s) throws PrologException, PrologInterfaceException {
+	private void abort(PrologSession s) throws PrologException, PrologProcessException {
 		s.queryOnce("thread_send_message('"
 				+ session.getProcessorThreadAlias()
 				+ "',notify('$abort',_))");
 	}
 
 
-	public void stop() throws PrologInterfaceException {
+	public void stop() throws PrologProcessException {
 		if (session == null) {
 			return;
 		}
@@ -261,7 +261,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		session = null;
 	}
 
-	public void stop(PrologSession s) throws PrologException, PrologInterfaceException {
+	public void stop(PrologSession s) throws PrologException, PrologProcessException {
 		if (session == null) {
 			return;
 		}
@@ -275,24 +275,24 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	 * @param string
 	 */
 	private void fireUpdate(String subject, String key, String event) {
-		Vector<PrologInterfaceListener> listeners = listenerLists.get(key);
+		Vector<PrologEventListener> listeners = listenerLists.get(key);
 		if (listeners == null) {
 			return;
 		}
-		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, event);
-		Vector<PrologInterfaceListener> cloned = getAListenersClone(listeners);
-		for (Iterator<PrologInterfaceListener> it = cloned.iterator(); it.hasNext();) {
-			PrologInterfaceListener l = it.next();
+		PrologEvent e = new PrologEvent(this, subject, event);
+		Vector<PrologEventListener> cloned = getAListenersClone(listeners);
+		for (Iterator<PrologEventListener> it = cloned.iterator(); it.hasNext();) {
+			PrologEventListener l = it.next();
 			l.update(e);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private Vector<PrologInterfaceListener> getAListenersClone(
-			Vector<PrologInterfaceListener> listeners) {
-		Vector<PrologInterfaceListener> cloned = null;
+	private Vector<PrologEventListener> getAListenersClone(
+			Vector<PrologEventListener> listeners) {
+		Vector<PrologEventListener> cloned = null;
 		synchronized (listeners) {
-			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
+			cloned = (Vector<PrologEventListener>) listeners.clone();
 		}
 		return cloned;
 	}

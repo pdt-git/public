@@ -17,7 +17,7 @@ package org.cs3.pdt.connector.service;
 import java.util.List;
 
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -37,9 +37,9 @@ public interface ConsultListener {
 	 *            the list of files
 	 * @param monitor
 	 *            a progress monitor
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException;
+	void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException;
 
 	/**
 	 * A list of toplevel files has been be consulted successfully into the given
@@ -53,8 +53,8 @@ public interface ConsultListener {
 	 *            a progress monitor
 	 * @param allConsultedFiles
 	 *            the list of all consulted files
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException;
+	void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException;
 
 }

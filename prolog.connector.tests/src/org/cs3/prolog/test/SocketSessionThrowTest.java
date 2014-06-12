@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 /**
@@ -42,9 +42,9 @@ public class SocketSessionThrowTest extends TestCase {
 	/**
 	 * http://roots.iai.uni-bonn.de/jira/browse/PDT-10
 	 * @throws PrologException
-	 * @throws PrologInterfaceException 
+	 * @throws PrologProcessException 
 	 */
-	public void testThrow() throws PrologException, PrologInterfaceException{
+	public void testThrow() throws PrologException, PrologProcessException{
 		PrologSession ss = pif.getSession();
 		try  {
 		ss.queryOnce("throw(A)");

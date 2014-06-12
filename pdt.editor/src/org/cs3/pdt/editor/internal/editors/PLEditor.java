@@ -48,7 +48,7 @@ import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -787,7 +787,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			Map<String, Object> result = null;
 			try {
 				result = PDTCommonUtil.getActivePrologProcess().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, QueryUtils.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 			if (ExternalPrologFilesProjectUtils.isExternalFile(((IFileEditorInput) input).getFile())) {
@@ -1342,13 +1342,13 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
 			String editorFile = getPrologFileName();
@@ -1379,7 +1379,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				try {
 					PLEditor.this.configuration.getPLScanner().initHighlighting();
 					PLEditor.this.getSourceViewer().invalidateTextPresentation();
-				} catch (PrologInterfaceException e) {
+				} catch (PrologProcessException e) {
 					Debug.report(e);
 				} catch (CoreException e) {
 					Debug.report(e);

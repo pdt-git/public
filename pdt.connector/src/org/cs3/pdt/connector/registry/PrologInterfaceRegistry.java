@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 /**
  * Central registry for managing PrologProcess instances and Subscriptions.
@@ -134,7 +134,7 @@ public interface PrologInterfaceRegistry {
 	 * @param key
 	 * 
 	 */
-	public void removePrologInterface(String key) throws PrologInterfaceException;
+	public void removePrologInterface(String key) throws PrologProcessException;
 
 	/**
 	 * Add a subscription to the registry.

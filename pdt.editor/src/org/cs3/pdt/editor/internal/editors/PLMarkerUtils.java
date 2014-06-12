@@ -29,7 +29,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -91,7 +91,7 @@ public class PLMarkerUtils {
 		}
 	}
 	
-	private static void addMarkersForErrorsAndWarnings(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologInterfaceException, CoreException {
+	private static void addMarkersForErrorsAndWarnings(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologProcessException, CoreException {
 		List<Map<String, Object>> msgs = session.queryAll(bT(PrologConnectorPredicates.ERRORS_AND_WARNINGS, "Kind", "Line", "Length", "Message", "File"));
 		monitor.beginTask("Add markers for errors and warnings", msgs.size());
 		
@@ -129,7 +129,7 @@ public class PLMarkerUtils {
 		monitor.done();
 	}
 	
-	private static void addMarkersForSmellDetectors(PrologSession session, IProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologInterfaceException, CoreException {
+	private static void addMarkersForSmellDetectors(PrologSession session, IProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologProcessException, CoreException {
 		monitor.beginTask("Update Prolog Smells Detectors", fileNameToIFiles.size());
 
 		for (String fileName : fileNameToIFiles.keySet()) {
@@ -162,7 +162,7 @@ public class PLMarkerUtils {
 		monitor.done();
 	}
 	
-//	private static void addMarkersUndefinedCalls(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologException, PrologInterfaceException {
+//	private static void addMarkersUndefinedCalls(PrologSession session, SubProgressMonitor monitor, Map<String, IFile> fileNameToIFiles) throws PrologException, PrologProcessException {
 //		monitor.beginTask("Add markers for undefined calls", 1);
 //		boolean doUndefinedCallAnalysis = PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_UNDEFINED_CALL_ANALYSIS);
 //		if (doUndefinedCallAnalysis) {

@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class LazyStartupRaceTest extends TestCase {
 	 private PrologProcess pif;
@@ -41,7 +41,7 @@ public class LazyStartupRaceTest extends TestCase {
 	        pif.stop();
 	    }
 	    
-	    public void testLazyStartUp() throws PrologInterfaceException {
+	    public void testLazyStartUp() throws PrologProcessException {
 	    	pif.getSession();
 
 		}

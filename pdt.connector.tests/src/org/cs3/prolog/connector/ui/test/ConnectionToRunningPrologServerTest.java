@@ -20,9 +20,9 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceEvent;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
-import org.cs3.prolog.connector.process.PrologInterfaceListener;
+import org.cs3.prolog.connector.process.PrologEvent;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.process.PrologEventListener;
 import org.cs3.prolog.connector.session.PrologSession;
 
 
@@ -62,9 +62,9 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 		PrologSession session = pif.getSession(PrologProcess.LEGACY);
 		
-		PrologInterfaceListener listener = new PrologInterfaceListener(){
+		PrologEventListener listener = new PrologEventListener(){
 			@Override
-			public void update(PrologInterfaceEvent e) {
+			public void update(PrologEvent e) {
 				System.out.println("RECEIVED EVENT: "+e.getEvent() + ", SUBJECT " + e.getSubject());
 				System.out.flush();
 				synchronized (monitor) {
@@ -76,9 +76,9 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 			}
 		};
 
-		PrologInterfaceListener locationListener = new PrologInterfaceListener(){
+		PrologEventListener locationListener = new PrologEventListener(){
 			@Override
-			public void update(PrologInterfaceEvent e) {
+			public void update(PrologEvent e) {
 				System.out.println("LOCALISATION: RECEIVED EVENT: "+e.getEvent() + ", SUBJECT " + e.getSubject());
 				System.out.flush();
 				synchronized (monitor) {
@@ -99,7 +99,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:thread_get_message/1))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:cleanup_thread/1))))");
 		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif);
-		dispatcher.addPrologInterfaceListener("localisation:company_nearby(MAC, Other, Distance, 1000)",locationListener);
+		dispatcher.addPrologEventListener("localisation:company_nearby(MAC, Other, Distance, 1000)",locationListener);
 
 		session.queryOnce("sync:deleteAll(magicmap:location('00-09-2D-53-27-3A', _,_,_))");
 		//Samsung
@@ -119,7 +119,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 			monitor.wait(500);
 		}			
 		
-		dispatcher.addPrologInterfaceListener("magicmap:position(A,B,C)",listener);
+		dispatcher.addPrologEventListener("magicmap:position(A,B,C)",listener);
 		
 		try {
 			session.queryOnce("sync:deleteAll(magicmap:position(_,_,_))");
@@ -158,15 +158,15 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	}
 
 	public void testErrors() throws Exception {
-		PrologInterfaceListener nullListener = new PrologInterfaceListener(){
+		PrologEventListener nullListener = new PrologEventListener(){
 			@Override
-			public void update(PrologInterfaceEvent e) {
+			public void update(PrologEvent e) {
 			}
 		};
 		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif);
 		try {
 			
-			dispatcher.addPrologInterfaceListener("aha(",nullListener);
+			dispatcher.addPrologEventListener("aha(",nullListener);
 			fail("expected prolog exception");
 		} catch(PrologException e) {
 
@@ -178,7 +178,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	}
 
 
-	private PrologProcess init() throws PrologInterfaceException {
+	private PrologProcess init() throws PrologProcessException {
 //		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
 //		PrologProcess pif = factory.create();
 		

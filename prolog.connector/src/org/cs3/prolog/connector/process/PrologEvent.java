@@ -20,7 +20,7 @@ import java.util.EventObject;
 
 /**
  */
-public class PrologInterfaceEvent extends EventObject {
+public class PrologEvent extends EventObject {
     /**
      * Comment for <code>serialVersionUID</code>
      */
@@ -45,13 +45,13 @@ public class PrologInterfaceEvent extends EventObject {
      * @param event
      * @param subject
      */
-    public PrologInterfaceEvent(Object source, String subject, String event) {
+    public PrologEvent(Object source, String subject, String event) {
         super(source);
         this.subject=subject;
         this.event=event;
     }
     
-    public PrologInterfaceEvent(Object source) {
+    public PrologEvent(Object source) {
 		super(source);
 	}
     

@@ -26,7 +26,7 @@ import org.cs3.pdt.connector.registry.PrologInterfaceRegistryListener;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -103,13 +103,13 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 		lifeCycleHook = new LifeCycleHook() {
 			@Override public void setData(Object data) {}
-			@Override public void onInit(PrologProcess pif, PrologSession initSession) throws PrologInterfaceException {}
+			@Override public void onInit(PrologProcess pif, PrologSession initSession) throws PrologProcessException {}
 			@Override public void onError(PrologProcess pif) {}
 			@Override public void lateInit(PrologProcess pif) {}
-			@Override public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologInterfaceException {}
+			@Override public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologProcessException {}
 			
 			@Override
-			public void afterInit(PrologProcess pif) throws PrologInterfaceException {
+			public void afterInit(PrologProcess pif) throws PrologProcessException {
 				PDTCommonPlugin.this.notifyPifStartHooks(pif);
 			}
 		};

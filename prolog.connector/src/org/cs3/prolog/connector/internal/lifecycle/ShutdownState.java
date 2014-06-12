@@ -16,7 +16,7 @@ package org.cs3.prolog.connector.internal.lifecycle;
 
 import java.util.HashSet;
 
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class ShutdownState extends AbstractState {
 
@@ -41,13 +41,13 @@ public class ShutdownState extends AbstractState {
 		context.enqueueWork(new NamedWorkRunnable("shutdown_server") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				try {
 					context.disposeSessions();
 					context.stopServer();
 					context.workDone();
 				} catch (Throwable e) {
-					throw new PrologInterfaceException(e);					
+					throw new PrologProcessException(e);					
 				}
 				
 			}

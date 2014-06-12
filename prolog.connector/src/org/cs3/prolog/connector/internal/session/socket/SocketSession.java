@@ -26,12 +26,12 @@ import java.util.Vector;
 
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.cterm.CTermUtil;
-import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
+import org.cs3.prolog.connector.internal.process.AbstractPrologProcess;
 import org.cs3.prolog.connector.internal.process.socket.SocketClient;
 import org.cs3.prolog.connector.internal.process.socket.SocketCommunicationConstants;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 /**
@@ -40,10 +40,10 @@ public class SocketSession implements PrologSession {
 	private static final String RESULT_LIST = "ResultList";
 	private SocketClient client;
 	private boolean queryActive;
-	private AbstractPrologInterface pif;
+	private AbstractPrologProcess pif;
 	private int flags;
 	
-	public SocketSession(SocketClient client, AbstractPrologInterface pif,int flags) {
+	public SocketSession(SocketClient client, AbstractPrologProcess pif,int flags) {
 		this.client = client;
 		this.pif = pif;
 		this.flags=flags;
@@ -73,13 +73,13 @@ public class SocketSession implements PrologSession {
 	
 	@Override
 	public List<Map<String, Object>> queryAll(String query) throws PrologException,
-	PrologInterfaceException {
+	PrologProcessException {
 		return queryAll(query, QUERY_ALL_AT_ONCE);
 	}
 	
 	@Override
 	public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException,
-	PrologInterfaceException {
+	PrologProcessException {
 		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologProcess.CTERMS) == 0)) {
 			return queryAllAtOnce(query);
 		} else {
@@ -88,7 +88,7 @@ public class SocketSession implements PrologSession {
 	}
 
 	private List<Map<String, Object>> queryAllDefault(String query) throws PrologException,
-		PrologInterfaceException {
+		PrologProcessException {
 		CTermUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
@@ -127,7 +127,7 @@ public class SocketSession implements PrologSession {
 }
 	
 	
-	private List<Map<String, Object>> queryAllAtOnce(String query) throws PrologInterfaceException {
+	private List<Map<String, Object>> queryAllAtOnce(String query) throws PrologProcessException {
 		int oldflags = flags;
 		flags = flags | PrologProcess.PROCESS_LISTS;
 		
@@ -184,7 +184,7 @@ public class SocketSession implements PrologSession {
 			} else {
 				return Arrays.asList(Util.unquoteAtom(varString).split(","));
 			}
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -218,7 +218,7 @@ public class SocketSession implements PrologSession {
 
 	@Override
 	public Map<String, Object> queryOnce(String query) throws PrologException,
-	PrologInterfaceException {
+	PrologProcessException {
 		CTermUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
@@ -242,7 +242,7 @@ public class SocketSession implements PrologSession {
 		return solution;
 	}
 
-	private void tryFinishReading() throws PrologInterfaceException {
+	private void tryFinishReading() throws PrologProcessException {
 		try {
 			finishReading();
 		} catch (IOException e) {
@@ -312,7 +312,7 @@ public class SocketSession implements PrologSession {
 		return client.readValue(flags);
 	}
 	
-	private void finishReading() throws IOException, PrologInterfaceException {
+	private void finishReading() throws IOException, PrologProcessException {
 		while (true) {
 			String line = client.readln();
 			if (line == null) {

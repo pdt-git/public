@@ -15,7 +15,7 @@
 package org.cs3.pdt.connector;
 
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.ui.IWorkbench;
 
 /**
@@ -85,8 +85,8 @@ public interface PrologContextTracker {
 	 * 
 	 * @return the PrologProcess or null, if the tracker thinks that none is
 	 *         active.
-	 * @throws PrologInterfaceException 
-	 * @throws PrologInterfaceException 
+	 * @throws PrologProcessException 
+	 * @throws PrologProcessException 
 	 */
 	public PrologProcess getCurrentPrologProcess() ;
 

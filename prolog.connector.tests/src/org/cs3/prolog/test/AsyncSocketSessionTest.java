@@ -30,7 +30,7 @@ import org.cs3.prolog.connector.cterm.CTerm;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
 import org.cs3.prolog.connector.session.AsyncPrologSessionListener;
@@ -565,7 +565,7 @@ public class AsyncSocketSessionTest extends TestCase {
 						} catch (PrologException e) {
 							Debug.report(e);
 
-						} catch (PrologInterfaceException e) {
+						} catch (PrologProcessException e) {
 							Debug.report(e);
 						}
 					}
@@ -603,7 +603,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		try {
 			pif.getAsyncSession();
 
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			e.printStackTrace();
 		}
 		for (int i = 0; i < N; i++) {

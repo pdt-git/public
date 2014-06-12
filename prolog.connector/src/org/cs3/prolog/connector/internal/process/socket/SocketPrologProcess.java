@@ -20,18 +20,18 @@ import java.io.IOException;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.PreferenceProvider;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
+import org.cs3.prolog.connector.internal.process.AbstractPrologProcess;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
 import org.cs3.prolog.connector.internal.session.socket.AsyncSocketSession;
 import org.cs3.prolog.connector.internal.session.socket.SocketSession;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.PrologSession;
 
-public class SocketPrologInterface extends AbstractPrologInterface {
+public class SocketPrologProcess extends AbstractPrologProcess {
 
 	private class InitSession extends SocketSession {
-		public InitSession(SocketClient client, AbstractPrologInterface pif,int flags)
+		public InitSession(SocketClient client, AbstractPrologProcess pif,int flags)
 				throws IOException {
 			super(client, pif,flags);
 		}
@@ -49,7 +49,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	}
 
 	private class ShutdownSession extends SocketSession {
-		public ShutdownSession(SocketClient client, AbstractPrologInterface pif, int flags)
+		public ShutdownSession(SocketClient client, AbstractPrologProcess pif, int flags)
 				throws IOException {
 			super(client, pif,flags);
 		}
@@ -132,7 +132,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	private ServerStartAndStopStrategy startAndStopStrategy;
 
 
-	public SocketPrologInterface(String name) {		
+	public SocketPrologProcess(String name) {		
 		super(name);		
 		setDefaults();
 		setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
@@ -228,7 +228,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getInitialSession()
 	 */
 	@Override
-	protected PrologSession getInitialSession() throws PrologInterfaceException {
+	protected PrologSession getInitialSession() throws PrologProcessException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
 			return new InitSession(new SocketClient(getHost(), port), this, getDefaultSessionFlag());
@@ -245,7 +245,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 */
 	@Override
 	protected PrologSession getShutdownSession()
-			throws PrologInterfaceException {
+			throws PrologProcessException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
 			return new ShutdownSession(new SocketClient(getHost(), port), this, getDefaultSessionFlag());
@@ -261,7 +261,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
 	@Override
-	public  void stop() throws PrologInterfaceException {
+	public  void stop() throws PrologProcessException {
 		try {
 			super.stop();
 		} finally {
@@ -272,7 +272,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	}
 
 	@Override
-	public  PrologInterfaceException error(Throwable e) {
+	public  PrologProcessException error(Throwable e) {
 		try {
 			super.error(e);
 		} finally {
@@ -289,7 +289,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
 	@Override
-	public void start() throws PrologInterfaceException {
+	public void start() throws PrologProcessException {
 		Debug.info("pdt: Start Socket ");
 		if (pool != null) {
 			pool.clear();

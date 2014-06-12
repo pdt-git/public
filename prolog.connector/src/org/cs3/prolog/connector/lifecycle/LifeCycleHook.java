@@ -15,7 +15,7 @@
 package org.cs3.prolog.connector.lifecycle;
 
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 
@@ -36,7 +36,7 @@ public interface LifeCycleHook{
      * disposed.  
      * @param initSession safe-mode session for startup phase.
      */
-	abstract void onInit(PrologProcess pif, PrologSession initSession) throws PrologInterfaceException;
+	abstract void onInit(PrologProcess pif, PrologSession initSession) throws PrologProcessException;
 	
 	/**
      * called by the PrologProcess  after the startup is complete.
@@ -47,7 +47,7 @@ public interface LifeCycleHook{
      * <br>
      * 
      */	
-	abstract void afterInit(PrologProcess pif) throws PrologInterfaceException;
+	abstract void afterInit(PrologProcess pif) throws PrologProcessException;
 	
 	/**
      * called by the PrologProcess  before the pif shuts down.
@@ -60,7 +60,7 @@ public interface LifeCycleHook{
      * or you will very propably couse a dead lock. The cleanup session cannot be 
      * disposed.  
      */		
-	abstract void beforeShutdown(PrologProcess pif,PrologSession session) throws PrologInterfaceException;	
+	abstract void beforeShutdown(PrologProcess pif,PrologSession session) throws PrologProcessException;	
 	
 	/**
      * called by the PrologProcess  when it encounters a fatal error.

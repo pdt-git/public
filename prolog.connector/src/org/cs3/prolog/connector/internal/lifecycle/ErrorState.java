@@ -14,21 +14,21 @@
 
 package org.cs3.prolog.connector.internal.lifecycle;
 
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class ErrorState extends AbstractState {
 
-	private PrologInterfaceException error;
+	private PrologProcessException error;
 	private boolean shouldReset=false;
 
-	public ErrorState(LifeCycle context, PrologInterfaceException e) {
+	public ErrorState(LifeCycle context, PrologProcessException e) {
 		super(context);
 		this.error = e;
 	}
 
 	
 	@Override
-	public PrologInterfaceException getError() {
+	public PrologProcessException getError() {
 		return error;
 	}
 
@@ -42,13 +42,13 @@ public class ErrorState extends AbstractState {
 		context.enqueueWork(new NamedWorkRunnable("shutdown") {
 			
 			@Override
-			public void run() throws PrologInterfaceException {
+			public void run() throws PrologProcessException {
 				try {
 					context.disposeSessions();
 					context.stopServer();
 					context.workDone();
 				} catch (Throwable e) {
-					throw new PrologInterfaceException(e);
+					throw new PrologProcessException(e);
 					
 				}
 

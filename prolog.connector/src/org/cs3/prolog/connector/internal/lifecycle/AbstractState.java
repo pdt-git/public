@@ -20,7 +20,7 @@ import java.util.Iterator;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public abstract class AbstractState implements State {
 
@@ -39,7 +39,7 @@ public abstract class AbstractState implements State {
 	
 	
 	@Override
-	public PrologInterfaceException getError() {	
+	public PrologProcessException getError() {	
 		return null;		
 	}
 	
@@ -111,10 +111,10 @@ public abstract class AbstractState implements State {
 	
 	@Override
 	public State error(Throwable e) {
-		if(e instanceof PrologInterfaceException){
-			return new ErrorState(context,(PrologInterfaceException) e);
+		if(e instanceof PrologProcessException){
+			return new ErrorState(context,(PrologProcessException) e);
 		}
-		return new ErrorState(context, new PrologInterfaceException(e));
+		return new ErrorState(context, new PrologProcessException(e));
 	}
 
 	

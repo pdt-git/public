@@ -26,7 +26,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -91,7 +91,7 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 					String prologFileName = FileUtils.prologFileNameQuoted(file);
 
 					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
-				} catch (PrologInterfaceException e) {
+				} catch (PrologProcessException e) {
 					Debug.report(e);
 				}
 			}

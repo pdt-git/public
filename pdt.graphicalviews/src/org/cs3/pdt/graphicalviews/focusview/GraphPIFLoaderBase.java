@@ -25,7 +25,7 @@ import org.cs3.pdt.graphicalviews.preferences.PredicateVisibilityPreferences;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -76,7 +76,7 @@ public abstract class GraphPIFLoaderBase {
 			}
 		} catch (PrologException e1) {
 			e1.printStackTrace();
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -118,7 +118,7 @@ public abstract class GraphPIFLoaderBase {
 	};
 	
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
-		throws PrologInterfaceException {
+		throws PrologProcessException {
 	
 		PrologSession session = pif.getSession(PrologProcess.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);

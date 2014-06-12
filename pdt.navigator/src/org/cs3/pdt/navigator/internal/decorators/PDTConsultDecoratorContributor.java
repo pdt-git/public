@@ -33,7 +33,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IPath;
@@ -190,7 +190,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 						parentDir = parentDir.substring(0, parentDirEndPos);
 					}
 				}
-			} catch (PrologInterfaceException e) {
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 			}
 			lastFill = System.currentTimeMillis();
@@ -210,11 +210,11 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	}
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
     	if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
     		fireLabelProviderChanged();
     	}

@@ -24,9 +24,9 @@ import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.process.socket.SocketClient;
 import org.cs3.prolog.connector.internal.process.socket.SocketCommunicationConstants;
-import org.cs3.prolog.connector.internal.process.socket.SocketPrologInterface;
+import org.cs3.prolog.connector.internal.process.socket.SocketPrologProcess;
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologInterfaceException;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
 import org.cs3.prolog.connector.session.AsyncPrologSessionListener;
@@ -35,7 +35,7 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSession implements AsyncPrologSession {
 	
-	private SocketPrologInterface pif;
+	private SocketPrologProcess pif;
 	private SocketClient client;
 	private Thread dispatcher;
 	private boolean disposing;
@@ -66,14 +66,14 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}		
 	}
 	
-	public AsyncSocketSession(SocketClient client, SocketPrologInterface pif, int flags) throws IOException {
+	public AsyncSocketSession(SocketClient client, SocketPrologProcess pif, int flags) throws IOException {
 		this.client = client;
 		this.pif = pif;
 		this.flags=flags;
 		enterBatch();	
 	}
 
-	private boolean readAndDispatch() throws PrologInterfaceException {
+	private boolean readAndDispatch() throws PrologProcessException {
 		try {
 			String line=client.readln().trim();
 			Thread.currentThread().setName("async result dispatcher ("+client.getProcessorThread()+")");
@@ -360,7 +360,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		dispatcher.start();	
 	}
 	
-	private void exitBatch() throws IOException, PrologInterfaceException{
+	private void exitBatch() throws IOException, PrologProcessException{
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call exitBatch() from dispatch thread");
 		}
@@ -385,7 +385,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 
-	private void configureProtocol(int flags) throws PrologInterfaceException {
+	private void configureProtocol(int flags) throws PrologProcessException {
 		/*
 		 * the only thing that needs to be configured on the server side, is
 		 * whether or not lists are processed.
@@ -395,12 +395,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 
 	@Override
-	public void queryOnce(Object ticket, String query) throws PrologInterfaceException {
+	public void queryOnce(Object ticket, String query) throws PrologProcessException {
 		queryOnce(ticket,query,this.flags);
 	}
 	
 	@Override
-	public void queryOnce(Object ticket, String query,int flags) throws PrologInterfaceException {
+	public void queryOnce(Object ticket, String query,int flags) throws PrologProcessException {
 		CTermUtil.checkFlags(flags);
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");
@@ -420,11 +420,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 	@Override
-	public void queryAll(Object ticket, String query) throws PrologInterfaceException {
+	public void queryAll(Object ticket, String query) throws PrologProcessException {
 		queryAll(ticket,query,this.flags);
 	}
 	@Override
-	public void queryAll(Object ticket, String query,int flags) throws PrologInterfaceException {
+	public void queryAll(Object ticket, String query,int flags) throws PrologProcessException {
 		CTermUtil.checkFlags(flags);
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");
@@ -491,7 +491,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 
 	@Override
-	public void join() throws PrologInterfaceException{
+	public void join() throws PrologProcessException{
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call join() from dispatch thread!");
 		}
@@ -506,7 +506,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 					ticket.wait();
 				}
 				if(this.batchError!=null){
-					throw new PrologInterfaceException(batchError);
+					throw new PrologProcessException(batchError);
 				}
 			}
 		} catch (IOException e) {
@@ -518,12 +518,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	private static class _AbortTicket{}
 	
 	@Override
-	public void abort() throws PrologInterfaceException {
+	public void abort() throws PrologProcessException {
 		abort(new _AbortTicket());
 	}
 	
 	@Override
-	public void abort(Object ticket) throws PrologInterfaceException {
+	public void abort(Object ticket) throws PrologProcessException {
 		Debug.debug("enter 2");
 		if(ticket==null){
 			throw new IllegalArgumentException("null ticket!");
@@ -618,7 +618,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		return pif;
 	}
 	
-	private void setProtocolOption(String id, String value) throws PrologInterfaceException {
+	private void setProtocolOption(String id, String value) throws PrologProcessException {
 		try {			
 			client.writeln("set_option("+id+","+value+").");			
 		} catch (IOException e) {
