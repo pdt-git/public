@@ -27,6 +27,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.metadata.SourceLocation;
+import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
@@ -156,7 +157,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				}
 			} else {
 				if (!"lgt".equals(file.getFileExtension())) {
-					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, QueryUtils.quoteAtom(UIUtils.prologFileName(file)), QueryUtils.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, QueryUtils.quoteAtom(FileUtils.prologFileName(file)), QueryUtils.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
 					if (result.isEmpty()) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),

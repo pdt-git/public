@@ -51,7 +51,7 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 			setSearchType("Undeclared meta predicates");
 		} else {
 			setSearchType("Undeclared meta predicates in project " + root.getName());
-			rootPath = QueryUtils.quoteAtom(QueryUtils.prologFileName(root.getLocation().toFile()));
+			rootPath = QueryUtils.prologFileNameQuoted(root.getLocation().toFile());
 		}
 	}
 

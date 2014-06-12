@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.util.FileUtils;
-import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.QueryUtils;
@@ -174,7 +173,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		try {
 			session = PDTCommonUtil.getActivePrologInterface().getSession();
 			Map<String, Object> solutions = session
-					.queryOnce(bT(PDTPredicates.PREDICATES_WITH_PROPERTY, property, QueryUtils.quoteAtom(UIUtils.prologFileName(file)), "Predicates")); 
+					.queryOnce(bT(PDTPredicates.PREDICATES_WITH_PROPERTY, property, QueryUtils.quoteAtom(FileUtils.prologFileName(file)), "Predicates")); 
 
 			if (solutions == null)
 				return null;

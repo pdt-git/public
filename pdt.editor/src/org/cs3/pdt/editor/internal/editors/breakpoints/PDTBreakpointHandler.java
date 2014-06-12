@@ -31,8 +31,6 @@ import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPredicates;
-import org.cs3.prolog.connector.common.QueryUtils;
-import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
@@ -46,10 +44,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -149,7 +145,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 									offset = UIUtils.physicalToLogicalOffset(document2, document2.getLineInformation(m.getLineNumber() - 1).getOffset());
 								}
 								try {
-									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), offset, "Id"));
+									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileNameQuoted(m.getFile()), m.getLineNumber(), offset, "Id"));
 								} catch (PrologInterfaceException e) {
 									Debug.report(e);
 								}
@@ -175,17 +171,6 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 				}
 			});
 	}
-
-	private String getPrologFileName(IFile file) {
-		String enclFile = file.getRawLocation().toPortableString();
-		if (Util.isWindows()) {
-			enclFile = enclFile.toLowerCase();
-		}
-
-		IPath filepath = new Path(enclFile);
-		return "'" + QueryUtils.prologFileName(filepath.toFile()) + "'";
-	}
-
 
 	private IMarker getBreakpointAtLine(IFile file, int line) {
 		// used to check if there is an existing breakpoint in this line
@@ -301,7 +286,8 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 			return;
 		}
 		checkForPif();
-		String prologFileName = getPrologFileName(file);
+		String prologFileName;
+		prologFileName = FileUtils.prologFileNameQuoted(file);
 		if (line > 0) {
 			IMarker existingMarker = getBreakpointAtLine(file, line);
 			if (existingMarker == null) {
@@ -475,8 +461,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 					} else {
 						buf.append(", ");
 					}
-					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
-					//			executeSetBreakpointQuery(getPrologFileName(m.getFile()), m.getLineNumber(), m.getOffset());
+					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
 				}
 				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
 //				PrologInterface pif = PDTCommonUtil.getActivePrologInterface();

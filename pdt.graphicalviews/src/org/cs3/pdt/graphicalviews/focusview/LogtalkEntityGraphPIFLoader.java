@@ -42,7 +42,7 @@ public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
 			String projectPath = QueryUtils.normalizeOnWindows(project.getLocation().toString());
 			
 			String query;
-			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(projectPath), QueryUtils.quoteAtom(QueryUtils.prologFileName(helpFile)));
+			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(projectPath), QueryUtils.prologFileNameQuoted(helpFile));
 			return query;
 			
 		} catch (IOException e) {

@@ -16,12 +16,12 @@ package org.cs3.pdt.console.internal.loadfile;
 import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
@@ -88,11 +88,9 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 
 			if (pif != null) {
 				try {
-					String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
+					String prologFileName = FileUtils.prologFileNameQuoted(file);
 
-					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, "'" + prologFileName + "'"));
-				} catch (IOException e) {
-					Debug.report(e);
+					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
 				} catch (PrologInterfaceException e) {
 					Debug.report(e);
 				}

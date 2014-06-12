@@ -809,7 +809,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				if (fileName == null) {
 					return null;
 				}
-				return QueryUtils.quoteAtom(QueryUtils.prologFileName(new File(fileName)));
+				return QueryUtils.prologFileNameQuoted(new File(fileName));
 			}
 
 		};

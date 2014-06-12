@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.connector.service.PDTReloadExecutor;
-import org.cs3.pdt.connector.util.UIUtils;
+import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -44,7 +44,7 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 		
 		String fileList = null;
 		try {
-			fileList = UIUtils.quotedPrologFileNameList(files);
+			fileList = FileUtils.quotedPrologFileNameList(files);
 		} catch (IOException e) {
 			Debug.report(e);
 			return false;

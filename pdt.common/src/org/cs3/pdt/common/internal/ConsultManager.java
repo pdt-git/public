@@ -11,7 +11,6 @@ import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtension;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
-import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
@@ -29,12 +28,8 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		for (IFile file : files) {
-			try {
-				String prologFileName = UIUtils.prologFileName(file);
-				addConsultedFile(pif, prologFileName);
-			} catch (IOException e) {
-				Debug.report(e);
-			}
+			String prologFileName = FileUtils.prologFileName(file);
+			addConsultedFile(pif, prologFileName);
 		}
 		monitor.done();
 	}

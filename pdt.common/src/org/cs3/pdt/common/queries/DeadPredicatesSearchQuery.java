@@ -55,7 +55,7 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 			setSearchType("Dead predicates");
 		} else {
 			setSearchType("Dead predicates in project " + root.getName());
-			rootPath = QueryUtils.quoteAtom(QueryUtils.prologFileName(root.getLocation().toFile()));
+			rootPath = QueryUtils.prologFileNameQuoted(root.getLocation().toFile());
 		}
 	}
 

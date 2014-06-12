@@ -117,12 +117,12 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		
 		if (pif != null) {
 			try {
-				String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
+				String prologFileName = QueryUtils.prologFileNameQuoted(file.getLocation().toFile().getCanonicalFile());
 				
 				if (b) {
-					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
+					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
 				} else {
-					pif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, QueryUtils.quoteAtom(prologFileName)));
+					pif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, prologFileName));
 				}
 			} catch (IOException e) {
 				Debug.report(e);

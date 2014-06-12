@@ -16,8 +16,10 @@ package org.cs3.pdt.connector.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -142,6 +144,30 @@ public class FileUtils {
 
 	public static IFile findFileForLocation(String path) throws IOException {
 		return findFileForLocation(new Path(path));
+	}
+
+	public static String prologFileNameQuoted(IFile file) {
+		return QueryUtils.prologFileNameQuoted(file.getLocation().toFile());
+	}
+
+	public static String prologFileName(IFile file) {
+		return QueryUtils.prologFileName(file.getLocation().toFile());
+	}
+
+	public static String quotedPrologFileNameList(Collection<IFile> files) throws IOException {
+		boolean first = true;
+		StringBuffer buffer = new StringBuffer("[");
+		for (IFile f : files) {
+			if (first) {
+				first = false;
+			} else {
+				buffer.append(", ");
+			}
+			buffer.append(QueryUtils.quoteAtom(prologFileName(f)));
+		}
+		;
+		buffer.append("]");
+		return buffer.toString();
 	}
 	
 }

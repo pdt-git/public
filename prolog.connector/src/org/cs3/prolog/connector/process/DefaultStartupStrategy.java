@@ -24,7 +24,7 @@ public class DefaultStartupStrategy implements StartupStrategy {
 	}
 	
 	private String createConsultCommand(File loadFile) {
-		return "['" + QueryUtils.prologFileName(loadFile) + "']";
+		return "[" + QueryUtils.prologFileNameQuoted(loadFile) + "]";
 	}
 
 	public void addFileSearchPath(String alias, File fsp) {
@@ -38,7 +38,7 @@ public class DefaultStartupStrategy implements StartupStrategy {
 	}
 	
 	private String createFileSearchPathCommand(String alias, File fsp) {
-		String term = bT("user:file_search_path", alias, QueryUtils.quoteAtom(QueryUtils.prologFileName(fsp)));
+		String term = bT("user:file_search_path", alias, QueryUtils.prologFileNameQuoted(fsp));
 		return bT("assertz", term);
 	}
 

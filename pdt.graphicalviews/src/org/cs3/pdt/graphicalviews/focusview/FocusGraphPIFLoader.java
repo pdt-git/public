@@ -53,7 +53,7 @@ public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
 
 	protected String generateQuery(File helpFile) {
 		String query;
-		query = bT(PDTGraphPredicates.WRITE_FOCUS_TO_GRAPHML, QueryUtils.quoteAtom(focusFile), QueryUtils.quoteAtom(QueryUtils.prologFileName(helpFile)), "Dependencies", getSettings());
+		query = bT(PDTGraphPredicates.WRITE_FOCUS_TO_GRAPHML, QueryUtils.quoteAtom(focusFile), QueryUtils.prologFileNameQuoted(helpFile), "Dependencies", getSettings());
 		return query;
 	}
 

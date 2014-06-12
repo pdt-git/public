@@ -266,9 +266,9 @@ private static JackTheProcessRipper processRipper;
 		String fileSearchPath = socketPif.getFileSearchPath();
 		String[] args;
 		if (fileSearchPath != null && !(fileSearchPath.trim().length() == 0)) {
-			args = new String[] { "-p", fileSearchPath, "-g", "['" + QueryUtils.prologFileName(tmpFile) + "']" };
+			args = new String[] { "-p", fileSearchPath, "-g", "[" + QueryUtils.prologFileNameQuoted(tmpFile) + "]" };
 		} else {
-			args = new String[] { "-g", "['" + QueryUtils.prologFileName(tmpFile) + "']" };
+			args = new String[] { "-g", "[" + QueryUtils.prologFileNameQuoted(tmpFile) + "]" };
 		}
 		return args;
 	}
@@ -297,8 +297,8 @@ private static JackTheProcessRipper processRipper;
 		for (String lfInit : startupStrategy.getLoadFileInitStatements()) {
 			tmpWriter.println(":- " + lfInit + ".");
 		}
-		tmpWriter.println(":- consult_server(" + port + ",'" + QueryUtils.prologFileName(socketPif.getLockFile()) + "').");
-		tmpWriter.println(":- write_pdt_startup_error_messages_to_file('" + QueryUtils.prologFileName(socketPif.getErrorLogFile()) + "').");
+		tmpWriter.println(":- consult_server(" + port + "," + QueryUtils.prologFileNameQuoted(socketPif.getLockFile()) + ").");
+		tmpWriter.println(":- write_pdt_startup_error_messages_to_file(" + QueryUtils.prologFileNameQuoted(socketPif.getErrorLogFile()) + ").");
 		tmpWriter.close();
 	}
 

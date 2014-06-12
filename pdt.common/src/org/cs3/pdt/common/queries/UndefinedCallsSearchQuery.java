@@ -50,7 +50,7 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 			setSearchType("Undefined calls");
 		} else {
 			setSearchType("Undefined calls in project " + root.getName());
-			rootPath = QueryUtils.quoteAtom(QueryUtils.prologFileName(root.getLocation().toFile()));
+			rootPath = QueryUtils.prologFileNameQuoted(root.getLocation().toFile());
 		}
 	}
 

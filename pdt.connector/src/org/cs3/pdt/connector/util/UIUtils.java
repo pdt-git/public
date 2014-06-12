@@ -15,18 +15,12 @@
 package org.cs3.pdt.connector.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
 
-import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -36,10 +30,7 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -50,9 +41,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * most of the methods in this class include code that needs to run on the ui
@@ -297,150 +286,6 @@ public final class UIUtils {
 		return enclFile;
 	}
 
-	/**
-	 * Use PDTCommonUtil.openIdEditor(IFile, boolean) instead.
-	 * 
-	 * @param file
-	 * @param activate
-	 * @return
-	 * @throws PartInitException
-	 */
-	@Deprecated
-	static public IEditorPart openInEditor(final IFile file, boolean activate)
-			throws PartInitException {
-		if (file != null) {
-			IWorkbenchPage p = getActivePage();
-			if (p != null) {
-				IEditorPart editorPart = IDE.openEditor(p, file, activate);
-				return editorPart;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Use PDTCommonUtil.openInEditor(String) instead.
-	 */
-	@Deprecated
-	public static IEditorPart openInEditor(String fileName) {
-		try {
-			Path path = new Path(new File(fileName).getCanonicalPath());
-	
-			IFile file = FileUtils.findFileForLocation(path);
-			if (file == null){
-				IFileStore fileStore = EFS.getLocalFileSystem().getStore(path);
-				if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
-					IWorkbenchPage page = getActivePage();
-					IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
-					return part;
-				}
-			} else {
-				final IEditorPart part = openInEditor(file, false);
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						part.setFocus();
-					}
-				});
-				return part;
-			}
-		} catch (IOException e) {
-			Debug.report(e);
-		} catch (PartInitException e) {
-			Debug.report(e);
-		}
-		return null;
-	}
-	
-	/**
-	 * Use PDTCommonUtil.openInEditor(int, int, String, boolean) instead.
-	 */
-	@Deprecated
-	public static void selectInEditor(int start, int length, String filename, boolean activate) throws PartInitException {
-		selectInEditor(start, length, filename, activate, true);
-	}
-	
-	/**
-	 * Use PDTCommonUtil.openInEditor(int, int, String, boolean, boolean) instead.
-	 */
-	@Deprecated
-	public static void selectInEditor(int start, int length, String filename, boolean activate, boolean adjustOffset) throws PartInitException {
-		try {
-			IFile file = FileUtils.findFileForLocation(filename);
-			selectInEditor(start, length, file, activate, adjustOffset);
-		} catch (IOException e) {
-			Debug.report(e);
-		}
-	}
-	
-	/**
-	 * Use PDTCommonUtil.openInEditor(int, int, IFile, boolean) instead.
-	 */
-	@Deprecated
-	public static void selectInEditor(int start, int length, IFile file, boolean activate) throws PartInitException {
-		selectInEditor(start, length, file, activate, true);
-	}
-	
-	/**
-	 * Use PDTCommonUtil.openInEditor(int, int, IFile, boolean, boolean) instead.
-	 */
-	@Deprecated
-	public static void selectInEditor(int start, int length, IFile file, boolean activate, boolean adjustOffset) throws PartInitException {
-		if (file == null) {
-			return;
-		}
-		IEditorPart editor = UIUtils.openInEditor(file, activate);
-		if (editor == null || !(editor instanceof AbstractTextEditor)) {
-			return;
-		}
-		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
-		if (adjustOffset) {
-			start = logicalToPhysicalOffset(document, start);
-		}
-		int end = start + length;
-		length = end - start;
-		ISelection selection = new TextSelection(document, start, length);
-		editor.getEditorSite().getSelectionProvider().setSelection(selection);
-	}
-
-	/**
-	 * Use PDTCommonUtil.openInEditor(int, String, boolean) instead.
-	 */
-	@Deprecated
-	public static void selectInEditor(int line, String filename, boolean activate) throws PartInitException {
-		try {
-			IFile file = FileUtils.findFileForLocation(filename);
-			selectInEditor(line, file, activate);
-		} catch (IOException e) {
-			Debug.report(e);
-		}
-	}
-	
-	/**
-	 * Use PDTCommonUtil.openInEditor(int, IFile, boolean) instead.
-	 */
-	@Deprecated
-	public static void selectInEditor(int line, IFile file, boolean activate) throws PartInitException {
-		if (file == null) {
-			return;
-		}
-		IEditorPart editor = UIUtils.openInEditor(file, activate);
-		if (editor == null || !(editor instanceof AbstractTextEditor)) {
-			return;
-		}
-		IDocument document = ((AbstractTextEditor) editor).getDocumentProvider().getDocument(editor.getEditorInput());
-		int offset;
-		try {
-			offset = document.getLineInformation(line - 1).getOffset();
-			TextSelection newSelection = new TextSelection(document, offset, 0);
-			editor.getEditorSite().getSelectionProvider().setSelection(newSelection);
-		} catch (BadLocationException e) {
-			Debug.report(e);
-		} catch (Exception e) {
-			Debug.report(e);
-		}
-	}
-
 	public static int logicalToPhysicalOffset(IDocument doc, int offset) {
 		return Util.logicalToPhysicalOffset(doc.get(), offset);
 	}
@@ -470,26 +315,6 @@ public final class UIUtils {
 		finally {
 			manager.disconnect(location, kind,null);
 		}
-	}
-	
-	public static String quotedPrologFileNameList(Collection<IFile> files) throws IOException {
-		boolean first = true;
-		StringBuffer buffer = new StringBuffer("[");
-		for (IFile f : files) {
-			if (first) {
-				first = false;
-			} else {
-				buffer.append(", ");
-			}
-			buffer.append(QueryUtils.quoteAtom(prologFileName(f)));
-		}
-		;
-		buffer.append("]");
-		return buffer.toString();
-	}
-
-	public static String prologFileName(IFile file) throws IOException {
-		return QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
 	}
 
 }
