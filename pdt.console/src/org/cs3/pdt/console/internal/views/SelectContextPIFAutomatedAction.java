@@ -32,7 +32,7 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -64,8 +64,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	private IWorkbenchWindow window;
 	private boolean unifiedTrackerEnabled;
 
-	protected abstract void setPrologInterface(PrologInterface prologInterface);
-	protected abstract PrologInterface getPrologInterface();
+	protected abstract void setPrologProcess(PrologProcess prologProcess);
+	protected abstract PrologProcess getPrologProcess();
 	protected abstract void trackerActivated(PrologContextTracker tracker);
 	protected abstract void trackerDeactivated(PrologContextTracker tracker);
 
@@ -267,14 +267,14 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			@Override
 			public void run() {
 				if (this.isChecked())
-					setPrologInterface(PDTConnectorPlugin.getDefault()
-							.getPrologInterface(key));
+					setPrologProcess(PDTConnectorPlugin.getDefault()
+							.getPrologProcess(key));
 				if(!unifiedTrackerEnabled) SelectContextPIFAutomatedAction.this.setImageDescriptor(ImageRepository
 						.getImageDescriptor(ImageRepository.MANUAL_MODE));
 			}
 
 		};
-		action.setChecked(key.equals(reg.getKey(getPrologInterface())));
+		action.setChecked(key.equals(reg.getKey(getPrologProcess())));
 		action.setText(getLabelForPif(key, reg));
 		action.setEnabled(!unifiedTrackerEnabled);
 		ActionContributionItem item = new ActionContributionItem(action);
@@ -350,7 +350,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		fAction = action;
 	}
 
-	public PrologInterface getCurrentPrologInterface() {
+	public PrologProcess getCurrentPrologProcess() {
 
 		for (Iterator<String> it = getActiveTrackers().iterator(); it.hasNext();) {
 			String trackerId = it.next();
@@ -359,8 +359,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			if (tracker == null) {
 				return null;
 			}
-			PrologInterface pif = null;
-			pif = tracker.getCurrentPrologInterface();
+			PrologProcess pif = null;
+			pif = tracker.getCurrentPrologProcess();
 			if (pif != null) {
 				return pif;
 			}
@@ -386,7 +386,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			return;
 		}
 		PrologInterfaceRegistry reg = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
-		PrologInterface pif = getPrologInterface();
+		PrologProcess pif = getPrologProcess();
 		if (pif == null) {
 			setToolTipText("no pif selected");
 			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
@@ -413,7 +413,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		
 		StringBuffer buf = new StringBuffer();
 
-		Object configuration = reg.getPrologInterface(key).getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE);
+		Object configuration = reg.getPrologProcess(key).getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE);
 		if (configuration != null) {
 			buf.append(configuration.toString().replaceAll("&", "&&"));
 			buf.append(": ");

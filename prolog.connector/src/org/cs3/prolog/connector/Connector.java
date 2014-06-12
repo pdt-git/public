@@ -10,7 +10,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.internal.process.socket.SocketPrologInterface;
 import org.cs3.prolog.connector.process.DefaultStartupStrategy;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public class Connector {
 
@@ -28,11 +28,11 @@ public class Connector {
 	public static final String PREF_HOST = "pif.host";
 	public static final String PREF_PORT = "pif.port";
 	
-	public static PrologInterface newUninitializedPrologProcess() {
+	public static PrologProcess newUninitializedPrologProcess() {
 		return newUninitializedPrologProcess(null);
 	}
 
-	public static PrologInterface newUninitializedPrologProcess(String name) {
+	public static PrologProcess newUninitializedPrologProcess(String name) {
 		SocketPrologInterface socketPrologInterface = new SocketPrologInterface(name);
 		try {
 			socketPrologInterface.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
@@ -47,7 +47,7 @@ public class Connector {
 	 * @return a new standalone Prolog Interface
 	 * @throws IOException
 	 */
-	public static PrologInterface newPrologProcess() throws IOException {
+	public static PrologProcess newPrologProcess() throws IOException {
 		return Connector.newPrologProcess(null);
 	}
 
@@ -57,7 +57,7 @@ public class Connector {
 	 * @return a new standalone Prolog Interface
 	 * @throws IOException
 	 */
-	public static PrologInterface newPrologProcess(String executable) throws IOException {
+	public static PrologProcess newPrologProcess(String executable) throws IOException {
 		SocketPrologInterface pif = new SocketPrologInterface(null);
 		pif.setStartupStrategy(new DefaultStartupStrategy());
 		pif.setOSInvocation(ProcessUtils.getInvocationCommand());

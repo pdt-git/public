@@ -47,7 +47,7 @@ import org.cs3.pdt.editor.metadata.PredicateReadingUtilities;
 import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -786,7 +786,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		if (input instanceof IFileEditorInput) {
 			Map<String, Object> result = null;
 			try {
-				result = PDTCommonUtil.getActivePrologInterface().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, QueryUtils.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
+				result = PDTCommonUtil.getActivePrologProcess().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, QueryUtils.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -1342,15 +1342,15 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
-		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
 			String editorFile = getPrologFileName();
 			if (allConsultedFiles.contains(editorFile)) {
 				updateState();
@@ -1360,13 +1360,13 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	@Override
-	public void activePrologInterfaceChanged(PrologInterface pif) {
+	public void activePrologProcessChanged(PrologProcess pif) {
 		updateState();
 	}
 	
 	@Override
-	public void prologInterfaceStarted(PrologInterface pif) {
-		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+	public void prologProcessStarted(PrologProcess pif) {
+		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
 			updateState();
 		}
 	}

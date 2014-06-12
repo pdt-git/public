@@ -31,7 +31,7 @@ public class ShutdownState extends AbstractState {
 	public void enter() {
 		
 		HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
-		context.getPrologInterface();
+		context.getPrologProcess();
 		context.clearWorkQueue(); //there may be afterINit hooks left. dump them.
 		
 		for (LifeCycleHookWrapper w : context.getHooks().values()) {			

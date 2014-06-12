@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 public class QueryUtils {
@@ -33,7 +33,7 @@ public class QueryUtils {
 	 * @return String - Version of SWI-Prolog
 	 * @throws PrologInterfaceException 
 	 */
-	public static String getSWIVersion(PrologInterface pif) throws PrologInterfaceException {
+	public static String getSWIVersion(PrologProcess pif) throws PrologInterfaceException {
 		
 		return (String) pif.queryOnce("current_prolog_flag(version,B)").get("B");
 	}

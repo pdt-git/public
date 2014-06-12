@@ -22,7 +22,7 @@ import java.util.Vector;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 
@@ -40,10 +40,10 @@ public class CTermUtil {
 	}
 
 	public static void checkFlags(int flags) {
-		if(Util.flagsSet(flags,PrologInterface.CTERMS | PrologInterface.UNQUOTE_ATOMS) ){
+		if(Util.flagsSet(flags,PrologProcess.CTERMS | PrologProcess.UNQUOTE_ATOMS) ){
 			throw new IllegalArgumentException("cannot combine CTERMS and UNTQUOTE_ATOMS");
 		}
-		if(Util.flagsSet(flags, PrologInterface.CTERMS | PrologInterface.PROCESS_LISTS)){
+		if(Util.flagsSet(flags, PrologProcess.CTERMS | PrologProcess.PROCESS_LISTS)){
 			throw new IllegalArgumentException("cannot combine CTERMS and PROCESS_LISTS (yet)");
 		}
 	}
@@ -151,15 +151,15 @@ public class CTermUtil {
 
 	
 	public static CTerm parseNonCanonicalTerm(String query) throws IOException, PrologInterfaceException {
-		PrologInterface pif = Connector.newPrologProcess();
+		PrologProcess pif = Connector.newPrologProcess();
 		CTerm returnTerm = parseNonCanonicalTerm(query, pif);
 		pif.stop();
 		return returnTerm;
 	}
 
-	public static CTerm parseNonCanonicalTerm(String term, PrologInterface pif) throws PrologInterfaceException {
+	public static CTerm parseNonCanonicalTerm(String term, PrologProcess pif) throws PrologInterfaceException {
 
-		PrologSession session = pif.getSession(PrologInterface.CTERMS|PrologInterface.UNBOUND_VARIABLES);
+		PrologSession session = pif.getSession(PrologProcess.CTERMS|PrologProcess.UNBOUND_VARIABLES);
 		
 		String query = QueryUtils.bT("atom_to_term", QueryUtils.quoteAtom(term), "Term", "D");
 

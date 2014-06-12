@@ -25,7 +25,7 @@ import org.cs3.pdt.connector.registry.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistryListener;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -103,13 +103,13 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 		lifeCycleHook = new LifeCycleHook() {
 			@Override public void setData(Object data) {}
-			@Override public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {}
-			@Override public void onError(PrologInterface pif) {}
-			@Override public void lateInit(PrologInterface pif) {}
-			@Override public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {}
+			@Override public void onInit(PrologProcess pif, PrologSession initSession) throws PrologInterfaceException {}
+			@Override public void onError(PrologProcess pif) {}
+			@Override public void lateInit(PrologProcess pif) {}
+			@Override public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologInterfaceException {}
 			
 			@Override
-			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
+			public void afterInit(PrologProcess pif) throws PrologInterfaceException {
 				PDTCommonPlugin.this.notifyPifStartHooks(pif);
 			}
 		};
@@ -125,7 +125,7 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 			}
 		});
 		for (String key : registry.getRegisteredKeys()) {
-			registry.getPrologInterface(key).addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
+			registry.getPrologProcess(key).addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
 		}
 		ConsultManager consultManager = new ConsultManager();
 		registerPifStartListener(consultManager);
@@ -248,13 +248,13 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		}
 	}
 	
-	private void notifyPifStartHooks(PrologInterface pif) {
+	private void notifyPifStartHooks(PrologProcess pif) {
 		ArrayList<PrologInterfaceStartListener> listeners;
 		synchronized (pifStartListeners) {
 			listeners = new ArrayList<PrologInterfaceStartListener>(pifStartListeners);
 		}
 		for (PrologInterfaceStartListener listener : listeners) {
-			listener.prologInterfaceStarted(pif);
+			listener.prologProcessStarted(pif);
 		}
 	}
 

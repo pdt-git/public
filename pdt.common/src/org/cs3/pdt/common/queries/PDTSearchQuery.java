@@ -115,7 +115,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @throws NumberFormatException
 	 */
 	private IStatus doSearch(IProgressMonitor monitor) throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
-		PrologSession session = PDTCommonUtil.getActivePrologInterface().getSession();
+		PrologSession session = PDTCommonUtil.getActivePrologProcess().getSession();
 		monitor.beginTask("Searching...", 2);
 		monitor.subTask("Running Prolog query");
 		List<Map<String, Object>> results = findReferencedClauses(session, new SubProgressMonitor(monitor, 1));

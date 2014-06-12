@@ -24,7 +24,7 @@ import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.preferences.PredicateVisibilityPreferences;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,7 +36,7 @@ public abstract class GraphPIFLoaderBase {
 
 	protected File helpFile;
 	protected PDTGraphView view;
-	private PrologInterface pif;
+	private PrologProcess pif;
 	//private ExecutorService executor = Executors.newCachedThreadPool();
 
 	public GraphPIFLoaderBase(PDTGraphView view, String helpFileName) {
@@ -120,13 +120,13 @@ public abstract class GraphPIFLoaderBase {
 	public Map<String, Object> sendQueryToCurrentPiF(String query)
 		throws PrologInterfaceException {
 	
-		PrologSession session = pif.getSession(PrologInterface.LEGACY);
+		PrologSession session = pif.getSession(PrologProcess.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);
 		return result;
 	}
 
-	public PrologInterface getActivePif() {
-		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+	public PrologProcess getActivePif() {
+		PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
 		return pif;
 	}
 

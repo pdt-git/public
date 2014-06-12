@@ -104,7 +104,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			IPrologInterfaceService prologInterfaceService = PDTConnectorPlugin.getDefault().getPrologInterfaceService();
 			CurrentPifListener pifListener = new CurrentPifListener();
 			prologInterfaceService.registerActivePrologInterfaceListener(pifListener);
-			pifListener.activePrologInterfaceChanged(prologInterfaceService.getActivePrologInterface());
+			pifListener.activePrologProcessChanged(prologInterfaceService.getActivePrologProcess());
 			prologInterfaceService.registerConsultListener(new EditorConsultListener());
 		} catch (Throwable t) {
 			Debug.report(t);

@@ -47,7 +47,7 @@ import org.cs3.pdt.editor.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.editor.internal.structureElements.OutlinePredicateElement;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -297,16 +297,16 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	}
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 
-		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
 			String editorFile = editor.getPrologFileName();
 			if (allConsultedFiles.contains(editorFile)) {
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
@@ -322,7 +322,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	}
 
 	@Override
-	public void activePrologInterfaceChanged(PrologInterface pif) {
+	public void activePrologProcessChanged(PrologProcess pif) {
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -334,8 +334,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	}
 
 	@Override
-	public void prologInterfaceStarted(PrologInterface pif) {
-		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+	public void prologProcessStarted(PrologProcess pif) {
+		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -360,7 +360,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 		if (elem instanceof OutlineModuleElement) { 
 			OutlineModuleElement module = (OutlineModuleElement)elem;
-			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
 			if ("module".equals(module.getKind())) {
 				try {
 					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, QueryUtils.quoteAtom(module.getName()), "file(File)"),

@@ -22,7 +22,7 @@ import java.util.Vector;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.cterm.CTerm;
 import org.cs3.prolog.connector.cterm.CTermFactory;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public class ValueReader {
 	private static final char END_OF_VALUE_CHAR = '>';
@@ -109,11 +109,11 @@ public class ValueReader {
 		Object value;
 		String unparsedValue = Util.unescapeBuffer(valueBuffer);
 		
-		if (Util.flagsSet(flags,PrologInterface.CTERMS)) {
+		if (Util.flagsSet(flags,PrologProcess.CTERMS)) {
 			CTerm ctermValue = CTermFactory.createCTerm(unparsedValue);
 			value=ctermValue;
 		} else{
-			if(Util.flagsSet(flags, PrologInterface.UNQUOTE_ATOMS)) {
+			if(Util.flagsSet(flags, PrologProcess.UNQUOTE_ATOMS)) {
 				value = Util.unquoteStringOrAtom(unparsedValue);
 			} else {
 				value=unparsedValue;

@@ -38,7 +38,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.StartupStrategy;
 
 public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrategy {
@@ -90,13 +90,13 @@ private static JackTheProcessRipper processRipper;
 	 * .IPrologInterface)
 	 */
 	@Override
-	public  Process startServer(PrologInterface pif) {
+	public  Process startServer(PrologProcess pif) {
 		if (pif.isStandAloneServer()) {
 			Debug.warning("Will not start server; the standalone option is set.");
 			return null;
 		}
 		if (!(pif instanceof SocketPrologInterface)) {
-			throw new ClassCastException("SocketPrologInterface needed but got another PrologInterface");
+			throw new ClassCastException("SocketPrologInterface needed but got another PrologProcess");
 		}
 		SocketPrologInterface socketPif = (SocketPrologInterface) pif;
 		return startSocketServer(socketPif);
@@ -322,13 +322,13 @@ private static JackTheProcessRipper processRipper;
 	 * .IPrologInterface, boolean)
 	 */
 	@Override
-	public void stopServer(PrologInterface pif) {
+	public void stopServer(PrologProcess pif) {
 		if (pif.isStandAloneServer()) {
 			Debug.warning("Will not stop server; the standalone option is set.");
 			return;
 		}
 		if (!(pif instanceof SocketPrologInterface)) {
-			throw new ClassCastException("SocketPrologInterface needed but got another PrologInterface");
+			throw new ClassCastException("SocketPrologInterface needed but got another PrologProcess");
 		}
 		try {
 			if (!isRunning(pif)) {
@@ -384,7 +384,7 @@ private static JackTheProcessRipper processRipper;
 	 * .IPrologInterface)
 	 */
 	@Override
-	public  boolean isRunning(PrologInterface pif) {
+	public  boolean isRunning(PrologProcess pif) {
 		File lockFile = ((SocketPrologInterface) pif).getLockFile();
 		return lockFile != null && lockFile.exists();
 	}

@@ -22,15 +22,15 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.connector.subscription.Subscription;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 
-	private HashMap<String, PrologInterface> pifs = new HashMap<String, PrologInterface>();
+	private HashMap<String, PrologProcess> pifs = new HashMap<String, PrologProcess>();
 	private HashMap<String, Subscription> subscriptions = new HashMap<String, Subscription>();
 	private HashMap<String, HashSet<Subscription>> subscriptionLists = new HashMap<String, HashSet<Subscription>>();
 	private Vector<PrologInterfaceRegistryListener> listeners = new Vector<PrologInterfaceRegistryListener>();
-	private HashMap<PrologInterface, String> pifKeys = new HashMap<PrologInterface, String>();
+	private HashMap<PrologProcess, String> pifKeys = new HashMap<PrologProcess, String>();
 
 	@Override
 	public void addPrologInterfaceRegistryListener(
@@ -114,12 +114,12 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 	}
 
 	@Override
-	public String getKey(PrologInterface prologInterface) {
-		return pifKeys.get(prologInterface);
+	public String getKey(PrologProcess prologProcess) {
+		return pifKeys.get(prologProcess);
 	}
 
 	@Override
-	public PrologInterface getPrologInterface(String key) {
+	public PrologProcess getPrologProcess(String key) {
 		return pifs.get(key);
 	}
 
@@ -156,7 +156,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 	}
 
 	@Override
-	public void addPrologInterface(String key, PrologInterface pif) {
+	public void addPrologProcess(String key, PrologProcess pif) {
 		Object old = pifs.get(key);
 		if (old == pif) {
 			return;
@@ -177,7 +177,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 	@SuppressWarnings("unchecked")
 	@Override
 	public void removePrologInterface(String key) {
-		PrologInterface pif = pifs.get(key);
+		PrologProcess pif = pifs.get(key);
 		if (pif == null) {
 			return;
 		}
@@ -218,7 +218,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		subscriptions.put(sid, s);
 
 		if (this.pifs.containsKey(s.getPifKey())) {
-			s.configure(getPrologInterface(s.getPifKey()));
+			s.configure(getPrologProcess(s.getPifKey()));
 		}
 		fireSubscriptionAdded(s);
 	}
@@ -243,7 +243,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 		String pifKey = subscription.getPifKey();
 		if (pifs.containsKey(pifKey)) {
-			subscription.deconfigure(getPrologInterface(pifKey));
+			subscription.deconfigure(getPrologProcess(pifKey));
 			Set<Subscription> otherSubscriptions = getSubscriptionsForPif(pifKey);
 			otherSubscriptions.remove(subscription);
 		}

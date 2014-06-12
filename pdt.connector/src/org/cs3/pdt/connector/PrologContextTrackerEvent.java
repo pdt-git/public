@@ -16,13 +16,13 @@ package org.cs3.pdt.connector;
 
 import java.util.EventObject;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public class PrologContextTrackerEvent extends EventObject {
 
 
 	private static final long serialVersionUID = 1L;
-	private PrologInterface pif;
+	private PrologProcess pif;
 
 	/**
 	 * creates a new PrologContextTrackerEvent.
@@ -32,21 +32,21 @@ public class PrologContextTrackerEvent extends EventObject {
 	 *            this should be the tracker that caused the event.
 	 * @param pif
 	 *            this should be what the pif thinks is the currently active
-	 *            PrologInterface _AFTER_ the change. Maybe null to indicate
+	 *            PrologProcess _AFTER_ the change. Maybe null to indicate
 	 *            that no pif is currently active according to the source
 	 *            tracker.
 	 */
-	public PrologContextTrackerEvent(Object source, PrologInterface pif) {
+	public PrologContextTrackerEvent(Object source, PrologProcess pif) {
 		super(source);
 		this.pif = pif;
 	}
 
 	/**
-	 * @return the currently active PrologInterface (according to the tracker
-	 *         that send this event), or null if no PrologInterface is active
+	 * @return the currently active PrologProcess (according to the tracker
+	 *         that send this event), or null if no PrologProcess is active
 	 *         (dito).
 	 */
-	public PrologInterface getPrologInterface() {
+	public PrologProcess getPrologProcess() {
 		return pif;
 	}
 }

@@ -28,7 +28,7 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,7 +44,7 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 	}
 	
 	@Override
-	public boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public boolean executePDTReload(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		if (files.isEmpty()) {
 			monitor.done();
@@ -66,7 +66,7 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		}
 	}
 	
-	private boolean executeQueryOnConsole(PrologInterface pif, String query) {
+	private boolean executeQueryOnConsole(PrologProcess pif, String query) {
 		PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 		if (activePrologConsole == null) {
 			return false;
@@ -90,9 +90,9 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 				}
 			}
 		});
-		PrologInterface activeConsolePif = activePrologConsole.getPrologInterface();
+		PrologProcess activeConsolePif = activePrologConsole.getPrologProcess();
 		if (activeConsolePif == null || !activeConsolePif.equals(pif)) {
-			activePrologConsole.setPrologInterface(pif);
+			activePrologConsole.setPrologProcess(pif);
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e) {

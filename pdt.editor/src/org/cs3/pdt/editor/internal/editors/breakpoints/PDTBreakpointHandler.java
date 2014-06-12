@@ -34,7 +34,7 @@ import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceEvent;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.process.PrologInterfaceListener;
@@ -71,7 +71,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	private static PDTBreakpointHandler instance;
 
-	private PrologInterface currentPif = null;
+	private PrologProcess currentPif = null;
 	private PrologEventDispatcher currentDispatcher;
 	private Set<String> deletedIds;
 
@@ -89,7 +89,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 
 	private void checkForPif() {
 		if (currentPif == null) {
-			currentPif = PDTCommonUtil.getActivePrologInterface();
+			currentPif = PDTCommonUtil.getActivePrologProcess();
 			addPifListener();
 		}
 	}
@@ -327,7 +327,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) throws PrologInterfaceException {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
 		String query = bT(PDTPredicates.PDT_SET_BREAKPOINT, prologFileName, line, offset, "_");
-		PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+		PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
 		pif.queryOnce(query);
 	}
 
@@ -438,11 +438,11 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	@Override
-	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
+	public void onInit(PrologProcess pif, PrologSession initSession) throws PrologInterfaceException {
 	}
 
 	@Override
-	public void afterInit(final PrologInterface pif) throws PrologInterfaceException {
+	public void afterInit(final PrologProcess pif) throws PrologInterfaceException {
 		shouldUpdateMarkers = true;
 		if (markerBackup == null || markerBackup.isEmpty()) {
 			markerBackup = null;
@@ -464,7 +464,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
 				}
 				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-//				PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+//				PrologProcess pif = PDTCommonUtil.getActivePrologInterface();
 				try {
 					pif.queryOnce(buf.toString());
 				} catch (PrologInterfaceException e) {
@@ -480,7 +480,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	@Override
-	public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologInterfaceException {
+	public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologInterfaceException {
 		if (currentPif.equals(pif)) {
 			shouldUpdateMarkers = false;
 			backupMarkers();
@@ -489,7 +489,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	@Override
-	public void onError(PrologInterface pif) {
+	public void onError(PrologProcess pif) {
 		if (currentPif.equals(pif)) {
 			shouldUpdateMarkers = false;
 			backupMarkers();
@@ -500,7 +500,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	public void setData(Object data) {}
 
 	@Override
-	public void lateInit(PrologInterface pif) {}
+	public void lateInit(PrologProcess pif) {}
 
 	private void waitForDispatcherSubjectActive() {
 		PrologEventDispatcher dispatcher = currentDispatcher;
@@ -516,7 +516,7 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	@Override
-	public void activePrologInterfaceChanged(PrologInterface pif) {
+	public void activePrologProcessChanged(PrologProcess pif) {
 		if (currentPif == pif) {
 			return;
 		}
@@ -531,14 +531,14 @@ public class PDTBreakpointHandler implements PrologInterfaceListener, LifeCycleH
 	}
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		if (pif.equals(currentPif) && markerBackup == null) {
 			backupMarkers();
 		}
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		if (pif.equals(currentPif)) {
 			Debug.debug("update marker");
 			updateMarkers();

@@ -29,7 +29,7 @@ import org.cs3.prolog.connector.cterm.CNil;
 import org.cs3.prolog.connector.cterm.CTerm;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
@@ -38,7 +38,7 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSessionTest extends TestCase {
 
-	private PrologInterface pif;
+	private PrologProcess pif;
 
 	private Recorder rec;
 
@@ -299,13 +299,13 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 
 		// atoms should be quoted.
-		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.NONE);
+		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologProcess.NONE);
 
 		// terms should be canonical.
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.NONE);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.NONE);
 
 		// lists should be ignored
-		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.NONE);
+		session.queryOnce("ignore_lists", "A=[1,2]",PrologProcess.NONE);
 
 		session.join();
 		assertEquals("'{\\n'", rec.get(0).event.getBindings().get("A"));
@@ -316,9 +316,9 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	public void testPDT287_1() throws Exception {
 		
-		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("ignore_lists", "A=[1,2]",PrologProcess.UNQUOTE_ATOMS);
 
 		session.join();
 		// atoms should be unquoted.
@@ -334,26 +334,26 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	public void testPDT291_nil() throws Exception{
 		rec.clear();
-		session.queryOnce("nabla", "A=[]", PrologInterface.PROCESS_LISTS);
+		session.queryOnce("nabla", "A=[]", PrologProcess.PROCESS_LISTS);
 		session.join();		
 		assertTrue(rec.get(0).event.getBindings().get("A") instanceof List<?>);
 		
 		rec.clear();
-		session.queryOnce("nabla", "A=[]", PrologInterface.NONE);
+		session.queryOnce("nabla", "A=[]", PrologProcess.NONE);
 		session.join();
 		assertTrue(rec.get(0).event.getBindings().get("A") instanceof String);
 		
 		rec.clear();
-		session.queryOnce("nabla", "A=[]", PrologInterface.CTERMS);
+		session.queryOnce("nabla", "A=[]", PrologProcess.CTERMS);
 		session.join();
 		assertTrue(rec.get(0).event.getBindings().get("A") instanceof CNil);
 	}
 	
 	public void testPDT287_2() throws Exception {
 		
-		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS);
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.PROCESS_LISTS);
-		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologInterface.PROCESS_LISTS);
+		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologProcess.PROCESS_LISTS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.PROCESS_LISTS);
+		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologProcess.PROCESS_LISTS);
 		session.join();
 		
 		// atoms should be quoted.
@@ -375,12 +375,12 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	public void testPDT287_3() throws Exception {
 		
-		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
 		session.join();
 		// atoms should be unquoted.
 		assertEquals("{\n", rec.get(0).event.getBindings().get("A"));
@@ -402,7 +402,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_4() throws Exception {
 		
 		// Everything should be CTerms, no list Processing.
-		session.queryOnce("bla", "A=[[1,2],'A']",PrologInterface.CTERMS);
+		session.queryOnce("bla", "A=[[1,2],'A']",PrologProcess.CTERMS);
 		session.join();
 		Object o = rec.get(0).event.getBindings().get("A");
 		assertTrue(o instanceof CCompound);
@@ -412,16 +412,16 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			pif.getAsyncSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
+			pif.getAsyncSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			pif.getAsyncSession(PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
+			pif.getAsyncSession(PrologProcess.CTERMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -429,9 +429,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			pif.getAsyncSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
+			pif.getAsyncSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -441,16 +441,16 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_illegal_query() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
+			session.queryOnce("bla","syntax error", PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
+			session.queryOnce("bla","syntax error", PrologProcess.CTERMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -458,9 +458,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
+			session.queryOnce("bla","syntax error", PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;

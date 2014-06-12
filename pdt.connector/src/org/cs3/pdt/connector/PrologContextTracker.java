@@ -14,20 +14,20 @@
 
 package org.cs3.pdt.connector;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.ui.IWorkbench;
 
 /**
- * keeps track of "the current" PrologInterface.
+ * keeps track of "the current" PrologProcess.
  * 
  * As there might be several (conflicting) notions or strategies of determining
- * the "active" or "current" PrologInterface at a given point in time, I decided
+ * the "active" or "current" PrologProcess at a given point in time, I decided
  * to attach a name to each of this strategies and let the user decide which one
  * to use.
  * 
  * Clients who are interested in finding out or following the currently "active"
- * PrologInterface should check with the ContextTrackerService to obtain a list
+ * PrologProcess should check with the ContextTrackerService to obtain a list
  * of all contributed strategies and either choose one that seems fitting or
  * even beter: ask the user.
  * 
@@ -48,7 +48,7 @@ public interface PrologContextTracker {
 	 * PrologContextTrackerService instead. See there for details.
 	 * 
 	 * The listener will be informed whenever the tracker thinks that the active
-	 * PrologInterface has changed, becomes available or invalid.
+	 * PrologProcess has changed, becomes available or invalid.
 	 * 	 * 
 	 * Implemntations are responsible for calling the listener methods.
 	 * 
@@ -80,15 +80,15 @@ public interface PrologContextTracker {
 	public String getId();
 
 	/**
-	 * There is no current PrologInterface.
-	 * find out what this tracker THINKS is the currently active PrologInterface.
+	 * There is no current PrologProcess.
+	 * find out what this tracker THINKS is the currently active PrologProcess.
 	 * 
-	 * @return the PrologInterface or null, if the tracker thinks that none is
+	 * @return the PrologProcess or null, if the tracker thinks that none is
 	 *         active.
 	 * @throws PrologInterfaceException 
 	 * @throws PrologInterfaceException 
 	 */
-	public PrologInterface getCurrentPrologInterface() ;
+	public PrologProcess getCurrentPrologProcess() ;
 
 	/**
 	 * initialize the tracker.

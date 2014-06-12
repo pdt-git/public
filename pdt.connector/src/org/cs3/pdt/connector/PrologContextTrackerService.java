@@ -17,16 +17,16 @@ package org.cs3.pdt.connector;
 /**
  * Service managing PrologContextTrackers.
  * 
- * There is no "current PrologInterface". Period.
+ * There is no "current PrologProcess". Period.
  * 
- * Clients that are interested in finding and/or following the "current" PrologInterface should
+ * Clients that are interested in finding and/or following the "current" PrologProcess should
  * check with this service to get a list of "opinions" on that matter. Each
  * PrologContextTracker represents such an opinion. Typically clients will
  * present the user with a choice of this opinions and let her decide.
  * 
  * 
  * Clients that want to contribute their own opinion on what is (and how to track) the 
- * current PrologInterface should subclass AbstractPrologContextTracker or otherwise implement
+ * current PrologProcess should subclass AbstractPrologContextTracker or otherwise implement
  * the interface PrologContextTracker and register it here. Another way to register a
  * tracker is adding an extension to the extension point prologContextTracker of the
  * pdt.runtime plugin. 

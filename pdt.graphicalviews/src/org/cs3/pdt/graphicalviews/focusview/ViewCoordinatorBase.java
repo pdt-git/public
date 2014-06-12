@@ -19,7 +19,7 @@ import java.util.List;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ConsultListener;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -98,11 +98,11 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files,
+	public void beforeConsult(PrologProcess pif, List<IFile> files,
 			IProgressMonitor monitor) throws PrologInterfaceException { }
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files,
+	public void afterConsult(PrologProcess pif, List<IFile> files,
 			List<String> allConsultedFiles, IProgressMonitor monitor)
 			throws PrologInterfaceException {
 		

@@ -20,22 +20,22 @@ import java.io.Writer;
 import java.util.Set;
 
 import org.cs3.pdt.connector.subscription.Subscription;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 /**
- * Central registry for managing PrologInterface instances and Subscriptions.
+ * Central registry for managing PrologProcess instances and Subscriptions.
  * 
- * The registry keeps track of every PrologInterface created by the pdt.runtime
+ * The registry keeps track of every PrologProcess created by the pdt.runtime
  * plugin. In addition, clients can register Subscriptions to particular
- * PrologInterface instances, thereby publically announcing what they intend to use them for.
+ * PrologProcess instances, thereby publically announcing what they intend to use them for.
  * 
- * This registry is ment to be a kind of "forum" for clients that need to share one and the same PrologInterface instance.
+ * This registry is ment to be a kind of "forum" for clients that need to share one and the same PrologProcess instance.
  * It is also intended to provide a model for ui components that need to provide the user with a choice of available Prolog runtimes.
  * 
- * Note that adding a Subscription means subscribing to a particular PrologInterface _KEY_ rather than to the instance itself.
- * Among other things this allows clients to express ther instance in a particular PrologInterface before it actually exists.
- * This is important since PrologInterface instances typically get created in a lazy fashion, whereas the ui should be able 
+ * Note that adding a Subscription means subscribing to a particular PrologProcess _KEY_ rather than to the instance itself.
+ * Among other things this allows clients to express ther instance in a particular PrologProcess before it actually exists.
+ * This is important since PrologProcess instances typically get created in a lazy fashion, whereas the ui should be able 
  * to reflect subscriptions much earlier to help the user understand her environment better. 
  * 
  * @author lukas
@@ -68,19 +68,19 @@ public interface PrologInterfaceRegistry {
 
 	
 	/**
-	 * retrieve the registry key of a registered PrologInterface. *
+	 * retrieve the registry key of a registered PrologProcess. *
 	 */
-	public String getKey(PrologInterface prologInterface);
+	public String getKey(PrologProcess prologProcess);
 
 	/**
-	 * retrieve the PrologInterface instance registered for the given key.
+	 * retrieve the PrologProcess instance registered for the given key.
 	 */
-	public PrologInterface getPrologInterface(String key);
+	public PrologProcess getPrologProcess(String key);
 
 	/**
 	 * add a listener to this registry.
 	 * 
-	 * Listeners get notified whenever a PrologInterface instance or
+	 * Listeners get notified whenever a PrologProcess instance or
 	 * Subscription is registered or unregistered.
 	 * 
 	 * @param l
@@ -98,9 +98,9 @@ public interface PrologInterfaceRegistry {
 
 	
 	/**
-	 * Register a PrologInterface with this registry.
+	 * Register a PrologProcess with this registry.
 	 * 
-	 * If another PrologInterface is already registered with this key,
+	 * If another PrologProcess is already registered with this key,
 	 * it is removed first.
 	 * 
 	 * If the same PrologInterace is already registered with this key,
@@ -119,12 +119,12 @@ public interface PrologInterfaceRegistry {
 	 * @param key
 	 * @param pif
 	 */
-	public void addPrologInterface(String key, PrologInterface pif) ;
+	public void addPrologProcess(String key, PrologProcess pif) ;
 
 	/**
-	 * Remove a PrologInterface from this registry.
+	 * Remove a PrologProcess from this registry.
 	 * 
-	 * Removes the PrologInterface with the given key. If no PrologInterface was
+	 * Removes the PrologProcess with the given key. If no PrologProcess was
 	 * registered for that key, this method has no effect. Subscriptions will
 	 * NOT be removed.
 	 * 
@@ -144,7 +144,7 @@ public interface PrologInterfaceRegistry {
 	 * 
 	 * If the same subscription is already registered, this method has no effect.
 	 * 
-	 * If there is already a PrologInterface instance registered for the
+	 * If there is already a PrologProcess instance registered for the
 	 * subscriptions pifKey, this method will cause a call to the method
 	 * configure() on the argument Subscription instance. 
 	 * In addition, for each registered Hook Descriptor that has at least one
@@ -163,7 +163,7 @@ public interface PrologInterfaceRegistry {
 	/**
 	 * Remove a subscription from the registry.
 	 * 
-	 * If there is currently a PrologInterface instance registered for the
+	 * If there is currently a PrologProcess instance registered for the
 	 * subscriptions pifKey, this method will cause a call to the method
 	 * deconfigure() on the argument Subscription instance.
 	 * In addition all hooks that were registered to this prolog interface 

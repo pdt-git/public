@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 
 /**
  * Simple data structure for storing information on a particular use of 
- * a PrologInterface instance.
+ * a PrologProcess instance.
  * 
  * Currently, only the pif's registry key and an informal description 
  * is stored.  
@@ -81,12 +81,12 @@ public class DefaultSubscription implements PersistableSubscription {
 	}
 
 	@Override
-	public void configure(PrologInterface pif) {
+	public void configure(PrologProcess pif) {
 		;		
 	}
 
 	@Override
-	public void deconfigure(PrologInterface pif){
+	public void deconfigure(PrologProcess pif){
 		;
 	}
 

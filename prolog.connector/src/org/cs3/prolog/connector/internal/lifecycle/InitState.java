@@ -68,7 +68,7 @@ public class InitState extends AbstractState {
 			context.enqueueWork(new NamedWorkRunnable("lateInit on"+id) {
 				@Override
 				public void run() throws PrologInterfaceException {
-					hook.lateInit(context.getPrologInterface());
+					hook.lateInit(context.getPrologProcess());
 				}
 			});
 		}

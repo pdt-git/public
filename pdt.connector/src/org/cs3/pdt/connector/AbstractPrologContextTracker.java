@@ -25,7 +25,7 @@ import org.cs3.prolog.connector.process.PrologInterfaceException;
  * Subclasses need to provide implementations for init() and
  * getCurrentPrologInterface(). In addition, subclasses are responsible for
  * calling fireContextChanged() when apropiate, i.e. when they think that the
- * "current" PrologInterface has changed, become available or invalid.
+ * "current" PrologProcess has changed, become available or invalid.
  * 
  * Clients that want to register a static PrologContextTracer instance via the
  * extension point prologContextTracker *MUST* subclass this class.
@@ -45,17 +45,17 @@ public abstract class AbstractPrologContextTracker implements
 	private Vector<PrologContextTrackerListener> listeners = new Vector<PrologContextTrackerListener>();
 
 	/**
-	 * Notify listeners that the "current" PrologInterface has changed.
+	 * Notify listeners that the "current" PrologProcess has changed.
 	 * 
 	 * Subclasses should call this method whenever they think the "current"
-	 * PrologInterface has changed, become available or invalid.
+	 * PrologProcess has changed, become available or invalid.
 	 * @throws PrologInterfaceException 
 	 */
 	protected void fireContextChanged()  {
 
 		PrologContextTrackerEvent e=null;
 		e = new PrologContextTrackerEvent(this,
-				getCurrentPrologInterface());
+				getCurrentPrologProcess());
 		Vector<PrologContextTrackerListener> cloned = getAListenersClone();
 		for (Iterator<PrologContextTrackerListener> it = cloned.iterator(); it.hasNext();) {
 			PrologContextTrackerListener l = it.next();

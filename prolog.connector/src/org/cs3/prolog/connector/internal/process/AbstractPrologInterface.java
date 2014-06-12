@@ -32,7 +32,7 @@ import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.process.StartupStrategy;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
@@ -44,7 +44,7 @@ import org.cs3.prolog.connector.session.PrologSession;
  * <p>
  * Subclasses have to implement getSession().
  */
-public abstract class AbstractPrologInterface implements PrologInterface {
+public abstract class AbstractPrologInterface implements PrologProcess {
 
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
 	private StartupStrategy startupStrategy;
@@ -197,13 +197,13 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	/************************************************/
 
 	protected static final class PifShutdownHook extends Thread {
-		WeakHashMap<PrologInterface, Object> pifs;
+		WeakHashMap<PrologProcess, Object> pifs;
 
 		private static PifShutdownHook instance;
 
 		private PifShutdownHook() {
 			super("PifShutdownHook");
-			pifs = new WeakHashMap<PrologInterface, Object>();
+			pifs = new WeakHashMap<PrologProcess, Object>();
 			Runtime.getRuntime().addShutdownHook(this);
 		}
 
@@ -216,8 +216,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 		@Override
 		public void run() {
-			for (Iterator<PrologInterface> it = pifs.keySet().iterator(); it.hasNext();) {
-				PrologInterface pif = it.next();
+			for (Iterator<PrologProcess> it = pifs.keySet().iterator(); it.hasNext();) {
+				PrologProcess pif = it.next();
 				if (pif != null) {
 					try {
 						pif.stop();
@@ -228,7 +228,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			}
 		}
 
-		public void add(PrologInterface pif) {
+		public void add(PrologProcess pif) {
 			pifs.put(pif, null);
 		}
 	}
@@ -245,7 +245,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 
 		@Override
-		public PrologInterface getPrologInterface() {
+		public PrologProcess getPrologProcess() {
 			return AbstractPrologInterface.this;
 		}
 

@@ -23,7 +23,7 @@ import org.cs3.prolog.connector.process.PrologInterfaceException;
 public interface PrologSession extends Disposable{
 	
 	/**
-	 * See: {@link org.cs3.prolog.connector.process.PrologInterface#queryOnce(String...)}  
+	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryOnce(String...)}  
 	 * @param query
 	 * @return
 	 * @throws PrologException
@@ -32,7 +32,7 @@ public interface PrologSession extends Disposable{
     public Map<String,Object> queryOnce(String query) throws PrologException, PrologInterfaceException;
 
 	/**
-	 * See: {@link org.cs3.prolog.connector.process.PrologInterface#queryAll(String...)}  
+	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryAll(String...)}  
 	 * @param query
 	 * @return
 	 * @throws PrologException
@@ -41,7 +41,7 @@ public interface PrologSession extends Disposable{
     public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologInterfaceException;
 
 	/**
-	 * See: {@link org.cs3.prolog.connector.process.PrologInterface#queryAll(String...)}  
+	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryAll(String...)}  
 	 * @param query
 	 * @param flag
 	 * @return

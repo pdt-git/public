@@ -1,9 +1,9 @@
 package org.cs3.pdt.common;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public interface PrologInterfaceStartListener {
 	
-	void prologInterfaceStarted(PrologInterface pif);
+	void prologProcessStarted(PrologProcess pif);
 
 }

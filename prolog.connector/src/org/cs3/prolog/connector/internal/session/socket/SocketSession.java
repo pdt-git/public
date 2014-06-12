@@ -30,7 +30,7 @@ import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
 import org.cs3.prolog.connector.internal.process.socket.SocketClient;
 import org.cs3.prolog.connector.internal.process.socket.SocketCommunicationConstants;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 
@@ -80,7 +80,7 @@ public class SocketSession implements PrologSession {
 	@Override
 	public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException,
 	PrologInterfaceException {
-		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologInterface.CTERMS) == 0)) {
+		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologProcess.CTERMS) == 0)) {
 			return queryAllAtOnce(query);
 		} else {
 			return queryAllDefault(query);
@@ -129,7 +129,7 @@ public class SocketSession implements PrologSession {
 	
 	private List<Map<String, Object>> queryAllAtOnce(String query) throws PrologInterfaceException {
 		int oldflags = flags;
-		flags = flags | PrologInterface.PROCESS_LISTS;
+		flags = flags | PrologProcess.PROCESS_LISTS;
 		
 		if (query.endsWith(".")) {
 			query = query.substring(0, query.length()-1);
@@ -267,7 +267,7 @@ public class SocketSession implements PrologSession {
 	private Map<String, Object> read_solution(int flags) throws IOException {
 		HashMap<String, Object> result = new HashMap<String, Object>();
 		while (true) {			
-			String varname = (String) readValue(PrologInterface.UNQUOTE_ATOMS);
+			String varname = (String) readValue(PrologProcess.UNQUOTE_ATOMS);
 			if (varname == null) {
 				return handleSpecialResults(result);
 			} else {
@@ -346,10 +346,10 @@ public class SocketSession implements PrologSession {
 		 * the only thing that needs to be configured on the server side, is
 		 * whether or not lists are processed.
 		 */
-		boolean processLists = (flags & PrologInterface.PROCESS_LISTS) > 0;
+		boolean processLists = (flags & PrologProcess.PROCESS_LISTS) > 0;
 		setProtocolOption("interprete_lists", Boolean.toString(processLists));
 		
-		boolean showUnboundResults = (flags & PrologInterface.UNBOUND_VARIABLES) > 0;
+		boolean showUnboundResults = (flags & PrologProcess.UNBOUND_VARIABLES) > 0;
 		setProtocolOption("unbound_variables", Boolean.toString(showUnboundResults));
 	}
 

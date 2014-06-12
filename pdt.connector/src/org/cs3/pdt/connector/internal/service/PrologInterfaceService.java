@@ -35,7 +35,7 @@ import org.cs3.pdt.connector.subscription.DefaultSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,7 +55,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 		registerPDTReloadExecutor(defaultReloadExecutor);
 	}
 	
-	private PrologInterface activePrologInterface = getDefaultPrologInterface();
+	private PrologProcess activePrologProcess = getDefaultPrologProcess();
 	
 	private static final ISchedulingRule activePifChangedRule = new ISchedulingRule() {
 		@Override
@@ -70,30 +70,30 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	};
 	
 	@Override
-	public PrologInterface getActivePrologInterface() {
-		if (activePrologInterface == null) {
-			setActivePrologInterface(null);
+	public PrologProcess getActivePrologProcess() {
+		if (activePrologProcess == null) {
+			setActivePrologProcess(null);
 		}
-		return activePrologInterface;
+		return activePrologProcess;
 	}
 	
 	@Override
-	public synchronized void setActivePrologInterface(PrologInterface pif) {
+	public synchronized void setActivePrologProcess(PrologProcess pif) {
 		if (pif == null) {
-			activePrologInterface = getDefaultPrologInterface();
+			activePrologProcess = getDefaultPrologProcess();
 		} else {
-			if (activePrologInterface == pif) {
+			if (activePrologProcess == pif) {
 				return;
 			} else {
-				activePrologInterface = pif;
+				activePrologProcess = pif;
 			}
 		}
-		fireActivePrologInterfaceChanged(activePrologInterface);
+		fireActivePrologProcessChanged(activePrologProcess);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private synchronized void fireActivePrologInterfaceChanged(final PrologInterface pif) {
-		Job job = new Job("Active PrologInterface changed: notify listeners") {
+	private synchronized void fireActivePrologProcessChanged(final PrologProcess pif) {
+		Job job = new Job("Active PrologProcess changed: notify listeners") {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -102,10 +102,10 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 					listenersClone = (ArrayList<ActivePrologInterfaceListener>) activePrologInterfaceListeners.clone();
 				}
 				
-				monitor.beginTask("Active PrologInterface changed: notify listeners", listenersClone.size());
+				monitor.beginTask("Active PrologProcess changed: notify listeners", listenersClone.size());
 				
 				for (ActivePrologInterfaceListener listener : listenersClone) {
-					listener.activePrologInterfaceChanged(pif);
+					listener.activePrologProcessChanged(pif);
 					monitor.worked(1);
 				}
 				monitor.done();
@@ -134,14 +134,14 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	
 	private static final String DEFAULT_PROCESS = "Default Process";
 	
-	private PrologInterface getDefaultPrologInterface() {
+	private PrologProcess getDefaultPrologProcess() {
 		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		Subscription subscription = registry.getSubscription(DEFAULT_PROCESS);
 		if (subscription == null) {
 			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", "Prolog");
 			registry.addSubscription(subscription);
 		}
-		PrologInterface pif = PDTConnectorPlugin.getDefault().getPrologInterface(subscription);
+		PrologProcess pif = PDTConnectorPlugin.getDefault().getPrologProcess(subscription);
 		return pif;
 	}
 	
@@ -184,11 +184,11 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	
 	@Override
 	public void consultFile(String file) {
-		consultFile(file, getActivePrologInterface());
+		consultFile(file, getActivePrologProcess());
 	}
 
 	@Override
-	public void consultFile(String file, PrologInterface pif) {
+	public void consultFile(String file, PrologProcess pif) {
 		try {
 			consultFile(FileUtils.findFileForLocation(file), pif);
 		} catch (IOException e) {
@@ -199,11 +199,11 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 
 	@Override
 	public void consultFile(final IFile file) {
-		consultFile(file, getActivePrologInterface());
+		consultFile(file, getActivePrologProcess());
 	}
 	
 	@Override
-	public void consultFile(IFile file, PrologInterface pif) {
+	public void consultFile(IFile file, PrologProcess pif) {
 		ArrayList<IFile> fileList = new ArrayList<IFile>();
 		fileList.add(file);
 		consultFiles(fileList, pif);
@@ -211,20 +211,20 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	
 	@Override
 	public void consultFiles(List<IFile> files) {
-		consultFiles(files, getActivePrologInterface());
+		consultFiles(files, getActivePrologProcess());
 	}
 	
 	@Override
-	public void consultFiles(final List<IFile> files, final PrologInterface pif) {
+	public void consultFiles(final List<IFile> files, final PrologProcess pif) {
 		consultFilesInJob(files, pif, false);
 	}
 	
 	@Override
-	public void consultFilesSilent(List<IFile> files, PrologInterface pif) {
+	public void consultFilesSilent(List<IFile> files, PrologProcess pif) {
 		consultFilesInJob(files, pif, true);
 	}
 	
-	private void consultFilesInJob(final List<IFile> files, final PrologInterface pif, final boolean silent) {
+	private void consultFilesInJob(final List<IFile> files, final PrologProcess pif, final boolean silent) {
 		Job job = new Job("Consult " + files.size() + " file(s)") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -244,7 +244,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void consultFilesImpl(List<IFile> files, PrologInterface pif, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
+	private void consultFilesImpl(List<IFile> files, PrologProcess pif, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
 		HashSet<ConsultListener> consultListenersClone;
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
@@ -272,7 +272,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 		monitor.done();
 	}
 	
-	private List<String> collectConsultedFiles(PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
+	private List<String> collectConsultedFiles(PrologProcess pif, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		
 		List<String> result = new ArrayList<String>();
@@ -288,7 +288,7 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean executeReload(PrologInterface pif, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
+	private boolean executeReload(PrologProcess pif, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
 		TreeSet<PDTReloadExecutor> executorsClone;
 		synchronized (pdtReloadExecutors) {
 			executorsClone = (TreeSet<PDTReloadExecutor>) pdtReloadExecutors.clone();

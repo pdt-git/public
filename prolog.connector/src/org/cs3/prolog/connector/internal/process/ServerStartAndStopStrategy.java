@@ -14,7 +14,7 @@
 
 package org.cs3.prolog.connector.internal.process;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 
 
@@ -33,22 +33,22 @@ public interface ServerStartAndStopStrategy {
      * starts the server process, returning its process.
      * 
      * @return the server process, if available, or null.
-     * @param pif the PrologInterface for which the server part should be started.
+     * @param pif the PrologProcess for which the server part should be started.
      */
-    public Process startServer(PrologInterface pif);
+    public Process startServer(PrologProcess pif);
 
     /**
      * stop the server process
      * 
      * @param pif the IPrologInterface for which the server should be stopped.
      */
-    public void stopServer(PrologInterface pif);
+    public void stopServer(PrologProcess pif);
 
     /**
      * @param pif
      * @return
      */
-    public boolean isRunning(PrologInterface pif);
+    public boolean isRunning(PrologProcess pif);
 }
 
 

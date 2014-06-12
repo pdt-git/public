@@ -17,17 +17,17 @@ package org.cs3.pdt.connector.service;
 import java.util.List;
 
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
 
 /**
- * An IPrologInterfaceService manages an active {@link PrologInterface} and
- * consults files into this active PrologInterface.<br/>
- * The active PrologInterface can be accessed and set.
+ * An IPrologInterfaceService manages an active {@link PrologProcess} and
+ * consults files into this active PrologProcess.<br/>
+ * The active PrologProcess can be accessed and set.
  * {@link ActivePrologInterfaceListener}s can be registered to listen to each
- * change of the active PrologInterface.<br/>
+ * change of the active PrologProcess.<br/>
  * Consults can be triggered via the <code>consultFile(s)</code> methods.
- * The consult will be done in the active PrologInterface or in a given PrologInterface. The call of the
+ * The consult will be done in the active PrologProcess or in a given PrologProcess. The call of the
  * consult predicate <code>pdt_reload/1</code> is executed by the registered
  * {@link PDTReloadExecutor} with the highest priority. If an executor fails,
  * the next one will be tried out. Utility methods to retrieve file names
@@ -76,7 +76,7 @@ public interface IPrologInterfaceService {
 	void unRegisterConsultListener(ConsultListener listener);
 
 	/**
-	 * Consults a file into the active PrologInterface.
+	 * Consults a file into the active PrologProcess.
 	 * 
 	 * @param file
 	 *            the file
@@ -84,17 +84,17 @@ public interface IPrologInterfaceService {
 	void consultFile(IFile file);
 
 	/**
-	 * Consults a file into the given PrologInterface.
+	 * Consults a file into the given PrologProcess.
 	 * 
 	 * @param file
 	 *            the file
 	 * @param pif
-	 *            the PrologInterface
+	 *            the PrologProcess
 	 */
-	void consultFile(IFile file, PrologInterface pif);
+	void consultFile(IFile file, PrologProcess pif);
 
 	/**
-	 * Consults a file into the active PrologInterface.
+	 * Consults a file into the active PrologProcess.
 	 * 
 	 * @param file
 	 *            the file
@@ -102,17 +102,17 @@ public interface IPrologInterfaceService {
 	void consultFile(String file);
 
 	/**
-	 * Consults a file into the given PrologInterface.
+	 * Consults a file into the given PrologProcess.
 	 * 
 	 * @param file
 	 *            the file
 	 * @param pif
-	 *            the PrologInterface
+	 *            the PrologProcess
 	 */
-	void consultFile(String file, PrologInterface pif);
+	void consultFile(String file, PrologProcess pif);
 	
 	/**
-	 * Consults a list of files into the active PrologInterface.
+	 * Consults a list of files into the active PrologProcess.
 	 * 
 	 * @param files
 	 *            the list of files
@@ -120,14 +120,14 @@ public interface IPrologInterfaceService {
 	void consultFiles(List<IFile> files);
 
 	/**
-	 * Consults a list of files into the given PrologInterface.
+	 * Consults a list of files into the given PrologProcess.
 	 * 
 	 * @param files
 	 *            the list of files
 	 * @param pif
-	 *            the PrologInterface
+	 *            the PrologProcess
 	 */
-	void consultFiles(List<IFile> files, PrologInterface pif);
+	void consultFiles(List<IFile> files, PrologProcess pif);
 	
 	/**
 	 * Registers an {@link ActivePrologInterfaceListener}.
@@ -146,18 +146,18 @@ public interface IPrologInterfaceService {
 	void unRegisterActivePrologInterfaceListener(ActivePrologInterfaceListener listener);
 
 	/**
-	 * Accesses the active PrologInterface.
+	 * Accesses the active PrologProcess.
 	 * 
-	 * @return the active PrologInterface
+	 * @return the active PrologProcess
 	 */
-	PrologInterface getActivePrologInterface();
+	PrologProcess getActivePrologProcess();
 
 	/**
-	 * Sets the active PrologInterface.
+	 * Sets the active PrologProcess.
 	 * 
 	 * @param pif
-	 *            the PrologInterface
+	 *            the PrologProcess
 	 */
-	void setActivePrologInterface(PrologInterface pif);
+	void setActivePrologProcess(PrologProcess pif);
 
 }

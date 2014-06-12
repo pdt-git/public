@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 
@@ -302,7 +302,7 @@ public abstract class LifeCycle {
 
 	}
 
-	public abstract PrologInterface getPrologInterface();
+	public abstract PrologProcess getPrologProcess();
 
 	public abstract PrologSession getShutdownSession()
 			throws PrologInterfaceException;

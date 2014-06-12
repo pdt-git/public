@@ -14,12 +14,12 @@
 
 package org.cs3.pdt.console;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public interface PrologConsole {
 	public ConsoleModel getModel();
-	public PrologInterface getPrologInterface();
-	public void setPrologInterface(PrologInterface pif);
+	public PrologProcess getPrologProcess();
+	public void setPrologProcess(PrologProcess pif);
 	public boolean isVisible();
 	public String getText();
 	public int getLineAtOffset(int offset);

@@ -28,7 +28,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceEvent;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.process.PrologInterfaceListener;
@@ -52,17 +52,17 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	Object eventTicket = new Object();
 
-	private PrologInterface pif;
+	private PrologProcess pif;
 	
 	private HashSet<String> subjects = new HashSet<String>();
 
-	public PrologEventDispatcher(PrologInterface pif) {
+	public PrologEventDispatcher(PrologProcess pif) {
 		this.pif = pif;
 		//make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			@Override
-			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
+			public void onInit(PrologProcess pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
 				try {
 					String query = QueryUtils.bT("use_module", QueryUtils.prologFileNameQuoted(getObserveFile()));
 					initSession.queryOnce(query);
@@ -72,7 +72,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
+			public void afterInit(PrologProcess pif) throws PrologInterfaceException {
 				synchronized (listenerLists) {
 					Set<String> subjects = listenerLists.keySet();
 					for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
@@ -83,7 +83,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
+			public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologException, PrologInterfaceException {
 				synchronized (subjects) {
 					subjects.clear();
 				}
@@ -91,7 +91,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void onError(PrologInterface pif) {
+			public void onError(PrologProcess pif) {
 				synchronized (subjects) {
 					subjects.clear();
 				}
@@ -104,7 +104,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 			
 			@Override
-			public void lateInit(PrologInterface pif) {
+			public void lateInit(PrologProcess pif) {
 				;
 			}
 
@@ -114,7 +114,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		if(pif.isUp()){
 			PrologSession s =null;
 			try{
-				s= pif.getSession(PrologInterface.NONE);
+				s= pif.getSession(PrologProcess.NONE);
 				hook.onInit(pif,s);
 
 			} catch (PrologInterfaceException e) {
@@ -193,12 +193,12 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 		}
 		if (session == null) {
-			session = pif.getAsyncSession(PrologInterface.NONE);
+			session = pif.getAsyncSession(PrologProcess.NONE);
 			session.addBatchListener(this);
 		} else {
 			abort();
 		}
-		PrologSession s = pif.getSession(PrologInterface.NONE);
+		PrologSession s = pif.getSession(PrologProcess.NONE);
 		try {
 			String query = "pif_observe('" + session.getProcessorThreadAlias() + "',"
 			+ subject + ","+QueryUtils.quoteAtom(subject) +")";
@@ -234,7 +234,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	}
 
 	private void abort() throws PrologInterfaceException {
-		PrologSession s = pif.getSession(PrologInterface.NONE);
+		PrologSession s = pif.getSession(PrologProcess.NONE);
 		try {
 			abort(s);
 		} finally {

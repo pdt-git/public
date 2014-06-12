@@ -14,20 +14,20 @@
 
 package org.cs3.pdt.connector.service;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 /**
- * This interface is used to listen to the active {@link PrologInterface}
+ * This interface is used to listen to the active {@link PrologProcess}
  * defined by an {@link IPrologInterfaceService}.
  */
 public interface ActivePrologInterfaceListener {
 
 	/**
-	 * The active {@link PrologInterface} has changed
+	 * The active {@link PrologProcess} has changed
 	 * 
 	 * @param pif
-	 *            the new {@link PrologInterface}
+	 *            the new {@link PrologProcess}
 	 */
-	void activePrologInterfaceChanged(PrologInterface pif);
+	void activePrologProcessChanged(PrologProcess pif);
 
 }

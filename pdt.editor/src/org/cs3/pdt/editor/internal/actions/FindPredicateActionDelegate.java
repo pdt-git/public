@@ -132,7 +132,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	private void run_impl(final Goal goal, IFile file) throws CoreException {
 		PrologSession session = null;
 		try {
-			session = PDTCommonUtil.getActivePrologInterface().getSession();
+			session = PDTCommonUtil.getActivePrologProcess().getSession();
 			SourceLocationAndResultKind res = findFirstClauseLocation(goal, session);
 			if (res != null) {
 				if (res.location != null) {

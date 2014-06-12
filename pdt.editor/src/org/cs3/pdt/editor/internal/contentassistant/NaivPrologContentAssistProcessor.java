@@ -105,7 +105,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		try {
 			String enclFile = UIUtils.getFileFromActiveEditor();
 //			String moduleArg = module != null ? Util.quoteAtomIfNeeded(module) : "Module";
-			session = PDTCommonUtil.getActivePrologInterface().getSession();
+			session = PDTCommonUtil.getActivePrologProcess().getSession();
 //			String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION,
 //					Util.quoteAtom(enclFile),
 //					Util.quoteAtomIfNeeded(prefix),

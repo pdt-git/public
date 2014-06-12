@@ -16,22 +16,22 @@ package org.cs3.pdt.connector.subscription;
 
 import java.util.List;
 
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 /**
- * Subscription for a PrologInterface instance.
+ * Subscription for a PrologProcess instance.
  * 
  * Subscriptions can best be thought of as describing a particular use some
- * client makes of a given PrologInterface instance. The pdt.core for example
+ * client makes of a given PrologProcess instance. The pdt.core for example
  * makes use of Subscriptions to describe the relation of a IPrologProject to
- * the PrologInterface instances it uses. On the one hand, a PrologInterface is
+ * the PrologProcess instances it uses. On the one hand, a PrologProcess is
  * used as the default runtime for the user application developed in the
  * project. On the other hand, the core itself internally needs a
- * PrologInterface to store metadata on the prolog source code and other
+ * PrologProcess to store metadata on the prolog source code and other
  * information associated to the project. So there are two Subscriptions
  * associated with each Prolog project.
  * 
- * Note that several subscriptions may be to one and the same PrologInterface.
+ * Note that several subscriptions may be to one and the same PrologProcess.
  * In the above example, this is configurable by the user. On the other hand the
  * relation between projects and Subscriptions is hard coded. This does make sense: every 
  * prolog project makes use of prolog in exactly the ways described above - there is no need to
@@ -48,7 +48,7 @@ public interface Subscription {
 	public abstract String getId();
 
 	/**
-	 * @return a key identifying the PrologInterface instance to subscribe to.
+	 * @return a key identifying the PrologProcess instance to subscribe to.
 	 *         May NOT be null.
 	 */
 	public abstract String getPifKey();
@@ -87,7 +87,7 @@ public interface Subscription {
 	 * 
 	 * Implementation should make no assumptions on the life cycle state of the pif
 	 * argument. It should also not contain calls that would alter the
-	 * state. Note that a call to PrologInterface.getSession() DOES alter the state of the 
+	 * state. Note that a call to PrologProcess.getSession() DOES alter the state of the 
 	 * pif (it may start it, if it is not already up!).
 	 * 
 	 * Why not? 
@@ -113,7 +113,7 @@ public interface Subscription {
 	 * 
 	 * @param pif
 	 */
-	public abstract void configure(PrologInterface pif) ;
+	public abstract void configure(PrologProcess pif) ;
 
 	/**
 	 * "clean-up-your-mess"-hook.
@@ -128,7 +128,7 @@ public interface Subscription {
 	 * state. If the pif is down, there is typically not much to clean up anyway.
 	 * @param pif
 	 */
-	public abstract void deconfigure(PrologInterface pif);
+	public abstract void deconfigure(PrologProcess pif);
 	
 	/**
 	 * Return the tags associated with this Subscriptions.

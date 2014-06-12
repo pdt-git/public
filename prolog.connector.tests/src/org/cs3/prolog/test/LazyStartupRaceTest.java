@@ -18,11 +18,11 @@ import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 public class LazyStartupRaceTest extends TestCase {
-	 private PrologInterface pif;
+	 private PrologProcess pif;
 
 	@Override
 	protected void setUp() throws Exception {

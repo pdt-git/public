@@ -67,7 +67,7 @@ public class AfterInitState extends AbstractState {
 				@Override
 				public void run() throws PrologInterfaceException {
 					hook.lateInit(context
-							.getPrologInterface());
+							.getPrologProcess());
 				}
 			});
 		}

@@ -21,18 +21,18 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.internal.process.socket.JackTheProcessRipper;
 import org.cs3.prolog.connector.internal.session.socket.SocketSession;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		PrologInterface pif = Connector.newUninitializedPrologProcess();
+		PrologProcess pif = Connector.newUninitializedPrologProcess();
 		
 		pif.start();
 
 		
-		SocketSession session = (SocketSession) pif.getSession(PrologInterface.LEGACY);
+		SocketSession session = (SocketSession) pif.getSession(PrologProcess.LEGACY);
 		long pid = session.getClient().getServerPid();
 		JackTheProcessRipper.getInstance().markForDeletion(pid);
 		try{
@@ -42,7 +42,7 @@ public class RestartTest extends TestCase {
 			;
 		}
 		pif.start();
-		session = (SocketSession) pif.getSession(PrologInterface.LEGACY);
+		session = (SocketSession) pif.getSession(PrologProcess.LEGACY);
 		assertTrue(pid!=session.getClient().getServerPid());
 		assertNotNull(session.queryOnce("true"));
 	}
@@ -50,9 +50,9 @@ public class RestartTest extends TestCase {
 	
 	public void testRecover_lazy() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface pif = Connector.newUninitializedPrologProcess();
+		PrologProcess pif = Connector.newUninitializedPrologProcess();
 		
-		SocketSession session = (SocketSession) pif.getSession(PrologInterface.LEGACY);
+		SocketSession session = (SocketSession) pif.getSession(PrologProcess.LEGACY);
 		long pid = session.getClient().getServerPid();
 		JackTheProcessRipper.getInstance().markForDeletion(pid);
 		try{
@@ -61,7 +61,7 @@ public class RestartTest extends TestCase {
 		catch(Throwable t){
 			;
 		}
-		session = (SocketSession) pif.getSession(PrologInterface.LEGACY);
+		session = (SocketSession) pif.getSession(PrologProcess.LEGACY);
 		assertTrue(pid!=session.getClient().getServerPid());
 		assertNotNull(session.queryOnce("true"));
 	}

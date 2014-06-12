@@ -25,7 +25,7 @@ public interface Disposable {
     /**
      * checks if the session has been disposed. This can happen without the
      * users explicitly calling dispose, if for example restart() is called on
-     * the PrologInterface.
+     * the PrologProcess.
      * 
      * @return true if the interface has been disposed, false otherwise
      */

@@ -18,7 +18,7 @@ import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 
@@ -26,7 +26,7 @@ import org.cs3.prolog.connector.session.PrologSession;
  * @author terra
  */
 public class SocketSessionThrowTest extends TestCase {
-	private PrologInterface pif;
+	private PrologProcess pif;
 
     @Override
 	protected void setUp() throws Exception {

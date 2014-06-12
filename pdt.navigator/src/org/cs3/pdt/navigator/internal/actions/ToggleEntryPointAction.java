@@ -25,7 +25,7 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -43,7 +43,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	public void run(IAction action) {
 		if (selectedFiles != null) {
 			
-			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
 			if (isSelectionChecked()) {
 				for (IFile file : selectedFiles) {
 					setEntryPoint(file, false, pif);
@@ -103,7 +103,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		return false;
 	}
 	
-	private void setEntryPoint(IFile file, boolean b, PrologInterface pif) {
+	private void setEntryPoint(IFile file, boolean b, PrologProcess pif) {
 		try {
 			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, Boolean.toString(b));
 			if (b) {

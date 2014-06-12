@@ -33,7 +33,7 @@ import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
@@ -432,8 +432,8 @@ public class PDTCommonUtil {
 		return plDocCss;
 	}
 	
-	public static PrologInterface getActivePrologInterface() {
-		return PDTConnectorPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+	public static PrologProcess getActivePrologProcess() {
+		return PDTConnectorPlugin.getDefault().getPrologInterfaceService().getActivePrologProcess();
 	}
 
 }

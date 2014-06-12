@@ -25,7 +25,7 @@ import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceEvent;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.process.PrologInterfaceListener;
@@ -65,7 +65,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		Display.getDefault().syncExec(r);
 	}
 
-	PrologInterface currentPif;
+	PrologProcess currentPif;
 	private PrologEventDispatcher currentDispatcher;
 	
 	private void addPifListener() {
@@ -110,7 +110,7 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 	}
 
 	@Override
-	public void activePrologInterfaceChanged(PrologInterface pif) {
+	public void activePrologProcessChanged(PrologProcess pif) {
 		if (currentPif == pif) {
 			return;
 		}

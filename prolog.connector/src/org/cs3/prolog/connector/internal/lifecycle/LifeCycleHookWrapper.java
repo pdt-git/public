@@ -65,7 +65,7 @@ public class LifeCycleHookWrapper {
 				
 				@Override
 				public void run() throws PrologInterfaceException {
-					hook.onInit(context.getPrologInterface(), context.getInitialSession());
+					hook.onInit(context.getPrologProcess(), context.getInitialSession());
 				}
 
 			});
@@ -92,7 +92,7 @@ public class LifeCycleHookWrapper {
 				
 				@Override
 				public void run() throws PrologInterfaceException {
-					hook.afterInit(context.getPrologInterface());
+					hook.afterInit(context.getPrologProcess());
 				}
 
 			});
@@ -114,7 +114,7 @@ public class LifeCycleHookWrapper {
 				
 				@Override
 				public void run() throws PrologInterfaceException {
-					hook.beforeShutdown(context.getPrologInterface(),context.getShutdownSession());
+					hook.beforeShutdown(context.getPrologProcess(),context.getShutdownSession());
 				}
 
 			});
@@ -127,7 +127,7 @@ public class LifeCycleHookWrapper {
 			context.enqueueWork(new NamedWorkRunnable("onError_on_"+id) {
 				@Override
 				public void run() throws PrologInterfaceException {
-					hook.onError(context.getPrologInterface());
+					hook.onError(context.getPrologProcess());
 				}
 			});
 		}

@@ -32,7 +32,7 @@ import org.cs3.pdt.navigator.internal.ImageRepository;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -61,7 +61,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 
 		try {
 			// get active pif from console
-			PrologInterface currentPif = PDTCommonUtil.getActivePrologInterface();
+			PrologProcess currentPif = PDTCommonUtil.getActivePrologProcess();
 			
 			if (currentPif == null) {
 				if (element instanceof IFile) {
@@ -169,7 +169,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 			filesInCurrentState = new HashSet<String>();
 			filesInOldState = new HashSet<String>();
 			directories = new HashSet<String>();
-			PrologInterface pif = PDTCommonUtil.getActivePrologInterface();
+			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
 			List<Map<String, Object>> results;
 			try {
 				results = pif.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State"));
@@ -198,24 +198,24 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	}
 
 	@Override
-	public void prologInterfaceStarted(PrologInterface pif) {
-    	if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+	public void prologProcessStarted(PrologProcess pif) {
+    	if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
     		fireLabelProviderChanged();
     	}
 	}
 
 	@Override
-	public void activePrologInterfaceChanged(PrologInterface pif) {
+	public void activePrologProcessChanged(PrologProcess pif) {
     	fireLabelProviderChanged();
 	}
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
-    	if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+    	if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
     		fireLabelProviderChanged();
     	}
 	}

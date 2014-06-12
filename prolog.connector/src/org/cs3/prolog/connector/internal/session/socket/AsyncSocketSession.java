@@ -25,7 +25,7 @@ import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.process.socket.SocketClient;
 import org.cs3.prolog.connector.internal.process.socket.SocketCommunicationConstants;
 import org.cs3.prolog.connector.internal.process.socket.SocketPrologInterface;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
@@ -298,7 +298,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		HashMap<String,Object> result = new HashMap<String, Object>();
 		// try to read a variable name
 		while (true) {
-			String varname = (String) client.readValue(PrologInterface.NONE);
+			String varname = (String) client.readValue(PrologProcess.NONE);
 			if (varname == null) {
 				// there was no respective data
 				String line = client.readln();
@@ -390,7 +390,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		 * the only thing that needs to be configured on the server side, is
 		 * whether or not lists are processed.
 		 */
-		boolean processLists = (flags & PrologInterface.PROCESS_LISTS) > 0;
+		boolean processLists = (flags & PrologProcess.PROCESS_LISTS) > 0;
 		setProtocolOption("interprete_lists", Boolean.toString(processLists));
 	}
 
@@ -496,7 +496,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			throw new IllegalThreadStateException("Cannot call join() from dispatch thread!");
 		}
 		Object ticket = new Object();
-		int id = storeTicket(ticket,null,PrologInterface.NONE);
+		int id = storeTicket(ticket,null,PrologProcess.NONE);
 		try {
 			synchronized (ticket) {
 				if(!disposing){
@@ -544,11 +544,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 		//Object ticket = new Object();
 		lastAbortTicket=ticket;
-		int id = storeTicket(ticket,null,PrologInterface.NONE);
+		int id = storeTicket(ticket,null,PrologProcess.NONE);
 		Debug.info("abort ticket stored, id="+id);
 		PrologSession controlSession = null;
 		try {
-			controlSession=pif.getSession(PrologInterface.NONE);
+			controlSession=pif.getSession(PrologProcess.NONE);
 			controlSession.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
 			Debug.info("async abort request queued, id="+id);
 			synchronized (ticket) {
@@ -614,7 +614,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
 	 */
-	public PrologInterface getPrologInterface() {
+	public PrologProcess getPrologProcess() {
 		return pif;
 	}
 	

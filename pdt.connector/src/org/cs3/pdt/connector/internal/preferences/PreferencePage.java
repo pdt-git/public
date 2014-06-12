@@ -31,7 +31,7 @@ import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePag
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.ProcessUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -250,7 +250,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
-			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());
+			PrologProcess pif = registry.getPrologProcess(registry.getSubscription(id).getPifKey());
 			if (pif != null && configuration.equals(pif.getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
 				pif.initOptions(new EclipsePreferenceProvider(PDTConnectorPlugin.getDefault(), configuration));
 			}

@@ -18,7 +18,7 @@ package org.cs3.prolog.connector.process;
 
 
 /**
- * A PrologInterfaceException is thrown when a PrologInterface looses
+ * A PrologInterfaceException is thrown when a PrologProcess looses
  * the connection to the prolog process due to an error.
  */
 public class PrologInterfaceException extends Exception {

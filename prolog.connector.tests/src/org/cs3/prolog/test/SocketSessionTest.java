@@ -34,7 +34,7 @@ import org.cs3.prolog.connector.cterm.CCompound;
 import org.cs3.prolog.connector.cterm.CNil;
 import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 
@@ -44,7 +44,7 @@ import org.cs3.prolog.connector.session.PrologSession;
  * 
  */
 public class SocketSessionTest extends TestCase {
-	private PrologInterface pif;
+	private PrologProcess pif;
 
 	/*
 	 * (non-Javadoc)
@@ -125,7 +125,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testCTerm() throws PrologException, PrologInterfaceException {
-		PrologSession s = pif.getSession(PrologInterface.CTERMS);		
+		PrologSession s = pif.getSession(PrologProcess.CTERMS);		
 		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
 		Object a = map.get("A");
@@ -135,7 +135,7 @@ public class SocketSessionTest extends TestCase {
 
 	public void testListProcessingDisabled() throws PrologException,
 			PrologInterfaceException {
-		PrologSession s =  pif.getSession(PrologInterface.NONE);
+		PrologSession s =  pif.getSession(PrologProcess.NONE);
 		
 		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
@@ -376,19 +376,19 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT291_nil() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.NONE);
+		PrologSession session = pif.getSession(PrologProcess.NONE);
 		Map<String,Object> m1=session.queryOnce("A=[]");
 		assertTrue(m1.get("A") instanceof String);
-		session = pif.getSession(PrologInterface.PROCESS_LISTS);
+		session = pif.getSession(PrologProcess.PROCESS_LISTS);
 		Map<String,Object> m2=session.queryOnce("A=[]");
 		assertTrue(m2.get("A") instanceof List<?>);
-		session = pif.getSession(PrologInterface.CTERMS);
+		session = pif.getSession(PrologProcess.CTERMS);
 		Map<String,Object> m3=session.queryOnce("A=[]");
 		assertTrue(m3.get("A") instanceof CNil);
 	}
 	
 	public void testPDT287_0() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.NONE);
+		PrologSession session = pif.getSession(PrologProcess.NONE);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be quoted.
@@ -410,7 +410,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_1() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.UNQUOTE_ATOMS);
+		PrologSession session = pif.getSession(PrologProcess.UNQUOTE_ATOMS);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be unquoted.
@@ -432,7 +432,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_2() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.PROCESS_LISTS);
+		PrologSession session = pif.getSession(PrologProcess.PROCESS_LISTS);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be quoted.
@@ -461,8 +461,8 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_3() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
+		PrologSession session = pif.getSession(PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be unquoted.
@@ -491,7 +491,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_4() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.CTERMS);
+		PrologSession session = pif.getSession(PrologProcess.CTERMS);
 		Map<String,Object> map = null;
 		try {
 			// Everything should be CTerms, no list Processing.
@@ -509,16 +509,16 @@ public class SocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			pif.getSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
+			pif.getSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			pif.getSession(PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
+			pif.getSession(PrologProcess.CTERMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -526,9 +526,9 @@ public class SocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			pif.getSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
+			pif.getSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;

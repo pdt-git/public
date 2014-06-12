@@ -17,20 +17,20 @@ package org.cs3.pdt.connector.registry;
 import java.util.EventObject;
 
 import org.cs3.pdt.connector.subscription.Subscription;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 
 public class PrologInterfaceRegistryEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 
-	public PrologInterface pif = null;
+	public PrologProcess pif = null;
 
 	public String key = null;
 
 	public Subscription subscription = null;
 
 	public PrologInterfaceRegistryEvent(Object source, 
-			PrologInterface pif,
+			PrologProcess pif,
 			String key, 
 			Subscription subscription) {
 		super(source);
@@ -44,7 +44,7 @@ public class PrologInterfaceRegistryEvent extends EventObject {
 		super(reg);
 		this.key = subscription.getPifKey();
 		this.subscription = subscription;
-		this.pif = reg.getPrologInterface(key);
+		this.pif = reg.getPrologProcess(key);
 	}
 
 	
@@ -52,7 +52,7 @@ public class PrologInterfaceRegistryEvent extends EventObject {
 			String key) {
 		super(reg);
 		this.key = key;
-		this.pif = reg.getPrologInterface(key);
+		this.pif = reg.getPrologProcess(key);
 	}
 }
 

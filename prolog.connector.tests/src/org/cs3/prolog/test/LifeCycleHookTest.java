@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 
@@ -36,14 +36,14 @@ public class LifeCycleHookTest extends TestCase {
 		private int onInit;
 
 		@Override
-		public void lateInit(PrologInterface pif) {
+		public void lateInit(PrologProcess pif) {
 			Debug.debug("lateInit");
 //			lateInit++;
 			
 		}
 
 		@Override
-		public void onError(PrologInterface pif) {
+		public void onError(PrologProcess pif) {
 			Debug.debug("onError");
 //			onError++;
 			
@@ -57,7 +57,7 @@ public class LifeCycleHookTest extends TestCase {
 		}
 
 		@Override
-		public void afterInit(PrologInterface pif)
+		public void afterInit(PrologProcess pif)
 				throws PrologInterfaceException {
 			Debug.debug("afterInit");
 			afterInit++;
@@ -65,7 +65,7 @@ public class LifeCycleHookTest extends TestCase {
 		}
 
 		@Override
-		public void beforeShutdown(PrologInterface pif, PrologSession session)
+		public void beforeShutdown(PrologProcess pif, PrologSession session)
 				throws PrologInterfaceException {
 			Debug.debug("beforeShutdown");
 			beforeShutdown++;
@@ -73,7 +73,7 @@ public class LifeCycleHookTest extends TestCase {
 		}
 
 		@Override
-		public void onInit(PrologInterface pif, PrologSession initSession)
+		public void onInit(PrologProcess pif, PrologSession initSession)
 				throws PrologInterfaceException {
 			Debug.debug("onInit");
 			onInit++;
@@ -83,12 +83,12 @@ public class LifeCycleHookTest extends TestCase {
 	}
 	
 	
-	private PrologInterface pif;
+	private PrologProcess pif;
 
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-//		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();
+//		this.pif=(PrologProcess) PrologInterfaceFactory.newInstance().create();
 		this.pif = Connector.newUninitializedPrologProcess();
 		
 	}
@@ -96,7 +96,7 @@ public class LifeCycleHookTest extends TestCase {
 	public void testPDT_295_00() throws Exception{
 		MyHook X = new MyHook();
 		pif.addLifeCycleHook(X, "X", new String[0]);
-		pif.getSession(PrologInterface.NONE).dispose();
+		pif.getSession(PrologProcess.NONE).dispose();
 		pif.stop();
 		assertEquals(1,X.onInit);
 		assertEquals(1,X.afterInit);
@@ -113,7 +113,7 @@ public class LifeCycleHookTest extends TestCase {
 		pif.addLifeCycleHook(X, "X", new String[0]);
 		pif.removeLifeCycleHook(X,"X");
 		pif.addLifeCycleHook(X, "X", new String[0]);
-		pif.getSession(PrologInterface.NONE).dispose();
+		pif.getSession(PrologProcess.NONE).dispose();
 		pif.stop();
 		assertEquals(1,X.onInit);
 		assertEquals(1,X.afterInit);

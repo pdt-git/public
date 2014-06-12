@@ -16,7 +16,7 @@ package org.cs3.pdt.editor.internal.editors;
 import java.util.List;
 
 import org.cs3.pdt.connector.service.ConsultListener;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,13 +24,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public class EditorConsultListener implements ConsultListener {
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		PLMarkerUtils.addMarkers(pif, allConsultedFiles, monitor);
 	}
 	

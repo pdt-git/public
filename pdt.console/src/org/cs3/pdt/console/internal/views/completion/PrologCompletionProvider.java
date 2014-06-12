@@ -26,14 +26,14 @@ import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 public class PrologCompletionProvider {
 
 	private static final PredicateCompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new PredicateCompletionProposal[0];
 
-	private PrologInterface pif;
+	private PrologProcess pif;
 
 	@SuppressWarnings("unchecked")
 	public IContentProposal[] getCompletionProposals(String line, int pos) {
@@ -195,11 +195,11 @@ public class PrologCompletionProvider {
 //			return "_";
 //		}
 	}
-	public void setPrologInterface(PrologInterface pif) {
+	public void setPrologProcess(PrologProcess pif) {
 		this.pif = pif;
 	}
 
-	public PrologInterface getPrologInterface() {
+	public PrologProcess getPrologProcess() {
 		return pif;
 	}
 }

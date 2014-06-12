@@ -23,7 +23,7 @@ import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.PrologSession;
 
-public interface PrologInterface {
+public interface PrologProcess {
 
 	/**
 	 * consult event subject constant.
@@ -90,7 +90,7 @@ public interface PrologInterface {
 	 * 
 	 * session flag.
 	 * 
-	 * This is what will be used by the legacy PrologInterface.getSession()
+	 * This is what will be used by the legacy PrologProcess.getSession()
 	 * method.
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
@@ -111,7 +111,7 @@ public interface PrologInterface {
 	/**
 	 * Returns a prolog session.<br>
 	 * Use sessions to interact with the prolog system. Sessions can only be
-	 * obtained while the PrologInterface is in UP state. During startup, this
+	 * obtained while the PrologProcess is in UP state. During startup, this
 	 * call will block until the pif is up. In state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
@@ -125,7 +125,7 @@ public interface PrologInterface {
 	/**
 	 * Returns a prolog session.<br>
 	 * Use sessions to interact with the prolog system. Sessions can only be
-	 * obtained while the PrologInterface is in UP state. During startup, this
+	 * obtained while the PrologProcess is in UP state. During startup, this
 	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
@@ -232,7 +232,7 @@ public interface PrologInterface {
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
 	
 	/**
-	 * Is the {@link PrologInterface} in an error state, e.g. the corresponding process has been killed externally.  
+	 * Is the {@link PrologProcess} in an error state, e.g. the corresponding process has been killed externally.  
 	 * @return
 	 */
 	public boolean hasError();

@@ -28,7 +28,7 @@ import org.cs3.pdt.editor.quickfix.PDTMarker;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -57,7 +57,7 @@ public class PLMarkerUtils {
 				+ severity);
 	}
 
-	public static void addMarkers(PrologInterface pif, List<String> allConsultedFiles, IProgressMonitor monitor) {
+	public static void addMarkers(PrologProcess pif, List<String> allConsultedFiles, IProgressMonitor monitor) {
 		monitor.beginTask("Update markers", 2);
 		PrologSession session =null;
 		try {

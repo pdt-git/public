@@ -18,13 +18,13 @@ import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 
 public class XpceTest extends TestCase {
 	public void testXpce() throws  PrologInterfaceException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface plInterface = Connector.newUninitializedPrologProcess();
+		PrologProcess plInterface = Connector.newUninitializedPrologProcess();
 		plInterface.start();
 		try{			
 			plInterface.getSession().queryOnce("help");

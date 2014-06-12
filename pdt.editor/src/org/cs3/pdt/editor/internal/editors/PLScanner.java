@@ -171,7 +171,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	private String[] getPredicatesWithProperty(String property) throws PrologInterfaceException, CoreException {
 		PrologSession session = null;
 		try {
-			session = PDTCommonUtil.getActivePrologInterface().getSession();
+			session = PDTCommonUtil.getActivePrologProcess().getSession();
 			Map<String, Object> solutions = session
 					.queryOnce(bT(PDTPredicates.PREDICATES_WITH_PROPERTY, property, QueryUtils.quoteAtom(FileUtils.prologFileName(file)), "Predicates")); 
 

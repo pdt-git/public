@@ -26,7 +26,7 @@ import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -51,7 +51,7 @@ public class AbortTestAction implements IObjectActionDelegate {
 			PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
 			Set<String> keys = registry.getAllKeys();
 			for (String key : keys) {
-				PrologInterface pif = registry.getPrologInterface(key);
+				PrologProcess pif = registry.getPrologProcess(key);
 				String threadId = readThreadIdFromFile();
 				int pifPort = (Integer)pif.getClass().getMethod("getPort").invoke(pif);
 				if(pifPort == port){
@@ -63,7 +63,7 @@ public class AbortTestAction implements IObjectActionDelegate {
 				}
 			}
 
-			Debug.warning("No PrologInterface with port "+ port + " found.");
+			Debug.warning("No PrologProcess with port "+ port + " found.");
 		} catch (Exception e) {
 			Debug.report(e);
 		} finally {

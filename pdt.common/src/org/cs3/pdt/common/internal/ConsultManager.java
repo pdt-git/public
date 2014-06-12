@@ -12,7 +12,7 @@ import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtensi
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -22,11 +22,11 @@ import org.eclipse.core.runtime.QualifiedName;
 public class ConsultManager implements ConsultListener, PrologInterfaceStartListener {
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		for (IFile file : files) {
 			String prologFileName = FileUtils.prologFileName(file);
 			addConsultedFile(pif, prologFileName);
@@ -35,7 +35,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 	}
 
 	@Override
-	public void prologInterfaceStarted(PrologInterface pif) {
+	public void prologProcessStarted(PrologProcess pif) {
 		final String reconsultFiles = PDTCommonPlugin.getDefault().getPreferenceValue(PDTCommon.PREF_RECONSULT_ON_RESTART, PDTCommon.RECONSULT_NONE);
 		
 		if (reconsultFiles.equals(PDTCommon.RECONSULT_NONE)) {
@@ -46,7 +46,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 	}
 	
 	// TODO: problem with quotes
-	private void reconsultFiles(PrologInterface pif, boolean onlyEntryPoints) {
+	private void reconsultFiles(PrologProcess pif, boolean onlyEntryPoints) {
 		Debug.debug("Reconsult files");
 		List<String> consultedFiles = getConsultedFileList(pif);
 		if (consultedFiles != null) {
@@ -66,13 +66,13 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 		}
 	}
 
-	private List<String> getConsultedFileList(PrologInterface pif) {
+	private List<String> getConsultedFileList(PrologProcess pif) {
 		@SuppressWarnings("unchecked")
 		List<String> consultedFiles = (List<String>) pif.getAttribute(PDTCommon.CONSULTED_FILES);
 		return consultedFiles;
 	}
 	
-	private void addConsultedFile(PrologInterface pif, String fileName) {
+	private void addConsultedFile(PrologProcess pif, String fileName) {
 		List<String> consultedFiles = getConsultedFileList(pif);
 		if (consultedFiles == null) {
 			consultedFiles = new ArrayList<String>();

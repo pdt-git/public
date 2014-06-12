@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceEvent;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.process.PrologInterfaceListener;
@@ -37,7 +37,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 	public final static String FACTORY="org.cs3.pl.prolog.internal.socket.Factory";
 
-	static PrologInterface pif = null;
+	static PrologProcess pif = null;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -60,7 +60,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	
 	public void testConnect() throws Exception {
 
-		PrologSession session = pif.getSession(PrologInterface.LEGACY);
+		PrologSession session = pif.getSession(PrologProcess.LEGACY);
 		
 		PrologInterfaceListener listener = new PrologInterfaceListener(){
 			@Override
@@ -178,9 +178,9 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	}
 
 
-	private PrologInterface init() throws PrologInterfaceException {
+	private PrologProcess init() throws PrologInterfaceException {
 //		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
-//		PrologInterface pif = factory.create();
+//		PrologProcess pif = factory.create();
 		
         pif = Connector.newUninitializedPrologProcess();
 		pif.setStandAloneServer(true);		
@@ -189,7 +189,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	}
 	
 	public void testConnectionWorks() throws Throwable{
-		pif.getSession(PrologInterface.LEGACY).queryOnce("threads");
+		pif.getSession(PrologProcess.LEGACY).queryOnce("threads");
 	}
 }
 

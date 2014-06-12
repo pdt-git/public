@@ -45,7 +45,7 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.process.PrologInterface;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.runtime.CoreException;
@@ -140,15 +140,15 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 
 
 	
-	private PrologInterface createPrologInterface(String name, String configuration) {
-		PrologInterface prologInterface = null;
+	private PrologProcess createPrologProcess(String name, String configuration) {
+		PrologProcess prologProcess = null;
 		
-		prologInterface = Connector.newUninitializedPrologProcess(name);
-		prologInterface.setAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE, configuration);
-		prologInterface.initOptions(new EclipsePreferenceProvider(this, configuration));
-		prologInterface.setStartupStrategy(new BootstrapStartupStrategy());
+		prologProcess = Connector.newUninitializedPrologProcess(name);
+		prologProcess.setAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE, configuration);
+		prologProcess.initOptions(new EclipsePreferenceProvider(this, configuration));
+		prologProcess.setStartupStrategy(new BootstrapStartupStrategy());
 		
-		return prologInterface;
+		return prologProcess;
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 			Iterator<String> it = keys.iterator();
 			while ( it.hasNext()) {
 				String key = it.next();
-				PrologInterface pif = registry.getPrologInterface(key);
+				PrologProcess pif = registry.getPrologProcess(key);
 				try {
 					pif.stop();
 					registry.removePrologInterface(key);
@@ -246,7 +246,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	/**
-	 * get a PrologInterface to a given key. This will create the PrologInterface if
+	 * get a PrologProcess to a given key. This will create the PrologProcess if
 	 * the registry does not contain it, and register it with the registry. No
 	 * subscription will be added to the history.
 	 * 
@@ -254,17 +254,17 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 * @return
 	 * @throws PrologInterfaceException
 	 */
-	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(key, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
+	public PrologProcess getPrologProcess(String key) {
+		return getPrologProcess(key, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
 	}
 	
-	public PrologInterface getPrologInterface(String key, String configuration) {
+	public PrologProcess getPrologProcess(String key, String configuration) {
 		DefaultSubscription defaultSubscription = new DefaultSubscription(null, key, null, null);
-		return getPrologInterface(defaultSubscription, configuration);
+		return getPrologProcess(defaultSubscription, configuration);
 	}
 
 	/**
-	 * Subscribe to a PrologInterface. If the registry does not contain a pif
+	 * Subscribe to a PrologProcess. If the registry does not contain a pif
 	 * for key the subscription is for, this method will create a new pif and
 	 * register it with the registry.
 	 * 
@@ -275,17 +275,17 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 *         created.
 	 * @throws PrologInterfaceException
 	 */
-	public PrologInterface getPrologInterface(Subscription s) {
-		return getPrologInterface(s, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
+	public PrologProcess getPrologProcess(Subscription s) {
+		return getPrologProcess(s, getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
 	}
 	
-	public PrologInterface getPrologInterface(Subscription s, String configuration) {
+	public PrologProcess getPrologProcess(Subscription s, String configuration) {
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
 		String pifKey = s.getPifKey();
-		PrologInterface pif = r.getPrologInterface(pifKey);
+		PrologProcess pif = r.getPrologProcess(pifKey);
 		boolean addPifToRegistry = false;
 		if (pif == null) {
-			pif = createPrologInterface(pifKey, configuration);
+			pif = createPrologProcess(pifKey, configuration);
 			addPifToRegistry = true;
 //			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
 		}
@@ -310,7 +310,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 					if (pif.isUp()) {
 						PrologSession session = null;
 						try {
-							session = pif.getSession(PrologInterface.LEGACY);
+							session = pif.getSession(PrologProcess.LEGACY);
 							
 							String consult = library.getPrologInitStatement();
 							Debug.debug("consult " + consult + ", from " + library);
@@ -325,7 +325,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 			}
 		}
 		if (addPifToRegistry) {
-			r.addPrologInterface(pifKey, pif);
+			r.addPrologProcess(pifKey, pif);
 		}
 		if (s.getId() != null) {
 			r.addSubscription(s);
@@ -335,10 +335,10 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	/**
-	 * Checks if a PrologInterface is registered for the given key.
+	 * Checks if a PrologProcess is registered for the given key.
 	 * 
 	 * This method may be used by clients who want to check for the existence of
-	 * a key in the registry without actually creating a PrologInterface (yet).
+	 * a key in the registry without actually creating a PrologProcess (yet).
 	 * 
 	 * This is equivalent to calling
 	 * <code>getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey)</code>
@@ -448,7 +448,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 
-//	public void addGlobalHooks(String pifKey, PrologInterface pif) {
+//	public void addGlobalHooks(String pifKey, PrologProcess pif) {
 //		Map hooks = getGlobalHooks().get(pifKey);
 //		if (hooks != null) {
 //			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
