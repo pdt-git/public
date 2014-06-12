@@ -114,7 +114,7 @@ public interface PrologInterface {
 	 * call will block until the pif is up. In state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
-	 * Uses flag=LEGACY
+	 * Uses default flag
 	 * 
 	 * @return a new Session Object
 	 * @throws PrologInterfaceException
@@ -191,10 +191,6 @@ public interface PrologInterface {
 	public void setStandAloneServer(boolean standAloneServer);
 
 	public boolean isStandAloneServer();
-	@Deprecated
-	public String getExecutable();
-	@Deprecated
-	public void setExecutable(String executable);
 	public String getOSInvocation();
 	public void setOSInvocation(String osInvocation);
 	public String getExecutablePath();
@@ -229,7 +225,7 @@ public interface PrologInterface {
 	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
 	
 	/**
-	 * Uses the PrologInterface.LEGACY 
+	 * Uses the default flag
 	 */
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
@@ -247,6 +243,8 @@ public interface PrologInterface {
 	 * The variables are the keys of each map.
 	 * If the query fails the returned list is empty.
 	 * 
+	 * Uses default flag
+	 * 
 	 * @param predicates a number of goals
 	 * @return all results of the query or an empty list if the query fails
 	 * @throws PrologInterfaceException
@@ -254,10 +252,28 @@ public interface PrologInterface {
 	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException;
 	
 	/**
+	 * Executes the given query and returns all results. The query is created
+	 * by connecting the given goals conjunctively. The result is always a list of maps. Each map
+	 * represents one result of the query containing the bindings for all variables. 
+	 * The variables are the keys of each map.
+	 * If the query fails the returned list is empty.
+	 * 
+	 * Flag sets the kind of objects returned by the query.
+	 * 
+	 * @param flag kind of objects returned by the query
+	 * @param predicates a number of goals
+	 * @return all results of the query or an empty list if the query fails
+	 * @throws PrologInterfaceException
+	 */
+	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologInterfaceException;
+	
+	/**
 	 * Executes the given query and returns the first result. The query is created
 	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
 	 * containing the bindings for all variables. The variables are the keys of the map.
 	 * If the query fails this method returns null.
+	 * 
+	 * Uses default flag
 	 * 
 	 * @param predicates a number of goals
 	 * @return the first result as of the query or null if the query fails
@@ -265,11 +281,24 @@ public interface PrologInterface {
 	 */
 	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
 	
-	public List<String> getConsultedFiles();
+	/**
+	 * Executes the given query and returns the first result. The query is created
+	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
+	 * containing the bindings for all variables. The variables are the keys of the map.
+	 * If the query fails this method returns null.
+	 * 
+	 * Flag sets the kind of objects returned by the query.
+	 * 
+	 * @param flag kind of objects returned by the query
+	 * @param predicates a number of goals
+	 * @return the first result as of the query or null if the query fails
+	 * @throws PrologInterfaceException
+	 */
+	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologInterfaceException;
 	
-	public void addConsultedFile(String file);
+	public int getDefaultSessionFlag();
 
-	public void clearConsultedFiles();
+	public void setDefaultSessionFlag(int flag);
 	
 }
 

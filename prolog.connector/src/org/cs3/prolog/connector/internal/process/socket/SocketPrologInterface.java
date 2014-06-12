@@ -16,8 +16,6 @@ package org.cs3.prolog.connector.internal.process.socket;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.PreferenceProvider;
@@ -26,7 +24,6 @@ import org.cs3.prolog.connector.internal.process.AbstractPrologInterface;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
 import org.cs3.prolog.connector.internal.session.socket.AsyncSocketSession;
 import org.cs3.prolog.connector.internal.session.socket.SocketSession;
-import org.cs3.prolog.connector.process.PrologInterface;
 import org.cs3.prolog.connector.process.PrologInterfaceException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.PrologSession;
@@ -234,7 +231,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
-			return new InitSession(new SocketClient(getHost(), port), this,LEGACY);
+			return new InitSession(new SocketClient(getHost(), port), this, getDefaultSessionFlag());
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -251,7 +248,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			throws PrologInterfaceException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
-			return new ShutdownSession(new SocketClient(getHost(), port), this,LEGACY);
+			return new ShutdownSession(new SocketClient(getHost(), port), this, getDefaultSessionFlag());
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -320,8 +317,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		return errorLogFile;
 	}
 
-	
-	
 	@Override
 	public ServerStartAndStopStrategy getStartAndStopStrategy() {	
 		return this.startAndStopStrategy;
@@ -340,73 +335,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		return getError()!=null;
 	}
 
-	/**
-	 * Wrapper for {@link PrologSession#queryOnce(String)}
-	 * Executes queryOnce for every predicate given in predicates.
-	 * 
-	 * @param predicates
-	 * @return result Map of the last predicate queried 
-	 * @throws PrologInterfaceException
-	 */
-	@Override
-	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException {
-		
-		StringBuffer buf = new StringBuffer();
-		boolean first = true;
-		for (String s : predicates) {
-			if (first) {
-				first = false;
-			} else {
-				buf.append(",");
-			}
-			buf.append(s);
-		}
-		
-		Map<String, Object> result = null;		 
-		PrologSession session = null;
-		try {
-			session = getSession(PrologInterface.LEGACY);
-			result = session.queryOnce(buf.toString());
-		} finally {
-		    if (session != null)
-		      session.dispose();
-		}
-		return result;
-	}
 
-	/**
-	 * Wrapper for {@link PrologSession#queryAll(String)}
-	 * Executes queryAll for every predicate given in predicates.
-	 * 
-	 * @param predicates
-	 * @return result List contains a result map for each predicate queried 
-	 * @throws PrologInterfaceException
-	 */
-	@Override
-	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException {
-		
-		StringBuffer buf = new StringBuffer();
-		boolean first = true;
-		for (String s : predicates) {
-			if (first) {
-				first = false;
-			} else {
-				buf.append(",");
-			}
-			buf.append(s);
-		}
-		List<Map<String, Object>> result = null;		 
-		PrologSession session = null;
-		try {
-		    session = getSession(PrologInterface.LEGACY);
-			result = session.queryAll(buf.toString());
-		} finally {
-		    if (session != null)
-		      session.dispose();
-		}
-		return result;
-	}
-	
 }
 
 

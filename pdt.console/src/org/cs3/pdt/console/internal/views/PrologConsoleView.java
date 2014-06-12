@@ -28,12 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.PrologSearchPage;
-import org.cs3.pdt.connector.PrologContextTracker;
-import org.cs3.pdt.connector.PrologContextTrackerEvent;
 import org.cs3.pdt.connector.PDTConnector;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
+import org.cs3.pdt.connector.PrologContextTracker;
+import org.cs3.pdt.connector.PrologContextTrackerEvent;
 import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
 import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
 import org.cs3.pdt.connector.subscription.DefaultSubscription;
@@ -281,7 +282,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 								if (oldPif != null) {
 									String currentKey = registry.getKey(oldPif);
 
-									oldPif.clearConsultedFiles();
+									@SuppressWarnings("unchecked")
+									List<String> consultedFiles = (List<String>) getPrologInterface().getAttribute(PDTCommon.CONSULTED_FILES);
+									consultedFiles.clear();
 									oldPif.stop();
 
 									if ("true".equals(oldPif.getAttribute(KILLABLE))) {
@@ -345,7 +348,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									IProgressMonitor.UNKNOWN);
 
 							if (getPrologInterface() != null) {
-								List<String> consultedFiles = getPrologInterface().getConsultedFiles();
+								@SuppressWarnings("unchecked")
+								List<String> consultedFiles = (List<String>) getPrologInterface().getAttribute(PDTCommon.CONSULTED_FILES);
 								
 								// only create load file if there are consulted files
 								if (consultedFiles != null && consultedFiles.size() > 0) {

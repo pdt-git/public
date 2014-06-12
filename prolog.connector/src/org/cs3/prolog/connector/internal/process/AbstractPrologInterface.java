@@ -17,16 +17,15 @@
 package org.cs3.prolog.connector.internal.process;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.PreferenceProvider;
-import org.cs3.prolog.connector.common.ProcessUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
@@ -48,14 +47,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
 	private StartupStrategy startupStrategy;
 	private final MyLifeCycle lifecycle;
+	private int defaultSessionFlag = LEGACY;
 
-	/************************************************/
-	/**** Options [Start] *****/
-	/************************************************/
+	// Options [Start]
 
 	private boolean standAloneServer = false;
 	private String host;
-	private String executable;
 	private String osInvocation;
 	private String executablePath;
 	private String commandLineArguments;
@@ -69,16 +66,14 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public AbstractPrologInterface() {
 		this(null);
 	}
-
+	
 	public AbstractPrologInterface(String string) {
 		PifShutdownHook.getInstance().add(this);
 		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
 	}
 
-	/************************************************/
-	/**** Options [Start] *****/
-	/************************************************/
 
+	// Options [Start]
 	public void setStandAloneServer(String standAloneServer) {
 		setStandAloneServer(Boolean.parseBoolean(standAloneServer));
 	}
@@ -130,22 +125,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	@Override
 	public int getTimeout() {
 		return timeout;
-	}
-
-	@Deprecated
-	@Override
-	public void setExecutable(String executable) {
-		this.executable = executable;
-	}
-
-	@Deprecated
-	@Override
-	public String getExecutable() {
-		if (executable != null) {
-			return executable;
-		} else {
-			return ProcessUtils.createExecutable(osInvocation, executablePath, commandLineArguments, additionalStartupFile);
-		}
 	}
 
 	public String getOSInvocation() {
@@ -372,7 +351,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 
 		try {
-			return getSession_internal(LEGACY);// FIXME: a temporary solution.
+			return getSession_internal(defaultSessionFlag);// FIXME: a temporary solution.
 		} catch (Throwable t) {
 			throw new PrologInterfaceException(t);
 		}
@@ -392,7 +371,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	@Override
 	public PrologSession getSession() throws PrologInterfaceException {
-		return getSession(LEGACY);
+		return getSession(defaultSessionFlag);
 	}
 
 	@Override
@@ -443,7 +422,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 */
 	protected PrologSession getShutdownSession() throws PrologInterfaceException {
 		try {
-			return getSession_internal(LEGACY); // FIXME: a temporary solution
+			return getSession_internal(defaultSessionFlag); // FIXME: a temporary solution
 		} catch (Throwable t) {
 			throw new PrologInterfaceException(t);
 		}
@@ -577,7 +556,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	@Override
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
-		return getAsyncSession(LEGACY);
+		return getAsyncSession(defaultSessionFlag);
 	}
 
 	@Override
@@ -609,36 +588,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return asyncSession;
 	}
 
-
-	private List<String> consultedFiles;
-
-	@Override
-	public List<String> getConsultedFiles() {
-		return consultedFiles;
-	}
-
-
-	@Override
-	public void clearConsultedFiles() {
-		consultedFiles = null;
-	}
-
-	@Override
-	public void addConsultedFile(String fileName) {
-		if (consultedFiles == null) {
-			consultedFiles = new ArrayList<String>();
-		}
-		synchronized (consultedFiles) {
-			// only take the last consult of a file
-			if (consultedFiles.remove(fileName)) {
-				Debug.debug("move " + fileName + " to end of consulted files");			
-			} else {
-				Debug.debug("add " + fileName + " to consulted files");
-			}
-			consultedFiles.add(fileName);
-		}
-	}
-	
 	@Override
 	public StartupStrategy getStartupStrategy() {
 		return startupStrategy;
@@ -648,6 +597,97 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public void setStartupStrategy(StartupStrategy startupStrategy) {
 		this.startupStrategy = startupStrategy;
 	}
+
+	@Override
+	public void setDefaultSessionFlag(int flag) {
+		defaultSessionFlag = flag;
+	}
+	
+	@Override
+	public int getDefaultSessionFlag() {
+		return defaultSessionFlag;
+	}
+	
+	@Override
+	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException {
+		return queryAll(getDefaultSessionFlag(), predicates);
+	}
+	
+	/**
+	 * Wrapper for {@link PrologSession#queryAll(String)}
+	 * Executes queryAll for every predicate given in predicates.
+	 * 
+	 * @param predicates
+	 * @return result List contains a result map for each predicate queried 
+	 * @throws PrologInterfaceException
+	 */
+	@Override
+	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologInterfaceException {
+		
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String s : predicates) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(",");
+			}
+			buf.append(s);
+		}
+		List<Map<String, Object>> result = null;		 
+		PrologSession session = null;
+		try {
+		    session = getSession(flag);
+			result = session.queryAll(buf.toString());
+		} finally {
+		    if (session != null)
+		      session.dispose();
+		}
+		return result;
+	}
+	
+
+	@Override
+	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException {
+		return queryOnce(getDefaultSessionFlag(), predicates);
+	}
+	
+	/**
+	 * Wrapper for {@link PrologSession#queryOnce(String)}
+	 * Executes queryOnce for every predicate given in predicates.
+	 * 
+	 * @param predicates
+	 * @return result Map of the last predicate queried 
+	 * @throws PrologInterfaceException
+	 */
+	@Override
+	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologInterfaceException {
+		
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String s : predicates) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(",");
+			}
+			buf.append(s);
+		}
+		
+		Map<String, Object> result = null;		 
+		PrologSession session = null;
+		try {
+			session = getSession(flag);
+			result = session.queryOnce(buf.toString());
+		} finally {
+		    if (session != null)
+		      session.dispose();
+		}
+		return result;
+	}
+
+
+	
 
 }
 

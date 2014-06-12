@@ -31,7 +31,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 		for (IFile file : files) {
 			try {
 				String prologFileName = UIUtils.prologFileName(file);
-				pif.addConsultedFile(prologFileName);
+				addConsultedFile(pif, prologFileName);
 			} catch (IOException e) {
 				Debug.report(e);
 			}
@@ -44,7 +44,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 		final String reconsultFiles = PDTCommonPlugin.getDefault().getPreferenceValue(PDTCommon.PREF_RECONSULT_ON_RESTART, PDTCommon.RECONSULT_NONE);
 		
 		if (reconsultFiles.equals(PDTCommon.RECONSULT_NONE)) {
-			pif.clearConsultedFiles();
+			getConsultedFileList(pif).clear();
 		} else {
 			reconsultFiles(pif, reconsultFiles.equals(PDTCommon.RECONSULT_ENTRY));
 		}
@@ -53,7 +53,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 	// TODO: problem with quotes
 	private void reconsultFiles(PrologInterface pif, boolean onlyEntryPoints) {
 		Debug.debug("Reconsult files");
-		List<String> consultedFiles = pif.getConsultedFiles();
+		List<String> consultedFiles = getConsultedFileList(pif);
 		if (consultedFiles != null) {
 			synchronized (consultedFiles) {
 				
@@ -70,6 +70,30 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 			}
 		}
 	}
+
+	private List<String> getConsultedFileList(PrologInterface pif) {
+		@SuppressWarnings("unchecked")
+		List<String> consultedFiles = (List<String>) pif.getAttribute(PDTCommon.CONSULTED_FILES);
+		return consultedFiles;
+	}
+	
+	private void addConsultedFile(PrologInterface pif, String fileName) {
+		List<String> consultedFiles = getConsultedFileList(pif);
+		if (consultedFiles == null) {
+			consultedFiles = new ArrayList<String>();
+			pif.setAttribute(PDTCommon.CONSULTED_FILES, consultedFiles);
+		}
+		synchronized (consultedFiles) {
+			// only take the last consult of a file
+			if (consultedFiles.remove(fileName)) {
+				Debug.debug("move " + fileName + " to end of consulted files");			
+			} else {
+				Debug.debug("add " + fileName + " to consulted files");
+			}
+			consultedFiles.add(fileName);
+		}
+	}
+	
 	
 	private void collectFiles(List<String> consultedFiles, List<IFile> files) {
 		for (String consultedFile : consultedFiles) {
