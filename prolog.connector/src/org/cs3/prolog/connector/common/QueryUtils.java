@@ -164,6 +164,15 @@ public class QueryUtils {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
+	
+	/**
+	 * normalize a Prolog filename
+	 * @param f the file
+	 * @return normalized path to the file
+	 */
+	public static String prologFileNameQuoted(File f) {
+		return quoteAtom(prologFileName(f));
+	}
 
 	/**
 	 * quote atom

@@ -16,6 +16,7 @@
  */
 package org.cs3.prolog.connector.internal.process;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import java.util.WeakHashMap;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.PreferenceProvider;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
@@ -686,6 +688,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return result;
 	}
 
+	@Override
+	public void consult(File file) throws PrologInterfaceException {
+		String fileName = QueryUtils.prologFileNameQuoted(file);
+		String query = QueryUtils.bT("consult", fileName);
+		queryOnce(query);
+	}
 
 	
 

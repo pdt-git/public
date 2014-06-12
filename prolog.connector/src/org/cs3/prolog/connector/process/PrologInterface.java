@@ -14,6 +14,7 @@
 
 package org.cs3.prolog.connector.process;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -300,6 +301,7 @@ public interface PrologInterface {
 
 	public void setDefaultSessionFlag(int flag);
 	
+	public void consult(File file) throws PrologInterfaceException;
 }
 
 
