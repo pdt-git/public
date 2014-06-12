@@ -30,7 +30,7 @@ public class GlobalViewCoordinator extends ViewCoordinatorBase {
 	{
 		super(focusView);
 		
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService()
+		PDTConnectorPlugin.getDefault().getPrologProcessService()
 			.registerConsultListener(this);
 	}
 	

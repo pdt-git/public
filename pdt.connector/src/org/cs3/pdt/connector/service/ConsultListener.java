@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * This interface is used to listen to the consulting process of an
- * {@link IPrologInterfaceService}.
+ * {@link IPrologProcessService}.
  */
 public interface ConsultListener {
 

@@ -19,7 +19,7 @@ import java.util.Set;
 
 import org.cs3.pdt.connector.PDTConnector;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.PrologProcessRegistry;
 import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
 import org.cs3.pdt.connector.util.preferences.MyBooleanFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyDirectoryFieldEditor;
@@ -247,7 +247,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 
 	private void updatePrologInterfaceExecutables() {
 		String configuration = configurationList.getText();
-		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
 			PrologProcess pif = registry.getPrologProcess(registry.getSubscription(id).getPifKey());

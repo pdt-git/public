@@ -35,8 +35,8 @@ import org.cs3.pdt.connector.PDTConnector;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.PrologContextTracker;
 import org.cs3.pdt.connector.PrologContextTrackerEvent;
-import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
-import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
+import org.cs3.pdt.connector.registry.PrologProcessRegistry;
+import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.subscription.DefaultSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.UIUtils;
@@ -107,7 +107,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole, ActivePrologInterfaceListener {
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole, ActivePrologProcessListener {
 
 	private static final String KILLABLE = "killable";
 
@@ -275,7 +275,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 								monitor.beginTask("initializing...",
 										IProgressMonitor.UNKNOWN);
 
-								PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+								PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 
 
 								PrologProcess oldPif = getPrologProcess();
@@ -294,7 +294,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 										}
 										registry.removePrologInterface(currentKey);
 										getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
-										PDTConnectorPlugin.getDefault().getPrologInterfaceService().setActivePrologProcess(null);
+										PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(null);
 									}
 
 								}
@@ -413,7 +413,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			{
 				@Override
 				public IStatus runInUIThread(IProgressMonitor arg0) {
-					PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+					PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 
 					InputDialog dialog = createNewProcessNameDialog(registry);	
 					int result = dialog.open();
@@ -427,7 +427,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				}
 
 				public InputDialog createNewProcessNameDialog(
-						PrologInterfaceRegistry registry) {
+						PrologProcessRegistry registry) {
 					final Set<String> pifKeys = registry.getRegisteredKeys();
 					String defaultPifKey = getNameOfProjectOfActiveEditorInput();
 					if (pifKeys.contains(defaultPifKey))
@@ -665,7 +665,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.getParent().addListener(SWT.FocusOut, handler);
 		PrologConsolePlugin.getDefault().getPrologConsoleService().registerPrologConsole(this);
 		getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		GridLayout layout = new GridLayout(1, true);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -982,7 +982,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 	}
 
-	public PrologProcess activateNewPrologProcess(PrologInterfaceRegistry registry, String pifKey, String configuration) {
+	public PrologProcess activateNewPrologProcess(PrologProcessRegistry registry, String pifKey, String configuration) {
 		DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", "Prolog");
 		registry.addSubscription(subscription);
 		PrologProcess pif = PDTConnectorPlugin.getDefault().getPrologProcess(subscription, configuration);
@@ -1047,7 +1047,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	@Override
 	public void dispose() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService().unregisterPrologConsole(this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterActivePrologProcessListener(this);
 		for (Iterator<PrologProcess> it = models.keySet().iterator(); it.hasNext();) {
 			PrologProcess pif = it.next();
 			try {
@@ -1077,7 +1077,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		try {
 			String queryString = bT(PDTConsolePredicates.PDT_START_CONSOLE_SERVER,
 					"Port",
-					QueryUtils.quoteAtom(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif)));
+					QueryUtils.quoteAtom(PDTConnectorPlugin.getDefault().getPrologProcessRegistry().getKey(pif)));
 			Debug.info("starting console server using: " + queryString);
 
 			Map<String,?> result = session.queryOnce(queryString);
@@ -1180,7 +1180,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			reconfigureViewer(currentPif);
 			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
 			if (updateActivePif) {
-				PDTConnectorPlugin.getDefault().getPrologInterfaceService().setActivePrologProcess(currentPif);
+				PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(currentPif);
 			}
 
 		} else {
@@ -1255,7 +1255,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 //			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
 			result = session.queryOnce(bT(PDTConsolePredicates.PDT_START_CONSOLE_SERVER,
 					"Port",
-					QueryUtils.quoteAtom(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif))));
+					QueryUtils.quoteAtom(PDTConnectorPlugin.getDefault().getPrologProcessRegistry().getKey(pif))));
 			if (result == null) {
 				startServer(pif, session);
 				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
@@ -1324,7 +1324,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				.get(pif);
 		if (savedState == null) {
 			viewer.clearOutput();
-			ConsoleHistory history = new ConsoleHistory(PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry().getKey(pif));
+			ConsoleHistory history = new ConsoleHistory(PDTConnectorPlugin.getDefault().getPrologProcessRegistry().getKey(pif));
 			viewer.setHistory(history);
 			loadHistory(history);
 			viewer.setModel(models.get(pif));
@@ -1334,7 +1334,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		} else {
 			viewer.loadState(savedState);
 		}
-		PrologInterfaceRegistry reg = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologProcessRegistry reg = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		String key = reg.getKey(pif);
 		title.setText(SelectContextPIFAutomatedAction.getLabelForPif(key, reg));
 //		Object configuration = pif.getAttribute(PrologRuntimeUI.CONFIGURATION_ATTRIBUTE);

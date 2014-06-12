@@ -2,11 +2,11 @@ package org.cs3.pdt.connector.internal.service.ext;
 
 import java.util.List;
 
-import org.cs3.pdt.connector.service.IPrologInterfaceService;
+import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
 
-public interface IPrologInterfaceServiceExtension extends IPrologInterfaceService {
+public interface IPrologProcessServiceExtension extends IPrologProcessService {
 	
 	/**
 	 * Consults a list of files into the given PrologProcess.

@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.cs3.pdt.connector.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.connector.internal.preferences.PreferenceConfiguration;
-import org.cs3.pdt.connector.internal.service.PrologInterfaceService;
+import org.cs3.pdt.connector.internal.service.PrologProcessService;
 import org.cs3.pdt.connector.load.BootstrapPrologContribution;
 import org.cs3.pdt.connector.load.BootstrapPrologContributionAlias;
 import org.cs3.pdt.connector.load.BootstrapPrologContributionFile;
@@ -34,10 +34,10 @@ import org.cs3.pdt.connector.load.BootstrapStartupStrategy;
 import org.cs3.pdt.connector.load.DefaultPrologLibrary;
 import org.cs3.pdt.connector.load.PrologLibrary;
 import org.cs3.pdt.connector.load.PrologLibraryManager;
-import org.cs3.pdt.connector.registry.DefaultSAXPrologInterfaceRegistry;
-import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.DefaultSAXPrologProcessRegistry;
+import org.cs3.pdt.connector.registry.PrologProcessRegistry;
 import org.cs3.pdt.connector.registry.RegistryHook;
-import org.cs3.pdt.connector.service.IPrologInterfaceService;
+import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.pdt.connector.subscription.DefaultSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
@@ -64,7 +64,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
-	private final static String PLUGIN_ID = "org.cs3.prolog.connector.ui";
+	private final static String PLUGIN_ID = "org.cs3.pdt.connector";
 
 	// The shared instance.
 	private static PDTConnectorPlugin plugin;
@@ -77,7 +77,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 
 	private Map<String, BootstrapPrologContribution> allBootStrapLists = new HashMap<String, BootstrapPrologContribution>();
 	private Map<String, List<BootstrapPrologContribution>> bootStrapContribForKey;
-	private PrologInterfaceRegistry registry;
+	private PrologProcessRegistry registry;
 	private static PrologLibraryManager libraryManager;
 	private final static Object libraryManagerMux = new Object();
 	private final static Object registryMux = new Object();
@@ -223,7 +223,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 		}
 		
 		try {
-			PrologInterfaceRegistry registry = getPrologInterfaceRegistry();
+			PrologProcessRegistry registry = getPrologProcessRegistry();
 			Set<String> keys = new HashSet<String>(registry.getRegisteredKeys()); // clone this. see
 			// PDT-194
 			Iterator<String> it = keys.iterator();
@@ -280,7 +280,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	}
 	
 	public PrologProcess getPrologProcess(Subscription s, String configuration) {
-		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
+		PrologProcessRegistry r = getPrologProcessRegistry();
 		String pifKey = s.getPifKey();
 		PrologProcess pif = r.getPrologProcess(pifKey);
 		boolean addPifToRegistry = false;
@@ -347,16 +347,16 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 * @return
 	 */
 	public boolean hasPrologInterface(String pifKey) {
-		return getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey);
+		return getPrologProcessRegistry().getRegisteredKeys().contains(pifKey);
 	}
 	
-	private IPrologInterfaceService prologInterfaceService;
+	private IPrologProcessService prologProcessService;
 	
-	public IPrologInterfaceService getPrologInterfaceService() {
-		if (prologInterfaceService == null) {
-			prologInterfaceService = new PrologInterfaceService();
+	public IPrologProcessService getPrologProcessService() {
+		if (prologProcessService == null) {
+			prologProcessService = new PrologProcessService();
 		}
-		return prologInterfaceService;
+		return prologProcessService;
 	}
 	
 	public List<String> getPreferenceConfigurations() {
@@ -469,10 +469,10 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 *  
 	 * @return prolog registry
 	 */
-	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
+	public PrologProcessRegistry getPrologProcessRegistry() {
 		synchronized (registryMux) {
 			if (this.registry == null) {
-				this.registry = new DefaultSAXPrologInterfaceRegistry();
+				this.registry = new DefaultSAXPrologProcessRegistry();
 				initRegistry();
 			}
 			return this.registry;

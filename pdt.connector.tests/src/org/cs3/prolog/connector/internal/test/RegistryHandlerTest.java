@@ -18,7 +18,7 @@ import java.io.StringReader;
 
 import junit.framework.TestCase;
 
-import org.cs3.pdt.connector.registry.DefaultSAXPrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.DefaultSAXPrologProcessRegistry;
 
 public class RegistryHandlerTest extends TestCase {
 	public void testHandler() throws Exception {
@@ -47,7 +47,7 @@ public class RegistryHandlerTest extends TestCase {
 				"      id=\"JTEngine.metadata_subscription\""+
 				"   />"+
 				"</registry>");
-			new DefaultSAXPrologInterfaceRegistry().load(reader);		
+			new DefaultSAXPrologProcessRegistry().load(reader);		
 		}
 }
 

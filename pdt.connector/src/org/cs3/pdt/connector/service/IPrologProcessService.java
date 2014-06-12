@@ -21,10 +21,10 @@ import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
 
 /**
- * An IPrologInterfaceService manages an active {@link PrologProcess} and
+ * An IPrologProcessService manages an active {@link PrologProcess} and
  * consults files into this active PrologProcess.<br/>
  * The active PrologProcess can be accessed and set.
- * {@link ActivePrologInterfaceListener}s can be registered to listen to each
+ * {@link ActivePrologProcessListener}s can be registered to listen to each
  * change of the active PrologProcess.<br/>
  * Consults can be triggered via the <code>consultFile(s)</code> methods.
  * The consult will be done in the active PrologProcess or in a given PrologProcess. The call of the
@@ -41,7 +41,7 @@ import org.eclipse.core.resources.IFile;
  * </pre>
  * 
  */
-public interface IPrologInterfaceService {
+public interface IPrologProcessService {
 
 	/**
 	 * Registers an {@link PDTReloadExecutor}.
@@ -130,20 +130,20 @@ public interface IPrologInterfaceService {
 	void consultFiles(List<IFile> files, PrologProcess pif);
 	
 	/**
-	 * Registers an {@link ActivePrologInterfaceListener}.
+	 * Registers an {@link ActivePrologProcessListener}.
 	 * 
 	 * @param listener
 	 *            the listener
 	 */
-	void registerActivePrologInterfaceListener(ActivePrologInterfaceListener listener);
+	void registerActivePrologProcessListener(ActivePrologProcessListener listener);
 
 	/**
-	 * Unregisters an {@link ActivePrologInterfaceListener}.
+	 * Unregisters an {@link ActivePrologProcessListener}.
 	 * 
 	 * @param listener
 	 *            the listener
 	 */
-	void unRegisterActivePrologInterfaceListener(ActivePrologInterfaceListener listener);
+	void unRegisterActivePrologProcessListener(ActivePrologProcessListener listener);
 
 	/**
 	 * Accesses the active PrologProcess.

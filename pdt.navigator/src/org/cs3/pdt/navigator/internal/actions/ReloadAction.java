@@ -44,10 +44,10 @@ public class ReloadAction implements IObjectActionDelegate  {
 		}
 		
 		if (filesToConsult.size() == 1) {
-			PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(filesToConsult.get(0));
+			PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(filesToConsult.get(0));
 //			new ConsultAction().consultWorkspaceFile(filesToConsult.get(0));
 		} else {
-			PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFiles(filesToConsult);
+			PDTConnectorPlugin.getDefault().getPrologProcessService().consultFiles(filesToConsult);
 //			new ConsultAction().consultWorkspaceFiles(filesToConsult);
 		}
 	}

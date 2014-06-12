@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.service.IPrologInterfaceService;
+import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.pdt.connector.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.connector.util.ErrorMessageProvider;
 import org.cs3.pdt.editor.internal.editors.ColorManager;
@@ -101,11 +101,11 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 		try {
 			super.start(context);
 			
-			IPrologInterfaceService prologInterfaceService = PDTConnectorPlugin.getDefault().getPrologInterfaceService();
+			IPrologProcessService prologProcessService = PDTConnectorPlugin.getDefault().getPrologProcessService();
 			CurrentPifListener pifListener = new CurrentPifListener();
-			prologInterfaceService.registerActivePrologInterfaceListener(pifListener);
-			pifListener.activePrologProcessChanged(prologInterfaceService.getActivePrologProcess());
-			prologInterfaceService.registerConsultListener(new EditorConsultListener());
+			prologProcessService.registerActivePrologProcessListener(pifListener);
+			pifListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
+			prologProcessService.registerConsultListener(new EditorConsultListener());
 		} catch (Throwable t) {
 			Debug.report(t);
 		}

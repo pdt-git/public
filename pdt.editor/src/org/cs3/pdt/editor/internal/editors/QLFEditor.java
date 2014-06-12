@@ -108,7 +108,7 @@ public class QLFEditor extends MultiPageEditorPart {
 					@Override
 					public void handleEvent(Event event) {
 
-						PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(getCurrentIFile());
+						PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(getCurrentIFile());
 					}
 					
 				});

@@ -16,7 +16,7 @@ package org.cs3.pdt.connector.registry;
 
 
 public interface RegistryHook {
-	public void addSubscriptions(PrologInterfaceRegistry registry);
+	public void addSubscriptions(PrologProcessRegistry registry);
 }
 
 

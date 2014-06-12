@@ -120,7 +120,7 @@ public class PDTQuickFix implements IMarkerResolution {
 					if (op.run(shell, "") != IDialogConstants.CANCEL_ID){
 						// changes are already performed by the dialog
 						file.refreshLocal(IResource.DEPTH_INFINITE, null);
-						PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(file);
+						PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(file);
 //						PLMarkerUtils.updateFileMarkers(file);
 					}
 				} catch (InterruptedException e) {
@@ -129,7 +129,7 @@ public class PDTQuickFix implements IMarkerResolution {
 				textFileChange.perform(new NullProgressMonitor());
 
 				file.refreshLocal(IResource.DEPTH_INFINITE, null);
-				PDTConnectorPlugin.getDefault().getPrologInterfaceService().consultFile(file);
+				PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(file);
 //				PLMarkerUtils.updateFileMarkers(file);
 			}
 		} catch (NumberFormatException e1) {

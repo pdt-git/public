@@ -17,7 +17,7 @@ package org.cs3.prolog.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class PrologInterfaceTests {
+public class PrologProcessTests {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for org.cs3.pl.prolog.tests");

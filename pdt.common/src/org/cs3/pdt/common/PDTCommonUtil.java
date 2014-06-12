@@ -433,7 +433,7 @@ public class PDTCommonUtil {
 	}
 	
 	public static PrologProcess getActivePrologProcess() {
-		return PDTConnectorPlugin.getDefault().getPrologInterfaceService().getActivePrologProcess();
+		return PDTConnectorPlugin.getDefault().getPrologProcessService().getActivePrologProcess();
 	}
 
 }

@@ -80,7 +80,7 @@ public interface Subscription {
 	 * conditions:
 	 *  - the pif has been instantiated. 
 	 *  - this subscription has been registered
-	 * with the PrologInterfaceRegistry.
+	 * with the PrologProcessRegistry.
 	 * 
 	 * Note that this method is never called for anonymous subscriptions. This
 	 * is implied by the second condition.

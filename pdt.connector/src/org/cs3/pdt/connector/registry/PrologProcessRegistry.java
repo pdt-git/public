@@ -40,7 +40,7 @@ import org.cs3.prolog.connector.process.PrologProcessException;
  * 
  * @author lukas
  */
-public interface PrologInterfaceRegistry {
+public interface PrologProcessRegistry {
 
 	/**
 	 * @return all keys to which PrologInterfaces are registered.
@@ -85,16 +85,16 @@ public interface PrologInterfaceRegistry {
 	 * 
 	 * @param l
 	 */
-	public void addPrologInterfaceRegistryListener(
-			PrologInterfaceRegistryListener l);
+	public void addPrologProcessRegistryListener(
+			PrologProcessRegistryListener l);
 
 	/**
 	 * remove a listener from this registry.
 	 * 
 	 * @param l
 	 */
-	public void removePrologInterfaceRegistryListener(
-			PrologInterfaceRegistryListener l);
+	public void removePrologProcessRegistryListener(
+			PrologProcessRegistryListener l);
 
 	
 	/**

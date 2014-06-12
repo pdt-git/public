@@ -24,17 +24,17 @@ import java.util.Vector;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.prolog.connector.process.PrologProcess;
 
-abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
+abstract public class DefaultPrologProcessRegistry implements PrologProcessRegistry {
 
 	private HashMap<String, PrologProcess> pifs = new HashMap<String, PrologProcess>();
 	private HashMap<String, Subscription> subscriptions = new HashMap<String, Subscription>();
 	private HashMap<String, HashSet<Subscription>> subscriptionLists = new HashMap<String, HashSet<Subscription>>();
-	private Vector<PrologInterfaceRegistryListener> listeners = new Vector<PrologInterfaceRegistryListener>();
+	private Vector<PrologProcessRegistryListener> listeners = new Vector<PrologProcessRegistryListener>();
 	private HashMap<PrologProcess, String> pifKeys = new HashMap<PrologProcess, String>();
 
 	@Override
-	public void addPrologInterfaceRegistryListener(
-			PrologInterfaceRegistryListener l) {
+	public void addPrologProcessRegistryListener(
+			PrologProcessRegistryListener l) {
 		synchronized (listeners) {
 			if (!listeners.contains(l)) {
 				listeners.add(l);
@@ -43,8 +43,8 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 	}
 
 	@Override
-	public void removePrologInterfaceRegistryListener(
-			PrologInterfaceRegistryListener l) {
+	public void removePrologProcessRegistryListener(
+			PrologProcessRegistryListener l) {
 		synchronized (listeners) {
 			if (listeners.contains(l)) {
 				listeners.remove(l);
@@ -54,13 +54,13 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	@SuppressWarnings("unchecked")
 	public void firePrologInterfaceAdded(String key) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
+		PrologProcessRegistryEvent e = new PrologProcessRegistryEvent(this,
 				key);
-		Vector<PrologInterfaceRegistryListener> clone = null;
+		Vector<PrologProcessRegistryListener> clone = null;
 		synchronized (listeners) {
-			clone = (Vector<PrologInterfaceRegistryListener>) listeners.clone();
+			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
-		for (PrologInterfaceRegistryListener l : clone) {				
+		for (PrologProcessRegistryListener l : clone) {				
 			l.prologInterfaceAdded(e);
 		}
 	}
@@ -68,13 +68,13 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	@SuppressWarnings("unchecked")
 	public void firePrologInterfaceRemoved(String key) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
+		PrologProcessRegistryEvent e = new PrologProcessRegistryEvent(this,
 				key);
-		Vector<PrologInterfaceRegistryListener> clone = null;
+		Vector<PrologProcessRegistryListener> clone = null;
 		synchronized (listeners) {
-			clone = (Vector<PrologInterfaceRegistryListener>) listeners.clone();
+			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
-		for (PrologInterfaceRegistryListener l : clone) {
+		for (PrologProcessRegistryListener l : clone) {
 			l.prologInterfaceRemoved(e);
 		}
 	}
@@ -82,13 +82,13 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	@SuppressWarnings("unchecked")
 	public void fireSubscriptionAdded(Subscription s) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
+		PrologProcessRegistryEvent e = new PrologProcessRegistryEvent(this,
 				s);
-		Vector<PrologInterfaceRegistryListener> clone = null;
+		Vector<PrologProcessRegistryListener> clone = null;
 		synchronized (listeners) {
-			clone = (Vector<PrologInterfaceRegistryListener>) listeners.clone();
+			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
-		for (PrologInterfaceRegistryListener l : clone) {
+		for (PrologProcessRegistryListener l : clone) {
 			l.subscriptionAdded(e);
 		}
 	}
@@ -96,13 +96,13 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	@SuppressWarnings("unchecked")
 	public void fireSubscriptionRemoved(Subscription s) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
+		PrologProcessRegistryEvent e = new PrologProcessRegistryEvent(this,
 				s);
-		Vector<PrologInterfaceRegistryListener> clone = null;
+		Vector<PrologProcessRegistryListener> clone = null;
 		synchronized (listeners) {
-			clone = (Vector<PrologInterfaceRegistryListener>) listeners.clone();
+			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
-		for (PrologInterfaceRegistryListener l : clone) {
+		for (PrologProcessRegistryListener l : clone) {
 			l.subscriptionRemoved(e);
 		}
 	}

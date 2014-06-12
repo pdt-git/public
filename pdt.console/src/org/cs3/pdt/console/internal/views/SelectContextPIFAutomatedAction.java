@@ -26,7 +26,7 @@ import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.PrologContextTracker;
 import org.cs3.pdt.connector.PrologContextTrackerListener;
 import org.cs3.pdt.connector.PrologContextTrackerService;
-import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
+import org.cs3.pdt.connector.registry.PrologProcessRegistry;
 import org.cs3.pdt.connector.subscription.Subscription;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
@@ -173,7 +173,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	// PIF Selection part
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologProcessRegistry reg = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		Set<String> keys = reg.getAllKeys();
 		List<String> sortedKeys = new ArrayList<String>();
 		
@@ -257,7 +257,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 
-	private ActionContributionItem createPIFAction(PrologInterfaceRegistry reg, final String key) {
+	private ActionContributionItem createPIFAction(PrologProcessRegistry reg, final String key) {
 		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
 		if (subs.size() == 0) {
 			return null;
@@ -385,7 +385,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologProcessRegistry reg = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		PrologProcess pif = getPrologProcess();
 		if (pif == null) {
 			setToolTipText("no pif selected");
@@ -408,7 +408,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 	
-	public static String getLabelForPif(String key, PrologInterfaceRegistry reg) {
+	public static String getLabelForPif(String key, PrologProcessRegistry reg) {
 		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
 		
 		StringBuffer buf = new StringBuffer();

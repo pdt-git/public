@@ -18,9 +18,9 @@ import org.cs3.prolog.connector.process.PrologProcess;
 
 /**
  * This interface is used to listen to the active {@link PrologProcess}
- * defined by an {@link IPrologInterfaceService}.
+ * defined by an {@link IPrologProcessService}.
  */
-public interface ActivePrologInterfaceListener {
+public interface ActivePrologProcessListener {
 
 	/**
 	 * The active {@link PrologProcess} has changed

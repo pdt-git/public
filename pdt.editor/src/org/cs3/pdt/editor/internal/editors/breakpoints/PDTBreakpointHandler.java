@@ -26,7 +26,7 @@ import java.util.Set;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
+import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
@@ -54,7 +54,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook, ActivePrologInterfaceListener, ConsultListener {
+public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook, ActivePrologProcessListener, ConsultListener {
 
 	private static final String ADD_BREAKPOINT = "add_breakpoint";
 	private static final String REMOVE_BREAKPOINT = "remove_breakpoint";
@@ -83,8 +83,8 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 
 	private PDTBreakpointHandler() {
 		checkForPif();
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
 	}
 
 	private void checkForPif() {

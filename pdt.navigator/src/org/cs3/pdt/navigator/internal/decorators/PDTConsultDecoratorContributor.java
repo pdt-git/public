@@ -23,9 +23,9 @@ import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.PDTDecorator;
-import org.cs3.pdt.common.PrologInterfaceStartListener;
+import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
+import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.navigator.internal.ImageRepository;
@@ -44,11 +44,11 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class PDTConsultDecoratorContributor extends BaseLabelProvider implements PDTDecorator, ILightweightLabelDecorator, ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
+public class PDTConsultDecoratorContributor extends BaseLabelProvider implements PDTDecorator, ILightweightLabelDecorator, ConsultListener, ActivePrologProcessListener, PrologProcessStartListener {
 
 	public PDTConsultDecoratorContributor() {
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
 		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 		PDTCommonPlugin.getDefault().addDecorator(this);
 	}
@@ -222,8 +222,8 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	
 	@Override
 	public void dispose() {
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterActivePrologProcessListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterConsultListener(this);
 		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 		PDTCommonPlugin.getDefault().removeDecorator(this);
 		super.dispose();

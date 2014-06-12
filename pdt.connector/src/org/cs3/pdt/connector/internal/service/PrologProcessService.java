@@ -25,11 +25,11 @@ import java.util.TreeSet;
 
 import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtension;
-import org.cs3.pdt.connector.registry.PrologInterfaceRegistry;
-import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
+import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
+import org.cs3.pdt.connector.registry.PrologProcessRegistry;
+import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.service.ConsultListener;
-import org.cs3.pdt.connector.service.IPrologInterfaceService;
+import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.pdt.connector.service.PDTReloadExecutor;
 import org.cs3.pdt.connector.subscription.DefaultSubscription;
 import org.cs3.pdt.connector.subscription.Subscription;
@@ -46,11 +46,11 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 
-public class PrologInterfaceService implements IPrologInterfaceService, IPrologInterfaceServiceExtension {
+public class PrologProcessService implements IPrologProcessService, IPrologProcessServiceExtension {
 	
 	private DefaultReloadExecutor defaultReloadExecutor;
 	
-	public PrologInterfaceService() {
+	public PrologProcessService() {
 		defaultReloadExecutor = new DefaultReloadExecutor();
 		registerPDTReloadExecutor(defaultReloadExecutor);
 	}
@@ -97,14 +97,14 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				ArrayList<ActivePrologInterfaceListener> listenersClone;
-				synchronized (activePrologInterfaceListeners) {
-					listenersClone = (ArrayList<ActivePrologInterfaceListener>) activePrologInterfaceListeners.clone();
+				ArrayList<ActivePrologProcessListener> listenersClone;
+				synchronized (activePrologProcessListeners) {
+					listenersClone = (ArrayList<ActivePrologProcessListener>) activePrologProcessListeners.clone();
 				}
 				
 				monitor.beginTask("Active PrologProcess changed: notify listeners", listenersClone.size());
 				
-				for (ActivePrologInterfaceListener listener : listenersClone) {
+				for (ActivePrologProcessListener listener : listenersClone) {
 					listener.activePrologProcessChanged(pif);
 					monitor.worked(1);
 				}
@@ -116,26 +116,26 @@ public class PrologInterfaceService implements IPrologInterfaceService, IPrologI
 		job.schedule();
 	}
 	
-	private ArrayList<ActivePrologInterfaceListener> activePrologInterfaceListeners = new ArrayList<ActivePrologInterfaceListener>();
+	private ArrayList<ActivePrologProcessListener> activePrologProcessListeners = new ArrayList<ActivePrologProcessListener>();
 	
 	@Override
-	public void registerActivePrologInterfaceListener(ActivePrologInterfaceListener listener) {
-		synchronized (activePrologInterfaceListeners) {
-			activePrologInterfaceListeners.add(listener);
+	public void registerActivePrologProcessListener(ActivePrologProcessListener listener) {
+		synchronized (activePrologProcessListeners) {
+			activePrologProcessListeners.add(listener);
 		}
 	}
 	
 	@Override
-	public void unRegisterActivePrologInterfaceListener(ActivePrologInterfaceListener listener) {
-		synchronized (activePrologInterfaceListeners) {
-			activePrologInterfaceListeners.remove(listener);
+	public void unRegisterActivePrologProcessListener(ActivePrologProcessListener listener) {
+		synchronized (activePrologProcessListeners) {
+			activePrologProcessListeners.remove(listener);
 		}
 	}
 	
 	private static final String DEFAULT_PROCESS = "Default Process";
 	
 	private PrologProcess getDefaultPrologProcess() {
-		PrologInterfaceRegistry registry = PDTConnectorPlugin.getDefault().getPrologInterfaceRegistry();
+		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		Subscription subscription = registry.getSubscription(DEFAULT_PROCESS);
 		if (subscription == null) {
 			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", "Prolog");

@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.common.PrologInterfaceStartListener;
+import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.internal.service.ext.IPrologInterfaceServiceExtension;
+import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 
-public class ConsultManager implements ConsultListener, PrologInterfaceStartListener {
+public class ConsultManager implements ConsultListener, PrologProcessStartListener {
 
 	@Override
 	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
@@ -55,7 +55,7 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 				ArrayList<IFile> files = new ArrayList<IFile>();
 				ArrayList<IFile> entryPointFiles = new ArrayList<IFile>();
 				collectFiles(consultedFiles, files);
-				IPrologInterfaceServiceExtension service = (IPrologInterfaceServiceExtension) PDTConnectorPlugin.getDefault().getPrologInterfaceService();
+				IPrologProcessServiceExtension service = (IPrologProcessServiceExtension) PDTConnectorPlugin.getDefault().getPrologProcessService();
 				if (onlyEntryPoints) {
 					filterEntryPoints(files, entryPointFiles);
 					service.consultFilesSilent(entryPointFiles, pif);

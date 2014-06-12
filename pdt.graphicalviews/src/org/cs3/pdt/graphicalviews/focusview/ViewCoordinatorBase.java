@@ -42,7 +42,7 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 		
 		focusView.getSite().getWorkbenchWindow().getPartService().addPartListener(this);
 		
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService()
+		PDTConnectorPlugin.getDefault().getPrologProcessService()
 			.registerConsultListener(this);
 	}
 	
@@ -118,6 +118,6 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	public void dispose() {
 		focusView.getSite().getWorkbenchWindow().getPartService().removePartListener(this);
 		
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterConsultListener(this);
 	}
 }

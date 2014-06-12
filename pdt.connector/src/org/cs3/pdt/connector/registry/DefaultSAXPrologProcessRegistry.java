@@ -35,7 +35,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceRegistry {
+public class DefaultSAXPrologProcessRegistry extends DefaultPrologProcessRegistry {
 
 	@Override
 	public void load(Reader reader) throws IOException {

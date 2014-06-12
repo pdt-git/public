@@ -29,10 +29,10 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.common.PrologInterfaceStartListener;
+import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
+import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.editor.PDT;
@@ -75,7 +75,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 
-public class NonNaturePrologOutline extends ContentOutlinePage implements ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener, IDoubleClickListener {
+public class NonNaturePrologOutline extends ContentOutlinePage implements ConsultListener, ActivePrologProcessListener, PrologProcessStartListener, IDoubleClickListener {
 	private static final int EXPANDING_LEVEL = 2;
 	public static final String MENU_ID = "org.cs3.pdt.editor.outline.menu";
 	private ITreeContentProvider contentProvider;
@@ -157,8 +157,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		hookContextMenu(parent);
 		setInput(editor.getEditorInput());
 
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 	}
 
@@ -289,8 +289,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	@Override
 	public void dispose() {
 		super.dispose();
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
-		PDTConnectorPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterConsultListener(this);
+		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterActivePrologProcessListener(this);
 		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 		contentProvider.dispose();
 		model.dispose();

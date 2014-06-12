@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * This interface is used to define an executor of the pdt_reload/1 predicate
- * during the consulting process in an {@link IPrologInterfaceService}.
+ * during the consulting process in an {@link IPrologProcessService}.
  */
 public interface PDTReloadExecutor {
 

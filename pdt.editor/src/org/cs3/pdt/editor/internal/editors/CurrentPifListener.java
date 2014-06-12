@@ -20,7 +20,7 @@ import java.io.IOException;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.pdt.connector.service.ActivePrologInterfaceListener;
+import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.logging.Debug;
@@ -33,7 +33,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 
-public class CurrentPifListener implements PrologEventListener, ActivePrologInterfaceListener {
+public class CurrentPifListener implements PrologEventListener, ActivePrologProcessListener {
 
 	@Override
 	public void update(PrologEvent e) {
