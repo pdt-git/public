@@ -51,7 +51,7 @@ public interface Subscription {
 	 * @return a key identifying the PrologProcess instance to subscribe to.
 	 *         May NOT be null.
 	 */
-	public abstract String getPifKey();
+	public abstract String getProcessKey();
 
 	/**
 	 * @return a short human readable text describing what the subscription is
@@ -75,30 +75,30 @@ public interface Subscription {
 
 	
 	/**
-	 * "configure-your-pif-here"-hook. Called by the runtime at the earliest
+	 * "configure-your-process-here"-hook. Called by the runtime at the earliest
 	 * possible point in time that does satisfy both of the following
 	 * conditions:
-	 *  - the pif has been instantiated. 
+	 *  - the process has been instantiated. 
 	 *  - this subscription has been registered
 	 * with the PrologProcessRegistry.
 	 * 
 	 * Note that this method is never called for anonymous subscriptions. This
 	 * is implied by the second condition.
 	 * 
-	 * Implementation should make no assumptions on the life cycle state of the pif
+	 * Implementation should make no assumptions on the life cycle state of the process
 	 * argument. It should also not contain calls that would alter the
 	 * state. Note that a call to PrologProcess.getSession() DOES alter the state of the 
-	 * pif (it may start it, if it is not already up!).
+	 * process (it may start it, if it is not already up!).
 	 * 
 	 * Why not? 
-	 * - We do not want the pif to start up before it is actual needed.
+	 * - We do not want the process to start up before it is actual needed.
 	 * - We do not want to care about possible PrologInterfaceExceptions during configuration.
 	 * 
-	 * A commonly faced problem is the fact that when subscribing to a pif, you do not know 
+	 * A commonly faced problem is the fact that when subscribing to a process, you do not know 
 	 * whether it has already been started or even created. E.g. if you add startup hooks 
 	 * from within the configure call back, you do not know if they will be executed within the 
 	 * same life cycle period. A solution that seems convenient at first glance is to check 
-	 * the life cycle state and, if the pif is already up, just call the hook methods "manually".
+	 * the life cycle state and, if the process is already up, just call the hook methods "manually".
 	 * 
 	 * The problem however is, that any exceptions thrown by the hook code cannot be correctly 
 	 * propagated. You either have to catch them in the configure method, which only makes sense 
@@ -111,24 +111,24 @@ public interface Subscription {
 	 * context is finally violated by the thrown exceptions, and it is also more likely to have
 	 * access to enough context to adequately handle the situation.  
 	 * 
-	 * @param pif
+	 * @param process
 	 */
-	public abstract void configure(PrologProcess pif) ;
+	public abstract void configure(PrologProcess process) ;
 
 	/**
 	 * "clean-up-your-mess"-hook.
 	 * Called by the runtime when the subscription is removed from the registry, or
-	 * when a pif to which the client subscribed is removed from the registry
+	 * when a process to which the client subscribed is removed from the registry
 	 * 
 	 * not called on anonymous subscriptions (see above)
 	 * 
 	 * 
-	 * Implementation should make no assumptions on the state of the pif
+	 * Implementation should make no assumptions on the state of the process
 	 * argument: It may be up and running. It may be not. Best is to check the
-	 * state. If the pif is down, there is typically not much to clean up anyway.
-	 * @param pif
+	 * state. If the process is down, there is typically not much to clean up anyway.
+	 * @param process
 	 */
-	public abstract void deconfigure(PrologProcess pif);
+	public abstract void deconfigure(PrologProcess process);
 	
 	/**
 	 * Return the tags associated with this Subscriptions.

@@ -97,9 +97,9 @@ public abstract class LifeCycle {
 	public LifeCycle(String name) {
 
 		setState(new DownState(this));
-		workThread = new DispatcherThread("PIF " + name + " Work");
+		workThread = new DispatcherThread("Prolog Process " + name + " Work");
 		workThread.start();
-		transitionThread = new DispatcherThread("PIF " + name + " Transitions");
+		transitionThread = new DispatcherThread("Prolog Process " + name + " Transitions");
 		transitionThread.start();
 	}
 

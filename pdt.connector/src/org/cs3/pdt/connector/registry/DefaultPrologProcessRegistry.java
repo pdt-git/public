@@ -26,11 +26,11 @@ import org.cs3.prolog.connector.process.PrologProcess;
 
 abstract public class DefaultPrologProcessRegistry implements PrologProcessRegistry {
 
-	private HashMap<String, PrologProcess> pifs = new HashMap<String, PrologProcess>();
+	private HashMap<String, PrologProcess> processes = new HashMap<String, PrologProcess>();
 	private HashMap<String, Subscription> subscriptions = new HashMap<String, Subscription>();
 	private HashMap<String, HashSet<Subscription>> subscriptionLists = new HashMap<String, HashSet<Subscription>>();
 	private Vector<PrologProcessRegistryListener> listeners = new Vector<PrologProcessRegistryListener>();
-	private HashMap<PrologProcess, String> pifKeys = new HashMap<PrologProcess, String>();
+	private HashMap<PrologProcess, String> processKeys = new HashMap<PrologProcess, String>();
 
 	@Override
 	public void addPrologProcessRegistryListener(
@@ -110,17 +110,17 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 	@Override
 	public Set<String> getRegisteredKeys() {
 
-		return pifs.keySet();
+		return processes.keySet();
 	}
 
 	@Override
 	public String getKey(PrologProcess prologProcess) {
-		return pifKeys.get(prologProcess);
+		return processKeys.get(prologProcess);
 	}
 
 	@Override
 	public PrologProcess getPrologProcess(String key) {
-		return pifs.get(key);
+		return processes.get(key);
 	}
 
 	@Override
@@ -146,7 +146,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 	}
 	
 	@Override
-	public Set<Subscription> getSubscriptionsForPif(String key) {
+	public Set<Subscription> getSubscriptionsForProcess(String key) {
 		Collection<Subscription> coll = subscriptionLists.get(key);
 		HashSet<Subscription> subscripitions = new HashSet<Subscription>();
 		if(coll != null){
@@ -156,19 +156,19 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 	}
 
 	@Override
-	public void addPrologProcess(String key, PrologProcess pif) {
-		Object old = pifs.get(key);
-		if (old == pif) {
+	public void addPrologProcess(String key, PrologProcess process) {
+		Object old = processes.get(key);
+		if (old == process) {
 			return;
 		}
 		if (old != null) {
 			removePrologInterface(key);
 		}
-		pifs.put(key, pif);
-		pifKeys.put(pif, key);
-		Set<Subscription> l = getSubscriptionsForPif(key);
+		processes.put(key, process);
+		processKeys.put(process, key);
+		Set<Subscription> l = getSubscriptionsForProcess(key);
 		for (Subscription s: l) {
-			s.configure(pif);
+			s.configure(process);
 		}
 		firePrologInterfaceAdded(key);
 	}
@@ -177,20 +177,20 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 	@SuppressWarnings("unchecked")
 	@Override
 	public void removePrologInterface(String key) {
-		PrologProcess pif = pifs.get(key);
-		if (pif == null) {
+		PrologProcess process = processes.get(key);
+		if (process == null) {
 			return;
 		}
 		HashSet<Subscription> keySet =  subscriptionLists.get(key);
 		if (keySet != null) {
 			keySet =  (HashSet<Subscription>) keySet.clone();
 			for (Subscription s : keySet) {
-				s.deconfigure(pif);
+				s.deconfigure(process);
 			}
 		}
 		firePrologInterfaceRemoved(key);
-		pifKeys.remove(pif);
-		pifs.remove(key);
+		processKeys.remove(process);
+		processes.remove(key);
 
 	}
 
@@ -209,16 +209,16 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 		if (old != null) {
 			removeSubscription(sid);
 		}
-		HashSet<Subscription> l = subscriptionLists.get(s.getPifKey());
+		HashSet<Subscription> l = subscriptionLists.get(s.getProcessKey());
 		if (l == null) {
 			l = new HashSet<Subscription>();
-			subscriptionLists.put(s.getPifKey(), l);
+			subscriptionLists.put(s.getProcessKey(), l);
 		}
 		l.add(s);
 		subscriptions.put(sid, s);
 
-		if (this.pifs.containsKey(s.getPifKey())) {
-			s.configure(getPrologProcess(s.getPifKey()));
+		if (this.processes.containsKey(s.getProcessKey())) {
+			s.configure(getPrologProcess(s.getProcessKey()));
 		}
 		fireSubscriptionAdded(s);
 	}
@@ -241,15 +241,15 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 		if (!subscriptions.containsKey(id)) {
 			return;
 		}
-		String pifKey = subscription.getPifKey();
-		if (pifs.containsKey(pifKey)) {
-			subscription.deconfigure(getPrologProcess(pifKey));
-			Set<Subscription> otherSubscriptions = getSubscriptionsForPif(pifKey);
+		String processKey = subscription.getProcessKey();
+		if (processes.containsKey(processKey)) {
+			subscription.deconfigure(getPrologProcess(processKey));
+			Set<Subscription> otherSubscriptions = getSubscriptionsForProcess(processKey);
 			otherSubscriptions.remove(subscription);
 		}
 		subscriptions.remove(id);
 
-		Set<Subscription> keySet = subscriptionLists.get(pifKey);
+		Set<Subscription> keySet = subscriptionLists.get(processKey);
 		if (keySet == null) {
 			return;
 		}

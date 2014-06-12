@@ -46,9 +46,9 @@ public class PreferenceConfiguration {
 		loadConfigurations();
 	}
 	
-	public static final String PREF_CONFIGURATIONS = "pif.configurations";
+	public static final String PREF_CONFIGURATIONS = "process.configurations";
 
-	private static final String DEFAULT_CONFIGURATION_PREFIX = "pif.configuration.default.";
+	private static final String DEFAULT_CONFIGURATION_PREFIX = "process.configuration.default.";
 	
 	
 	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PDTConnector.CONFIGURATION_SWI, PDTConnector.CONFIGURATION_SWI_LOGTALK, PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP_LOGTALK});

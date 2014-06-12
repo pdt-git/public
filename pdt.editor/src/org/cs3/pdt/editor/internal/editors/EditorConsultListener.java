@@ -24,14 +24,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public class EditorConsultListener implements ConsultListener {
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
-		PLMarkerUtils.addMarkers(pif, allConsultedFiles, monitor);
+	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
+		PLMarkerUtils.addMarkers(process, allConsultedFiles, monitor);
 	}
 	
 }

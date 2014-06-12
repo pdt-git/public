@@ -229,12 +229,12 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 			Iterator<String> it = keys.iterator();
 			while ( it.hasNext()) {
 				String key = it.next();
-				PrologProcess pif = registry.getPrologProcess(key);
+				PrologProcess process = registry.getPrologProcess(key);
 				try {
-					pif.stop();
+					process.stop();
 					registry.removePrologInterface(key);
 				} catch (Throwable e) {
-					Debug.warning("problems during shutdown of pif " + key);
+					Debug.warning("problems during shutdown of process " + key);
 					Debug.report(e);
 				}
 
@@ -264,8 +264,8 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	/**
-	 * Subscribe to a PrologProcess. If the registry does not contain a pif
-	 * for key the subscription is for, this method will create a new pif and
+	 * Subscribe to a PrologProcess. If the registry does not contain a process
+	 * for key the subscription is for, this method will create a new process and
 	 * register it with the registry.
 	 * 
 	 * @param s
@@ -281,13 +281,13 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	
 	public PrologProcess getPrologProcess(Subscription s, String configuration) {
 		PrologProcessRegistry r = getPrologProcessRegistry();
-		String pifKey = s.getPifKey();
-		PrologProcess pif = r.getPrologProcess(pifKey);
-		boolean addPifToRegistry = false;
-		if (pif == null) {
-			pif = createPrologProcess(pifKey, configuration);
-			addPifToRegistry = true;
-//			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
+		String processKey = s.getProcessKey();
+		PrologProcess process = r.getPrologProcess(processKey);
+		boolean addProcessToRegistry = false;
+		if (process == null) {
+			process = createPrologProcess(processKey, configuration);
+			addProcessToRegistry = true;
+//			PrologRuntimePlugin.getDefault().addGlobalHooks(processKey, process);
 		}
 		List<String> contributionKeys = new ArrayList<String>();
 		contributionKeys.addAll(s.getBootstrapConstributionKeys());
@@ -295,22 +295,22 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 			contributionKeys.add("");
 		}
 		BootstrapStartupStrategy startupStrategy = null;
-		if (pif.getStartupStrategy() instanceof BootstrapStartupStrategy) {
-			startupStrategy = (BootstrapStartupStrategy) pif.getStartupStrategy();
+		if (process.getStartupStrategy() instanceof BootstrapStartupStrategy) {
+			startupStrategy = (BootstrapStartupStrategy) process.getStartupStrategy();
 		} else {
-			Debug.error("startup strategy is " + pif.getStartupStrategy().getClass() + ", but has to be an instance of BootstrapStartupStrategy");
+			Debug.error("startup strategy is " + process.getStartupStrategy().getClass() + ", but has to be an instance of BootstrapStartupStrategy");
 			startupStrategy = new BootstrapStartupStrategy();
-			pif.setStartupStrategy(startupStrategy);
+			process.setStartupStrategy(startupStrategy);
 		}
 		for (String contributionKey : contributionKeys) {
 			List<BootstrapPrologContribution> libraryList = getBootstrapList(contributionKey);
 			for (BootstrapPrologContribution library : libraryList) {
 				if (!startupStrategy.contains(library)) {
 					startupStrategy.add(library);
-					if (pif.isUp()) {
+					if (process.isUp()) {
 						PrologSession session = null;
 						try {
-							session = pif.getSession(PrologProcess.LEGACY);
+							session = process.getSession(PrologProcess.LEGACY);
 							
 							String consult = library.getPrologInitStatement();
 							Debug.debug("consult " + consult + ", from " + library);
@@ -324,14 +324,14 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 				}
 			}
 		}
-		if (addPifToRegistry) {
-			r.addPrologProcess(pifKey, pif);
+		if (addProcessToRegistry) {
+			r.addPrologProcess(processKey, process);
 		}
 		if (s.getId() != null) {
 			r.addSubscription(s);
 		}
 
-		return pif;
+		return process;
 	}
 
 	/**
@@ -341,13 +341,13 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 * a key in the registry without actually creating a PrologProcess (yet).
 	 * 
 	 * This is equivalent to calling
-	 * <code>getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey)</code>
+	 * <code>getPrologInterfaceRegistry().getRegisteredKeys().contains(processKey)</code>
 	 * 
-	 * @param pifKey
+	 * @param processKey
 	 * @return
 	 */
-	public boolean hasPrologInterface(String pifKey) {
-		return getPrologProcessRegistry().getRegisteredKeys().contains(pifKey);
+	public boolean hasPrologInterface(String processKey) {
+		return getPrologProcessRegistry().getRegisteredKeys().contains(processKey);
 	}
 	
 	private IPrologProcessService prologProcessService;
@@ -448,19 +448,19 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 
-//	public void addGlobalHooks(String pifKey, PrologProcess pif) {
-//		Map hooks = getGlobalHooks().get(pifKey);
+//	public void addGlobalHooks(String processKey, PrologProcess process) {
+//		Map hooks = getGlobalHooks().get(processKey);
 //		if (hooks != null) {
 //			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
 //				_HookRecord record = it.next();
-//				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
+//				process.addLifeCycleHook(record.hook, record.hookId, record.deps);
 //			}
 //		}
 //		hooks = getGlobalHooks().get("");
 //		if (hooks != null) {
 //			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
 //				_HookRecord record = it.next();
-//				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
+//				process.addLifeCycleHook(record.hook, record.hookId, record.deps);
 //			}
 //		}
 //	}

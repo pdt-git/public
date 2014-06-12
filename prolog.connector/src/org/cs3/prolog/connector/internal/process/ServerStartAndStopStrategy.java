@@ -19,7 +19,7 @@ import org.cs3.prolog.connector.process.PrologProcess;
 
 
 /**
- * A pluggable strategy for starting and stopping a PIF server.
+ * A pluggable strategy for starting and stopping a Prolog server.
  * 
  * Since the Prolog System is living in its own process and starting 
  * and stopping this "server" process is dependent on a lot of issues 
@@ -33,22 +33,22 @@ public interface ServerStartAndStopStrategy {
      * starts the server process, returning its process.
      * 
      * @return the server process, if available, or null.
-     * @param pif the PrologProcess for which the server part should be started.
+     * @param process the PrologProcess for which the server part should be started.
      */
-    public Process startServer(PrologProcess pif);
+    public Process startServer(PrologProcess process);
 
     /**
      * stop the server process
      * 
-     * @param pif the IPrologInterface for which the server should be stopped.
+     * @param process the IPrologInterface for which the server should be stopped.
      */
-    public void stopServer(PrologProcess pif);
+    public void stopServer(PrologProcess process);
 
     /**
-     * @param pif
+     * @param process
      * @return
      */
-    public boolean isRunning(PrologProcess pif);
+    public boolean isRunning(PrologProcess process);
 }
 
 

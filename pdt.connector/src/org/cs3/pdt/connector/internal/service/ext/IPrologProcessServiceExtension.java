@@ -13,9 +13,9 @@ public interface IPrologProcessServiceExtension extends IPrologProcessService {
 	 * 
 	 * @param files
 	 *            the list of files
-	 * @param pif
+	 * @param process
 	 *            the PrologProcess
 	 */
-	void consultFilesSilent(List<IFile> files, PrologProcess pif);
+	void consultFilesSilent(List<IFile> files, PrologProcess process);
 
 }

@@ -26,17 +26,17 @@ import org.cs3.prolog.connector.session.PrologSession;
  * @author terra
  */
 public class SocketSessionThrowTest extends TestCase {
-	private PrologProcess pif;
+	private PrologProcess process;
 
     @Override
 	protected void setUp() throws Exception {
-      pif = Connector.newUninitializedPrologProcess();
-      pif.start();
+      process = Connector.newUninitializedPrologProcess();
+      process.start();
     }
     
     @Override
 	protected void tearDown() throws Exception {
-        pif.stop();
+        process.stop();
     }
 	
 	/**
@@ -45,7 +45,7 @@ public class SocketSessionThrowTest extends TestCase {
 	 * @throws PrologProcessException 
 	 */
 	public void testThrow() throws PrologException, PrologProcessException{
-		PrologSession ss = pif.getSession();
+		PrologSession ss = process.getSession();
 		try  {
 		ss.queryOnce("throw(A)");
 		} catch(Exception ex){

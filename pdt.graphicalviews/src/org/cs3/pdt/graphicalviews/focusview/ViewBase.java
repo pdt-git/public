@@ -71,7 +71,7 @@ public abstract class ViewBase extends ViewPart {
 
 	protected abstract ViewCoordinatorBase createViewCoordinator();
 	
-	protected abstract GraphPIFLoaderBase createGraphPIFLoader(PDTGraphView pdtGraphView);
+	protected abstract GraphProcessLoaderBase createGraphProcessLoader(PDTGraphView pdtGraphView);
 	
 	@Override
 	public void createPartControl(final Composite parent) {
@@ -315,7 +315,7 @@ public abstract class ViewBase extends ViewPart {
 			f.updateLayout();
 	}
 
-	public FocusViewControl createFocusViewControl(PDTGraphView pdtGraphView, GraphPIFLoaderBase loader) {
+	public FocusViewControl createFocusViewControl(PDTGraphView pdtGraphView, GraphProcessLoaderBase loader) {
 		return new FocusViewControl(pdtGraphView, loader);
 	}
 	
@@ -383,17 +383,17 @@ public abstract class ViewBase extends ViewPart {
 		private final String FOCUS_VIEW_IS_OUTDATED = "[FocusView is outdated]";
 		
 		private final PDTGraphView pdtGraphView;
-		private final GraphPIFLoaderBase pifLoader;
+		private final GraphProcessLoaderBase processLoader;
 		
 		private boolean isDirty = false;
 		
-		public FocusViewControl(PDTGraphView pdtGraphView, GraphPIFLoaderBase pifLoader) {
+		public FocusViewControl(PDTGraphView pdtGraphView, GraphProcessLoaderBase processLoader) {
 			super(getViewContainer(), SWT.NONE);
 			
 			this.pdtGraphView = pdtGraphView;
-			this.pifLoader = pifLoader;
+			this.processLoader = processLoader;
 			
-			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
+			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, processLoader));
 			pdtGraphView.addViewMode(new MouseHandler(this));
 		}
 		
@@ -422,15 +422,15 @@ public abstract class ViewBase extends ViewPart {
 			return isDirty;
 		}
 		
-		public GraphPIFLoaderBase getPifLoader() {
-			return pifLoader;
+		public GraphProcessLoaderBase getProcessLoader() {
+			return processLoader;
 		}
 
 		public void reload() {
 			Job j = new Job("Reloading Graph") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					pifLoader.loadGraph();
+					processLoader.loadGraph();
 					setStatusText("");
 					
 					isDirty = false;

@@ -54,7 +54,7 @@ import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
  * @author morales
  * 
  */
-public abstract class SelectContextPIFAutomatedAction extends Action implements
+public abstract class SelectContextProcessAutomatedAction extends Action implements
 		IMenuCreator, IWorkbenchWindowPulldownDelegate2,
 		PrologContextTrackerListener {
 
@@ -81,7 +81,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		}
 	}
 
-	public SelectContextPIFAutomatedAction() {
+	public SelectContextProcessAutomatedAction() {
 		super();
 
 		setText(null);
@@ -171,7 +171,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 
-	// PIF Selection part
+	// process selection part
 	private void fillMenu() {
 		PrologProcessRegistry reg = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		Set<String> keys = reg.getAllKeys();
@@ -185,7 +185,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		
 		ArrayList<ActionContributionItem> actionItems = new ArrayList<ActionContributionItem>();
 		for (String key : sortedKeys) {
-			ActionContributionItem actionItem = createPIFAction(reg, key);
+			ActionContributionItem actionItem = createProcessAction(reg, key);
 			if (actionItem != null) {
 				actionItems.add(actionItem);
 			}
@@ -221,7 +221,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 						getActiveTrackers().add(trackerId);
 						trackers[i]
-								.addPrologContextTrackerListener(SelectContextPIFAutomatedAction.this);
+								.addPrologContextTrackerListener(SelectContextProcessAutomatedAction.this);
 
 						trackerActivated(trackers[i]);
 
@@ -239,7 +239,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 						if (getActiveTrackers().contains(trackerId)) {
 							getActiveTrackers().remove(trackerId);
 							trackers[i]
-									.removePrologContextTrackerListener(SelectContextPIFAutomatedAction.this);
+									.removePrologContextTrackerListener(SelectContextProcessAutomatedAction.this);
 
 							trackerDeactivated(trackers[i]);
 						}
@@ -257,8 +257,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 
-	private ActionContributionItem createPIFAction(PrologProcessRegistry reg, final String key) {
-		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
+	private ActionContributionItem createProcessAction(PrologProcessRegistry reg, final String key) {
+		Set<Subscription> subs = reg.getSubscriptionsForProcess(key);
 		if (subs.size() == 0) {
 			return null;
 		}
@@ -269,13 +269,13 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 				if (this.isChecked())
 					setPrologProcess(PDTConnectorPlugin.getDefault()
 							.getPrologProcess(key));
-				if(!unifiedTrackerEnabled) SelectContextPIFAutomatedAction.this.setImageDescriptor(ImageRepository
+				if(!unifiedTrackerEnabled) SelectContextProcessAutomatedAction.this.setImageDescriptor(ImageRepository
 						.getImageDescriptor(ImageRepository.MANUAL_MODE));
 			}
 
 		};
 		action.setChecked(key.equals(reg.getKey(getPrologProcess())));
-		action.setText(getLabelForPif(key, reg));
+		action.setText(getLabelForProcess(key, reg));
 		action.setEnabled(!unifiedTrackerEnabled);
 		ActionContributionItem item = new ActionContributionItem(action);
 		return item;
@@ -359,10 +359,10 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			if (tracker == null) {
 				return null;
 			}
-			PrologProcess pif = null;
-			pif = tracker.getCurrentPrologProcess();
-			if (pif != null) {
-				return pif;
+			PrologProcess process = null;
+			process = tracker.getCurrentPrologProcess();
+			if (process != null) {
+				return process;
 			}
 		}
 		return null;
@@ -386,13 +386,13 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			return;
 		}
 		PrologProcessRegistry reg = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
-		PrologProcess pif = getPrologProcess();
-		if (pif == null) {
-			setToolTipText("no pif selected");
+		PrologProcess process = getPrologProcess();
+		if (process == null) {
+			setToolTipText("no process selected");
 			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 			return;
 		}
-		String key = reg.getKey(pif);
+		String key = reg.getKey(process);
 		if (key == null) {
 			setToolTipText("unregisterd Prologinterface???");
 			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
@@ -408,8 +408,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 	
-	public static String getLabelForPif(String key, PrologProcessRegistry reg) {
-		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
+	public static String getLabelForProcess(String key, PrologProcessRegistry reg) {
+		Set<Subscription> subs = reg.getSubscriptionsForProcess(key);
 		
 		StringBuffer buf = new StringBuffer();
 

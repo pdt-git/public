@@ -90,31 +90,31 @@ private static JackTheProcessRipper processRipper;
 	 * .IPrologInterface)
 	 */
 	@Override
-	public  Process startServer(PrologProcess pif) {
-		if (pif.isStandAloneServer()) {
+	public  Process startServer(PrologProcess process) {
+		if (process.isStandAloneServer()) {
 			Debug.warning("Will not start server; the standalone option is set.");
 			return null;
 		}
-		if (!(pif instanceof SocketPrologProcess)) {
+		if (!(process instanceof SocketPrologProcess)) {
 			throw new ClassCastException("SocketPrologProcess needed but got another PrologProcess");
 		}
-		SocketPrologProcess socketPif = (SocketPrologProcess) pif;
-		return startSocketServer(socketPif);
+		SocketPrologProcess socketProcess = (SocketPrologProcess) process;
+		return startSocketServer(socketProcess);
 	}
 
-	private Process startSocketServer(SocketPrologProcess socketPif) {
+	private Process startSocketServer(SocketPrologProcess socketProcess) {
 		File lockFile = Util.getLockFile();
-		socketPif.setLockFile(lockFile);
+		socketProcess.setLockFile(lockFile);
 		Util.addTempFile(lockFile);
 		File errorLogFile = Util.getLockFile();
-		socketPif.setErrorLogFile(errorLogFile);
+		socketProcess.setErrorLogFile(errorLogFile);
 		Util.addTempFile(errorLogFile);
-		int port = getFreePort(socketPif);
-		Process process = getNewProcess(socketPif, port);
+		int port = getFreePort(socketProcess);
+		Process process = getNewProcess(socketProcess, port);
 		try {			
-			initializeBuffers(socketPif, process);
-			waitForProcessToGetRunning(socketPif, process);
-			String errorLogFileContent = getErrorLogFileContent(socketPif);
+			initializeBuffers(socketProcess, process);
+			waitForProcessToGetRunning(socketProcess, process);
+			String errorLogFileContent = getErrorLogFileContent(socketProcess);
 			if (errorLogFileContent != null && !errorLogFileContent.isEmpty()) {
 				Debug.warning("Prolog warnings and errors during initialization:\n" + errorLogFileContent);
 			}
@@ -125,9 +125,9 @@ private static JackTheProcessRipper processRipper;
 		}
 	}
 
-	private static Process getNewProcess(SocketPrologProcess socketPif, int port) {
-		String[] commandArray = getCommandArray(socketPif, port);
-		Map<String, String> env = getEnvironmentAsArray(socketPif);
+	private static Process getNewProcess(SocketPrologProcess socketProcess, int port) {
+		String[] commandArray = getCommandArray(socketProcess, port);
+		Map<String, String> env = getEnvironmentAsArray(socketProcess);
 		Process process = null;
 		try {
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
@@ -160,16 +160,16 @@ private static JackTheProcessRipper processRipper;
 		return process;
 	}
 
-	private static void initializeBuffers(SocketPrologProcess socketPif,
+	private static void initializeBuffers(SocketPrologProcess socketProcess,
 			Process process) throws IOException {
-		BufferedWriter writer = initializeCorrespondingLogFile(socketPif);
+		BufferedWriter writer = initializeCorrespondingLogFile(socketProcess);
 		new InputStreamPump(process.getErrorStream(), writer).start();
 		new InputStreamPump(process.getInputStream(), writer).start();
 	}
 
 	private static BufferedWriter initializeCorrespondingLogFile(
-			SocketPrologProcess socketPif) throws IOException {
-		File logFile = Util.getLogFile(socketPif.getServerLogDir(),"pdt.server.log");
+			SocketPrologProcess socketProcess) throws IOException {
+		File logFile = Util.getLogFile(socketProcess.getServerLogDir(),"pdt.server.log");
 		BufferedWriter writer = new BufferedWriter(new FileWriter(logFile.getAbsolutePath(), true));
 		writer.write("---------------------------------\n");
 		writer.write(new Date().toString() + "\n");
@@ -177,15 +177,15 @@ private static JackTheProcessRipper processRipper;
 		return writer;
 	}
 	
-	private  void waitForProcessToGetRunning(SocketPrologProcess socketPif,
+	private  void waitForProcessToGetRunning(SocketPrologProcess socketProcess,
 			Process process) {
-		long timeout = socketPif.getTimeout();
+		long timeout = socketProcess.getTimeout();
 		long startTime = System.currentTimeMillis();
-		while (!isRunning(socketPif)) {
+		while (!isRunning(socketProcess)) {
 			try {
 				long now = System.currentTimeMillis();
 				if (now - startTime > timeout) {
-					String errorLogFileContent = getErrorLogFileContent(socketPif);
+					String errorLogFileContent = getErrorLogFileContent(socketProcess);
 					if (errorLogFileContent != null) {
 						Debug.error("Prolog errors during initialization:\n" + errorLogFileContent);
 					}
@@ -205,10 +205,10 @@ private static JackTheProcessRipper processRipper;
 		}
 	}
 
-	private String getErrorLogFileContent(SocketPrologProcess socketPif) {
+	private String getErrorLogFileContent(SocketPrologProcess socketProcess) {
 		String errorLogFileContent = null;
 		try {
-			errorLogFileContent = Util.readInputStreamToString(new FileInputStream(socketPif.getErrorLogFile()));
+			errorLogFileContent = Util.readInputStreamToString(new FileInputStream(socketProcess.getErrorLogFile()));
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
 		}
@@ -217,8 +217,8 @@ private static JackTheProcessRipper processRipper;
 
 
 
-	private static Map<String, String> getEnvironmentAsArray(SocketPrologProcess socketPif) {
-		String environment = socketPif.getEnvironment();
+	private static Map<String, String> getEnvironmentAsArray(SocketPrologProcess socketProcess) {
+		String environment = socketProcess.getEnvironment();
 		Map<String, String> env = new HashMap<String, String>();
 		String[] envarray = Util.split(environment, ",");
 		for (int i = 0; i < envarray.length; i++) {
@@ -228,42 +228,42 @@ private static JackTheProcessRipper processRipper;
 		return env;
 	}
 
-	private static String[] getCommandArray(SocketPrologProcess socketPif, int port) {
-		String[] command = getCommands(socketPif);
-		String[] args = getArguments(socketPif, port);
+	private static String[] getCommandArray(SocketPrologProcess socketProcess, int port) {
+		String[] command = getCommands(socketProcess);
+		String[] args = getArguments(socketProcess, port);
 		String[] commandArray = new String[command.length + args.length];
 		System.arraycopy(command, 0, commandArray, 0, command.length);
 		System.arraycopy(args, 0, commandArray, command.length, args.length);
 		return commandArray;
 	}
 
-	private static String[] getArguments(SocketPrologProcess socketPif, int port) {
+	private static String[] getArguments(SocketPrologProcess socketProcess, int port) {
 		File tmpFile = null;
 		try {
-			tmpFile = File.createTempFile("socketPif", null);
+			tmpFile = File.createTempFile("socketProcess", null);
 			Util.addTempFile(tmpFile);
-			writeInitialisationToTempFile(socketPif, port, tmpFile);
+			writeInitialisationToTempFile(socketProcess, port, tmpFile);
 		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException(e.getMessage());
 		}
-		String[] args = buildArguments(socketPif, tmpFile);
+		String[] args = buildArguments(socketProcess, tmpFile);
 		return args;
 	}
 
-	private static String[] getCommands(SocketPrologProcess socketPif) {
+	private static String[] getCommands(SocketPrologProcess socketProcess) {
 		String executable = ProcessUtils.createExecutable(
-				socketPif.getOSInvocation(),
-				socketPif.getExecutablePath(),
-				socketPif.getCommandLineArguments(),
-				socketPif.getAdditionalStartupFile());
+				socketProcess.getOSInvocation(),
+				socketProcess.getExecutablePath(),
+				socketProcess.getCommandLineArguments(),
+				socketProcess.getAdditionalStartupFile());
 		String[] command = Util.split(executable, " ");
 		return command;
 	}
 
-	private static String[] buildArguments(SocketPrologProcess socketPif,
+	private static String[] buildArguments(SocketPrologProcess socketProcess,
 			File tmpFile) {
-		String fileSearchPath = socketPif.getFileSearchPath();
+		String fileSearchPath = socketProcess.getFileSearchPath();
 		String[] args;
 		if (fileSearchPath != null && !(fileSearchPath.trim().length() == 0)) {
 			args = new String[] { "-p", fileSearchPath, "-g", "[" + QueryUtils.prologFileNameQuoted(tmpFile) + "]" };
@@ -273,40 +273,40 @@ private static JackTheProcessRipper processRipper;
 		return args;
 	}
 
-	private static void writeInitialisationToTempFile(SocketPrologProcess socketPif,
+	private static void writeInitialisationToTempFile(SocketPrologProcess socketProcess,
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
 //      Don't set the encoding globally because it breaks something
 //		tmpWriter.println(":- set_prolog_flag(encoding, utf8).");
 		tmpWriter.println(STARTUP_ERROR_LOG_PROLOG_CODE);
-		if (socketPif.getAdditionalStartupFile() != null && socketPif.getAdditionalStartupFile().contains("logtalk")) {
+		if (socketProcess.getAdditionalStartupFile() != null && socketProcess.getAdditionalStartupFile().contains("logtalk")) {
 			tmpWriter.print(STARTUP_ERROR_LOG_LOGTALK_CODE);
 		}
 		tmpWriter.println(":- (current_prolog_flag(xpce_threaded, _) -> set_prolog_flag(xpce_threaded, true) ; true).");
 		tmpWriter.println(":- (current_prolog_flag(dialect, swi) -> guitracer ; true).");
-		if (socketPif.isHidePlwin()) {
+		if (socketProcess.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(dialect, swi), current_prolog_flag(windows, true))  -> win_window_pos([show(false)]) ; true).");
 		}
 		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false) ; true).");
 
-		tmpWriter.println(":- ['" + socketPif.getConsultServerLocation() + "'].");
-		StartupStrategy startupStrategy = socketPif.getStartupStrategy();
+		tmpWriter.println(":- ['" + socketProcess.getConsultServerLocation() + "'].");
+		StartupStrategy startupStrategy = socketProcess.getStartupStrategy();
 		for (String fspInit : startupStrategy.getFileSearchPathInitStatements()) {
 			tmpWriter.println(":- " + fspInit + ".");
 		}
 		for (String lfInit : startupStrategy.getLoadFileInitStatements()) {
 			tmpWriter.println(":- " + lfInit + ".");
 		}
-		tmpWriter.println(":- consult_server(" + port + "," + QueryUtils.prologFileNameQuoted(socketPif.getLockFile()) + ").");
-		tmpWriter.println(":- write_pdt_startup_error_messages_to_file(" + QueryUtils.prologFileNameQuoted(socketPif.getErrorLogFile()) + ").");
+		tmpWriter.println(":- consult_server(" + port + "," + QueryUtils.prologFileNameQuoted(socketProcess.getLockFile()) + ").");
+		tmpWriter.println(":- write_pdt_startup_error_messages_to_file(" + QueryUtils.prologFileNameQuoted(socketProcess.getErrorLogFile()) + ").");
 		tmpWriter.close();
 	}
 
-	private static int getFreePort(SocketPrologProcess socketPif) {
+	private static int getFreePort(SocketPrologProcess socketProcess) {
 		int port;
 		try {
 			port = Util.findFreePort();
-			socketPif.setPort(port);
+			socketProcess.setPort(port);
 		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException(e.getMessage());
@@ -322,35 +322,35 @@ private static JackTheProcessRipper processRipper;
 	 * .IPrologInterface, boolean)
 	 */
 	@Override
-	public void stopServer(PrologProcess pif) {
-		if (pif.isStandAloneServer()) {
+	public void stopServer(PrologProcess process) {
+		if (process.isStandAloneServer()) {
 			Debug.warning("Will not stop server; the standalone option is set.");
 			return;
 		}
-		if (!(pif instanceof SocketPrologProcess)) {
+		if (!(process instanceof SocketPrologProcess)) {
 			throw new ClassCastException("SocketPrologProcess needed but got another PrologProcess");
 		}
 		try {
-			if (!isRunning(pif)) {
+			if (!isRunning(process)) {
 				Debug.info("There is no server running. I do not stop anything.");
 				return;
 			}
-			SocketPrologProcess socketPif = (SocketPrologProcess) pif;
-			stopSocketServer(socketPif);
+			SocketPrologProcess socketProcess = (SocketPrologProcess) process;
+			stopSocketServer(socketProcess);
 		} catch (Throwable e) {
 			Debug.report(e);
 			throw new RuntimeException(e.getMessage());
 		}
 	}
 	
-	private static void stopSocketServer(SocketPrologProcess socketPif){
+	private static void stopSocketServer(SocketPrologProcess socketProcess){
 		try {
-			SocketClient client = getSocketClient(socketPif);
+			SocketClient client = getSocketClient(socketProcess);
 			sendClientShutdownCommand(client);
 			long pid = client.getServerPid();
 			client.close();
-			socketPif.getLockFile().delete();
-			File errorLogFile = socketPif.getErrorLogFile();
+			socketProcess.getLockFile().delete();
+			File errorLogFile = socketProcess.getErrorLogFile();
 			if (errorLogFile.exists()) {
 				errorLogFile.delete();
 			}
@@ -362,10 +362,10 @@ private static JackTheProcessRipper processRipper;
 		}
 	}
 
-	private static SocketClient getSocketClient(SocketPrologProcess socketPif)
+	private static SocketClient getSocketClient(SocketPrologProcess socketProcess)
 			throws UnknownHostException, IOException {
-		int port = socketPif.getPort();
-		SocketClient client = new SocketClient(socketPif.getHost(), port);
+		int port = socketProcess.getPort();
+		SocketClient client = new SocketClient(socketProcess.getHost(), port);
 		return client;
 	}
 
@@ -384,8 +384,8 @@ private static JackTheProcessRipper processRipper;
 	 * .IPrologInterface)
 	 */
 	@Override
-	public  boolean isRunning(PrologProcess pif) {
-		File lockFile = ((SocketPrologProcess) pif).getLockFile();
+	public  boolean isRunning(PrologProcess process) {
+		File lockFile = ((SocketPrologProcess) process).getLockFile();
 		return lockFile != null && lockFile.exists();
 	}
 }

@@ -49,7 +49,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	public PDTConsultDecoratorContributor() {
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
-		PDTCommonPlugin.getDefault().registerPifStartListener(this);
+		PDTCommonPlugin.getDefault().registerProcessStartListener(this);
 		PDTCommonPlugin.getDefault().addDecorator(this);
 	}
 	
@@ -60,10 +60,10 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 		}
 
 		try {
-			// get active pif from console
-			PrologProcess currentPif = PDTCommonUtil.getActivePrologProcess();
+			// get active process from console
+			PrologProcess currentProcess = PDTCommonUtil.getActivePrologProcess();
 			
-			if (currentPif == null) {
+			if (currentProcess == null) {
 				if (element instanceof IFile) {
 					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_UNCONSULTED), IDecoration.UNDERLAY);
 				}
@@ -169,10 +169,10 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 			filesInCurrentState = new HashSet<String>();
 			filesInOldState = new HashSet<String>();
 			directories = new HashSet<String>();
-			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
+			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 			List<Map<String, Object>> results;
 			try {
-				results = pif.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State"));
+				results = process.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State"));
 				for (Map<String, Object> result: results) {
 					String fileName = result.get("File").toString();
 					String fileState = result.get("State").toString();
@@ -198,24 +198,24 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	}
 
 	@Override
-	public void prologProcessStarted(PrologProcess pif) {
-    	if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
+	public void prologProcessStarted(PrologProcess process) {
+    	if (process.equals(PDTCommonUtil.getActivePrologProcess())) {
     		fireLabelProviderChanged();
     	}
 	}
 
 	@Override
-	public void activePrologProcessChanged(PrologProcess pif) {
+	public void activePrologProcessChanged(PrologProcess process) {
     	fireLabelProviderChanged();
 	}
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
-    	if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
+	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
+    	if (process.equals(PDTCommonUtil.getActivePrologProcess())) {
     		fireLabelProviderChanged();
     	}
 	}
@@ -224,7 +224,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	public void dispose() {
 		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterConsultListener(this);
-		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
+		PDTCommonPlugin.getDefault().unregisterProcessStartListener(this);
 		PDTCommonPlugin.getDefault().removeDecorator(this);
 		super.dispose();
 	}

@@ -84,13 +84,13 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
 			
 			PDTCommonPlugin.getDefault().addEntryPoint(file);
 			
-			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
+			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 
-			if (pif != null) {
+			if (process != null) {
 				try {
 					String prologFileName = FileUtils.prologFileNameQuoted(file);
 
-					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
+					process.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
 				} catch (PrologProcessException e) {
 					Debug.report(e);
 				}

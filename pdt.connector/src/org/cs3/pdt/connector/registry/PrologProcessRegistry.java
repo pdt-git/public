@@ -48,8 +48,8 @@ public interface PrologProcessRegistry {
 	public Set<String> getRegisteredKeys();
 
 	/**
-	 * @return all pif keys that are known to the registry, including keys for which
-	 *         no pif is registered.
+	 * @return all process keys that are known to the registry, including keys for which
+	 *         no process is registered.
 	 */
 	public Set<String> getAllKeys();
 
@@ -60,9 +60,9 @@ public interface PrologProcessRegistry {
 
 	/**
 	 * 
-	 * @return all subscriptions to a given pif key
+	 * @return all subscriptions to a given process key
 	 */
-	public Set<Subscription> getSubscriptionsForPif(String key);
+	public Set<Subscription> getSubscriptionsForProcess(String key);
 
 	
 
@@ -107,7 +107,7 @@ public interface PrologProcessRegistry {
 	 * this method has no effect.
 	 * 
 	 * This method will cause a call to the method configure() on any waiting
-	 * subscriptions that are already registered for the given pifkey.
+	 * subscriptions that are already registered for the given processkey.
 	 * 
 	 * For each distinct tuple ( Data, Hook descriptor) where
 	 *  - Data is the return value of the getData() method called on a subscription 
@@ -117,9 +117,9 @@ public interface PrologProcessRegistry {
 	 * a hook will be created using named hook descriptor, it will be parameterized with 
 	 * the user data and will be registered with the prolog interface instance.
 	 * @param key
-	 * @param pif
+	 * @param process
 	 */
-	public void addPrologProcess(String key, PrologProcess pif) ;
+	public void addPrologProcess(String key, PrologProcess process) ;
 
 	/**
 	 * Remove a PrologProcess from this registry.
@@ -129,7 +129,7 @@ public interface PrologProcessRegistry {
 	 * NOT be removed.
 	 * 
 	 * This method will cause a call to the method deconfigure() on any
-	 * subscription registered for the given pif key.
+	 * subscription registered for the given process key.
 	 * All hooks that were added by the registry are removed from the prolog interface.
 	 * @param key
 	 * 
@@ -145,12 +145,12 @@ public interface PrologProcessRegistry {
 	 * If the same subscription is already registered, this method has no effect.
 	 * 
 	 * If there is already a PrologProcess instance registered for the
-	 * subscriptions pifKey, this method will cause a call to the method
+	 * subscriptions processKey, this method will cause a call to the method
 	 * configure() on the argument Subscription instance. 
 	 * In addition, for each registered Hook Descriptor that has at least one
 	 * tag in common with the subscription, said descriptor will be used to 
 	 * create a hook, parameterize it with the return value of the method
-	 * getData() called on the subscription and add register it with the pif. 
+	 * getData() called on the subscription and add register it with the process. 
 	 * 
 	 * If the argument Subscription is an instance of PersistableSubscription,
 	 * the registry will take the neccesary steps to save the subscription on
@@ -164,7 +164,7 @@ public interface PrologProcessRegistry {
 	 * Remove a subscription from the registry.
 	 * 
 	 * If there is currently a PrologProcess instance registered for the
-	 * subscriptions pifKey, this method will cause a call to the method
+	 * subscriptions processKey, this method will cause a call to the method
 	 * deconfigure() on the argument Subscription instance.
 	 * In addition all hooks that were registered to this prolog interface 
 	 * because of this subscription will be removed, unless they are still

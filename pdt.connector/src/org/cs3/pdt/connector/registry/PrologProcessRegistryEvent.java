@@ -23,18 +23,18 @@ public class PrologProcessRegistryEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 
-	public PrologProcess pif = null;
+	public PrologProcess process = null;
 
 	public String key = null;
 
 	public Subscription subscription = null;
 
 	public PrologProcessRegistryEvent(Object source, 
-			PrologProcess pif,
+			PrologProcess process,
 			String key, 
 			Subscription subscription) {
 		super(source);
-		this.pif = pif;
+		this.process = process;
 		this.key = key;
 		this.subscription = subscription;
 	}
@@ -42,9 +42,9 @@ public class PrologProcessRegistryEvent extends EventObject {
 	public PrologProcessRegistryEvent(PrologProcessRegistry reg,
 			Subscription subscription) {
 		super(reg);
-		this.key = subscription.getPifKey();
+		this.key = subscription.getProcessKey();
 		this.subscription = subscription;
-		this.pif = reg.getPrologProcess(key);
+		this.process = reg.getPrologProcess(key);
 	}
 
 	
@@ -52,7 +52,7 @@ public class PrologProcessRegistryEvent extends EventObject {
 			String key) {
 		super(reg);
 		this.key = key;
-		this.pif = reg.getPrologProcess(key);
+		this.process = reg.getPrologProcess(key);
 	}
 }
 

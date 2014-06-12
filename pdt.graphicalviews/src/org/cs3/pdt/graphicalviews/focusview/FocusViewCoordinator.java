@@ -30,7 +30,7 @@ public class FocusViewCoordinator extends ViewCoordinatorBase {
 		currentFocusView = views.get(path);
 		if (currentFocusView == null) {
 			PDTGraphView pdtGraphView = new PDTGraphView(focusView);
-			GraphPIFLoaderBase loader = focusView.createGraphPIFLoader(pdtGraphView);
+			GraphProcessLoaderBase loader = focusView.createGraphProcessLoader(pdtGraphView);
 			loader.setCurrentPath(path);
 			
 			currentFocusView = focusView.createFocusViewControl(pdtGraphView, loader);

@@ -43,14 +43,14 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	public void run(IAction action) {
 		if (selectedFiles != null) {
 			
-			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
+			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 			if (isSelectionChecked()) {
 				for (IFile file : selectedFiles) {
-					setEntryPoint(file, false, pif);
+					setEntryPoint(file, false, process);
 				}
 			} else {
 				for (IFile file : selectedFiles) {
-					setEntryPoint(file, true, pif);
+					setEntryPoint(file, true, process);
 				}
 			}
 			PDTCommonPlugin.getDefault().notifyDecorators();
@@ -103,7 +103,7 @@ public class ToggleEntryPointAction implements IActionDelegate {
 		return false;
 	}
 	
-	private void setEntryPoint(IFile file, boolean b, PrologProcess pif) {
+	private void setEntryPoint(IFile file, boolean b, PrologProcess process) {
 		try {
 			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, Boolean.toString(b));
 			if (b) {
@@ -115,14 +115,14 @@ public class ToggleEntryPointAction implements IActionDelegate {
 			e.printStackTrace();
 		}
 		
-		if (pif != null) {
+		if (process != null) {
 			try {
 				String prologFileName = QueryUtils.prologFileNameQuoted(file.getLocation().toFile().getCanonicalFile());
 				
 				if (b) {
-					pif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
+					process.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
 				} else {
-					pif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, prologFileName));
+					process.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, prologFileName));
 				}
 			} catch (IOException e) {
 				Debug.report(e);

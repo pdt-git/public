@@ -151,15 +151,15 @@ public class CTermUtil {
 
 	
 	public static CTerm parseNonCanonicalTerm(String query) throws IOException, PrologProcessException {
-		PrologProcess pif = Connector.newPrologProcess();
-		CTerm returnTerm = parseNonCanonicalTerm(query, pif);
-		pif.stop();
+		PrologProcess process = Connector.newPrologProcess();
+		CTerm returnTerm = parseNonCanonicalTerm(query, process);
+		process.stop();
 		return returnTerm;
 	}
 
-	public static CTerm parseNonCanonicalTerm(String term, PrologProcess pif) throws PrologProcessException {
+	public static CTerm parseNonCanonicalTerm(String term, PrologProcess process) throws PrologProcessException {
 
-		PrologSession session = pif.getSession(PrologProcess.CTERMS|PrologProcess.UNBOUND_VARIABLES);
+		PrologSession session = process.getSession(PrologProcess.CTERMS|PrologProcess.UNBOUND_VARIABLES);
 		
 		String query = QueryUtils.bT("atom_to_term", QueryUtils.quoteAtom(term), "Term", "D");
 

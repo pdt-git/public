@@ -32,14 +32,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.progress.UIJob;
 
-public abstract class GraphPIFLoaderBase {
+public abstract class GraphProcessLoaderBase {
 
 	protected File helpFile;
 	protected PDTGraphView view;
-	private PrologProcess pif;
+	private PrologProcess process;
 	//private ExecutorService executor = Executors.newCachedThreadPool();
 
-	public GraphPIFLoaderBase(PDTGraphView view, String helpFileName) {
+	public GraphProcessLoaderBase(PDTGraphView view, String helpFileName) {
 		this.view = view;
 		helpFile = new File(System.getProperty("java.io.tmpdir"), helpFileName);
 	}
@@ -50,14 +50,14 @@ public abstract class GraphPIFLoaderBase {
 
 		try {
 			helpFile.delete();
-			pif = getActivePif();
-			if (pif != null) {
+			process = getActiveProcess();
+			if (process != null) {
 				String query = generateQuery(helpFile);
-				Map<String, Object> output = sendQueryToCurrentPiF(query);
+				Map<String, Object> output = sendQueryToCurrentProcess(query);
 					
 				// query =
 				// "collect_ids_for_focus_file(FocusId,Files,CalledPredicates,Calls)";
-				// Map<String, Object> result = sendQueryToCurrentPiF(query);
+				// Map<String, Object> result = sendQueryToCurrentProcess(query);
 				// result.get("FocusId");
 
 				new UIJob("Layouting") {
@@ -117,17 +117,17 @@ public abstract class GraphPIFLoaderBase {
 		view.loadGraph(helpFile.toURI().toURL());
 	};
 	
-	public Map<String, Object> sendQueryToCurrentPiF(String query)
+	public Map<String, Object> sendQueryToCurrentProcess(String query)
 		throws PrologProcessException {
 	
-		PrologSession session = pif.getSession(PrologProcess.LEGACY);
+		PrologSession session = process.getSession(PrologProcess.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);
 		return result;
 	}
 
-	public PrologProcess getActivePif() {
-		PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
-		return pif;
+	public PrologProcess getActiveProcess() {
+		PrologProcess process = PDTCommonUtil.getActivePrologProcess();
+		return process;
 	}
 
 	public abstract void setCurrentPath(String currentPath);

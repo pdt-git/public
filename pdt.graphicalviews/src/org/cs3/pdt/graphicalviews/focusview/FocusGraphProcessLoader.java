@@ -26,14 +26,14 @@ import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.prolog.connector.common.QueryUtils;
 
-public class FocusGraphPIFLoader extends GraphPIFLoaderBase {
+public class FocusGraphProcessLoader extends GraphProcessLoaderBase {
 
 	private static final String NAME_OF_FOCUS_HELPING_FILE = "pdt-focus-help.graphml";
 
 	private String focusFile;
 	private List<String> dependencies = new ArrayList<String>();
 
-	public FocusGraphPIFLoader(PDTGraphView view) {
+	public FocusGraphProcessLoader(PDTGraphView view) {
 		super(view, NAME_OF_FOCUS_HELPING_FILE);
 	}
 

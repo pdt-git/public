@@ -160,12 +160,12 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
 		addField(timeoutFieldEditor);
 
-		// The host the PIF server is listening on
+		// The host the process server is listening on
 		StringFieldEditor host = new MyStringFieldEditor(Connector.PREF_HOST, "Server host", getFieldEditorParent());
 		host.setEnabled(false, getFieldEditorParent());
 		addField(host);
 
-		// The port the PIF server is listening on
+		// The port the process server is listening on
 		IntegerFieldEditor port = new MyIntegerFieldEditor(Connector.PREF_PORT, "Server port", getFieldEditorParent());
 		port.setEnabled(false, getFieldEditorParent());
 		addField(port);
@@ -250,9 +250,9 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
-			PrologProcess pif = registry.getPrologProcess(registry.getSubscription(id).getPifKey());
-			if (pif != null && configuration.equals(pif.getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
-				pif.initOptions(new EclipsePreferenceProvider(PDTConnectorPlugin.getDefault(), configuration));
+			PrologProcess process = registry.getPrologProcess(registry.getSubscription(id).getProcessKey());
+			if (process != null && configuration.equals(process.getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
+				process.initOptions(new EclipsePreferenceProvider(PDTConnectorPlugin.getDefault(), configuration));
 			}
 		}
 	}

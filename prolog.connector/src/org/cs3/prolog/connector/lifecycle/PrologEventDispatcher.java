@@ -52,17 +52,17 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	Object eventTicket = new Object();
 
-	private PrologProcess pif;
+	private PrologProcess process;
 	
 	private HashSet<String> subjects = new HashSet<String>();
 
-	public PrologEventDispatcher(PrologProcess pif) {
-		this.pif = pif;
-		//make sure that we do not hang the pif on shutdown.
+	public PrologEventDispatcher(PrologProcess process) {
+		this.process = process;
+		//make sure that we do not hang the process on shutdown.
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			@Override
-			public void onInit(PrologProcess pif, PrologSession initSession) throws PrologException, PrologProcessException {				
+			public void onInit(PrologProcess process, PrologSession initSession) throws PrologException, PrologProcessException {				
 				try {
 					String query = QueryUtils.bT("use_module", QueryUtils.prologFileNameQuoted(getObserveFile()));
 					initSession.queryOnce(query);
@@ -72,7 +72,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void afterInit(PrologProcess pif) throws PrologProcessException {
+			public void afterInit(PrologProcess process) throws PrologProcessException {
 				synchronized (listenerLists) {
 					Set<String> subjects = listenerLists.keySet();
 					for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
@@ -83,7 +83,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologException, PrologProcessException {
+			public void beforeShutdown(PrologProcess process, PrologSession session) throws PrologException, PrologProcessException {
 				synchronized (subjects) {
 					subjects.clear();
 				}
@@ -91,7 +91,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void onError(PrologProcess pif) {
+			public void onError(PrologProcess process) {
 				synchronized (subjects) {
 					subjects.clear();
 				}
@@ -104,18 +104,18 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 			
 			@Override
-			public void lateInit(PrologProcess pif) {
+			public void lateInit(PrologProcess process) {
 				;
 			}
 
 		};
 
-		pif.addLifeCycleHook(hook, null,null);
-		if(pif.isUp()){
+		process.addLifeCycleHook(hook, null,null);
+		if(process.isUp()){
 			PrologSession s =null;
 			try{
-				s= pif.getSession(PrologProcess.NONE);
-				hook.onInit(pif,s);
+				s= process.getSession(PrologProcess.NONE);
+				hook.onInit(process,s);
 
 			} catch (PrologProcessException e) {
 				Debug.rethrow(e);
@@ -193,14 +193,14 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 		}
 		if (session == null) {
-			session = pif.getAsyncSession(PrologProcess.NONE);
+			session = process.getAsyncSession(PrologProcess.NONE);
 			session.addBatchListener(this);
 		} else {
 			abort();
 		}
-		PrologSession s = pif.getSession(PrologProcess.NONE);
+		PrologSession s = process.getSession(PrologProcess.NONE);
 		try {
-			String query = "pif_observe('" + session.getProcessorThreadAlias() + "',"
+			String query = "process_observe('" + session.getProcessorThreadAlias() + "',"
 			+ subject + ","+QueryUtils.quoteAtom(subject) +")";
 			s.queryOnce(query);
 			synchronized (subjects) {
@@ -219,7 +219,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		}
 
 		abort();
-		session.queryOnce(observerTicket, "thread_self(_Me),pif_unobserve(_Me,"
+		session.queryOnce(observerTicket, "thread_self(_Me),process_unobserve(_Me,"
 				+ subject + ")");
 		if (!listenerLists.isEmpty()) {
 			dispatch();
@@ -230,11 +230,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	}
 
 	private void dispatch() throws PrologProcessException {
-		session.queryAll(eventTicket, "pif_dispatch(Subject,Key,Event)");
+		session.queryAll(eventTicket, "process_dispatch(Subject,Key,Event)");
 	}
 
 	private void abort() throws PrologProcessException {
-		PrologSession s = pif.getSession(PrologProcess.NONE);
+		PrologSession s = process.getSession(PrologProcess.NONE);
 		try {
 			abort(s);
 		} finally {
@@ -323,11 +323,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		if (observeFile == null) {
 			String tempDir = System.getProperty("java.io.tmpdir");
 			InputStream resourceAsStream;
-			resourceAsStream = PrologEventDispatcher.class.getResourceAsStream("pif_observe.pl");
+			resourceAsStream = PrologEventDispatcher.class.getResourceAsStream("process_observe.pl");
 			if (resourceAsStream == null) {
-				throw new RuntimeException("Cannot find pif_observe.pl!");
+				throw new RuntimeException("Cannot find process_observe.pl!");
 			}
-			observeFile = new File(tempDir, "pif_observe.pl");
+			observeFile = new File(tempDir, "process_observe.pl");
 			if (observeFile.exists()) {
 				observeFile.delete();
 			}

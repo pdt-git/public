@@ -38,7 +38,7 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSessionTest extends TestCase {
 
-	private PrologProcess pif;
+	private PrologProcess process;
 
 	private Recorder rec;
 
@@ -47,17 +47,17 @@ public class AsyncSocketSessionTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		pif = Connector.newUninitializedPrologProcess();
+		process = Connector.newUninitializedPrologProcess();
 
-		pif.start();
+		process.start();
 		rec = new Recorder();
-		session = pif.getAsyncSession();
+		session = process.getAsyncSession();
 		session.addBatchListener(rec);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		pif.stop();
+		process.stop();
 	}
 
 	class Record {
@@ -242,7 +242,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	}
 
 	public void test_queryOnce_sequence01() throws Throwable {
-		// PrologSession session=pif.getSession();
+		// PrologSession session=process.getSession();
 		session.queryOnce("1", "member(A,[a,b,c])");
 		session.queryOnce("2", "member(a,[a,b,c])");
 		session.queryOnce("3", "member(a,[a,b,c)");
@@ -258,7 +258,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	}
 
 	public void test_queryAll_sequence01() throws Throwable {
-		// PrologSession session=pif.getSession();
+		// PrologSession session=process.getSession();
 		session.queryAll("1", "member(A,[a,b,c])");
 		session.queryAll("2", "member(a,[a,b,c])");
 		session.queryAll("3", "member(a,[a,b,c)");
@@ -412,7 +412,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			pif.getAsyncSession(PrologProcess.CTERMS
+			process.getAsyncSession(PrologProcess.CTERMS
 					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -420,7 +420,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			pif.getAsyncSession(PrologProcess.CTERMS
+			process.getAsyncSession(PrologProcess.CTERMS
 					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -429,7 +429,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			pif.getAsyncSession(PrologProcess.CTERMS
+			process.getAsyncSession(PrologProcess.CTERMS
 					| PrologProcess.UNQUOTE_ATOMS
 					| PrologProcess.PROCESS_LISTS);
 			fail();
@@ -494,7 +494,7 @@ public class AsyncSocketSessionTest extends TestCase {
 				.queryAll(
 						ticket,
 						"repeat,writeln(waiting),thread_get_message(test(M)),writeln(got(M)),(M==stop,!;true)");
-		PrologSession syncSession = pif.getSession();
+		PrologSession syncSession = process.getSession();
 		rec.clear();
 		synchronized (rec) {
 			syncSession.queryOnce("writeln('i am here'),thread_send_message('"
@@ -533,7 +533,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		Record r = (Record) rec.records.get(0);
 		final String alias = (String) r.event.getBindings().get("Alias");
 		session.queryAll("2", "repeat,thread_get_message(test(M))");
-		final PrologSession syncSession = pif.getSession();
+		final PrologSession syncSession = process.getSession();
 
 		synchronized (rec) {
 			syncSession.queryOnce("thread_send_message('" + alias
@@ -598,10 +598,10 @@ public class AsyncSocketSessionTest extends TestCase {
 		int N = 30;
 		AsyncPrologSession[] sessions = new AsyncPrologSession[N];
 		for (int i = 0; i < N; i++) {
-			sessions[i] = pif.getAsyncSession();
+			sessions[i] = process.getAsyncSession();
 		}
 		try {
-			pif.getAsyncSession();
+			process.getAsyncSession();
 
 		} catch (PrologProcessException e) {
 			e.printStackTrace();

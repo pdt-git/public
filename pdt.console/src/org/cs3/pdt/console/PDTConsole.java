@@ -21,13 +21,13 @@ final public class PDTConsole {
      * the port on which the prolog console server is listening.
      */
 
-	public static final String CONTRIB_PIF_SELECTOR_ID = "pdt.console.contribution.pifselector";
+	public static final String CONTRIB_PROCESS_SELECTOR_ID = "pdt.console.contribution.processselector";
 	public static final String COMMAND_PASTE_FILENAME = "pdt.console.paste_filename";
 	public static final String CONTEXT_USING_CONSOLE_VIEW = "org.cs3.pdt.console";
 	public static final int ERR_UNKNOWN = -1;
-	public static final int ERR_PIF = -2;
-	public static final int CX_CONSOLE_VIEW_ATTACH_TO_PIF = -3;
-	public static final int CX_CONSOLE_SWITCH_PIF = -4;
+	public static final int ERR_PROCESS = -2;
+	public static final int CX_CONSOLE_VIEW_ATTACH_TO_PROCESS = -3;
+	public static final int CX_CONSOLE_SWITCH_PROCESS = -4;
 
 	// Font & Color
 	public static final String PREF_CONSOLE_FONT = "pdt.console.font";

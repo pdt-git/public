@@ -4,6 +4,6 @@ import org.cs3.prolog.connector.process.PrologProcess;
 
 public interface PrologProcessStartListener {
 	
-	void prologProcessStarted(PrologProcess pif);
+	void prologProcessStarted(PrologProcess process);
 
 }

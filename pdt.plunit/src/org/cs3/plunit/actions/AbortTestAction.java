@@ -51,11 +51,11 @@ public class AbortTestAction implements IObjectActionDelegate {
 			PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 			Set<String> keys = registry.getAllKeys();
 			for (String key : keys) {
-				PrologProcess pif = registry.getPrologProcess(key);
+				PrologProcess process = registry.getPrologProcess(key);
 				String threadId = readThreadIdFromFile();
-				int pifPort = (Integer)pif.getClass().getMethod("getPort").invoke(pif);
-				if(pifPort == port){
-					s=pif.getSession();
+				int processPort = (Integer)process.getClass().getMethod("getPort").invoke(process);
+				if(processPort == port){
+					s=process.getSession();
 					if(threadId != null){
 						s.queryOnce("catch(thread_signal('"+threadId +"', abort),_,fail)");
 					}

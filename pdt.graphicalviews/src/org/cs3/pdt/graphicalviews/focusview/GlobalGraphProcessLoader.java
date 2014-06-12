@@ -17,7 +17,6 @@ package org.cs3.pdt.graphicalviews.focusview;
 import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 
-public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
+public class GlobalGraphProcessLoader extends GraphProcessLoaderBase {
 	
 	private static final String NAME_OF_GLOBAL_HELPING_FILE = "pdt-global-help.graphml";
 	
@@ -47,11 +46,11 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 	protected List<String> paths = new ArrayList<String>();
 	protected String currentPath;
 
-	public GlobalGraphPIFLoader(PDTGraphView view) {
+	public GlobalGraphProcessLoader(PDTGraphView view) {
 		super(view, NAME_OF_GLOBAL_HELPING_FILE);
 	}
 	
-	protected GlobalGraphPIFLoader(PDTGraphView view, String helpFileName) {
+	protected GlobalGraphProcessLoader(PDTGraphView view, String helpFileName) {
 		super(view, helpFileName);
 	}
 	

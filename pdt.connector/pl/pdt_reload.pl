@@ -95,7 +95,7 @@ notify_reload_listeners(_).
 
 %pdt_reload_listener(Files) :-
 %    atomic_list_concat(Files, '<>', FileList),
-%    catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
+%    catch(process_observe:process_notify(file_loaded,FileList),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *

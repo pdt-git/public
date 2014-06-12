@@ -57,11 +57,11 @@ public class PLMarkerUtils {
 				+ severity);
 	}
 
-	public static void addMarkers(PrologProcess pif, List<String> allConsultedFiles, IProgressMonitor monitor) {
+	public static void addMarkers(PrologProcess process, List<String> allConsultedFiles, IProgressMonitor monitor) {
 		monitor.beginTask("Update markers", 2);
 		PrologSession session =null;
 		try {
-			session = pif.getSession();
+			session = process.getSession();
 			Map<String, IFile> fileNameToIFiles = new HashMap<String, IFile>();
 			monitor.subTask("add markers for errors and warnings");
 			collectIFilesForFileNames(allConsultedFiles, fileNameToIFiles);

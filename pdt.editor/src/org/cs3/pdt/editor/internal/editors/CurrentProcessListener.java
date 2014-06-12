@@ -33,7 +33,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 
-public class CurrentPifListener implements PrologEventListener, ActivePrologProcessListener {
+public class CurrentProcessListener implements PrologEventListener, ActivePrologProcessListener {
 
 	@Override
 	public void update(PrologEvent e) {
@@ -65,13 +65,13 @@ public class CurrentPifListener implements PrologEventListener, ActivePrologProc
 		Display.getDefault().syncExec(r);
 	}
 
-	PrologProcess currentPif;
+	PrologProcess currentProcess;
 	private PrologEventDispatcher currentDispatcher;
 	
-	private void addPifListener() {
-		if (currentPif != null) {
-			Debug.debug("add edit registry listener for pif " + currentPif.toString());
-			currentDispatcher = new PrologEventDispatcher(currentPif);
+	private void addProcessListener() {
+		if (currentProcess != null) {
+			Debug.debug("add edit registry listener for process " + currentProcess.toString());
+			currentDispatcher = new PrologEventDispatcher(currentProcess);
 			try {
 				currentDispatcher.addPrologEventListener(PDTPredicates.PDT_EDIT_HOOK, this);
 			} catch (PrologProcessException e) {
@@ -80,9 +80,9 @@ public class CurrentPifListener implements PrologEventListener, ActivePrologProc
 			
 		}
 	}
-	private void removePifListener() {
-		if (currentPif != null && currentDispatcher != null) {
-			Debug.debug("remove edit registry listener for pif " + currentPif.toString());
+	private void removeProcessListener() {
+		if (currentProcess != null && currentDispatcher != null) {
+			Debug.debug("remove edit registry listener for process " + currentProcess.toString());
 			try {
 				currentDispatcher.removePrologEventListener(PDTPredicates.PDT_EDIT_HOOK, this);
 			} catch (PrologProcessException e) {
@@ -93,12 +93,12 @@ public class CurrentPifListener implements PrologEventListener, ActivePrologProc
 
 	private void updateEntryPoints() {
 		try {
-			currentPif.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, "_"));
+			currentProcess.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, "_"));
 			
 			for (IFile file : PDTCommonPlugin.getDefault().getEntryPoints()) {
 				try {
 					String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
-					currentPif.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
+					currentProcess.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -110,16 +110,16 @@ public class CurrentPifListener implements PrologEventListener, ActivePrologProc
 	}
 
 	@Override
-	public void activePrologProcessChanged(PrologProcess pif) {
-		if (currentPif == pif) {
+	public void activePrologProcessChanged(PrologProcess process) {
+		if (currentProcess == process) {
 			return;
 		}
 		
-		removePifListener();
+		removeProcessListener();
 		
-		currentPif = pif;
+		currentProcess = process;
 		
-		addPifListener();
+		addProcessListener();
 		
 		updateEntryPoints();
 	}

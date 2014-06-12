@@ -180,10 +180,10 @@ public class PDTOutlineQuery {
 //	}
 	
 	public static boolean isFileLoaded(String fileName) {
-		PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
+		PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 		Map<String, Object> result = null;
 		try {
-			result = pif.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, QueryUtils.quoteAtom(fileName)));
+			result = process.queryOnce(bT(PDTCommonPredicates.LOADED_FILE, QueryUtils.quoteAtom(fileName)));
 		} catch (PrologProcessException e) {
 			Debug.report(e);
 		}

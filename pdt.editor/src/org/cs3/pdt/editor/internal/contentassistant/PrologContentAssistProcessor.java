@@ -181,7 +181,7 @@ public abstract class PrologContentAssistProcessor {
 			Debug.report(e);
 //			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
 //					.getErrorMessageProvider(), viewer.getTextWidget()
-//					.getShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
+//					.getShell(), PDT.ERR_PROCESS, PDT.CX_COMPLETION, e);
 			return null;
 		} catch (CoreException e) {
 			Debug.report(e);

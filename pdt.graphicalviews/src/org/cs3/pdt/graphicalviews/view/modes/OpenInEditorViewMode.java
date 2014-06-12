@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
-import org.cs3.pdt.graphicalviews.focusview.GraphPIFLoaderBase;
+import org.cs3.pdt.graphicalviews.focusview.GraphProcessLoaderBase;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.model.GraphDataHolder;
 import org.cs3.prolog.connector.common.QueryUtils;
@@ -35,11 +35,11 @@ import y.view.ViewMode;
 public class OpenInEditorViewMode extends ViewMode { 
 	
 	private PDTGraphView view;
-	private GraphPIFLoaderBase pifLoader;
+	private GraphProcessLoaderBase processLoader;
 
-	public OpenInEditorViewMode(PDTGraphView view, GraphPIFLoaderBase pifLoader) {
+	public OpenInEditorViewMode(PDTGraphView view, GraphProcessLoaderBase processLoader) {
 		this.view = view;
-		this.pifLoader = pifLoader;
+		this.processLoader = processLoader;
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class OpenInEditorViewMode extends ViewMode {
 			Integer targetArity = (Integer)dataHolder.getArityMap().get(target);
 			
 			String LocationArgument = "TermPosition";
-			Map<String, Object> res = pifLoader.sendQueryToCurrentPiF(QueryUtils.bT(PDTGraphPredicates.CALL_LOCATION_PREDICATE, sourceModule, sourceFunctor, sourceArity, targetModule, targetFunctor, targetArity, LocationArgument));
+			Map<String, Object> res = processLoader.sendQueryToCurrentProcess(QueryUtils.bT(PDTGraphPredicates.CALL_LOCATION_PREDICATE, sourceModule, sourceFunctor, sourceArity, targetModule, targetFunctor, targetArity, LocationArgument));
 			if (res != null && res.containsKey(LocationArgument))
 				return (String)res.get(LocationArgument);
 			

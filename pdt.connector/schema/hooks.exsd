@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.cs3.prolog.connector">
+<schema targetNamespace="org.cs3.prolog.connector" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.cs3.prolog.connector" id="hooks" name="Lifecycle Hooks"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          Define code hooks that should be executed on certain points during the lifecycle of the PrologInterface.
       </documentation>
@@ -12,9 +12,9 @@
 
    <element name="extension">
       <annotation>
-         <documentation>
-            
-         </documentation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
       </annotation>
       <complexType>
          <choice minOccurs="0" maxOccurs="unbounded">
@@ -58,9 +58,9 @@
                <documentation>
                   fully qualified class name of a class implementing the org.cs3.pl.prolog.LifeCycleHook interface.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn=":org.cs3.pl.LifeCycleHook"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="dependsOn" type="string">
@@ -70,9 +70,9 @@
 
 Use of this attribute is deprecated, please use the hookDependency element instead.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute deprecated="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -85,14 +85,14 @@ Use of this attribute is deprecated, please use the hookDependency element inste
          <attribute name="key" type="string">
             <annotation>
                <documentation>
-                  An optional key identifying a PrologInterface instance created by the PDT.&lt;p&gt;
-This hook will be registered with all PIF instance that are created using the &lt;code&gt; org.cs3.pdt.PDTPlugin.getPrologInterface(String key)&lt;/code&gt; method with a matching &lt;code&gt;key&lt;/code&gt; argument. If this attribute is ommited, the hook is registered with every PIF created by the PDT.
+                  An optional key identifying a PrologProcess instance created by the PDT.&lt;p&gt;
+This hook will be registered with all PrologProcess instances that are created using the &lt;code&gt; org.cs3.pdt.PDTPlugin.getPrologInterface(String key)&lt;/code&gt; method with a matching &lt;code&gt;key&lt;/code&gt; argument. If this attribute is ommited, the hook is registered with every PrologProcess created by the PDT.
 
 Use of this attribute is deprecated, please use tag elements instead.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute deprecated="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -117,9 +117,9 @@ Use of this attribute is deprecated, please use tag elements instead.
                <documentation>
                   the resource that should be consulted.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="resource"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -157,57 +157,49 @@ See Extension Point org.cs3.prolog.connector.prologLibrary.
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn=":org.cs3.prolog.connector.RegistryHook"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter the first release in which this extension point appears.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter extension point usage example here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiInfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter API information here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          [Enter information about supplied implementation of this extension point.]
       </documentation>
    </annotation>
 
-   <annotation>
-      <appInfo>
-         <meta.section type="copyright"/>
-      </appInfo>
-      <documentation>
-         
-      </documentation>
-   </annotation>
 
 </schema>

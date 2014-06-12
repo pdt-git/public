@@ -71,7 +71,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 
 	private static PDTBreakpointHandler instance;
 
-	private PrologProcess currentPif = null;
+	private PrologProcess currentProcess = null;
 	private PrologEventDispatcher currentDispatcher;
 	private Set<String> deletedIds;
 
@@ -82,15 +82,15 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	private PDTBreakpointHandler() {
-		checkForPif();
+		checkForProcess();
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
 	}
 
-	private void checkForPif() {
-		if (currentPif == null) {
-			currentPif = PDTCommonUtil.getActivePrologProcess();
-			addPifListener();
+	private void checkForProcess() {
+		if (currentProcess == null) {
+			currentProcess = PDTCommonUtil.getActivePrologProcess();
+			addProcessListener();
 		}
 	}
 
@@ -145,7 +145,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 									offset = UIUtils.physicalToLogicalOffset(document2, document2.getLineInformation(m.getLineNumber() - 1).getOffset());
 								}
 								try {
-									currentPif.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileNameQuoted(m.getFile()), m.getLineNumber(), offset, "Id"));
+									currentProcess.queryOnce(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileNameQuoted(m.getFile()), m.getLineNumber(), offset, "Id"));
 								} catch (PrologProcessException e) {
 									Debug.report(e);
 								}
@@ -269,11 +269,11 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	public void removeBreakpointFactsForFile(String prologFileName) {
-		checkForPif();
+		checkForProcess();
 		try {
-			List<Map<String, Object>> results = currentPif.queryAll(bT(BREAKPOINT_PROPERTY, "Id" , "file('" + prologFileName + "')"));
+			List<Map<String, Object>> results = currentProcess.queryAll(bT(BREAKPOINT_PROPERTY, "Id" , "file('" + prologFileName + "')"));
 			for (Map<String, Object> r : results) {
-				currentPif.queryOnce(bT(DELETE_BREAKPOINT, r.get("Id")));
+				currentProcess.queryOnce(bT(DELETE_BREAKPOINT, r.get("Id")));
 			}
 		} catch (PrologProcessException e) {
 			Debug.report(e);
@@ -285,7 +285,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 			UIUtils.displayErrorDialog(Display.getCurrent().getActiveShell(), "File is not in workspace", "You can only set breakpoint markers to files, which are in your workspace.");
 			return;
 		}
-		checkForPif();
+		checkForProcess();
 		String prologFileName;
 		prologFileName = FileUtils.prologFileNameQuoted(file);
 		if (line > 0) {
@@ -294,7 +294,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 				// add marker
 				if (file != null) {
 					try {
-						boolean isSourceFile = (currentPif.queryOnce(bT(SOURCE_FILE, prologFileName)) != null);
+						boolean isSourceFile = (currentProcess.queryOnce(bT(SOURCE_FILE, prologFileName)) != null);
 						if (isSourceFile) {
 							executeSetBreakpointQuery(prologFileName, line, offset);
 						} else {
@@ -309,7 +309,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 				try {
 					String id = existingMarker.getAttribute(BREAKPOINT_ID, "");
 					if (!id.isEmpty()) {
-						currentPif.queryOnce(bT(BREAKPOINT_PROPERTY, id, "file(_)"),
+						currentProcess.queryOnce(bT(BREAKPOINT_PROPERTY, id, "file(_)"),
 								bT(DELETE_BREAKPOINT, id));
 					}
 					// if for some strange reason the marker is still there, even if there is no
@@ -327,14 +327,14 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	public void executeSetBreakpointQuery(String prologFileName, int line, int offset) throws PrologProcessException {
 		Debug.debug("Set breakpoint in file " + prologFileName + " (line: " + line + ", offset: " + offset + ")");
 		String query = bT(PDTPredicates.PDT_SET_BREAKPOINT, prologFileName, line, offset, "_");
-		PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
-		pif.queryOnce(query);
+		PrologProcess process = PDTCommonUtil.getActivePrologProcess();
+		process.queryOnce(query);
 	}
 
-	private void loadBreakpointsFromPif() {
+	private void loadBreakpointsFromProcess() {
 		List<Map<String, Object>> results;
 		try {
-			results = currentPif.queryAll(bT(BREAKPOINT_PROPERTY, "Id" , "file(File)"),
+			results = currentProcess.queryAll(bT(BREAKPOINT_PROPERTY, "Id" , "file(File)"),
 					bT(BREAKPOINT_PROPERTY, "Id" , "line_count(Line)"),
 					bT(BREAKPOINT_PROPERTY, "Id" , "character_range(Offset, Length)"));
 			for (Map<String, Object> result : results) {
@@ -357,12 +357,12 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 
 	}
 
-	private void addPifListener() {
-		if (currentPif != null) {
-			Debug.debug("add listener for pif " + currentPif.toString());
+	private void addProcessListener() {
+		if (currentProcess != null) {
+			Debug.debug("add listener for process " + currentProcess.toString());
 
-			currentDispatcher = new PrologEventDispatcher(currentPif);
-			currentPif.addLifeCycleHook(this, BREAKPOINT_LIFECYCLE_HOOK, DEPENDENCIES);
+			currentDispatcher = new PrologEventDispatcher(currentProcess);
+			currentProcess.addLifeCycleHook(this, BREAKPOINT_LIFECYCLE_HOOK, DEPENDENCIES);
 			try {
 				currentDispatcher.addPrologEventListener(ADD_BREAKPOINT, this);
 				currentDispatcher.addPrologEventListener(REMOVE_BREAKPOINT, this);
@@ -373,10 +373,10 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 		}
 	}
 
-	private void removePifListener() {
-		if (currentPif != null && currentDispatcher != null) {
-			Debug.debug("remove listener for pif " + currentPif.toString());
-			currentPif.removeLifeCycleHook(BREAKPOINT_LIFECYCLE_HOOK);
+	private void removeProcessListener() {
+		if (currentProcess != null && currentDispatcher != null) {
+			Debug.debug("remove listener for process " + currentProcess.toString());
+			currentProcess.removeLifeCycleHook(BREAKPOINT_LIFECYCLE_HOOK);
 			try {
 				currentDispatcher.removePrologEventListener(ADD_BREAKPOINT, this);
 				currentDispatcher.removePrologEventListener(REMOVE_BREAKPOINT, this);
@@ -391,7 +391,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 		if (e.getSubject().equals(ADD_BREAKPOINT)) {
 			String id = e.getEvent();
 			try {
-				Map<String, Object> result = currentPif.queryOnce(bT(PDTPredicates.PDT_BREAKPOINT_PROPERTIES, id, "File", "Line", "Offset", "Length"));
+				Map<String, Object> result = currentProcess.queryOnce(bT(PDTPredicates.PDT_BREAKPOINT_PROPERTIES, id, "File", "Line", "Offset", "Length"));
 				String file = result.get("File").toString();
 				int line = Integer.parseInt(result.get("Line").toString());
 				int offset = Integer.parseInt(result.get("Offset").toString());
@@ -438,11 +438,11 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	@Override
-	public void onInit(PrologProcess pif, PrologSession initSession) throws PrologProcessException {
+	public void onInit(PrologProcess process, PrologSession initSession) throws PrologProcessException {
 	}
 
 	@Override
-	public void afterInit(final PrologProcess pif) throws PrologProcessException {
+	public void afterInit(final PrologProcess process) throws PrologProcessException {
 		shouldUpdateMarkers = true;
 		if (markerBackup == null || markerBackup.isEmpty()) {
 			markerBackup = null;
@@ -464,9 +464,9 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
 				}
 				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-//				PrologProcess pif = PDTCommonUtil.getActivePrologInterface();
+//				PrologProcess process = PDTCommonUtil.getActivePrologInterface();
 				try {
-					pif.queryOnce(buf.toString());
+					process.queryOnce(buf.toString());
 				} catch (PrologProcessException e) {
 					Debug.report(e);
 				}
@@ -480,8 +480,8 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	@Override
-	public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologProcessException {
-		if (currentPif.equals(pif)) {
+	public void beforeShutdown(PrologProcess process, PrologSession session) throws PrologProcessException {
+		if (currentProcess.equals(process)) {
 			shouldUpdateMarkers = false;
 			backupMarkers();
 			removeAllBreakpointMarkers();
@@ -489,8 +489,8 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	@Override
-	public void onError(PrologProcess pif) {
-		if (currentPif.equals(pif)) {
+	public void onError(PrologProcess process) {
+		if (currentProcess.equals(process)) {
 			shouldUpdateMarkers = false;
 			backupMarkers();
 		}
@@ -500,7 +500,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	public void setData(Object data) {}
 
 	@Override
-	public void lateInit(PrologProcess pif) {}
+	public void lateInit(PrologProcess process) {}
 
 	private void waitForDispatcherSubjectActive() {
 		PrologEventDispatcher dispatcher = currentDispatcher;
@@ -516,30 +516,30 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	@Override
-	public void activePrologProcessChanged(PrologProcess pif) {
-		if (currentPif == pif) {
+	public void activePrologProcessChanged(PrologProcess process) {
+		if (currentProcess == process) {
 			return;
 		}
 		
-		removePifListener();
+		removeProcessListener();
 
-		currentPif = pif;
+		currentProcess = process;
 		removeAllBreakpointMarkers();
-		loadBreakpointsFromPif();
+		loadBreakpointsFromProcess();
 
-		addPifListener();
+		addProcessListener();
 	}
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
-		if (pif.equals(currentPif) && markerBackup == null) {
+	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+		if (process.equals(currentProcess) && markerBackup == null) {
 			backupMarkers();
 		}
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
-		if (pif.equals(currentPif)) {
+	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
+		if (process.equals(currentProcess)) {
 			Debug.debug("update marker");
 			updateMarkers();
 		}

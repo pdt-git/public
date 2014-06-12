@@ -27,7 +27,7 @@ import org.cs3.prolog.connector.process.PrologProcess;
  * Simple data structure for storing information on a particular use of 
  * a PrologProcess instance.
  * 
- * Currently, only the pif's registry key and an informal description 
+ * Currently, only the process's registry key and an informal description 
  * is stored.  
  * 
  * If the need should arise, we may add arbitrary other "tags". 
@@ -40,7 +40,7 @@ public class DefaultSubscription implements PersistableSubscription {
 	private String id;
 	private String name;
 	private boolean persistent;
-	private String pifKey;
+	private String processKey;
 	private String[] tags = new String[0];
 	
 	/**
@@ -54,24 +54,24 @@ public class DefaultSubscription implements PersistableSubscription {
 	/**
 	 * Only for non-persistent subscriptions
 	 * @param id
-	 * @param pifID
+	 * @param processID
 	 * @param descritpion
 	 * @param name
 	 */
 	public DefaultSubscription(String id,
-			   String pifID,  
+			   String processID,  
 			   String descritpion, 
 			   String name){
-		this(id,pifID,descritpion,name,null,false);
+		this(id,processID,descritpion,name,null,false);
 	}
 	
 	public DefaultSubscription(String id,
-							   String pifID,  
+							   String processID,  
 							   String descritpion, 
 							   String name,
 							   String hostId,
 							   boolean persistent) {
-		this.setPifKey(pifID);
+		this.setProcessKey(processID);
 		this.setId(id);
 		this.setDescritpion(descritpion);
 		this.setName(name);
@@ -81,12 +81,12 @@ public class DefaultSubscription implements PersistableSubscription {
 	}
 
 	@Override
-	public void configure(PrologProcess pif) {
+	public void configure(PrologProcess process) {
 		;		
 	}
 
 	@Override
-	public void deconfigure(PrologProcess pif){
+	public void deconfigure(PrologProcess process){
 		;
 	}
 
@@ -117,8 +117,8 @@ public class DefaultSubscription implements PersistableSubscription {
 	 * @see org.cs3.pdt.runtime.Subscription#getKey()
 	 */
 	@Override
-	public String getPifKey() {
-		return pifKey;
+	public String getProcessKey() {
+		return processKey;
 	}
 
 	@Override
@@ -131,7 +131,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		setDescritpion(params.get("description"));
 		setName(params.get("name"));
 		setHostId(params.get("hostid"));
-		setPifKey(params.get("pifkey"));
+		setProcessKey(params.get("processkey"));
 		setId(params.get("id"));
 		setPersistent(params.get("persistent"));
 		if(params.get("tags")!= null) {
@@ -149,7 +149,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		m.put("description",getDescritpion());
 		m.put("name",getName());
 		m.put("hostid",getHostId());
-		m.put("pifkey",getPifKey());
+		m.put("processkey",getProcessKey());
 		m.put("id",getId());
 		m.put("persistent",String.valueOf(isPersistent()));
 		m.put("tags",Util.splice(tags, ","));
@@ -176,8 +176,8 @@ public class DefaultSubscription implements PersistableSubscription {
 		this.persistent = persistent;
 	}
 
-	protected void setPifKey(String key) {
-		this.pifKey = key;
+	protected void setProcessKey(String key) {
+		this.processKey = key;
 	}
 
 	@Override

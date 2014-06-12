@@ -33,7 +33,7 @@ public class PrologCompletionProvider {
 
 	private static final PredicateCompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new PredicateCompletionProposal[0];
 
-	private PrologProcess pif;
+	private PrologProcess process;
 
 	@SuppressWarnings("unchecked")
 	public IContentProposal[] getCompletionProposals(String line, int pos) {
@@ -86,7 +86,7 @@ public class PrologCompletionProvider {
 				"Doc");
 		List<Map<String, Object>> results;
 		try {
-			results = pif.queryAll(query);
+			results = process.queryAll(query);
 			for (Map<String,Object> result : results) {
 				String kind = result.get("Kind").toString();
 				String name = result.get("Name").toString();
@@ -195,12 +195,12 @@ public class PrologCompletionProvider {
 //			return "_";
 //		}
 	}
-	public void setPrologProcess(PrologProcess pif) {
-		this.pif = pif;
+	public void setPrologProcess(PrologProcess process) {
+		this.process = process;
 	}
 
 	public PrologProcess getPrologProcess() {
-		return pif;
+		return process;
 	}
 }
 

@@ -20,7 +20,7 @@ import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 public class DependenciesView extends GlobalView {
 	
 	@Override
-	public GraphPIFLoaderBase createGraphPIFLoader(PDTGraphView pdtGraphView) {
-		return new DependenciesGraphPIFLoader(pdtGraphView);
+	public GraphProcessLoaderBase createGraphProcessLoader(PDTGraphView pdtGraphView) {
+		return new DependenciesGraphProcessLoader(pdtGraphView);
 	}
 }

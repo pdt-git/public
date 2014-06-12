@@ -31,7 +31,7 @@ public interface ConsultListener {
 	 * A list of files which will be consulted into the given
 	 * {@link PrologProcess}
 	 * 
-	 * @param pif
+	 * @param process
 	 *            the given {@link PrologProcess}
 	 * @param files
 	 *            the list of files
@@ -39,13 +39,13 @@ public interface ConsultListener {
 	 *            a progress monitor
 	 * @throws PrologProcessException
 	 */
-	void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException;
+	void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException;
 
 	/**
 	 * A list of toplevel files has been be consulted successfully into the given
 	 * {@link PrologProcess}
 	 * 
-	 * @param pif
+	 * @param process
 	 *            the given {@link PrologProcess}
 	 * @param files
 	 *            the list of toplevel files
@@ -55,6 +55,6 @@ public interface ConsultListener {
 	 *            the list of all consulted files
 	 * @throws PrologProcessException
 	 */
-	void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException;
+	void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException;
 
 }

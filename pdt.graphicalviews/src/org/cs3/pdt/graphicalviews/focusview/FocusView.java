@@ -25,7 +25,7 @@ public class FocusView extends ViewBase {
 	}
 	
 	@Override
-	public GraphPIFLoaderBase createGraphPIFLoader(PDTGraphView pdtGraphView) {
-		return new FocusGraphPIFLoader(pdtGraphView);
+	public GraphProcessLoaderBase createGraphProcessLoader(PDTGraphView pdtGraphView) {
+		return new FocusGraphProcessLoader(pdtGraphView);
 	}
 }

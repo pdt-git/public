@@ -112,7 +112,7 @@ public interface PrologProcess {
 	 * Returns a prolog session.<br>
 	 * Use sessions to interact with the prolog system. Sessions can only be
 	 * obtained while the PrologProcess is in UP state. During startup, this
-	 * call will block until the pif is up. In state SHUTODWN or DOWN, this will
+	 * call will block until the process is up. In state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
 	 * Uses default flag
@@ -126,7 +126,7 @@ public interface PrologProcess {
 	 * Returns a prolog session.<br>
 	 * Use sessions to interact with the prolog system. Sessions can only be
 	 * obtained while the PrologProcess is in UP state. During startup, this
-	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
+	 * call will block until the process is up. in state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
 	 * Flag sets the kind of objects returned by the queries.

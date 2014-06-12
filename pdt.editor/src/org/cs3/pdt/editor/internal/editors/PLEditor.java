@@ -364,7 +364,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
-		PDTCommonPlugin.getDefault().registerPifStartListener(this);
+		PDTCommonPlugin.getDefault().registerProcessStartListener(this);
 	}
 
 	/**
@@ -1342,15 +1342,15 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
+	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
-		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
+		if (process.equals(PDTCommonUtil.getActivePrologProcess())) {
 			String editorFile = getPrologFileName();
 			if (allConsultedFiles.contains(editorFile)) {
 				updateState();
@@ -1360,13 +1360,13 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	@Override
-	public void activePrologProcessChanged(PrologProcess pif) {
+	public void activePrologProcessChanged(PrologProcess process) {
 		updateState();
 	}
 	
 	@Override
-	public void prologProcessStarted(PrologProcess pif) {
-		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
+	public void prologProcessStarted(PrologProcess process) {
+		if (process.equals(PDTCommonUtil.getActivePrologProcess())) {
 			updateState();
 		}
 	}
@@ -1393,7 +1393,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		super.dispose();
 		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterConsultListener(this);
-		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
+		PDTCommonPlugin.getDefault().unregisterProcessStartListener(this);
 	}
 
 }

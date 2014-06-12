@@ -37,12 +37,12 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 	public final static String FACTORY="org.cs3.pl.prolog.internal.socket.Factory";
 
-	static PrologProcess pif = null;
+	static PrologProcess process = null;
 
 	@Override
 	protected void setUp() throws Exception {
-		if(pif == null) {
-			pif = init();
+		if(process == null) {
+			process = init();
 		}
 		super.setUp();
 	}
@@ -60,7 +60,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	
 	public void testConnect() throws Exception {
 
-		PrologSession session = pif.getSession(PrologProcess.LEGACY);
+		PrologSession session = process.getSession(PrologProcess.LEGACY);
 		
 		PrologEventListener listener = new PrologEventListener(){
 			@Override
@@ -98,7 +98,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:notify/2))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:thread_get_message/1))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:cleanup_thread/1))))");
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif);
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher(process);
 		dispatcher.addPrologEventListener("localisation:company_nearby(MAC, Other, Distance, 1000)",locationListener);
 
 		session.queryOnce("sync:deleteAll(magicmap:location('00-09-2D-53-27-3A', _,_,_))");
@@ -163,7 +163,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 			public void update(PrologEvent e) {
 			}
 		};
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif);
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher(process);
 		try {
 			
 			dispatcher.addPrologEventListener("aha(",nullListener);
@@ -180,16 +180,16 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 	private PrologProcess init() throws PrologProcessException {
 //		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
-//		PrologProcess pif = factory.create();
+//		PrologProcess process = factory.create();
 		
-        pif = Connector.newUninitializedPrologProcess();
-		pif.setStandAloneServer(true);		
-		pif.start();
-		return pif;
+        process = Connector.newUninitializedPrologProcess();
+		process.setStandAloneServer(true);		
+		process.start();
+		return process;
 	}
 	
 	public void testConnectionWorks() throws Throwable{
-		pif.getSession(PrologProcess.LEGACY).queryOnce("threads");
+		process.getSession(PrologProcess.LEGACY).queryOnce("threads");
 	}
 }
 

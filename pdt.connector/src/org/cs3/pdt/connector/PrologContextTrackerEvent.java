@@ -22,7 +22,7 @@ public class PrologContextTrackerEvent extends EventObject {
 
 
 	private static final long serialVersionUID = 1L;
-	private PrologProcess pif;
+	private PrologProcess process;
 
 	/**
 	 * creates a new PrologContextTrackerEvent.
@@ -30,15 +30,15 @@ public class PrologContextTrackerEvent extends EventObject {
 	 * 
 	 * @param source
 	 *            this should be the tracker that caused the event.
-	 * @param pif
-	 *            this should be what the pif thinks is the currently active
+	 * @param process
+	 *            this should be what the process thinks is the currently active
 	 *            PrologProcess _AFTER_ the change. Maybe null to indicate
-	 *            that no pif is currently active according to the source
+	 *            that no process is currently active according to the source
 	 *            tracker.
 	 */
-	public PrologContextTrackerEvent(Object source, PrologProcess pif) {
+	public PrologContextTrackerEvent(Object source, PrologProcess process) {
 		super(source);
-		this.pif = pif;
+		this.process = process;
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class PrologContextTrackerEvent extends EventObject {
 	 *         (dito).
 	 */
 	public PrologProcess getPrologProcess() {
-		return pif;
+		return process;
 	}
 }
 

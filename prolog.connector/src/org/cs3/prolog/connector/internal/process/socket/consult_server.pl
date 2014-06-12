@@ -84,13 +84,13 @@ delete_lock_file(Filename):-
 	
 
 
-:- multifile pif_shutdown_hook/0.
-:- dynamic pif_shutdown_hook/0.
+:- multifile process_shutdown_hook/0.
+:- dynamic process_shutdown_hook/0.
 
-pif_shutdown_hook.
+process_shutdown_hook.
 
 call_shutdown_hook:-
-    forall(pif_shutdown_hook,true).
+    forall(process_shutdown_hook,true).
     
 do_shutdown:-
    	debug(consult_server(shutdown), 'begin shutdown ~n', []),
@@ -116,7 +116,7 @@ consult_server(Port):-
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
 	atomic_list_concat([consult_server,'@',Port],Alias),
-	recordz(pif_flag,port(Port),_),
+	recordz(process_flag,port(Port),_),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
 
 consult_server(Port,Lockfile):-
@@ -149,7 +149,7 @@ accept_loop_impl(ServerSocket) :-
 
 accept_loop_impl_X(ServerSocket,Slave):-
     debug(consult_server(shutdown),'Checking for shutdown flag. ~n',[]),
-    recorded(pif_flag,shutdown,_),    
+    recorded(process_flag,shutdown,_),    
     !,
     debug(consult_server(shutdown),'Shutdown flag is set. We are closing down. ~n',[]),
     tcp_close_socket(Slave),
@@ -220,8 +220,8 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	% then we have to kick the accept loop out of the tcp_accept/3 call.
 	% we do this by simply opening a connection to the listen port.
 
-	recordz(pif_flag,shutdown,_),
-	recorded(pif_flag,port(Port),_),
+	recordz(process_flag,shutdown,_),
+	recorded(process_flag,port(Port),_),
 	tcp_socket(Socket),
 	tcp_connect(Socket,localhost:Port),
 	tcp_close_socket(Socket).
@@ -302,22 +302,22 @@ handle_batch_messages(OutStream):-
 
 record_abort_request(Type,Id):-
     thread_self(Thread),
-    (	recorded(pif_batch_abort,request(Thread,Type,Id),_)
+    (	recorded(process_batch_abort,request(Thread,Type,Id),_)
     ->	true
-    ;	recordz(pif_batch_abort,request(Thread,Type,Id),_)
+    ;	recordz(process_batch_abort,request(Thread,Type,Id),_)
     ).
     
 
 erase_abort_request(Type,Id):-
     thread_self(Thread),
-    (	recorded(pif_batch_abort,request(Thread,Type,Id),Ref)
+    (	recorded(process_batch_abort,request(Thread,Type,Id),Ref)
     ->	erase(Ref)
     ;	true
     ).
     
 abort_requested(Type,Id):-
 	thread_self(Thread),
-	recorded(pif_batch_abort,request(Thread,Type,Id),_).    
+	recorded(process_batch_abort,request(Thread,Type,Id),_).    
 
 aborting:-
     abort_requested(async,_).

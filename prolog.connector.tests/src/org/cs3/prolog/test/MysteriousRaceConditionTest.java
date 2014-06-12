@@ -24,13 +24,13 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 public class MysteriousRaceConditionTest extends TestCase {
 
-	private PrologProcess pif;
+	private PrologProcess process;
 
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		pif = Connector.newUninitializedPrologProcess();
+		process = Connector.newUninitializedPrologProcess();
 
 	}
 
@@ -41,12 +41,12 @@ public class MysteriousRaceConditionTest extends TestCase {
 	 */
 	@Override
 	protected void tearDown() throws Exception {
-		pif.stop();
+		process.stop();
 	}
 
 	public void testMyteriousRaceCondition() throws PrologProcessException {
 		
-		PrologSession session = pif.getSession();
+		PrologSession session = process.getSession();
 		
 		String workspace="/home/lukas/workspace";
 		String query = 
@@ -55,11 +55,11 @@ public class MysteriousRaceConditionTest extends TestCase {
 				"	;	user:assert(file_search_path(library, '"+workspace+"/pdt.runtime/library/attic')" +
 				"), " +
 				"pdt_util:assert(pdt_hidden_path('"+workspace+"/pdt.runtime/library/attic')))," +
-				"(	user:file_search_path(library, '"+workspace+"/pdt.runtime/library/pif')" +
+				"(	user:file_search_path(library, '"+workspace+"/pdt.runtime/library/process')" +
 				"->	true" +
-				";	user:assert(file_search_path(library, '"+workspace+"/pdt.runtime/library/pif')" +
+				";	user:assert(file_search_path(library, '"+workspace+"/pdt.runtime/library/process')" +
 				"), " +
-				"pdt_util:assert(pdt_hidden_path('"+workspace+"/pdt.runtime/library/pif')))," +
+				"pdt_util:assert(pdt_hidden_path('"+workspace+"/pdt.runtime/library/process')))," +
 				"(	user:file_search_path(library, '"+workspace+"/pdt.runtime/library/pdt')" +
 				"->	true" +
 				";	user:assert(file_search_path(library, '"+workspace+"/pdt.runtime/library/pdt')" +

@@ -57,7 +57,7 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	
 	private PrologProcess activePrologProcess = getDefaultPrologProcess();
 	
-	private static final ISchedulingRule activePifChangedRule = new ISchedulingRule() {
+	private static final ISchedulingRule activeProcessChangedRule = new ISchedulingRule() {
 		@Override
 		public boolean isConflicting(ISchedulingRule rule) {
 			return this == rule;
@@ -78,21 +78,21 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	}
 	
 	@Override
-	public synchronized void setActivePrologProcess(PrologProcess pif) {
-		if (pif == null) {
+	public synchronized void setActivePrologProcess(PrologProcess process) {
+		if (process == null) {
 			activePrologProcess = getDefaultPrologProcess();
 		} else {
-			if (activePrologProcess == pif) {
+			if (activePrologProcess == process) {
 				return;
 			} else {
-				activePrologProcess = pif;
+				activePrologProcess = process;
 			}
 		}
 		fireActivePrologProcessChanged(activePrologProcess);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private synchronized void fireActivePrologProcessChanged(final PrologProcess pif) {
+	private synchronized void fireActivePrologProcessChanged(final PrologProcess process) {
 		Job job = new Job("Active PrologProcess changed: notify listeners") {
 			
 			@Override
@@ -105,14 +105,14 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 				monitor.beginTask("Active PrologProcess changed: notify listeners", listenersClone.size());
 				
 				for (ActivePrologProcessListener listener : listenersClone) {
-					listener.activePrologProcessChanged(pif);
+					listener.activePrologProcessChanged(process);
 					monitor.worked(1);
 				}
 				monitor.done();
 				return Status.OK_STATUS;
 			}
 		};
-		job.setRule(activePifChangedRule);
+		job.setRule(activeProcessChangedRule);
 		job.schedule();
 	}
 	
@@ -141,8 +141,8 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 			subscription = new DefaultSubscription(DEFAULT_PROCESS + "_indepent", DEFAULT_PROCESS, "Independent prolog process", "Prolog");
 			registry.addSubscription(subscription);
 		}
-		PrologProcess pif = PDTConnectorPlugin.getDefault().getPrologProcess(subscription);
-		return pif;
+		PrologProcess process = PDTConnectorPlugin.getDefault().getPrologProcess(subscription);
+		return process;
 	}
 	
 	private TreeSet<PDTReloadExecutor> pdtReloadExecutors = new TreeSet<PDTReloadExecutor>(new Comparator<PDTReloadExecutor>() {
@@ -188,9 +188,9 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	}
 
 	@Override
-	public void consultFile(String file, PrologProcess pif) {
+	public void consultFile(String file, PrologProcess process) {
 		try {
-			consultFile(FileUtils.findFileForLocation(file), pif);
+			consultFile(FileUtils.findFileForLocation(file), process);
 		} catch (IOException e) {
 			Debug.report(e);
 			return;
@@ -203,10 +203,10 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	}
 	
 	@Override
-	public void consultFile(IFile file, PrologProcess pif) {
+	public void consultFile(IFile file, PrologProcess process) {
 		ArrayList<IFile> fileList = new ArrayList<IFile>();
 		fileList.add(file);
-		consultFiles(fileList, pif);
+		consultFiles(fileList, process);
 	}
 	
 	@Override
@@ -215,21 +215,21 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	}
 	
 	@Override
-	public void consultFiles(final List<IFile> files, final PrologProcess pif) {
-		consultFilesInJob(files, pif, false);
+	public void consultFiles(final List<IFile> files, final PrologProcess process) {
+		consultFilesInJob(files, process, false);
 	}
 	
 	@Override
-	public void consultFilesSilent(List<IFile> files, PrologProcess pif) {
-		consultFilesInJob(files, pif, true);
+	public void consultFilesSilent(List<IFile> files, PrologProcess process) {
+		consultFilesInJob(files, process, true);
 	}
 	
-	private void consultFilesInJob(final List<IFile> files, final PrologProcess pif, final boolean silent) {
+	private void consultFilesInJob(final List<IFile> files, final PrologProcess process, final boolean silent) {
 		Job job = new Job("Consult " + files.size() + " file(s)") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					consultFilesImpl(files, pif, silent, monitor);
+					consultFilesImpl(files, process, silent, monitor);
 				} catch (PrologProcessException e) {
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
@@ -244,7 +244,7 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void consultFilesImpl(List<IFile> files, PrologProcess pif, boolean silent, IProgressMonitor monitor) throws PrologProcessException {
+	private void consultFilesImpl(List<IFile> files, PrologProcess process, boolean silent, IProgressMonitor monitor) throws PrologProcessException {
 		HashSet<ConsultListener> consultListenersClone;
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
@@ -254,30 +254,30 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 		
 		for (ConsultListener listener : consultListenersClone) {
 			monitor.subTask("Notify Listener");
-			listener.beforeConsult(pif, files, new SubProgressMonitor(monitor, 1));
+			listener.beforeConsult(process, files, new SubProgressMonitor(monitor, 1));
 		}
 		
 		monitor.subTask("Execute reload");
-		boolean success = executeReload(pif, files, silent, new SubProgressMonitor(monitor, consultListenersClone.size()));
+		boolean success = executeReload(process, files, silent, new SubProgressMonitor(monitor, consultListenersClone.size()));
 		
 		if (success) {
 			monitor.subTask("Collect all consulted files");
-			List<String> allConsultedFiles = collectConsultedFiles(pif, new SubProgressMonitor(monitor, consultListenersClone.size()));
+			List<String> allConsultedFiles = collectConsultedFiles(process, new SubProgressMonitor(monitor, consultListenersClone.size()));
 			
 			for (ConsultListener listener : consultListenersClone) {
 				monitor.subTask("Notify Listener");
-				listener.afterConsult(pif, files, allConsultedFiles, new SubProgressMonitor(monitor, 1));
+				listener.afterConsult(process, files, allConsultedFiles, new SubProgressMonitor(monitor, 1));
 			}
 		}
 		monitor.done();
 	}
 	
-	private List<String> collectConsultedFiles(PrologProcess pif, IProgressMonitor monitor) throws PrologProcessException {
+	private List<String> collectConsultedFiles(PrologProcess process, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		
 		List<String> result = new ArrayList<String>();
 		
-		List<Map<String, Object>> reloadedFiles = pif.queryAll(bT(PrologConnectorPredicates.RELOADED_FILE, "File"));
+		List<Map<String, Object>> reloadedFiles = process.queryAll(bT(PrologConnectorPredicates.RELOADED_FILE, "File"));
 		for (Map<String, Object> reloadedFile : reloadedFiles) {
 			result.add(reloadedFile.get("File").toString());
 		}
@@ -288,20 +288,20 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean executeReload(PrologProcess pif, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologProcessException {
+	private boolean executeReload(PrologProcess process, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologProcessException {
 		TreeSet<PDTReloadExecutor> executorsClone;
 		synchronized (pdtReloadExecutors) {
 			executorsClone = (TreeSet<PDTReloadExecutor>) pdtReloadExecutors.clone();
 		}
 		monitor.beginTask("Execute reload", executorsClone.size());
 		if (silent) {
-			boolean success = defaultReloadExecutor.executePDTReload(pif, files, new SubProgressMonitor(monitor, executorsClone.size()));
+			boolean success = defaultReloadExecutor.executePDTReload(process, files, new SubProgressMonitor(monitor, executorsClone.size()));
 			monitor.done();
 			return success;
 		} else {
 			for (PDTReloadExecutor executor : executorsClone) {
 				monitor.subTask("Execute reload");
-				boolean success = executor.executePDTReload(pif, files, new SubProgressMonitor(monitor, 1));
+				boolean success = executor.executePDTReload(process, files, new SubProgressMonitor(monitor, 1));
 				if (success) {
 					monitor.done();
 					return true;

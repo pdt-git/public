@@ -33,7 +33,7 @@ public interface PDTReloadExecutor {
 	int getPriority();
 
 	/**
-	 * @param pif
+	 * @param process
 	 *            the {@link PrologProcess} on which the pdt_reload/1
 	 *            predicate is called to consult the list of files
 	 * @param files
@@ -43,6 +43,6 @@ public interface PDTReloadExecutor {
 	 * @return True if consulting is successful, otherwise false
 	 * @throws PrologProcessException
 	 */
-	boolean executePDTReload(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException;
+	boolean executePDTReload(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException;
 
 }

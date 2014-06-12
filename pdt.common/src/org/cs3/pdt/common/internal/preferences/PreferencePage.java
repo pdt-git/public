@@ -59,7 +59,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 //		// connected to the default runtime
 //		// of the respective prolog project, should i switch to the default
 //		// runtime first?
-//		addField(new RadioGroupFieldEditor(PDT.PREF_SWITCH_TO_DEFAULT_PIF, "Switch to default runtime before consulting", 4,
+//		addField(new RadioGroupFieldEditor(PDT.PREF_SWITCH_TO_DEFAULT_PROCESS, "Switch to default runtime before consulting", 4,
 //				new String[][] { { "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
 //						{ "ask", MessageDialogWithToggle.PROMPT } }, getFieldEditorParent(), true));
 //		

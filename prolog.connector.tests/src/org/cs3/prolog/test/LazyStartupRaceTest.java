@@ -22,14 +22,14 @@ import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class LazyStartupRaceTest extends TestCase {
-	 private PrologProcess pif;
+	 private PrologProcess process;
 
 	@Override
 	protected void setUp() throws Exception {
          Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 	     
-//	       pif=PrologInterfaceFactory.newInstance().create();
-	      pif=Connector.newUninitializedPrologProcess();
+//	       process=PrologInterfaceFactory.newInstance().create();
+	      process=Connector.newUninitializedPrologProcess();
 	      
 	    }
 	    
@@ -38,11 +38,11 @@ public class LazyStartupRaceTest extends TestCase {
 	     */
 	    @Override
 		protected void tearDown() throws Exception {
-	        pif.stop();
+	        process.stop();
 	    }
 	    
 	    public void testLazyStartUp() throws PrologProcessException {
-	    	pif.getSession();
+	    	process.getSession();
 
 		}
 }

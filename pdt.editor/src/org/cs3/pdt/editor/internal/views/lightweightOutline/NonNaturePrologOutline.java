@@ -159,7 +159,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
-		PDTCommonPlugin.getDefault().registerPifStartListener(this);
+		PDTCommonPlugin.getDefault().registerProcessStartListener(this);
 	}
 
 
@@ -291,22 +291,22 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 		super.dispose();
 		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterConsultListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().unRegisterActivePrologProcessListener(this);
-		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
+		PDTCommonPlugin.getDefault().unregisterProcessStartListener(this);
 		contentProvider.dispose();
 		model.dispose();
 	}
 
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		monitor.done();
 	}
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
+	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 
-		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
+		if (process.equals(PDTCommonUtil.getActivePrologProcess())) {
 			String editorFile = editor.getPrologFileName();
 			if (allConsultedFiles.contains(editorFile)) {
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
@@ -322,7 +322,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	}
 
 	@Override
-	public void activePrologProcessChanged(PrologProcess pif) {
+	public void activePrologProcessChanged(PrologProcess process) {
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -334,8 +334,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 	}
 
 	@Override
-	public void prologProcessStarted(PrologProcess pif) {
-		if (pif.equals(PDTCommonUtil.getActivePrologProcess())) {
+	public void prologProcessStarted(PrologProcess process) {
+		if (process.equals(PDTCommonUtil.getActivePrologProcess())) {
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -360,10 +360,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 
 		if (elem instanceof OutlineModuleElement) { 
 			OutlineModuleElement module = (OutlineModuleElement)elem;
-			PrologProcess pif = PDTCommonUtil.getActivePrologProcess();
+			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 			if ("module".equals(module.getKind())) {
 				try {
-					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, QueryUtils.quoteAtom(module.getName()), "file(File)"),
+					Map<String, Object> result = process.queryOnce(bT(PDTPredicates.MODULE_PROPERTY, QueryUtils.quoteAtom(module.getName()), "file(File)"),
 							bT(PDTPredicates.MODULE_PROPERTY, QueryUtils.quoteAtom(module.getName()), "line_count(Line)"));
 					if (result == null) {
 						return;
@@ -377,7 +377,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage implements Consul
 				}
 			} else { // logtalk (no modules, but entities)
 				try {
-					Map<String, Object> result = pif.queryOnce(bT(PDTPredicates.ENTITY_PROPERTY, QueryUtils.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
+					Map<String, Object> result = process.queryOnce(bT(PDTPredicates.ENTITY_PROPERTY, QueryUtils.quoteAtom(module.getName()), "_", "file(FileName, Folder)"),
 							bT(PDTPredicates.ENTITY_PROPERTY, QueryUtils.quoteAtom(module.getName()), "_", "lines(Line, _)"));
 					if (result == null) {
 						return;

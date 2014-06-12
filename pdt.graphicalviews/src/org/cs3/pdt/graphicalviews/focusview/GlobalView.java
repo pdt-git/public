@@ -25,7 +25,7 @@ public class GlobalView extends ViewBase {
 	}
 	
 	@Override
-	protected GraphPIFLoaderBase createGraphPIFLoader(PDTGraphView pdtGraphView) {
-		return new GlobalGraphPIFLoader(pdtGraphView);
+	protected GraphProcessLoaderBase createGraphProcessLoader(PDTGraphView pdtGraphView) {
+		return new GlobalGraphProcessLoader(pdtGraphView);
 	}
 }

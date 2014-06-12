@@ -20,7 +20,7 @@ import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 public class LogtalkEntityView extends GlobalView {
 	
 	@Override
-	public GraphPIFLoaderBase createGraphPIFLoader(PDTGraphView pdtGraphView) {
-		return new LogtalkEntityGraphPIFLoader(pdtGraphView);
+	public GraphProcessLoaderBase createGraphProcessLoader(PDTGraphView pdtGraphView) {
+		return new LogtalkEntityGraphProcessLoader(pdtGraphView);
 	}
 }

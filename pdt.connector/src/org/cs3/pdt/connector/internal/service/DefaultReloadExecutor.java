@@ -35,7 +35,7 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	}
 
 	@Override
-	public boolean executePDTReload(PrologProcess pif, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public boolean executePDTReload(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		if (files.isEmpty()) {
 			monitor.done();
@@ -49,7 +49,7 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 			Debug.report(e);
 			return false;
 		}
-		pif.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, fileList));
+		process.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, fileList));
 		monitor.done();
 		return true;
 	}

@@ -25,9 +25,9 @@ public interface ActivePrologProcessListener {
 	/**
 	 * The active {@link PrologProcess} has changed
 	 * 
-	 * @param pif
+	 * @param process
 	 *            the new {@link PrologProcess}
 	 */
-	void activePrologProcessChanged(PrologProcess pif);
+	void activePrologProcessChanged(PrologProcess process);
 
 }

@@ -31,9 +31,9 @@ import org.cs3.prolog.connector.session.PrologSession;
 public class SocketPrologProcess extends AbstractPrologProcess {
 
 	private class InitSession extends SocketSession {
-		public InitSession(SocketClient client, AbstractPrologProcess pif,int flags)
+		public InitSession(SocketClient client, AbstractPrologProcess process,int flags)
 				throws IOException {
-			super(client, pif,flags);
+			super(client, process,flags);
 		}
 
 		@Override
@@ -49,9 +49,9 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	}
 
 	private class ShutdownSession extends SocketSession {
-		public ShutdownSession(SocketClient client, AbstractPrologProcess pif, int flags)
+		public ShutdownSession(SocketClient client, AbstractPrologProcess process, int flags)
 				throws IOException {
-			super(client, pif,flags);
+			super(client, process,flags);
 		}
 
 		@Override

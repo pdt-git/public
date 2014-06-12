@@ -70,7 +70,7 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 	}
 	
 	public AbstractPrologProcess(String string) {
-		PifShutdownHook.getInstance().add(this);
+		ProcessShutdownHook.getInstance().add(this);
 		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
 	}
 
@@ -196,31 +196,31 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 	/**** Options [End] *****/
 	/************************************************/
 
-	protected static final class PifShutdownHook extends Thread {
-		WeakHashMap<PrologProcess, Object> pifs;
+	protected static final class ProcessShutdownHook extends Thread {
+		WeakHashMap<PrologProcess, Object> processes;
 
-		private static PifShutdownHook instance;
+		private static ProcessShutdownHook instance;
 
-		private PifShutdownHook() {
-			super("PifShutdownHook");
-			pifs = new WeakHashMap<PrologProcess, Object>();
+		private ProcessShutdownHook() {
+			super("ProcessShutdownHook");
+			processes = new WeakHashMap<PrologProcess, Object>();
 			Runtime.getRuntime().addShutdownHook(this);
 		}
 
-		static synchronized PifShutdownHook getInstance() {
+		static synchronized ProcessShutdownHook getInstance() {
 			if (instance == null) {
-				instance = new PifShutdownHook();
+				instance = new ProcessShutdownHook();
 			}
 			return instance;
 		}
 
 		@Override
 		public void run() {
-			for (Iterator<PrologProcess> it = pifs.keySet().iterator(); it.hasNext();) {
-				PrologProcess pif = it.next();
-				if (pif != null) {
+			for (Iterator<PrologProcess> it = processes.keySet().iterator(); it.hasNext();) {
+				PrologProcess process = it.next();
+				if (process != null) {
 					try {
-						pif.stop();
+						process.stop();
 					} catch (PrologProcessException e) {
 						;
 					}
@@ -228,8 +228,8 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 			}
 		}
 
-		public void add(PrologProcess pif) {
-			pifs.put(pif, null);
+		public void add(PrologProcess process) {
+			processes.put(process, null);
 		}
 	}
 

@@ -29,13 +29,13 @@ public class QueryUtils {
 	/**
 	 * Returns the version of SWI-Prolog which is currently used by a given Factbase 
 	 * 
-	 * @param pif 
+	 * @param process 
 	 * @return String - Version of SWI-Prolog
 	 * @throws PrologProcessException 
 	 */
-	public static String getSWIVersion(PrologProcess pif) throws PrologProcessException {
+	public static String getSWIVersion(PrologProcess process) throws PrologProcessException {
 		
-		return (String) pif.queryOnce("current_prolog_flag(version,B)").get("B");
+		return (String) process.queryOnce("current_prolog_flag(version,B)").get("B");
 	}
 	
 	/**

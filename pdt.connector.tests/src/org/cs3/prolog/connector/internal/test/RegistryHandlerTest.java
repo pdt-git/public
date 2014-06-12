@@ -28,7 +28,7 @@ public class RegistryHandlerTest extends TestCase {
 				"      hostid=\"org.cs3.pdt.core\""+
 				"      persistent=\"true\""+
 				"      class=\"org.cs3.pdt.core.internal.natures.RuntimeSubscription\""+
-				"      pifkey=\"JTEngine\""+
+				"      processkey=\"JTEngine\""+
 				"      description=\"used as default runtime for projectJTEngine\""+
 				"      project=\"JTEngine\""+
 				"      bundle=\"org.cs3.pdt.core\""+
@@ -39,7 +39,7 @@ public class RegistryHandlerTest extends TestCase {
 				"      hostid=\"org.cs3.pdt.core\""+
 				"      persistent=\"true\""+
 				"      class=\"org.cs3.pdt.core.internal.natures.MetadataSubscription\""+
-				"      pifkey=\"JTEngine\""+
+				"      processkey=\"JTEngine\""+
 				"      description=\"used to store and process meta information on prologsource code found in project JTEngine\""+
 				"      project=\"JTEngine\""+
 				"      bundle=\"org.cs3.pdt.core\""+

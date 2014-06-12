@@ -35,7 +35,7 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSession implements AsyncPrologSession {
 	
-	private SocketPrologProcess pif;
+	private SocketPrologProcess process;
 	private SocketClient client;
 	private Thread dispatcher;
 	private boolean disposing;
@@ -66,9 +66,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}		
 	}
 	
-	public AsyncSocketSession(SocketClient client, SocketPrologProcess pif, int flags) throws IOException {
+	public AsyncSocketSession(SocketClient client, SocketPrologProcess process, int flags) throws IOException {
 		this.client = client;
-		this.pif = pif;
+		this.process = process;
 		this.flags=flags;
 		enterBatch();	
 	}
@@ -96,7 +96,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			
 		} catch (IOException e) {
 			handleBatchError(e);
-			throw pif.error(e);
+			throw process.error(e);
 		}
 		return true;
 	}
@@ -367,11 +367,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		try{
 			client.writeln(SocketCommunicationConstants.EOB);
 			
-			dispatcher.join(pif.getTimeout());
+			dispatcher.join(process.getTimeout());
 			if(dispatcher.isAlive()){
 				Debug.error("Dispatcher won't die. Trying to abort it.");
 				abort();
-				dispatcher.join(pif.getTimeout());
+				dispatcher.join(process.getTimeout());
 				if(dispatcher.isAlive()){
 					Debug.error("Thread is still alive. I will not longer wait for it.");					
 				}
@@ -416,7 +416,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.writeln(command);
 			client.writeln(query);
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		}
 	}
 	@Override
@@ -438,7 +438,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.writeln("query_all("+id+").");
 			client.writeln(query);
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		}
 	}
 
@@ -510,7 +510,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				}
 			}
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
 		}
@@ -548,7 +548,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		Debug.info("abort ticket stored, id="+id);
 		PrologSession controlSession = null;
 		try {
-			controlSession=pif.getSession(PrologProcess.NONE);
+			controlSession=process.getSession(PrologProcess.NONE);
 			controlSession.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
 			Debug.info("async abort request queued, id="+id);
 			synchronized (ticket) {
@@ -569,7 +569,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				
 			}
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
 		}finally{
@@ -588,12 +588,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 		disposing=true;
 		try {
-			if(pif.getError()==null){
+			if(process.getError()==null){
 				exitBatch();
 			}			
 			client.close();
 		} catch (Exception e) {
-			pif.error(e);
+			process.error(e);
 		} finally {
 			client = null;
 			disposing=false;
@@ -615,14 +615,14 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	 * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
 	 */
 	public PrologProcess getPrologProcess() {
-		return pif;
+		return process;
 	}
 	
 	private void setProtocolOption(String id, String value) throws PrologProcessException {
 		try {			
 			client.writeln("set_option("+id+","+value+").");			
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		}
 	}
 	

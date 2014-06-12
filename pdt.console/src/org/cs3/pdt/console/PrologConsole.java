@@ -19,7 +19,7 @@ import org.cs3.prolog.connector.process.PrologProcess;
 public interface PrologConsole {
 	public ConsoleModel getModel();
 	public PrologProcess getPrologProcess();
-	public void setPrologProcess(PrologProcess pif);
+	public void setPrologProcess(PrologProcess process);
 	public boolean isVisible();
 	public String getText();
 	public int getLineAtOffset(int offset);

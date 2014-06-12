@@ -25,11 +25,11 @@ import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IProject;
 
-public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
+public class DependenciesGraphProcessLoader extends GlobalGraphProcessLoader {
 	
-	private static final String NAME_OF_DEPENDENCIES_HELPING_FILE = "pdt-logtalk-entity-help.graphml";
+	private static final String NAME_OF_DEPENDENCIES_HELPING_FILE = "pdt-dependencies-help.graphml";
 	
-	public LogtalkEntityGraphPIFLoader(PDTGraphView view) {
+	public DependenciesGraphProcessLoader(PDTGraphView view) {
 		super(view, NAME_OF_DEPENDENCIES_HELPING_FILE);
 	}
 	
@@ -42,7 +42,7 @@ public class LogtalkEntityGraphPIFLoader extends GlobalGraphPIFLoader {
 			String projectPath = QueryUtils.normalizeOnWindows(project.getLocation().toString());
 			
 			String query;
-			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(projectPath), QueryUtils.prologFileNameQuoted(helpFile));
+			query = bT(PDTGraphPredicates.WRITE_DEPENDENCIES_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(projectPath), QueryUtils.prologFileNameQuoted(helpFile));
 			return query;
 			
 		} catch (IOException e) {

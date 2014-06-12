@@ -16,17 +16,17 @@ public class Connector {
 
     // Preferences
     public static final String EP_TRACKERS = "prologContextTracker";
-	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
-	public static final String PREF_SERVER_LOGDIR = "pif.server_log_dir";
+	public static final String PREF_HIDE_PLWIN = "process.hide_plwin";
+	public static final String PREF_SERVER_LOGDIR = "process.server_log_dir";
 	
-	public static final String PREF_INVOCATION = "pif.invocation";
+	public static final String PREF_INVOCATION = "process.invocation";
 	public static final String PREF_EXECUTABLE = "prolog.connector.executable";
-	public static final String PREF_COMMAND_LINE_ARGUMENTS = "pif.command.line.arguments";
-	public static final String PREF_ENVIRONMENT = "pif.environment";
-	public static final String PREF_ADDITIONAL_STARTUP = "pif.additional.startup";
-	public static final String PREF_TIMEOUT = "pif.timeout";
-	public static final String PREF_HOST = "pif.host";
-	public static final String PREF_PORT = "pif.port";
+	public static final String PREF_COMMAND_LINE_ARGUMENTS = "process.command.line.arguments";
+	public static final String PREF_ENVIRONMENT = "process.environment";
+	public static final String PREF_ADDITIONAL_STARTUP = "process.additional.startup";
+	public static final String PREF_TIMEOUT = "process.timeout";
+	public static final String PREF_HOST = "process.host";
+	public static final String PREF_PORT = "process.port";
 	
 	public static PrologProcess newUninitializedPrologProcess() {
 		return newUninitializedPrologProcess(null);
@@ -58,21 +58,21 @@ public class Connector {
 	 * @throws IOException
 	 */
 	public static PrologProcess newPrologProcess(String executable) throws IOException {
-		SocketPrologProcess pif = new SocketPrologProcess(null);
-		pif.setStartupStrategy(new DefaultStartupStrategy());
-		pif.setOSInvocation(ProcessUtils.getInvocationCommand());
+		SocketPrologProcess process = new SocketPrologProcess(null);
+		process.setStartupStrategy(new DefaultStartupStrategy());
+		process.setOSInvocation(ProcessUtils.getInvocationCommand());
 		if (executable == null) {
-			pif.setExecutablePath(ProcessUtils.getExecutablePreference());
+			process.setExecutablePath(ProcessUtils.getExecutablePreference());
 		} else {
-			pif.setExecutablePath(executable);
+			process.setExecutablePath(executable);
 		}
-		pif.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
-		pif.setHost("localhost");
-		pif.setTimeout("15000");
-		pif.setStandAloneServer("false");
-		pif.setHidePlwin(true);
-		pif.setUseSessionPooling(true);
-		return pif;
+		process.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
+		process.setHost("localhost");
+		process.setTimeout("15000");
+		process.setStandAloneServer("false");
+		process.setHidePlwin(true);
+		process.setUseSessionPooling(true);
+		return process;
 	}
 
 	private static File consultServerFile = null;

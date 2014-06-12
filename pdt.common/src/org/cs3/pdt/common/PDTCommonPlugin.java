@@ -103,14 +103,14 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 		lifeCycleHook = new LifeCycleHook() {
 			@Override public void setData(Object data) {}
-			@Override public void onInit(PrologProcess pif, PrologSession initSession) throws PrologProcessException {}
-			@Override public void onError(PrologProcess pif) {}
-			@Override public void lateInit(PrologProcess pif) {}
-			@Override public void beforeShutdown(PrologProcess pif, PrologSession session) throws PrologProcessException {}
+			@Override public void onInit(PrologProcess process, PrologSession initSession) throws PrologProcessException {}
+			@Override public void onError(PrologProcess process) {}
+			@Override public void lateInit(PrologProcess process) {}
+			@Override public void beforeShutdown(PrologProcess process, PrologSession session) throws PrologProcessException {}
 			
 			@Override
-			public void afterInit(PrologProcess pif) throws PrologProcessException {
-				PDTCommonPlugin.this.notifyPifStartHooks(pif);
+			public void afterInit(PrologProcess process) throws PrologProcessException {
+				PDTCommonPlugin.this.notifyProcessStartHooks(process);
 			}
 		};
 		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
@@ -121,14 +121,14 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 			
 			@Override
 			public void prologInterfaceAdded(PrologProcessRegistryEvent e) {
-				e.pif.addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
+				e.process.addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
 			}
 		});
 		for (String key : registry.getRegisteredKeys()) {
 			registry.getPrologProcess(key).addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
 		}
 		ConsultManager consultManager = new ConsultManager();
-		registerPifStartListener(consultManager);
+		registerProcessStartListener(consultManager);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(consultManager);
 	}
 	
@@ -234,27 +234,27 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		}
 	}
 	
-	private Set<PrologProcessStartListener> pifStartListeners = new HashSet<PrologProcessStartListener>();
+	private Set<PrologProcessStartListener> processStartListeners = new HashSet<PrologProcessStartListener>();
 
-	public void registerPifStartListener(PrologProcessStartListener listener) {
-		synchronized (pifStartListeners) {
-			pifStartListeners.add(listener);
+	public void registerProcessStartListener(PrologProcessStartListener listener) {
+		synchronized (processStartListeners) {
+			processStartListeners.add(listener);
 		}
 	}
 
-	public void unregisterPifStartListener(PrologProcessStartListener listener) {
-		synchronized (pifStartListeners) {
-			pifStartListeners.remove(listener);
+	public void unregisterProcessStartListener(PrologProcessStartListener listener) {
+		synchronized (processStartListeners) {
+			processStartListeners.remove(listener);
 		}
 	}
 	
-	private void notifyPifStartHooks(PrologProcess pif) {
+	private void notifyProcessStartHooks(PrologProcess process) {
 		ArrayList<PrologProcessStartListener> listeners;
-		synchronized (pifStartListeners) {
-			listeners = new ArrayList<PrologProcessStartListener>(pifStartListeners);
+		synchronized (processStartListeners) {
+			listeners = new ArrayList<PrologProcessStartListener>(processStartListeners);
 		}
 		for (PrologProcessStartListener listener : listeners) {
-			listener.prologProcessStarted(pif);
+			listener.prologProcessStarted(process);
 		}
 	}
 

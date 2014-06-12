@@ -22,7 +22,7 @@ import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.pdt.connector.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.connector.util.ErrorMessageProvider;
 import org.cs3.pdt.editor.internal.editors.ColorManager;
-import org.cs3.pdt.editor.internal.editors.CurrentPifListener;
+import org.cs3.pdt.editor.internal.editors.CurrentProcessListener;
 import org.cs3.pdt.editor.internal.editors.EditorConsultListener;
 import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.core.runtime.Platform;
@@ -102,9 +102,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			super.start(context);
 			
 			IPrologProcessService prologProcessService = PDTConnectorPlugin.getDefault().getPrologProcessService();
-			CurrentPifListener pifListener = new CurrentPifListener();
-			prologProcessService.registerActivePrologProcessListener(pifListener);
-			pifListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
+			CurrentProcessListener processListener = new CurrentProcessListener();
+			prologProcessService.registerActivePrologProcessListener(processListener);
+			processListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
 			prologProcessService.registerConsultListener(new EditorConsultListener());
 		} catch (Throwable t) {
 			Debug.report(t);

@@ -40,12 +40,12 @@ public class SocketSession implements PrologSession {
 	private static final String RESULT_LIST = "ResultList";
 	private SocketClient client;
 	private boolean queryActive;
-	private AbstractPrologProcess pif;
+	private AbstractPrologProcess process;
 	private int flags;
 	
-	public SocketSession(SocketClient client, AbstractPrologProcess pif,int flags) {
+	public SocketSession(SocketClient client, AbstractPrologProcess process,int flags) {
 		this.client = client;
-		this.pif = pif;
+		this.process = process;
 		this.flags=flags;
 	}
 
@@ -62,7 +62,7 @@ public class SocketSession implements PrologSession {
 		try {
 			client.close();
 		} catch (IOException e) {
-			pif.error(e);
+			process.error(e);
 		} finally {
 			client = null;
 		}
@@ -105,7 +105,7 @@ public class SocketSession implements PrologSession {
 			normalizeQuery(query);
 			results = readResults();
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		} 
 		return results;
 	}
@@ -236,7 +236,7 @@ public class SocketSession implements PrologSession {
 				solution = read_solution(flags);
 				tryFinishReading();
 			} catch (IOException e) {
-				throw pif.error(e);
+				throw process.error(e);
 			}
 		}
 		return solution;
@@ -246,7 +246,7 @@ public class SocketSession implements PrologSession {
 		try {
 			finishReading();
 		} catch (IOException e) {
-			throw pif.error(e);
+			throw process.error(e);
 		}
 	}
 
@@ -316,7 +316,7 @@ public class SocketSession implements PrologSession {
 		while (true) {
 			String line = client.readln();
 			if (line == null) {
-				throw pif.error(new IllegalStateException(
+				throw process.error(new IllegalStateException(
 						"There is nothing to read"));
 			}
 			if (SocketCommunicationConstants.MORE.equals(line)) {

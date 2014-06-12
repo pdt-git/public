@@ -98,11 +98,11 @@ public abstract class ViewCoordinatorBase implements IPartListener, ConsultListe
 	}
 	
 	@Override
-	public void beforeConsult(PrologProcess pif, List<IFile> files,
+	public void beforeConsult(PrologProcess process, List<IFile> files,
 			IProgressMonitor monitor) throws PrologProcessException { }
 
 	@Override
-	public void afterConsult(PrologProcess pif, List<IFile> files,
+	public void afterConsult(PrologProcess process, List<IFile> files,
 			List<String> allConsultedFiles, IProgressMonitor monitor)
 			throws PrologProcessException {
 		

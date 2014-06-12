@@ -38,7 +38,7 @@ public final class PDT {
 	public static final int CX_UNKNOWN = -1;
 	public static final int ERR_COMPLETION_BAD_LOCATION = -2;
 	public static final int CX_COMPLETION = -2;
-	public static final int ERR_PIF = -3;
+	public static final int ERR_PROCESS = -3;
 	public static final int ERR_CORE_EXCEPTION = -4;
 	public static final int CX_EDITOR_CONFIGURATION = -5;
 	public static final int CX_GENERATING_OUTLINE_DATA = -6;
