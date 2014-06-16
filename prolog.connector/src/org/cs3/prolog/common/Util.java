@@ -1048,5 +1048,37 @@ public class Util {
 			return buf.toString();
 		}
 	}
+
+
+	@Deprecated
+	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
+//		return "51118_64";// TEMPversion +"_"+bits;
+		
+			String swiExecutable;
+			if (isWindows()) {
+				swiExecutable = getWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			String version ="";
+			Process p = Runtime.getRuntime().exec(new String[]{
+					swiExecutable,
+					"-g",
+					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			version = reader.readLine();
+			bits = reader.readLine();
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {
+				// TR: fatal anyway:
+				throw new RuntimeException(e);
+			}
+	
+
+		return version +"_"+bits;
+	}
 }
 
