@@ -27,7 +27,7 @@ import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;

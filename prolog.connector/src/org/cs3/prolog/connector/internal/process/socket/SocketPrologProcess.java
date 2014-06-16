@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.PreferenceProvider;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.internal.process.AbstractPrologProcess;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
 import org.cs3.prolog.connector.internal.session.socket.AsyncSocketSession;

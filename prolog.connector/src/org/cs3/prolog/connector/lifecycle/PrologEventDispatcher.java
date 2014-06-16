@@ -24,9 +24,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologEvent;

@@ -7,7 +7,6 @@ Bundle-Version: 2.3.1.qualifier
 Bundle-ClassPath: .
 Export-Package: org.cs3.prolog.connector,
  org.cs3.prolog.connector.common,
- org.cs3.prolog.connector.common.logging,
  org.cs3.prolog.connector.cterm,
  org.cs3.prolog.connector.internal.cterm.parser;x-friends:="org.cs3.prolog.connector.tests",
  org.cs3.prolog.connector.internal.lifecycle;x-friends:="org.cs3.prolog.connector.tests",

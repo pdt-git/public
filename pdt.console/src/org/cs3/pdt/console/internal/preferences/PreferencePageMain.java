@@ -23,7 +23,7 @@ import org.cs3.pdt.connector.util.preferences.MyFontFieldEditor;
 import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePage;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.swt.SWT;

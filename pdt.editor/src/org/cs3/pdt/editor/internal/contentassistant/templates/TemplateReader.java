@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.cs3.pdt.editor.PDTPlugin;
 import org.cs3.pdt.editor.internal.contentassistant.DefaultCompletion;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;

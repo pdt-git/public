@@ -24,9 +24,9 @@ import java.util.List;
 import org.cs3.pdt.connector.PDTConnector;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.PDTConstants;
 import org.cs3.prolog.connector.common.ProcessUtils;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 

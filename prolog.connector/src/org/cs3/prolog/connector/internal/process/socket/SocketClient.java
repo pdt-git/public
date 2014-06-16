@@ -31,8 +31,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologException;
 
 

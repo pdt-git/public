@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.cs3.prolog.connector.common.logging.Debug;
-import org.cs3.prolog.connector.common.logging.LogBuffer;
-import org.cs3.prolog.connector.common.logging.SimpleLogBuffer;
+import org.cs3.prolog.connector.common.Debug;
 
 public class ReusableSocket extends Socket implements Reusable {
 

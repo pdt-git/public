@@ -22,8 +22,8 @@ import java.util.Vector;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CCompound;
 import org.cs3.prolog.connector.cterm.CNil;
 import org.cs3.prolog.connector.cterm.CTerm;

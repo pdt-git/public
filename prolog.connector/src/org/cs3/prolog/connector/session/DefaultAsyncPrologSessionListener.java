@@ -14,7 +14,7 @@
 
 package org.cs3.prolog.connector.session;
 
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 
 public class DefaultAsyncPrologSessionListener implements
 		AsyncPrologSessionListener2 {

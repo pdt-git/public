@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.prolog.connector.common.logging;
+package org.cs3.prolog.connector.common;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -21,8 +21,6 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.cs3.prolog.connector.common.Util;
 
 /**
  * Provides a application-wide mechanism to send debug, or other informational

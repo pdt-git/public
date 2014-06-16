@@ -17,8 +17,8 @@ package org.cs3.prolog.connector.internal.lifecycle;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcessException;
 

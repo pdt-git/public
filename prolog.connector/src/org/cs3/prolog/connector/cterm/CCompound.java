@@ -14,6 +14,7 @@
 
 package org.cs3.prolog.connector.cterm;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class CCompound extends CTerm implements Iterable<CTerm> {
 		for (int i = 0;i<args.length;i++) {
 			getArgument(i);
 		}
-		return new ArrayIterator<CTerm>(args);
+		return Arrays.asList(args).iterator();
 	}
 
 	@Override

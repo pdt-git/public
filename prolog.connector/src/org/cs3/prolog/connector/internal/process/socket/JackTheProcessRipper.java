@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 
 public class JackTheProcessRipper extends Thread {
 

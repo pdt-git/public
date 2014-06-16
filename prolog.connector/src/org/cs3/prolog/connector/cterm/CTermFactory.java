@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTAtom;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTCompound;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTFloat;

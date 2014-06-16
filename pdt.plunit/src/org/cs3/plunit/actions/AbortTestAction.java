@@ -25,7 +25,7 @@ import java.util.Set;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.registry.PrologProcessRegistry;
 import org.cs3.pdt.connector.util.UIUtils;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.jface.action.IAction;

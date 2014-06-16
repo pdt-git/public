@@ -14,8 +14,8 @@
 package org.cs3.pdt.editor.metadata;
 
 import org.cs3.pdt.editor.internal.editors.PLPartitionScanner;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.ParserUtils;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;

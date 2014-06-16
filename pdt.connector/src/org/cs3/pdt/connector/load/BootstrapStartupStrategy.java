@@ -3,7 +3,7 @@ package org.cs3.pdt.connector.load;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.StartupStrategy;
 
 public class BootstrapStartupStrategy implements StartupStrategy {

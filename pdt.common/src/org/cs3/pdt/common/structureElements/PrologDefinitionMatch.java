@@ -16,7 +16,7 @@ package org.cs3.pdt.common.structureElements;
 
 import java.util.List;
 
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.viewers.StyledString;

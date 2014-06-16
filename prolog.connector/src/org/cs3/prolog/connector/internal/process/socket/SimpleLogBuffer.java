@@ -14,7 +14,7 @@
 
 /*
  */
-package org.cs3.prolog.connector.common.logging;
+package org.cs3.prolog.connector.internal.process.socket;
 
 import java.io.PrintStream;
 

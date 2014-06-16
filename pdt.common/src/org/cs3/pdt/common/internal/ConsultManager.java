@@ -11,7 +11,7 @@ import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;

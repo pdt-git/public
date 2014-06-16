@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.process.socket.SocketClient;
 import org.cs3.prolog.connector.internal.process.socket.SocketCommunicationConstants;

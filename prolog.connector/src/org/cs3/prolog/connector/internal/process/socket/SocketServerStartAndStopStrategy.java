@@ -32,11 +32,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.InputStreamPump;
 import org.cs3.prolog.connector.common.ProcessUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.StartupStrategy;

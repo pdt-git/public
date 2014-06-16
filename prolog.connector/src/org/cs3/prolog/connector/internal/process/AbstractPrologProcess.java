@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.PreferenceProvider;
 import org.cs3.prolog.connector.common.QueryUtils;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;

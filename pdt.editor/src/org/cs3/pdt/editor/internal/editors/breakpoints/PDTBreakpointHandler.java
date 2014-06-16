@@ -31,7 +31,7 @@ import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPredicates;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
 import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologProcess;

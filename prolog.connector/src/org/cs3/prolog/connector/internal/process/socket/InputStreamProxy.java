@@ -17,8 +17,6 @@ package org.cs3.prolog.connector.internal.process.socket;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.cs3.prolog.connector.common.logging.LogBuffer;
-
 class InputStreamProxy extends InputStream {
 	private InputStream in;
 	private SocketClient client;

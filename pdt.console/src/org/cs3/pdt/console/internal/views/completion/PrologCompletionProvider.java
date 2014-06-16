@@ -23,9 +23,9 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.search.SearchConstants;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
-import org.cs3.prolog.connector.common.logging.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 

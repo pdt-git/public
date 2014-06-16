@@ -25,7 +25,7 @@ import org.cs3.pdt.graphicalviews.preferences.PredicateVisibilityPreferences;
 import org.cs3.pdt.graphicalviews.preferences.PreferenceConstants;
 import org.cs3.pdt.graphicalviews.view.modes.MouseHandler;
 import org.cs3.pdt.graphicalviews.view.modes.OpenInEditorViewMode;
-import org.cs3.prolog.connector.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.albireo.core.SwingControl;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
