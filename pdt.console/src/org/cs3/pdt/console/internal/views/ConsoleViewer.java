@@ -773,7 +773,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					Position location = getLocation(row);
 					if (location != null) {
 						int start = startOfInput + CharCount + location.offset;
-						StyleRange range = new StyleRange(start, location.length, LastOutputColor, control.getBackground());
+						StyleRange range = new StyleRange(start, location.length, LastOutputColor, null);
 						range.underline = true;
 						range.underlineStyle = SWT.UNDERLINE_LINK;
 						control.setStyleRange(range);
