@@ -20,6 +20,9 @@ import java.util.Set;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
+/**
+ * Common superclass for all Prolog elements represented as Java objects.
+ */
 public class CTerm {
 	protected ASTNode node;
 	protected String functorValue;

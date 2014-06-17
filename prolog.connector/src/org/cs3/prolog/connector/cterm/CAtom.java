@@ -16,7 +16,9 @@ package org.cs3.prolog.connector.cterm;
 
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
-
+/**
+ * Represents a Prolog atom.
+ */
 public class CAtom extends CTerm {
 	
 	public CAtom(ASTNode node) {

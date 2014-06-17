@@ -20,50 +20,57 @@ import org.cs3.prolog.connector.session.PrologSession;
 
 
 /**
- * hook into the process' lifecycle.
+ * Interface to hook into a process' lifecycle.
  */
 public interface LifeCycleHook{
     /**
-     * called by the PrologProcess during startup phase.
+     * Called by the PrologProcess during startup phase.
      * <br>
-     * This method executes on the same thread that starts the prolog interface.
+     * This method executes on the same thread that starts the prolog process.
      * No interaction via regular PrologSessions will take place before
      * this method is called on all registered LifeCycleHooks.
      * <br><b>Important Note:</b> Only access the process through the
      * initSession argument. In particular, take care that this method
      * does not indirectly trigger a call to PrologProcess.getSession() on the same thread,
-     * or you will very propably couse a dead lock. The initial session cannot be 
+     * or you will very probably cause a dead lock. The initial session cannot be 
      * disposed.  
+     * @param process 
      * @param initSession safe-mode session for startup phase.
+     * @throws PrologProcessException 
      */
 	abstract void onInit(PrologProcess process, PrologSession initSession) throws PrologProcessException;
 	
 	/**
-     * called by the PrologProcess  after the startup is complete.
+     * Called by the PrologProcess  after the startup is complete.
      * <br>
      * This method executes asynchronously to the thread that started
-     * the prolog interface. By the time it is called, the process is guaranteed to be
+     * the prolog process. By the time it is called, the process is guaranteed to be
      * up and ready for normal operation (getSession() and friends).
      * <br>
+	 * @param process 
+	 * @throws PrologProcessException 
      * 
      */	
 	abstract void afterInit(PrologProcess process) throws PrologProcessException;
 	
 	/**
-     * called by the PrologProcess  before the process shuts down.
+     * Called by the PrologProcess  before the process shuts down.
      * <br>
-     * This method is called on the same thread that stops the prolog interface.
-     * There are no other sessions running. (FIXME verify this!!)
+     * This method is called on the same thread that stops the prolog process.
+     * There are no other sessions running.
      * <br><b>Important Note:</b> Only access the process through the
      * initSession argument. In particular, take care that this method
      * does not indirectly trigger a call to PrologProcess.getSession() on the same thread,
-     * or you will very propably couse a dead lock. The cleanup session cannot be 
+     * or you will very probably cause a dead lock. The cleanup session cannot be 
      * disposed.  
+	 * @param process 
+	 * @param session 
+	 * @throws PrologProcessException 
      */		
-	abstract void beforeShutdown(PrologProcess process,PrologSession session) throws PrologProcessException;	
+	abstract void beforeShutdown(PrologProcess process, PrologSession session) throws PrologProcessException;	
 	
 	/**
-     * called by the PrologProcess  when it encounters a fatal error.
+     * Called by the PrologProcess  when it encounters a fatal error.
      * <br>
      * This hook method is called when the PrologProcess detects any kind of problem that
      * keeps it from further communicating with the Prolog process. It will call the 
@@ -78,22 +85,25 @@ public interface LifeCycleHook{
      * PrologProcess has left its normal life cycle. Before the hook is called, the 
      * PrologProcess is in sate ERROR, after they have been called, it will enter
      * state DOWN. No other hook methods will be called in between.
+	 * @param process 
      */		
 	public void onError(PrologProcess process);
 	
 	/**
-	 * parameterize this hook instance with domain data.
+	 * Parameterize this hook instance with domain data.
+	 * @param data 
 	 */
 	public void setData(Object data);
 	
 	/**
-	 * called by the PrologProcess when the hook is registered while the process is already up or in the process of starting up.
+	 * Called by the PrologProcess when the hook is registered while the process is already up or in the process of starting up.
 	 * When it is called, the PrologProcess is up and running.
 	 * Note that this method will ignore hook dependencies. 	
 	 * 
 	 * Most implementation will just call onInit and/or after init, since they will not 
 	 * be called by the PrologProcess when the hook is registered "to late", i.e. after the
 	 * startup sequence has begun.
+	 * @param process 
 	 * 
 	 */
 	public void lateInit(PrologProcess process);

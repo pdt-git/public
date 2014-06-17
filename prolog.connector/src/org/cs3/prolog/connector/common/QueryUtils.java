@@ -20,48 +20,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologProcessException;
 
+/**
+ * Contains utility methods for simplifying the creation of Prolog queries.
+ */
 public class QueryUtils {
 	
-	public final static String USER_MODULE = "user";
-	
 	/**
-	 * Returns the version of SWI-Prolog which is currently used by a given Factbase 
+	 * Build a term with the given functor and arguments. Iterables are
+	 * automatically converted to Prolog lists.
 	 * 
-	 * @param process 
-	 * @return String - Version of SWI-Prolog
-	 * @throws PrologProcessException 
-	 */
-	public static String getSWIVersion(PrologProcess process) throws PrologProcessException {
-		
-		return (String) process.queryOnce("current_prolog_flag(version,B)").get("B");
-	}
-	
-	/**
-	 * Tests if the module name equals the default user name
-	 * 
-	 * @param moduleName - variable to be tested
-	 * @return true - yes USER_MODULE - else false
-	 */
-	public static boolean isDefaultModule(String moduleName) {
-		return (moduleName == null) || ("".equals(moduleName)) || (USER_MODULE.equals(moduleName));
-	}
-	
-	
-	/**
-	 * Shortcut for buildTerm(String functor, Object...args)
-	 * @see buildTerm(String functor, Object...args)
+	 * @param functor
+	 *            functor of the term
+	 * @param args
+	 *            arguments of the term
+	 * @return query String ready to handover to
+	 *         {@link PrologProcess#queryOnce(String...)} or
+	 *         {@link PrologProcess#queryAll(String...)}
 	 */
 	public static String bT(String functor, Object...args) {
 		return buildTerm(functor, args);
 	}
 	
 	/**
-	 * Build a term with the given functor and args
+	 * Build a term with the given functor and arguments. Iterables are
+	 * automatically converted to Prolog lists.
+	 * 
 	 * @param functor
+	 *            functor of the term
 	 * @param args
-	 * @return query String ready to handover to the queryOnce or queryAll
+	 *            arguments of the term
+	 * @return query String ready to handover to
+	 *         {@link PrologProcess#queryOnce(String...)} or
+	 *         {@link PrologProcess#queryAll(String...)}
 	 */
 	public static String buildTerm(String functor, Object...args) {
 		
@@ -91,10 +82,11 @@ public class QueryUtils {
 	}
 	
 	/**
-	 * Converts an Iterable to a String in prologstyle like "[ , , ]" 
+	 * Converts an Iterable to a Prolog list like "[ , , ]"
 	 * 
-	 * @param listToString - Iterable or subclass of Iterable
-	 * @return String - Iterable wrapped in "[]" and separated by ","
+	 * @param listToString
+	 *            Iterable or subclass of Iterable
+	 * @return elements of the Iterable wrapped in "[]" and separated by ","
 	 */
 	public static String listToArgList(Iterable<?> listToString) {
 		
@@ -121,11 +113,12 @@ public class QueryUtils {
 	}
 	
 	/**
-	 * Converts a given amount of Objects to a single String
-	 * representing a list in prolog notation
+	 * Converts a given amount of Objects to a single String representing a list
+	 * in Prolog notation.
 	 * 
 	 * @param objects
-	 * @return - String - wrapped in "[]" and separated by ","
+	 *            an arbitrary number of objects
+	 * @return objects wrapped in "[]" and separated by ","
 	 */
 	public static String objectsToArgList(Object...objects) {
 		
@@ -139,9 +132,10 @@ public class QueryUtils {
 	}
 
 	/**
-	 * normalize String for Windows system
-	 *  
-	 * @param s the String
+	 * Normalizes String for a Windows system.
+	 * 
+	 * @param s
+	 *            the String
 	 * @return normalized String
 	 */
 	public static String normalizeOnWindows(String s) {
@@ -153,8 +147,10 @@ public class QueryUtils {
 	}
 
 	/**
-	 * normalize a Prolog filename
-	 * @param f the file
+	 * Converts a given file into a Prolog filename.
+	 * 
+	 * @param f
+	 *            the file
 	 * @return normalized path to the file
 	 */
 	public static String prologFileName(File f) {
@@ -166,18 +162,23 @@ public class QueryUtils {
 	}
 	
 	/**
-	 * normalize a Prolog filename
-	 * @param f the file
-	 * @return normalized path to the file
+	 * Converts a given file into a Prolog filename and wraps the filename with
+	 * single quotes.
+	 * 
+	 * @param f
+	 *            the file
+	 * @return normalized and quoted path to the file
 	 */
 	public static String prologFileNameQuoted(File f) {
 		return quoteAtom(prologFileName(f));
 	}
 
 	/**
-	 * quote atom
+	 * Wraps an atom with single quotes and escapes all single quotes contained
+	 * in the atom.
 	 * 
-	 * @param term unquoted atom
+	 * @param term
+	 *            unquoted atom
 	 * @return quoted atom
 	 */
 	public static String quoteAtom(String term) {
@@ -186,8 +187,11 @@ public class QueryUtils {
 	}
 
 	/**
-	 * quote atom if it isn't already quoted
-	 * @param term atom (quoted or unquoted)
+	 * Wraps an atom with single quotes (if it is not already quoted) and
+	 * escapes all single quotes contained in the atom.
+	 * 
+	 * @param term
+	 *            atom (quoted or unquoted)
 	 * @return quoted atom
 	 */
 	

@@ -20,10 +20,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 /**
- * A thread that exhaustes InputStream objects.
+ * A thread that exhausts InputStream objects.
  *
- * Actualy not very exiting, but it was needed on several places, so 
- * i put it here as a public class.  
  */
 public class InputStreamPump extends Thread {
 	BufferedReader in = null;

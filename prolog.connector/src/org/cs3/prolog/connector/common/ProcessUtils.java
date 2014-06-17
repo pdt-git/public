@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * Contains utility methods to determine default settings.
+ */
 public class ProcessUtils {
 
 	public static String guessEnvironmentVariables() {
@@ -91,8 +94,6 @@ public class ProcessUtils {
 	}
 
 	/**
-	 * @author Hasan Abdel Halim
-	 * 
 	 * Finds the current SWI-Prolog executable for Windows OS
 	 * @param executables 
 	 * @return the complete path of the executable otherwise it will return plwin

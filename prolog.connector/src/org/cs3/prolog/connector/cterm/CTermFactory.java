@@ -29,6 +29,9 @@ import org.cs3.prolog.connector.internal.cterm.parser.ASTVariable;
 import org.cs3.prolog.connector.internal.cterm.parser.CanonicalTermParser;
 import org.cs3.prolog.connector.internal.cterm.parser.Node;
 
+/**
+ * Contains helper methods to create CTerms.
+ */
 public class CTermFactory {
 
 	public static CTerm createCTerm(Object data) {

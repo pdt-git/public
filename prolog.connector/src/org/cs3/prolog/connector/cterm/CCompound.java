@@ -22,6 +22,10 @@ import java.util.Set;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTAtom;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
+/**
+ * Represents a compound Prolog term, e.g. a(1, x). Every argument is a {@link CTerm}
+ * itself.
+ */
 public class CCompound extends CTerm implements Iterable<CTerm> {
 	private CTerm[] args;
 

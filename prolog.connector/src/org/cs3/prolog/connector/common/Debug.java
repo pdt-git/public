@@ -49,6 +49,22 @@ public class Debug {
 	static private PrintStream out = System.err;
 	static private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM HH:mm:ss");
 
+	/**
+	 * Sets the debug level.
+	 * 
+	 * @param s
+	 *            one of
+	 *            <ul>
+	 *            <li>NONE - No console output at all</li>
+	 *            <li>ERROR - Only serious errors should be reported</li>
+	 *            <li>WARNING - Less serious error conditions should be reported
+	 *            </li>
+	 *            <li>INFO - Informational Messages about program operation
+	 *            should be printed</li>
+	 *            <li>DEBUG - Insanely verbose debug output.</li>
+	 *            </ul>
+	 * 
+	 */
 	static public void setDebugLevel(String s) {
 		System.out.println(PREFIX_OUTPUT + "set debug level: " + s);
 		if (s.equalsIgnoreCase("NONE"))
@@ -67,6 +83,16 @@ public class Debug {
 		}
 	}
 
+	/**
+	 * Changes the default output.
+	 * 
+	 * @param output
+	 *            one of
+	 *            <ul>
+	 *            <li>LOGFILE</li>
+	 *            <li>CONSOLE</li>
+	 *            </ul>
+	 */
 	static public void setOutputTo(String output) {		
 		if (output.equalsIgnoreCase("LOGFILE") ) {
 			if (outputLogFilePrintStream!=null) {
@@ -77,13 +103,19 @@ public class Debug {
 				out.println(PREFIX_OUTPUT + "set debug output NOT to "+ output+" because LogFileStream/File invalid, please check preferences");
 				out.println(PREFIX_OUTPUT + "set debug output to CONSOLE");
 			}
-		}
-		if (output.equalsIgnoreCase("CONSOLE")) {
+		} else if (output.equalsIgnoreCase("CONSOLE")) {
 			setOutputStream(System.err);
 			out.println(PREFIX_OUTPUT + "set debug output to " + output);
 		}
 	}	
 	
+	/**
+	 * Sets the directory for the logfile.
+	 * 
+	 * @param logFileDir
+	 *            directory for the logile.
+	 * @throws FileNotFoundException
+	 */
 	static public void setLogDir(String logFileDir) throws FileNotFoundException {
 		outputDir = logFileDir;
 		if (outputDir != null && !outputDir.equals("")) {
@@ -224,6 +256,13 @@ public class Debug {
 		throw new RuntimeException(e);
 	}
 	
+	/**
+	 * Returns a limited number of latest log file entries.
+	 * 
+	 * @param entryCount
+	 *            number of entries for the output
+	 * @return the specified number of entries
+	 */
 	public static String getTailOfLogFile(int entryCount) {
 		File logFile = new File(outputDir, "pdt.log");
 		if (!logFile.exists()) {

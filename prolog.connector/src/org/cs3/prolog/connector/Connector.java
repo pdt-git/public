@@ -12,13 +12,18 @@ import org.cs3.prolog.connector.internal.process.socket.SocketPrologProcess;
 import org.cs3.prolog.connector.process.DefaultStartupStrategy;
 import org.cs3.prolog.connector.process.PrologProcess;
 
+/**
+ * This class is the main entry point for creating a Prolog process.
+ * <p>
+ * A process with default settings is created by calling:
+ * {@link #newPrologProcess()}
+ */
 public class Connector {
 
-    // Preferences
+	// Preferences
     public static final String EP_TRACKERS = "prologContextTracker";
 	public static final String PREF_HIDE_PLWIN = "process.hide_plwin";
 	public static final String PREF_SERVER_LOGDIR = "process.server_log_dir";
-	
 	public static final String PREF_INVOCATION = "process.invocation";
 	public static final String PREF_EXECUTABLE = "prolog.connector.executable";
 	public static final String PREF_COMMAND_LINE_ARGUMENTS = "process.command.line.arguments";
@@ -28,10 +33,32 @@ public class Connector {
 	public static final String PREF_HOST = "process.host";
 	public static final String PREF_PORT = "process.port";
 	
+	
+    private static final String CONSULT_SERVER_PL = "consult_server.pl";
+
+    /**
+	 * Creates a new uninitialized Prolog process.
+	 * <p>
+	 * For this process, all the settings has to be set manually.
+	 * See {@link #newPrologProcess()} for an implementation with
+	 * default settings. 
+	 * 
+	 * @return a new uninitialized Prolog process.
+	 */
 	public static PrologProcess newUninitializedPrologProcess() {
 		return newUninitializedPrologProcess(null);
 	}
 
+	/**
+	 * Creates a new uninitialized Prolog process.
+	 * <p>
+	 * For this process, all the settings has to be set manually. See
+	 * {@link #newPrologProcess()} for an implementation with default settings.
+	 * 
+	 * @param name
+	 *            the name of the process.
+	 * @return a new uninitialized Prolog process with the specified name.
+	 */
 	public static PrologProcess newUninitializedPrologProcess(String name) {
 		SocketPrologProcess socketPrologProcess = new SocketPrologProcess(name);
 		try {
@@ -43,8 +70,12 @@ public class Connector {
 	}
 
 	/**
+	 * Creates a new Prolog process with default settings.
+	 * <p>
+	 * The executable which is used to start the process is provided by the
+	 * {@link ProcessUtils#getExecutablePreference()} method.
 	 * 
-	 * @return a new standalone Prolog Interface
+	 * @return a new Prolog process.
 	 * @throws IOException
 	 */
 	public static PrologProcess newPrologProcess() throws IOException {
@@ -52,9 +83,12 @@ public class Connector {
 	}
 
 	/**
+	 * Creates a new Prolog process with default settings and the provided
+	 * executable.
 	 * 
 	 * @param executable
-	 * @return a new standalone Prolog Interface
+	 *            path to the Prolog executable.
+	 * @return a new Prolog process.
 	 * @throws IOException
 	 */
 	public static PrologProcess newPrologProcess(String executable) throws IOException {
@@ -69,7 +103,7 @@ public class Connector {
 		process.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
 		process.setHost("localhost");
 		process.setTimeout("15000");
-		process.setStandAloneServer("false");
+		process.setStandAloneServer(false);
 		process.setHidePlwin(true);
 		process.setUseSessionPooling(true);
 		return process;
@@ -81,11 +115,11 @@ public class Connector {
 		if (consultServerFile == null) {
 			String tempDir = System.getProperty("java.io.tmpdir");
 			InputStream resourceAsStream;
-			resourceAsStream = SocketPrologProcess.class.getResourceAsStream("consult_server.pl");
+			resourceAsStream = SocketPrologProcess.class.getResourceAsStream(CONSULT_SERVER_PL);
 			if (resourceAsStream == null) {
-				throw new RuntimeException("Cannot find consult_server.pl!");
+				throw new RuntimeException("Cannot find " + CONSULT_SERVER_PL + "!");
 			}
-			consultServerFile = new File(tempDir, "consult_server.pl");
+			consultServerFile = new File(tempDir, CONSULT_SERVER_PL);
 			if (consultServerFile.exists()) {
 				consultServerFile.delete();
 			}

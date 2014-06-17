@@ -18,7 +18,9 @@ import java.math.BigDecimal;
 
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
-
+/**
+ * Represents a floating point number.
+ */
 public class CFloat extends CTerm {
 	
 	private BigDecimal bigDec;

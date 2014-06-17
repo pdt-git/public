@@ -19,7 +19,9 @@ import java.util.Set;
 
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
-
+/**
+ * Represents a Prolog variable.
+ */
 public class CVariable extends CTerm {
 	public CVariable(ASTNode node) {
 		super(node);

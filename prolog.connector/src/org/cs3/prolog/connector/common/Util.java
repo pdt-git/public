@@ -32,21 +32,22 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
- * contains static methods that do not quite fit anywhere else :-)=
+ * Contains static methods that do not quite fit anywhere else.
  */
 public class Util {
 	
 	/**
-	 * converts a logical character offset to a physical character offset. E.g.
+	 * Converts a logical character offset to a physical character offset. E.g.
 	 * prolog uses logical offsets in the sense that it counts any line
 	 * delimiter as a single character, even if it is CRLF, etc.
-	 * 
+	 * <p>
 	 * Eclipse documents and views however seem to count physical characters,
 	 * i.e. the CRLF line delimiter would count as two characters.
 	 * 
 	 * @param data the text
 	 * @param logical the logical offset
 	 * @return the physical offset
+	 * @see #physicalToLogicalOffset(String, int)
 	 */
 	public static int logicalToPhysicalOffset(String data, int logical) {
 		int physical = 0;
@@ -62,11 +63,10 @@ public class Util {
 	
 	
 	/**
-	 * @see logicalToPhysicalOffset(String data, int logical)
-	 * 
 	 * @param data the text
 	 * @param physical the physical offset
 	 * @return the logical offset
+	 * @see #logicalToPhysicalOffset(String, int)
 	 */
 	public static int physicalToLogicalOffset(String data, int physical) {
 		int logical = 0;
@@ -81,7 +81,7 @@ public class Util {
 	}
 
 	/**
-	 * getting the lock file for starting a socket server
+	 * Getting the lock file for starting a socket server.
 	 * 
 	 * @return the lock file
 	 */
@@ -97,7 +97,7 @@ public class Util {
 	}
 
 	/**
-	 * pretty print of a Map
+	 * Pretty print of a Map.
 	 * 
 	 * @param input the map that should be printed
 	 * @return the String representation
@@ -125,7 +125,7 @@ public class Util {
 	}
 	
 	/**
-	 * pretty print of an array
+	 * Pretty print of an array.
 	 *  
 	 * @param a the array that should be printed
 	 * @return the String representation
@@ -145,7 +145,7 @@ public class Util {
 	}
 	
 	/**
-	 * pretty print of a collection
+	 * Pretty print of a collection.
 	 *  
 	 * @param input the collection that should be printed
 	 * @return the String representation
@@ -175,7 +175,7 @@ public class Util {
 	}
 
 	/**
-	 * get the logfile (create if necessary)
+	 * Get the logfile (create if necessary).
 	 * 
 	 * @param dir path to the directory
 	 * @param name filename
@@ -193,7 +193,7 @@ public class Util {
 	}
 
 	/**
-	 * copy an InputStream to an OutputStream
+	 * Copy an InputStream to an OutputStream.
 	 * 
 	 * @param in
 	 * @param out
@@ -217,7 +217,7 @@ public class Util {
 	}
 
 	/**
-	 * checks if current OS is Windows
+	 * Checks if current OS is Windows.
 	 * 
 	 * @return true if current OS is Windows
 	 */
@@ -227,7 +227,7 @@ public class Util {
 	}
 
 	/**
-	 * checks if current OS is MacOS
+	 * Checks if current OS is MacOS.
 	 * 
 	 * @return true if current OS is MacOS
 	 */
@@ -237,7 +237,7 @@ public class Util {
 	}
 
 	/**
-	 * Read InputStream to String
+	 * Read InputStream to String.
 	 * 
 	 * @param in the InputStream
 	 * @return String representation
@@ -255,7 +255,7 @@ public class Util {
 	}
 
 	/**
-	 * escapes special characters in a String
+	 * Escapes special characters in a String.
 	 * @param s the input string
 	 * @return the output String
 	 */
@@ -344,7 +344,7 @@ public class Util {
 	}
 
 	/**
-	 * find a free port for communication with Prolog
+	 * Find a free port for communication with Prolog.
 	 * 
 	 * @return free port number
 	 * @throws IOException
@@ -373,7 +373,7 @@ public class Util {
 	}
 	
 	/**
-	 * unquote atom (replace ' at the start and end)
+	 * Unquote atom (replace ' at the start and end).
 	 * 
 	 * @param atom quoted atom
 	 * @return unquoted atom
@@ -399,7 +399,7 @@ public class Util {
 	}
 	
 	/**
-	 * unquote String or atom (replace " or ' at the start and end)
+	 * Unquote String or atom (replace " or ' at the start and end).
 	 * 
 	 * @param atom quoted atom
 	 * @return unquoted atom
@@ -521,15 +521,28 @@ public class Util {
 		return Character.isDigit(c) || '0' <= c && c <= '7';
 	}
 
-	public static void split(String string, String search, Collection<String> results) {
-		// this method can NOT be replaced by String.split because the results differ (empty strings, trim)  
+	/**
+	 * Splits a String by the given delimiter and adds the parts to the
+	 * specified Collection.
+	 * 
+	 * This method can NOT be replaced by String.split because the results
+	 * differ (empty strings, trim).
+	 * 
+	 * @param string
+	 *            the String to split
+	 * @param delimiter
+	 *            the delimiter
+	 * @param results
+	 *            Collection where the parts are added to
+	 */
+	public static void split(String string, String delimiter, Collection<String> results) {
 		if (string == null) {
 			return;
 		}
 		int i = -1;
-		while ((i = string.indexOf(search, 0)) >= 0) {
+		while ((i = string.indexOf(delimiter, 0)) >= 0) {
 			results.add(string.substring(0, i).trim());
-			string = string.substring(i + search.length());
+			string = string.substring(i + delimiter.length());
 		}
 		String rest = string.trim();
 		if (rest.length() > 0) {
@@ -538,12 +551,22 @@ public class Util {
 
 	}
 
-	public static String[] split(String string, String search) {
-		// this method can NOT be replaced by String.split because the results differ (empty strings, trim)
+	/**
+	 * Splits a String by the given delimiter.
+	 * 
+	 * This method can NOT be replaced by String.split because the results
+	 * differ (empty strings, trim).
+	 * 
+	 *  @param string
+	 *            the String to split
+	 * @param delimiter
+	 *            the delimiter
+	 * @return an array with the parts of the string.
+	 */
+	public static String[] split(String string, String delimiter) {
 		Vector<String> v = new Vector<String>();
-		split(string, search, v);
+		split(string, delimiter, v);
 		return v.toArray(new String[v.size()]);
-
 	}
 	
 	public static String splice(Object[] c, String delim) {
@@ -566,10 +589,11 @@ public class Util {
 		return (flags & set) == set;
 	}
 	
-	/** 
-	 * read text from file to String
+	/**
+	 * Reads text from file to String.
 	 * 
 	 * @param f
+	 *            the input file
 	 * @return content of the file
 	 */
 	public static String readFromFile(File f) {

@@ -27,7 +27,7 @@ import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 /**
- * some frequently used code fragments related to the setup of prolog runtimes.
+ * Contains utility methods for handling CTerms.
  * 
  */
 public class CTermUtil {

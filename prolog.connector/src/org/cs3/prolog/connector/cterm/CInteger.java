@@ -18,7 +18,9 @@ import java.math.BigInteger;
 
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
-
+/**
+ * Represents an integer.
+ */
 public class CInteger extends CTerm{
 	
 	private BigInteger bigInt;

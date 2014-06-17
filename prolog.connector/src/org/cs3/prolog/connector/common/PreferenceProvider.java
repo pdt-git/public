@@ -14,6 +14,9 @@
 
 package org.cs3.prolog.connector.common;
 
+/**
+ * Interface that provides options for a Prolog process.
+ */
 public interface PreferenceProvider {
 	String getPreference(String key);
 }

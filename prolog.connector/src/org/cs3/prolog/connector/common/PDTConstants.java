@@ -14,8 +14,10 @@
 
 package org.cs3.prolog.connector.common;
 
-// Guenter Kniesel, 23.9.2010: Adapted to changes in SWI-Prolog 5.9.9: 
-// Reordered so that the values in the newer releases are the defaults. 
+/**
+ * Contains constants for Prolog executable names. 
+ *
+ */
 public class PDTConstants {
 	
 	// with graphic environment: First value is default!
@@ -39,30 +41,3 @@ public class PDTConstants {
 	public static final String DIALECT_YAP = "dialect.yap";
 	
 }
-
-/*
-From: Jan Wielemaker <J.Wielemaker@cs.vu.nl>
-To: swi-prolog@iai.uni-bonn.de
-Date: Wed, 24 Feb 2010 11:38:34 +0100 
-Subject: [SWIPL] Ann: SWI-Prolog 5.9.9
-
-Finally. SWI-Prolog 5.9.9 has been released.  
-There are some incompatible changes, notably using 
-the same executable name on all platforms. 
-
-	 * MODIFIED: Renaming executables for better system interoperability:
-	   	pl   --> swipl
-	   	plld --> swipl-ld
-	   	plrc --> swipl-rc
-		xpce --> <deleted>
-		libpl.dll --> swipl.dll
-	  Windows:
-		plwin.exe --> swipl-win.exe
-		plcon.exe --> swipl.exe
-		
-	 * MODIFIED: The default stack-limit has been changed to 128Mb per
-	   stack on 32-bit and 256Mb on 64-bit hardware. This probably 
-	   results in fewer complaints about running out-of-stack.
-*/
-
-

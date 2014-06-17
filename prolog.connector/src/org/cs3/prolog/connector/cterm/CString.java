@@ -16,7 +16,9 @@ package org.cs3.prolog.connector.cterm;
 
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
-
+/**
+ * Represents a Prolog string.
+ */
 public class CString extends CTerm {
 	public CString(ASTNode node) {
 		super(node);
