@@ -34,6 +34,8 @@ public interface AsyncPrologSessionListener {
 	void goalCut(AsyncPrologSessionEvent e);
 
 	void batchComplete(AsyncPrologSessionEvent e);
+	
+	void batchError(AsyncPrologSessionEvent e);
 
 }
 

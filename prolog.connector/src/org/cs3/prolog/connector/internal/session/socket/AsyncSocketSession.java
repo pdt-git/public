@@ -30,7 +30,6 @@ import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
 import org.cs3.prolog.connector.session.AsyncPrologSessionListener;
-import org.cs3.prolog.connector.session.AsyncPrologSessionListener2;
 import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSession implements AsyncPrologSession {
@@ -285,9 +284,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		e.exception=e2;
 		synchronized (listeners) {
 			for (AsyncPrologSessionListener l:listeners) {
-				if(l instanceof AsyncPrologSessionListener2){
-					((AsyncPrologSessionListener2)l).batchError(e);	
-				}
+				l.batchError(e);	
 			}
 		}
 	}

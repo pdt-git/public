@@ -16,8 +16,7 @@ package org.cs3.prolog.connector.session;
 
 import org.cs3.prolog.connector.common.Debug;
 
-public class DefaultAsyncPrologSessionListener implements
-		AsyncPrologSessionListener2 {
+public class DefaultAsyncPrologSessionListener implements AsyncPrologSessionListener {
 
 	@Override
 	public void joinComplete(AsyncPrologSessionEvent e) {

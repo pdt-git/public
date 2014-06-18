@@ -28,7 +28,7 @@ import org.cs3.prolog.connector.process.PrologProcessException;
  * The batch can be thought of as a FIFO queue. Clients add queries to the queue
  * using the queryAll(Object,String) and queryOnce(Object,String) methods. But
  * unlike the PrologSession, the AsyncPrologSession will not wait for any reply
- * from the processor, but will return control to the calling thread imediatly.
+ * from the processor, but will return control to the calling thread immediately.
  * Clients can obtain the results of the queries by registering a
  * AsyncPrologSessionListener. The processor will write all results back into
  * the output queue. On the client side, a dedicated dispatcher thread reads and

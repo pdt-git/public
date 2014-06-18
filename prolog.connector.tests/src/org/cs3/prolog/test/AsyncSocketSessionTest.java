@@ -217,6 +217,9 @@ public class AsyncSocketSessionTest extends TestCase {
 			return records.size();
 		}
 
+		@Override
+		public void batchError(AsyncPrologSessionEvent e) {}
+
 	}
 
 	public void test_syntaxError() throws Throwable {
