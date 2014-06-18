@@ -4,4 +4,4 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Utils
 Bundle-SymbolicName: org.cs3.prolog.library;singleton:=true
 Bundle-Version: 2.3.1.qualifier
-Require-Bundle: org.cs3.prolog.connector
+Require-Bundle: org.cs3.prolog.connector;bundle-version="[2.3.1,3.0.0)"
