@@ -17,6 +17,14 @@ package org.cs3.prolog.connector.session;
 import java.util.EventObject;
 import java.util.Map;
 
+/**
+ * An asynchronous Prolog session event consisting of a ticket and a query.
+ * Depending on the context it may also contain a message or a map of bindings
+ * representing a Prolog result.
+ * 
+ * An event is passed to an {@link AsyncPrologSessionListener} and can be
+ * handled there.
+ */
 public class AsyncPrologSessionEvent extends EventObject {
 	
 	private static final long serialVersionUID = 1787537795491818031L;
@@ -27,27 +35,57 @@ public class AsyncPrologSessionEvent extends EventObject {
 	public Exception exception=null;
 	public int id=-1;
 	
+	/**
+	 * Creates an asynchronous Prolog session event for the given source.
+	 * 
+	 * @param source
+	 */
 	public AsyncPrologSessionEvent(Object source) {
 		super(source);
 	}
 
+	/**
+	 * Creates an asynchronous Prolog session event for the given source and
+	 * ticket.
+	 * 
+	 * @param source
+	 * @param ticket 
+	 */
 	public AsyncPrologSessionEvent(Object source, Object ticket) {
 		super(source);
 		this.ticket=ticket;
 	}
 
+	/**
+	 * Creates an asynchronous Prolog session event for the given source, ticket
+	 * and message.
+	 * 
+	 * @param source
+	 * @param ticket
+	 * @param message
+	 */
 	public AsyncPrologSessionEvent(Object source, Object ticket, String message) {
 		super(source);
 		this.ticket=ticket;
 		this.message=message;
 	}
 
+	/**
+	 * Creates an asynchronous Prolog session event for the given source, ticket and map of bindings.
+	 * 
+	 * @param source
+	 * @param ticket 
+	 * @param bindings 
+	 */
 	public AsyncPrologSessionEvent(Object source, Object ticket, Map<String, Object> bindings) {
 		super(source);
 		this.ticket=ticket;
 		this.bindings=bindings;
 	}
 
+	/**
+	 * @return the map of bindings;<br>null if bindings are not available 
+	 */
 	public Map<String, Object> getBindings() {
 		return bindings;
 	}

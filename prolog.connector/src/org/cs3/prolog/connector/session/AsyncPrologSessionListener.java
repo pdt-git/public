@@ -14,7 +14,12 @@
 
 package org.cs3.prolog.connector.session;
 
-
+/**
+ * A listener interface for asynchronous Prolog sessions.
+ * 
+ * @see AsyncPrologSessionEvent
+ * @see AsyncPrologSession
+ */
 public interface AsyncPrologSessionListener {
 
 	void joinComplete(AsyncPrologSessionEvent e);

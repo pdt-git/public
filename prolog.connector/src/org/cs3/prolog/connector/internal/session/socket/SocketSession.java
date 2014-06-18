@@ -75,9 +75,7 @@ public class SocketSession implements PrologSession {
 		return queryAll(query, QUERY_ALL_AT_ONCE);
 	}
 	
-	@Override
-	public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException,
-	PrologProcessException {
+	private List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologProcessException {
 		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologProcess.CTERMS) == 0)) {
 			return queryAllAtOnce(query);
 		} else {

@@ -14,6 +14,7 @@
 
 package org.cs3.prolog.connector.session;
 
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 
 
@@ -37,15 +38,30 @@ import org.cs3.prolog.connector.process.PrologProcessException;
  * 
  */
 public interface AsyncPrologSession extends  Disposable {
+	
+	/**
+	 * Adds an {@link AsyncPrologSessionListener}
+	 * 
+	 * @param l
+	 *            the listener
+	 */
 	public void addBatchListener(AsyncPrologSessionListener l);
 
+	/**
+	 * Removes an {@link AsyncPrologSessionListener}
+	 * 
+	 * @param l
+	 *            the listener
+	 */
 	public void removeBatchListener(AsyncPrologSessionListener l);
 
 	/**
 	 * Enqueue a request for all solutions to a goal.
-	 * 
+	 * <p>
 	 * Results, errors, etc will be reported asynchronously to registered
 	 * listeners.
+	 * <p>
+	 * Uses the flag of the session.
 	 * 
 	 * @param ticket
 	 *            An arbitrary object that will be reported back together with
@@ -53,14 +69,15 @@ public interface AsyncPrologSession extends  Disposable {
 	 *            certain query or group of queries.
 	 * @param query
 	 *            the query goal
+	 * @throws PrologProcessException
 	 * @see AsyncPrologSessionListener
+	 * @see PrologProcess#queryAll(String...)
 	 */
 	public void queryAll(Object ticket, String query) throws PrologProcessException;
-	public void queryAll(Object ticket, String query,int flags) throws PrologProcessException;
-
+	
 	/**
-	 * Enque a request for the first solution to a goal.
-	 * 
+	 * Enqueue a request for all solutions to a goal.
+	 * <p>
 	 * Results, errors, etc will be reported asynchronously to registered
 	 * listeners.
 	 * 
@@ -70,10 +87,51 @@ public interface AsyncPrologSession extends  Disposable {
 	 *            certain query or group of queries.
 	 * @param query
 	 *            the query goal
+	 * @param flags
+	 * @throws PrologProcessException
 	 * @see AsyncPrologSessionListener
+	 * @see PrologProcess#queryAll(String...)
+	 */
+	public void queryAll(Object ticket, String query, int flags) throws PrologProcessException;
+
+	/**
+	 * Enqueue a request for the first solution to a goal.
+	 * <p>
+	 * Results, errors, etc will be reported asynchronously to registered
+	 * listeners.
+	 * <p>
+	 * Uses the flag of the session.
+	 * 
+	 * @param ticket
+	 *            An arbitrary object that will be reported back together with
+	 *            the results. clients can use this to identify results to a
+	 *            certain query or group of queries.
+	 * @param query
+	 *            the query goal
+	 * @throws PrologProcessException 
+	 * @see AsyncPrologSessionListener
+	 * @see PrologProcess#queryOnce(String...)
 	 */
 	public void queryOnce(Object ticket, String query) throws PrologProcessException;
-	public void queryOnce(Object ticket, String query,int flags) throws PrologProcessException;
+
+	/**
+	 * Enqueue a request for the first solution to a goal.
+	 * <p>
+	 * Results, errors, etc will be reported asynchronously to registered
+	 * listeners.
+	 * 
+	 * @param ticket
+	 *            An arbitrary object that will be reported back together with
+	 *            the results. clients can use this to identify results to a
+	 *            certain query or group of queries.
+	 * @param query
+	 *            the query goal
+	 * @param flags
+	 * @throws PrologProcessException 
+	 * @see AsyncPrologSessionListener
+	 * @see PrologProcess#queryOnce(String...)
+	 */
+	public void queryOnce(Object ticket, String query, int flags) throws PrologProcessException;
 
 	/**
 	 * Wait for pending queries.
@@ -87,6 +145,8 @@ public interface AsyncPrologSession extends  Disposable {
 	 * Other threads may continue adding queries after the mark while this
 	 * thread is waiting. Also note that another thread may abort the batch -
 	 * the marker will be processed nevertheless.
+	 * 
+	 * @throws PrologProcessException
 	 */
 	public void join() throws PrologProcessException;
 
@@ -103,16 +163,18 @@ public interface AsyncPrologSession extends  Disposable {
 	 * up blocking system calls, etc. Those have to be dealt with in an
 	 * application-specific manner.
 	 * 
+	 * @throws PrologProcessException
+	 * 
 	 */
 	public void abort() throws PrologProcessException;
 
 	/**
-	 * Abort the batch, using a sepcific monitor as ticket.
+	 * Abort the batch, using a specific monitor as ticket.
 	 * 
 	 * Like abort(), but allows the caller to choose the ticket that is used
 	 * with the abort marker. The session uses this ticket as monitor when
 	 * waiting for the marker echo. The idea is to allow something like this:
-	 * <code> 
+	 * <pre>
 	 * final Object lock = new Object();
 	 * session.queryOnce("some_blocking_predicate");
 	 * synchronized (lock) {
@@ -128,31 +190,30 @@ public interface AsyncPrologSession extends  Disposable {
 	 *   thread.start();
 	 *   session.abort(lock);
 	 * }
-	 * </code>
-	 * 
-	 * This method is mainly usefull for test cases, where it is important that
+	 * </pre>
+	 * <p>
+	 * This method is mainly useful for test cases, where it is important that
 	 * things happen in a certain order. You should overuse it in your
 	 * application. 
+	 * @param monitor 
+	 * @throws PrologProcessException 
 	 */
 	public void abort(Object monitor) throws PrologProcessException;
 
 	
-	
 	/**
-	 * check wether a request is on queue.
+	 * Checks whether a request is on queue.
 	 * 
-	 * 
-	 * 
-	 * @param ticket the ticket used with the request.
+	 * @param ticket the ticket used with the request
 	 * @return true if at least one request was enqueued using this ticket,
-	 * and this request has not yet been processed. 
+	 * and this request has not yet been processed
 	 * 
 	 */
 	public boolean isPending(Object ticket);
 	
 	/**
 	 * 
-	 * @return true if there are no pending requests.
+	 * @return true if there are no pending requests
 	 */
 	public boolean isIdle();
 
@@ -160,7 +221,7 @@ public interface AsyncPrologSession extends  Disposable {
 	 * Dispose the batch.
 	 * 
 	 * Adds a special end_of_batch marker to the queue. No more queries may
-	 * follow this marker. The processor will continue to process all encqueued
+	 * follow this marker. The processor will continue to process all enqueued
 	 * queries and markers until it reaches the end_of_batch marker. It will
 	 * then notify the listeners, shut down the dispatcher and close the batch.
 	 * 
@@ -174,14 +235,14 @@ public interface AsyncPrologSession extends  Disposable {
 	 * Check if the batch is disposed.
 	 * See: {@link #dispose()}
 	 * 
-	 * @return true if the batch is disposed or in the proceess of beeing
+	 * @return true if the batch is disposed or in the process of being
 	 *         disposed.
 	 */
 	@Override
 	public boolean isDisposed();
 
 	/**
-	 * @return the thread alias of the processor.
+	 * @return the thread alias of the processor
 	 */
 	public String getProcessorThreadAlias();
 }

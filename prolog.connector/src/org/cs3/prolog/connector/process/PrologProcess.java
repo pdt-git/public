@@ -365,61 +365,69 @@ public interface PrologProcess {
 	public boolean hasError();
 	
 	/**
-	 * Executes the given query and returns all results. The query is created
-	 * by connecting the given goals conjunctively. The result is always a list of maps. Each map
-	 * represents one result of the query containing the bindings for all variables. 
-	 * The variables are the keys of each map.
-	 * If the query fails the returned list is empty.
+	 * Executes the given query and returns all results. The query is created by
+	 * connecting the given goals conjunctively. The result is always a list of
+	 * maps. Each map represents one result of the query containing the bindings
+	 * for all variables. The variables are the keys of each map. If the query
+	 * fails the returned list is empty.
 	 * <p>
 	 * Uses default flag
 	 * 
-	 * @param predicates a number of goals
+	 * @param predicates
+	 *            a number of goals
 	 * @return all results of the query or an empty list if the query fails
 	 * @throws PrologProcessException
 	 */
 	public List<Map<String, Object>> queryAll(String... predicates) throws PrologProcessException;
 	
 	/**
-	 * Executes the given query and returns all results. The query is created
-	 * by connecting the given goals conjunctively. The result is always a list of maps. Each map
-	 * represents one result of the query containing the bindings for all variables. 
-	 * The variables are the keys of each map.
-	 * If the query fails the returned list is empty.
+	 * Executes the given query and returns all results. The query is created by
+	 * connecting the given goals conjunctively. The result is always a list of
+	 * maps. Each map represents one result of the query containing the bindings
+	 * for all variables. The variables are the keys of each map. If the query
+	 * fails the returned list is empty.
 	 * <p>
 	 * Flag sets the kind of objects returned by the query.
 	 * 
-	 * @param flag kind of objects returned by the query
-	 * @param predicates a number of goals
+	 * @param flag
+	 *            kind of objects returned by the query
+	 * @param predicates
+	 *            a number of goals
 	 * @return all results of the query or an empty list if the query fails
 	 * @throws PrologProcessException
 	 */
 	public List<Map<String, Object>> queryAll(int flag, String... predicates) throws PrologProcessException;
 	
 	/**
-	 * Executes the given query and returns the first result. The query is created
-	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
-	 * containing the bindings for all variables. The variables are the keys of the map.
-	 * If the query fails this method returns null.
+	 * Executes the given query and returns the first result. The query is
+	 * created by connecting the given goals conjunctively. If the query
+	 * succeeds, the result is a map containing the bindings for all variables.
+	 * The variables are the keys of the map. If the query fails this method
+	 * returns null.
 	 * <p>
 	 * Uses default flag
 	 * 
-	 * @param predicates a number of goals
-	 * @return the first result as of the query or null if the query fails
+	 * @param predicates
+	 *            a number of goals
+	 * @return the first result of the query or null if the query fails
 	 * @throws PrologProcessException
 	 */
 	public Map<String, Object> queryOnce(String... predicates) throws PrologProcessException;
 	
 	/**
-	 * Executes the given query and returns the first result. The query is created
-	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
-	 * containing the bindings for all variables. The variables are the keys of the map.
-	 * If the query fails this method returns null.
+	 * Executes the given query and returns the first result. The query is
+	 * created by connecting the given goals conjunctively. If the query
+	 * succeeds, the result is a map containing the bindings for all variables.
+	 * The variables are the keys of the map. If the query fails this method
+	 * returns null.
 	 * <p>
 	 * Flag sets the kind of objects returned by the query.
 	 * 
-	 * @param flag kind of objects returned by the query
-	 * @param predicates a number of goals
-	 * @return the first result as of the query or null if the query fails
+	 * @param flag
+	 *            kind of objects returned by the query
+	 * @param predicates
+	 *            a number of goals
+	 * @return the first result of the query or null if the query fails
 	 * @throws PrologProcessException
 	 */
 	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologProcessException;

@@ -18,38 +18,36 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 
-public interface PrologSession extends Disposable{
+/**
+ * Prolog Session for synchronous queries.
+ * 
+ * A single Prolog engine thread is attached to this session through its
+ * complete lifetime.
+ * 
+ */
+public interface PrologSession extends Disposable {
 	
 	/**
-	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryOnce(String...)}  
 	 * @param query
-	 * @return
+	 * @return the first result of the query or null if the query fails
 	 * @throws PrologException
 	 * @throws PrologProcessException
+	 * @see PrologProcess#queryOnce(String...)
 	 */
     public Map<String,Object> queryOnce(String query) throws PrologException, PrologProcessException;
 
 	/**
-	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryAll(String...)}  
 	 * @param query
-	 * @return
+	 * @return all results of the query or an empty list if the query fails
 	 * @throws PrologException
 	 * @throws PrologProcessException
+	 * @see PrologProcess#queryAll(String...)
 	 */
     public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologProcessException;
 
-	/**
-	 * See: {@link org.cs3.prolog.connector.process.PrologProcess#queryAll(String...)}  
-	 * @param query
-	 * @param flag
-	 * @return
-	 * @throws PrologException
-	 * @throws PrologProcessException
-	 */
-    public List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologProcessException;
-	
 }
 
 

@@ -16,6 +16,9 @@ package org.cs3.prolog.connector.session;
 
 import org.cs3.prolog.connector.common.Debug;
 
+/**
+ * Default implementation of an asynchronous Prolog session listener.
+ */
 public class DefaultAsyncPrologSessionListener implements AsyncPrologSessionListener {
 
 	@Override

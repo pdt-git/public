@@ -213,7 +213,6 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 
 		public int size() {
-
 			return records.size();
 		}
 

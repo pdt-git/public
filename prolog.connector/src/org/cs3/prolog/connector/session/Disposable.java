@@ -14,6 +14,11 @@
 
 package org.cs3.prolog.connector.session;
 
+/**
+ * A simple Interface to support disposing of a session and checking if a
+ * session has been disposed.
+ *
+ */
 public interface Disposable {
 
     /**
