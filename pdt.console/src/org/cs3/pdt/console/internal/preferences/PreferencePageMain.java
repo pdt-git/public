@@ -66,6 +66,7 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		Group fontGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		fontGroup.setText("Console font");
 		addField(new MyFontFieldEditor(PDTConsole.PREF_CONSOLE_FONT, "Console font:", fontGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_NORMAL, "Console font color:", fontGroup));
 		
 		Group colourGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		colourGroup.setText("Colour output line starting with ...");
@@ -83,12 +84,19 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		addField(bfe_inter_start);
 		
 		
+		Group backgroundGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
+		backgroundGroup.setText("Console background colors");
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, "Normal", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Single char mode", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "Disabled", backgroundGroup));
+		
 		//The Prolog Console uses this to save its command history.\n
 		//Just leave it empty if you do not want the command history to be persistent.
 		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
 		
 		adjustLayoutForElement(fontGroup);
 		adjustLayoutForElement(colourGroup);
+		adjustLayoutForElement(backgroundGroup);
 	}
 
 	/*
