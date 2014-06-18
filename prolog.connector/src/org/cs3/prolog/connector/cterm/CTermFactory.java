@@ -76,7 +76,7 @@ public class CTermFactory {
 			return new CFloat((ASTFloat)root);
 		}
 		if(root instanceof ASTNil){
-			return new CNil((ASTNil)root);
+			return new CEmptyList((ASTNil)root);
 		}
 		throw new IllegalArgumentException("bad node type: "+root.getClass().getName());
 	}

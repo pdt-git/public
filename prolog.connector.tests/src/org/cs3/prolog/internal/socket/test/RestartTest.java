@@ -32,7 +32,7 @@ public class RestartTest extends TestCase {
 		process.start();
 
 		
-		SocketSession session = (SocketSession) process.getSession(PrologProcess.LEGACY);
+		SocketSession session = (SocketSession) process.getSession(PrologProcess.DEFAULT);
 		long pid = session.getClient().getServerPid();
 		JackTheProcessRipper.getInstance().markForDeletion(pid);
 		try{
@@ -42,7 +42,7 @@ public class RestartTest extends TestCase {
 			;
 		}
 		process.start();
-		session = (SocketSession) process.getSession(PrologProcess.LEGACY);
+		session = (SocketSession) process.getSession(PrologProcess.DEFAULT);
 		assertTrue(pid!=session.getClient().getServerPid());
 		assertNotNull(session.queryOnce("true"));
 	}
@@ -52,7 +52,7 @@ public class RestartTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologProcess process = Connector.newUninitializedPrologProcess();
 		
-		SocketSession session = (SocketSession) process.getSession(PrologProcess.LEGACY);
+		SocketSession session = (SocketSession) process.getSession(PrologProcess.DEFAULT);
 		long pid = session.getClient().getServerPid();
 		JackTheProcessRipper.getInstance().markForDeletion(pid);
 		try{
@@ -61,7 +61,7 @@ public class RestartTest extends TestCase {
 		catch(Throwable t){
 			;
 		}
-		session = (SocketSession) process.getSession(PrologProcess.LEGACY);
+		session = (SocketSession) process.getSession(PrologProcess.DEFAULT);
 		assertTrue(pid!=session.getClient().getServerPid());
 		assertNotNull(session.queryOnce("true"));
 	}

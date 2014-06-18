@@ -32,10 +32,9 @@ public interface PrologProcess {
 	/**
 	 * Session flag.
 	 * 
-	 * This shall eventually be the *new* default behavior. All bindings are
-	 * reported as java.lang.String objects using the canonical syntax. Atoms
-	 * are quoted when necessary. lists are not processed. I.e. all bindings
-	 * should be of a form as created by write_canonical/1.
+	 * All bindings are reported as java.lang.String objects using the canonical
+	 * syntax. Atoms are quoted when necessary. lists are not processed. I.e.
+	 * all bindings should be of a form as created by write_canonical/1.
 	 * 
 	 */
 	public final static int NONE = 0;
@@ -85,7 +84,7 @@ public interface PrologProcess {
 	 * This is what will be used by the legacy
 	 * {@link PrologProcess#getSession()} method.
 	 */
-	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
+	public final static int DEFAULT = UNQUOTE_ATOMS | PROCESS_LISTS;
 	
 	/**
 	 * 
@@ -386,8 +385,23 @@ public interface PrologProcess {
 	 * maps. Each map represents one result of the query containing the bindings
 	 * for all variables. The variables are the keys of each map. If the query
 	 * fails the returned list is empty.
+	 * 
+	 * <h3>Result types</h3>
+	 * 
+	 * The type of the result differs, depending on the given flag. If not
+	 * specified otherwise the {@link #DEFAULT} flag will be used. This means,
+	 * that the results will be instances of Strings or instances of
+	 * java.util.List (in case of Prolog lists). The elements in this list can
+	 * also be of type String or List. This is the recommended way if the
+	 * results only consist of atoms, numbers and lists or if the string
+	 * representation of a result is sufficient for the context of the program.
 	 * <p>
-	 * Flag sets the kind of objects returned by the query.
+	 * If the result contains compound Prolog terms and the values inside of
+	 * these terms are important and need to be processed at a later point, the
+	 * recommended flag is {@link #CTERMS} (see {@link CTerm}). Every element
+	 * (atom, integer, compound term ...) will be transformed to a corresponding
+	 * Java object. See the package {@link org.cs3.prolog.connector.cterm} for a
+	 * list of possible objects.
 	 * 
 	 * @param flag
 	 *            kind of objects returned by the query
@@ -433,21 +447,21 @@ public interface PrologProcess {
 	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologProcessException;
 	
 	/**
-	 * Returns the default session flag. If no flag is specified for a query or
-	 * a session, this default flag will be used.
+	 * Returns the flag for new sessions. If no flag is specified for a query or
+	 * a session, this flag will be used.
 	 * 
-	 * @return the default session flag
+	 * @return the flag for new sessions
 	 */
-	public int getDefaultSessionFlag();
+	public int getSessionFlag();
 
 	/**
-	 * Sets the default session flag. If no flag is specified for a query or a
-	 * session, this default flag will be used.
+	 * Sets the flag for new sessions. If no flag is specified for a query or a
+	 * session, this flag will be used.
 	 * 
 	 * @param flag
-	 *            the default session flag
+	 *            the flag for new sessions
 	 */
-	public void setDefaultSessionFlag(int flag);
+	public void setSessionFlag(int flag);
 	
 	/**
 	 * Consults the given file to this process.

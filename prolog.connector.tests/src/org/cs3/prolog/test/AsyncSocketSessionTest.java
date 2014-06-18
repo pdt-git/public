@@ -25,7 +25,7 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.cterm.CCompound;
-import org.cs3.prolog.connector.cterm.CNil;
+import org.cs3.prolog.connector.cterm.CEmptyList;
 import org.cs3.prolog.connector.cterm.CTerm;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.process.PrologException;
@@ -348,7 +348,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		rec.clear();
 		session.queryOnce("nabla", "A=[]", PrologProcess.CTERMS);
 		session.join();
-		assertTrue(rec.get(0).event.getBindings().get("A") instanceof CNil);
+		assertTrue(rec.get(0).event.getBindings().get("A") instanceof CEmptyList);
 	}
 	
 	public void testPDT287_2() throws Exception {

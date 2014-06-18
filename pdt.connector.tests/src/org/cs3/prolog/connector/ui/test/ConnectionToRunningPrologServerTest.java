@@ -60,7 +60,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	
 	public void testConnect() throws Exception {
 
-		PrologSession session = process.getSession(PrologProcess.LEGACY);
+		PrologSession session = process.getSession(PrologProcess.DEFAULT);
 		
 		PrologEventListener listener = new PrologEventListener(){
 			@Override
@@ -189,7 +189,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	}
 	
 	public void testConnectionWorks() throws Throwable{
-		process.getSession(PrologProcess.LEGACY).queryOnce("threads");
+		process.getSession(PrologProcess.DEFAULT).queryOnce("threads");
 	}
 }
 

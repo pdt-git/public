@@ -310,7 +310,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 					if (process.isUp()) {
 						PrologSession session = null;
 						try {
-							session = process.getSession(PrologProcess.LEGACY);
+							session = process.getSession(PrologProcess.DEFAULT);
 							
 							String consult = library.getPrologInitStatement();
 							Debug.debug("consult " + consult + ", from " + library);

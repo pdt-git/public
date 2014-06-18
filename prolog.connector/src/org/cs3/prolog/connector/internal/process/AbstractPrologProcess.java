@@ -50,7 +50,7 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
 	private StartupStrategy startupStrategy;
 	private final MyLifeCycle lifecycle;
-	private int defaultSessionFlag = LEGACY;
+	private int defaultSessionFlag = DEFAULT;
 
 	// Options [Start]
 
@@ -571,18 +571,18 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 	}
 
 	@Override
-	public void setDefaultSessionFlag(int flag) {
+	public void setSessionFlag(int flag) {
 		defaultSessionFlag = flag;
 	}
 	
 	@Override
-	public int getDefaultSessionFlag() {
+	public int getSessionFlag() {
 		return defaultSessionFlag;
 	}
 	
 	@Override
 	public List<Map<String, Object>> queryAll(String... predicates) throws PrologProcessException {
-		return queryAll(getDefaultSessionFlag(), predicates);
+		return queryAll(getSessionFlag(), predicates);
 	}
 	
 	/**
@@ -621,7 +621,7 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 
 	@Override
 	public Map<String, Object> queryOnce(String... predicates) throws PrologProcessException {
-		return queryOnce(getDefaultSessionFlag(), predicates);
+		return queryOnce(getSessionFlag(), predicates);
 	}
 	
 	/**

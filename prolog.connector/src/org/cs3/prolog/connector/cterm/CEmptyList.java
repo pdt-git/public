@@ -17,11 +17,11 @@ package org.cs3.prolog.connector.cterm;
 import org.cs3.prolog.connector.internal.cterm.parser.ASTNode;
 
 /**
- * Represents the empty list [].
+ * Represents the empty list <code>[]</code>.
  */
-public class CNil extends CTerm {
+public class CEmptyList extends CTerm {
 	
-	public CNil(ASTNode node) {
+	public CEmptyList(ASTNode node) {
 		super(node);
 	}
 	

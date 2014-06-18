@@ -33,7 +33,7 @@ import org.cs3.prolog.connector.session.PrologSession;
 public class CTermUtil {
 	
 	public static boolean isList(CTerm term) {
-		if(term instanceof CNil){
+		if(term instanceof CEmptyList){
 			return true;
 		}
 		return term.getFunctorValue().equals(".") && term.getArity() == 2;

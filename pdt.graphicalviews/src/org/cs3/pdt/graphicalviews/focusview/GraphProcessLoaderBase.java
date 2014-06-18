@@ -120,7 +120,7 @@ public abstract class GraphProcessLoaderBase {
 	public Map<String, Object> sendQueryToCurrentProcess(String query)
 		throws PrologProcessException {
 	
-		PrologSession session = process.getSession(PrologProcess.LEGACY);
+		PrologSession session = process.getSession(PrologProcess.DEFAULT);
 		Map<String, Object> result = session.queryOnce(query);
 		return result;
 	}

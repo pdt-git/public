@@ -231,7 +231,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	protected PrologSession getInitialSession() throws PrologProcessException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
-			return new InitSession(new SocketClient(getHost(), port), this, getDefaultSessionFlag());
+			return new InitSession(new SocketClient(getHost(), port), this, getSessionFlag());
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -248,7 +248,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 			throws PrologProcessException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
-			return new ShutdownSession(new SocketClient(getHost(), port), this, getDefaultSessionFlag());
+			return new ShutdownSession(new SocketClient(getHost(), port), this, getSessionFlag());
 		} catch (Throwable e) {
 			throw error(e);
 			
