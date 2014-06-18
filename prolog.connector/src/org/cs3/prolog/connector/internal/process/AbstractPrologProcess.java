@@ -31,7 +31,7 @@ import org.cs3.prolog.connector.common.PreferenceProvider;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.cterm.CTermUtil;
 import org.cs3.prolog.connector.internal.lifecycle.LifeCycle;
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
+import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.process.StartupStrategy;
@@ -54,7 +54,6 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 
 	// Options [Start]
 
-	private boolean standAloneServer = false;
 	private String host;
 	private String osInvocation;
 	private String executablePath;
@@ -62,7 +61,6 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 	private String additionalStartupFile;
 	private String environment;
 	private int timeout;
-	private String fileSearchPath;
 
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 
@@ -77,35 +75,6 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 
 
 	// Options [Start]
-	public void setStandAloneServer(String standAloneServer) {
-		setStandAloneServer(Boolean.parseBoolean(standAloneServer));
-	}
-
-	@Override
-	public void setStandAloneServer(boolean standAloneServer) {
-		if (isDown()) {
-			this.standAloneServer = standAloneServer;
-		} else {
-			throw new IllegalStateException("Cannot change standalone flag while in use.");
-		}
-
-	}
-
-	@Override
-	public boolean isStandAloneServer() {
-		return standAloneServer;
-	}
-
-	@Override
-	public void setFileSearchPath(String fileSearchPath) {
-		this.fileSearchPath = fileSearchPath;
-	}
-
-	@Override
-	public String getFileSearchPath() {
-		return fileSearchPath;
-	}
-
 	@Override
 	public void setHost(String value) {
 		this.host = value;

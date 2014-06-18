@@ -19,7 +19,7 @@ import java.util.Iterator;
 
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
+import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcessException;
 
 public abstract class AbstractState implements State {

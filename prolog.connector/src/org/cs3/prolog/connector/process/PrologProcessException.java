@@ -25,20 +25,38 @@ public class PrologProcessException extends Exception {
 
 	private static final long serialVersionUID = 1298404946804072338L;
 
-
+	/**
+	 * Creates a PrologProcessException.
+	 */
     public PrologProcessException() {
         super();
     }
-
-
+    
+    /**
+	 * Creates a PrologProcessException with the specified detail message.
+	 * 
+	 * @param message
+	 */
     public PrologProcessException(String message) {
         super(message);
     }
     
+	/**
+	 * Creates a PrologProcessException with the specified cause.
+	 * 
+	 * @param cause
+	 */
     public PrologProcessException(Throwable cause) {
         super(cause);
     }
-
+    
+	/**
+	 * Creates a PrologProcessException with the specified detail message and
+	 * the specified cause.
+	 * 
+	 * @param message
+	 * @param cause
+	 */
     public PrologProcessException(String message, Throwable cause) {
         super(message, cause);
      }

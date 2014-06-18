@@ -19,26 +19,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.prolog.connector.common.PreferenceProvider;
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
+import org.cs3.prolog.connector.cterm.CTerm;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.PrologSession;
 
+/**
+ * Provides the main interface for interacting with Prolog processes. Each
+ * instance of PrologProcess corresponds to exactly one process.
+ */
 public interface PrologProcess {
 
 	/**
-	 * consult event subject constant.
-	 * Events of this subject will be fired
-	 * whenever something was consulted into the prolog system. <br>
-	 * NOT IMPLEMENTED YET
-	 */
-	public final static String SUBJECT_CONSULTED = "consulted";
-
-	
-
-	/**
-	 * session flag.
+	 * Session flag.
 	 * 
-	 * this shall eventually be the *new* default behavior. All bindings are
+	 * This shall eventually be the *new* default behavior. All bindings are
 	 * reported as java.lang.String objects using the canonical syntax. Atoms
 	 * are quoted when necessary. lists are not processed. I.e. all bindings
 	 * should be of a form as created by write_canonical/1.
@@ -47,38 +41,37 @@ public interface PrologProcess {
 	public final static int NONE = 0;
 
 	/**
-	 * session flag.
+	 * Session flag.
 	 * 
-	 * Deviates from NONE in that bindings that are atoms are unquoted. This is
-	 * supposed to mimic the "old" behavior where bindings where written into
-	 * the stream using write/2 rather than write_canonical/2 or writeq/2. Note
-	 * that this will NOT un-quote atoms nested in complex terms, so the
+	 * Deviates from {@link #NONE} in that bindings that are atoms are unquoted.
+	 * This is supposed to mimic the "old" behavior where bindings where written
+	 * into the stream using write/2 rather than write_canonical/2 or writeq/2.
+	 * Note that this will NOT un-quote atoms nested in complex terms, so the
 	 * behavior is slightly different than it was before.
 	 */
 	public final static int UNQUOTE_ATOMS = 1;
 
 	/**
-	 * session flag.
+	 * Session flag.
 	 * 
-	 * Deviates from NONE in that bindings that are lists are reported as
-	 * java.util.List instances. Elements are processed recursively.
+	 * Deviates from {@link #NONE} in that bindings that are lists are reported
+	 * as java.util.List instances. Elements are processed recursively.
 	 */
 	public final static int PROCESS_LISTS = 2;
 
 	/**
-	 * session flag.
+	 * Session flag.
 	 * 
 	 * Deviates from NONE in that all bindings are reported as instances of
-	 * org.cs3.pl.cterm.CTerm. Cannot be used together with UNQUOTE_ATOMS. Doing
-	 * so will raise an IllegalArgumentException. Can be combined with
-	 * PROCESS_LISTS.
+	 * {@link CTerm}. Cannot be used together with {@link #UNQUOTE_ATOMS}. Doing so will
+	 * raise an IllegalArgumentException. Can be combined with {@link #PROCESS_LISTS}.
 	 * 
 	 */
 	public final static int CTERMS = 4;
 
 	
 	/**
-	 * session flag.
+	 * Session flag.
 	 * 
 	 * If this flag is set, all variables will be part of the result, even
 	 * the variables which are not bound (you will have entries like A=A)
@@ -87,17 +80,16 @@ public interface PrologProcess {
 	public final static int UNBOUND_VARIABLES = 8;
 	
 	/**
+	 * Session flag.
 	 * 
-	 * session flag.
-	 * 
-	 * This is what will be used by the legacy PrologProcess.getSession()
-	 * method.
+	 * This is what will be used by the legacy
+	 * {@link PrologProcess#getSession()} method.
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
 	
 	/**
 	 * 
-	 * session flag.
+	 * Session flag.
 	 * 
 	 * This is what should be used by JPC. It creates CTerms and create
 	 * result entries for unbound variables.
@@ -109,12 +101,13 @@ public interface PrologProcess {
 	
 
 	/**
-	 * Returns a prolog session.<br>
+	 * Returns a prolog session.
+	 * <p>
 	 * Use sessions to interact with the prolog system. Sessions can only be
 	 * obtained while the PrologProcess is in UP state. During startup, this
-	 * call will block until the process is up. In state SHUTODWN or DOWN, this will
-	 * raise an IllegalStateException.
-	 * 
+	 * call will block until the process is up. In state SHUTODWN or DOWN, this
+	 * will raise an IllegalStateException.
+	 * <p>
 	 * Uses default flag
 	 * 
 	 * @return a new Session Object
@@ -123,14 +116,16 @@ public interface PrologProcess {
 	public abstract PrologSession getSession() throws PrologProcessException;
 
 	/**
-	 * Returns a prolog session.<br>
+	 * Returns a prolog session.
+	 * <p>
 	 * Use sessions to interact with the prolog system. Sessions can only be
 	 * obtained while the PrologProcess is in UP state. During startup, this
-	 * call will block until the process is up. in state SHUTODWN or DOWN, this will
-	 * raise an IllegalStateException.
-	 * 
+	 * call will block until the process is up. in state SHUTODWN or DOWN, this
+	 * will raise an IllegalStateException.
+	 * <p>
 	 * Flag sets the kind of objects returned by the queries.
 	 * 
+	 * @param flags
 	 * @return a new Session Object
 	 * @throws PrologProcessException
 	 */
@@ -166,74 +161,206 @@ public interface PrologProcess {
 	public abstract void reset() throws PrologProcessException;
 
 	/**
-	 * checks whether the prologInterface is up and running.
+	 * Checks whether the process is up and running.
 	 * 
-	 * @return true if the prolog system is ready for battle.
+	 * @return true if the process is up and running
 	 */
 	public boolean isUp();
 
 	/**
-	 * checks whether the prologInterface is down. <br>
-	 * this is not the same as <code>!isUp()</code>. During startup and
+	 * Checks whether the process is down.
+	 * <p>
+	 * This is not the same as <code>!{@link #isUp()}</code>. During startup and
 	 * shutdown both methods return false.
 	 * 
-	 * @return
+	 * @return true if the process is down
 	 */
 	public boolean isDown();
 
-	public void addLifeCycleHook(LifeCycleHook hook, String id,
-			String[] dependencies);
-
 	/**
-	 * initializes options of this prolog interface from preference_store
+	 * Initializes options of this prolog interface from the given preference provider.
+	 * 
+	 * @param provider the preference provider
 	 */
 	public void initOptions(PreferenceProvider provider);	
 	
-	public void setStandAloneServer(boolean standAloneServer);
-
-	public boolean isStandAloneServer();
+	/**
+	 * @return the Operating System invocation
+	 */
 	public String getOSInvocation();
+	
+	/**
+	 * Sets the Operating System invocation.
+	 * 
+	 * @param osInvocation
+	 */
 	public void setOSInvocation(String osInvocation);
+	
+	/**
+	 * 
+	 * @return the path to the Prolog executable
+	 */
 	public String getExecutablePath();
+	
+	/**
+	 * Sets the path to the Prolog executable.
+	 * @param executablePath
+	 */
 	public void setExecutablePath(String executablePath);
+	
+	/**
+	 * 
+	 * @return the command line arguments
+	 */
 	public String getCommandLineArguments();
+	
+	/**
+	 * Sets the command line arguments.
+	 * @param commandLineArguments
+	 */
 	public void setCommandLineArguments(String commandLineArguments);
+	
+	/**
+	 * @return the additional startup file
+	 */
 	public String getAdditionalStartupFile();
+	
+	/**
+	 * Sets the additional startup file.
+	 * 
+	 * @param additionalStartupFile
+	 *            path to the startup file
+	 */
 	public void setAdditionalStartupFile(String additionalStartupFile);
+	
+	/**
+	 * @return the extra environment variables
+	 */
 	public String getEnvironment() ;
-	public void setEnvironment(String executable) ;
+	
+	/**
+	 * Sets the extra environment variables.
+	 * 
+	 * The entries are separated by <code>;</code> and have the structure:
+	 * <pre>VARIABLE=VALUE</pre>
+	 * @param environmentVariables
+	 */
+	public void setEnvironment(String environmentVariables) ;
+	
+	/**
+	 * @return the host
+	 */
 	public String getHost();
+	
+	/**
+	 * Sets the host.
+	 * @param host
+	 */
 	public void setHost(String host);
-	public String getFileSearchPath();
+	
+	/**
+	 * Returns the time in milliseconds to wait for the initialization of the process.
+	 * 
+	 * @return timeout in milliseconds. 
+	 */
 	public int getTimeout();
+	
+	/**
+	 * Sets the time in milliseconds to wait for the initialization of the process.
+	 * 
+	 * @param timeout in milliseconds
+	 */
 	public void setTimeout(String timeout);
+	
+	/**
+	 * Generic way to get an attribute.
+	 * @param attribute
+	 * @return the value of the attribute;<br>null if attribute is not defined
+	 */
 	public Object getAttribute(String attribute);
+	
+	/**
+	 * Generic way to set an attribute.
+	 * @param attribute
+	 * @param value
+	 */
 	public void setAttribute(String attribute, Object value);
-	public void setFileSearchPath(String fileSearchPath);
 	
-	
+	/**
+	 * @return the {@link StartupStrategy}
+	 */
 	public StartupStrategy getStartupStrategy();
+	
+	/**
+	 * Sets the {@link StartupStrategy}.
+	 * @param startupStrategy
+	 */
 	public void setStartupStrategy(StartupStrategy startupStrategy);
 
 	/**
-	 * unregister a lifeCycleHook.
+	 * Adds a life cycle hook to this process.
 	 * 
-	 * this will remove ALL hooks registered for this id.
+	 * @param hook
+	 *            the life cycle hook
+	 * @param id
+	 *            the id of the life cycle hook
+	 * @param dependencies
+	 *            ids of other registered life cycle hooks on which this hook
+	 *            depends
+	 */
+	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies);
+	
+	/**
+	 * Unregister a lifeCycleHook.
+	 * 
+	 * This will remove ALL hooks registered for this id.
 	 * 
 	 * @param hookId
 	 */
-	public abstract void removeLifeCycleHook(String hookId);
+	public void removeLifeCycleHook(String hookId);
+	
+	/**
+	 * Unregister a specific lifeCycleHook.
+	 * 
+	 * This will remove only the specified hook.
+	 * 
+	 * @param hook
+	 * @param hookId
+	 */
 	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
 	
 	/**
-	 * Uses the default flag
+	 * Returns an asynchronous prolog session.
+	 * <p>
+	 * Contrary to a {@link PrologSession} asynchronous sessions don't wait for a query to finish.
+	 * <p>
+	 * Uses default flag.
+	 * 
+	 * @return a new asynchronous session object
+	 * @throws PrologProcessException
+	 * @see #getSession()
 	 */
 	public AsyncPrologSession getAsyncSession() throws PrologProcessException;
+	
+	/**
+	 * Returns an asynchronous prolog session.
+	 * <p>
+	 * Contrary to a {@link PrologSession} asynchronous sessions don't wait for
+	 * a query to finish.
+	 * 
+	 * @param flags
+	 * 
+	 * @return a new asynchronous session object
+	 * @throws PrologProcessException
+	 * @see #getSession(int)
+	 */
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologProcessException;
 	
 	/**
-	 * Is the {@link PrologProcess} in an error state, e.g. the corresponding process has been killed externally.  
-	 * @return
+	 * Checks if the process is in an error state, e.g. if the corresponding
+	 * process has been killed externally.
+	 * 
+	 * @return true if the process is in an error state
 	 */
 	public boolean hasError();
 	
@@ -243,7 +370,7 @@ public interface PrologProcess {
 	 * represents one result of the query containing the bindings for all variables. 
 	 * The variables are the keys of each map.
 	 * If the query fails the returned list is empty.
-	 * 
+	 * <p>
 	 * Uses default flag
 	 * 
 	 * @param predicates a number of goals
@@ -258,7 +385,7 @@ public interface PrologProcess {
 	 * represents one result of the query containing the bindings for all variables. 
 	 * The variables are the keys of each map.
 	 * If the query fails the returned list is empty.
-	 * 
+	 * <p>
 	 * Flag sets the kind of objects returned by the query.
 	 * 
 	 * @param flag kind of objects returned by the query
@@ -273,7 +400,7 @@ public interface PrologProcess {
 	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
 	 * containing the bindings for all variables. The variables are the keys of the map.
 	 * If the query fails this method returns null.
-	 * 
+	 * <p>
 	 * Uses default flag
 	 * 
 	 * @param predicates a number of goals
@@ -287,7 +414,7 @@ public interface PrologProcess {
 	 * by connecting the given goals conjunctively. If the query succeeds, the result is a map
 	 * containing the bindings for all variables. The variables are the keys of the map.
 	 * If the query fails this method returns null.
-	 * 
+	 * <p>
 	 * Flag sets the kind of objects returned by the query.
 	 * 
 	 * @param flag kind of objects returned by the query
@@ -297,11 +424,34 @@ public interface PrologProcess {
 	 */
 	public Map<String, Object> queryOnce(int flag, String... predicates) throws PrologProcessException;
 	
+	/**
+	 * Returns the default session flag. If no flag is specified for a query or
+	 * a session, this default flag will be used.
+	 * 
+	 * @return the default session flag
+	 */
 	public int getDefaultSessionFlag();
 
+	/**
+	 * Sets the default session flag. If no flag is specified for a query or a
+	 * session, this default flag will be used.
+	 * 
+	 * @param flag
+	 *            the default session flag
+	 */
 	public void setDefaultSessionFlag(int flag);
 	
+	/**
+	 * Consults the given file to this process.
+	 * <p>
+	 * This is done by calling the Prolog predicate <code>consult/1</code>.
+	 * 
+	 * @param file
+	 *            the file to consult
+	 * @throws PrologProcessException
+	 */
 	public void consult(File file) throws PrologProcessException;
+	
 }
 
 

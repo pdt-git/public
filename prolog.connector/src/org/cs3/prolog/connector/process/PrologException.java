@@ -24,19 +24,33 @@ package org.cs3.prolog.connector.process;
  */
 public class PrologException extends RuntimeException {
 
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
     private static final long serialVersionUID = 2832762018351845476L;
 
+	/**
+	 * Creates a PrologException with the specified detail message.
+	 * 
+	 * @param message
+	 */
     public PrologException(String message) {
         super(message);
     }
 
+	/**
+	 * Creates a PrologException with the specified cause.
+	 * 
+	 * @param cause
+	 */
     public PrologException(Throwable cause) {
         super(cause);
      }
-
+    
+	/**
+	 * Creates a PrologException with the specified detail message and the
+	 * specified cause.
+	 * 
+	 * @param message
+	 * @param cause
+	 */
     public PrologException(String message, Throwable cause) {
         super(message, cause);
      }

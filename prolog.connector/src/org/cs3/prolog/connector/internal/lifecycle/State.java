@@ -14,7 +14,7 @@
 
 package org.cs3.prolog.connector.internal.lifecycle;
 
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
+import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcessException;
 
 public interface State{

@@ -32,8 +32,8 @@ import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.Debug;
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
-import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.connector.process.LifeCycleHook;
+import org.cs3.prolog.connector.process.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologEvent;
 import org.cs3.prolog.connector.process.PrologProcessException;
@@ -389,7 +389,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	@Override
 	public void update(PrologEvent e) {
 		if (e.getSubject().equals(ADD_BREAKPOINT)) {
-			String id = e.getEvent();
+			String id = e.getData();
 			try {
 				Map<String, Object> result = currentProcess.queryOnce(bT(PDTPredicates.PDT_BREAKPOINT_PROPERTIES, id, "File", "Line", "Offset", "Length"));
 				String file = result.get("File").toString();
@@ -403,7 +403,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 				Debug.report(e1);
 			}
 		} else if (e.getSubject().equals(REMOVE_BREAKPOINT)) {
-			String id = e.getEvent();
+			String id = e.getData();
 			removeMarkerWithId(id);
 		}
 	}

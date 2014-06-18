@@ -19,41 +19,48 @@ package org.cs3.prolog.connector.process;
 import java.util.EventObject;
 
 /**
+ * A Prolog event consisting of a subject and subject-specific data.
  */
 public class PrologEvent extends EventObject {
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
-    private static final long serialVersionUID = 1L;
-    private String subject;
-    private String event;
 
-    /**
-     * @return Returns the event.
-     */
-    public String getEvent() {
-        return event;
+	private static final long serialVersionUID = 1L;
+    private String subject;
+    private String data;
+
+	/**
+	 * Constructs a Prolog event.
+	 * 
+	 * @param source
+	 *            the {@link PrologEventDispatcher}
+	 * @param subject
+	 *            the subject for which a {@link PrologEventListener} can be
+	 *            registered
+	 * @param data
+	 *            subject-specific data of the event
+	 */
+    public PrologEvent(Object source, String subject, String data) {
+        super(source);
+        this.subject=subject;
+        this.data=data;
     }
+    
     /**
-     * @return Returns the subject.
+     * @return subject-specific data of the event
      */
+    public String getData() {
+        return data;
+    }
+
+	/**
+	 * Returns the subject for which a {@link PrologEventListener} can be
+	 * registered.
+	 * 
+	 * @return the subject
+	 */
     public String getSubject() {
         return subject;
     }
-    /**
-     * @param source
-     * @param event
-     * @param subject
-     */
-    public PrologEvent(Object source, String subject, String event) {
-        super(source);
-        this.subject=subject;
-        this.event=event;
-    }
     
-    public PrologEvent(Object source) {
-		super(source);
-	}
     
 }
 

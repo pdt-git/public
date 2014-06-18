@@ -19,11 +19,16 @@ package org.cs3.prolog.connector.process;
 import java.util.EventListener;
 
 /**
+ * The listener interface for receiving notification of Prolog events.
  */
-public interface PrologEventListener extends EventListener{
-    /**
-     * @param e
-     */
+public interface PrologEventListener extends EventListener {
+
+	/**
+	 * Invoked when an event is triggered from Prolog.
+	 * 
+	 * @param e
+	 *            the PrologEvent
+	 */
     void update(PrologEvent e);
 
 	

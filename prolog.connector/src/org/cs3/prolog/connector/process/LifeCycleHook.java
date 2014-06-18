@@ -12,10 +12,8 @@
  * 
  ****************************************************************************/
 
-package org.cs3.prolog.connector.lifecycle;
+package org.cs3.prolog.connector.process;
 
-import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 

@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-package org.cs3.prolog.connector.lifecycle;
+package org.cs3.prolog.connector.process;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,17 +27,63 @@ import java.util.Vector;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
-import org.cs3.prolog.connector.process.PrologException;
-import org.cs3.prolog.connector.process.PrologProcess;
-import org.cs3.prolog.connector.process.PrologEvent;
-import org.cs3.prolog.connector.process.PrologProcessException;
-import org.cs3.prolog.connector.process.PrologEventListener;
 import org.cs3.prolog.connector.session.AsyncPrologSession;
 import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
 import org.cs3.prolog.connector.session.DefaultAsyncPrologSessionListener;
 import org.cs3.prolog.connector.session.PrologSession;
 
-public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener implements IPrologEventDispatcher {
+/**
+ * Provides an interface that reacts on events triggered from a Prolog process.
+ * 
+ * In addition to the message based interaction of Java and Prolog supported by
+ * the {@link PrologProcess#queryOnce(String...)} and
+ * {@link PrologProcess#queryAll(String...)} methods, the Prolog Connector also
+ * supports an event / observer / notification mechanism.
+ * <p>
+ * The Java side does not need to poll the Prolog processes to find out when
+ * some event occurred but can declare that it is listening for certain events.
+ * The Prolog side triggers these events if something relevant happens (e.g. the
+ * end of a long running computation). Then the Java side can send a normal
+ * {@link PrologProcess#queryOnce(String...)} /
+ * {@link PrologProcess#queryAll(String...)} to retrieve the results.
+ * 
+ * <h3>Listening to Prolog notifications</h3>
+ * 
+ * First you need to create a PrologEventDispatcher for a {@link PrologProcess}.
+ * Then add one or more {@link PrologEventListener} to this dispatcher. Every
+ * listener can listen to one or more subjects.
+ * 
+ * <blockquote><pre>
+ * currentDispatcher = new PrologEventDispatcher(process);
+ * currentDispatcher.addPrologEventListener(&quot;pdt_edit_hook&quot;, this);
+ * </pre></blockquote>
+ * <p>
+ * The above code creates a listener for the “pdt_edit_hook” event /
+ * notification.
+ * 
+ * When the related notification is sent by the Prolog side, the
+ * {@link PrologEventListener#update(PrologEvent)} method of each registered
+ * {@link PrologEventListener} will be called with a parameter of type
+ * {@link PrologEvent} that contains the event identifier (
+ * <code>“pdt_edit_hook”</code> in this example) and some arbitrary additional
+ * data from the second parameter of the <code>process_notify/2</code> call (see
+ * below).
+ * 
+ * <h3>Sending Prolog notifications</h3>
+ * 
+ * To send a notification from a Prolog process, call the process_notify/2
+ * predicate. Its first argument is an even identifier (which must be an atom)
+ * and the second argument an arbitrary value that will be passed to the Java
+ * side along with the event.
+ * 
+ * <blockquote><pre>
+ *   process_observe:process_notify(pdt_edit_hook, 'l:\test.pl 1')
+ * </pre></blockquote>
+ * <p>
+ * The above tells the Java side that the <code>pdt_edit_hook</code> event
+ * occurred for the file <code>'l:\test.pl'</code>.
+ */
+public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 	private HashMap<String, Vector<PrologEventListener>> listenerLists = new HashMap<String, Vector<PrologEventListener>>();
 
@@ -48,18 +94,24 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	 */
 	private AsyncPrologSession session;
 
-	Object observerTicket = new Object();
+	private Object observerTicket = new Object();
 
-	Object eventTicket = new Object();
+	private Object eventTicket = new Object();
 
 	private PrologProcess process;
 	
 	private HashSet<String> subjects = new HashSet<String>();
 
+	/**
+	 * Creates a new PrologEventDispatcher for the given process.
+	 * 
+	 * @param process
+	 *            the PrologProcess
+	 */
 	public PrologEventDispatcher(PrologProcess process) {
 		this.process = process;
 		//make sure that we do not hang the process on shutdown.
-		LifeCycleHook hook = new LifeCycleHook(){
+		LifeCycleHook hook = new LifeCycleHook() {
 
 			@Override
 			public void onInit(PrologProcess process, PrologSession initSession) throws PrologException, PrologProcessException {				
@@ -99,14 +151,10 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			@Override
-			public void setData(Object data) {
-				;
-			}
+			public void setData(Object data) {}
 			
 			@Override
-			public void lateInit(PrologProcess process) {
-				;
-			}
+			public void lateInit(PrologProcess process) {}
 
 		};
 
@@ -137,10 +185,15 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
+	/**
+	 * Adds a listener for the specified subject.
+	 * 
+	 * @param subject
+	 *            the subject
+	 * @param l
+	 *            the listener
+	 * @throws PrologProcessException
 	 */
-	@Override
 	public void addPrologEventListener(String subject,
 			PrologEventListener l) throws PrologProcessException {
 		synchronized (listenerLists) {
@@ -157,16 +210,15 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Removes a listener for the specified subject.
 	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#removePrologInterfaceListener(java.lang.String,
-	 *      org.cs3.pl.prolog.PrologInterfaceListener)
+	 * @param subject
+	 *            the subject
+	 * @param l
+	 *            the listener
+	 * @throws PrologProcessException
 	 */
-	/* (non-Javadoc)
-	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
-	 */
-	@Override
 	public void removePrologEventListener(String subject,
 			PrologEventListener l) throws PrologProcessException {
 		synchronized (listenerLists) {
@@ -251,7 +303,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				+ "',notify('$abort',_))");
 	}
 
-
+	/**
+	 * Stops the dispatcher.
+	 * 
+	 * @throws PrologProcessException
+	 */
 	public void stop() throws PrologProcessException {
 		if (session == null) {
 			return;
@@ -261,7 +317,8 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		session = null;
 	}
 
-	public void stop(PrologSession s) throws PrologException, PrologProcessException {
+	
+	private void stop(PrologSession s) throws PrologException, PrologProcessException {
 		if (session == null) {
 			return;
 		}
@@ -270,10 +327,6 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		session = null;
 	}
 
-	/**
-	 * @param subject2
-	 * @param string
-	 */
 	private void fireUpdate(String subject, String key, String event) {
 		Vector<PrologEventListener> listeners = listenerLists.get(key);
 		if (listeners == null) {
@@ -309,7 +362,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		fireUpdate(subject, key, event);
 	}
 
-	public Set<String> getSubjects(){
+	/**
+	 * Returns the currently active subjects.
+	 * @return the currently active subjects
+	 */
+	public Set<String> getSubjects() {
 		Set<String> res = new HashSet<String>();
 		synchronized (subjects) {
 			res.addAll(subjects);
@@ -319,7 +376,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	private static File observeFile = null;
 
-	public static File getObserveFile() throws IOException {
+	private static File getObserveFile() throws IOException {
 		if (observeFile == null) {
 			String tempDir = System.getProperty("java.io.tmpdir");
 			InputStream resourceAsStream;

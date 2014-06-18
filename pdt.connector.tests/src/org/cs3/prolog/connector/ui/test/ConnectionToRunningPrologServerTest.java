@@ -17,7 +17,7 @@ package org.cs3.prolog.connector.ui.test;
 import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
-import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.connector.process.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologEvent;
@@ -65,7 +65,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 		PrologEventListener listener = new PrologEventListener(){
 			@Override
 			public void update(PrologEvent e) {
-				System.out.println("RECEIVED EVENT: "+e.getEvent() + ", SUBJECT " + e.getSubject());
+				System.out.println("RECEIVED EVENT: "+e.getData() + ", SUBJECT " + e.getSubject());
 				System.out.flush();
 				synchronized (monitor) {
 					counter++;
@@ -79,7 +79,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 		PrologEventListener locationListener = new PrologEventListener(){
 			@Override
 			public void update(PrologEvent e) {
-				System.out.println("LOCALISATION: RECEIVED EVENT: "+e.getEvent() + ", SUBJECT " + e.getSubject());
+				System.out.println("LOCALISATION: RECEIVED EVENT: "+e.getData() + ", SUBJECT " + e.getSubject());
 				System.out.flush();
 				synchronized (monitor) {
 					counter++;
@@ -183,7 +183,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		PrologProcess process = factory.create();
 		
         process = Connector.newUninitializedPrologProcess();
-		process.setStandAloneServer(true);		
+//		process.setStandAloneServer(true);		
 		process.start();
 		return process;
 	}

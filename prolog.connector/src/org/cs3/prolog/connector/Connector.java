@@ -103,7 +103,6 @@ public class Connector {
 		process.setConsultServerLocation(QueryUtils.prologFileName(Connector.getConsultServerFile()));
 		process.setHost("localhost");
 		process.setTimeout("15000");
-		process.setStandAloneServer(false);
 		process.setHidePlwin(true);
 		process.setUseSessionPooling(true);
 		return process;

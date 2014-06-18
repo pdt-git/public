@@ -17,7 +17,7 @@ package org.cs3.prolog.connector.internal.lifecycle;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
+import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class AfterInitState extends AbstractState {

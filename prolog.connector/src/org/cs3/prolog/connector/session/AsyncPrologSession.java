@@ -35,8 +35,6 @@ import org.cs3.prolog.connector.process.PrologProcessException;
  * parses the incoming results an will dispatch them to the registered
  * listeners.
  * 
- * @author lukas
- * 
  */
 public interface AsyncPrologSession extends  Disposable {
 	public void addBatchListener(AsyncPrologSessionListener l);

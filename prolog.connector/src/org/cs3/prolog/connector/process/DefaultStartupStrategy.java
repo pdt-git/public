@@ -8,16 +8,29 @@ import java.util.List;
 
 import org.cs3.prolog.connector.common.QueryUtils;
 
+/**
+ * Provides a default implementation for the {@link StartupStrategy}.
+ */
 public class DefaultStartupStrategy implements StartupStrategy {
 	
 	private final List<String> loadFileInitStatments = new ArrayList<>();
 	private final List<String> fileSearchPathInitStatements = new ArrayList<>(); 
 
+	/**
+	 * Adds a file.
+	 * 
+	 * @param loadFile
+	 */
 	public void addLoadFile(File loadFile) {
 		String cmd = createConsultCommand(loadFile);
 		loadFileInitStatments.add(cmd);
 	}
 	
+	/**
+	 * Removes a file.
+	 * @param loadFile
+	 * @return true if this strategy contained the specified file
+	 */
 	public boolean removeLoadFile(File loadFile) {
 		String cmd = createConsultCommand(loadFile);
 		return loadFileInitStatments.remove(cmd);
@@ -27,13 +40,24 @@ public class DefaultStartupStrategy implements StartupStrategy {
 		return "[" + QueryUtils.prologFileNameQuoted(loadFile) + "]";
 	}
 
-	public void addFileSearchPath(String alias, File fsp) {
-		String cmd = createFileSearchPathCommand(alias, fsp);
+	/**
+	 * Adds a file search path.
+	 * @param alias
+	 * @param path
+	 */
+	public void addFileSearchPath(String alias, File path) {
+		String cmd = createFileSearchPathCommand(alias, path);
 		fileSearchPathInitStatements.add(cmd);
 	}
 	
-	public boolean removeFileSearchPath(String alias, File fsp) {
-		String cmd = createFileSearchPathCommand(alias, fsp);
+	/**
+	 * Removes a file search path.
+	 * @param alias
+	 * @param path
+	 * @return true if this strategy contained the specified file search path
+	 */
+	public boolean removeFileSearchPath(String alias, File path) {
+		String cmd = createFileSearchPathCommand(alias, path);
 		return fileSearchPathInitStatements.remove(cmd);
 	}
 	

@@ -91,10 +91,6 @@ private static JackTheProcessRipper processRipper;
 	 */
 	@Override
 	public  Process startServer(PrologProcess process) {
-		if (process.isStandAloneServer()) {
-			Debug.warning("Will not start server; the standalone option is set.");
-			return null;
-		}
 		if (!(process instanceof SocketPrologProcess)) {
 			throw new ClassCastException("SocketPrologProcess needed but got another PrologProcess");
 		}
@@ -263,13 +259,7 @@ private static JackTheProcessRipper processRipper;
 
 	private static String[] buildArguments(SocketPrologProcess socketProcess,
 			File tmpFile) {
-		String fileSearchPath = socketProcess.getFileSearchPath();
-		String[] args;
-		if (fileSearchPath != null && !(fileSearchPath.trim().length() == 0)) {
-			args = new String[] { "-p", fileSearchPath, "-g", "[" + QueryUtils.prologFileNameQuoted(tmpFile) + "]" };
-		} else {
-			args = new String[] { "-g", "[" + QueryUtils.prologFileNameQuoted(tmpFile) + "]" };
-		}
+		String[] args = new String[] { "-g", "[" + QueryUtils.prologFileNameQuoted(tmpFile) + "]" };
 		return args;
 	}
 
@@ -323,10 +313,6 @@ private static JackTheProcessRipper processRipper;
 	 */
 	@Override
 	public void stopServer(PrologProcess process) {
-		if (process.isStandAloneServer()) {
-			Debug.warning("Will not stop server; the standalone option is set.");
-			return;
-		}
 		if (!(process instanceof SocketPrologProcess)) {
 			throw new ClassCastException("SocketPrologProcess needed but got another PrologProcess");
 		}

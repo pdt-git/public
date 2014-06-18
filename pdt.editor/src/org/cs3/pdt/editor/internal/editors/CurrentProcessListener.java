@@ -24,7 +24,7 @@ import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
-import org.cs3.prolog.connector.lifecycle.PrologEventDispatcher;
+import org.cs3.prolog.connector.process.PrologEventDispatcher;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologEvent;
 import org.cs3.prolog.connector.process.PrologProcessException;
@@ -38,7 +38,7 @@ public class CurrentProcessListener implements PrologEventListener, ActiveProlog
 	@Override
 	public void update(PrologEvent e) {
 		if (e.getSubject().equals(PDTPredicates.PDT_EDIT_HOOK)) {
-			openFileInEditor(e.getEvent());
+			openFileInEditor(e.getData());
 		}
 	}
 

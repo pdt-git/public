@@ -18,7 +18,7 @@ import junit.framework.TestCase;
 
 import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.Debug;
-import org.cs3.prolog.connector.lifecycle.LifeCycleHook;
+import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
