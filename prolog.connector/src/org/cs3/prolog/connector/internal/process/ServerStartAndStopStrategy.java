@@ -16,8 +16,6 @@ package org.cs3.prolog.connector.internal.process;
 
 import org.cs3.prolog.connector.process.PrologProcess;
 
-
-
 /**
  * A pluggable strategy for starting and stopping a Prolog server.
  * 
@@ -46,7 +44,7 @@ public interface ServerStartAndStopStrategy {
 
     /**
      * @param process
-     * @return
+     * @return true if process is running
      */
     public boolean isRunning(PrologProcess process);
 }

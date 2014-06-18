@@ -2,8 +2,8 @@
 /* JavaCCOptions:MULTI=true,NODE_USES_PARSER=true,VISITOR=true,TRACK_TOKENS=true,NODE_PREFIX=AST,NODE_EXTENDS=,NODE_FACTORY=,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 package org.cs3.prolog.connector.internal.cterm.parser;
 
-public
-class SimpleNode implements Node {
+@SuppressWarnings("javadoc")
+public class SimpleNode implements Node {
 
   protected Node parent;
   protected Node[] children;

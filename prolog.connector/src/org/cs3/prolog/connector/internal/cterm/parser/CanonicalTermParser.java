@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@SuppressWarnings("javadoc")
 public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserTreeConstants, CanonicalTermParserConstants {/*@bgen(jjtree)*/
   protected JJTCanonicalTermParserState jjtree = new JJTCanonicalTermParserState();public static class RuntimeException extends java.lang.RuntimeException{
 
@@ -509,7 +509,7 @@ public static void main(String args[]) throws FileNotFoundException {
   private int jj_gc = 0;
 
   /** Constructor with InputStream. */
-  public CanonicalTermParser(java.io.InputStream stream) {
+public CanonicalTermParser(java.io.InputStream stream) {
      this(stream, null);
   }
   /** Constructor with InputStream and supplied encoding */
@@ -609,9 +609,6 @@ public static void main(String args[]) throws FileNotFoundException {
 
   static private final class LookaheadSuccess extends java.lang.Error {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2916935552030986067L; }
   
   final private LookaheadSuccess jj_ls = new LookaheadSuccess();

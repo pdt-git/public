@@ -122,19 +122,28 @@ public class SocketClient {
 	}
 
 	/**
-	 * same as readUntil(prefix,null).
+	 * reads until a line with the given prefix is received. This call will
+	 * block until line is read that is that starts with the given prefix or the
+	 * special prefix <code>ERROR</code>, or if <code>EndOfStream</code> is
+	 * reached. In the two latter cases, a <code>ConsultException</code> is
+	 * raised. In all three cases only complete lines (i.e. terminated with a
+	 * newline char) are read.
 	 * 
 	 * @param prefix
-	 * @return
-	 * @throws PrologException
+	 *            The awaited prefix
+	 * @return the remaining postfix of the line beginning with prefix.
 	 * @throws IOException
+	 *             you never know...
+	 * @throws PrologException
+	 *             if a line starting with <code>ERROR</code> or <code>
+	 *             EndOfStream</code> is received.
 	 */
 	public String readUntil(String prefix) throws PrologException, IOException {
 		return readUntil(prefix, null);
 	}
 
 	/**
-	 * reads until a line with the given prefix is recieved. This call will
+	 * reads until a line with the given prefix is received. This call will
 	 * block until line is read that is that starts with the given prefix or the
 	 * special prefix <code>ERROR</code>, or if <code>EndOfStream</code> is
 	 * reached. In the two latter cases, a <code>ConsultException</code> is
@@ -144,7 +153,7 @@ public class SocketClient {
 	 * @param prefix
 	 *            The awaited prefix
 	 * @param data
-	 *            all data recieved BEFORE the above prefix is appended to this
+	 *            all data received BEFORE the above prefix is appended to this
 	 *            StringBuffer. If this argument is <code>null</code>, .the
 	 *            data is silently discarded.
 	 * @return the remaining postfix of the line beginning with prefix.
@@ -152,7 +161,7 @@ public class SocketClient {
 	 *             you never know...
 	 * @throws PrologException
 	 *             if a line starting with <code>ERROR</code> or <code>
-	 *             EndOfStream</code> is recieved.
+	 *             EndOfStream</code> is received.
 	 */
 	public String readUntil(String prefix, StringBuffer data)
 			throws IOException, PrologException {

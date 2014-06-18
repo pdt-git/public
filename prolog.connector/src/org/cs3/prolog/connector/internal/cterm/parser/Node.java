@@ -2,12 +2,12 @@
 /* JavaCCOptions:MULTI=true,NODE_USES_PARSER=true,VISITOR=true,TRACK_TOKENS=true,NODE_PREFIX=AST,NODE_EXTENDS=,NODE_FACTORY=,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 package org.cs3.prolog.connector.internal.cterm.parser;
 
-/* All AST nodes must implement this interface.  It provides basic
-   machinery for constructing the parent and child relationships
-   between nodes. */
-
-public
-interface Node {
+/**
+ * All AST nodes must implement this interface. It provides basic machinery for
+ * constructing the parent and child relationships between nodes.
+ */
+@SuppressWarnings("javadoc")
+public interface Node {
 
   /** This method is called after the node has been made the current
     node.  It indicates that child nodes can now be added to it. */

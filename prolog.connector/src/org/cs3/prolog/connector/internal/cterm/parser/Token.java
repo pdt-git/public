@@ -5,7 +5,7 @@ package org.cs3.prolog.connector.internal.cterm.parser;
 /**
  * Describes the input token stream.
  */
-
+@SuppressWarnings("javadoc")
 public class Token implements java.io.Serializable {
 
   /**

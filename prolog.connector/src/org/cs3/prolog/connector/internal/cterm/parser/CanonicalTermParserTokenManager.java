@@ -2,6 +2,7 @@
 package org.cs3.prolog.connector.internal.cterm.parser;
 
 /** Token Manager. */
+@SuppressWarnings("javadoc")
 public class CanonicalTermParserTokenManager implements CanonicalTermParserConstants
 {
 

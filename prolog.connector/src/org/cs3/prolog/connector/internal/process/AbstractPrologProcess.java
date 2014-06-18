@@ -44,6 +44,7 @@ import org.cs3.prolog.connector.session.PrologSession;
  * <p>
  * Subclasses have to implement getSession().
  */
+@SuppressWarnings("javadoc")
 public abstract class AbstractPrologProcess implements PrologProcess {
 
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();

@@ -6,7 +6,7 @@ package org.cs3.prolog.connector.internal.cterm.parser;
  * An implementation of interface CharStream, where the stream is assumed to
  * contain only ASCII characters (without unicode processing).
  */
-
+@SuppressWarnings("javadoc")
 public class SimpleCharStream
 {
 /** Whether parser is static. */

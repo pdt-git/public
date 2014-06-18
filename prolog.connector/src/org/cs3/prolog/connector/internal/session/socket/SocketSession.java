@@ -34,8 +34,6 @@ import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
-/**
- */
 public class SocketSession implements PrologSession {
 	private static final String RESULT_LIST = "ResultList";
 	private SocketClient client;
@@ -144,6 +142,7 @@ public class SocketSession implements PrologSession {
 	private List<Map<String, Object>> transformResults(Map<String, Object> result,  List<String> vars) {
 		List<Map<String, Object>> newResult = new ArrayList<Map<String,Object>>();
 		
+		@SuppressWarnings("unchecked")
 		List<List<Object>> listOfLists = (List<List<Object>>) result.get(RESULT_LIST);
 		for (List<Object> list : listOfLists) {
 			HashMap<String, Object> newMap = new HashMap<String, Object>();
