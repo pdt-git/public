@@ -68,15 +68,13 @@ private static JackTheProcessRipper processRipper;
 			"    forall(pdt_startup_error_message(Msg),format(Stream, '~w~n', [Msg])),\n" +
 			"    close(Stream).\n";
 	private static final String STARTUP_ERROR_LOG_LOGTALK_CODE =
-			":- multifile('$lgt_logtalk.message_hook'/5).\n" +
-			":- dynamic('$lgt_logtalk.message_hook'/5).\n" +
-			"'$lgt_logtalk.message_hook'(_, Kind, core, Tokens, _) :-\n" +
-			"    collect_pdt_startup_error_messages,\n" +
+			":- logtalk::assertz((message_hook(_, Kind, core, Tokens) :-\n" +
+			"    user::collect_pdt_startup_error_messages,\n" +
 			"    functor(Kind, Level, _),\n" +
 			"    (Level == error; Level == warning),\n" + 
 			"    with_output_to(atom(Msg), (current_output(S), logtalk::print_message_tokens(S, '', Tokens))),\n" +
-			"    assertz(pdt_startup_error_message(Msg)),\n" +
-			"    fail.\n";
+			"    user::assertz(pdt_startup_error_message(Msg)),\n" +
+			"    fail)).\n";
 
 	public SocketServerStartAndStopStrategy() {
 		processRipper=JackTheProcessRipper.getInstance();
