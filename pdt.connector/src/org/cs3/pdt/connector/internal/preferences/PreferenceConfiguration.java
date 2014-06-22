@@ -189,7 +189,7 @@ public class PreferenceConfiguration {
 		
 		store.setDefault(Connector.PREF_HOST, "localhost");
 		
-		store.setDefault(Connector.PREF_TIMEOUT,15000 );
+		store.setDefault(Connector.PREF_TIMEOUT, 15000);
 		store.setDefault(Connector.PREF_PORT, 9944);
 		store.setDefault(Connector.PREF_HIDE_PLWIN, true);
 		
@@ -206,6 +206,7 @@ public class PreferenceConfiguration {
 
 		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, ProcessUtils.getLogtalkStartupFile());
 		store.setDefault(Connector.PREF_ENVIRONMENT, ProcessUtils.getLogtalkEnvironmentVariables());
+		store.setDefault(Connector.PREF_TIMEOUT, 20000);
 	}
 
 	public static void initWithYAPPreferences(IPreferenceStore store) {
@@ -218,6 +219,7 @@ public class PreferenceConfiguration {
 
 		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, ProcessUtils.getLogtalkStartupFile());
 		store.setDefault(Connector.PREF_ENVIRONMENT, ProcessUtils.getLogtalkEnvironmentVariables());
+		store.setDefault(Connector.PREF_TIMEOUT, 20000);
 	}
 
 }
