@@ -61,7 +61,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
 		for (PrologProcessRegistryListener l : clone) {				
-			l.prologInterfaceAdded(e);
+			l.processAdded(e);
 		}
 	}
 
@@ -75,7 +75,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
 		for (PrologProcessRegistryListener l : clone) {
-			l.prologInterfaceRemoved(e);
+			l.processRemoved(e);
 		}
 	}
 
