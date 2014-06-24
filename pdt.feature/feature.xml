@@ -93,12 +93,6 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.prolog.connector.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.cs3.prolog.library"
          download-size="0"
          install-size="0"
@@ -129,7 +123,13 @@ and/or distributed.
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.contextview"
+         id="org.cs3.pdt.connector"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.graphicalviews"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
