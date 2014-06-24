@@ -609,7 +609,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
+	 * @see org.cs3.pl.prolog.PrologSession#getPrologProcess()
 	 */
 	public PrologProcess getPrologProcess() {
 		return process;

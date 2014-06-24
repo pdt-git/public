@@ -85,7 +85,7 @@ private static JackTheProcessRipper processRipper;
 	 * 
 	 * @see
 	 * org.cs3.pl.prolog.ServerStartAndStopStrategy#startServer(org.cs3.pl.prolog
-	 * .IPrologInterface)
+	 * .IPrologProcess)
 	 */
 	@Override
 	public  Process startServer(PrologProcess process) {
@@ -307,7 +307,7 @@ private static JackTheProcessRipper processRipper;
 	 * 
 	 * @see
 	 * org.cs3.pl.prolog.ServerStartAndStopStrategy#stopServer(org.cs3.pl.prolog
-	 * .IPrologInterface, boolean)
+	 * .IPrologProcess, boolean)
 	 */
 	@Override
 	public void stopServer(PrologProcess process) {
@@ -365,7 +365,7 @@ private static JackTheProcessRipper processRipper;
 	 * 
 	 * @see
 	 * org.cs3.pl.prolog.ServerStartAndStopStrategy#isRunning(org.cs3.pl.prolog
-	 * .IPrologInterface)
+	 * .IPrologProcess)
 	 */
 	@Override
 	public  boolean isRunning(PrologProcess process) {

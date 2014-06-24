@@ -394,7 +394,7 @@ public abstract class SelectContextProcessAutomatedAction extends Action impleme
 		}
 		String key = reg.getKey(process);
 		if (key == null) {
-			setToolTipText("unregisterd Prologinterface???");
+			setToolTipText("unregisterd Prolog process???");
 			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 			return;
 		}

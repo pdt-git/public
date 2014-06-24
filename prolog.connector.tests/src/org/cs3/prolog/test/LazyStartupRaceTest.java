@@ -28,7 +28,7 @@ public class LazyStartupRaceTest extends TestCase {
 	protected void setUp() throws Exception {
          Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 	     
-//	       process=PrologInterfaceFactory.newInstance().create();
+//	       process=PrologProcessFactory.newInstance().create();
 	      process=Connector.newUninitializedPrologProcess();
 	      
 	    }

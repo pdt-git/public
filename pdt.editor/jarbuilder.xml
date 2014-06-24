@@ -24,14 +24,14 @@
 <!--			<depjar name="RaPlaRPC" />-->
 			<depjar name="Console" />
 			<depjar name="MetaData" />
-			<depjar name="PrologInterface" />		
-			<depjar name="PrologInterface-Socket" />		
-			<!--<depjar name="PrologInterface-XML" />		-->
+			<depjar name="PrologProcess" />		
+			<depjar name="PrologProcess-Socket" />		
+			<!--<depjar name="PrologProcess-XML" />		-->
 		<delete failonerror="false" dir="PDT/engine"></delete>
 		<copydir dest="PDT/engine" src="PDT/pl"></copydir>
 		<!--<library name="Console" />-->
 		<library name="MetaData" />
-		<library name="PrologInterface" />		
+		<library name="PrologProcess" />		
 
 	</target>	
 </project>

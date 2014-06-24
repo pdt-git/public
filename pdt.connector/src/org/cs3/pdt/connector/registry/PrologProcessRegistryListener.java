@@ -17,8 +17,8 @@ package org.cs3.pdt.connector.registry;
 import java.util.EventListener;
 
 public interface PrologProcessRegistryListener extends EventListener{
-	public void prologInterfaceAdded(PrologProcessRegistryEvent e);
-	public void prologInterfaceRemoved(PrologProcessRegistryEvent e);
+	public void processAdded(PrologProcessRegistryEvent e);
+	public void processRemoved(PrologProcessRegistryEvent e);
 	public void subscriptionAdded(PrologProcessRegistryEvent e);
 	public void subscriptionRemoved(PrologProcessRegistryEvent e);
 }

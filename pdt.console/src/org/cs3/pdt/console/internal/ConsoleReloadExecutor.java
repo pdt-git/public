@@ -101,7 +101,7 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		if (!process.isUp()) {
 			try {
 				process.start();
-				activePrologConsole.ensureConnectionForCurrentPrologInterface();
+				activePrologConsole.ensureConnectionForCurrentPrologProcess();
 			} catch (PrologProcessException e) {
 				Debug.report(e);
 				return false;

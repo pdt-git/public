@@ -117,10 +117,10 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		registry.addPrologProcessRegistryListener(new PrologProcessRegistryListener() {
 			@Override public void subscriptionRemoved(PrologProcessRegistryEvent e) {}
 			@Override public void subscriptionAdded(PrologProcessRegistryEvent e) {}
-			@Override public void prologInterfaceRemoved(PrologProcessRegistryEvent e) {}
+			@Override public void processRemoved(PrologProcessRegistryEvent e) {}
 			
 			@Override
-			public void prologInterfaceAdded(PrologProcessRegistryEvent e) {
+			public void processAdded(PrologProcessRegistryEvent e) {
 				e.process.addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
 			}
 		});

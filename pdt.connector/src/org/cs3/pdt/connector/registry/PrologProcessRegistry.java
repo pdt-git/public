@@ -43,7 +43,7 @@ import org.cs3.prolog.connector.process.PrologProcessException;
 public interface PrologProcessRegistry {
 
 	/**
-	 * @return all keys to which PrologInterfaces are registered.
+	 * @return all keys to which PrologProcesss are registered.
 	 */
 	public Set<String> getRegisteredKeys();
 
@@ -134,7 +134,7 @@ public interface PrologProcessRegistry {
 	 * @param key
 	 * 
 	 */
-	public void removePrologInterface(String key) throws PrologProcessException;
+	public void removePrologProcess(String key) throws PrologProcessException;
 
 	/**
 	 * Add a subscription to the registry.

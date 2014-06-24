@@ -37,7 +37,7 @@ import org.eclipse.core.resources.IFile;
  * This service can be acquired via
  * 
  * <pre>
- * PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService()
+ * PrologRuntimeUIPlugin.getDefault().getPrologProcessService()
  * </pre>
  * 
  */

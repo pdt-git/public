@@ -48,7 +48,7 @@
    <element name="fileContribution">
       <annotation>
          <documentation>
-            Contributes a prolog file that will be consulted into a PrologInterface with a matching contribution key.
+            Contributes a prolog file that will be consulted into a PrologProcess with a matching contribution key.
          </documentation>
       </annotation>
       <complexType>
@@ -65,7 +65,7 @@
          <attribute name="path" type="string" use="required">
             <annotation>
                <documentation>
-                  A path to a prolog source file that should be consulted during every startup of a PrologInterface created by the PDT.
+                  A path to a prolog source file that should be consulted during every startup of a PrologProcess created by the PDT.
                </documentation>
                <appInfo>
                   <meta.attribute kind="resource"/>
@@ -75,7 +75,7 @@
          <attribute name="key" type="string">
             <annotation>
                <documentation>
-                  An optional bootstrap contribution key to determine with which PrologInterface a contribution should be loaded.
+                  An optional bootstrap contribution key to determine with which PrologProcess a contribution should be loaded.
 Subscriptions may demand for a list of contribution keys.
 See Subscription.getBootstrapConstributionKeys() for details.
                </documentation>
@@ -128,7 +128,7 @@ See Subscription.getBootstrapConstributionKeys() for details.
          <attribute name="key" type="string">
             <annotation>
                <documentation>
-                  An optional bootstrap contribution key to determine with which PrologInterface a contribution should be loaded.
+                  An optional bootstrap contribution key to determine with which PrologProcess a contribution should be loaded.
 Subscriptions may demand for a list of contribution keys.
 See Subscription.getBootstrapConstributionKeys() for details.
                </documentation>

@@ -53,7 +53,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 	}
 
 	@SuppressWarnings("unchecked")
-	public void firePrologInterfaceAdded(String key) {
+	public void firePrologProcessAdded(String key) {
 		PrologProcessRegistryEvent e = new PrologProcessRegistryEvent(this,
 				key);
 		Vector<PrologProcessRegistryListener> clone = null;
@@ -61,13 +61,13 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
 		for (PrologProcessRegistryListener l : clone) {				
-			l.prologInterfaceAdded(e);
+			l.processAdded(e);
 		}
 	}
 
 
 	@SuppressWarnings("unchecked")
-	public void firePrologInterfaceRemoved(String key) {
+	public void firePrologProcessRemoved(String key) {
 		PrologProcessRegistryEvent e = new PrologProcessRegistryEvent(this,
 				key);
 		Vector<PrologProcessRegistryListener> clone = null;
@@ -75,7 +75,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 			clone = (Vector<PrologProcessRegistryListener>) listeners.clone();
 		}
 		for (PrologProcessRegistryListener l : clone) {
-			l.prologInterfaceRemoved(e);
+			l.processRemoved(e);
 		}
 	}
 
@@ -162,7 +162,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 			return;
 		}
 		if (old != null) {
-			removePrologInterface(key);
+			removePrologProcess(key);
 		}
 		processes.put(key, process);
 		processKeys.put(process, key);
@@ -170,13 +170,13 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 		for (Subscription s: l) {
 			s.configure(process);
 		}
-		firePrologInterfaceAdded(key);
+		firePrologProcessAdded(key);
 	}
 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void removePrologInterface(String key) {
+	public void removePrologProcess(String key) {
 		PrologProcess process = processes.get(key);
 		if (process == null) {
 			return;
@@ -188,7 +188,7 @@ abstract public class DefaultPrologProcessRegistry implements PrologProcessRegis
 				s.deconfigure(process);
 			}
 		}
-		firePrologInterfaceRemoved(key);
+		firePrologProcessRemoved(key);
 		processKeys.remove(process);
 		processes.remove(key);
 

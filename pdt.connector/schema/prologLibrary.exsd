@@ -90,7 +90,7 @@
    <element name="dependency">
       <annotation>
          <documentation>
-            Used to specify a dependency of the hosted library to some other library, possibly hosted by some other plugin. When the Prolog Runtime is asked to configure the lookup path of a PrologInterface to include the hosted library, it will first make sure that the path also includes the libraries the hosted library depends on.
+            Used to specify a dependency of the hosted library to some other library, possibly hosted by some other plugin. When the Prolog Runtime is asked to configure the lookup path of a PrologProcess to include the hosted library, it will first make sure that the path also includes the libraries the hosted library depends on.
          </documentation>
       </annotation>
       <complexType>

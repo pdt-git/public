@@ -280,7 +280,7 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
+	 * org.cs3.pl.prolog.PrologProcess#removeLifeCycleHook(java.lang.String)
 	 */
 	@Override
 	public void removeLifeCycleHook(String hookId) {
