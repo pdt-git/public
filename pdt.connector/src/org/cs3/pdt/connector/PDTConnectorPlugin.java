@@ -232,7 +232,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 				PrologProcess process = registry.getPrologProcess(key);
 				try {
 					process.stop();
-					registry.removePrologInterface(key);
+					registry.removePrologProcess(key);
 				} catch (Throwable e) {
 					Debug.warning("problems during shutdown of process " + key);
 					Debug.report(e);
@@ -341,12 +341,12 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 	 * a key in the registry without actually creating a PrologProcess (yet).
 	 * 
 	 * This is equivalent to calling
-	 * <code>getPrologInterfaceRegistry().getRegisteredKeys().contains(processKey)</code>
+	 * <code>getPrologProcessRegistry().getRegisteredKeys().contains(processKey)</code>
 	 * 
 	 * @param processKey
 	 * @return
 	 */
-	public boolean hasPrologInterface(String processKey) {
+	public boolean hasPrologProcess(String processKey) {
 		return getPrologProcessRegistry().getRegisteredKeys().contains(processKey);
 	}
 	
@@ -696,7 +696,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 		String contributionId = element.getAttribute("id");
 		contributionKey = (contributionKey == null) ? "" : contributionKey;
 
-		List<BootstrapPrologContribution> contribs = createCachedContribsForPrologInterface(contributionKey);
+		List<BootstrapPrologContribution> contribs = createCachedContribsForPrologProcess(contributionKey);
 
 		String resource = element.getAttribute("path");
 		String alias = element.getAttribute("alias");
@@ -716,7 +716,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 		return dependencies;
 	}
 
-	private List<BootstrapPrologContribution> createCachedContribsForPrologInterface(String contributionKey) {
+	private List<BootstrapPrologContribution> createCachedContribsForPrologProcess(String contributionKey) {
 		List<BootstrapPrologContribution> contribs = bootStrapContribForKey.get(contributionKey);
 		if (contribs == null) {
 			contribs = new ArrayList<BootstrapPrologContribution>();

@@ -207,7 +207,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									process.stop();
 									monitor.worked(1);
 								}
-								// setPrologInterface(getEditorPrologInterface());
+								// setPrologProcess(getEditorPrologProcess());
 							} finally {
 								if (process != null) {
 									if (!process.isDown()){
@@ -292,7 +292,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 										for (Subscription s : subscriptionsForProcess) {
 											registry.removeSubscription(s);
 										}
-										registry.removePrologInterface(currentKey);
+										registry.removePrologProcess(currentKey);
 										getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 										PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(null);
 									}
@@ -943,13 +943,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		//		processSelector = new SelectProcessAction() {
 		//
-		//			protected void setPrologInterface(PrologProcess prologInterface) {
-		//				PrologConsoleView.this.setPrologInterface(prologInterface);
+		//			protected void setPrologProcess(PrologProcess prologProcess) {
+		//				PrologConsoleView.this.setPrologProcess(prologProcess);
 		//
 		//			}
 		//
-		//			protected PrologProcess getPrologInterface() {
-		//				return PrologConsoleView.this.getPrologInterface();
+		//			protected PrologProcess getPrologProcess() {
+		//				return PrologConsoleView.this.getPrologProcess();
 		//			}
 		//
 		//		};
@@ -961,23 +961,23 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		//				PrologContextTracker tracker = (PrologContextTracker) e
 		//						.getSource();
 		//				Debug.info("context changed for tracker " + tracker.getLabel());
-		//				setPrologInterface(e.getPrologInterface());
+		//				setPrologProcess(e.getPrologProcess());
 		//
 		//			}
 		//
 		//			protected void trackerActivated(PrologContextTracker tracker) {
-		//				setPrologInterface(contextSelector.getCurrentPrologInterface());
+		//				setPrologProcess(contextSelector.getCurrentPrologProcess());
 		//
 		//			}
 		//
 		//			protected void trackerDeactivated(PrologContextTracker tracker) {
-		//				setPrologInterface(contextSelector.getCurrentPrologInterface());
+		//				setPrologProcess(contextSelector.getCurrentPrologProcess());
 		//
 		//			}
 		//		};
 
 		//		toolBarManager.add(contextSelector);
-		//		setPrologInterface(contextSelector.getCurrentPrologInterface());
+		//		setPrologProcess(contextSelector.getCurrentPrologProcess());
 		setPrologProcess(PDTCommonUtil.getActivePrologProcess());
 		automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 	}
@@ -1178,7 +1178,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				Debug.report(e);
 			}
 			reconfigureViewer(currentProcess);
-			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
+			getDefaultPrologConsoleService().fireActivePrologProcessChanged(this);
 			if (updateActiveProcess) {
 				PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(currentProcess);
 			}
@@ -1205,7 +1205,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 	
 	@Override
-	public void ensureConnectionForCurrentPrologInterface() {
+	public void ensureConnectionForCurrentPrologProcess() {
 		try {
 			connect(currentProcess);
 		} catch (PrologProcessException e) {

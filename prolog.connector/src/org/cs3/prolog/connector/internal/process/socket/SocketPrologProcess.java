@@ -203,7 +203,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeInitialSession(org.cs3.pl.prolog.PrologSession)
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologProcess#disposeInitialSession(org.cs3.pl.prolog.PrologSession)
 	 */
 	@Override
 	protected void disposeInitialSession(PrologSession initSession) {
@@ -214,7 +214,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeShutdownSession(org.cs3.pl.prolog.PrologSession)
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologProcess#disposeShutdownSession(org.cs3.pl.prolog.PrologSession)
 	 */
 	@Override
 	protected void disposeShutdownSession(PrologSession s) {
@@ -225,7 +225,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getInitialSession()
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologProcess#getInitialSession()
 	 */
 	@Override
 	protected PrologSession getInitialSession() throws PrologProcessException {
@@ -241,7 +241,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getShutdownSession()
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologProcess#getShutdownSession()
 	 */
 	@Override
 	protected PrologSession getShutdownSession()
@@ -258,7 +258,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologProcess#stop()
 	 */
 	@Override
 	public  void stop() throws PrologProcessException {
@@ -286,7 +286,7 @@ public class SocketPrologProcess extends AbstractPrologProcess {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologProcess#stop()
 	 */
 	@Override
 	public void start() throws PrologProcessException {

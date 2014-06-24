@@ -88,7 +88,7 @@ public class LifeCycleHookTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-//		this.process=(PrologProcess) PrologInterfaceFactory.newInstance().create();
+//		this.process=(PrologProcess) PrologProcessFactory.newInstance().create();
 		this.process = Connector.newUninitializedPrologProcess();
 		
 	}

@@ -179,7 +179,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 
 	private PrologProcess init() throws PrologProcessException {
-//		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
+//		PrologProcessFactory factory= Factory.newInstance(FACTORY);
 //		PrologProcess process = factory.create();
 		
         process = Connector.newUninitializedPrologProcess();

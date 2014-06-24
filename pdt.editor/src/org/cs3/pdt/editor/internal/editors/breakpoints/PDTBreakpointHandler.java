@@ -464,7 +464,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
 				}
 				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-//				PrologProcess process = PDTCommonUtil.getActivePrologInterface();
+//				PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 				try {
 					process.queryOnce(buf.toString());
 				} catch (PrologProcessException e) {

@@ -23,7 +23,7 @@ import org.cs3.prolog.connector.process.PrologProcessException;
  * Convenience class for implementing PrologContextTracker.
  * 
  * Subclasses need to provide implementations for init() and
- * getCurrentPrologInterface(). In addition, subclasses are responsible for
+ * getCurrentPrologProcess(). In addition, subclasses are responsible for
  * calling fireContextChanged() when apropiate, i.e. when they think that the
  * "current" PrologProcess has changed, become available or invalid.
  * 

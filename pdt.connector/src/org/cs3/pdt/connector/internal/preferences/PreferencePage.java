@@ -235,7 +235,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			Debug.report(e);
 		}
 		if (preferencesChanged) {
-			updatePrologInterfaceExecutables();	
+			updatePrologProcessExecutables();	
 		}
 		return result;
 	}
@@ -245,7 +245,7 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 		executeablePreviewLabel.setText(newExecutable);
 	}
 
-	private void updatePrologInterfaceExecutables() {
+	private void updatePrologProcessExecutables() {
 		String configuration = configurationList.getText();
 		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();

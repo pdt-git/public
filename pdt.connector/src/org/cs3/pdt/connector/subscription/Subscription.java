@@ -92,7 +92,7 @@ public interface Subscription {
 	 * 
 	 * Why not? 
 	 * - We do not want the process to start up before it is actual needed.
-	 * - We do not want to care about possible PrologInterfaceExceptions during configuration.
+	 * - We do not want to care about possible PrologProcessExceptions during configuration.
 	 * 
 	 * A commonly faced problem is the fact that when subscribing to a process, you do not know 
 	 * whether it has already been started or even created. E.g. if you add startup hooks 
@@ -102,7 +102,7 @@ public interface Subscription {
 	 * 
 	 * The problem however is, that any exceptions thrown by the hook code cannot be correctly 
 	 * propagated. You either have to catch them in the configure method, which only makes sense 
-	 * if can locally recover from them (unlikely in the case of PrologInterfaceExceptions!),
+	 * if can locally recover from them (unlikely in the case of PrologProcessExceptions!),
 	 * or you have to throw a RuntimeException, which is rather impolite because it leaves the
 	 * upper tiers little chance to handle the problem gracefully.
 	 * 

@@ -38,7 +38,7 @@ public interface ServerStartAndStopStrategy {
     /**
      * stop the server process
      * 
-     * @param process the IPrologInterface for which the server should be stopped.
+     * @param process the IPrologProcess for which the server should be stopped.
      */
     public void stopServer(PrologProcess process);
 
