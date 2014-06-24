@@ -58,6 +58,7 @@ import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -978,7 +979,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		//		toolBarManager.add(contextSelector);
 		//		setPrologInterface(contextSelector.getCurrentPrologInterface());
-		setPrologProcess(PDTCommonUtil.getActivePrologProcess());
+		Job j = new Job("Initialize Prolog Console") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				PrologConsoleView.this.setPrologProcess(PDTCommonUtil.getActivePrologProcess());
+				return Status.OK_STATUS;
+			}
+		};
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.schedule();
 		automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
 	}
 
