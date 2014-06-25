@@ -22,12 +22,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
 
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologInterfaceRegistry;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.session.PrologSession;
-import org.cs3.prolog.ui.util.UIUtils;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
+import org.cs3.pdt.connector.registry.PrologProcessRegistry;
+import org.cs3.pdt.connector.util.UIUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;
@@ -48,14 +48,14 @@ public class AbortTestAction implements IObjectActionDelegate {
 		}
 		PrologSession s = null;
 		try {
-			PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
 			Set<String> keys = registry.getAllKeys();
 			for (String key : keys) {
-				PrologInterface pif = registry.getPrologInterface(key);
+				PrologProcess process = registry.getPrologProcess(key);
 				String threadId = readThreadIdFromFile();
-				int pifPort = (Integer)pif.getClass().getMethod("getPort").invoke(pif);
-				if(pifPort == port){
-					s=pif.getSession();
+				int processPort = (Integer)process.getClass().getMethod("getPort").invoke(process);
+				if(processPort == port){
+					s=process.getSession();
 					if(threadId != null){
 						s.queryOnce("catch(thread_signal('"+threadId +"', abort),_,fail)");
 					}
@@ -63,7 +63,7 @@ public class AbortTestAction implements IObjectActionDelegate {
 				}
 			}
 
-			Debug.warning("No PrologInterface with port "+ port + " found.");
+			Debug.warning("No PrologProcess with port "+ port + " found.");
 		} catch (Exception e) {
 			Debug.report(e);
 		} finally {

@@ -21,24 +21,24 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.cterm.CCompound;
-import org.cs3.prolog.cterm.CNil;
-import org.cs3.prolog.cterm.CTerm;
-import org.cs3.prolog.cterm.CTermUtil;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.AsyncPrologSession;
-import org.cs3.prolog.session.AsyncPrologSessionEvent;
-import org.cs3.prolog.session.AsyncPrologSessionListener;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.cterm.CCompound;
+import org.cs3.prolog.connector.cterm.CEmptyList;
+import org.cs3.prolog.connector.cterm.CTerm;
+import org.cs3.prolog.connector.cterm.CTermUtil;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.session.AsyncPrologSession;
+import org.cs3.prolog.connector.session.AsyncPrologSessionEvent;
+import org.cs3.prolog.connector.session.AsyncPrologSessionListener;
+import org.cs3.prolog.connector.session.PrologSession;
 
 public class AsyncSocketSessionTest extends TestCase {
 
-	private PrologInterface pif;
+	private PrologProcess process;
 
 	private Recorder rec;
 
@@ -47,17 +47,17 @@ public class AsyncSocketSessionTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+		process = Connector.newUninitializedPrologProcess();
 
-		pif.start();
+		process.start();
 		rec = new Recorder();
-		session = pif.getAsyncSession();
+		session = process.getAsyncSession();
 		session.addBatchListener(rec);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		pif.stop();
+		process.stop();
 	}
 
 	class Record {
@@ -102,7 +102,7 @@ public class AsyncSocketSessionTest extends TestCase {
 				sb.append(event.ticket == null ? "null" : "dummy");
 			}
 			sb.append(',');
-			sb.append(event.message == null ? "null" : Util.hideStreamHandles(
+			sb.append(event.message == null ? "null" : hideStreamHandles(
 					event.message, "$stream(_)"));
 			sb.append(',');
 			sb.append(event.getBindings() == null ? "null" : "("
@@ -110,8 +110,24 @@ public class AsyncSocketSessionTest extends TestCase {
 			sb.append(')');
 			return sb.toString();
 		}
-	}
 
+		private String hideStreamHandles(String string, String replace) {
+			int i = -1;
+			String search = "$stream(";
+			StringBuffer sb = new StringBuffer();
+			while ((i = string.indexOf(search, 0)) >= 0) {
+				sb.append(string.substring(0, i));
+				sb.append(replace);
+				int j = string.indexOf(')', i + search.length());
+				string = string.substring(j + 1);
+			}
+			sb.append(string);
+			return sb.toString();
+
+		}
+	}
+	
+	
 	class Recorder implements AsyncPrologSessionListener {
 		public void clear() {
 			records.clear();
@@ -197,9 +213,11 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 
 		public int size() {
-
 			return records.size();
 		}
+
+		@Override
+		public void batchError(AsyncPrologSessionEvent e) {}
 
 	}
 
@@ -226,7 +244,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	}
 
 	public void test_queryOnce_sequence01() throws Throwable {
-		// PrologSession session=pif.getSession();
+		// PrologSession session=process.getSession();
 		session.queryOnce("1", "member(A,[a,b,c])");
 		session.queryOnce("2", "member(a,[a,b,c])");
 		session.queryOnce("3", "member(a,[a,b,c)");
@@ -242,7 +260,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	}
 
 	public void test_queryAll_sequence01() throws Throwable {
-		// PrologSession session=pif.getSession();
+		// PrologSession session=process.getSession();
 		session.queryAll("1", "member(A,[a,b,c])");
 		session.queryAll("2", "member(a,[a,b,c])");
 		session.queryAll("3", "member(a,[a,b,c)");
@@ -283,13 +301,13 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 
 		// atoms should be quoted.
-		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.NONE);
+		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologProcess.NONE);
 
 		// terms should be canonical.
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.NONE);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.NONE);
 
 		// lists should be ignored
-		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.NONE);
+		session.queryOnce("ignore_lists", "A=[1,2]",PrologProcess.NONE);
 
 		session.join();
 		assertEquals("'{\\n'", rec.get(0).event.getBindings().get("A"));
@@ -300,9 +318,9 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	public void testPDT287_1() throws Exception {
 		
-		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("ignore_lists", "A=[1,2]",PrologProcess.UNQUOTE_ATOMS);
 
 		session.join();
 		// atoms should be unquoted.
@@ -318,26 +336,26 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	public void testPDT291_nil() throws Exception{
 		rec.clear();
-		session.queryOnce("nabla", "A=[]", PrologInterface.PROCESS_LISTS);
+		session.queryOnce("nabla", "A=[]", PrologProcess.PROCESS_LISTS);
 		session.join();		
 		assertTrue(rec.get(0).event.getBindings().get("A") instanceof List<?>);
 		
 		rec.clear();
-		session.queryOnce("nabla", "A=[]", PrologInterface.NONE);
+		session.queryOnce("nabla", "A=[]", PrologProcess.NONE);
 		session.join();
 		assertTrue(rec.get(0).event.getBindings().get("A") instanceof String);
 		
 		rec.clear();
-		session.queryOnce("nabla", "A=[]", PrologInterface.CTERMS);
+		session.queryOnce("nabla", "A=[]", PrologProcess.CTERMS);
 		session.join();
-		assertTrue(rec.get(0).event.getBindings().get("A") instanceof CNil);
+		assertTrue(rec.get(0).event.getBindings().get("A") instanceof CEmptyList);
 	}
 	
 	public void testPDT287_2() throws Exception {
 		
-		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS);
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.PROCESS_LISTS);
-		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologInterface.PROCESS_LISTS);
+		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologProcess.PROCESS_LISTS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.PROCESS_LISTS);
+		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologProcess.PROCESS_LISTS);
 		session.join();
 		
 		// atoms should be quoted.
@@ -359,12 +377,12 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	public void testPDT287_3() throws Exception {
 		
-		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
-		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
+		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
 		session.join();
 		// atoms should be unquoted.
 		assertEquals("{\n", rec.get(0).event.getBindings().get("A"));
@@ -386,7 +404,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_4() throws Exception {
 		
 		// Everything should be CTerms, no list Processing.
-		session.queryOnce("bla", "A=[[1,2],'A']",PrologInterface.CTERMS);
+		session.queryOnce("bla", "A=[[1,2],'A']",PrologProcess.CTERMS);
 		session.join();
 		Object o = rec.get(0).event.getBindings().get("A");
 		assertTrue(o instanceof CCompound);
@@ -396,16 +414,16 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			pif.getAsyncSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
+			process.getAsyncSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			pif.getAsyncSession(PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
+			process.getAsyncSession(PrologProcess.CTERMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -413,9 +431,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			pif.getAsyncSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
+			process.getAsyncSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -425,16 +443,16 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_illegal_query() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
+			session.queryOnce("bla","syntax error", PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
+			session.queryOnce("bla","syntax error", PrologProcess.CTERMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -442,9 +460,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
+			session.queryOnce("bla","syntax error", PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -478,7 +496,7 @@ public class AsyncSocketSessionTest extends TestCase {
 				.queryAll(
 						ticket,
 						"repeat,writeln(waiting),thread_get_message(test(M)),writeln(got(M)),(M==stop,!;true)");
-		PrologSession syncSession = pif.getSession();
+		PrologSession syncSession = process.getSession();
 		rec.clear();
 		synchronized (rec) {
 			syncSession.queryOnce("writeln('i am here'),thread_send_message('"
@@ -517,7 +535,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		Record r = (Record) rec.records.get(0);
 		final String alias = (String) r.event.getBindings().get("Alias");
 		session.queryAll("2", "repeat,thread_get_message(test(M))");
-		final PrologSession syncSession = pif.getSession();
+		final PrologSession syncSession = process.getSession();
 
 		synchronized (rec) {
 			syncSession.queryOnce("thread_send_message('" + alias
@@ -549,7 +567,7 @@ public class AsyncSocketSessionTest extends TestCase {
 						} catch (PrologException e) {
 							Debug.report(e);
 
-						} catch (PrologInterfaceException e) {
+						} catch (PrologProcessException e) {
 							Debug.report(e);
 						}
 					}
@@ -582,12 +600,12 @@ public class AsyncSocketSessionTest extends TestCase {
 		int N = 30;
 		AsyncPrologSession[] sessions = new AsyncPrologSession[N];
 		for (int i = 0; i < N; i++) {
-			sessions[i] = pif.getAsyncSession();
+			sessions[i] = process.getAsyncSession();
 		}
 		try {
-			pif.getAsyncSession();
+			process.getAsyncSession();
 
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			e.printStackTrace();
 		}
 		for (int i = 0; i < N; i++) {

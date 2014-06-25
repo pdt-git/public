@@ -17,12 +17,12 @@ package org.cs3.pdt.console;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.connector.PDTConnectorPlugin;
+import org.cs3.pdt.connector.service.IPrologProcessService;
+import org.cs3.pdt.connector.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.connector.util.ErrorMessageProvider;
 import org.cs3.pdt.console.internal.ConsoleReloadExecutor;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.pif.service.IPrologInterfaceService;
-import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
-import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.ui.IStartup;
@@ -53,8 +53,8 @@ public class PrologConsolePlugin extends AbstractUIPlugin implements IStartup {
 	@Override
 	public void start(BundleContext context) throws Exception{
 		super.start(context);
-		IPrologInterfaceService prologInterfaceService = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService();
-		prologInterfaceService.registerPDTReloadExecutor(new ConsoleReloadExecutor());
+		IPrologProcessService prologProcessService = PDTConnectorPlugin.getDefault().getPrologProcessService();
+		prologProcessService.registerPDTReloadExecutor(new ConsoleReloadExecutor());
 	}
 
 	private PrologConsoleService consoleService;

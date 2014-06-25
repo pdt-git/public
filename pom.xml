@@ -14,6 +14,7 @@
    	<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
    	<eclipse-project-site>http://download.eclipse.org/eclipse/updates/3.7</eclipse-project-site>
 	<platform-version>[3.6,3.7)</platform-version>
+	<maven.compiler.source>1.7</maven.compiler.source>
   </properties>
 
   <!-- Add additional repository locations -->
@@ -41,8 +42,8 @@
 			<groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-compiler-plugin</artifactId>
             <configuration>
-                <source>1.6</source>
-                <target>1.6</target>
+                <source>1.7</source>
+                <target>1.7</target>
 				 <showDeprecation>true</showDeprecation>
 			      <showWarnings>true</showWarnings>
                 
@@ -75,13 +76,13 @@
     <module>pdt.builder</module>
     <module>pdt.common</module>
     <module>pdt.console</module>
-    <module>pdt.contextview</module>
+    <module>pdt.graphicalviews</module>
     <module>pdt.editor</module>
     <module>pdt.feature</module>
     <module>pdt.navigator</module>
     <module>pdt.updatesite</module>
     <module>prolog.library</module>
     <module>prolog.connector</module>
-    <module>prolog.connector.ui</module>
+    <module>pdt.connector</module>
   </modules>
 </project>

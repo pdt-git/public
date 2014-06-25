@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.common.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,9 +25,9 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.common.structureElements.PrologMatch;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.ui.util.UIUtils;
+import org.cs3.pdt.connector.util.UIUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -55,7 +55,7 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 			setSearchType("Dead predicates");
 		} else {
 			setSearchType("Dead predicates in project " + root.getName());
-			rootPath = Util.quoteAtom(Util.prologFileName(root.getLocation().toFile()));
+			rootPath = QueryUtils.prologFileNameQuoted(root.getLocation().toFile());
 		}
 	}
 

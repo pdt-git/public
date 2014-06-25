@@ -19,9 +19,9 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.internal.cterm.parser.ASTAtom;
-import org.cs3.prolog.internal.cterm.parser.CanonicalTermParser;
-import org.cs3.prolog.internal.cterm.parser.Node;
+import org.cs3.prolog.connector.internal.cterm.parser.ASTAtom;
+import org.cs3.prolog.connector.internal.cterm.parser.CanonicalTermParser;
+import org.cs3.prolog.connector.internal.cterm.parser.Node;
 
 public class ClauseReferenceTest extends TestCase {
     CanonicalTermParser termParser;

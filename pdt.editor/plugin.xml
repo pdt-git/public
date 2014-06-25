@@ -12,7 +12,7 @@
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
-          class="org.cs3.pdt.internal.preferences.PreferenceInitializer">
+          class="org.cs3.pdt.editor.internal.preferences.PreferenceInitializer">
     </initializer>
  </extension>
  
@@ -20,13 +20,13 @@
        point="org.eclipse.ui.preferencePages">
     <page
           category="org.cs3.pdt.preferences.PreferencePageEditor"
-          class="org.cs3.pdt.internal.preferences.PreferencePageEditorColors"
+          class="org.cs3.pdt.editor.internal.preferences.PreferencePageEditorColors"
           id="org.cs3.pdt.preferences.PreferencePageEditorColors"
           name="Editor Colors">
     </page>
     <page
           category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
-          class="org.cs3.pdt.internal.preferences.PreferencePageEditor"
+          class="org.cs3.pdt.editor.internal.preferences.PreferencePageEditor"
           id="org.cs3.pdt.preferences.PreferencePageEditor"
           name="Editor">
     </page>
@@ -37,7 +37,7 @@
             name="PL Editor"
             icon="icons/prolog_file_transparent.png"
             extensions="pl , plt, lgt, pro, yap"
-            class="org.cs3.pdt.internal.editors.PLEditor"
+            class="org.cs3.pdt.editor.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
       </editor>
@@ -45,8 +45,8 @@
             name="QLF Editor"
             icon="icons/qlf_file.png"
             extensions="qlf"
-            class="org.cs3.pdt.internal.editors.QLFEditor"
-            contributorClass="org.cs3.pdt.internal.editors.QLFEditorContributor"
+            class="org.cs3.pdt.editor.internal.editors.QLFEditor"
+            contributorClass="org.cs3.pdt.editor.internal.editors.QLFEditorContributor"
             id="org.cs3.pdt.internal.editors.QLFEditor">
       </editor>
    </extension>
@@ -126,45 +126,45 @@
       point="org.eclipse.ui.bindings">
    <key
          commandId="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+O"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+C"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.save.no.reconsult"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+ALT+S"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.consult"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F9"/>
 
    <key
          commandId="org.eclipse.pdt.ui.edit.run.unit.test"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+U"/>
    <key
          commandId="org.eclipse.pdt.ui.open.primary.definition"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F3">
    </key>
    <key
          commandId="org.eclipse.pdt.ui.find.all.definitions"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+G">
    </key>
    <key
          commandId="org.eclipse.pdt.ui.find.references"
-         contextId="org.cs3.pdt.editingProlog"
+         contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+G">
    </key>
@@ -174,14 +174,14 @@
       point="org.eclipse.ui.contexts">
    <context
          description="oh well, what will that be... editing giggling goblins i suppose?"
-         id="org.cs3.pdt.editingProlog"
+         id="org.cs3.pdt.editor.editingProlog"
          name="Editing Prolog Code"
          parentId="org.eclipse.ui.textEditorScope"/>
 </extension>
 <extension
-      point="org.cs3.prolog.connector.ui.prologContextTracker">
+      point="org.cs3.pdt.connector.prologContextTracker">
    <tracker
-         class="org.cs3.pdt.internal.editors.PLEditorTracker"
+         class="org.cs3.pdt.editor.internal.editors.PLEditorTracker"
          id="pdt.track.pleditor"
          label="Follow PL Editor"/>
 </extension>
@@ -302,11 +302,11 @@
       
             <wizard
                   category="org.cs3.pdt.wizards"
-                  class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard"
+                  class="org.cs3.pdt.editor.internal.wizards.NewModuleCreationWizard"
                   icon="icons/module_2.png"
                   id="pdt.module.wizard"
                   name="Prolog Module">
-         <class class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard">
+         <class class="org.cs3.pdt.editor.internal.wizards.NewModuleCreationWizard">
             <parameter
                 name="javatype"
                 value="true">
@@ -338,7 +338,7 @@
  <extension
        point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
-          class="org.cs3.pdt.quickfix.PDTMarker"
+          class="org.cs3.pdt.editor.quickfix.PDTMarker"
           markerType="org.eclipse.core.resources.problemmarker">
     </markerResolutionGenerator>
  </extension>
@@ -379,7 +379,7 @@
            verticalRulerPreferenceValue="true"/>
   </extension>
   <extension
-        point="org.cs3.prolog.connector.bootstrapContribution">
+        point="org.cs3.pdt.connector.bootstrapContribution">
      <fileContribution
            id="org.cs3.pdt.fileContribution"
            path="pl/load.pl">

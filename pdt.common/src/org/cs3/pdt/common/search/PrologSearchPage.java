@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.common.search;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +30,9 @@ import org.cs3.pdt.common.queries.ModuleReferenceSearchQuery;
 import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.queries.ReferencesSearchQueryDirect;
 import org.cs3.pdt.common.queries.UndefinedCallsSearchQuery;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
+import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -233,9 +233,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 //			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
 //            
             if (limitTo == REFERENCES) {
-            	searchQuery = new ModuleReferenceSearchQuery(Util.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
+            	searchQuery = new ModuleReferenceSearchQuery(QueryUtils.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             } else {
-            	searchQuery = new ModuleDefinitionsSearchQuery(Util.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
+            	searchQuery = new ModuleDefinitionsSearchQuery(QueryUtils.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             }
         } else if (searchFor == UNDEFINED_CALL) {
 //        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
@@ -413,9 +413,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	
     	public String toSearchGoal() {
     		return bT(SearchConstants.PREDICATE_GOAL_FUNCTOR, 
-    				module != null ? Util.quoteAtomIfNeeded(module) : "_",
+    				module != null ? QueryUtils.quoteAtomIfNeeded(module) : "_",
     				mSeparator != null ? mSeparator : "_",
-    				Util.quoteAtomIfNeeded(name),
+    				QueryUtils.quoteAtomIfNeeded(name),
     				aSeparator != null ? aSeparator : "_",
     				arity >= 0 ? arity : "_");
     	}

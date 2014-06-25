@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.cs3.pdt.console.internal.views.completion;
 
+import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
+
 /**
  * IContentProposalProvider provides an array of IContentProposals that are
  * appropriate for a textual dialog field, given the field's current content and
