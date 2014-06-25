@@ -72,7 +72,7 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		loadPaths(currentPath);
 		
 		String query;
-		query = bT(PDTGraphPredicates.WRITE_GLOBAL_TO_GRAPHML, paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)));
+		query = bT(PDTGraphPredicates.WRITE_GLOBAL_TO_GRAPHML, paths.toString(), Util.quoteAtom(Util.prologFileName(helpFile)), getSettings());
 		return query;
 	}
 
@@ -85,7 +85,9 @@ public class GlobalGraphPIFLoader extends GraphPIFLoaderBase {
 		try {			
 			IProject project = FileUtils.findFileForLocation(path).getProject();
 			
-			if (ignoreExternalPrologFilesProject() && ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
+			if (ignoreExternalPrologFilesProject()
+					&& ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().isAccessible() 
+					&& ExternalPrologFilesProjectUtils.getExternalPrologFilesProject().equals(project)) {
 				return paths;
 			}
 			

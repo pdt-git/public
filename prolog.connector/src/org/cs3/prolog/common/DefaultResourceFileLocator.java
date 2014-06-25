@@ -42,10 +42,10 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
 	public ResourceFileLocator subLocator(String subdir){
         return new DefaultResourceFileLocator(resolve(subdir));
     }
-    /*
-     * (non-Javadoc)
+    
+    /**
      * 
-     * @see org.cs3.pl.common.ResourceLocator#resolve(java.lang.String)
+     * @see org.cs3.prolog.common.ResourceFileLocator#resolve(java.lang.String)
      */
     @Override
 	public File resolve(String rel) {

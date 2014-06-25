@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="lib/prolog-interface.jar"/>
 	<classpathentry kind="lib" path="lib/jpl.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -22,15 +22,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
 public class RefreshModeFieldEditor extends FieldEditor {
 
@@ -53,7 +48,7 @@ public class RefreshModeFieldEditor extends FieldEditor {
 
 	@Override
 	protected void doFillIntoGrid(Composite parent, int numColumns) {
-		Control control = getLabelControl(parent);
+//		Control control = getLabelControl(parent);
 		//GridData gdInfo = new GridData();
         //gdInfo.horizontalSpan = numColumns;
         //gdInfo.horizontalIndent = 9;
@@ -64,7 +59,7 @@ public class RefreshModeFieldEditor extends FieldEditor {
         //text.setText("Specify when to redraw the Focus View.");
         //text.setLayoutData(gdInfo);
         
-		control = getRadioBoxControl(parent);
+//		control = getRadioBoxControl(parent);
 		//GridData gdRadio = new GridData(GridData.FILL_HORIZONTAL);
         //gdRadio.horizontalSpan = numColumns;
         //gdRadio.verticalIndent = 10;

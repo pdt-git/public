@@ -49,8 +49,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	
 	private void initializeDefaultPreferences_Main(IPreferenceStore store){
-		store.setDefault(PDTConsole.PREF_RECONSULT_ON_RESTART, PDTConsole.RECONSULT_ENTRY);
-		
 		String historyFile = System.getProperty("user.home") + File.separator + ".prolog_console_history";		
 		store.setDefault(PDTConsole.PREF_CONSOLE_HISTORY_FILE,	historyFile);
 			
@@ -79,10 +77,12 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		FontData fd = new FontData("Courier New", 10, SWT.NORMAL);
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_FONT, fd);
 
+		Color colorNormal = Display.getDefault().getSystemColor(SWT.COLOR_LIST_FOREGROUND);
 		Color color_err = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 		Color color_warn = new Color(Display.getDefault(),255,128,50);
 		Color color_info = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 		Color color_dbg = Display.getDefault().getSystemColor(SWT.COLOR_MAGENTA);
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_NORMAL, colorNormal.getRGB());
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_ERROR, color_err.getRGB());
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_WARNING, color_warn.getRGB());
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_INFO, color_info.getRGB());
@@ -90,6 +90,12 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 		store.setDefault(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, true);
 
+		Color backgroundNormal = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		Color backgroundSingleCharMode = Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+		Color backgroundDisabled = Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, backgroundNormal.getRGB());
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, backgroundSingleCharMode.getRGB());
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, backgroundDisabled.getRGB());
 	}
 
 }

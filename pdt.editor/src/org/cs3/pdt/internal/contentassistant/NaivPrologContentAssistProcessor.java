@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.prolog.common.Util;
 import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.session.PrologSession;
 import org.cs3.prolog.ui.util.UIUtils;
@@ -104,7 +104,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		try {
 			String enclFile = UIUtils.getFileFromActiveEditor();
 //			String moduleArg = module != null ? Util.quoteAtomIfNeeded(module) : "Module";
-			session = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface().getSession();
+			session = PDTCommonUtil.getActivePrologInterface().getSession();
 //			String query = bT(PDTCommonPredicates.FIND_PRED_FOR_EDITOR_COMPLETION,
 //					Util.quoteAtom(enclFile),
 //					Util.quoteAtomIfNeeded(prefix),

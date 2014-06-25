@@ -136,7 +136,7 @@ public class SocketClient {
 	/**
 	 * reads until a line with the given prefix is recieved. This call will
 	 * block until line is read that is that starts with the given prefix or the
-	 * special prefix <cpde>ERROR</code>, or if <code>EndOfStream</code> is
+	 * special prefix <code>ERROR</code>, or if <code>EndOfStream</code> is
 	 * reached. In the two latter cases, a <code>ConsultException</code> is
 	 * raised. In all three cases only complete lines (i.e. terminated with a
 	 * newline char) are read.

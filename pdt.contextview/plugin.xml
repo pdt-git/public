@@ -43,37 +43,37 @@
       <page
             category="org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage"
             class="pdt.y.preferences.MainPreferencePage"
-            id="pdt.y.focusview.preferences.PreferencePage"
+            id="pdt.y.preferences.MainPreferencePage"
             name="Context View">
       </page>
       <page
-            category="pdt.y.focusview.preferences.PreferencePage"
+            category="pdt.y.preferences.MainPreferencePage"
             class="pdt.y.preferences.FileAppearancePreferences"
-            id="pdt.y.preferences.FileAppearance"
+            id="pdt.y.preferences.FileAppearancePreferences"
             name="File Appearance">
       </page>
       <page
-            category="pdt.y.focusview.preferences.PreferencePage"
+            category="pdt.y.preferences.MainPreferencePage"
             class="pdt.y.preferences.PredicateAppearancePreferences"
-            id="pdt.y.preferences.PredicateAppearance"
+            id="pdt.y.preferences.PredicateAppearancePreferences"
             name="Predicate Appearance">
       </page>
       <page
-            category="pdt.y.focusview.preferences.PreferencePage"
+            category="pdt.y.preferences.MainPreferencePage"
             class="pdt.y.preferences.PredicateLayoutPreferences"
-            id="pdt.y.focusview.preferences.LayoutPreferences"
+            id="pdt.y.preferences.PredicateLayoutPreferences"
             name="Predicate Layout">
       </page>
       <page
-            category="pdt.y.focusview.preferences.PreferencePage"
+            category="pdt.y.preferences.MainPreferencePage"
             class="pdt.y.preferences.EdgeAppearancePreferences"
-            id="pdt.y.preferences.EdgeAppearance"
+            id="pdt.y.preferences.EdgeAppearancePreferences"
             name="Edge Appearance">
       </page>
       <page
-            category="pdt.y.focusview.preferences.PreferencePage"
+            category="pdt.y.preferences.MainPreferencePage"
             class="pdt.y.preferences.SkinsPreferencePage"
-            id="pdt.y.preferences.FocusViewSkinsPreferences"
+            id="pdt.y.preferences.SkinsPreferencePage"
             name="Skins">
       </page>
    </extension>

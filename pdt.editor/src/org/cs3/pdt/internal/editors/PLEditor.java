@@ -25,16 +25,15 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.PrologInterfaceStartListener;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
-import org.cs3.pdt.internal.actions.RunUnitTestAction;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
@@ -63,7 +62,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -74,7 +72,6 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.source.Annotation;
@@ -94,14 +91,14 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener {
+public class PLEditor extends TextEditor implements ConsultListener, ActivePrologInterfaceListener, PrologInterfaceStartListener {
 
 	public static final String COMMAND_OPEN_PRIMARY_DEFINITION = "org.eclipse.pdt.ui.open.primary.definition";
 	
@@ -109,15 +106,11 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	
 	public static final String COMMAND_FIND_REFERENCES = "org.eclipse.pdt.ui.find.references";
 	
-	public static final String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
-
 	public static final String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
 	public static final String COMMAND_SAVE_NO_CONSULT = "org.eclipse.pdt.ui.edit.save.no.reconsult";
 
 	public static final String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
-
-	public static final String COMMAND_RUN_UNIT_TEST = "org.eclipse.pdt.ui.edit.run.unit.test";
 
 	public static final String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 	
@@ -130,8 +123,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	private static final boolean EXPERIMENTAL_ADD_TASKS = true;
 
 	private PLConfiguration configuration;
-
-	private IContentAssistant assistant;
 
 	@Override
 	protected void initializeKeyBindingScopes() {
@@ -152,8 +143,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			if(EXPERIMENTAL_ADD_TASKS){
 				addTasks(((FileEditorInput)getEditorInput()).getFile(),document);
 			}
-			breakpointHandler.backupMarkers(getCurrentIFile(), document);
-			
 			PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", true);
 			
 			IFile currentIFile = getCurrentIFile();
@@ -292,10 +281,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		}
 	}
 
-	private static final String SEP_PDT_SEARCH = "pdt_search_actions";
 	private static final String SEP_PDT_INFO = "pdt_info_actions";
-	private static final String SEP_PDT_EDIT = "pdt_edit_actions";
-	private static final String SEP_PDT_LAST = "pdt_dummy";
 
 	private IPath filepath;
 
@@ -334,22 +320,17 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	private void createPartControl_impl(final Composite parent) {
 		super.createPartControl(parent);
 
-		MenuManager menuMgr = createPopupMenu();
-
-		createInspectionMenu(menuMgr);
+		createInspectionMenu();
 
 		// TODO: create own bundle
 		ResourceBundle bundle = ResourceBundle.getBundle(PDT.RES_BUNDLE_UI);
 
-		createMenuEntryForTooltip(menuMgr, bundle);
-		createMenuEntryForOutlinePresenter(menuMgr, bundle);
-		createMenuEntryForContentAssist(menuMgr, bundle);
+		createMenuEntryForOutlinePresenter(bundle);
 
-		createMenuEntryForReconsult(menuMgr, bundle);
-		createMenuEntryForSaveWithoutReconsult(menuMgr, bundle);
-		createMenuEntryForRunUnitTest(menuMgr, bundle);
+		createMenuEntryForReconsult(bundle);
+		createMenuEntryForSaveWithoutReconsult(bundle);
 
-		createMenuEntryForToggleComments(menuMgr, bundle);
+		createMenuEntryForToggleComments(bundle);
 
 		getSourceViewer().getTextWidget().addCaretListener(new CaretListener() {
 
@@ -382,29 +363,26 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(this);
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(this);
-
+		PDTCommonPlugin.getDefault().registerPifStartListener(this);
 	}
 
 	/**
 	 * @param menuMgr
 	 */
-	private void createInspectionMenu(MenuManager menuMgr) {
+	private void createInspectionMenu() {
 		
-		addAction(menuMgr, new FindPredicateActionDelegate(this),
-				"Open Primary Definition or Declaration", SEP_PDT_SEARCH,
-				COMMAND_OPEN_PRIMARY_DEFINITION);
+		addAction(new FindPredicateActionDelegate(this),
+				"Open Primary Definition or Declaration", COMMAND_OPEN_PRIMARY_DEFINITION);
 //				"org.eclipse.pdt.ui.open.primary.definition");
 //				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 
-		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
-				"Find all Definitions and Declarations", SEP_PDT_SEARCH,
-				COMMAND_FIND_ALL_DEFINITIONS);
+		addAction(new FindDefinitionsActionDelegate(this),
+				"Find all Definitions and Declarations", COMMAND_FIND_ALL_DEFINITIONS);
 //				"org.cs3.pdt.find.definitions");
 //				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
-		addAction(menuMgr, new FindReferencesActionDelegate(this),
-				"Find References", SEP_PDT_SEARCH,
-				COMMAND_FIND_REFERENCES);
+		addAction(new FindReferencesActionDelegate(this),
+				"Find References", COMMAND_FIND_REFERENCES);
 //				"org.cs3.pdt.find.references");
 //				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
 
@@ -413,22 +391,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		// "org.eclipse.debug.ui.commands.ToggleBreakpoint");
 	}
 
-	private void createMenuEntryForTooltip(MenuManager menuMgr,
-			ResourceBundle bundle) {
-		Action action;
-		action = new TextEditorAction(bundle, PLEditor.class.getName()
-				+ ".ToolTipAction", this) {
-			@Override
-			public void run() {
-				assistant.showContextInformation();
-			}
-		};
-		addAction(menuMgr, action, "Show Tooltip", SEP_PDT_INFO,
-				COMMAND_SHOW_TOOLTIP);
-	}
-
-	private void createMenuEntryForOutlinePresenter(MenuManager menuMgr,
-			ResourceBundle bundle) {
+	private void createMenuEntryForOutlinePresenter(ResourceBundle bundle) {
 		Action action;
 
 		fOutlinePresenter = configuration.getOutlinePresenter(this
@@ -446,37 +409,18 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				fOutlinePresenter.showInformation();
 			}
 		};
-		addAction(menuMgr, action, "Show Outline", SEP_PDT_INFO,
-				COMMAND_SHOW_QUICK_OUTLINE);
+		addAction(action, "Show Outline", COMMAND_SHOW_QUICK_OUTLINE);
 	}
 
-	private void createMenuEntryForContentAssist(MenuManager menuMgr,
-			ResourceBundle bundle) {
-		assistant = configuration.getContentAssistant(getSourceViewer());
-
-		Action action = new TextEditorAction(bundle, PLEditor.class.getName()
-				+ ".ContextAssistProposal", this) {
-			@Override
-			public void run() {
-				assistant.showPossibleCompletions();
-			}
-		};
-		addAction(menuMgr, action, "Context Assist Proposal", SEP_PDT_INFO,
-				ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-	}
-
-	private void createMenuEntryForToggleComments(MenuManager menuMgr,
-			ResourceBundle bundle) {
+	private void createMenuEntryForToggleComments(ResourceBundle bundle) {
 		ToggleCommentAction tca = new ToggleCommentAction(bundle,
 				PLEditor.class.getName() + ".ToggleCommentsAction", this);
 		tca.configure(getSourceViewer(), configuration);
 		tca.setEnabled(true);
-		addAction(menuMgr, tca, "Toggle Comments", SEP_PDT_LAST,
-				COMMAND_TOGGLE_COMMENTS);
+		addAction(tca, "Toggle Comments", COMMAND_TOGGLE_COMMENTS);
 	}
 
-	private void createMenuEntryForReconsult(MenuManager menuMgr,
-			ResourceBundle bundle) {
+	private void createMenuEntryForReconsult(ResourceBundle bundle) {
 		reloadAction = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ConsultAction", this) {
 			@Override
@@ -498,12 +442,10 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 						new PDTChangedFileInformation(getEditorInput()));
 			}
 		};
-		addAction(menuMgr, reloadAction, "(Re)consult", SEP_PDT_EDIT,
-				COMMAND_CONSULT);
+		addAction(reloadAction, "(Re)consult", COMMAND_CONSULT);
 	}
 
-	private void createMenuEntryForSaveWithoutReconsult(MenuManager menuMgr,
-			ResourceBundle bundle) {
+	private void createMenuEntryForSaveWithoutReconsult(ResourceBundle bundle) {
 		Action action;
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".SaveNoConsultAction", this) {
@@ -518,47 +460,37 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				}
 			}
 		};
-		addAction(menuMgr, action, "Save without consult", SEP_PDT_EDIT, COMMAND_SAVE_NO_CONSULT);
+		addAction(action, "Save without consult", COMMAND_SAVE_NO_CONSULT);
 	}
 
-	private void createMenuEntryForRunUnitTest(MenuManager menuMgr,
-			ResourceBundle bundle) {
-		Action action;
-		action = new RunUnitTestAction();
-		addAction(menuMgr, action, "Run Unit Test", SEP_PDT_EDIT,
-				COMMAND_RUN_UNIT_TEST);
-	}
-	
 	/**
 	 * @param menuMgr
 	 */
-	private void addAction(MenuManager menuMgr, Action action, String name,
-			String separator, String id) {
+	private void addAction(Action action, String name, String id) {
 
 		action.setActionDefinitionId(id);
 		action.setText(name);
-		menuMgr.appendToGroup(separator, action);
+//		menuMgr.appendToGroup(separator, action);
 		setAction(id,
 //				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE,
 				action);
 	}
-
-	/**
-	 * @return
-	 */
-	private MenuManager createPopupMenu() {
-		MenuManager menuMgr = new MenuManager(
-				"org.cs3.pl.editors.PLEditor", "org.cs3.pl.editors.PLEditor"); //$NON-NLS-1$
-		menuMgr.addMenuListener(getContextMenuListener());
-		menuMgr.add(new Separator(SEP_PDT_SEARCH));
-		menuMgr.add(new Separator(SEP_PDT_INFO));
-		menuMgr.add(new Separator(SEP_PDT_EDIT));
-		menuMgr.add(new Separator(SEP_PDT_LAST));
-		// menuMgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		getSourceViewer().getTextWidget().setMenu(
-				menuMgr.createContextMenu(getSourceViewer().getTextWidget()));
-		getEditorSite().registerContextMenu(menuMgr, getSelectionProvider());
-		return menuMgr;
+	
+	@Override
+	protected void editorContextMenuAboutToShow(IMenuManager menu) {
+		super.editorContextMenuAboutToShow(menu);
+		
+		menu.prependToGroup(ITextEditorActionConstants.GROUP_OPEN, getAction(COMMAND_OPEN_PRIMARY_DEFINITION));
+		menu.insertAfter(COMMAND_OPEN_PRIMARY_DEFINITION, getAction(COMMAND_FIND_ALL_DEFINITIONS));
+		menu.insertAfter(COMMAND_FIND_ALL_DEFINITIONS, getAction(COMMAND_FIND_REFERENCES));
+		menu.insertAfter(COMMAND_FIND_REFERENCES, getAction(COMMAND_SHOW_QUICK_OUTLINE));
+		
+		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, COMMAND_TOGGLE_COMMENTS);
+		
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_OPEN, new Separator(SEP_PDT_INFO));
+		
+		addAction(menu, SEP_PDT_INFO, COMMAND_CONSULT);
+		addAction(menu, SEP_PDT_INFO, COMMAND_SAVE_NO_CONSULT);
 	}
 
 	/**
@@ -853,7 +785,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		if (input instanceof IFileEditorInput) {
 			Map<String, Object> result = null;
 			try {
-				result = PDTUtils.getActivePif().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, Util.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
+				result = PDTCommonUtil.getActivePrologInterface().queryOnce(bT(PDTCommonPredicates.PDT_SOURCE_FILE, Util.quoteAtom(PDTCommonUtil.prologFileName(input)), "State"));
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -1417,29 +1349,28 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	@Override
 	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
 		monitor.beginTask("", 1);
-		String editorFile = getPrologFileName();
-		if (allConsultedFiles.contains(editorFile)) {
-			getSite().getShell().getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					PLEditor.this.updateTitleImage(getEditorInput());
-					try {
-						PLEditor.this.configuration.getPLScanner().initHighlighting();
-						PLEditor.this.getSourceViewer().invalidateTextPresentation();
-					} catch (PrologInterfaceException e) {
-						Debug.report(e);
-					} catch (CoreException e) {
-						Debug.report(e);
-					};
-				}
-			});
+		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+			String editorFile = getPrologFileName();
+			if (allConsultedFiles.contains(editorFile)) {
+				updateState();
+			}
 		}
-
 		monitor.done();
 	}
 
 	@Override
 	public void activePrologInterfaceChanged(PrologInterface pif) {
+		updateState();
+	}
+	
+	@Override
+	public void prologInterfaceStarted(PrologInterface pif) {
+		if (pif.equals(PDTCommonUtil.getActivePrologInterface())) {
+			updateState();
+		}
+	}
+	
+	private void updateState() {
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -1461,6 +1392,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		super.dispose();
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterActivePrologInterfaceListener(this);
 		PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().unRegisterConsultListener(this);
+		PDTCommonPlugin.getDefault().unregisterPifStartListener(this);
 	}
 
 }

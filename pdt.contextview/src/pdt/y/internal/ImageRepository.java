@@ -30,6 +30,10 @@ public class ImageRepository {
 	public static final String PREFERENCES = "preferences.png";
 	public static final String REFRESH = "refresh.gif";
 	public static final String MOVE = "move.png";
+	public static final String M = "m.png";
+	public static final String I = "i.png";
+	public static final String P = "p.png";
+	public static final String S = "s.png";
 	
 	public static final String INPUT_TYPE_PROJECT = "prj_obj.gif";
 	public static final String INPUT_TYPE_LIBRARY = "package_obj.gif";

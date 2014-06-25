@@ -60,25 +60,6 @@
       </actionSetPartAssociation>
    </extension>
 
- <extension
-         point="org.eclipse.ui.popupMenus">      
-       <objectContribution
-            adaptable="false"
-             id="pdt.junit.testcase.contribution"
-             objectClass="org.eclipse.jdt.junit.model.ITestCaseElement">
-          <action
-                class="org.cs3.pdt.internal.actions.OpenJUnitWrapperAction"
-                id="org.cs3.pdt.internal.actions.OpenJUnitWrapperTest"
-                label="Open Prolog Test">
-          </action>
-            <action
-                class="org.cs3.pdt.internal.actions.AbortTestAction"
-                id="org.cs3.pdt.internal.actions.AbortTestAction"
-                label="Abort Prolog Test">
-          </action>
-       </objectContribution>
- </extension>
- 
 <extension
       point="org.eclipse.ui.perspectiveExtensions">
    <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
@@ -371,18 +352,31 @@
  
   <extension point="org.eclipse.ui.editors.annotationTypes">
      <type
-        super="org.eclipse.ui.workbench.texteditor.warning"
-        markerType="org.cs3.pdt.PDTBreakpointMarker"
+        markerType="org.cs3.pdt.editor.PDTBreakpointMarker"
         name="org.cs3.pdt.PDTBreakpointAnnotation"
         markerSeverity="0"/>
   </extension>
 
   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
      <specification
-        annotationType="org.cs3.pdt.PDTBreakpointAnnotation"
-        icon="icons/brkpoint.gif"
-        verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
-        verticalRulerPreferenceValue="true"/>
+           annotationType="org.cs3.pdt.PDTBreakpointAnnotation"
+           colorPreferenceKey="org.cs3.pdt.breakpoint.color"
+           colorPreferenceValue="127,127,255"
+           contributesToHeader="false"
+           highlightPreferenceKey="org.cs3.pdt.breakpoint.highlight"
+           highlightPreferenceValue="false"
+           icon="icons/brkpoint.gif"
+           includeOnPreferencePage="true"
+           label="PDT Breakpoint"
+           overviewRulerPreferenceKey="org.cs3.pdt.breakpoint.overview"
+           overviewRulerPreferenceValue="false"
+           presentationLayer="0"
+           textPreferenceKey="org.cs3.pdt.breakpoint.text"
+           textPreferenceValue="true"
+           textStylePreferenceKey="org.cs3.pdt.breakpoint.textStyle"
+           textStylePreferenceValue="UNDERLINE"
+           verticalRulerPreferenceKey="myMarkerIndicationInVerticalRuler"
+           verticalRulerPreferenceValue="true"/>
   </extension>
   <extension
         point="org.cs3.prolog.connector.bootstrapContribution">

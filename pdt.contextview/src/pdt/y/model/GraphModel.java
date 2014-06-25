@@ -55,7 +55,24 @@ public class GraphModel {
 	private int nodesMaxWidth;
 	private int nodesMedianWidth;
 	private int nodesHeight;
+	
+	private boolean metapredicateCallsVisisble;
+	private boolean inferredCallsVisible;
 
+	public boolean isMetapredicateCallsVisisble() {
+		return metapredicateCallsVisisble;
+	}
+	public void setMetapredicateCallsVisisble(boolean metapredicateCallsVisisble) {
+		this.metapredicateCallsVisisble = metapredicateCallsVisisble;
+	}
+	
+	public boolean isInferredCallsVisible() {
+		return inferredCallsVisible;
+	}
+	public void setInferredCallsVisible(boolean inferredCallsVisible) {
+		this.inferredCallsVisible = inferredCallsVisible;
+	}
+	
 	public GraphModel(){
 		initNodeRealizers();
 		initEdgeRealizers();
@@ -142,9 +159,22 @@ public class GraphModel {
 				}
 				
 			} else if (dataHolder.isCallEdge(edge)) {
-				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
+				boolean isMetaCall = dataHolder.isMetaCall(edge);
+				boolean isDatabaseCall = dataHolder.isDatabaseCall(edge);
+				
+				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer, isMetaCall, isDatabaseCall);
 				graph.setRealizer(edge, newCallEdgeRealizer);
 				newCallEdgeRealizer.adjustLineWidth(this);
+				
+//				String label = dataHolder.getEdgeLabel(edge);
+//				newCallEdgeRealizer.setLabelText(label);
+				
+				boolean isMetaPredicateCall = dataHolder.isMetaPred(edge.target());
+				boolean isInferredCall = isMetaCall || isDatabaseCall;
+				
+				newCallEdgeRealizer.setVisible(!isMetaPredicateCall && !isInferredCall
+						|| isMetaPredicateCall && metapredicateCallsVisisble
+						|| isInferredCall && inferredCallsVisible);
 			} else if (dataHolder.isLogtalkGraphEdge(edge)){
 				LogtalkEdgeRealizer logtalkEdgeRealizer = new LogtalkEdgeRealizer();
 				graph.setRealizer(edge, logtalkEdgeRealizer);
@@ -154,7 +184,7 @@ public class GraphModel {
 			}
 		}
 	}
-	
+
 	public Graph2D getGraph() {
 		return graph;
 	}

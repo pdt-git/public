@@ -109,7 +109,7 @@ public class GraphLayout {
 //		layouter.setGroupCompactionEnabled(true);
 		layouter.setRecursiveGroupLayeringEnabled(true);
 	    layouter.setNodePlacer(snp);
-	   
+	    
 		return layouter;
 	}
 	

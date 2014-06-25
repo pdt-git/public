@@ -98,19 +98,6 @@
        </fileSearchPathContribution>
     </extension>
     <extension
-          point="org.eclipse.ui.popupMenus">
-       <objectContribution
-             adaptable="false"
-             id="pdt.junit.testcase.contribution"
-             objectClass="org.eclipse.jdt.junit.model.ITestCaseElement">
-          <action
-                class="org.cs3.pdt.console.internal.actions.RunUnitTestOnConsoleAction"
-                id="org.cs3.pdt.console.internal.actions.RunUnitTestAction"
-                label="Run Test on Prolog Console">
-          </action>
-       </objectContribution>
-    </extension>
-    <extension
           point="org.eclipse.ui.perspectiveExtensions">
        <perspectiveExtension
              targetID="org.cs3.pdt.perspective">

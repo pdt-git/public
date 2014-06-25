@@ -14,7 +14,7 @@
 
 :- module(pdt_editor_breakpoints,[
 	pdt_set_breakpoint/4,			% used in PDTBreakpointHandler.java
-	pdt_breakpoint_properties/4,
+	pdt_breakpoint_properties/5,
 	pdt_breakpoint_property/2
 ]).
 
@@ -38,10 +38,10 @@ existing_breakpoint(File, Offset) :-
     Offset >= StartPos,
     Offset < EndPos.
     
-pdt_breakpoint_properties(Id, File, Line, Offset) :-
+pdt_breakpoint_properties(Id, File, Line, Offset, Length) :-
     breakpoint_property(Id, file(File)),
     breakpoint_property(Id, line_count(Line)),
-    breakpoint_property(Id, character_range(Offset, _)).
+    breakpoint_property(Id, character_range(Offset, Length)).
 
 pdt_breakpoint_property(Id, Property) :-
 	breakpoint_property(Id, Property).

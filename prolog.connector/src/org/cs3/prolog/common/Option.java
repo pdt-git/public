@@ -55,8 +55,7 @@ public interface Option {
 
 	/**
 	 * 
-	 * @param The
-	 *            value to be validated
+	 * @param value The value to be validated
 	 * @return An error message, if the given value is invalid. An empty String,
 	 *         if the value is valid. null if the option does not perform
 	 *         validation. Note: if you want to express that validation is not

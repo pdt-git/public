@@ -21,8 +21,8 @@ public class PDTPredicates {
 	public static final String PDT_EDIT_HOOK = "pdt_edit_hook";
 	
 	// breakpoints
-	public static final String PDT_SET_BREAKPOINT = "pdt_set_breakpoint";
-	public static final String PDT_BREAKPOINT_PROPERTIES = "pdt_breakpoint_properties";
+	public static final String PDT_SET_BREAKPOINT = "pdt_editor_breakpoints:pdt_set_breakpoint";
+	public static final String PDT_BREAKPOINT_PROPERTIES = "pdt_editor_breakpoints:pdt_breakpoint_properties";
 
 	// editor highlighting
 	public static final String PREDICATES_WITH_PROPERTY = "pdt_editor_highlighting:predicates_with_property";

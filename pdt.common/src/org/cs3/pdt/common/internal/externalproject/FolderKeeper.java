@@ -70,7 +70,7 @@ public class FolderKeeper {
 		};
 		try {
 			j.setRule(ExternalPrologFilesProjectUtils
-					.getExternalPrologFilesProject());
+					.getExternalPrologFilesProjectEnsureAccessible());
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return;
@@ -104,7 +104,7 @@ public class FolderKeeper {
 			}
 		};
 		try {
-			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProject());
+			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProjectEnsureAccessible());
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return;
@@ -132,7 +132,7 @@ public class FolderKeeper {
 			}
 		};
 		try {
-			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProject());
+			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProjectEnsureAccessible());
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return;

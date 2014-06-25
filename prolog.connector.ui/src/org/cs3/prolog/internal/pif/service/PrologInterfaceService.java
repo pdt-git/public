@@ -30,6 +30,7 @@ import org.cs3.prolog.connector.PrologInterfaceRegistry;
 import org.cs3.prolog.connector.PrologRuntimePlugin;
 import org.cs3.prolog.connector.Subscription;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.internal.pif.service.ext.IPrologInterfaceServiceExtension;
 import org.cs3.prolog.pif.PrologInterface;
 import org.cs3.prolog.pif.PrologInterfaceException;
 import org.cs3.prolog.pif.service.ActivePrologInterfaceListener;
@@ -46,13 +47,16 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 
-public class PrologInterfaceService implements IPrologInterfaceService{
+public class PrologInterfaceService implements IPrologInterfaceService, IPrologInterfaceServiceExtension {
+	
+	private DefaultReloadExecutor defaultReloadExecutor;
 	
 	public PrologInterfaceService() {
-		registerPDTReloadExecutor(new DefaultReloadExecutor());
+		defaultReloadExecutor = new DefaultReloadExecutor();
+		registerPDTReloadExecutor(defaultReloadExecutor);
 	}
 	
-	private PrologInterface activePrologInterface;
+	private PrologInterface activePrologInterface = getDefaultPrologInterface();
 	
 	private static final ISchedulingRule activePifChangedRule = new ISchedulingRule() {
 		@Override
@@ -164,7 +168,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	}
 	
 	private HashSet<ConsultListener> consultListeners = new HashSet<ConsultListener>();
-	
+
 	@Override
 	public void registerConsultListener(ConsultListener listener) {
 		synchronized (consultListeners) {
@@ -213,11 +217,20 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	
 	@Override
 	public void consultFiles(final List<IFile> files, final PrologInterface pif) {
+		consultFilesInJob(files, pif, false);
+	}
+	
+	@Override
+	public void consultFilesSilent(List<IFile> files, PrologInterface pif) {
+		consultFilesInJob(files, pif, true);
+	}
+	
+	private void consultFilesInJob(final List<IFile> files, final PrologInterface pif, final boolean silent) {
 		Job job = new Job("Consult " + files.size() + " file(s)") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					consultFilesImpl(files, pif, monitor);
+					consultFilesImpl(files, pif, silent, monitor);
 				} catch (PrologInterfaceException e) {
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
@@ -232,7 +245,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void consultFilesImpl(List<IFile> files, PrologInterface pif, IProgressMonitor monitor) throws PrologInterfaceException {
+	private void consultFilesImpl(List<IFile> files, PrologInterface pif, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
 		HashSet<ConsultListener> consultListenersClone;
 		synchronized (consultListeners) {
 			consultListenersClone = (HashSet<ConsultListener>) consultListeners.clone();
@@ -246,7 +259,7 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 		}
 		
 		monitor.subTask("Execute reload");
-		boolean success = executeReload(pif, files, new SubProgressMonitor(monitor, consultListenersClone.size()));
+		boolean success = executeReload(pif, files, silent, new SubProgressMonitor(monitor, consultListenersClone.size()));
 		
 		if (success) {
 			monitor.subTask("Collect all consulted files");
@@ -276,25 +289,30 @@ public class PrologInterfaceService implements IPrologInterfaceService{
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean executeReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	private boolean executeReload(PrologInterface pif, List<IFile> files, boolean silent, IProgressMonitor monitor) throws PrologInterfaceException {
 		TreeSet<PDTReloadExecutor> executorsClone;
 		synchronized (pdtReloadExecutors) {
 			executorsClone = (TreeSet<PDTReloadExecutor>) pdtReloadExecutors.clone();
 		}
 		monitor.beginTask("Execute reload", executorsClone.size());
-		for (PDTReloadExecutor executor : executorsClone) {
-			monitor.subTask("Execute reload");
-			boolean success = executor.executePDTReload(pif, files, new SubProgressMonitor(monitor, 1));
-			if (success) {
-				monitor.done();
-				return true;
+		if (silent) {
+			boolean success = defaultReloadExecutor.executePDTReload(pif, files, new SubProgressMonitor(monitor, executorsClone.size()));
+			monitor.done();
+			return success;
+		} else {
+			for (PDTReloadExecutor executor : executorsClone) {
+				monitor.subTask("Execute reload");
+				boolean success = executor.executePDTReload(pif, files, new SubProgressMonitor(monitor, 1));
+				if (success) {
+					monitor.done();
+					return true;
+				}
 			}
 		}
 		monitor.done();
 		return false;
 	}
-	
-	
+
 }
 
 

@@ -144,10 +144,19 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	private Color LastOutputColor = null;
 	private boolean LineFeedOccured = true;
+	private Color defaultFontColor;
 	private Color COLOR_ERROR;
 	private Color COLOR_WARNING;
 	private Color COLOR_INFO;
 	private Color COLOR_DEBUG;
+	private Color backgroundNormal;
+	private Color backgroundSingleCharMode;
+	private Color backgroundDisabled;
+	
+	private int currentBackground;
+	private static final int BACKGROUND_NORMAL = 0;
+	private static final int BACKGROUND_SINGLE_CHAR_MODE = 1;
+	private static final int BACKGROUND_DISABLED = 2;
 	
 	private static final String[] extensions = {".pl", ".plt", ".pro"};
 
@@ -212,17 +221,42 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			control.setFont(new Font(display, fd));
 
 			// Coloring
+			RGB fontRGB = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_NORMAL);
 			RGB color_err = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_ERROR);
 			RGB color_warn = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_WARNING);
 			RGB color_info = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_INFO);
 			RGB color_dbg = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_DEBUG);
+			
+			RGB bgNormal = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL);
+			RGB bgSingleChar = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE);
+			RGB bgDisabled = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED);
 
+			defaultFontColor = new Color(display, fontRGB);
+			
+			control.setForeground(defaultFontColor);
+			
 			COLOR_ERROR = new Color(display, color_err);
 			COLOR_WARNING = new Color(display, color_warn);
 			COLOR_INFO = new Color(display, color_info);
 			COLOR_DEBUG = new Color(display, color_dbg);
 			
+			backgroundNormal = new Color(display, bgNormal);
+			backgroundSingleCharMode = new Color(display, bgSingleChar);
+			backgroundDisabled = new Color(display, bgDisabled);
+			
+			setBackground(currentBackground);
 		}
+	}
+
+	private void setBackground(int background) {
+		if (background == BACKGROUND_NORMAL) {
+			control.setBackground(backgroundNormal);
+		} else if (background == BACKGROUND_SINGLE_CHAR_MODE) {
+			control.setBackground(backgroundSingleCharMode);
+		} else if (background == BACKGROUND_DISABLED){
+			control.setBackground(backgroundDisabled);
+		}
+		currentBackground = background;
 	}
 
 	private void createControl(Composite parent, int styles) {
@@ -663,7 +697,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	private void setColorRangeInControl(int start, int end, Color col) {
-		StyleRange range = new StyleRange(start, end, col, control.getBackground());
+		StyleRange range = new StyleRange(start, end, col, null);
 		control.setStyleRange(range);
 	}
 
@@ -739,7 +773,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					Position location = getLocation(row);
 					if (location != null) {
 						int start = startOfInput + CharCount + location.offset;
-						StyleRange range = new StyleRange(start, location.length, LastOutputColor, control.getBackground());
+						StyleRange range = new StyleRange(start, location.length, LastOutputColor, null);
 						range.underline = true;
 						range.underlineStyle = SWT.UNDERLINE_LINK;
 						control.setStyleRange(range);
@@ -783,23 +817,19 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	private void ui_setSingleCharMode(boolean b) {
-		Display display = control.getDisplay();
 		if (b) {
-			control.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-
+			setBackground(BACKGROUND_SINGLE_CHAR_MODE);
 		} else {
-			control.setBackground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			setBackground(BACKGROUND_NORMAL);
 		}
 	}
 
 	private void ui_setEnabled(boolean b) {
 		control.setEnabled(b);
-		Display display = control.getDisplay();
 		if (b) {
-			control.setBackground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-
+			setBackground(BACKGROUND_NORMAL);
 		} else {
-			control.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
+			setBackground(BACKGROUND_DISABLED);
 		}
 	}
 
@@ -1051,7 +1081,15 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		int inputLine = control.getLineAtOffset(startOfInput);
 		int inputLineOffset = control.getOffsetAtLine(inputLine);
 		int c = control.getCaretOffset() - inputLineOffset;
-		control.getContent().replaceTextRange(0, inputLineOffset, "");
+		int charCount = control.getCharCount();
+		if (charCount > 0 && inputLineOffset > 0) {
+			if (charCount > inputLineOffset) {
+				control.setText(control.getText(inputLineOffset, charCount - 1));
+			} else {
+				control.setText("");
+			}
+		}
+//		control.replaceTextRange(0, inputLineOffset, "");
 		startOfInput -= inputLineOffset;
 		control.setCaretOffset(c);
 		thatWasMe = false;

@@ -13,8 +13,6 @@
 
 package pdt.y.focusview;
 
-import java.awt.event.MouseEvent;
-
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -34,43 +32,29 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
 import pdt.y.internal.ImageRepository;
-import pdt.y.internal.ui.PredicatesListDialog;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
-import pdt.y.model.realizer.edges.InfoTextProvider;
-import pdt.y.model.realizer.nodes.NodeRealizerBase;
-import pdt.y.preferences.EdgeAppearancePreferences;
-import pdt.y.preferences.FileAppearancePreferences;
 import pdt.y.preferences.MainPreferencePage;
-import pdt.y.preferences.PredicateAppearancePreferences;
 import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.preferences.PredicateVisibilityPreferences;
 import pdt.y.preferences.PreferenceConstants;
-import pdt.y.preferences.SkinsPreferencePage;
+import pdt.y.view.modes.MouseHandler;
 import pdt.y.view.modes.OpenInEditorViewMode;
-import y.base.Edge;
-import y.base.Node;
-import y.view.EdgeRealizer;
-import y.view.HitInfo;
-import y.view.NodeRealizer;
-import y.view.ViewMode;
 
 
 public abstract class ViewBase extends ViewPart {
@@ -81,6 +65,8 @@ public abstract class ViewBase extends ViewPart {
 	private String infoText = "", statusText = "";
 	private ViewCoordinatorBase focusViewCoordinator;
 	private boolean navigationEnabled = false;
+	private boolean metapredicateCallsVisible = true;
+	private boolean inferredCallsVisible = true;
 	
 	public ViewBase() {
 	}
@@ -161,6 +147,78 @@ public abstract class ViewBase extends ViewPart {
 	protected void initButtons(final Composite parent) {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
+
+		toolBarManager.add(new ToolBarAction("Show PDT Predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.P)) {
+			{
+				setChecked(PredicateVisibilityPreferences.showPDTPredicates());
+			}
+
+			@Override
+			public int getStyle() {
+				return IAction.AS_CHECK_BOX;
+			}
+			
+			@Override
+			public void performAction() {
+				PredicateVisibilityPreferences.setShowPDTPredicates(isChecked());
+				updateCurrentFocusView();	
+			}
+		});
+		
+		toolBarManager.add(new ToolBarAction("Show SWI Predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.S)) {
+			{
+				setChecked(PredicateVisibilityPreferences.showSWIPredicates());
+			}
+
+			@Override
+			public int getStyle() {
+				return IAction.AS_CHECK_BOX;
+			}
+			
+			@Override
+			public void performAction() {
+				PredicateVisibilityPreferences.setShowSWIPredicates(isChecked());
+				updateCurrentFocusView();	
+			}
+		});
+		
+		toolBarManager.add(new ToolBarAction("Show Metapredicates",
+				ImageRepository.getImageDescriptor(ImageRepository.M)) {
+				{
+					setChecked(metapredicateCallsVisible);
+				}
+			
+				@Override
+				public int getStyle() {
+					return IAction.AS_CHECK_BOX;
+				}
+				
+				@Override
+				public void performAction() {
+					metapredicateCallsVisible = !metapredicateCallsVisible;
+					updateCurrentFocusView();	
+				}
+			});
+		
+		toolBarManager.add(new ToolBarAction("Show Inferred Calls",
+				ImageRepository.getImageDescriptor(ImageRepository.I)) {
+				{
+					setChecked(inferredCallsVisible);
+				}
+				
+				@Override
+				public int getStyle() {
+					return IAction.AS_CHECK_BOX;
+				}
+			
+				@Override
+				public void performAction() {
+					inferredCallsVisible = !inferredCallsVisible;
+					updateCurrentFocusView();	
+				}
+			});
 		
 		toolBarManager.add(new Separator("control"));
 		
@@ -168,14 +226,13 @@ public abstract class ViewBase extends ViewPart {
 				ImageRepository.getImageDescriptor(ImageRepository.MOVE)) {
 
 				@Override
-					public int getStyle() {
-						return IAction.AS_CHECK_BOX;
-					}
+				public int getStyle() {
+					return IAction.AS_CHECK_BOX;
+				}
 			
 				@Override
 				public void performAction() {
 					navigationEnabled = !navigationEnabled;
-					setChecked(navigationEnabled);
 					focusViewCoordinator.currentFocusView.recalculateMode();
 				}
 			});
@@ -220,33 +277,15 @@ public abstract class ViewBase extends ViewPart {
 
 				@Override
 				public void performAction() {
-					PreferenceManager mgr = new PreferenceManager();
+					PreferenceManager globalmgr = PlatformUI.getWorkbench().getPreferenceManager();
+					IPreferenceNode node = globalmgr.find("org.cs3.pdt.common.internal.preferences.PDTCommonPreferencePage/pdt.y.preferences.MainPreferencePage");
 					
 					IPreferencePage page = new MainPreferencePage();
 					page.setTitle("Context View");
+					IPreferenceNode root = new PreferenceNode("PreferencePage", page);
+					root.add(node);
 					
-					IPreferenceNode node = new PreferenceNode("PreferencePage", page);
-					mgr.addToRoot(node);
-					
-					IPreferencePage edgePrefs = new EdgeAppearancePreferences();
-					edgePrefs.setTitle("Edge Appearance");
-					node.add(new PreferenceNode("EdgeAppearancePreferences", edgePrefs));
-					
-					IPreferencePage filePrefs = new FileAppearancePreferences();
-					filePrefs.setTitle("File Appearance");
-					node.add(new PreferenceNode("FileAppearancePreferences", filePrefs));
-					
-					IPreferencePage predicatePrefs = new PredicateAppearancePreferences();
-					predicatePrefs.setTitle("Predicate Appearance");
-					node.add(new PreferenceNode("PredicateAppearancePreferences", predicatePrefs));
-					
-					IPreferencePage predicateLayoutPrefs = new PredicateLayoutPreferences();
-					predicateLayoutPrefs.setTitle("Predicate Layout");
-					node.add(new PreferenceNode("PredicateLayoutPreferences", predicateLayoutPrefs));
-					
-					IPreferencePage skinsPrefs = new SkinsPreferencePage();
-					skinsPrefs.setTitle("Skins");
-					node.add(new PreferenceNode("FocusViewSkinsPreferences", skinsPrefs));
+					PreferenceManager mgr = new PreferenceManager('.', (PreferenceNode)root);
 					
 					PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
 					dialog.create();
@@ -332,6 +371,14 @@ public abstract class ViewBase extends ViewPart {
 		return navigationEnabled;
 	}
 	
+	public boolean isMetapredicateCallsVisible() {
+		return metapredicateCallsVisible;
+	}
+	
+	public boolean isInferredCallsVisible() {
+		return inferredCallsVisible;
+	}
+	
 	@Override
 	public void dispose() {
 		focusViewCoordinator.dispose();
@@ -355,7 +402,11 @@ public abstract class ViewBase extends ViewPart {
 			this.pifLoader = pifLoader;
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
-			pdtGraphView.addViewMode(new MouseHandler(getShell()));
+			pdtGraphView.addViewMode(new MouseHandler(this));
+		}
+		
+		public boolean isNavigationEnabled() {
+			return navigationEnabled;
 		}
 		
 		public PDTGraphView getPdtGraphView() {
@@ -412,95 +463,12 @@ public abstract class ViewBase extends ViewPart {
 			return getViewContainer();
 		}
 
-		private final class MouseHandler extends ViewMode {
+		public String getInfoText() {
+			return infoText;
+		}
 
-			private final ToolTip t;
-			
-			public MouseHandler(Shell parent) {
-				t = new ToolTip(parent, SWT.NONE);
-				t.setVisible(false);
-			}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				super.mouseClicked(e);
-				
-				if (e.getClickCount() != 2)
-					return;
-
-				HitInfo hitInfo = getHitInfo(e);
-				if (hitInfo.hasHitEdgeLabels()) {
-					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(edge);
-					if (realizer instanceof InfoTextProvider) {
-						InfoTextProvider infoProvider = (InfoTextProvider)realizer;
-						final String text = infoProvider.getInfoText();
-						
-						new UIJob("Predicates List") {
-							@Override
-							public IStatus runInUIThread(IProgressMonitor monitor) {
-								new PredicatesListDialog(getShell(), text).open();
-								return Status.OK_STATUS;
-							}
-						}.schedule();
-					}
-				}
-			}
-			
-			@Override
-			public void mouseMoved(final double x, final double y) {
-				super.mouseMoved(x, y);
-				
-				updateStatus(x, y);
-			}
-
-			protected void updateStatus(double x, double y) {
-				HitInfo hitInfo = getHitInfo(x, y);
-				
-				String text = "";
-				
-				if (hitInfo.hasHitNodes()) {
-					Node node = hitInfo.getHitNode();
-					
-					NodeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(node);
-					if (realizer instanceof NodeRealizerBase) {
-						text = ((NodeRealizerBase)realizer).getInfoText();
-					}
-				}
-				else if (hitInfo.hasHitEdgeLabels()) {
-					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(edge);
-					if (realizer instanceof InfoTextProvider) {
-						InfoTextProvider infoProvider = (InfoTextProvider)realizer;
-						text = infoProvider.getInfoText();
-					}
-				}
-
-				if (!infoText.equals(text))
-				{
-					final String finalText = text;
-					new UIJob("Updating status") {
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							setInfoText(finalText);
-							
-							if (PredicateLayoutPreferences.isShowToolTip() && finalText.startsWith("Predicate")) {
-								Point location = Display.getCurrent().getCursorLocation();
-								location.x += 10;
-								location.y += 10;
-								t.setLocation(location);
-								t.setMessage(finalText.substring(11));
-								t.setVisible(true);
-							}
-							else {
-								t.setVisible(false);
-							}
-							
-							return Status.OK_STATUS;
-						}
-					}.schedule();
-				}
-			}
+		public void setInfoText(String text) {
+			ViewBase.this.setInfoText(text);
 		}
 	}
 }

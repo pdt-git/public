@@ -52,7 +52,8 @@ public class IsExternalPropertyTester extends PropertyTester {
 	}
 
 	private boolean isExternalProject(IProject project) throws CoreException {
-		return project.equals(ExternalPrologFilesProjectUtils.getExternalPrologFilesProject());
+		IProject externalPrologFilesProject = ExternalPrologFilesProjectUtils.getExternalPrologFilesProject();
+		return externalPrologFilesProject.isAccessible() && project.equals(externalPrologFilesProject);
 	}
 
 }

@@ -26,6 +26,8 @@ public class GraphDataHolder {
 	private static final String FILE_NODE = "file_node";
 	private static final String PREDICATE = "predicate";
 	private static final String CALL = "call";
+	private static final String METADATA_DATABASE = "database";
+	private static final String METADATA_METACALL = "metacall";
 	private static final String LOADING = "loading";
 	private static final String TOP_FILE = "top";
 	private static final String LOGTALK_GROUP = "logtalk_group";
@@ -38,18 +40,22 @@ public class GraphDataHolder {
 	// Addition data:
 	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
+	private DataMap moduleOfPredicateMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
 	private DataMap lineNumberMap = Maps.createHashedDataMap();
+	private DataMap offsetMap = Maps.createHashedDataMap();
 	private DataMap fileNodeNameMap = Maps.createHashedDataMap();
 	private DataMap fileNodePathMap = Maps.createHashedDataMap();
 	private DataMap fileTypeMap = Maps.createHashedDataMap();
 	private DataMap kindMap = Maps.createHashedDataMap();
+	private DataMap metadataMap = Maps.createHashedDataMap();
 	private DataMap functorMap = Maps.createHashedDataMap();
 	private DataMap arityMap = Maps.createHashedDataMap();
 	private DataMap callFrequencyMap = Maps.createHashedDataMap();
 	private DataMap dynamicMap = Maps.createHashedDataMap();
 	private DataMap transparentMap = Maps.createHashedDataMap();
 	private DataMap metaPredMap = Maps.createHashedDataMap();
+	private DataMap metaPredTypeMap = Maps.createHashedDataMap();
 	private DataMap multifileMap = Maps.createHashedDataMap();
 	private DataMap exportedMap = Maps.createHashedDataMap();
 	private DataMap unusedLocal = Maps.createHashedDataMap();
@@ -71,6 +77,10 @@ public class GraphDataHolder {
 	public DataMap getModuleMap() {
 		return moduleMap;
 	}
+	
+	public DataMap getModuleOfPredicateMap() {
+		return moduleOfPredicateMap;
+	}
 
 	public DataMap getFileNameMap() {
 		return fileNameMap;
@@ -83,12 +93,20 @@ public class GraphDataHolder {
 		return fileNodeNameMap;
 	}
 	
+	public DataMap getOffsetMap() {
+		return offsetMap;
+	}
+	
 	public DataMap getFileNodePathMap() {
 		return fileNodePathMap;
 	}
 
 	public DataMap getKindMap() {
 		return kindMap;
+	}
+	
+	public DataMap getMetadataMap() {
+		return metadataMap;
 	}
 
 	public DataMap getFunctorMap() {
@@ -113,6 +131,10 @@ public class GraphDataHolder {
 
 	public DataMap getMetaPredMap() {
 		return metaPredMap;
+	}
+	
+	public DataMap getMetaPredTypeMap() {
+		return metaPredTypeMap;
 	}
 
 	public DataMap getMultifileMap() {
@@ -163,35 +185,63 @@ public class GraphDataHolder {
 	public DataMap getNodeContentMap() {
 		return nodeContentMap;
 	}
+	
+	public String getFileName(Node node) {
+		return (String)getFileNameMap().get(node);
+	}
+	
+	public String getFileName(Edge edge) {
+		return (String)getFileNameMap().get(edge);
+	}
+	
+	public String getOffset(Node node) {
+		return (String)getOffsetMap().get(node);
+	}
+	
+	public String getOffset(Edge edge) {
+		return (String)getOffsetMap().get(edge);
+	}
 
 	public boolean isPredicate(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(PREDICATE);
 	}
 
 	public boolean isModule(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(MODULE);
 	}
 
 	public boolean isFile(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(FILE);
 	}
 	
 	public boolean isFileNode(Node node) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
+		String kind = (String)kindMap.get(node);
 		return kind.equals(FILE_NODE);
 	}
 
 	public boolean isCallEdge(Edge edge) {
 		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(edge).toString();
+		String kind = (String)kindMap.get(edge);
 		return kind.equals(CALL);
+	}
+	
+	public boolean isMetaCall(Edge edge) {
+		DataMap metadataMap = getMetadataMap();
+		String metadata = String.valueOf(metadataMap.get(edge));
+		return METADATA_METACALL.equals(metadata); 
+	}
+	
+	public boolean isDatabaseCall(Edge edge) {
+		DataMap metadataMap = getMetadataMap();
+		String metadata = String.valueOf(metadataMap.get(edge));
+		return METADATA_DATABASE.equals(metadata); 
 	}
 	
 	public String getModulePublicStaticPredicates(Node node) {
@@ -231,6 +281,10 @@ public class GraphDataHolder {
 		if(returnNode == null)
 			return false;
 		return (Boolean)returnNode;
+	}
+	
+	public String getMetaPredType(Node node) {
+		return (String)metaPredTypeMap.get(node);
 	}
 
 	public boolean isMultifile(Node node) {
@@ -298,9 +352,6 @@ public class GraphDataHolder {
 		return functorMap.get(node) + " / " + arityMap.get(node);
 	}
 
-	public String getFileName(Node node) {
-		return fileNameMap.get(node).toString();
-	}
 	public String getNodeText(Node node) {
 		return nodeMap.get(node).toString();
 	}

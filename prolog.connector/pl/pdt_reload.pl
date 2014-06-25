@@ -65,14 +65,23 @@ pdt_reload__(File):-
     logtalk_reload_adapter::pdt_reload(File),
     assertz(reloaded_file__(File)).
 
+:- if(current_prolog_flag(dialect, swi)).
 % SWI-Prolog
+:- use_module(library(make)).
+pdt_reload__(File):-
+	debug(pdt_reload, 'pdt_reload(~w)', [File]),
+	
+	% we have to continiue, even if reload_file fails
+	% normally failing means: the file has errors
+	(make:reload_file(File) -> true ; true).
+:- else.
 pdt_reload__(File):-
 	debug(pdt_reload, 'pdt_reload(~w)', [File]),
 	
 	% we have to continiue, even if reload_file fails
 	% normally failing means: the file has errors
 	(user:consult(File) -> true ; true).
-%	(make:reload_file(File) -> true ; true).
+:- endif.
 
 :- multifile(pdt_reload_listener/1).
 
@@ -84,9 +93,9 @@ notify_reload_listeners(Files) :-
 	fail.
 notify_reload_listeners(_).
 
-pdt_reload_listener(Files) :-
-    atomic_list_concat(Files, '<>', FileList),
-    catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
+%pdt_reload_listener(Files) :-
+%    atomic_list_concat(Files, '<>', FileList),
+%    catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *
@@ -123,11 +132,14 @@ deactivate_warning_and_error_tracing :-
 :- multifile(user:message_hook/3).
 :- dynamic(user:message_hook/3).
 
-user:message_hook(_Term, Level,Lines) :-
+user:message_hook(Term, Level,Lines) :-
     with_mutex('reloadMutex', (
 		warning_and_error_tracing,
-		prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
-		prolog_load_context(source, File),
+		(	Term = error(_, file(File, Line, _, _))
+		->	true
+		;	prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
+			prolog_load_context(source, File)
+		),
 		assertz(traced_messages(swi, Level, Line,Lines, File)),
 		trace_reload(traced_messages(swi, Level, Line,Lines, File)),
 	%	assertz(user:am(_Term, Level,Lines)),

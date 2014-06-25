@@ -298,9 +298,9 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			Debug.info("connecting console to server at port " + port);
 			socket = new Socket((String) null, port);
 			writer = new BufferedWriter(new OutputStreamWriter(socket
-					.getOutputStream()));
+					.getOutputStream(), "UTF-8"));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					socket.getInputStream()));
+					socket.getInputStream(), "UTF-8"));
 			readerThread = new Thread(new ConsoleReader(reader));
 			readerThread.setDaemon(true);
 			readerThread.setName("Console Reader Thread");

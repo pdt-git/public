@@ -14,3 +14,4 @@
 :- ['completion/load'].
 :- ['outline/load'].
 :- ['search/load'].
+:- use_module('callgraph/call_graph_examples').
