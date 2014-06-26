@@ -201,16 +201,16 @@
 
 <extension point="org.eclipse.ui.editors.annotationTypes">
       <type
-         name="org.cs3.pdt.occurrences">
+         name="org.cs3.pdt.editor.occurrences">
       </type>
-      <type name="org.cs3.pdt.occurrences.singleton"
-      	super="org.cs3.pdt.occurrences">
+      <type name="org.cs3.pdt.editor.occurrences.singleton"
+      	super="org.cs3.pdt.editor.occurrences">
       </type>
-      <type name="org.cs3.pdt.occurrences.non.singleton"
-      	super="org.cs3.pdt.occurrences">
+      <type name="org.cs3.pdt.editor.occurrences.non.singleton"
+      	super="org.cs3.pdt.editor.occurrences">
       </type>
-      <type name="org.cs3.pdt.occurrences.singleton.wrong.prefix"
-      	super="org.cs3.pdt.occurrences">
+      <type name="org.cs3.pdt.editor.occurrences.singleton.wrong.prefix"
+      	super="org.cs3.pdt.editor.occurrences">
       </type>
       
 
@@ -218,7 +218,7 @@
 	
 	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
  <specification
-            annotationType="org.cs3.pdt.occurrences"
+            annotationType="org.cs3.pdt.editor.occurrences"
             label="Variable occurrence"
             textPreferenceKey="occurrenceIndication"
             textPreferenceValue="false"
@@ -242,7 +242,7 @@
             textStylePreferenceValue="NONE">
 	  </specification>
 	  <specification
-            annotationType="org.cs3.pdt.occurrences.singleton"
+            annotationType="org.cs3.pdt.editor.occurrences.singleton"
             label="Singleton"
             textPreferenceKey="singletonOccurrenceIndication"
             textPreferenceValue="false"
@@ -259,7 +259,7 @@
             textStylePreferenceValue="NONE">
 	  </specification>	  
 	<specification
-            annotationType="org.cs3.pdt.occurrences.non.singleton"
+            annotationType="org.cs3.pdt.editor.occurrences.non.singleton"
             label="Not a singleton although named as a singleton"
             textPreferenceKey="nonSingletonOccurrenceIndication"
             textPreferenceValue="false"
@@ -276,7 +276,7 @@
             textStylePreferenceValue="NONE">
 	  </specification>	  	  
 	<specification
-            annotationType="org.cs3.pdt.occurrences.singleton.wrong.prefix"
+            annotationType="org.cs3.pdt.editor.occurrences.singleton.wrong.prefix"
             label="Singleton, but named as normal variable"
             textPreferenceKey="singletonWrongPrefixOccurrenceIndication"
             textPreferenceValue="false"
