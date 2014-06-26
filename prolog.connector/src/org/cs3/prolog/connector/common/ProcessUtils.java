@@ -33,15 +33,15 @@ public class ProcessUtils {
 	public static String getExecutablePreference(String dialect) {
 		if (PDTConstants.DIALECT_SWI.equals(dialect)) {
 			if (Util.isWindows()) {
-				return ProcessUtils.getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
+				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
 			} else {
-				return ProcessUtils.getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
+				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
 			}
 		} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
 			if (Util.isWindows()) {
-				return ProcessUtils.getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
+				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
 			} else {
-				return ProcessUtils.getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
+				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
 			}
 		} else {
 			return "";
