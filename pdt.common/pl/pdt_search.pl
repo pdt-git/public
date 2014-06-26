@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_search,
-         [ find_predicate_reference/10                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
+         [ find_predicate_reference/8                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
          , find_categorized_predicate_definitions/11       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
          , find_predicate_definitions/9
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
@@ -30,7 +30,7 @@
              [ split_file_path/5                % (File,Folder,FileName,BaseName,Extension)
              ] ).
 :- use_module( 'xref/pdt_xref', 
-             [ find_reference_to/10             % ...
+             [ find_reference_to/8             % ...
              ] ).
 :- use_module( properties, 
              [ properties_for_predicate/4
@@ -49,13 +49,13 @@
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
-%% find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
+%% find_predicate_reference(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 
-find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+find_predicate_reference(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_reference_to(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
-find_predicate_reference(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
-	find_reference_to(Term, File, Line, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
+	logtalk_adapter::find_reference_to(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
+find_predicate_reference(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+	find_reference_to(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
 
         /***********************************************************************
          * Find Definitions and Declarations and categorize them by visibility *
@@ -793,7 +793,7 @@ find_module_reference(Module, ExactMatch, File, Line, system, load_files, 2, [sh
 
 find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	search_module_name(Module, ExactMatch, SearchModule),
-	find_reference_to(module(SearchModule), _, _, ExactMatch, ReferencingModule, RefName, RefArity, File, Line, PropertyList).
+	find_reference_to(predicate(SearchModule, _, _, _, _), ExactMatch, ReferencingModule, RefName, RefArity, File, Line, PropertyList).
 
 find_module_reference(Module, ExactMatch, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	current_predicate(logtalk_load/1),

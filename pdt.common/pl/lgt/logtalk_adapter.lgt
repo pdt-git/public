@@ -20,7 +20,7 @@
 
 :- public([
 	loaded_by/4,	% ?SourceFile, ?ParentSourceFile, -Line, -Directive
-	find_reference_to/10, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
+	find_reference_to/8, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
 	find_entity_reference/8,
 	find_entity_definition/5,
 	find_predicate_definitions/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
@@ -76,14 +76,12 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
-	(	Term = predicate(From, _, SearchFunctor, Separator, Arity0),
-		(	Separator == (//),
-			nonvar(Arity0)
-		->	Arity is Arity0 + 2
-		;	Arity = Arity0
-		)
-	;	Term = entity(From)
+find_reference_to(Term, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
+	Term = predicate(From, _, SearchFunctor, Separator, Arity0),
+	(	Separator == (//),
+		nonvar(Arity0)
+	->	Arity is Arity0 + 2
+	;	Arity = Arity0
 	),
 	!,
 	(	(	nonvar(SearchFunctor)
@@ -170,7 +168,7 @@ find_reference_to(Term, _File, _Line, ExactMatch, Entity, CallerFunctor, CallerA
 
 find_entity_reference(Entity, ExactMatch, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
-	find_reference_to(entity(SearchEntity), _, _, ExactMatch, RefEntity, RefName, RefArity, File, Line, PropertyList).
+	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, RefEntity, RefName, RefArity, File, Line, PropertyList).
 
 search_entity_name(Entity, true, Entity) :- !.
 search_entity_name(EntityPart, false, EntityName) :-

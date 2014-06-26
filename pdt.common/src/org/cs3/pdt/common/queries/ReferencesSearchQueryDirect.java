@@ -72,8 +72,6 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 //		
 		String query = bT(PDTCommonPredicates.FIND_PREDICATE_REFERENCE,
 				getGoal(),
-				filePath != null ? filePath : "_",
-				Integer.toString(line),
 //				name,
 //				arity,
 //				file,
