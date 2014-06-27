@@ -16,16 +16,12 @@ package org.cs3.pdt.connector.internal.preferences;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.swing.JOptionPane;
 
 import org.cs3.pdt.connector.PDTConnector;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
@@ -34,11 +30,9 @@ import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.PDTConstants;
 import org.cs3.prolog.connector.common.ProcessUtils;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
-import org.osgi.framework.Bundle;
 
 public class PreferenceConfiguration {
 
@@ -206,37 +200,22 @@ public class PreferenceConfiguration {
 		store.setDefault(Connector.PREF_SERVER_LOGDIR, PDTConnectorPlugin.getDefault().getStateLocation().toOSString());
 	}
 	
-	private static String getInternalPrologDirectory() {
-		Bundle bundle = Platform.getBundle(PDTConnectorPlugin.getPluginId());
-		Platform.getInstallLocation();
-		Platform.getInstanceLocation();
-		Path path = new Path("plugin.xml");
-		URL fileURL = FileLocator.find(bundle, path, null);
-//		InputStream in = fileURL.openStream();
+	private static File getInternalPrologDirectory() {
 		try {
-			URL url = FileLocator.resolve(fileURL.toURI().toURL());
-			File f = new File(url.toURI()).getCanonicalFile();
-			return f.getParent();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			URL installLocation = FileLocator.resolve(Platform.getInstallLocation().getURL());
+			File eclipseDirectory = new File(installLocation.toURI());
+			File prologDirectory = new File(eclipseDirectory.getParentFile(), "prolog");
+			return prologDirectory;
+		} catch (IOException | URISyntaxException e1) {
+			e1.printStackTrace();
 		}
-
-		return "";
-
+		return null;
 	}
 
 	public static void initWithSWIPreferences(IPreferenceStore store) {
 		initPreferences(store);
-		String directory = getInternalPrologDirectory();
-		JOptionPane.showMessageDialog(null, directory);
-		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_SWI));
+		File directory = getInternalPrologDirectory();
+		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_SWI, directory));
 	}
 
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {
@@ -249,7 +228,8 @@ public class PreferenceConfiguration {
 
 	public static void initWithYAPPreferences(IPreferenceStore store) {
 		initPreferences(store);
-		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_YAP));
+		File directory = getInternalPrologDirectory();
+		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_YAP, directory));
 	}
 
 	public static void initWithYAPLogtalkPreferences(IPreferenceStore store) {
