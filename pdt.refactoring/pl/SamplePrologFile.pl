@@ -1,0 +1,2 @@
+isCity(bonn).
+isCity(copenhagen).

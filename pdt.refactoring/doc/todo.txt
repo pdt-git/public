@@ -1,0 +1,3 @@
+- automatically consult the files in the pl folder
+- Change "Refactoring" to "Renaming" and think about a concept to include various refacorings
+- Create Test suites

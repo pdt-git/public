@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Refactoring
-Bundle-SymbolicName: org.cs3.pdt.refactoring
+Bundle-SymbolicName: org.cs3.pdt.refactoring;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: org.cs3.pdt.refactoring.PDTRefactoringPlugin
 Require-Bundle: org.eclipse.ui,
@@ -10,6 +10,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  org.cs3.pdt.common;bundle-version="[3.0.0,4.0.0)",
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ org.eclipse.ui.workbench
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Import-Package: org.cs3.jtransformer.util,
+ org.cs3.pdt.editor.internal.editors,
+ org.eclipse.jdt.ui,
+ org.eclipse.ui,
+ org.eclipse.ui.editors.text
