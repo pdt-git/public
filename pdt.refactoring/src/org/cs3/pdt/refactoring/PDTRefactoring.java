@@ -3,9 +3,10 @@ package org.cs3.pdt.refactoring;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.editor.internal.editors.PLEditor;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
@@ -13,57 +14,40 @@ import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 
 public class PDTRefactoring extends Refactoring{
 
-	public static final String VARIABLE_REPLACEMENT = "Replacement";
-	public static final String VARIABLE_OFFSET_END = "OffsetEnd";
-	public static final String VARIABLE_OFFSET_START = "OffsetStart";
+	public static final String VARIABLE_NEW_TEXT = "NewText";
+	public static final String VARIABLE_OFFSET_END = "End";
+	public static final String VARIABLE_OFFSET_START = "Start";
 	public static final String VARIABLE_FILE = "File";
 	
 	public static final String REFACTORING_NAME = "PDT Refactoring";
 
-	private IFile file;
-	private TextSelection selection;
 	private PDTRefactoringWizard wizard;
 	private PrologProcess prologProcess;
+	private PLEditor editor;
+	
+	private Goal goal;
 	
 	public void init(ExecutionEvent event){
 		
-		// Is the active editor a prolog editor?
-		TextEditor editor = (TextEditor)HandlerUtil.getActiveEditor(event);
-		if(! (editor instanceof PLEditor)){
-			System.out.println("The active editor is not a prolog editor!");
-		}
-		else{
-			editor = (PLEditor)editor;
-		}
-		
-		// Get the active file TODO: Not a save cast
-		IFileEditorInput editorInput = (IFileEditorInput) (HandlerUtil.getActiveEditorInput(event));
-		file = editorInput.getFile();
-		
-		
-		// Get the current selection TODO: Not a save cast
-		selection = (TextSelection) HandlerUtil.getCurrentSelection(event);
+		editor = (PLEditor)HandlerUtil.getActiveEditor(event);
 		
 		// Get a reference to the running prolog process
 		prologProcess = PDTCommonUtil.getActivePrologProcess();
@@ -108,13 +92,22 @@ public class PDTRefactoring extends Refactoring{
 	
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		int offset = this.selection.getOffset();
-		int length = this.selection.getLength();
 		String newText = wizard.getNewText();
-		String path = file.getFullPath().toOSString();
+		// The prolog predicate that is to be renamed
 		
-		String query = QueryUtils.bT("rename", "['"+path+"', "+
-				+ offset +","+length+"],'"+newText+"', TextChange");
+		Display.getDefault().syncExec(new Runnable() {
+		    public void run() {
+		    	try {
+					goal = editor.getSelectedPrologElement();
+				} catch (BadLocationException e) {
+					e.printStackTrace();
+				}
+		    }
+		});
+		
+		
+		String query = QueryUtils.bT("rename_predicate", "user:"+goal.toString(),"'"+newText+"'",
+				VARIABLE_FILE,VARIABLE_OFFSET_START,VARIABLE_OFFSET_END,VARIABLE_NEW_TEXT);
 		
 		
 		
@@ -128,28 +121,30 @@ public class PDTRefactoring extends Refactoring{
 				try {
 					//TODO Check for exceptional results
 					//TODO instanceof check
-					Vector<String> textChangeList = (Vector<String>) result.get("TextChange");
-								
-										
-					String pathOut = textChangeList.get(0);
-					int offsetOut = Integer.parseInt(textChangeList.get(1));
-					int lengthOut = Integer.parseInt(textChangeList.get(2));
-					String replacementOut =  textChangeList.get(3);
+					String pathOut = (String) result.get(VARIABLE_FILE);
+					int startOut = Integer.parseInt((String) result.get(VARIABLE_OFFSET_START));
+					int endOut = Integer.parseInt((String) result.get(VARIABLE_OFFSET_END));
+					String replacementOut = (String) result.get(VARIABLE_NEW_TEXT);
+					int offset = startOut;
+					int length = endOut-startOut;
+
 					
 					//path = Util.unquoteAtom(path); TODO: What do I need this for?
 					TextFileChange textFileChange = changes.get(pathOut);
 					if (textFileChange == null) {
-						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(
-								new Path(pathOut).makeAbsolute());
+						//IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(
+						//		new Path(pathOut).makeAbsolute());
+						IFile file = FileUtils.findFileForLocation(pathOut);
 						textFileChange = new TextFileChange(file.getName(), file);
 						MultiTextEdit fileChangeRootEdit = new MultiTextEdit();
 						textFileChange.setEdit(fileChangeRootEdit);
 						changes.put(pathOut, textFileChange);
+						change.add(textFileChange);
+
 					}
 					
-					ReplaceEdit replaceEdit = new ReplaceEdit(offsetOut, lengthOut, replacementOut);
+					ReplaceEdit replaceEdit = new ReplaceEdit(offset, length, replacementOut);
 					textFileChange.addEdit(replaceEdit);
-					change.add(textFileChange);
 				} catch (Exception e) {
 					Debug.report(e);
 				}

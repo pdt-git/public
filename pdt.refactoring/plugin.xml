@@ -44,7 +44,7 @@
 	  <fileContribution
 		 id="pdt.refactoring.contribution"
 		 path="pl/load.pl"
-		 key="pdt.bootstrap.contribution.key">
+		 key="">
 		 <dependency
 		    contribution="org.cs3.pdt.common.fileContribution">
 		 </dependency>
