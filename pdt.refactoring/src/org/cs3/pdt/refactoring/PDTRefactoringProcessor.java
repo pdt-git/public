@@ -77,7 +77,7 @@ public class PDTRefactoringProcessor extends RefactoringProcessor {
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		Change change = null;
+		CompositeChange change = null;
 		try {
 			List<Map<String, Object>> results = process.queryAll(query);
 			change = new CompositeChange("Replacements");
@@ -99,6 +99,7 @@ public class PDTRefactoringProcessor extends RefactoringProcessor {
 						MultiTextEdit fileChangeRootEdit = new MultiTextEdit();
 						textFileChange.setEdit(fileChangeRootEdit);
 						changes.put(path, textFileChange);
+						change.add(textFileChange);
 					}
 					
 					IDocument document = UIUtils.getDocument(new File(path));
