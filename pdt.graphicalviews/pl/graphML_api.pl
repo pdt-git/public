@@ -315,6 +315,12 @@ write_graphML_ast_keys(OutStream):-
     nl(OutStream),
     write(OutStream, '<key id="edge_label" for="edge" attr.name="edge_label" attr.type="string" />'),
   	nl(OutStream),
+    write(OutStream, '<key id="node_label" for="node" attr.name="node_label" attr.type="string" />'),
+  	nl(OutStream),
+    write(OutStream, '<key id="styles" for="all" attr.name="styles" attr.type="string" />'),
+  	nl(OutStream),
+    write(OutStream, '<key id="node_content" for="node" attr.name="node_content" attr.type="string" />'),
+  	nl(OutStream),
     nl(OutStream).
     
 

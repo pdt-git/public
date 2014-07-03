@@ -34,6 +34,12 @@ public class ImageRepository {
 	public static final String P = "p.png";
 	public static final String S = "s.png";
 	
+	public static final String INPUT_TYPE_PROJECT = "prj_obj.gif";
+	public static final String INPUT_TYPE_LIBRARY = "package_obj.gif";
+	public static final String INPUT_TYPE_RECURSIVE_LIBRARY = "packages.gif";
+	
+	public static final String CONFIGURE_LOGTALK_GRAPH = "configure_graph.png";
+	
 	public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PluginActivator.getDefault().getBundle().getEntry("/icons/" + icon);
         return ImageDescriptor.createFromURL(url);

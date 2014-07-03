@@ -30,6 +30,9 @@ public class GraphDataHolder {
 	private static final String METADATA_METACALL = "metacall";
 	private static final String LOADING = "loading";
 	private static final String TOP_FILE = "top";
+	private static final String LOGTALK_GROUP = "logtalk_group";
+	private static final String LOGTALK_NODE = "logtalk_node";
+	private static final String LOGTALK_EDGE = "logtalk_edge";
 	@SuppressWarnings("unused")
 	private static final String INTERMEDIATE_FILE = "intermediate";
 	private static final String BOTTOM_FILE = "bottom";
@@ -61,6 +64,9 @@ public class GraphDataHolder {
 	private DataMap nodeStereoTypeMapMap = Maps.createHashedDataMap();
 	private DataMap moduleImportedPredicatesMap = Maps.createHashedDataMap();
 	private DataMap edgeLabelMap = Maps.createHashedDataMap();
+	private DataMap nodeLabelMap = Maps.createHashedDataMap();
+	private DataMap stylesMap = Maps.createHashedDataMap();
+	private DataMap nodeContentMap = Maps.createHashedDataMap();
 
 
 	// Getter and Setter
@@ -166,6 +172,18 @@ public class GraphDataHolder {
 	
 	public DataMap getEdgeLabelMap() {
 		return edgeLabelMap;
+	}
+	
+	public DataMap getNodeLabelMap() {
+		return nodeLabelMap;
+	}
+
+	public DataMap getStylesMap() {
+		return stylesMap;
+	}
+	
+	public DataMap getNodeContentMap() {
+		return nodeContentMap;
 	}
 	
 	public String getFileName(Node node) {
@@ -310,6 +328,8 @@ public class GraphDataHolder {
 			labelText = getFileNodeText(node);
 		} else if (isPredicate(node))  {
 			labelText = getPredicateText(node);
+		} else if (isLogtalkGraphNode(node) || isLogtalkGraphGroup(node))  {
+			labelText = getNodeLabel(node);
 		} else {
 			labelText = getNodeText(node);
 		}
@@ -345,12 +365,7 @@ public class GraphDataHolder {
 	}
 	
 	public String getEdgeLabel(Edge edge) {
-		Object object = edgeLabelMap.get(edge);
-		if (object != null) {
-			return object.toString();
-		} else {
-			return null;
-		}
+		return (String) edgeLabelMap.get(edge);
 	}
 	
 	public String getNodeStereoType(Node node) {
@@ -360,6 +375,38 @@ public class GraphDataHolder {
 		} else {
 			return null;
 		}
+	}
+	
+	public String getNodeLabel(Node node) {
+		return (String) nodeLabelMap.get(node);
+	}
+	
+	public boolean isLogtalkGraphGroup(Node node) {
+		return LOGTALK_GROUP.equals(getKindMap().get(node));
+	}
+	
+	public boolean isLogtalkGraphNode(Node node) {
+		return LOGTALK_NODE.equals(getKindMap().get(node));
+	}
+	
+	public boolean isLogtalkGraphEdge(Edge edge) {
+		return LOGTALK_EDGE.equals(getKindMap().get(edge));
+	}
+	
+	public String getNodeStyle(Node node) {
+		return getStyle(node);
+	}
+	
+	public String getEdgeStyle(Edge edge) {
+		return getStyle(edge);
+	}
+	
+	private String getStyle(Object element) {
+		return (String) getStylesMap().get(element);
+	}
+	
+	public String getNodeContent(Node node) {
+		return (String) getNodeContentMap().get(node);
 	}
 
 }

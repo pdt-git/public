@@ -3,7 +3,7 @@ package org.cs3.pdt.graphicalviews.view.modes;
 import org.cs3.pdt.graphicalviews.focusview.NavigationToolTip;
 import org.cs3.pdt.graphicalviews.focusview.ViewBase.FocusViewControl;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
-import org.cs3.pdt.graphicalviews.model.realizer.edges.EdgeRealizerBase;
+import org.cs3.pdt.graphicalviews.model.realizer.edges.InfoTextProvider;
 import org.cs3.pdt.graphicalviews.model.realizer.edges.LoadEdgeRealizer;
 import org.cs3.pdt.graphicalviews.model.realizer.nodes.NodeRealizerBase;
 import org.cs3.pdt.graphicalviews.preferences.PredicateLayoutPreferences;
@@ -74,7 +74,7 @@ public class MouseHandler extends ViewMode {
 		}
 		else if (hitInfo.hasHitEdgeLabels()) {
 			Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-			EdgeRealizerBase realizer = (EdgeRealizerBase)view.getGraph2D().getRealizer(edge);
+			InfoTextProvider realizer = (InfoTextProvider)view.getGraph2D().getRealizer(edge);
 			text = realizer.getInfoText();
 			
 			if (realizer instanceof LoadEdgeRealizer)

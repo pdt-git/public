@@ -76,6 +76,9 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("file_node_name", dataHolder.getFileNodeNameMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("file_node_path", dataHolder.getFileNodePathMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("file_node_type", dataHolder.getFileTypeMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("node_label", dataHolder.getNodeLabelMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("styles", dataHolder.getStylesMap(), KeyScope.ALL, KeyType.STRING);
+		core.addInputDataAcceptor("node_content", dataHolder.getNodeContentMap(), KeyScope.NODE, KeyType.STRING);
 	}
 
 	private boolean loadFile(URL resource){

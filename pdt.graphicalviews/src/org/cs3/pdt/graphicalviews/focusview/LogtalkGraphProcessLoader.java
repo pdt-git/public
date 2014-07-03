@@ -15,6 +15,8 @@
 package org.cs3.pdt.graphicalviews.focusview;
 
 import static org.cs3.prolog.connector.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.prologFileNameQuoted;
+import static org.cs3.prolog.connector.common.QueryUtils.quoteAtom;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,27 +24,50 @@ import java.io.IOException;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.graphicalviews.PDTGraphPredicates;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
-import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IProject;
 
-public class LogtalkEntityGraphProcessLoader extends GlobalGraphProcessLoader {
+public class LogtalkGraphProcessLoader extends GlobalGraphProcessLoader {
 	
 	private static final String NAME_OF_DEPENDENCIES_HELPING_FILE = "pdt-logtalk-entity-help.graphml";
+	private LogtalkView focusView;
 	
-	public LogtalkEntityGraphProcessLoader(PDTGraphView view) {
+	public LogtalkGraphProcessLoader(PDTGraphView view, LogtalkView focusView) {
 		super(view, NAME_OF_DEPENDENCIES_HELPING_FILE);
+		this.focusView = focusView;
 	}
 	
 	@Override
 	protected String generateQuery(File helpFile) {
 		try {
-			loadPaths(currentPath);
-
-			IProject project = FileUtils.findFileForLocation(currentPath).getProject();
-			String projectPath = QueryUtils.normalizeOnWindows(project.getLocation().toString());
-			
 			String query;
-			query = bT(PDTGraphPredicates.WRITE_LOGTALK_ENTITIES_TO_GRAPHML, paths.toString(), QueryUtils.quoteAtom(projectPath), QueryUtils.prologFileNameQuoted(helpFile));
+			
+			String diagramEntity = focusView.getDiagramType().getDiagramEntity();
+			switch (focusView.getInputType()) {
+			case PROJECT:
+				IProject project = FileUtils.findFileForLocation(currentPath).getProject();
+				String projectName = project.getName();
+				loadPaths(currentPath);
+				query = bT(PDTGraphPredicates.WRITE_LOGTALK_PROJECT_FILES_TO_GRAPHML,
+						diagramEntity,
+						paths.toString(),
+						quoteAtom(projectName),
+						prologFileNameQuoted(helpFile));
+				break;
+			case LIBRARY:
+				query = bT(PDTGraphPredicates.WRITE_LOGTALK_LIBRARY_TO_GRAPHML,
+						diagramEntity,
+						quoteAtom(focusView.getCurrentLibrary()),
+						prologFileNameQuoted(helpFile));
+				break;
+			case RECURSIVE_LIBRARY:
+				query = bT(PDTGraphPredicates.WRITE_LOGTALK_RECURSIVE_LIBRARY_TO_GRAPHML,
+						diagramEntity,
+						quoteAtom(focusView.getCurrentLibrary()),
+						prologFileNameQuoted(helpFile));
+				break;
+			default:
+				return "true";
+			}
 			return query;
 			
 		} catch (IOException e) {
@@ -51,6 +76,7 @@ public class LogtalkEntityGraphProcessLoader extends GlobalGraphProcessLoader {
 		}
 	}
 	
+	@Override
 	protected boolean ignoreExternalPrologFilesProject() {
 		return false;
 	}

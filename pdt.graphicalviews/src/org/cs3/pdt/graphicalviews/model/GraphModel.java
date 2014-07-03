@@ -17,8 +17,11 @@ import java.util.Arrays;
 
 import org.cs3.pdt.graphicalviews.model.realizer.edges.CallEdgeRealizer;
 import org.cs3.pdt.graphicalviews.model.realizer.edges.LoadEdgeRealizer;
+import org.cs3.pdt.graphicalviews.model.realizer.edges.LogtalkEdgeRealizer;
 import org.cs3.pdt.graphicalviews.model.realizer.groups.FileGroupNodeRealizer;
+import org.cs3.pdt.graphicalviews.model.realizer.groups.LogtalkGroupNodeRealizer;
 import org.cs3.pdt.graphicalviews.model.realizer.groups.ModuleGroupNodeRealizer;
+import org.cs3.pdt.graphicalviews.model.realizer.nodes.LogtalkNodeRealizer;
 import org.cs3.pdt.graphicalviews.model.realizer.nodes.NodeRealizerBase;
 import org.cs3.pdt.graphicalviews.model.realizer.nodes.PredicateNodeRealizer;
 import org.cs3.pdt.graphicalviews.model.realizer.nodes.UMLClassNodeRealizer;
@@ -129,6 +132,14 @@ public class GraphModel {
 				UMLClassNodeRealizer newNodeRealizer = new UMLClassNodeRealizer(fileNodeRealizer);
 				graph.setRealizer(node, newNodeRealizer);
 				newNodeRealizer.initialize();
+			} else if (dataHolder.isLogtalkGraphGroup(node)) {
+				LogtalkGroupNodeRealizer logtalkGroupNodeRealizer = new LogtalkGroupNodeRealizer();
+				graph.setRealizer(node, logtalkGroupNodeRealizer);
+				logtalkGroupNodeRealizer.init(this);
+			} else if (dataHolder.isLogtalkGraphNode(node)) {
+				LogtalkNodeRealizer logtalkNodeRealizer = new LogtalkNodeRealizer();
+				graph.setRealizer(node, logtalkNodeRealizer);
+				logtalkNodeRealizer.init(this);
 			} else {
 				PredicateNodeRealizer newNodeRealizer = new PredicateNodeRealizer(predicateNodeRealizer);
 				graph.setRealizer(node, newNodeRealizer);
@@ -165,6 +176,10 @@ public class GraphModel {
 				newCallEdgeRealizer.setVisible(!isMetaPredicateCall && !isInferredCall
 						|| isMetaPredicateCall && metapredicateCallsVisisble
 						|| isInferredCall && inferredCallsVisible);
+			} else if (dataHolder.isLogtalkGraphEdge(edge)){
+				LogtalkEdgeRealizer logtalkEdgeRealizer = new LogtalkEdgeRealizer();
+				graph.setRealizer(edge, logtalkEdgeRealizer);
+				logtalkEdgeRealizer.init(this);
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}

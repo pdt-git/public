@@ -19,9 +19,10 @@ import org.cs3.pdt.graphicalviews.preferences.EdgeAppearancePreferences;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
+import y.view.GenericEdgeRealizer;
 import y.view.LineType;
 
-public class CallEdgeRealizer extends EdgeRealizerBase {
+public class CallEdgeRealizer extends GenericEdgeRealizer implements InfoTextProvider {
 
 	private static final float METER_LIMIT = (float)1.45;
 	private float width;
@@ -84,6 +85,11 @@ public class CallEdgeRealizer extends EdgeRealizerBase {
 		width = calculateLineWidth(model);
 		LineType myLineType = LineType.createLineType(width, LineType.CAP_ROUND, LineType.JOIN_ROUND, (float) METER_LIMIT, dash, phase);
 		setLineType(myLineType);
+	}
+
+	@Override
+	public String getInfoText() {
+		return "";
 	}
 }
 

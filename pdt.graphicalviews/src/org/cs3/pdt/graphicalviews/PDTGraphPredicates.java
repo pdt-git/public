@@ -19,7 +19,9 @@ public class PDTGraphPredicates {
 	public static final String WRITE_DEPENDENCIES_TO_GRAPHML = "pl_to_graphML:write_dependencies_to_graphML";
 	public static final String WRITE_FOCUS_TO_GRAPHML = "pl_to_graphML:write_focus_to_graphML";
 	public static final String WRITE_GLOBAL_TO_GRAPHML = "pl_to_graphML:write_global_to_graphML";
-	public static final String WRITE_LOGTALK_ENTITIES_TO_GRAPHML = "pl_to_graphML:write_logtalk_entities_to_graphML";
+	public static final String WRITE_LOGTALK_PROJECT_FILES_TO_GRAPHML = "pl_to_graphML:write_logtalk_project_files_to_graphML";
+	public static final String WRITE_LOGTALK_LIBRARY_TO_GRAPHML = "pl_to_graphML:write_logtalk_library_to_graphML";
+	public static final String WRITE_LOGTALK_RECURSIVE_LIBRARY_TO_GRAPHML = "pl_to_graphML:write_logtalk_recursive_library_to_graphML";
 	public static final String CALL_LOCATION_PREDICATE = "pl_to_graphML:call_term_position";
 	
 }
