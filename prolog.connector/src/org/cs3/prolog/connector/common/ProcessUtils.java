@@ -82,7 +82,9 @@ public class ProcessUtils {
 	}
 	
 	public static String getUnixExecutable(String unixCommandLineExecutables, File localPdtDirectory) {
-		// TODO: handle stuff with localPdtDirectory
+		// currently, the localPdtDirectory argument is ignored, because it's only used in the installer
+		//   and this is only available for windows
+		
 		// TODO shall we look for the env. variables as we do for Windows ?
 		String[] appendPath = null;
 	
