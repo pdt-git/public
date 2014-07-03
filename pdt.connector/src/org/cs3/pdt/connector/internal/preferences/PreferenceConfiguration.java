@@ -16,6 +16,8 @@ package org.cs3.pdt.connector.internal.preferences;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +29,8 @@ import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.PDTConstants;
 import org.cs3.prolog.connector.common.ProcessUtils;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 
@@ -196,9 +200,22 @@ public class PreferenceConfiguration {
 		store.setDefault(Connector.PREF_SERVER_LOGDIR, PDTConnectorPlugin.getDefault().getStateLocation().toOSString());
 	}
 	
+	private static File getInternalPrologDirectory() {
+		try {
+			URL installLocation = FileLocator.resolve(Platform.getInstallLocation().getURL());
+			File eclipseDirectory = new File(installLocation.toURI());
+			File prologDirectory = new File(eclipseDirectory.getParentFile(), "prolog");
+			return prologDirectory;
+		} catch (IOException | URISyntaxException e1) {
+			e1.printStackTrace();
+		}
+		return null;
+	}
+
 	public static void initWithSWIPreferences(IPreferenceStore store) {
 		initPreferences(store);
-		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_SWI));
+		File directory = getInternalPrologDirectory();
+		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_SWI, directory));
 	}
 
 	public static void initWithSWILogtalkPreferences(IPreferenceStore store) {

@@ -29,22 +29,46 @@ public class ProcessUtils {
 	public static String getExecutablePreference() {
 		return ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_SWI);
 	}
-
+	
 	public static String getExecutablePreference(String dialect) {
-		if (PDTConstants.DIALECT_SWI.equals(dialect)) {
-			if (Util.isWindows()) {
-				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
+		return getExecutablePreference(dialect, null);
+	}
+	
+	public static String getExecutablePreference(String dialect, File localPrologDirectory) {
+		if (localPrologDirectory == null) {
+			if (PDTConstants.DIALECT_SWI.equals(dialect)) {
+				if (Util.isWindows()) {
+					return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI);
+				} else {
+					return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
+				}
+			} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
+				if (Util.isWindows()) {
+					return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
+				} else {
+					return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
+				}
 			} else {
-				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI);
+				return "";
 			}
-		} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
-			if (Util.isWindows()) {
-				return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP);
+		} else { // localPrologDirectory was found, use subfolder, depending on dialect
+			if (PDTConstants.DIALECT_SWI.equals(dialect)) {
+				File swiDirectory = new File(localPrologDirectory, "swi");
+				if (Util.isWindows()) {
+					return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_SWI, swiDirectory);
+				} else {
+					return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_SWI, swiDirectory);
+				}
+			} else if (PDTConstants.DIALECT_YAP.equals(dialect)) {
+				File yapDirectory = new File(localPrologDirectory, "yap");
+				if (Util.isWindows()) {
+					return getWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES_YAP, yapDirectory);
+				} else {
+					return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP, yapDirectory);
+				}
 			} else {
-				return getUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES_YAP);
+				return "";
 			}
-		} else {
-			return "";
 		}
 	}
 
@@ -54,7 +78,12 @@ public class ProcessUtils {
 	 * @return the complete path of the executable otherwise it will return xpce
 	 */
 	public static String getUnixExecutable(String unixCommandLineExecutables) {
-		String[] default_exec = unixCommandLineExecutables.split(",");
+		return getUnixExecutable(unixCommandLineExecutables, null);
+	}
+	
+	public static String getUnixExecutable(String unixCommandLineExecutables, File localPdtDirectory) {
+		// currently, the localPdtDirectory argument is ignored, because it's only used in the installer
+		//   and this is only available for windows
 		
 		// TODO shall we look for the env. variables as we do for Windows ?
 		String[] appendPath = null;
@@ -66,11 +95,8 @@ public class ProcessUtils {
 		}
 	
 		try {
-			
-			for (String exec : default_exec) {
-	
 				Process process = Runtime.getRuntime().exec(
-						"which " + exec, appendPath);
+						"which " + unixCommandLineExecutables, appendPath);
 	
 				if (process == null)
 					return null;
@@ -79,17 +105,14 @@ public class ProcessUtils {
 						process.getInputStream()));
 				String path = br.readLine();
 	
-				if (path == null || path.startsWith("no " + default_exec))
-					continue;
-				else {
+				if (path != null && !path.startsWith("no " + unixCommandLineExecutables)) {
 					return path;
 				}
-			}
-			return default_exec[0];
+			return unixCommandLineExecutables;
 	
 		} catch (IOException e) {
 	
-			return default_exec[0];
+			return unixCommandLineExecutables;
 		}
 	}
 
@@ -99,7 +122,23 @@ public class ProcessUtils {
 	 * @return the complete path of the executable otherwise it will return plwin
 	 */
 	public static String getWindowsExecutable(String executables) {
-		String[] default_exec = executables.split(",");
+		return getWindowsExecutable(executables, null);
+	}
+	
+	public static String getWindowsExecutable(String executables, File localPrologDirectory) {
+
+		String exec = executables;
+		if (exec.indexOf(".exe") == -1)
+			exec += ".exe";
+		
+		if (localPrologDirectory != null) {
+			File binDir = new File(localPrologDirectory, "bin");
+			File exeFile = new File(binDir, exec);
+			if (exeFile.exists()) {
+				return exeFile.getAbsolutePath();
+			}
+		}
+		
 		String plwin = null;
 	
 		String path;
@@ -109,45 +148,37 @@ public class ProcessUtils {
 					"cmd.exe /c echo %PATH%");
 	
 			if (process == null)
-				return default_exec[0];
+				return executables;
 	
 			BufferedReader br = new BufferedReader(new InputStreamReader(
 					process.getInputStream()));
 			path = br.readLine();
 	
 			if (path == null)
-				return default_exec[0];
+				return executables;
 	
 			// TODO just search in case of executable was not found.
 			String[] paths = Util.split(path, ";");
 			File exeFile = null;
-	
+
 			for (int i = 0; i < paths.length; i++) {
-				
-				for (String exec : default_exec) {
-					if (exec.indexOf(".exe") == -1)
-						exec += ".exe";
-	
-					String currPath = paths[i] + "\\" + exec;
-					exeFile = new File(currPath);
-	
-					if (exeFile.exists()) {
-						plwin = currPath;
-						break;
-					}
-				}
-				if(plwin!=null){
+				String currPath = paths[i] + "\\" + exec;
+				exeFile = new File(currPath);
+
+				if (exeFile.exists()) {
+					plwin = currPath;
 					break;
 				}
 			}
+
 			if(plwin== null){
-				return default_exec[0];
+				return executables;
 			}
 			return plwin;
-	
+
 		} catch (IOException e) {
-	
-			return default_exec[0];
+
+			return executables;
 		}
 	}
 
