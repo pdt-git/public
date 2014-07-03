@@ -51,16 +51,16 @@ public class PreferenceConfiguration {
 	private static final String DEFAULT_CONFIGURATION_PREFIX = "process.configuration.default.";
 	
 	
-	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PDTConnector.CONFIGURATION_SWI, PDTConnector.CONFIGURATION_SWI_LOGTALK, PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP_LOGTALK});
+	private final List<String> defaultConfigurations = Arrays.<String>asList(new String[]{PDTConnector.CONFIGURATION_SWI, PDTConnector.CONFIGURATION_SWI_LOGTALK/*, PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP_LOGTALK*/});
 	private ArrayList<String> configurations;
 
 	public static void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(PREF_CONFIGURATIONS, PDTConnector.CONFIGURATION_SWI + ";" + PDTConnector.CONFIGURATION_SWI_LOGTALK + ";" + PDTConnector.CONFIGURATION_YAP + ";" + PDTConnector.CONFIGURATION_YAP_LOGTALK);
+		store.setDefault(PREF_CONFIGURATIONS, PDTConnector.CONFIGURATION_SWI + ";" + PDTConnector.CONFIGURATION_SWI_LOGTALK/* + ";" + PDTConnector.CONFIGURATION_YAP + ";" + PDTConnector.CONFIGURATION_YAP_LOGTALK*/);
 		
 		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_SWI, PDTConnector.CONFIGURATION_SWI);
 		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_SWI_LOGTALK, PDTConnector.CONFIGURATION_SWI_LOGTALK);
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP);
-		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_YAP_LOGTALK, PDTConnector.CONFIGURATION_YAP_LOGTALK);
+//		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_YAP, PDTConnector.CONFIGURATION_YAP);
+//		store.setDefault(DEFAULT_CONFIGURATION_PREFIX + PDTConnector.CONFIGURATION_YAP_LOGTALK, PDTConnector.CONFIGURATION_YAP_LOGTALK);
 	}
 
 	private HashMap<String, PreferenceStore> stores = new HashMap<String, PreferenceStore>();
@@ -89,10 +89,10 @@ public class PreferenceConfiguration {
 			initWithSWIPreferences(store);
 		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_SWI_LOGTALK)) {
 			initWithSWILogtalkPreferences(store);
-		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_YAP)) {
-			initWithYAPPreferences(store);
-		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_YAP_LOGTALK)) {
-			initWithYAPLogtalkPreferences(store);
+//		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_YAP)) {
+//			initWithYAPPreferences(store);
+//		} else if (defaultConfiguration.equals(PDTConnector.CONFIGURATION_YAP_LOGTALK)) {
+//			initWithYAPLogtalkPreferences(store);
 		} else {
 			Debug.error("Invalid default configuration " + defaultConfiguration + " of " + configuration);
 		}
@@ -209,17 +209,17 @@ public class PreferenceConfiguration {
 		store.setDefault(Connector.PREF_TIMEOUT, 20000);
 	}
 
-	public static void initWithYAPPreferences(IPreferenceStore store) {
-		initPreferences(store);
-		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_YAP));
-	}
-
-	public static void initWithYAPLogtalkPreferences(IPreferenceStore store) {
-		initWithYAPPreferences(store);
-
-		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, ProcessUtils.getLogtalkStartupFile());
-		store.setDefault(Connector.PREF_ENVIRONMENT, ProcessUtils.getLogtalkEnvironmentVariables());
-		store.setDefault(Connector.PREF_TIMEOUT, 20000);
-	}
+//	public static void initWithYAPPreferences(IPreferenceStore store) {
+//		initPreferences(store);
+//		store.setDefault(Connector.PREF_EXECUTABLE, ProcessUtils.getExecutablePreference(PDTConstants.DIALECT_YAP));
+//	}
+//
+//	public static void initWithYAPLogtalkPreferences(IPreferenceStore store) {
+//		initWithYAPPreferences(store);
+//
+//		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, ProcessUtils.getLogtalkStartupFile());
+//		store.setDefault(Connector.PREF_ENVIRONMENT, ProcessUtils.getLogtalkEnvironmentVariables());
+//		store.setDefault(Connector.PREF_TIMEOUT, 20000);
+//	}
 
 }
