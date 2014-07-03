@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.common.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
-import org.cs3.prolog.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
@@ -34,7 +34,7 @@ public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 	public ContextAwareDefinitionsSearchQuery(Goal goal) {
 		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
 		setSearchType("Definitions and declarations of");
-		filePath = Util.quoteAtomIfNeeded(goal.getFilePath());
+		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
 		line = goal.getLine();
 	}
 

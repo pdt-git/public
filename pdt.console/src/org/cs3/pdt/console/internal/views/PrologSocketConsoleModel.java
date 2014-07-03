@@ -28,7 +28,7 @@ import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.ConsoleModelEvent;
 import org.cs3.pdt.console.ConsoleModelListener;
 import org.cs3.pdt.console.QueryExpansion;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 
 /**
  * @author terra

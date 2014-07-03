@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -44,10 +44,10 @@ public class ReloadAction implements IObjectActionDelegate  {
 		}
 		
 		if (filesToConsult.size() == 1) {
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFile(filesToConsult.get(0));
+			PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(filesToConsult.get(0));
 //			new ConsultAction().consultWorkspaceFile(filesToConsult.get(0));
 		} else {
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().consultFiles(filesToConsult);
+			PDTConnectorPlugin.getDefault().getPrologProcessService().consultFiles(filesToConsult);
 //			new ConsultAction().consultWorkspaceFiles(filesToConsult);
 		}
 	}

@@ -15,7 +15,7 @@ package org.cs3.pdt.common.internal.preferences;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.prolog.ui.util.preferences.MyRadioGroupFieldEditor;
+import org.cs3.pdt.connector.util.preferences.MyRadioGroupFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
@@ -59,7 +59,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 //		// connected to the default runtime
 //		// of the respective prolog project, should i switch to the default
 //		// runtime first?
-//		addField(new RadioGroupFieldEditor(PDT.PREF_SWITCH_TO_DEFAULT_PIF, "Switch to default runtime before consulting", 4,
+//		addField(new RadioGroupFieldEditor(PDT.PREF_SWITCH_TO_DEFAULT_PROCESS, "Switch to default runtime before consulting", 4,
 //				new String[][] { { "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
 //						{ "ask", MessageDialogWithToggle.PROMPT } }, getFieldEditorParent(), true));
 //		

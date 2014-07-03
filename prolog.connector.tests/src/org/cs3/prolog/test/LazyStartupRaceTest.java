@@ -16,20 +16,20 @@ package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class LazyStartupRaceTest extends TestCase {
-	 private PrologInterface pif;
+	 private PrologProcess process;
 
 	@Override
 	protected void setUp() throws Exception {
          Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 	     
-//	       pif=PrologInterfaceFactory.newInstance().create();
-	      pif=PrologRuntimePlugin.getDefault().newPrologInterface();
+//	       process=PrologProcessFactory.newInstance().create();
+	      process=Connector.newUninitializedPrologProcess();
 	      
 	    }
 	    
@@ -38,11 +38,11 @@ public class LazyStartupRaceTest extends TestCase {
 	     */
 	    @Override
 		protected void tearDown() throws Exception {
-	        pif.stop();
+	        process.stop();
 	    }
 	    
-	    public void testLazyStartUp() throws PrologInterfaceException {
-	    	pif.getSession();
+	    public void testLazyStartUp() throws PrologProcessException {
+	    	process.getSession();
 
 		}
 }

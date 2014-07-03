@@ -28,15 +28,15 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.cterm.CCompound;
-import org.cs3.prolog.cterm.CNil;
-import org.cs3.prolog.internal.pif.AbstractPrologInterface;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.cterm.CCompound;
+import org.cs3.prolog.connector.cterm.CEmptyList;
+import org.cs3.prolog.connector.internal.process.AbstractPrologProcess;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.session.PrologSession;
 
 /**
  * @author Lukas Degener
@@ -44,7 +44,7 @@ import org.cs3.prolog.session.PrologSession;
  * 
  */
 public class SocketSessionTest extends TestCase {
-	private PrologInterface pif;
+	private PrologProcess process;
 
 	/*
 	 * (non-Javadoc)
@@ -54,8 +54,8 @@ public class SocketSessionTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel("DEBUG");
-		pif = PrologRuntimePlugin.getDefault().newPrologInterface();
-		pif.start();
+		process = Connector.newUninitializedPrologProcess();
+		process.start();
 	}
 
 	/*
@@ -65,11 +65,11 @@ public class SocketSessionTest extends TestCase {
 	 */
 	@Override
 	protected void tearDown() throws Exception {
-		pif.stop();
+		process.stop();
 	}
 
-	public void testCreation() throws PrologInterfaceException {
-		PrologSession ss = pif.getSession();
+	public void testCreation() throws PrologProcessException {
+		PrologSession ss = process.getSession();
 
 		assertNotNull(ss);
 		ss.dispose();
@@ -84,9 +84,9 @@ public class SocketSessionTest extends TestCase {
 			public void run() {
 				for (int i = 0; i < 5; i++) {
 					try {
-						pif.stop();
-						pif.start();
-					} catch (PrologInterfaceException e) {
+						process.stop();
+						process.start();
+					} catch (PrologProcessException e) {
 						this.e = e;
 					}
 
@@ -97,15 +97,15 @@ public class SocketSessionTest extends TestCase {
 		_Thread t = new _Thread();
 		t.start();
 		for (int i = 0; i < 5; i++) {
-			pif.stop();
-			pif.start();
+			process.stop();
+			process.start();
 		}
 		t.join();
 		assertNull(t.e);
 	}
 
-	public void testQueries() throws PrologException, PrologInterfaceException {
-		PrologSession ss = pif.getSession();
+	public void testQueries() throws PrologException, PrologProcessException {
+		PrologSession ss = process.getSession();
 
 		assertNotNull(ss.queryOnce("assert(a(b))"));
 		assertNotNull(ss.queryOnce("assert(a(v))"));
@@ -124,8 +124,8 @@ public class SocketSessionTest extends TestCase {
 		ss.dispose();
 	}
 
-	public void testCTerm() throws PrologException, PrologInterfaceException {
-		PrologSession s = pif.getSession(PrologInterface.CTERMS);		
+	public void testCTerm() throws PrologException, PrologProcessException {
+		PrologSession s = process.getSession(PrologProcess.CTERMS);		
 		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
 		Object a = map.get("A");
@@ -134,8 +134,8 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testListProcessingDisabled() throws PrologException,
-			PrologInterfaceException {
-		PrologSession s =  pif.getSession(PrologInterface.NONE);
+			PrologProcessException {
+		PrologSession s =  process.getSession(PrologProcess.NONE);
 		
 		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
@@ -148,8 +148,8 @@ public class SocketSessionTest extends TestCase {
 
 		
 
-	public void testDispose() throws PrologException, PrologInterfaceException {
-		PrologSession ss = pif.getSession();
+	public void testDispose() throws PrologException, PrologProcessException {
+		PrologSession ss = process.getSession();
 
 		ss.dispose();
 
@@ -163,8 +163,8 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testMultipleQuery() throws PrologException,
-			PrologInterfaceException {
-		PrologSession server = pif.getSession();
+			PrologProcessException {
+		PrologSession server = process.getSession();
 
 		// ClientConnection connection= new ClientConnectionStub();
 		Map<String,Object> r = server.queryOnce("assert(wahr(wahrheit))");
@@ -190,10 +190,10 @@ public class SocketSessionTest extends TestCase {
 	/**
 	 * PDT-205
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public void testSyntaxError() throws PrologInterfaceException {
-		PrologSession s = pif.getSession();
+	public void testSyntaxError() throws PrologProcessException {
+		PrologSession s = process.getSession();
 		try {
 			s.queryAll("test(''asdf'')");
 		} catch (PrologException e) {
@@ -202,7 +202,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testIOProblem() throws Throwable {
-		final PrologSession s = pif.getSession();
+		final PrologSession s = process.getSession();
 		final Throwable[] t = new Throwable[1];
 		Thread thread = new Thread() {
 
@@ -213,28 +213,28 @@ public class SocketSessionTest extends TestCase {
 					t[0] = null;
 				} catch (PrologException e) {
 					t[0] = e;
-				} catch (PrologInterfaceException e) {
+				} catch (PrologProcessException e) {
 					t[0] = e;
 				}
 			}
 		};
 		thread.start();
 
-		((AbstractPrologInterface) pif).getStartAndStopStrategy().stopServer(
-				pif);
+		((AbstractPrologProcess) process).getStartAndStopStrategy().stopServer(
+				process);
 		thread.join();
 		assertNotNull(t[0]);
-		assertEquals(PrologInterfaceException.class, t[0].getClass());
-		pif.restart();
+		assertEquals(PrologProcessException.class, t[0].getClass());
+		process.restart();
 	}
 
 	/**
-	 * this one fails if the pif impl does not support lists
+	 * this one fails if the process impl does not support lists
 	 * 
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
-	public void testList() throws PrologInterfaceException {
-		PrologSession s = pif.getSession();
+	public void testList() throws PrologProcessException {
+		PrologSession s = process.getSession();
 		Map<String,Object> map = s.queryOnce("A=[1,2,3,[[a,b,['{}']]],[b,c]]");
 
 		Object A = map.get("A");
@@ -267,7 +267,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testQueryAll() throws Throwable {
-		PrologSession s = pif.getSession();
+		PrologSession s = process.getSession();
 
 		List<Map<String,Object>> result = s.queryAll("member(A,[ich,du,muellers_kuh])");
 		assertEquals(3, result.size());
@@ -300,7 +300,7 @@ public class SocketSessionTest extends TestCase {
 		}
 
 		String atom = sb.toString();
-		PrologSession s = pif.getSession();
+		PrologSession s = process.getSession();
 		Map<String,Object> map = s.queryOnce("atom_length(" + atom + ",1,3,_,Sub)");
 		assertEquals("aaa", map.get("Sub"));
 	}
@@ -313,7 +313,7 @@ public class SocketSessionTest extends TestCase {
 		}
 
 		String atom = sb.toString();
-		PrologSession s = pif.getSession();
+		PrologSession s = process.getSession();
 		Map<String,Object> map = s.queryOnce("A=" + atom);
 		assertEquals(atom, map.get("A"));
 	}
@@ -326,7 +326,7 @@ public class SocketSessionTest extends TestCase {
 		}
 
 		String atom = sb.toString();
-		PrologSession s = pif.getSession();
+		PrologSession s = process.getSession();
 		assertNotNull(s.queryOnce("atom(" + atom + ")"));
 
 	}
@@ -335,7 +335,7 @@ public class SocketSessionTest extends TestCase {
 	 * PDT-195
 	 */
 	public void testTurkish() throws Exception {
-		PrologSession session = pif.getSession();
+		PrologSession session = process.getSession();
 		String query = "A=kad\u0131n(nurhan)";
 		Map<String,Object> map = session.queryOnce(query);
 		String actual = (String) map.get("A");
@@ -362,7 +362,7 @@ public class SocketSessionTest extends TestCase {
 		 * by default terms shall be canonical, but unquoted, if they are atoms.
 		 * This should ensure compatibility with legacy code.
 		 */
-		PrologSession session = pif.getSession();
+		PrologSession session = process.getSession();
 		Map<String,Object> map = null;
 		try {
 
@@ -376,19 +376,19 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT291_nil() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.NONE);
+		PrologSession session = process.getSession(PrologProcess.NONE);
 		Map<String,Object> m1=session.queryOnce("A=[]");
 		assertTrue(m1.get("A") instanceof String);
-		session = pif.getSession(PrologInterface.PROCESS_LISTS);
+		session = process.getSession(PrologProcess.PROCESS_LISTS);
 		Map<String,Object> m2=session.queryOnce("A=[]");
 		assertTrue(m2.get("A") instanceof List<?>);
-		session = pif.getSession(PrologInterface.CTERMS);
+		session = process.getSession(PrologProcess.CTERMS);
 		Map<String,Object> m3=session.queryOnce("A=[]");
-		assertTrue(m3.get("A") instanceof CNil);
+		assertTrue(m3.get("A") instanceof CEmptyList);
 	}
 	
 	public void testPDT287_0() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.NONE);
+		PrologSession session = process.getSession(PrologProcess.NONE);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be quoted.
@@ -410,7 +410,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_1() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.UNQUOTE_ATOMS);
+		PrologSession session = process.getSession(PrologProcess.UNQUOTE_ATOMS);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be unquoted.
@@ -432,7 +432,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_2() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.PROCESS_LISTS);
+		PrologSession session = process.getSession(PrologProcess.PROCESS_LISTS);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be quoted.
@@ -461,8 +461,8 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_3() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.PROCESS_LISTS
-				| PrologInterface.UNQUOTE_ATOMS);
+		PrologSession session = process.getSession(PrologProcess.PROCESS_LISTS
+				| PrologProcess.UNQUOTE_ATOMS);
 		Map<String,Object> map = null;
 		try {
 			// atoms should be unquoted.
@@ -491,7 +491,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testPDT287_4() throws Exception {
-		PrologSession session = pif.getSession(PrologInterface.CTERMS);
+		PrologSession session = process.getSession(PrologProcess.CTERMS);
 		Map<String,Object> map = null;
 		try {
 			// Everything should be CTerms, no list Processing.
@@ -509,16 +509,16 @@ public class SocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			pif.getSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
+			process.getSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			pif.getSession(PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
+			process.getSession(PrologProcess.CTERMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -526,9 +526,9 @@ public class SocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			pif.getSession(PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
+			process.getSession(PrologProcess.CTERMS
+					| PrologProcess.UNQUOTE_ATOMS
+					| PrologProcess.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
 			;
@@ -536,7 +536,7 @@ public class SocketSessionTest extends TestCase {
 	}
 		
 	public void testEscapePDT245() throws Exception {
-		PrologSession session = pif.getSession();
+		PrologSession session = process.getSession();
 		Map<String,Object> map = null;
 		try {
 			map = session.queryOnce("atom_codes(A,[123,10])");
@@ -549,7 +549,7 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	public void testException() throws Exception {
-		PrologSession session = pif.getSession();
+		PrologSession session = process.getSession();
 		try {
 			session.queryOnce("cluse(a,b)");
 			fail("expected exception");
@@ -568,7 +568,7 @@ public class SocketSessionTest extends TestCase {
 		int N = 24;
 		PrologSession[] sessions = new PrologSession[N];
 		for (int i = 0; i < N; i++) {
-			sessions[i] = pif.getSession();
+			sessions[i] = process.getSession();
 		}
 		for (int i = 0; i < N; i++) {
 			sessions[i].dispose();

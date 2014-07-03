@@ -16,36 +16,36 @@ package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.session.PrologSession;
 
 /**
  * @author terra
  */
 public class SocketSessionThrowTest extends TestCase {
-	private PrologInterface pif;
+	private PrologProcess process;
 
     @Override
 	protected void setUp() throws Exception {
-      pif = PrologRuntimePlugin.getDefault().newPrologInterface();
-      pif.start();
+      process = Connector.newUninitializedPrologProcess();
+      process.start();
     }
     
     @Override
 	protected void tearDown() throws Exception {
-        pif.stop();
+        process.stop();
     }
 	
 	/**
 	 * http://roots.iai.uni-bonn.de/jira/browse/PDT-10
 	 * @throws PrologException
-	 * @throws PrologInterfaceException 
+	 * @throws PrologProcessException 
 	 */
-	public void testThrow() throws PrologException, PrologInterfaceException{
-		PrologSession ss = pif.getSession();
+	public void testThrow() throws PrologException, PrologProcessException{
+		PrologSession ss = process.getSession();
 		try  {
 		ss.queryOnce("throw(A)");
 		} catch(Exception ex){

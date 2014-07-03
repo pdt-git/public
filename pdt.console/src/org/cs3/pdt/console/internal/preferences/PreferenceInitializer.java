@@ -15,10 +15,10 @@ package org.cs3.pdt.console.internal.preferences;
 
 import java.io.File;
 
+import org.cs3.pdt.connector.PrologContextTracker;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.prolog.connector.ui.PrologContextTracker;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -58,7 +58,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	public String getDefaultContextTrackers() {
 
-		PrologContextTracker[] trackers = PrologRuntimeUIPlugin
+		PrologContextTracker[] trackers = PDTConnectorPlugin
 				.getDefault().getContextTrackerService()
 				.getContextTrackers();
 		StringBuffer sb = new StringBuffer();

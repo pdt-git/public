@@ -195,9 +195,9 @@ pdt_stop_console_server:-
     	stop_server
     ).
 
-:- multifile(consult_server:pif_shutdown_hook/0).
-:- dynamic(consult_server:pif_shutdown_hook/0).
-consult_server:pif_shutdown_hook:-
+:- multifile(consult_server:process_shutdown_hook/0).
+:- dynamic(consult_server:process_shutdown_hook/0).
+consult_server:process_shutdown_hook:-
     pdt_stop_console_server.
 
 start_server(Port, Name) :-

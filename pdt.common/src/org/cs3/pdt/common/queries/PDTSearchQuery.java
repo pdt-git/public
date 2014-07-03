@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.common.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -35,12 +35,12 @@ import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.PrologReferenceMatch;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologException;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
-import org.cs3.prolog.ui.util.FileUtils;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.QueryUtils;
+import org.cs3.prolog.connector.process.PrologException;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -101,7 +101,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	}
 	
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
-			BadLocationException, IOException, PrologException, PrologInterfaceException {
+			BadLocationException, IOException, PrologException, PrologProcessException {
 		result.removeAll();
 
 		return doSearch(monitor); 
@@ -109,13 +109,13 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 
 	/**
 	 * @return
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 * @throws PrologException
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	private IStatus doSearch(IProgressMonitor monitor) throws PrologInterfaceException, PrologException, IOException, NumberFormatException {
-		PrologSession session = PDTCommonUtil.getActivePrologInterface().getSession();
+	private IStatus doSearch(IProgressMonitor monitor) throws PrologProcessException, PrologException, IOException, NumberFormatException {
+		PrologSession session = PDTCommonUtil.getActivePrologProcess().getSession();
 		monitor.beginTask("Searching...", 2);
 		monitor.subTask("Running Prolog query");
 		List<Map<String, Object>> results = findReferencedClauses(session, new SubProgressMonitor(monitor, 1));
@@ -129,10 +129,10 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	 * @param session
 	 * @return
 	 * @throws PrologException
-	 * @throws PrologInterfaceException
+	 * @throws PrologProcessException
 	 */
 	private List<Map<String, Object>> findReferencedClauses(PrologSession session, IProgressMonitor monitor)
-			throws PrologException, PrologInterfaceException {
+			throws PrologException, PrologProcessException {
 		
 		monitor.beginTask("", 1);
 //		String module;               
@@ -157,7 +157,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	abstract protected String buildSearchQuery();
 
 	protected List<Map<String, Object>> getResultForQuery(PrologSession session, String query) 
-			throws PrologInterfaceException {
+			throws PrologProcessException {
 		Debug.info(query);
 				
 		List<Map<String, Object>> clauses = session.queryAll(query);
@@ -287,9 +287,9 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	
 	protected static String toPredicateGoal(Goal goal) {
 		return bT(SearchConstants.PREDICATE_GOAL_FUNCTOR,
-				goal.getModule() != null ? Util.quoteAtomIfNeeded(goal.getModule()) : "_",
+				goal.getModule() != null ? QueryUtils.quoteAtomIfNeeded(goal.getModule()) : "_",
 				"_",
-				Util.quoteAtomIfNeeded(goal.getFunctor()),
+				QueryUtils.quoteAtomIfNeeded(goal.getFunctor()),
 				"_",
 				goal.getArity() >= 0 ? goal.getArity() : "_");
 	}

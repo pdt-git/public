@@ -101,7 +101,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 
 	
 	@Override
-	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
+	public void activePrologProcessChanged(PrologConsoleEvent e) {
 		
 	}
 
@@ -133,12 +133,12 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		}
 	}	
 
-	public void fireActivePrologInterfaceChanged(PrologConsole console) {
+	public void fireActivePrologProcessChanged(PrologConsole console) {
 		Vector<PrologConsoleListener> clone = getAListenersClone();
 		PrologConsoleEvent e = new PrologConsoleEvent(console);
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
-			l.activePrologInterfaceChanged(e);
+			l.activePrologProcessChanged(e);
 		}
 	}
 

@@ -14,7 +14,7 @@
 package org.cs3.plunit.actions;
 
 import org.cs3.pdt.common.PDTCommonUtil;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;

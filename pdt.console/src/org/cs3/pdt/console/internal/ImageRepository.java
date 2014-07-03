@@ -51,7 +51,7 @@ public class ImageRepository {
 	
 	public static final String SELECT_ALL = "selectall.png";
 	
-	public static final String SELECT_PIF = "console.png";
+	public static final String SELECT_PROCESS = "console.png";
 	
 	public static final String TRACK_CONTEXT = "synced.gif";
 

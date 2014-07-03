@@ -16,12 +16,12 @@ package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.lifecycle.LifeCycleHook;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.session.PrologSession;
+import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.process.LifeCycleHook;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.session.PrologSession;
 
 public class LifeCycleHookTest extends TestCase {
 
@@ -36,14 +36,14 @@ public class LifeCycleHookTest extends TestCase {
 		private int onInit;
 
 		@Override
-		public void lateInit(PrologInterface pif) {
+		public void lateInit(PrologProcess process) {
 			Debug.debug("lateInit");
 //			lateInit++;
 			
 		}
 
 		@Override
-		public void onError(PrologInterface pif) {
+		public void onError(PrologProcess process) {
 			Debug.debug("onError");
 //			onError++;
 			
@@ -57,24 +57,24 @@ public class LifeCycleHookTest extends TestCase {
 		}
 
 		@Override
-		public void afterInit(PrologInterface pif)
-				throws PrologInterfaceException {
+		public void afterInit(PrologProcess process)
+				throws PrologProcessException {
 			Debug.debug("afterInit");
 			afterInit++;
 			
 		}
 
 		@Override
-		public void beforeShutdown(PrologInterface pif, PrologSession session)
-				throws PrologInterfaceException {
+		public void beforeShutdown(PrologProcess process, PrologSession session)
+				throws PrologProcessException {
 			Debug.debug("beforeShutdown");
 			beforeShutdown++;
 			
 		}
 
 		@Override
-		public void onInit(PrologInterface pif, PrologSession initSession)
-				throws PrologInterfaceException {
+		public void onInit(PrologProcess process, PrologSession initSession)
+				throws PrologProcessException {
 			Debug.debug("onInit");
 			onInit++;
 			
@@ -83,21 +83,21 @@ public class LifeCycleHookTest extends TestCase {
 	}
 	
 	
-	private PrologInterface pif;
+	private PrologProcess process;
 
 	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-//		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();
-		this.pif = PrologRuntimePlugin.getDefault().newPrologInterface();
+//		this.process=(PrologProcess) PrologProcessFactory.newInstance().create();
+		this.process = Connector.newUninitializedPrologProcess();
 		
 	}
 
 	public void testPDT_295_00() throws Exception{
 		MyHook X = new MyHook();
-		pif.addLifeCycleHook(X, "X", new String[0]);
-		pif.getSession(PrologInterface.NONE).dispose();
-		pif.stop();
+		process.addLifeCycleHook(X, "X", new String[0]);
+		process.getSession(PrologProcess.NONE).dispose();
+		process.stop();
 		assertEquals(1,X.onInit);
 		assertEquals(1,X.afterInit);
 		assertEquals(1,X.beforeShutdown);
@@ -110,11 +110,11 @@ public class LifeCycleHookTest extends TestCase {
 	
 	public void testPDT_295_01() throws Exception{
 		MyHook X = new MyHook();
-		pif.addLifeCycleHook(X, "X", new String[0]);
-		pif.removeLifeCycleHook(X,"X");
-		pif.addLifeCycleHook(X, "X", new String[0]);
-		pif.getSession(PrologInterface.NONE).dispose();
-		pif.stop();
+		process.addLifeCycleHook(X, "X", new String[0]);
+		process.removeLifeCycleHook(X,"X");
+		process.addLifeCycleHook(X, "X", new String[0]);
+		process.getSession(PrologProcess.NONE).dispose();
+		process.stop();
 		assertEquals(1,X.onInit);
 		assertEquals(1,X.afterInit);
 		assertEquals(1,X.beforeShutdown);

@@ -48,15 +48,6 @@
     </page>
  </extension>
     <extension
-          point="org.cs3.prolog.connector.prologLibrary">
-       <library
-             alias="lib_pdt_console_pl"
-             id="pdt.console.pl"
-             path="pl">
-                     <attribute id="hidden" value="true"/>
-       </library>
-    </extension>
-    <extension
           point="org.eclipse.ui.commands">
        <category
              id="org.cs3.pdt.console"
@@ -83,7 +74,7 @@
              sequence="CTRL+SHIFT+V"/>
     </extension>
     <extension
-          point="org.cs3.prolog.connector.bootstrapContribution">
+          point="org.cs3.pdt.connector.bootstrapContribution">
        <fileContribution
              id="pdt.console.pl.fileContribution"
              path="pl/loader.pl">

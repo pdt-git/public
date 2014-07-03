@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.cs3.pdt.console.internal.views.completion;
 
+import org.eclipse.jface.fieldassist.ContentProposal;
+
 
 /**
  * IContentProposal describes a content proposal to be shown. It consists of the

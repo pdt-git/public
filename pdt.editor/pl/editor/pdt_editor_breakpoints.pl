@@ -50,10 +50,10 @@ pdt_breakpoint_property(Id, Property) :-
 :- dynamic(user:message_hook/3).
 
 user:message_hook(breakpoint(set, Id), _Kind, _Lines) :-
-    catch(pif_observe:pif_notify(add_breakpoint,Id),_,true), fail.
+    catch(process_observe:process_notify(add_breakpoint,Id),_,true), fail.
     
 user:message_hook(breakpoint(delete, Id), _Kind, _Lines) :-
-    catch(pif_observe:pif_notify(remove_breakpoint,Id),_,true), fail.
+    catch(process_observe:process_notify(remove_breakpoint,Id),_,true), fail.
 
 :- else.
 

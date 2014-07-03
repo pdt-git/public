@@ -16,6 +16,13 @@ package org.cs3.prolog.cterm;
 
 import junit.framework.TestCase;
 
+import org.cs3.prolog.connector.cterm.CAtom;
+import org.cs3.prolog.connector.cterm.CCompound;
+import org.cs3.prolog.connector.cterm.CInteger;
+import org.cs3.prolog.connector.cterm.CString;
+import org.cs3.prolog.connector.cterm.CTerm;
+import org.cs3.prolog.connector.cterm.CTermFactory;
+
 
 public class CTermFactoryTest extends TestCase {
 	

@@ -16,15 +16,15 @@ package org.cs3.prolog.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologRuntimePlugin;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.Connector;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class XpceTest extends TestCase {
-	public void testXpce() throws  PrologInterfaceException {
+	public void testXpce() throws  PrologProcessException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface plInterface = PrologRuntimePlugin.getDefault().newPrologInterface();
+		PrologProcess plInterface = Connector.newUninitializedPrologProcess();
 		plInterface.start();
 		try{			
 			plInterface.getSession().queryOnce("help");

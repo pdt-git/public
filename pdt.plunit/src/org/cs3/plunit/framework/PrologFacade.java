@@ -15,13 +15,7 @@ package org.cs3.plunit.framework;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,12 +27,11 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
-import org.cs3.plunit.PLUnitTest;
 
 public class PrologFacade {
 
 	private static String PATH_TO_CONSULT_SERVER_PL;
-	private static PrologInterface pif;
+	private static PrologInterface process;
 	private static File targetConsultServerDir;
 	static {
 		
@@ -47,14 +40,14 @@ public class PrologFacade {
 			BufferedReader reader = new BufferedReader(new FileReader(portFile));
 			int port = Integer.parseInt(reader.readLine());
 			reader.close();
-			pif = AbstractPrologInterface.newInstance();
-			pif.setStandAloneServer(true);
-			pif.setHost("localhost");
-//			pif.setExecutable(Util.guessExecutableName());
-//			pif.setEnvironment(Util.guessEnvironmentVariables());
-			pif.setTimeout("15000");
-			pif.getClass().getMethod("setPort",int.class).invoke(pif,port);
-			pif.getSession().dispose();
+			process = AbstractPrologInterface.newInstance();
+			process.setStandAloneServer(true);
+			process.setHost("localhost");
+//			process.setExecutable(Util.guessExecutableName());
+//			process.setEnvironment(Util.guessEnvironmentVariables());
+			process.setTimeout("15000");
+			process.getClass().getMethod("setPort",int.class).invoke(process,port);
+			process.getSession().dispose();
 			
 		} catch (Exception e) {
 			//e.printStackTrace();
@@ -85,7 +78,7 @@ public class PrologFacade {
 	public static List<Map<String, Object>> queryAll(String query) throws PrologException,
 			PrologInterfaceException {
 		if(session == null)
-			session = pif.getSession(PrologInterface.LEGACY);
+			session = process.getSession(PrologInterface.LEGACY);
 		List<Map<String, Object>> results = session.queryAll(query);
 //		session.dispose();
 		return results;
@@ -95,7 +88,7 @@ public class PrologFacade {
 	public static Map<String, Object> queryOnce(String query)
 			throws PrologInterfaceException {
 		if(session == null)
-			session = pif.getSession(PrologInterface.LEGACY);
+			session = process.getSession(PrologInterface.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);
 //		session.dispose();
 		return result;
@@ -104,7 +97,7 @@ public class PrologFacade {
 
 	public static Map<String, Object> queryOnceNewSession(String query)
 			throws PrologInterfaceException {
-		PrologSession session = pif.getSession(PrologInterface.LEGACY);
+		PrologSession session = process.getSession(PrologInterface.LEGACY);
 		Map<String, Object> result = session.queryOnce(query);
 		session.dispose();
 		return result;
