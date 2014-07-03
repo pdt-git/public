@@ -286,6 +286,15 @@ public abstract class ViewBase extends ViewPart {
 				}
 			});
 
+		toolBarManager.add(new ToolBarAction("Help", 
+				ImageRepository.getImageDescriptor(ImageRepository.HELP)) {
+			
+			@Override
+			public void performAction() {
+				new HelpDialog(getSite().getShell()).open();
+			}
+		});
+
 	}
 	
 	@Override
