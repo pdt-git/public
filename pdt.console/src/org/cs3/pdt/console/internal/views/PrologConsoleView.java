@@ -285,7 +285,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 									@SuppressWarnings("unchecked")
 									List<String> consultedFiles = (List<String>) getPrologProcess().getAttribute(PDTCommon.CONSULTED_FILES);
-									consultedFiles.clear();
+									if (consultedFiles != null) {
+										consultedFiles.clear();
+									}
 									oldProcess.stop();
 
 									if ("true".equals(oldProcess.getAttribute(KILLABLE))) {
