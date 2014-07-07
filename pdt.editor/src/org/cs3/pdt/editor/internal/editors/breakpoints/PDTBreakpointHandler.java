@@ -64,7 +64,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	private static final String DELETE_BREAKPOINT = "delete_breakpoint";
 	private static final String BREAKPOINT_PROPERTY = "pdt_editor_breakpoints:pdt_breakpoint_property";
 
-	private static final String PDT_BREAKPOINT_MARKER = "org.cs3.pdt.editor.editor.PDTBreakpointMarker";
+	private static final String PDT_BREAKPOINT_MARKER = "org.cs3.pdt.editor.PDTBreakpointMarker";
 	private static final String BREAKPOINT_ID = "pdt.breakpoint.id";
 	private static final String BREAKPOINT_OFFSET = "pdt.breakpoint.offset";
 	private static final String BREAKPOINT_OFFSET_PHYSICAL = "pdt.breakpoint.offset.physical";
