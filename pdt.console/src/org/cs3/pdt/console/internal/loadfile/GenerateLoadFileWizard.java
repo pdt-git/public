@@ -79,24 +79,18 @@ public class GenerateLoadFileWizard extends Wizard implements INewWizard {
     	}
 
 	public void addEntryPoint(IFile file) {
-		try {
-			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, "true");
-			
-			PDTCommonPlugin.getDefault().addEntryPoint(file);
-			
-			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
+		PDTCommonPlugin.getDefault().addEntryPoint(file);
+		
+		PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 
-			if (process != null) {
-				try {
-					String prologFileName = FileUtils.prologFileNameQuoted(file);
+		if (process != null) {
+			try {
+				String prologFileName = FileUtils.prologFileNameQuoted(file);
 
-					process.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
-				} catch (PrologProcessException e) {
-					Debug.report(e);
-				}
+				process.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, prologFileName));
+			} catch (PrologProcessException e) {
+				Debug.report(e);
 			}
-		} catch (CoreException e) {
-			Debug.report(e);
 		}
 	}
 

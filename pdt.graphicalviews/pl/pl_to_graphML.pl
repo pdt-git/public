@@ -217,8 +217,7 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
     	(
     		nth1(Id, ProjectFilePaths, FilePath),
     		file_node_name(FilePath, ProjectPath, FileNodeName),
-    		file_node_type(FilePath, FoundDependencies, FileType),
-    		file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates)
+    		file_exports(FilePath, FileType, ExportedStaticPredicates, ExportedDynamicPredicates)
     	),	
 		write_file_as_element(OutStream, Id, FilePath, FileNodeName, FileType, ExportedStaticPredicates, ExportedDynamicPredicates)
     ),
@@ -237,19 +236,35 @@ write_dependencies_facts_to_graphML(ProjectPath, ProjectFilePaths, OutStream) :-
 		)
     ).
    
-file_exports(FilePath, ExportedStaticPredicates, ExportedDynamicPredicates) :-
-    module_property(ModuleName, file(FilePath)),
-    module_property(ModuleName, exports(Exports)),
-    exports_classification(Exports, ExportedStaticPredicates, ExportedDynamicPredicates), !.
-file_exports(_, [], []).
+file_exports(FilePath, module, ExportedStaticPredicates, ExportedDynamicPredicates) :-
+	module_property(Module, file(FilePath)),
+	module_property(Module, exports(Exports)),
+	exports_classification(Exports, ExportedStaticPredicates, ExportedDynamicPredicates, Module),
+	!.
+file_exports(FilePath, non_module_file, StaticPredicates, DynamicPredicates) :-
+	findall(
+		N/A,
+		(	source_file(PI, FilePath),
+			(	PI = M:H
+			->	M == user
+			;	PI = H
+			),
+			functor(H, N, A),
+			\+ atom_concat('$', _, N)
+		),
+		Predicates
+	),
+	exports_classification(Predicates, StaticPredicates, DynamicPredicates, user),
+	!.
 
-exports_classification([Name/Arity|Tail], S, [Name/Arity|DTail]) :-
-    functor(H, Name, Arity),
-    predicate_property(H, dynamic),
-	exports_classification(Tail, S, DTail).
-exports_classification([E|Tail], [E|STail], D) :-
-    exports_classification(Tail, STail, D).
-exports_classification([], [], []) :- !.
+exports_classification([Name/Arity|Tail], S, [Name/Arity|DTail], Module) :-
+	functor(H, Name, Arity),
+	predicate_property(Module:H, dynamic),
+	!,
+	exports_classification(Tail, S, DTail, Module).
+exports_classification([E|Tail], [E|STail], D, Module) :-
+    exports_classification(Tail, STail, D, Module).
+exports_classification([], [], [], _Module) :- !.
 
 file_imports(File1, File2, PredNames) :-
     once(module_of_file(File1,M1)),

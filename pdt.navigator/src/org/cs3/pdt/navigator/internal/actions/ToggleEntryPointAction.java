@@ -28,7 +28,6 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -93,26 +92,14 @@ public class ToggleEntryPointAction implements IActionDelegate {
 	}
 	
 	private boolean isEntryPoint(IFile file) {
-		try {
-			String prop = file.getPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY);
-			if (prop != null && prop.equalsIgnoreCase("true")) {
-				return true;
-			}
-		} catch (CoreException e) {}
-
-		return false;
+		return PDTCommonPlugin.getDefault().isEntryPoint(file);
 	}
 	
 	private void setEntryPoint(IFile file, boolean b, PrologProcess process) {
-		try {
-			file.setPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY, Boolean.toString(b));
-			if (b) {
-				PDTCommonPlugin.getDefault().addEntryPoint(file);
-			} else {
-				PDTCommonPlugin.getDefault().removeEntryPoint(file);
-			}
-		} catch (CoreException e) {
-			e.printStackTrace();
+		if (b) {
+			PDTCommonPlugin.getDefault().addEntryPoint(file);
+		} else {
+			PDTCommonPlugin.getDefault().removeEntryPoint(file);
 		}
 		
 		if (process != null) {

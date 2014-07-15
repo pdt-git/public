@@ -15,9 +15,7 @@ import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.QualifiedName;
 
 public class ConsultManager implements ConsultListener, PrologProcessStartListener {
 
@@ -106,13 +104,8 @@ public class ConsultManager implements ConsultListener, PrologProcessStartListen
 	
 	private void filterEntryPoints(List<IFile> files, List<IFile> entryPointFiles) {
 		for (IFile file : files) {
-			try {
-				String isEntryPoint = file.getPersistentProperty(new QualifiedName("pdt", "entry.point"));
-				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
-					entryPointFiles.add(file);
-				}
-			} catch (CoreException e) {
-				Debug.report(e);
+			if (PDTCommonPlugin.getDefault().isEntryPoint(file)) {
+				entryPointFiles.add(file);
 			}
 		}
 	}

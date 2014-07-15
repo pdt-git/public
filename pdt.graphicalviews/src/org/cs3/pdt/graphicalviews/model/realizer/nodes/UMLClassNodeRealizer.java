@@ -52,6 +52,7 @@ public class UMLClassNodeRealizer extends NodeRealizerBase {
 	private boolean omitDetails;
 	private String stereotype = "";
 	private String constraint = "";
+	private static final Color BACKGROUND = new Color(153, 179, 231);;
 
 	/**
 	 * Instantiates a new UMLNodeRealizer.
@@ -270,20 +271,6 @@ public class UMLClassNodeRealizer extends NodeRealizerBase {
 	// /////////////////////////////////////////////////////////////////
 	// ////////////////////////////////////////////////////////////////////////////
 
-	@Override
-	protected void paintNode(Graphics2D gfx) {
-
-		if (model.getDataHolder().isTopFile(getNode())) {
-			setFillColor(Color.GREEN);
-		} else if (model.getDataHolder().isBottomFile(getNode())) {
-			setFillColor(Color.ORANGE);
-		} else {
-			setFillColor(Color.YELLOW);
-		}
-
-		super.paintNode(gfx);
-	}
-
 	/**
 	 * Paint the labels associated with this realizer.
 	 */
@@ -416,6 +403,12 @@ public class UMLClassNodeRealizer extends NodeRealizerBase {
 			if (i.length() > 0) {
 				addAttribute(i);
 			}
+		}
+		
+		if (model.getDataHolder().isFileNodeAModule(getNode())) {
+			setFillColor(BACKGROUND);
+		} else {
+			setFillColor(BACKGROUND.darker());
 		}
 
 		fitContent();

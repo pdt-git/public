@@ -408,6 +408,10 @@ public class GraphDataHolder {
 	public String getNodeContent(Node node) {
 		return (String) getNodeContentMap().get(node);
 	}
+	
+	public boolean isFileNodeAModule(Node node) {
+		return MODULE.equals(fileTypeMap.get(node));
+	}
 
 }
 
