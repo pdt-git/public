@@ -65,6 +65,7 @@
 	graph_style_margin_color(files, rounded, 10, snow2).
 	graph_style_margin_color(file, rounded, 10, snow).
 	graph_style_margin_color(external, rounded, 10, white).
+	graph_style_margin_color(entity, rounded, 10, snow).
 
 	node(Stream, Identifier, Label, Contents, Kind, _Options) :-
 		node_shape_style_color(Kind, Shape, Style, Color),
