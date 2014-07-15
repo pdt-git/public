@@ -17,6 +17,7 @@ package org.cs3.pdt.editor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.pdt.connector.util.DefaultErrorMessageProvider;
@@ -104,6 +105,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			IPrologProcessService prologProcessService = PDTConnectorPlugin.getDefault().getPrologProcessService();
 			CurrentProcessListener processListener = new CurrentProcessListener();
 			prologProcessService.registerActivePrologProcessListener(processListener);
+			PDTCommonPlugin.getDefault().registerProcessStartListener(processListener);
 			processListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
 			prologProcessService.registerConsultListener(new EditorConsultListener());
 		} catch (Throwable t) {

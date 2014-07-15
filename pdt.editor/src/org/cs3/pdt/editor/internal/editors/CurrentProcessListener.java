@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.prolog.connector.common.Debug;
@@ -33,7 +34,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 
-public class CurrentProcessListener implements PrologEventListener, ActivePrologProcessListener {
+public class CurrentProcessListener implements PrologEventListener, ActivePrologProcessListener, PrologProcessStartListener {
 
 	@Override
 	public void update(PrologEvent e) {
@@ -95,7 +96,7 @@ public class CurrentProcessListener implements PrologEventListener, ActiveProlog
 		try {
 			currentProcess.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, "_"));
 			
-			for (IFile file : PDTCommonPlugin.getDefault().getEntryPoints()) {
+			for (IFile file : PDTCommonPlugin.getDefault().getAllEntryPoints()) {
 				try {
 					String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
 					currentProcess.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
@@ -122,6 +123,13 @@ public class CurrentProcessListener implements PrologEventListener, ActiveProlog
 		addProcessListener();
 		
 		updateEntryPoints();
+	}
+
+	@Override
+	public void prologProcessStarted(PrologProcess process) {
+		if (process.equals(currentProcess)) {
+			updateEntryPoints();
+		}
 	}
 
 }
