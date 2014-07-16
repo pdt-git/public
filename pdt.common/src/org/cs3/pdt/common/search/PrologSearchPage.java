@@ -49,12 +49,12 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
@@ -77,7 +77,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	{META_HINT, META_HINT}
     };
     
-    private static final String PROJECT_SCOPE = "projectScope";
     private static final String LAST_PROJECT = "lastProject";
     private static final String LAST_CREATE_MARKERS = "lastCreateMarkers";
     
@@ -86,26 +85,27 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         private static final String PATTERN = "pattern";
         private static final String LIMIT_TO = "limitTo";
         private static final String EXACT_MATCH = "exactMatch";
+        private static final String SCOPE = "scope";
 
         public final int searchFor;
         public final int limitTo;
         public final String pattern;
         public final boolean exactMatch;
+        private final int scope;
         public final boolean createMarkers;
-        private final boolean projectScope;
         public final String project;
 
-        public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch) {
-        	this(searchFor, limitTo, pattern, exactMatch, true, true, "");
+        public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch, int scope) {
+        	this(searchFor, limitTo, pattern, exactMatch, scope, true, "");
         }
         
-        public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch, boolean createMarkers, boolean projectScope, String project) {
+        public SearchPatternData(int searchFor, int limitTo, String pattern, boolean exactMatch, int scope, boolean createMarkers, String project) {
             this.searchFor = searchFor;
             this.limitTo = limitTo;
             this.pattern = pattern;
             this.exactMatch = exactMatch;
             this.createMarkers = createMarkers;
-            this.projectScope = projectScope;
+            this.scope = scope;
             this.project = project;
         }
 
@@ -128,8 +128,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         	return createMarkers;
         }
         
-        public boolean isProjectScope() {
-        	return projectScope;
+        public int getScope() {
+        	return scope;
         }
         
         public String getProject() {
@@ -141,6 +141,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             settings.put(PATTERN, pattern);
             settings.put(LIMIT_TO, limitTo);
             settings.put(EXACT_MATCH, exactMatch);
+            settings.put(SCOPE, scope);
         }
 
         public static SearchPatternData create(IDialogSettings settings) {
@@ -153,8 +154,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 int searchFor = settings.getInt(SEARCH_FOR);
                 int limitTo = settings.getInt(LIMIT_TO);
                 boolean exactMatch = settings.getBoolean(EXACT_MATCH);
+                int scope = settings.getInt(SCOPE);
 
-                return new SearchPatternData(searchFor, limitTo, pattern, exactMatch);
+                return new SearchPatternData(searchFor, limitTo, pattern, exactMatch, scope);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -171,6 +173,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     // limit to
     private final static int DECLARATIONS = 0;
     private final static int REFERENCES = 1;
+    
+    // scope
+    private static final int WORKSPACE = 0;
+    private static final int PROJECT = 1;
     
     public static final String EXTENSION_POINT_ID = "org.cs3.pdt.prologSearchPage";
 
@@ -191,15 +197,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private Combo patternList;
     private ISearchPageContainer searchPageContainer;
 
-    private Button[] searchForRadioButtons;
-    private Button[] limitToRadioButtons;
+    private ArrayList<Button> searchForRadioButtons = new ArrayList<>();
+    private ArrayList<Button> limitToRadioButtons = new ArrayList<>();
+    private ArrayList<Button> scopeRadioButtons = new ArrayList<>();
     private Button exactMatchCheckBox;
     private Button createMarkersCheckBox;
 	private Label explainingLabel;
-	private Button projectScopeCheckBox;
 	private Combo projectSelector;
 	private String lastProject;
-	private boolean lastProjectScope;
 	private boolean lastCreateMarkers;
 
     //---- Action Handling ------------------------------------------------
@@ -238,7 +243,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         } else if (searchFor == META_PREDICATE) {
         	searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
         }
-    	if (data.isProjectScope()) {
+    	if (data.getScope() == PROJECT) {
     		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
     		if (project.isAccessible()) {
     			searchQuery.setProjectScope(project);
@@ -260,8 +265,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
     private int getLimitTo() {
-        for (int i = 0; i < limitToRadioButtons.length; i++) {
-            Button button = limitToRadioButtons[i];
+        for (Button button : limitToRadioButtons) {
             if (button.getSelection()) {
                 return getIntData(button);
             }
@@ -270,8 +274,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
     private int getSearchFor() {
-        for (int i = 0; i < searchForRadioButtons.length; i++) {
-            Button button = searchForRadioButtons[i];
+        for (Button button : searchForRadioButtons) {
             if (button.getSelection()) {
                 return getIntData(button);
             }
@@ -291,65 +294,15 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		return projectSelector.getText();
     }
     
-    private boolean isProjectScope() {
-    	return projectScopeCheckBox.getSelection();
+    private int getScope() {
+        for (Button button : scopeRadioButtons) {
+            if (button.getSelection()) {
+                return getIntData(button);
+            }
+        }
+        return -1;    
     }
    
-//    private SearchPattern getSearchPattern(String pattern) {
-//        if (pattern == null || pattern.isEmpty()) {
-//            return null;
-//        }
-//        String module = null;
-//        String mSeparator;
-//        String functor = "";
-//        String aSeparator = null;
-//        int arity = 0;
-//        
-//        String beforeArity;
-//        int lastSlash = pattern.lastIndexOf("//");
-//        if (lastSlash == -1) {
-//        	lastSlash = pattern.lastIndexOf("/");
-//        	if (lastSlash != -1) {
-//        		aSeparator = "/";
-//        	}
-//        } else {
-//        	aSeparator = "//";
-//        }
-//        if (lastSlash == -1) {
-//        	beforeArity = pattern;
-//            arity = -1;
-//        } else {
-//            try {
-//                arity = Integer.parseInt(pattern.substring(lastSlash + aSeparator.length()));
-//            } catch (NumberFormatException e) {
-//                return null;
-//            }
-//            if (arity < 0) {
-//                return null;
-//            }
-//            beforeArity = pattern.substring(0, lastSlash);
-//        }
-//        if (beforeArity.isEmpty()) {
-//        	return null;
-//        }
-//        int firstSplitter = beforeArity.indexOf("::");
-//        int splitterLength = 2;
-//        if (firstSplitter == -1) {
-//        	firstSplitter = beforeArity.indexOf(":");
-//        	splitterLength = 1;
-//        }
-//        if (firstSplitter == -1) {
-//        	functor = beforeArity;
-//        } else {
-//        	module = beforeArity.substring(0, firstSplitter);
-//        	functor = beforeArity.substring(firstSplitter + splitterLength);
-//        	if (module.isEmpty() || functor.isEmpty()) {
-//        		return null;
-//        	}
-//        }
-//        return new Object[]{module, functor, arity};
-//    }
-    
     private static class SearchPattern {
     	private static final Pattern p = Pattern.compile("(([^:]+)(:|::))?([^:/]+)((/|//)(\\d+))?");
     	
@@ -401,8 +354,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
 
     private void setSearchFor(int searchFor) {
-        for (int i = 0; i < searchForRadioButtons.length; i++) {
-            Button button = searchForRadioButtons[i];
+        for (Button button : searchForRadioButtons) {
             button.setSelection(searchFor == getIntData(button));
         }
         updateLabelAndEnablement(searchFor, getLimitTo());
@@ -417,8 +369,11 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	}
     }
     
-    private void setProjectScope(boolean projectScope) {
-    	projectScopeCheckBox.setSelection(projectScope);
+    private void setScope(int scope) {
+        for (Button button : scopeRadioButtons) {
+            button.setSelection(scope == getIntData(button));
+        }
+        projectSelector.setEnabled(scope == PROJECT);
     }
 
 	private void updateLabelAndEnablement(int searchFor, int limitTo) {
@@ -436,13 +391,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			limitToButton.setEnabled(doPatternSearch);
 		}
 		createMarkersCheckBox.setEnabled(!doPatternSearch);
-		projectScopeCheckBox.setEnabled(!doPatternSearch);
-		projectSelector.setEnabled(!doPatternSearch && projectScopeCheckBox.getSelection());
 	}
 
     private void setLimitTo(int limitTo) {
-        for (int i = 0; i < limitToRadioButtons.length; i++) {
-            Button button = limitToRadioButtons[i];
+        for (Button button : limitToRadioButtons) {
             button.setSelection(limitTo == getIntData(button));
         }
         updateLabelAndEnablement(getSearchFor(), limitTo);
@@ -491,8 +443,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         		getLimitTo(),
         		pattern,
         		isExactMatch(),
+        		getScope(),
         		isCreateMarkers(),
-        		isProjectScope(),
         		getProject()
         		);
     	if (searchFor < 2) {
@@ -536,50 +488,44 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         readConfiguration();
 
         Composite result = new Composite(parent, SWT.NONE);
-
+        
         GridLayout layout = new GridLayout(2, false);
         layout.horizontalSpacing = 10;
         result.setLayout(layout);
+        
+        Group elementSearch = new Group(result, SWT.NONE);
+        elementSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        elementSearch.setLayout(new GridLayout(1, false));
+        elementSearch.setText("Element search");
+        
+        createExpression(elementSearch);
 
-        Control expressionComposite = createExpression(result);
-        expressionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+        createElementSearchFor(elementSearch);
+        createLimitTo(elementSearch);
+        
+        Group problemSearch = new Group(result, SWT.NONE);
+        problemSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        problemSearch.setLayout(new GridLayout(1, false));
+        problemSearch.setText("Problem search");
+        createProblemSearchFor(problemSearch);
 
-        explainingLabel = new Label(result, SWT.WRAP);
-        GridData labelLayoutData = new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1);
-        labelLayoutData.heightHint = convertHeightInCharsToPixels(2);
-		explainingLabel.setLayoutData(labelLayoutData);
+        createScope(result);
 
-        Label separator = new Label(result, SWT.NONE);
-        separator.setVisible(false);
-        GridData data = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
-        data.heightHint = convertHeightInCharsToPixels(1) / 3;
-        separator.setLayoutData(data);
-
-        Control searchFor = createSearchFor(result);
-        searchFor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-
-        Control limitTo = createLimitTo(result);
-        limitTo.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
+        createHelpLabel(result);
 
         setControl(result);
 
         Dialog.applyDialogFont(result);
     }
 
-    private Control createExpression(Composite parent) {
-        Composite result = new Composite(parent, SWT.NONE);
-        GridLayout layout = new GridLayout(2, false);
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        result.setLayout(layout);
-
+	private void createExpression(Composite parent) {
         // Pattern text + info
-        Label label = new Label(result, SWT.LEFT);
+        Label label = new Label(parent, SWT.LEFT);
         label.setText("Search String");
-        label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
         // Pattern combo
-        patternList = new Combo(result, SWT.SINGLE | SWT.BORDER);
+        patternList = new Combo(parent, SWT.SINGLE | SWT.BORDER);
         patternList.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -594,104 +540,95 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
             }
         });
-        GridData data = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
-        data.widthHint = convertWidthInCharsToPixels(50);
+        GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
+        data.widthHint = convertWidthInCharsToPixels(30);
         patternList.setLayoutData(data);
 
-        exactMatchCheckBox = createButton(result, SWT.CHECK, "Exact matches only", 0, true);
-        exactMatchCheckBox.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
-
-        return result;
+        exactMatchCheckBox = createButton(parent, SWT.CHECK, "Exact matches only", 0, true);
+        exactMatchCheckBox.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
     }
 
-    private Control createSearchFor(Composite parent) {
-        Composite container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout(1, true));
-    	
-        Group patternSearch = new Group(container, SWT.NONE);
-        patternSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        patternSearch.setText("Search For");
-        patternSearch.setLayout(new GridLayout(2, false));
+    private void createElementSearchFor(Composite parent) {
+        Group elementSearch = new Group(parent, SWT.NONE);
+        elementSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        elementSearch.setText("Search For");
+        elementSearch.setLayout(new GridLayout(1, false));
 
-    	Group globalSearch = new Group(container, SWT.NONE);
-    	globalSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    	globalSearch.setText("Search Globally For");
-    	globalSearch.setLayout(new GridLayout(2, false));
-        
-        searchForRadioButtons = new Button[] {
-                createButton(patternSearch, SWT.RADIO, "Entity", MODULE, false),
-                createButton(patternSearch, SWT.RADIO, "Predicate", PREDICATE, true),
-                createButton(globalSearch, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false),
-                createButton(globalSearch, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false),
-                createButton(globalSearch, SWT.RADIO, "Undeclared Meta Predicate", META_PREDICATE, false)
-        };
-        createMarkersCheckBox = createButton(globalSearch, SWT.CHECK, "Create Warnings", -1, true);
-        
-        for (Button button : searchForRadioButtons) {
-        	button.addSelectionListener(new SelectionAdapter() {
-				@Override
-        		public void widgetSelected(SelectionEvent e) {
-					if (e.getSource() instanceof Button) {
-						Button button2 = (Button) e.getSource();
-						for (Button button3 : searchForRadioButtons) {
-							button3.setSelection(false);
-						}
-						button2.setSelection(true);
-						updateLabelAndEnablement(getIntData(button2), getLimitTo());
-						updateOKStatus();
-					}
-				}
-			});
-        }
-
-        return container;
-    }
-
-    private Control createLimitTo(Composite parent) {
-        Composite container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout(1, true));
-
-        Group result = new Group(container, SWT.NONE);
-        result.setText("Limit To");
-        result.setLayout(new GridLayout(2, false));
-
-        limitToRadioButtons = new Button[]{
-                createButton(result, SWT.RADIO, "Declarations && Definitions", DECLARATIONS, true),
-                createButton(result, SWT.RADIO, "References", REFERENCES, false)
-        };
-        for (Button button : limitToRadioButtons) {
-        	button.addSelectionListener(new SelectionAdapter() {
-				@Override
-        		public void widgetSelected(SelectionEvent e) {
-					if (e.getSource() instanceof Button) {
-						updateLabelAndEnablement(getSearchFor(), getIntData((Button) e.getSource()));
-						updateOKStatus();
-					}
-				}
-			});
-        }
-        
-        Group scope = new Group(container, SWT.NONE);
-        scope.setText("Scope");
-        scope.setLayout(new GridLayout(2, false));
-        
-        projectScopeCheckBox = createButton(scope, SWT.CHECK, "Project", -1, false);
-        projectScopeCheckBox.addSelectionListener(new SelectionAdapter() {
-			@Override
-    		public void widgetSelected(SelectionEvent e) {
-				projectSelector.setEnabled(projectScopeCheckBox.getSelection());
-			}
-		});
-        projectSelector = new Combo(scope, SWT.READ_ONLY);
-        fillProjectList(projectSelector);
-        return container;
+        Button moduleButton = createButton(elementSearch, SWT.RADIO, "Module/Entity", MODULE, false);
+		searchForRadioButtons.add(moduleButton);
+		moduleButton.addSelectionListener(searchForSelectionListener);
+		
+        Button predicateButton = createButton(elementSearch, SWT.RADIO, "Predicate", PREDICATE, true);
+		searchForRadioButtons.add(predicateButton);
+		predicateButton.addSelectionListener(searchForSelectionListener);
     }
     
-    private void fillProjectList(Combo combo) {
-    	TreeSet<String> projectNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+    private void createProblemSearchFor(Composite parent) {
+    	Group problemSearch = new Group(parent, SWT.NONE);
+    	problemSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    	problemSearch.setText("Search For");
+    	problemSearch.setLayout(new GridLayout(1, false));
+        
+    	Button undefinedCallButton = createButton(problemSearch, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false);
+		searchForRadioButtons.add(undefinedCallButton);
+		undefinedCallButton.addSelectionListener(searchForSelectionListener);
     	
-    	IProject externalPrologFiles = null;
-    	try {
+		Button deadPredicateButton = createButton(problemSearch, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false);
+		searchForRadioButtons.add(deadPredicateButton);
+		deadPredicateButton.addSelectionListener(searchForSelectionListener);
+    	
+		Button metaPredicateButton = createButton(problemSearch, SWT.RADIO, "Undeclared Meta Predicate", META_PREDICATE, false);
+		searchForRadioButtons.add(metaPredicateButton);
+		metaPredicateButton.addSelectionListener(searchForSelectionListener);
+        
+		createMarkersCheckBox = createButton(parent, SWT.CHECK, "Create Warnings", -1, true);
+    }
+    
+	private void createLimitTo(Composite parent) {
+		Group result = new Group(parent, SWT.NONE);
+		result.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		result.setText("Limit To");
+		result.setLayout(new GridLayout(1, false));
+
+		limitToRadioButtons.add(createButton(result, SWT.RADIO, "Declarations && Definitions", DECLARATIONS, true));
+		limitToRadioButtons.add(createButton(result, SWT.RADIO, "References", REFERENCES, false));
+		for (Button button : limitToRadioButtons) {
+			button.addSelectionListener(limitToSelectionListener);
+        }
+    }
+	
+	private void createScope(Composite parent) {
+		Group scope = new Group(parent, SWT.NONE);
+		scope.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		scope.setText("Scope");
+		scope.setLayout(new GridLayout(2, false));
+
+		Button workspaceScope = createButton(scope, SWT.RADIO, "Workspace", WORKSPACE, true);
+		scopeRadioButtons.add(workspaceScope);
+		workspaceScope.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				projectSelector.setEnabled(false);
+			}
+		});
+		workspaceScope.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		Button projectScope = createButton(scope, SWT.RADIO, "Project", PROJECT, true);
+		scopeRadioButtons.add(projectScope);
+		projectScope.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				projectSelector.setEnabled(true);
+			}
+		});
+		projectSelector = new Combo(scope, SWT.READ_ONLY);
+		fillProjectList(projectSelector);
+	}
+
+	private void fillProjectList(Combo combo) {
+		TreeSet<String> projectNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+
+		IProject externalPrologFiles = null;
+		try {
 			externalPrologFiles = ExternalPrologFilesProjectUtils.getExternalPrologFilesProject();
 		} catch (CoreException e) {
 			Debug.report(e);
@@ -706,6 +643,13 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	}
     }
 
+	private void createHelpLabel(Composite result) {
+		explainingLabel = new Label(result, SWT.WRAP);
+        GridData labelLayoutData = new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1);
+        labelLayoutData.heightHint = convertHeightInCharsToPixels(2);
+        explainingLabel.setLayoutData(labelLayoutData);
+	}
+
     private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
         Button button = new Button(parent, style);
         button.setText(text);
@@ -714,6 +658,31 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         button.setSelection(isSelected);
         return button;
     }
+
+	private final SelectionListener searchForSelectionListener = new SelectionAdapter() {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			if (e.getSource() instanceof Button) {
+				Button button2 = (Button) e.getSource();
+				for (Button button3 : searchForRadioButtons) {
+					button3.setSelection(false);
+				}
+				button2.setSelection(true);
+				updateLabelAndEnablement(getIntData(button2), getLimitTo());
+				updateOKStatus();
+			}
+		}
+	};
+
+	private final SelectionListener limitToSelectionListener = new SelectionAdapter() {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			if (e.getSource() instanceof Button) {
+				updateLabelAndEnablement(getSearchFor(), getIntData((Button) e.getSource()));
+				updateOKStatus();
+			}
+		}
+	};
 
     final void updateOKStatus() {
         boolean isValid = isValidSearchPattern();
@@ -757,6 +726,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         setSearchFor(data.getSearchFor());
         setLimitTo(data.getLimitTo());
         setExactMatch(data.isExactMatch());
+        setScope(data.getScope());
     }
 
     private void initSelections() {
@@ -775,7 +745,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         applySearchPatternData(initData);
     	setProject(lastProject);
-		setProjectScope(lastProjectScope);
 		setCreateMarkers(lastCreateMarkers);
     }
 
@@ -787,7 +756,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
                 i++;
             }
             if (i > 0) {
-                return new SearchPatternData(PREDICATE, DECLARATIONS, selectedText.substring(0, i), true);
+                return new SearchPatternData(PREDICATE, DECLARATIONS, selectedText.substring(0, i), true, WORKSPACE);
             }
         }
         return null;
@@ -797,7 +766,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
         if (!previousSearchPatterns.isEmpty()) {
             return (SearchPatternData) previousSearchPatterns.get(0);
         }
-        return new SearchPatternData(PREDICATE, DECLARATIONS, "", true);
+        return new SearchPatternData(PREDICATE, DECLARATIONS, "", true, WORKSPACE);
     }
 
     /*
@@ -838,7 +807,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         try {
         	lastProject = s.get(LAST_PROJECT);
-        	lastProjectScope = !s.getBoolean(PROJECT_SCOPE);
         	lastCreateMarkers = s.getBoolean(LAST_CREATE_MARKERS);
         	
             int historySize = s.getInt(STORE_HISTORY_SIZE);
@@ -862,7 +830,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private void writeConfiguration() {
         IDialogSettings s = getDialogSettings();
     	s.put(LAST_PROJECT, getProject());
-        s.put(PROJECT_SCOPE, !isProjectScope());
         s.put(LAST_CREATE_MARKERS, isCreateMarkers());
 
         int historySize = Math.min(previousSearchPatterns.size(), HISTORY_SIZE);
