@@ -20,10 +20,10 @@
 
 :- public([
 	loaded_by/4,	% ?SourceFile, ?ParentSourceFile, -Line, -Directive
-	find_reference_to/8, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
-	find_entity_reference/8,
-	find_entity_definition/5,
-	find_predicate_definitions/9, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
+	find_reference_to/9, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
+	find_entity_reference/9,
+	find_entity_definition/6,
+	find_predicate_definitions/10, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_categorized_predicate_definitions/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
 	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/10,
@@ -76,7 +76,7 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Term, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
+find_reference_to(Term, ExactMatch, Root, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
 	Term = predicate(From, _, SearchFunctor, Separator, Arity0),
 	(	Separator == (//),
 		nonvar(Arity0)
@@ -117,6 +117,10 @@ find_reference_to(Term, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFi
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),
+	(	nonvar(Root)
+	->	sub_atom(EntityFile, 0, _, _, Root)
+	;	true
+	),
 %	(	Kind == logtalk(object) ->
 %		entity_property(From, _, file(FromBase, FromDirectory)),
 %		atom_concat(FromDirectory, FromBase, FromFile)
@@ -166,9 +170,9 @@ find_reference_to(Term, ExactMatch, Entity, CallerFunctor, CallerArity, EntityFi
 	format(atom(Label), '~w (in clause starting at line ~w)', [Called, Line]),
 	PropertyList = [line(Line), label(Label)|PropertyList0].
 
-find_entity_reference(Entity, ExactMatch, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
+find_entity_reference(Entity, ExactMatch, Root, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
-	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, RefEntity, RefName, RefArity, File, Line, PropertyList).
+	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, Root, RefEntity, RefName, RefArity, File, Line, PropertyList).
 
 search_entity_name(Entity, true, Entity) :- !.
 search_entity_name(EntityPart, false, EntityName) :-
@@ -176,7 +180,7 @@ search_entity_name(EntityPart, false, EntityName) :-
 	functor(Entity, EntityName, _),
 	once(sub_atom(EntityName, _, _, _, EntityPart)).
 
-find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
+find_entity_definition(SearchString, ExactMatch, Root, File, Line, Entity) :-
 	entity(Entity),
 	functor(Entity, Functor, _),
 	(	ExactMatch == true
@@ -185,20 +189,14 @@ find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
 	),
 	entity_property(Entity, _, file(Base, Directory)),
 	atom_concat(Directory, Base, File),
+	(	nonvar(Root)
+	->	sub_atom(File, 0, _, _, Root)
+	;	true
+	),
 	entity_property(Entity, _, lines(Line, _)).
 
-find_entity_definition(SearchString, ExactMatch, File, Line, Entity) :-
-	current_logtalk_flag(modules, supported),
-	current_module(Entity),
-	(	ExactMatch == true
-	->	SearchString = Entity
-	;	once(sub_atom(Entity, _, _, _, SearchString))
-	),
-	module_property(Entity, file(File)),
-	module_property(Entity, line_count(Line)).
 
-
-find_predicate_definitions(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
+find_predicate_definitions(Term, ExactMatch, Root, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
 	Term = predicate(Entity, _, SearchFunctor, Separator, SearchArity0),
 	(	Separator == (//),
 		nonvar(SearchArity0)
@@ -215,6 +213,10 @@ find_predicate_definitions(Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, 
 	),
 	entity_property(From, _, file(File, Directory)),
 	atom_concat(Directory, File, FullPath),
+	(	nonvar(Root)
+	->	sub_atom(FullPath, 0, _, _, Root)
+	;	true
+	),
 	memberchk(line_count(Line), Properties).
 
 split_search_pi(Module:Functor/Arity, Module, Functor, Arity) :- !.

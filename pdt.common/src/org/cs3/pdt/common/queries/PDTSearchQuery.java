@@ -42,6 +42,7 @@ import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -65,6 +66,8 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private PrologSearchResult result;
 	private LinkedHashMap<String, SearchMatchElement> matchElements = new LinkedHashMap<String, SearchMatchElement>();
 	private LinkedHashMap<String, SearchPredicateElement> predicateElements = new LinkedHashMap<String, SearchPredicateElement>();
+	private IProject project;
+	private String projectPath;
 
 	public PDTSearchQuery(String goal, String searchGoalLabel) {
 		this(goal, searchGoalLabel, true);
@@ -292,6 +295,23 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 				QueryUtils.quoteAtomIfNeeded(goal.getFunctor()),
 				"_",
 				goal.getArity() >= 0 ? goal.getArity() : "_");
+	}
+	
+	public void setProjectScope(IProject project) {
+		this.project = project;
+		if (project != null) {
+			projectPath = QueryUtils.prologFileNameQuoted(project.getLocation().toFile());
+		} else {
+			projectPath = null;
+		}
+	}
+	
+	public IProject getProject() {
+		return project;
+	}
+	
+	public String getProjectPath() {
+		return projectPath;
 	}
 
 }

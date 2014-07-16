@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_xref,
-         [ find_reference_to/8 % +Term,+ExactMatch,
+         [ find_reference_to/9 % +Term,+ExactMatch,?Root,
                                % -RefModule,-RefName,-RefArity,-RefFile,-RefLine,-PropertyList
          ]
          ).
@@ -61,8 +61,8 @@ assert_result(IsAlias, QGoal-clause_term_position(Ref, TermPosition)) :-
 
 assert_result(_,_). 
 
-%% find_reference_to(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
-find_reference_to(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+%% find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
+find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	Term = predicate(SearchMod, _, Functor, Separator, Arity0),
 	(	Separator == (//),
 		nonvar(Arity0)
@@ -77,6 +77,10 @@ find_reference_to(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Posit
 	retract(result(Alias, M0:ReferencingGoal, ClauseRefOrFile, Termposition, _)),
 	(	atom(ClauseRefOrFile)
 	->	RefFile = ClauseRefOrFile,
+		(	nonvar(Root)
+		->	sub_atom(RefFile, 0, _, _, Root)
+		;	true
+		),
 		Line = 1,
 		once(module_of_file(RefFile, RefModule)),
 		RefName = (initialization),
@@ -90,6 +94,10 @@ find_reference_to(Term, ExactMatch, RefModule, RefName, RefArity, RefFile, Posit
 		;	true
 		),
 		clause_property(ClauseRef, file(RefFile)),
+		(	nonvar(Root)
+		->	sub_atom(RefFile, 0, _, _, Root)
+		;	true
+		),
 		% check that RefFile is not derived from another file
 		clause_property(ClauseRef, source(RefFile)),
 		clause_property(ClauseRef, line_count(Line))

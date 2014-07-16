@@ -41,6 +41,7 @@ public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 		String query = bT(PDTCommonPredicates.FIND_ENTITY_DEFINITION,
 				getGoal(),
 				Boolean.toString(isExactMatch()),
+				getProjectPath() == null ? "_" : getProjectPath(),
 				"File",
 				"Line",
 				"Module");
@@ -52,7 +53,11 @@ public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 		String module = m.get("Module").toString();
 		IFile file = findFile(m.get("File").toString());
 		int line = Integer.parseInt(m.get("Line").toString());
-		
+
+		if (getProject() != null && !getProject().equals(file.getProject())) {
+			return null;
+		}
+
 		SearchModuleElement moduleElement = new SearchModuleElement(null, module, null);
 		ModuleMatch match = new ModuleMatch(moduleElement, module, file, line);
 		moduleElement.setMatch(match);

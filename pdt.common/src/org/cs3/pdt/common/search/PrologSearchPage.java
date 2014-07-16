@@ -217,62 +217,36 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
         PDTSearchQuery searchQuery = null;
 
-//        Goal goal;
         if (searchFor == PREDICATE) {
         	SearchPattern searchPattern = SearchPattern.createSearchPattern(data.pattern);
         	String searchGoal = searchPattern.toSearchGoal();
-//            goal = new Goal("", searchPattern.module, Util.quoteAtom(searchPattern.name), searchPattern.arity, null, data.isExactMatch());
-            
             if (limitTo == REFERENCES) {
             	searchQuery = new ReferencesSearchQueryDirect(searchGoal, data.pattern, data.isExactMatch());
             } else {
             	searchQuery = new GlobalDefinitionsSearchQuery(searchGoal, data.pattern, data.isExactMatch());
             }
         } else if (searchFor == MODULE) {
-//        	boolean exactMatch = data.isExactMatch();
-//			goal = new Goal("", data.pattern, "", 0, data.pattern, exactMatch);
-//            
             if (limitTo == REFERENCES) {
             	searchQuery = new ModuleReferenceSearchQuery(QueryUtils.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             } else {
             	searchQuery = new ModuleDefinitionsSearchQuery(QueryUtils.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             }
         } else if (searchFor == UNDEFINED_CALL) {
-//        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
-        	if (data.isProjectScope()) {
-        		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
-        		if (project.isAccessible()) {
-        			searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers(), project);
-        		} else {
-        			Debug.error(project.getName() + " is not accessible.");
-        		}
-        	} else {
-        		searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
-        	}
+        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
         } else if (searchFor == DEAD_PREDICATE) {
-        	if (data.isProjectScope()) {
-        		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
-        		if (project.isAccessible()) {
-        			searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers(), project);
-        		} else {
-        			Debug.error(project.getName() + " is not accessible.");
-        		}
-        	} else {
-        		searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
-        	}
+        	searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
         } else if (searchFor == META_PREDICATE) {
-        	if (data.isProjectScope()) {
-        		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
-        		if (project.isAccessible()) {
-        			searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers(), project);
-        		} else {
-        			Debug.error(project.getName() + " is not accessible.");
-        		}
-        	} else {
-        		searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
-        	}
-//        	searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
+        	searchQuery = new MetaPredicatesSearchQuery(data.isCreateMarkers());
         }
+    	if (data.isProjectScope()) {
+    		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(data.getProject());
+    		if (project.isAccessible()) {
+    			searchQuery.setProjectScope(project);
+    		} else {
+    			searchQuery = null;
+    			Debug.error(project.getName() + " is not accessible.");
+    		}
+    	}
         
         if (searchQuery != null) {
         	NewSearchUI.activateSearchResultView();

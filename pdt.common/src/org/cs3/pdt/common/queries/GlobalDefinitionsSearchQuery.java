@@ -37,21 +37,10 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 
 	@Override
 	protected String buildSearchQuery() {
-//		String term;
-//		
-//		if (goal.getArity() == -1) {
-//			if (module == null || module.isEmpty()) {
-//				term = goal.getFunctor();
-//			} else {
-//				term = module + ":" + goal.getFunctor();
-//			}
-//		} else {
-//			term = goal.getSignature();
-//		}
-//		
 		String query = bT(PDTCommonPredicates.FIND_PREDICATE_DEFINITIONS,
 				getGoal(),
 				Boolean.toString(isExactMatch()),
+				getProjectPath() == null ? "_" : getProjectPath(),
 				"DefiningModule",
 				"Functor",
 				"Arity",
@@ -82,6 +71,9 @@ public class GlobalDefinitionsSearchQuery extends PDTSearchQuery {
 		String declOrDef = m.get("DeclOrDef").toString();
 
 		Match match;
+		if (getProject() != null && (file == null || !getProject().equals(file.getProject()))) {
+			return null;
+		}
 		if (file == null) {
 			match = createUniqueMatch(definingModule, functor, arity, properties, "", declOrDef);
 		} else {

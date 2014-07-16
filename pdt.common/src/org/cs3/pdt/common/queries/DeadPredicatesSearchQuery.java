@@ -27,7 +27,6 @@ import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.Debug;
-import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -41,28 +40,25 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 
 	private static final String DEAD_CODE_MARKER = "org.cs3.pdt.common.deadCodeMarker";
 	
-	private IProject root;
-	private String rootPath;
-
 	public DeadPredicatesSearchQuery(boolean createMarkers) {
-		this(createMarkers, null);
+		super(createMarkers, DEAD_CODE_MARKER);
+		setSearchType("Dead predicates");
 	}
 	
-	public DeadPredicatesSearchQuery(boolean createMarkers, IProject root) {
-		super(createMarkers, DEAD_CODE_MARKER);
-		this.root = root;
-		if (root == null) {
+	@Override
+	public void setProjectScope(IProject project) {
+		super.setProjectScope(project);
+		if (project == null) {
 			setSearchType("Dead predicates");
 		} else {
-			setSearchType("Dead predicates in project " + root.getName());
-			rootPath = QueryUtils.prologFileNameQuoted(root.getLocation().toFile());
+			setSearchType("Dead predicates in project " + project.getName());
 		}
 	}
 
 	@Override
 	protected String buildSearchQuery() {
 		return bT(PDTCommonPredicates.FIND_DEAD_PREDICATE,
-				rootPath == null ? "_" : rootPath,
+				getProjectPath() == null ? "_" : getProjectPath(),
 				"Module",
 				"Name",
 				"Arity",
@@ -85,7 +81,7 @@ public class DeadPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 		
 		IFile file = findFile(m.get("File").toString());
 		
-		if (root != null && !root.equals(file.getProject())) {
+		if (getProject() != null && !getProject().equals(file.getProject())) {
 			return null;
 		}
 		
