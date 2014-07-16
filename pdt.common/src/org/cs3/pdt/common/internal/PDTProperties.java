@@ -17,12 +17,9 @@ import org.eclipse.core.resources.IProject;
 
 public class PDTProperties {
 	
-	private static HashMap<IProject, PDTProperties> projectMap;
+	private static HashMap<IProject, PDTProperties> projectMap = new HashMap<>();
 	
 	public static PDTProperties getPDTProperties(IProject project) {
-		if (projectMap == null) {
-			projectMap = new HashMap<>();
-		}
 		PDTProperties result = projectMap.get(project);
 		if (result == null) {
 			result = new PDTProperties(project);
