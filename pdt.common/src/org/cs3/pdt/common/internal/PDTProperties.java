@@ -14,7 +14,6 @@ import java.util.Set;
 import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Path;
 
 public class PDTProperties {
 	
@@ -83,7 +82,7 @@ public class PDTProperties {
 	public void addEntryPointFile(IFile file) throws InvalidPropertiesFormatException, FileNotFoundException, IOException {
 		entryPoints.add(file);
 		String entryPointsProperty = getProperty(ENTRY_POINTS_PROPERTY);
-		String path = file.getFullPath().toString();
+		String path = file.getProjectRelativePath().toString();
 		if (entryPointsProperty == null || entryPointsProperty.isEmpty()) {
 			entryPointsProperty = path + ENTRY_POINT_SEPARATOR;
 		} else {
@@ -98,7 +97,7 @@ public class PDTProperties {
 	public void removeEntryPointFile(IFile file) throws InvalidPropertiesFormatException, FileNotFoundException, IOException {
 		entryPoints.remove(file);
 		String entryPointsProperty = getProperty(ENTRY_POINTS_PROPERTY);
-		String path = file.getFullPath().toString();
+		String path = file.getProjectRelativePath().toString();
 		if (entryPointsProperty == null || entryPointsProperty.isEmpty()) {
 			return;
 		} 
@@ -112,6 +111,10 @@ public class PDTProperties {
 		return entryPoints.contains(file);
 	}
 	
+	public Set<IFile> getEntryPoints() {
+		return entryPoints;
+	}
+	
 	private void loadEntryPoints() throws InvalidPropertiesFormatException, FileNotFoundException, IOException {
 		String entryPointProperty = getProperty(ENTRY_POINTS_PROPERTY);
 		if (entryPointProperty == null || entryPointProperty.isEmpty()) {
@@ -119,7 +122,10 @@ public class PDTProperties {
 		}
 		for (String entryPointPath : entryPointProperty.split("\\" + ENTRY_POINT_SEPARATOR)) {
 			if (!entryPointPath.isEmpty()) {
-				entryPoints.add(project.getWorkspace().getRoot().getFile(new Path(entryPointPath).makeAbsolute()));
+				IFile file = project.getFile(entryPointPath);
+				if (file.exists()) {
+					entryPoints.add(file);
+				}
 			}
 		}
 	}
