@@ -1051,7 +1051,15 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		int inputLine = control.getLineAtOffset(startOfInput);
 		int inputLineOffset = control.getOffsetAtLine(inputLine);
 		int c = control.getCaretOffset() - inputLineOffset;
-		control.getContent().replaceTextRange(0, inputLineOffset, "");
+		int charCount = control.getCharCount();
+		if (charCount > 0 && inputLineOffset > 0) {
+			if (charCount > inputLineOffset) {
+				control.setText(control.getText(inputLineOffset, charCount - 1));
+			} else {
+				control.setText("");
+			}
+		}
+//		control.replaceTextRange(0, inputLineOffset, "");
 		startOfInput -= inputLineOffset;
 		control.setCaretOffset(c);
 		thatWasMe = false;

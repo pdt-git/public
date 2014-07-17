@@ -54,12 +54,6 @@
       </page>
       <page
             category="pdt.y.preferences.MainPreferencePage"
-            class="pdt.y.preferences.PredicateVisibilityPreferences"
-            id="pdt.y.preferences.PredicateVisibilityPreferences"
-            name="Predicate Visibility">
-      </page>
-      <page
-            category="pdt.y.preferences.MainPreferencePage"
             class="pdt.y.preferences.PredicateAppearancePreferences"
             id="pdt.y.preferences.PredicateAppearancePreferences"
             name="Predicate Appearance">

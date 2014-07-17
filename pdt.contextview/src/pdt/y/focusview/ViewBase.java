@@ -31,16 +31,12 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -52,19 +48,12 @@ import org.eclipse.ui.progress.UIJob;
 import pdt.y.internal.ImageRepository;
 import pdt.y.internal.ui.ToolBarAction;
 import pdt.y.main.PDTGraphView;
-import pdt.y.model.realizer.edges.EdgeRealizerBase;
-import pdt.y.model.realizer.edges.LoadEdgeRealizer;
-import pdt.y.model.realizer.nodes.NodeRealizerBase;
 import pdt.y.preferences.MainPreferencePage;
 import pdt.y.preferences.PredicateLayoutPreferences;
+import pdt.y.preferences.PredicateVisibilityPreferences;
 import pdt.y.preferences.PreferenceConstants;
+import pdt.y.view.modes.MouseHandler;
 import pdt.y.view.modes.OpenInEditorViewMode;
-import y.base.Edge;
-import y.base.Node;
-import y.view.EdgeLabel;
-import y.view.HitInfo;
-import y.view.NodeRealizer;
-import y.view.ViewMode;
 
 
 public abstract class ViewBase extends ViewPart {
@@ -158,6 +147,42 @@ public abstract class ViewBase extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
+		toolBarManager.add(new ToolBarAction("Show PDT Predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.P)) {
+			{
+				setChecked(PredicateVisibilityPreferences.showPDTPredicates());
+			}
+
+			@Override
+			public int getStyle() {
+				return IAction.AS_CHECK_BOX;
+			}
+			
+			@Override
+			public void performAction() {
+				PredicateVisibilityPreferences.setShowPDTPredicates(isChecked());
+				updateCurrentFocusView();	
+			}
+		});
+		
+		toolBarManager.add(new ToolBarAction("Show SWI Predicates",
+				ImageRepository.getImageDescriptor(ImageRepository.S)) {
+			{
+				setChecked(PredicateVisibilityPreferences.showSWIPredicates());
+			}
+
+			@Override
+			public int getStyle() {
+				return IAction.AS_CHECK_BOX;
+			}
+			
+			@Override
+			public void performAction() {
+				PredicateVisibilityPreferences.setShowSWIPredicates(isChecked());
+				updateCurrentFocusView();	
+			}
+		});
+		
 		toolBarManager.add(new ToolBarAction("Show Metapredicates",
 				ImageRepository.getImageDescriptor(ImageRepository.M)) {
 				{
@@ -370,7 +395,11 @@ public abstract class ViewBase extends ViewPart {
 			this.pifLoader = pifLoader;
 			
 			pdtGraphView.addViewMode(new OpenInEditorViewMode(pdtGraphView, pifLoader));
-			pdtGraphView.addViewMode(new MouseHandler(getShell()));
+			pdtGraphView.addViewMode(new MouseHandler(this));
+		}
+		
+		public boolean isNavigationEnabled() {
+			return navigationEnabled;
 		}
 		
 		public PDTGraphView getPdtGraphView() {
@@ -427,108 +456,12 @@ public abstract class ViewBase extends ViewPart {
 			return getViewContainer();
 		}
 
-		private final class MouseHandler extends ViewMode {
+		public String getInfoText() {
+			return infoText;
+		}
 
-			private final ToolTip t;
-			private final NavigationToolTip nav;
-			
-			public MouseHandler(Shell parent) {
-				t = new ToolTip(parent, SWT.NONE);
-				t.setVisible(false);
-				nav = new NavigationToolTip(FocusViewControl.this);
-			}
-			
-			@Override
-			public void mouseClicked(double x, double y) {
-				super.mouseClicked(x, y);	
-				
-				if (navigationEnabled) return;
-				
-				HitInfo hitInfo = getHitInfo(x, y);
-				
-				if (hitInfo.hasHitEdges()) {
-					Edge edge = hitInfo.getHitEdge();
-					EdgeLabel label = pdtGraphView.getGraph2D().getRealizer(edge).getLabel();
-					pdtGraphView.getGraph2D().setSelected(label, true);
-				}
-				
-				if (hitInfo.hasHitEdgeLabels()) {
-					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					pdtGraphView.getGraph2D().setSelected(edge, true);
-				}
-				
-				if (hitInfo.hasHits())
-					showToolTip("Double click to show in editor");
-			}
-			
-			@Override
-			public void mouseMoved(final double x, final double y) {
-				super.mouseMoved(x, y);
-				
-				updateStatus(x, y);
-			}
-
-			protected void updateStatus(double x, double y) {
-				HitInfo hitInfo = getHitInfo(x, y);
-				
-				String text = "";
-				
-				if (hitInfo.hasHitNodes()) {
-					Node node = hitInfo.getHitNode();
-					
-					NodeRealizer realizer = pdtGraphView.getGraph2D().getRealizer(node);
-					if (realizer instanceof NodeRealizerBase) {
-						text = ((NodeRealizerBase)realizer).getInfoText();
-					}
-				}
-				else if (hitInfo.hasHitEdgeLabels()) {
-					Edge edge = hitInfo.getHitEdgeLabel().getEdge();
-					EdgeRealizerBase realizer = (EdgeRealizerBase)pdtGraphView.getGraph2D().getRealizer(edge);
-					text = realizer.getInfoText();
-					
-					if (realizer instanceof LoadEdgeRealizer)
-					{
-						final String content = text;
-						new UIJob("Updating status") {
-							@Override
-							public IStatus runInUIThread(IProgressMonitor monitor) {
-								nav.setContent(content);
-								nav.activate();
-								return Status.OK_STATUS;
-							}
-						}.schedule();
-					}
-				}
-
-				if (!infoText.equals(text) && text.startsWith("Predicate"))
-				{
-					setInfoText(text);
-					showToolTip(text.substring(11));
-				}
-			}
-
-			private void showToolTip(final String finalText) {
-				new UIJob("Updating status") {
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						
-						if (PredicateLayoutPreferences.isShowToolTip()) {
-							t.setVisible(false);
-							Point location = Display.getCurrent().getCursorLocation();
-							location.x += 10;
-							location.y += 10;
-							t.setLocation(location);
-							t.setMessage(finalText);
-							t.setVisible(true);
-						}
-						else {
-							t.setVisible(false);
-						}
-						
-						return Status.OK_STATUS;
-					}
-				}.schedule();
-			}
+		public void setInfoText(String text) {
+			ViewBase.this.setInfoText(text);
 		}
 	}
 }

@@ -36,24 +36,11 @@ import org.eclipse.ui.IEditorPart;
 
 public class CurrentPifListener implements PrologInterfaceListener, ActivePrologInterfaceListener {
 
-	private static final String FILE_LOADED = "file_loaded";
-
 	@Override
 	public void update(PrologInterfaceEvent e) {
-		if (e.getSubject().equals(FILE_LOADED)) {
-			fileLoaded(e.getEvent());
-		} else if (e.getSubject().equals(PDTPredicates.PDT_EDIT_HOOK)) {
+		if (e.getSubject().equals(PDTPredicates.PDT_EDIT_HOOK)) {
 			openFileInEditor(e.getEvent());
 		}
-	}
-
-	private void fileLoaded(String file) {
-		file = Util.unquoteStringOrAtom(file);
-		String[] parts = file.split("<>");
-		for (String s : parts) {
-			currentPif.addConsultedFile(s);
-		}
-		PDTCommonPlugin.getDefault().notifyDecorators();
 	}
 
 	public void openFileInEditor(String event) {
@@ -88,7 +75,6 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 			currentDispatcher = new PrologEventDispatcher(currentPif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
 			try {
 				currentDispatcher.addPrologInterfaceListener(PDTPredicates.PDT_EDIT_HOOK, this);
-				currentDispatcher.addPrologInterfaceListener(FILE_LOADED, this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -100,7 +86,6 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 			Debug.debug("remove edit registry listener for pif " + currentPif.toString());
 			try {
 				currentDispatcher.removePrologInterfaceListener(PDTPredicates.PDT_EDIT_HOOK, this);
-				currentDispatcher.removePrologInterfaceListener(FILE_LOADED, this);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 			}
@@ -130,8 +115,6 @@ public class CurrentPifListener implements PrologInterfaceListener, ActiveProlog
 		if (currentPif == pif) {
 			return;
 		}
-		
-		PDTCommonPlugin.getDefault().notifyDecorators();
 		
 		removePifListener();
 		

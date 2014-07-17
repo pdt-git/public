@@ -47,12 +47,11 @@ pdt_reload(FileOrFiles) :-
 	with_mutex('reloadMutex',(
 		setup_call_cleanup(
 			activate_warning_and_error_tracing,
-			(	pdt_reload__(FileOrFiles),
-				notify_reload_listeners(FileOrFiles)
-			),
+			pdt_reload__(FileOrFiles),
 			deactivate_warning_and_error_tracing
 		)
-	)).
+	)),
+	notify_reload_listeners(FileOrFiles).
 
 pdt_reload__(Files):-
     is_list(Files),
@@ -94,9 +93,9 @@ notify_reload_listeners(Files) :-
 	fail.
 notify_reload_listeners(_).
 
-pdt_reload_listener(Files) :-
-    atomic_list_concat(Files, '<>', FileList),
-    catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
+%pdt_reload_listener(Files) :-
+%    atomic_list_concat(Files, '<>', FileList),
+%    catch(pif_observe:pif_notify(file_loaded,FileList),_,true).
 
                /*************************************
                 * INTERCEPT PROLOG ERROR MESSAGES   *

@@ -22,6 +22,7 @@ import org.cs3.pdt.internal.editors.CurrentPifListener;
 import org.cs3.pdt.internal.editors.EditorConsultListener;
 import org.cs3.prolog.common.logging.Debug;
 import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
+import org.cs3.prolog.pif.service.IPrologInterfaceService;
 import org.cs3.prolog.ui.util.DefaultErrorMessageProvider;
 import org.cs3.prolog.ui.util.ErrorMessageProvider;
 import org.eclipse.core.runtime.Platform;
@@ -100,8 +101,11 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 		try {
 			super.start(context);
 			
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerActivePrologInterfaceListener(new CurrentPifListener());
-			PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().registerConsultListener(new EditorConsultListener());
+			IPrologInterfaceService prologInterfaceService = PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService();
+			CurrentPifListener pifListener = new CurrentPifListener();
+			prologInterfaceService.registerActivePrologInterfaceListener(pifListener);
+			pifListener.activePrologInterfaceChanged(prologInterfaceService.getActivePrologInterface());
+			prologInterfaceService.registerConsultListener(new EditorConsultListener());
 		} catch (Throwable t) {
 			Debug.report(t);
 		}

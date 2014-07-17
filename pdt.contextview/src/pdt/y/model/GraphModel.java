@@ -155,9 +155,8 @@ public class GraphModel {
 				graph.setRealizer(edge, newCallEdgeRealizer);
 				newCallEdgeRealizer.adjustLineWidth(this);
 				
-				String label = dataHolder.getEdgeLabel(edge);
-				
-				newCallEdgeRealizer.setLabelText(label);
+//				String label = dataHolder.getEdgeLabel(edge);
+//				newCallEdgeRealizer.setLabelText(label);
 				
 				boolean isMetaPredicateCall = dataHolder.isMetaPred(edge.target());
 				boolean isInferredCall = isMetaCall || isDatabaseCall;
