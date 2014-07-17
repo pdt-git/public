@@ -564,20 +564,15 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     }
     
     private void createProblemSearchFor(Composite parent) {
-    	Group problemSearch = new Group(parent, SWT.NONE);
-    	problemSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    	problemSearch.setText("Search For");
-    	problemSearch.setLayout(new GridLayout(1, false));
-        
-    	Button undefinedCallButton = createButton(problemSearch, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false);
+    	Button undefinedCallButton = createButton(parent, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false);
 		searchForRadioButtons.add(undefinedCallButton);
 		undefinedCallButton.addSelectionListener(searchForSelectionListener);
     	
-		Button deadPredicateButton = createButton(problemSearch, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false);
+		Button deadPredicateButton = createButton(parent, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false);
 		searchForRadioButtons.add(deadPredicateButton);
 		deadPredicateButton.addSelectionListener(searchForSelectionListener);
     	
-		Button metaPredicateButton = createButton(problemSearch, SWT.RADIO, "Undeclared Meta Predicate", META_PREDICATE, false);
+		Button metaPredicateButton = createButton(parent, SWT.RADIO, "Undeclared Meta Predicate", META_PREDICATE, false);
 		searchForRadioButtons.add(metaPredicateButton);
 		metaPredicateButton.addSelectionListener(searchForSelectionListener);
         
