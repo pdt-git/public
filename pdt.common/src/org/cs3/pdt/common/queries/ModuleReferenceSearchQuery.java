@@ -41,6 +41,7 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 		String query = bT(PDTCommonPredicates.FIND_MODULE_REFERENCE,
 				getGoal(),
 				Boolean.toString(isExactMatch()),
+				getProjectPath() == null ? "_" : getProjectPath(),
 				"RefFile",
 				"RefLine",
 				"RefModule",
@@ -63,7 +64,12 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}
+		
 		IFile file = findFile(m.get("RefFile").toString());
+		if (getProject() != null && !getProject().equals(file.getProject())) {
+			return null;
+		}
+		
 		String offsetOrLine = m.get("RefLine").toString();
 		
 		PrologMatch match = null;
