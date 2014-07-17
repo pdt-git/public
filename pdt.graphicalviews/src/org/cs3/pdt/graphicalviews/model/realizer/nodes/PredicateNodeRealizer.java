@@ -86,36 +86,39 @@ public class PredicateNodeRealizer extends NodeRealizerBase {
 	@Override
 	protected void paintNode(Graphics2D gfx) {
 		byte myStyle;
-		if (model.getDataHolder().isDynamicNode(getNode())) {
+		GraphDataHolder dataHolder = model.getDataHolder();
+		
+		if (dataHolder.isDynamicNode(getNode())) {
 			myStyle = PredicateAppearancePreferences.getDynamicPredicateBorderStyle().getLineStyle();
-		} else if ("inferred".equals(model.getDataHolder().getMetaPredType(getNode()))) {
+		} else if (dataHolder.isMetaPred(getNode())) {
+//		} else if ("inferred".equals(dataHolder.getMetaPredType(getNode()))) {
 			myStyle = LineType.DASHED_2.getLineStyle();
 		} else {
 			myStyle = PredicateAppearancePreferences.getBorderStyle().getLineStyle();
 		}
 		
 //		if ("inferred".equals(model.getDataHolder().getMetaPredType(getNode()))) {
-//			setLabelText(model.getLabelTextForNode(getNode()) + " [i]");
+//			setLabelText(model.getLabelTextForNode(getNode()) + " [inferred]");
 //		}
 		
 		LineType myLineType = LineType.getLineType(1, myStyle);
 		setLineType(myLineType);
 
-		if (model.getDataHolder().isMetaPred(getNode())) {
+		if (dataHolder.isMetaPred(getNode())) {
 			setShapeType(HEXAGON);
-		} else if (model.getDataHolder().isTransparentNode(getNode())) {
+		} else if (dataHolder.isTransparentNode(getNode())) {
 			setShapeType(ELLIPSE);
 		} else {
 			setShapeType(ROUND_RECT);
 		}
 
-		if (model.getDataHolder().isExported(getNode())) {
+		if (dataHolder.isExported(getNode())) {
 			setFillColor(PredicateAppearancePreferences.getExportedPredicateColor());
 		} else {
 			setFillColor(PredicateAppearancePreferences.getPredicateColor());
 		}
 
-		if (model.getDataHolder().isUnusedLocal(getNode())) {
+		if (dataHolder.isUnusedLocal(getNode())) {
 			setLineColor(PredicateAppearancePreferences.getUnusedPredicateBorderColor());
 		} else {
 			setLineColor(PredicateAppearancePreferences.getBorderColor());
@@ -178,6 +181,10 @@ public class PredicateNodeRealizer extends NodeRealizerBase {
 			sb.append(" [Unused]");
 		}
 		
+		if ("inferred".equals(data.getMetaPredType(getNode()))) {
+			setLabelText(model.getLabelTextForNode(getNode()) + " [Inferred]");
+		}
+			
 		return sb.toString();
 	}
 
