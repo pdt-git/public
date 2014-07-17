@@ -40,46 +40,34 @@ public class HelpDialog extends ApplicationWindow {
 		 * Icon Legend
 		 */
 		
-		Group predicateGroup = createGroup(masterComposite, "Predicates", 3);
-		addLegendIcon(predicateGroup, "pred_normal.png");
-		addLegendIcon(predicateGroup, "pred_meta.png");
-		addLegendIcon(predicateGroup, "pred_dynamic.png");
+		Group predicateGroup = createGroup(masterComposite, "Predicates", 4);
+		addLegendIcon(predicateGroup, "pred_normal_exported.png");
+		addLegendIcon(predicateGroup, "pred_meta_exported.png");
+		addLegendIcon(predicateGroup, "pred_dynamic_exported.png");
+		addLegendLabel(predicateGroup, "Exported predicates");
+		addLegendIcon(predicateGroup, "pred_normal_local.png");
+		addLegendIcon(predicateGroup, "pred_meta_local.png");
+		addLegendIcon(predicateGroup, "pred_dynamic_local.png");
+		addLegendLabel(predicateGroup, "Local predicates\n(not exported)");
+		addLegendIcon(predicateGroup, "pred_normal_dead.png");
+		addLegendIcon(predicateGroup, "pred_meta_dead.png");
+		addLegendIcon(predicateGroup, "pred_dynamic_dead.png");
+		addLegendLabel(predicateGroup, "Dead predicates\n(local and uncalled)");
 		addLegendLabel(predicateGroup, "Normal predicate");
 		addLegendLabel(predicateGroup, "Meta predicate");
 		addLegendLabel(predicateGroup, "Dynamic predicate");
+		addLegendLabel(predicateGroup, "");
 		
-		Group callGroup = createGroup(masterComposite, "Calls", 3);
+		Group callGroup = createGroup(masterComposite, "Calls", 4);
 		addLegendIcon(callGroup, "call_normal.png");
 		addLegendIcon(callGroup, "call_meta.png");
 		addLegendIcon(callGroup, "call_dynamic.png");
+		addLegendLabel(callGroup, "");
 		addLegendLabel(callGroup, "Normal call");
 		addLegendLabel(callGroup, "Metacall");
-		addLegendLabel(callGroup, "Dynamic call\n(assert/retract)");
+		addLegendLabel(callGroup, "Database call\n(assert/retract)");
+		addLegendLabel(callGroup, "");
 
-//		Group visibilityGroup = createGroup(masterComposite, "Visibility", 2);
-//		addLegendIcon(visibilityGroup, "visibility_exported.png");
-//		addLegendIcon(visibilityGroup, "visibility_local.png");
-//		addLegendLabel(visibilityGroup, "Exported Predicate");
-//		addLegendLabel(visibilityGroup, "Local Predicate");
-//
-//		Group deadCodeGroup = createGroup(masterComposite, "Dead code detection", 2);
-//		addLegendIcon(deadCodeGroup, "pred_normal.png");
-//		addLegendIcon(deadCodeGroup, "pred_dead.png");
-//		addLegendLabel(deadCodeGroup, "Not dead\n(called and/or exported)");
-//		addLegendLabel(deadCodeGroup, "Dead\n(Uncalled and not exported)");
-		
-		
-		
-		// alternative
-		Group visibilityGroup = createGroup(masterComposite, "Visibility and Dead code", 3);
-		addLegendIcon(visibilityGroup, "pred_normal_exported.png");
-		addLegendIcon(visibilityGroup, "pred_normal_local.png");
-		addLegendIcon(visibilityGroup, "pred_dead.png");
-		addLegendLabel(visibilityGroup, "Exported Predicate");
-		addLegendLabel(visibilityGroup, "Local Predicate\n(not exported)");
-		addLegendLabel(visibilityGroup, "Local and uncalled predicate\n(Dead code)");
-
-		
 		Button close = new Button(masterComposite, SWT.PUSH);
 		close.setText("Close");
 		close.addSelectionListener(new SelectionAdapter() {
@@ -113,14 +101,8 @@ public class HelpDialog extends ApplicationWindow {
 		Label textLabel = new Label(legendGroup, SWT.NONE);
 		textLabel.setText(label);
 		textLabel.setAlignment(SWT.CENTER);
-		GridData data = new GridData(GridData.CENTER, GridData.BEGINNING, true, true);
+		GridData data = new GridData(GridData.CENTER, GridData.CENTER, true, true);
 		textLabel.setLayoutData(data);
 	}
 	
-	private void addLegendItem(Group legendGroup, String iconName, String label) {
-		Label iconLabel = new Label(legendGroup, SWT.NONE);
-		iconLabel.setImage(ImageRepository.getImageDescriptor("help\\" + iconName).createImage());
-		Label textLabel = new Label(legendGroup, SWT.NONE);
-		textLabel.setText(label);
-	}
 }
