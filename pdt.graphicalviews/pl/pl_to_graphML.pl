@@ -251,6 +251,9 @@ file_exports(FilePath, non_module_file, StaticPredicates, DynamicPredicates) :-
 			),
 			functor(H, N, A),
 			\+ atom_concat('$', _, N)
+		;	loaded_by(LoadedFile, FilePath, _, _),
+			file_imports(FilePath, LoadedFile, Imports),
+			member(N/A, Imports)
 		),
 		Predicates
 	),

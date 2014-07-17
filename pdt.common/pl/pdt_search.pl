@@ -819,6 +819,7 @@ search_module_name(ModulePart, false, Module) :-
 
 /* For Load File Dependency Graph: */
 loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
+	nonvar(LoadedFile),
 	(	split_file_path(LoadedFile, _, _, _, lgt)
 	;	split_file_path(LoadedFile, _, _, _, logtalk)
 	),
@@ -827,7 +828,6 @@ loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
 	logtalk_adapter::loaded_by(LoadedFile, LoadingFile, Line, Directive).
 
 loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
-	source_file(LoadedFile),
 	source_file_property(LoadedFile, load_context(_LoadingModule, LoadingFile:Line, _OptionList)),
 	% If the loaded file is a module conclude that the
 	% loading directive should have been 'use_module'.
