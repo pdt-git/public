@@ -52,7 +52,8 @@ public class UMLClassNodeRealizer extends NodeRealizerBase {
 	private boolean omitDetails;
 	private String stereotype = "";
 	private String constraint = "";
-	private static final Color BACKGROUND = new Color(153, 179, 231);;
+	private static final Color BACKGROUND_MODULE = new Color(210, 225, 240);
+	private static final Color BACKGROUND_FILE = new Color(147, 167, 185);
 
 	/**
 	 * Instantiates a new UMLNodeRealizer.
@@ -406,9 +407,9 @@ public class UMLClassNodeRealizer extends NodeRealizerBase {
 		}
 		
 		if (model.getDataHolder().isFileNodeAModule(getNode())) {
-			setFillColor(BACKGROUND);
+			setFillColor(BACKGROUND_MODULE);
 		} else {
-			setFillColor(BACKGROUND.darker());
+			setFillColor(BACKGROUND_FILE);
 		}
 
 		fitContent();
