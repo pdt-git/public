@@ -495,7 +495,7 @@ find_completion(SearchEntity::PredicatePrefix, _EnclosingFile, _, predicate, Dec
 	Entity::predicate_property(Head, declared_in(DeclaringEntity)),
 	(	Entity::predicate_property(Head, info(Info))
 	->	predicate_documentation(Head, info(Info), ArgNames, DocKind, Documentation)
-	;predicate_documentation(Head, [], ArgNames, DocKind, Documentation)
+	;	predicate_documentation(Head, [], ArgNames, DocKind, Documentation)
 	).
 
 find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, ArgNames, DocKind, Documentation) :-
@@ -518,7 +518,7 @@ find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, Dec
 	Entity<<predicate_property(Head, declared_in(DeclaringEntity)),
 	(	Entity<<predicate_property(Head, info(Info))
 	->	predicate_documentation(Head, info(Info), ArgNames, DocKind, Documentation)
-	;predicate_documentation(Head, [], ArgNames, DocKind, Documentation)
+	;	predicate_documentation(Head, [], ArgNames, DocKind, Documentation)
 	).
 
 find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
