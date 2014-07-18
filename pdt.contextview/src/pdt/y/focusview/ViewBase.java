@@ -64,8 +64,6 @@ public abstract class ViewBase extends ViewPart {
 	private String infoText = "", statusText = "";
 	private ViewCoordinatorBase focusViewCoordinator;
 	private boolean navigationEnabled = false;
-	private boolean metapredicateCallsVisible = true;
-	private boolean inferredCallsVisible = true;
 	
 	public ViewBase() {
 	}
@@ -183,41 +181,7 @@ public abstract class ViewBase extends ViewPart {
 			}
 		});
 		
-		toolBarManager.add(new ToolBarAction("Show Metapredicates",
-				ImageRepository.getImageDescriptor(ImageRepository.M)) {
-				{
-					setChecked(metapredicateCallsVisible);
-				}
-			
-				@Override
-				public int getStyle() {
-					return IAction.AS_CHECK_BOX;
-				}
-				
-				@Override
-				public void performAction() {
-					metapredicateCallsVisible = !metapredicateCallsVisible;
-					updateCurrentFocusView();	
-				}
-			});
-		
-		toolBarManager.add(new ToolBarAction("Show Inferred Calls",
-				ImageRepository.getImageDescriptor(ImageRepository.I)) {
-				{
-					setChecked(inferredCallsVisible);
-				}
-				
-				@Override
-				public int getStyle() {
-					return IAction.AS_CHECK_BOX;
-				}
-			
-				@Override
-				public void performAction() {
-					inferredCallsVisible = !inferredCallsVisible;
-					updateCurrentFocusView();	
-				}
-			});
+		initViewButtons(toolBarManager);
 		
 		toolBarManager.add(new ToolBarAction("Navigation", 
 				ImageRepository.getImageDescriptor(ImageRepository.MOVE)) {
@@ -287,6 +251,9 @@ public abstract class ViewBase extends ViewPart {
 				}
 			});
 
+	}
+
+	protected void initViewButtons(IToolBarManager toolBarManager) {
 	}
 	
 	@Override
@@ -362,14 +329,6 @@ public abstract class ViewBase extends ViewPart {
 
 	public boolean isNavigationModeEnabled() {
 		return navigationEnabled;
-	}
-	
-	public boolean isMetapredicateCallsVisible() {
-		return metapredicateCallsVisible;
-	}
-	
-	public boolean isInferredCallsVisible() {
-		return inferredCallsVisible;
 	}
 	
 	@Override

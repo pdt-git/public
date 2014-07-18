@@ -53,6 +53,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("module", dataHolder.getModuleMap(), KeyScope.NODE,KeyType.STRING);
 		core.addInputDataAcceptor("moduleOfPredicate", dataHolder.getModuleOfPredicateMap(), KeyScope.NODE,KeyType.STRING);
 		core.addInputDataAcceptor("fileName", dataHolder.getFileNameMap(), KeyScope.ALL, KeyType.STRING);
+		core.addInputDataAcceptor("label", dataHolder.getLabelMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("lineNumber", dataHolder.getLineNumberMap(), KeyScope.ALL, KeyType.INT);
 		core.addInputDataAcceptor("offset", dataHolder.getOffsetMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("kind", dataHolder.getKindMap(), KeyScope.ALL, KeyType.STRING);
@@ -71,7 +72,6 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("exported_dynamic_predicates", dataHolder.getModulePublicDynamicPredicatesMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("node_stereotype", dataHolder.getNodeStereoTypeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("imported_predicates", dataHolder.getModuleImportedPredicatesMap(), KeyScope.EDGE, KeyType.STRING);
-		core.addInputDataAcceptor("edge_label", dataHolder.getEdgeLabelMap(), KeyScope.EDGE, KeyType.STRING);
 		core.addInputDataAcceptor("file_node_name", dataHolder.getFileNodeNameMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("file_node_path", dataHolder.getFileNodePathMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("file_node_type", dataHolder.getFileTypeMap(), KeyScope.NODE, KeyType.STRING);

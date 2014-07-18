@@ -23,11 +23,11 @@ import org.eclipse.core.resources.IProject;
 
 import pdt.y.main.PDTGraphView;
 
-public class GlobalViewCoordinator extends ViewCoordinatorBase {
+public class ProjectViewCoordinator extends ViewCoordinatorBase {
 	
 	final HashMap<String, ViewBase.FocusViewControl> views = new HashMap<String, ViewBase.FocusViewControl>();
 	
-	public GlobalViewCoordinator(ViewBase focusView)
+	public ProjectViewCoordinator(ViewBase focusView)
 	{
 		super(focusView);
 		
