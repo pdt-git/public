@@ -37,11 +37,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 
@@ -121,11 +119,11 @@ public class LogtalkView extends ViewBase {
 		return logtalkViewCoordinator;
 	}
 	
+	
 	@Override
-	protected void initButtons(Composite parent) {
-		IActionBars actionBars = getViewSite().getActionBars();
+	protected void initViewButtons(IToolBarManager toolBarManager) {
+		super.initViewButtons(toolBarManager);
 		
-		IToolBarManager toolBarManager = actionBars.getToolBarManager();
 		inputSelector = new Action("Select input type", IAction.AS_DROP_DOWN_MENU) {
 			@Override
 			public void run() {
@@ -239,8 +237,6 @@ public class LogtalkView extends ViewBase {
 			}
 		});
 		toolBarManager.add(typeSelector);
-
-		super.initButtons(parent);
 	}
 	
 	protected String askForLibrary(InputType inputType2) {
