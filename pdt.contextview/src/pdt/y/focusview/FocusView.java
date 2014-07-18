@@ -17,11 +17,11 @@ package pdt.y.focusview;
 import pdt.y.main.PDTGraphView;
 
 
-public class FocusView extends ViewBase {
+public class FocusView extends CallGraphViewBase {
 	
 	@Override
 	protected ViewCoordinatorBase createViewCoordinator() {
-		return new FocusViewCoordinator(this);
+		return new ContextViewCoordinator(this);
 	}
 	
 	@Override

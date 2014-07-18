@@ -17,10 +17,15 @@ package pdt.y.focusview;
 import pdt.y.main.PDTGraphView;
 
 
-public class DependenciesView extends GlobalView {
+public class DependenciesView extends ViewBase {
 	
 	@Override
 	public GraphPIFLoaderBase createGraphPIFLoader(PDTGraphView pdtGraphView) {
 		return new DependenciesGraphPIFLoader(pdtGraphView);
+	}
+
+	@Override
+	protected ViewCoordinatorBase createViewCoordinator() {
+		return new ProjectViewCoordinator(this);
 	}
 }

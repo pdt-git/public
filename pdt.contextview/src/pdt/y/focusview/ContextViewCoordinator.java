@@ -18,11 +18,11 @@ import java.util.HashMap;
 
 import pdt.y.main.PDTGraphView;
 
-public class FocusViewCoordinator extends ViewCoordinatorBase {
+public class ContextViewCoordinator extends ViewCoordinatorBase {
 	
 	final HashMap<String, ViewBase.FocusViewControl> views = new HashMap<String, ViewBase.FocusViewControl>();
 	
-	public FocusViewCoordinator(ViewBase focusView) {
+	public ContextViewCoordinator(ViewBase focusView) {
 		super(focusView);
 	}
 	
