@@ -21,7 +21,6 @@ import org.cs3.pdt.graphicalviews.internal.ui.ToolBarAction;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.preferences.MainPreferencePage;
 import org.cs3.pdt.graphicalviews.preferences.PredicateLayoutPreferences;
-import org.cs3.pdt.graphicalviews.preferences.PredicateVisibilityPreferences;
 import org.cs3.pdt.graphicalviews.preferences.PreferenceConstants;
 import org.cs3.pdt.graphicalviews.view.modes.MouseHandler;
 import org.cs3.pdt.graphicalviews.view.modes.OpenInEditorViewMode;
@@ -145,42 +144,6 @@ public abstract class ViewBase extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
-		toolBarManager.add(new ToolBarAction("Show PDT Predicates",
-				ImageRepository.getImageDescriptor(ImageRepository.P)) {
-			{
-				setChecked(PredicateVisibilityPreferences.showPDTPredicates());
-			}
-
-			@Override
-			public int getStyle() {
-				return IAction.AS_CHECK_BOX;
-			}
-			
-			@Override
-			public void performAction() {
-				PredicateVisibilityPreferences.setShowPDTPredicates(isChecked());
-				updateCurrentFocusView();	
-			}
-		});
-		
-		toolBarManager.add(new ToolBarAction("Show SWI Predicates",
-				ImageRepository.getImageDescriptor(ImageRepository.S)) {
-			{
-				setChecked(PredicateVisibilityPreferences.showSWIPredicates());
-			}
-
-			@Override
-			public int getStyle() {
-				return IAction.AS_CHECK_BOX;
-			}
-			
-			@Override
-			public void performAction() {
-				PredicateVisibilityPreferences.setShowSWIPredicates(isChecked());
-				updateCurrentFocusView();	
-			}
-		});
-		
 		initViewButtons(toolBarManager);
 		
 		toolBarManager.add(new Separator("control"));
