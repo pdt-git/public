@@ -13,22 +13,23 @@
 
 package org.cs3.pdt.console.internal;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.connector.PrologConnectorPredicates;
+import org.cs3.pdt.connector.service.PDTReloadExecutor;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.PrologConnectorPredicates;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.service.PDTReloadExecutor;
-import org.cs3.prolog.ui.util.UIUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -43,7 +44,7 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 	}
 	
 	@Override
-	public boolean executePDTReload(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public boolean executePDTReload(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
 		if (files.isEmpty()) {
 			monitor.done();
@@ -53,19 +54,19 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		try {
 			String fileList = null;
 			try {
-				fileList = UIUtils.quotedPrologFileNameList(files);
+				fileList = FileUtils.quotedPrologFileNameList(files);
 			} catch (IOException e) {
 				Debug.report(e);
 				return false;
 			}
 			String query = bT(PrologConnectorPredicates.PDT_RELOAD, fileList);
-			return executeQueryOnConsole(pif, query);
+			return executeQueryOnConsole(process, query);
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	private boolean executeQueryOnConsole(PrologInterface pif, String query) {
+	private boolean executeQueryOnConsole(PrologProcess process, String query) {
 		PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 		if (activePrologConsole == null) {
 			return false;
@@ -89,19 +90,19 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 				}
 			}
 		});
-		PrologInterface activeConsolePif = activePrologConsole.getPrologInterface();
-		if (activeConsolePif == null || !activeConsolePif.equals(pif)) {
-			activePrologConsole.setPrologInterface(pif);
+		PrologProcess activeConsoleProcess = activePrologConsole.getPrologProcess();
+		if (activeConsoleProcess == null || !activeConsoleProcess.equals(process)) {
+			activePrologConsole.setPrologProcess(process);
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e) {
 			}
 		}
-		if (!pif.isUp()) {
+		if (!process.isUp()) {
 			try {
-				pif.start();
-				activePrologConsole.ensureConnectionForCurrentPrologInterface();
-			} catch (PrologInterfaceException e) {
+				process.start();
+				activePrologConsole.ensureConnectionForCurrentPrologProcess();
+			} catch (PrologProcessException e) {
 				Debug.report(e);
 				return false;
 			}

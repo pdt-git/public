@@ -17,18 +17,16 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTDecorator;
+import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.navigator.internal.ImageRepository;
-import org.cs3.prolog.common.OptionProviderEvent;
-import org.cs3.prolog.common.OptionProviderListener;
-import org.cs3.prolog.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-public class EntryPointDecoratorContributor implements ILightweightLabelDecorator, OptionProviderListener {
+public class EntryPointDecoratorContributor implements ILightweightLabelDecorator, PDTDecorator {
 
 	private static final String ENTRY_POINT_SUFFIX = " [entry point]";
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
@@ -72,26 +70,14 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 		PDTCommonPlugin.getDefault().addDecorator(this);
 		
 		IFile file = (IFile) element;
-		try {
-			if (file.exists()) {
-				String isEntryPoint = file.getPersistentProperty(PDTCommonPlugin.ENTRY_POINT_KEY);
-				
-				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
-					decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
-					decoration.addSuffix(ENTRY_POINT_SUFFIX);
-				}
+		if (file.exists()) {
+			if (PDTCommonPlugin.getDefault().isEntryPoint(file)) {
+				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_ENTRY_POINT));
+				decoration.addSuffix(ENTRY_POINT_SUFFIX);
 			}
-			
-		} catch (CoreException e) {
-			e.printStackTrace();
 		}
 		
 		
-	}
-	
-	@Override
-	public void valuesChanged(OptionProviderEvent e) {
-		fireLabelProviderChanged();
 	}
 
 	private void fireLabelProviderChanged() {
@@ -109,6 +95,11 @@ public class EntryPointDecoratorContributor implements ILightweightLabelDecorato
 				}
 			});
 		}
+	}
+
+	@Override
+	public void updateDecorator() {
+		fireLabelProviderChanged();
 	}
 
 }

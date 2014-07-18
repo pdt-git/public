@@ -14,7 +14,6 @@
 package org.cs3.pdt.common.structureElements;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IFile;

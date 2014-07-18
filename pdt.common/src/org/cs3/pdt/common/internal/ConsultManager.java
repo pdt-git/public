@@ -6,70 +6,87 @@ import java.util.List;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.common.PrologInterfaceStartListener;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.internal.pif.service.ext.IPrologInterfaceServiceExtension;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
-import org.cs3.prolog.pif.service.ConsultListener;
-import org.cs3.prolog.ui.util.FileUtils;
-import org.cs3.prolog.ui.util.UIUtils;
+import org.cs3.pdt.common.PrologProcessStartListener;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
+import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
+import org.cs3.pdt.connector.service.ConsultListener;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.QualifiedName;
 
-public class ConsultManager implements ConsultListener, PrologInterfaceStartListener {
+public class ConsultManager implements ConsultListener, PrologProcessStartListener {
 
 	@Override
-	public void beforeConsult(PrologInterface pif, List<IFile> files, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
 	}
 
 	@Override
-	public void afterConsult(PrologInterface pif, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologInterfaceException {
+	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
 		for (IFile file : files) {
-			try {
-				String prologFileName = UIUtils.prologFileName(file);
-				pif.addConsultedFile(prologFileName);
-			} catch (IOException e) {
-				Debug.report(e);
-			}
+			String prologFileName = FileUtils.prologFileName(file);
+			addConsultedFile(process, prologFileName);
 		}
 		monitor.done();
 	}
 
 	@Override
-	public void prologInterfaceStarted(PrologInterface pif) {
+	public void prologProcessStarted(PrologProcess process) {
 		final String reconsultFiles = PDTCommonPlugin.getDefault().getPreferenceValue(PDTCommon.PREF_RECONSULT_ON_RESTART, PDTCommon.RECONSULT_NONE);
 		
 		if (reconsultFiles.equals(PDTCommon.RECONSULT_NONE)) {
-			pif.clearConsultedFiles();
+			getConsultedFileList(process).clear();
 		} else {
-			reconsultFiles(pif, reconsultFiles.equals(PDTCommon.RECONSULT_ENTRY));
+			reconsultFiles(process, reconsultFiles.equals(PDTCommon.RECONSULT_ENTRY));
 		}
 	}
 	
 	// TODO: problem with quotes
-	private void reconsultFiles(PrologInterface pif, boolean onlyEntryPoints) {
+	private void reconsultFiles(PrologProcess process, boolean onlyEntryPoints) {
 		Debug.debug("Reconsult files");
-		List<String> consultedFiles = pif.getConsultedFiles();
+		List<String> consultedFiles = getConsultedFileList(process);
 		if (consultedFiles != null) {
 			synchronized (consultedFiles) {
 				
 				ArrayList<IFile> files = new ArrayList<IFile>();
 				ArrayList<IFile> entryPointFiles = new ArrayList<IFile>();
 				collectFiles(consultedFiles, files);
-				IPrologInterfaceServiceExtension service = (IPrologInterfaceServiceExtension) PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService();
+				IPrologProcessServiceExtension service = (IPrologProcessServiceExtension) PDTConnectorPlugin.getDefault().getPrologProcessService();
 				if (onlyEntryPoints) {
 					filterEntryPoints(files, entryPointFiles);
-					service.consultFilesSilent(entryPointFiles, pif);
+					service.consultFilesSilent(entryPointFiles, process);
 				} else {
-					service.consultFilesSilent(files, pif);
+					service.consultFilesSilent(files, process);
 				}
 			}
 		}
 	}
+
+	private List<String> getConsultedFileList(PrologProcess process) {
+		@SuppressWarnings("unchecked")
+		List<String> consultedFiles = (List<String>) process.getAttribute(PDTCommon.CONSULTED_FILES);
+		return consultedFiles;
+	}
+	
+	private void addConsultedFile(PrologProcess process, String fileName) {
+		List<String> consultedFiles = getConsultedFileList(process);
+		if (consultedFiles == null) {
+			consultedFiles = new ArrayList<String>();
+			process.setAttribute(PDTCommon.CONSULTED_FILES, consultedFiles);
+		}
+		synchronized (consultedFiles) {
+			// only take the last consult of a file
+			if (consultedFiles.remove(fileName)) {
+				Debug.debug("move " + fileName + " to end of consulted files");			
+			} else {
+				Debug.debug("add " + fileName + " to consulted files");
+			}
+			consultedFiles.add(fileName);
+		}
+	}
+	
 	
 	private void collectFiles(List<String> consultedFiles, List<IFile> files) {
 		for (String consultedFile : consultedFiles) {
@@ -87,13 +104,8 @@ public class ConsultManager implements ConsultListener, PrologInterfaceStartList
 	
 	private void filterEntryPoints(List<IFile> files, List<IFile> entryPointFiles) {
 		for (IFile file : files) {
-			try {
-				String isEntryPoint = file.getPersistentProperty(new QualifiedName("pdt", "entry.point"));
-				if (isEntryPoint != null && isEntryPoint.equalsIgnoreCase("true")) {
-					entryPointFiles.add(file);
-				}
-			} catch (CoreException e) {
-				Debug.report(e);
+			if (PDTCommonPlugin.getDefault().isEntryPoint(file)) {
+				entryPointFiles.add(file);
 			}
 		}
 	}

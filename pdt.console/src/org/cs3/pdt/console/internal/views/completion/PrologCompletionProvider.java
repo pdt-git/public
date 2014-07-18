@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.console.internal.views.completion;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,16 +23,17 @@ import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.search.SearchConstants;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.pif.PrologInterfaceException;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.ParserUtils;
+import org.cs3.prolog.connector.common.QueryUtils;
+import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
 
 public class PrologCompletionProvider {
 
 	private static final PredicateCompletionProposal[] EMPTY_COMPLETION_PROPOSAL = new PredicateCompletionProposal[0];
 
-	private PrologInterface pif;
+	private PrologProcess process;
 
 	@SuppressWarnings("unchecked")
 	public IContentProposal[] getCompletionProposals(String line, int pos) {
@@ -55,14 +56,14 @@ public class PrologCompletionProvider {
 			module = retrievePrefixedModule(line, prefix.begin - splittingOperator.length());
 		}
 		if (module == null || module.isEmpty()) {
-			searchPrefix = Util.quoteAtomIfNeeded(prefix.prefix);
+			searchPrefix = QueryUtils.quoteAtomIfNeeded(prefix.prefix);
 		} else {
-			if (Util.isVarPrefix(module)){
+			if (ParserUtils.isVarPrefix(module)){
 				module = "_";
 			} else {
-				module = Util.quoteAtomIfNeeded(module);
+				module = QueryUtils.quoteAtomIfNeeded(module);
 			}
-			searchPrefix = module + splittingOperator + Util.quoteAtomIfNeeded(prefix.prefix);
+			searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(prefix.prefix);
 		}
 		
 		if (prefix.length <= 0) {
@@ -85,7 +86,7 @@ public class PrologCompletionProvider {
 				"Doc");
 		List<Map<String, Object>> results;
 		try {
-			results = pif.queryAll(query);
+			results = process.queryAll(query);
 			for (Map<String,Object> result : results) {
 				String kind = result.get("Kind").toString();
 				String name = result.get("Name").toString();
@@ -108,7 +109,7 @@ public class PrologCompletionProvider {
 					proposals.add(new AtomCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
 				}
 			}
-		} catch (PrologInterfaceException e) {
+		} catch (PrologProcessException e) {
 			Debug.report(e);
 		}
 		Collections.sort(proposals);
@@ -136,7 +137,7 @@ public class PrologCompletionProvider {
 		if (c == '\'') {
 			return new Prefix(offset, "", false);
 		}
-		boolean isPredChar = Util.isNonQualifiedPredicateNameChar(c);
+		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
 		
 		while (isPredChar){
 			length++;
@@ -146,7 +147,7 @@ public class PrologCompletionProvider {
 				if (c == '\'') {
 					return new Prefix(begin - 1, line.substring(begin, begin + length), true);
 				}
-				isPredChar = Util.isNonQualifiedPredicateNameChar(c);
+				isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
 				if(!isPredChar){
 					break;
 				}
@@ -185,7 +186,7 @@ public class PrologCompletionProvider {
 	private String retrievePrefixedModule(String line, int begin) {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && Util.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
+		while (moduleBegin >= 0 && ParserUtils.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
 			moduleBegin--;
 		String moduleName = line.substring(moduleBegin + 1, moduleEnd);
 //		if(!Util.isVarPrefix(moduleName)){
@@ -194,12 +195,12 @@ public class PrologCompletionProvider {
 //			return "_";
 //		}
 	}
-	public void setPrologInterface(PrologInterface pif) {
-		this.pif = pif;
+	public void setPrologProcess(PrologProcess process) {
+		this.process = process;
 	}
 
-	public PrologInterface getPrologInterface() {
-		return pif;
+	public PrologProcess getPrologProcess() {
+		return process;
 	}
 }
 

@@ -27,12 +27,13 @@ import java.util.List;
 
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.common.search.SearchConstants;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
-import org.cs3.prolog.connector.ui.PrologRuntimeUIPlugin;
-import org.cs3.prolog.pif.PrologInterface;
-import org.cs3.prolog.ui.util.FileUtils;
-import org.cs3.prolog.ui.util.UIUtils;
+import org.cs3.pdt.connector.PDTConnectorPlugin;
+import org.cs3.pdt.connector.util.FileUtils;
+import org.cs3.pdt.connector.util.UIUtils;
+import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.QueryUtils;
+import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
@@ -96,12 +97,12 @@ public class PDTCommonUtil {
 			FileEditorInput fileEditorInput = (FileEditorInput)input;
 			IPath path = fileEditorInput.getPath();
 			File file = path.toFile();
-			return Util.prologFileName(file);
+			return QueryUtils.prologFileName(file);
 		}
 		if (input instanceof FileStoreEditorInput) {
 			FileStoreEditorInput e = (FileStoreEditorInput)input;
 			File file = new File(e.getURI());
-			return Util.prologFileName(file);
+			return QueryUtils.prologFileName(file);
 		}
 		return input.getName();
 	}
@@ -431,8 +432,8 @@ public class PDTCommonUtil {
 		return plDocCss;
 	}
 	
-	public static PrologInterface getActivePrologInterface() {
-		return PrologRuntimeUIPlugin.getDefault().getPrologInterfaceService().getActivePrologInterface();
+	public static PrologProcess getActivePrologProcess() {
+		return PDTConnectorPlugin.getDefault().getPrologProcessService().getActivePrologProcess();
 	}
 
 }

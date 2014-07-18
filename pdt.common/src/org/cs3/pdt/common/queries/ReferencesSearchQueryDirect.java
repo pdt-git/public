@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.common.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,7 +23,6 @@ import java.util.Vector;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
-import org.cs3.prolog.common.Util;
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -32,8 +31,8 @@ import org.eclipse.core.resources.IFile;
  */
 public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
-	private String filePath;
-	private int line = -1;
+//	private String filePath;
+//	private int line = -1;
 	
 	public ReferencesSearchQueryDirect(String goal, String searchGoalLabel, boolean isExactMatch) {
 		super(goal, searchGoalLabel, isExactMatch);
@@ -47,38 +46,17 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 	public ReferencesSearchQueryDirect(Goal goal) {
 		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
 		setSearchType("References to");
-		filePath = Util.quoteAtomIfNeeded(goal.getFilePath());
-		line = goal.getLine();
+//		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
+//		line = goal.getLine();
 	}
 
 
 	@Override
 	protected String buildSearchQuery() {
-//		String arity = Integer.toString(goal.getArity());
-//		if (goal.getArity() < 0) 
-//			arity = "Arity";
-//		
-//		String file = Util.quoteAtom(goal.getFilePath());
-//		if (goal.getFilePath().isEmpty())
-//			file = "File";
-//
-//		String name = Util.quoteAtomIfNeeded(goal.getFunctor());
-//		if (goal.getFunctor().isEmpty())
-//			name = "Predicate";
-//		
-//		String module2 = module;
-//		if (module.equals("''"))
-//			module2 = "Module";
-//		
 		String query = bT(PDTCommonPredicates.FIND_PREDICATE_REFERENCE,
 				getGoal(),
-				filePath != null ? filePath : "_",
-				Integer.toString(line),
-//				name,
-//				arity,
-//				file,
-//				module2,
 				Boolean.toString(isExactMatch()),
+				getProjectPath() == null ? "_" : getProjectPath(),
 				"RefModule",
 				"RefName",
 				"RefArity",
@@ -102,7 +80,12 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}
+		
 		IFile file = findFile(m.get("RefFile").toString());
+		if (getProject() != null && !getProject().equals(file.getProject())) {
+			return null;
+		}
+		
 		String offsetOrLine = m.get("RefLine").toString();
 		
 		PrologMatch match = null;

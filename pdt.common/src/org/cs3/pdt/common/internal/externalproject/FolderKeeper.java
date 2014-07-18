@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.prolog.ui.util.ExternalPrologFilesProjectUtils;
-import org.cs3.prolog.ui.util.FileUtils;
+import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
+import org.cs3.pdt.connector.util.FileUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -70,7 +70,7 @@ public class FolderKeeper {
 		};
 		try {
 			j.setRule(ExternalPrologFilesProjectUtils
-					.getExternalPrologFilesProject());
+					.getExternalPrologFilesProjectEnsureAccessible());
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return;
@@ -104,7 +104,7 @@ public class FolderKeeper {
 			}
 		};
 		try {
-			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProject());
+			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProjectEnsureAccessible());
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return;
@@ -132,7 +132,7 @@ public class FolderKeeper {
 			}
 		};
 		try {
-			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProject());
+			j.setRule(ExternalPrologFilesProjectUtils.getExternalPrologFilesProjectEnsureAccessible());
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return;

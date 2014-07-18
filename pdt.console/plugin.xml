@@ -48,15 +48,6 @@
     </page>
  </extension>
     <extension
-          point="org.cs3.prolog.connector.prologLibrary">
-       <library
-             alias="lib_pdt_console_pl"
-             id="pdt.console.pl"
-             path="pl">
-                     <attribute id="hidden" value="true"/>
-       </library>
-    </extension>
-    <extension
           point="org.eclipse.ui.commands">
        <category
              id="org.cs3.pdt.console"
@@ -83,7 +74,7 @@
              sequence="CTRL+SHIFT+V"/>
     </extension>
     <extension
-          point="org.cs3.prolog.connector.bootstrapContribution">
+          point="org.cs3.pdt.connector.bootstrapContribution">
        <fileContribution
              id="pdt.console.pl.fileContribution"
              path="pl/loader.pl">
@@ -96,19 +87,6 @@
              id="pdt.console.pl.fileSearchPathContribution"
              path="pl/">
        </fileSearchPathContribution>
-    </extension>
-    <extension
-          point="org.eclipse.ui.popupMenus">
-       <objectContribution
-             adaptable="false"
-             id="pdt.junit.testcase.contribution"
-             objectClass="org.eclipse.jdt.junit.model.ITestCaseElement">
-          <action
-                class="org.cs3.pdt.console.internal.actions.RunUnitTestOnConsoleAction"
-                id="org.cs3.pdt.console.internal.actions.RunUnitTestAction"
-                label="Run Test on Prolog Console">
-          </action>
-       </objectContribution>
     </extension>
     <extension
           point="org.eclipse.ui.perspectiveExtensions">

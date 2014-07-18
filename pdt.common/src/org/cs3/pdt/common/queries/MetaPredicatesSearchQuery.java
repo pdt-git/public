@@ -14,7 +14,7 @@
 
 package org.cs3.pdt.common.queries;
 
-import static org.cs3.prolog.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.prolog.common.Util;
-import org.cs3.prolog.common.logging.Debug;
+import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -37,28 +36,24 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 	private static final String QUICKFIX_DESCRIPTION = "PDT_QuickfixDescription";
 	private static final String QUICKFIX_ACTION = "PDT_QuickfixAction";
 	
-	private IProject root;
-	private String rootPath;
-
 	public MetaPredicatesSearchQuery(boolean createMarkers) {
-		this(createMarkers, null);
-	}
-	
-	public MetaPredicatesSearchQuery(boolean createMarkers, IProject root) {
 		super(createMarkers, ATTRIBUTE, ATTRIBUTE);
-		this.root = root;
-		if (root == null) {
+	}
+
+	@Override
+	public void setProjectScope(IProject project) {
+		super.setProjectScope(project);
+		if (project == null) {
 			setSearchType("Undeclared meta predicates");
 		} else {
-			setSearchType("Undeclared meta predicates in project " + root.getName());
-			rootPath = Util.quoteAtom(Util.prologFileName(root.getLocation().toFile()));
+			setSearchType("Undeclared meta predicates in project " + project.getName());
 		}
 	}
 
 	@Override
 	protected String buildSearchQuery() {
 		return bT(PDTCommonPredicates.FIND_UNDECLARED_META_PREDICATE,
-				rootPath == null ? "_" : rootPath,
+				getProjectPath() == null ? "_" : getProjectPath(),
 				"Module",
 				"Name",
 				"Arity",
@@ -82,7 +77,7 @@ public class MetaPredicatesSearchQuery extends MarkerCreatingSearchQuery {
 		
 		IFile file = findFile(m.get("File").toString());
 		
-		if (root != null && !root.equals(file.getProject())) {
+		if (getProject() != null && !getProject().equals(file.getProject())) {
 			return null;
 		}
 
