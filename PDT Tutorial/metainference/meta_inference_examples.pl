@@ -34,6 +34,8 @@
 
 % direct meta call
 % simple0(0)
+:- meta_predicate simple0(0).
+
 simple0(Z) :-
 	call(Z).
 
@@ -67,6 +69,11 @@ unify2(X) :-
 	X = Y,
 	Y = Z,
 	call(Z).
+
+tobeinferred(Goal) :- 
+	findall(a,Goal,_).
+
+callOfToBeInferred :- tobeinferred(unify2(non_meta1(a))).
 
 % unification chain, other order
 % unify3(0)
