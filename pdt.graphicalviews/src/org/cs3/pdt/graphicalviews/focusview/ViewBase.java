@@ -21,7 +21,6 @@ import org.cs3.pdt.graphicalviews.internal.ui.ToolBarAction;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.preferences.MainPreferencePage;
 import org.cs3.pdt.graphicalviews.preferences.PredicateLayoutPreferences;
-import org.cs3.pdt.graphicalviews.preferences.PredicateVisibilityPreferences;
 import org.cs3.pdt.graphicalviews.preferences.PreferenceConstants;
 import org.cs3.pdt.graphicalviews.view.modes.MouseHandler;
 import org.cs3.pdt.graphicalviews.view.modes.OpenInEditorViewMode;
@@ -64,8 +63,6 @@ public abstract class ViewBase extends ViewPart {
 	private String infoText = "", statusText = "";
 	private ViewCoordinatorBase focusViewCoordinator;
 	private boolean navigationEnabled = false;
-	private boolean metapredicateCallsVisible = true;
-	private boolean inferredCallsVisible = true;
 	
 	public ViewBase() {
 	}
@@ -147,77 +144,7 @@ public abstract class ViewBase extends ViewPart {
 		IActionBars bars = this.getViewSite().getActionBars();
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
-		toolBarManager.add(new ToolBarAction("Show PDT Predicates",
-				ImageRepository.getImageDescriptor(ImageRepository.P)) {
-			{
-				setChecked(PredicateVisibilityPreferences.showPDTPredicates());
-			}
-
-			@Override
-			public int getStyle() {
-				return IAction.AS_CHECK_BOX;
-			}
-			
-			@Override
-			public void performAction() {
-				PredicateVisibilityPreferences.setShowPDTPredicates(isChecked());
-				updateCurrentFocusView();	
-			}
-		});
-		
-		toolBarManager.add(new ToolBarAction("Show SWI Predicates",
-				ImageRepository.getImageDescriptor(ImageRepository.S)) {
-			{
-				setChecked(PredicateVisibilityPreferences.showSWIPredicates());
-			}
-
-			@Override
-			public int getStyle() {
-				return IAction.AS_CHECK_BOX;
-			}
-			
-			@Override
-			public void performAction() {
-				PredicateVisibilityPreferences.setShowSWIPredicates(isChecked());
-				updateCurrentFocusView();	
-			}
-		});
-		
-		toolBarManager.add(new ToolBarAction("Show Metapredicates",
-				ImageRepository.getImageDescriptor(ImageRepository.M)) {
-				{
-					setChecked(metapredicateCallsVisible);
-				}
-			
-				@Override
-				public int getStyle() {
-					return IAction.AS_CHECK_BOX;
-				}
-				
-				@Override
-				public void performAction() {
-					metapredicateCallsVisible = !metapredicateCallsVisible;
-					updateCurrentFocusView();	
-				}
-			});
-		
-		toolBarManager.add(new ToolBarAction("Show Inferred Calls",
-				ImageRepository.getImageDescriptor(ImageRepository.I)) {
-				{
-					setChecked(inferredCallsVisible);
-				}
-				
-				@Override
-				public int getStyle() {
-					return IAction.AS_CHECK_BOX;
-				}
-			
-				@Override
-				public void performAction() {
-					inferredCallsVisible = !inferredCallsVisible;
-					updateCurrentFocusView();	
-				}
-			});
+		initViewButtons(toolBarManager);
 		
 		toolBarManager.add(new Separator("control"));
 		
@@ -303,6 +230,9 @@ public abstract class ViewBase extends ViewPart {
 		});
 
 	}
+
+	protected void initViewButtons(IToolBarManager toolBarManager) {
+	}
 	
 	@Override
 	public void setFocus() {
@@ -377,14 +307,6 @@ public abstract class ViewBase extends ViewPart {
 
 	public boolean isNavigationModeEnabled() {
 		return navigationEnabled;
-	}
-	
-	public boolean isMetapredicateCallsVisible() {
-		return metapredicateCallsVisible;
-	}
-	
-	public boolean isInferredCallsVisible() {
-		return inferredCallsVisible;
 	}
 	
 	@Override

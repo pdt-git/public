@@ -63,7 +63,7 @@ public class GraphDataHolder {
 	private DataMap modulePublicDynamicPredicatesMap = Maps.createHashedDataMap();
 	private DataMap nodeStereoTypeMapMap = Maps.createHashedDataMap();
 	private DataMap moduleImportedPredicatesMap = Maps.createHashedDataMap();
-	private DataMap edgeLabelMap = Maps.createHashedDataMap();
+	private DataMap labelMap = Maps.createHashedDataMap();
 	private DataMap nodeLabelMap = Maps.createHashedDataMap();
 	private DataMap stylesMap = Maps.createHashedDataMap();
 	private DataMap nodeContentMap = Maps.createHashedDataMap();
@@ -170,8 +170,8 @@ public class GraphDataHolder {
 		return fileTypeMap;
 	}
 	
-	public DataMap getEdgeLabelMap() {
-		return edgeLabelMap;
+	public DataMap getLabelMap() {
+		return labelMap;
 	}
 	
 	public DataMap getNodeLabelMap() {
@@ -323,7 +323,7 @@ public class GraphDataHolder {
 		if (isModule(node)) {
 			labelText = getModuleName(node);
 		} else if (isFile(node)) {
-			labelText = getFileName(node);
+			labelText = getLabel(node);
 		} else if (isFileNode(node)) {
 			labelText = getFileNodeText(node);
 		} else if (isPredicate(node))  {
@@ -339,6 +339,10 @@ public class GraphDataHolder {
 	//	public int getIdForNode(Node node) {
 	//		return (Integer) nodeMap.get(node);
 	//	}
+
+	private String getLabel(Object element) {
+		return labelMap.get(element).toString();
+	}
 
 	private String getModuleName(Node node) {
 		return moduleMap.get(node).toString();
@@ -365,7 +369,7 @@ public class GraphDataHolder {
 	}
 	
 	public String getEdgeLabel(Edge edge) {
-		return (String) edgeLabelMap.get(edge);
+		return (String) labelMap.get(edge);
 	}
 	
 	public String getNodeStereoType(Node node) {

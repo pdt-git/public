@@ -17,10 +17,15 @@ package org.cs3.pdt.graphicalviews.focusview;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 
 
-public class DependenciesView extends GlobalView {
+public class DependenciesView extends ViewBase {
 	
 	@Override
 	public GraphProcessLoaderBase createGraphProcessLoader(PDTGraphView pdtGraphView) {
 		return new DependenciesGraphProcessLoader(pdtGraphView);
+	}
+
+	@Override
+	protected ViewCoordinatorBase createViewCoordinator() {
+		return new ProjectViewCoordinator(this);
 	}
 }

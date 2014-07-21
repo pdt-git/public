@@ -17,11 +17,11 @@ package org.cs3.pdt.graphicalviews.focusview;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 
 
-public class GlobalView extends ViewBase {
+public class GlobalView extends CallGraphViewBase {
 	
 	@Override
 	protected ViewCoordinatorBase createViewCoordinator() {
-		return new GlobalViewCoordinator(this);
+		return new ProjectViewCoordinator(this);
 	}
 	
 	@Override

@@ -39,26 +39,21 @@ finish_writing(OutStream):-
     write_graphML_footer(OutStream),
     close(OutStream).
     
-write_file(Stream, RelativePath, Filters, File, Module) :-
-	get_id(File, Id),
+write_file(Stream, _RelativePath, Filters, FilePath, Module) :-
+	get_id(FilePath, Id),
 	open_node(Stream, Id),
 	write_data(Stream, 'id', Id),
-	(	catch(	(	atom_concat(RelativePath,RelativeWithSlash,File),
-					atom_concat('/',RelativeFileName,RelativeWithSlash), !
-				),
-				_, 
-				fail
-			)
-	;	RelativeFileName = File
-	),
-	write_data(Stream,'fileName',RelativeFileName),
+	directory_file_path(_, FileName, FilePath),
+	%file_name_extension(Name, _, FileName), 
+	write_data(Stream, 'label', FileName),
+	write_data(Stream,'fileName', FilePath),
 	write_data(Stream,'module',Module),	
 	(	Module=user
 	->	write_data(Stream,'kind','file')
 	;	write_data(Stream,'kind','module')
 	),
 	start_graph_element(Stream),
-	write_predicates(Stream, File, Filters),
+	write_predicates(Stream, FilePath, Filters),
 	close_graph_element(Stream),
 	close_node(Stream).	
 
@@ -150,7 +145,7 @@ write_load_edge(Stream, LoadingFileId, FileId, Imported, Label) :-
     write_data(Stream, 'kind', 'loading'),
     write_data(Stream, 'imported_predicates', Imported),
     (	nonvar(Label)
-    ->	write_data(Stream, 'edge_label', Label)
+    ->	write_data(Stream, 'label', Label)
     ;	true
     ),
     %write_data(Stream, 'kind', 'call'),
@@ -205,7 +200,7 @@ write_edge_label(Stream, Meta, I) :-
 	Meta =.. [F|Args],
 	format_arg_terms(Args, I, NewArgs),
 	Label =.. [F|NewArgs],
-	write_data(Stream, 'edge_label', Label).
+	write_data(Stream, 'label', Label).
 	
 format_arg_terms([], _, []).
 format_arg_terms([H|T], 1, [R|T2]) :- !, 
@@ -232,6 +227,8 @@ write_graphML_ast_keys(OutStream):-
   	nl(OutStream),
     write(OutStream, '<key id="fileName" for="all" attr.name="fileName" attr.type="string"/>'),
     nl(OutStream),
+    write(OutStream, '<key id="label" for="all" attr.name="label" attr.type="string" />'),
+  	nl(OutStream),
     write(OutStream, '<key id="lineNumber" for="all" attr.name="lineNumber" attr.type="int">'),
     nl(OutStream),
   	write(OutStream, '    <default>-1</default>'),

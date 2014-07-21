@@ -21,6 +21,7 @@ import java.net.URL;
 
 import javax.swing.JPanel;
 
+import org.cs3.pdt.graphicalviews.focusview.CallGraphViewBase;
 import org.cs3.pdt.graphicalviews.focusview.ViewBase;
 import org.cs3.pdt.graphicalviews.graphml.GraphMLReader;
 import org.cs3.pdt.graphicalviews.model.GraphDataHolder;
@@ -189,8 +190,12 @@ public class PDTGraphView extends  JPanel {
 	
 	public void loadGraph(GraphModel model) {
 		graphModel = model;
-		graphModel.setMetapredicateCallsVisisble(focusView.isMetapredicateCallsVisible());
-		graphModel.setInferredCallsVisible(focusView.isInferredCallsVisible());
+		if (focusView instanceof CallGraphViewBase)
+		{
+			CallGraphViewBase callGraphView = (CallGraphViewBase)focusView;
+			graphModel.setMetapredicateCallsVisisble(callGraphView.isMetapredicateCallsVisible());
+			graphModel.setInferredCallsVisible(callGraphView.isInferredCallsVisible());
+		}
 		graphModel.categorizeData();
 		graphModel.assignPortsToEdges();
 		graph = graphModel.getGraph();

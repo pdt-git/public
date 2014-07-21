@@ -17,11 +17,11 @@ package org.cs3.pdt.graphicalviews.focusview;
 import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 
 
-public class FocusView extends ViewBase {
+public class FocusView extends CallGraphViewBase {
 	
 	@Override
 	protected ViewCoordinatorBase createViewCoordinator() {
-		return new FocusViewCoordinator(this);
+		return new ContextViewCoordinator(this);
 	}
 	
 	@Override

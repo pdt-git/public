@@ -304,8 +304,9 @@ module_consults_from__(Module,File,Head) :-
 file_node_name(FilePath, _, ModuleName) :-
 	module_property(ModuleName, file(FilePath)), !.
 		
-file_node_name(FilePath, ProjectPath, RelativePath)	:-
-	relative_path(ProjectPath, FilePath, RelativePath), !.
+file_node_name(FilePath, _, Name)	:-
+	directory_file_path(_, Name, FilePath), !.
+	%relative_path(ProjectPath, FilePath, RelativePath), !.
 	
 file_node_name(FilePath, _, FilePath).
     
