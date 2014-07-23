@@ -14,6 +14,8 @@
 
 package org.cs3.pdt.common;
 
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,7 +25,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cs3.pdt.common.metadata.SourceLocation;
 import org.cs3.pdt.common.search.SearchConstants;
@@ -34,6 +38,7 @@ import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
@@ -434,6 +439,42 @@ public class PDTCommonUtil {
 	
 	public static PrologProcess getActivePrologProcess() {
 		return PDTConnectorPlugin.getDefault().getPrologProcessService().getActivePrologProcess();
+	}
+	
+	private static final HashSet<String> PROLOG_FILE_EXTENSIONS = new HashSet<String>();
+
+	static {
+		PROLOG_FILE_EXTENSIONS.add("pl");
+		PROLOG_FILE_EXTENSIONS.add("plt");
+		PROLOG_FILE_EXTENSIONS.add("pro");
+		PROLOG_FILE_EXTENSIONS.add("lgt");
+		PROLOG_FILE_EXTENSIONS.add("logtalk");
+	}
+
+	public static Set<String> getPrologFileExtensions() {
+		return PROLOG_FILE_EXTENSIONS;
+	}
+	
+	public static boolean isPrologFile(IFile file) {
+		return PROLOG_FILE_EXTENSIONS.contains(file.getFileExtension());
+	}
+	
+	public static boolean isPrologFile(String filename) {
+		return filename.contains(".") && PROLOG_FILE_EXTENSIONS.contains(filename.substring(filename.lastIndexOf('.') + 1));
+	}
+
+	public static void updateEntryPointsInProcess(PrologProcess process) throws PrologProcessException {
+		process.queryOnce(bT(PDTCommonPredicates.REMOVE_ENTRY_POINTS, "_"));
+
+		for (IFile file : PDTCommonPlugin.getDefault().getAllEntryPoints()) {
+			try {
+				String prologFileName = QueryUtils.prologFileName(file.getLocation().toFile().getCanonicalFile());
+				process.queryOnce(bT(PDTCommonPredicates.ADD_ENTRY_POINT, QueryUtils.quoteAtom(prologFileName)));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }
