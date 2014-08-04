@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_term_position/7, call_type/7, calls_multifile/8, pdt_walk_code/1, generate_call_info/6]).
+:- module(pdt_call_graph, [ensure_call_graph_generated/0, calls/7, call_type/7, calls_multifile/8, pdt_walk_code/1]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
@@ -36,10 +36,6 @@ ensure_call_graph_generated.
 %% calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls)
 calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls) :-
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls, _TermPosition, _Info).
-	
-
-call_term_position(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, TermPosition) :-
-	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, [TermPosition|_], _Info).
 
 call_type(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, Info) :-
 	calls_(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, _NumberOfCalls, _TermPosition, [Info|_]).
@@ -108,12 +104,6 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	;	true
 	).
 	
-generate_call_info(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity) :-
-	functor(Target, TargetFunctor, TargetArity),
-	pdt_walk_code([trace_reference(TargetModule:Target), predicates([SourceModule:SourceFunctor/SourceArity]), on_trace(pdt_call_graph:assert_edge)]).
-
-assert_edge(_, '<initialization>', _, _) :- !.
-
 assert_edge(M1:Callee, M2:Caller, ClauseInfo) :-
 	assert_edge(M1:Callee, M2:Caller, ClauseInfo, _).
 

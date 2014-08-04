@@ -12,7 +12,16 @@
  * 
  ****************************************************************************/
 
-:- module(util_for_graphML, [predicate_in_file/4, file_of_predicate/4, main_module_of_file/2, first_line_of_predicate_in_file/5, exported_predicate/3, exported_predicate/2, locally_dead_predicate/3]).
+:- module(util_for_graphML, [
+	predicate_in_file/4,
+	file_of_predicate/4,
+	main_module_of_file/2,
+	first_line_of_predicate_in_file/5,
+	exported_predicate/3,
+	exported_predicate/2,
+	locally_dead_predicate/3,
+	call_term_position/7
+]).
 
 :- use_module(library(lists)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
@@ -78,23 +87,39 @@ exported_predicate(Module, Head) :-
 	!.
 
 locally_dead_predicate(Module, Name, Arity) :-
-    locally_dead_predicate(Module, Name, Arity, [Module:Name/Arity]).
+	locally_dead_predicate(Module, Name, Arity, [Module:Name/Arity]).
 
 locally_dead_predicate(Module, Name, Arity, _Visited):-
-    uncalled_local_predicate(Module, Name, Arity).
+	uncalled_local_predicate(Module, Name, Arity).
 locally_dead_predicate(Module, Name, Arity, Visited):-
-    \+ exported_predicate(Module, Name, Arity),
-    forall((
-    	calls(Module, Name, Arity, CallerModule, CallerName, CallerArity, _NumberOfCalls),
-    	\+ member(CallerModule:CallerName/CallerArity, Visited)
-    ),(
-    	locally_dead_predicate(CallerModule, CallerName, CallerArity, [CallerModule:CallerName/CallerArity | Visited])
-    )).
-    		
+	\+ exported_predicate(Module, Name, Arity),
+	forall((
+		calls(Module, Name, Arity, CallerModule, CallerName, CallerArity, _NumberOfCalls),
+		\+ member(CallerModule:CallerName/CallerArity, Visited)
+	),(
+		locally_dead_predicate(CallerModule, CallerName, CallerArity, [CallerModule:CallerName/CallerArity | Visited])
+	)).
+			
 uncalled_local_predicate(Module, Name, Arity):-
-    uncalled_predicate(Module, Name, Arity),
-    \+ exported_predicate(Module, Name, Arity).
+	uncalled_predicate(Module, Name, Arity),
+	\+ exported_predicate(Module, Name, Arity).
 
 uncalled_predicate(Module, Name, Arity):-
-    declared_in_module(Module, Name, Arity, _),
-    \+ calls(Module, Name, Arity, _, _, _, _).
+	declared_in_module(Module, Name, Arity, _),
+	\+ calls(Module, Name, Arity, _, _, _, _).
+
+assert_location(_, _, clause_term_position(_Ref, TermPosition), _) :-
+	asserta(location(TermPosition)).
+
+:- dynamic(location/1).
+
+call_term_position(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity, Position) :-
+	retractall(location(_)),
+	functor(Target, TargetFunctor, TargetArity),
+	pdt_walk_code([trace_reference(TargetModule:Target), predicates([SourceModule:SourceFunctor/SourceArity]), on_trace(util_for_graphML:assert_location)]),
+	location(TermPosition),
+	!,
+	(	TermPosition = term_position(Start, End, _, _, _)
+	;	TermPosition = Start-End
+	),
+	format(atom(Position), '~w-~w', [Start, End]).
