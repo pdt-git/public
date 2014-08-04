@@ -657,11 +657,22 @@ find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Vi
 
 find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	!,
-	PredicatePrefix \== '',
-	setof(Module-Name-Arity, SpecifiedModule^(
-		declared_in_module(SpecifiedModule, Name, Arity, Module),
-		atom_concat(PredicatePrefix, _, Name)
-	), Predicates),
+	(	PredicatePrefix \== ''
+	->	setof(
+			Module-Name-Arity,
+			SpecifiedModule^(
+				declared_in_module(SpecifiedModule, Name, Arity, Module),
+				atom_concat(PredicatePrefix, _, Name)
+			),
+			Predicates
+		)
+	;	nonvar(SpecifiedModule),
+		setof(
+			SpecifiedModule-Name-Arity,
+			SpecifiedModule^(declared_in_module(SpecifiedModule, Name, Arity, SpecifiedModule)),
+			Predicates
+		)
+	),
 	member(Module-Name-Arity, Predicates),
 	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 

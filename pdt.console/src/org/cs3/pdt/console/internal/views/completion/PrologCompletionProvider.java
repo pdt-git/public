@@ -66,9 +66,6 @@ public class PrologCompletionProvider {
 			searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(prefix.prefix);
 		}
 		
-		if (prefix.length <= 0) {
-			return EMPTY_COMPLETION_PROPOSAL;
-		}
 		
 		ArrayList<ComparableCompletionProposal> proposals = new ArrayList<ComparableCompletionProposal>();
 		String query = bT(PDTCommonPredicates.FIND_COMPLETION,
@@ -138,6 +135,10 @@ public class PrologCompletionProvider {
 			return new Prefix(offset, "", false);
 		}
 		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
+		
+		if (!isPredChar) {
+			return new Prefix(offset + 1, "", false);
+		}
 		
 		while (isPredChar){
 			length++;
