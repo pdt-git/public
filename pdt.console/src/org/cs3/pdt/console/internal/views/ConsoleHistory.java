@@ -113,15 +113,6 @@ public class ConsoleHistory implements ConsoleModelListener {
 		}
 	}
 
-	public void clearHistory() {
-		if (lastLine!=null){
-			model.setLineBuffer(lastLine);
-			lastLine=null;
-			pointer=0;
-		}
-		history.clear();
-	}
-
 	@Override
 	public void onCommit(ConsoleModelEvent e) {		
 		lastLine=null;
@@ -154,25 +145,6 @@ public class ConsoleHistory implements ConsoleModelListener {
 
 	@Override
 	public void beforeDisconnect(ConsoleModelEvent e) {}
-	
-	public void saveHistory(OutputStream os) throws IOException{
-//		PrintStream ps = new PrintStream(os);
-//		for (Iterator<String> iter = history.iterator(); iter.hasNext();) {
-//			String line = iter.next();
-//			ps.println(line);
-//		}
-	}
-
-	public void loadHistory(InputStream is) throws IOException{
-//		clearHistory();
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-//		String line = reader.readLine();
-//		while(line!=null){
-//			history.add(line);
-//			line = reader.readLine();
-//		}
-//		pointer=history.size();
-	}
 	
 	private void loadHistory() {
 		String[] array = getSettings().getArray(key);

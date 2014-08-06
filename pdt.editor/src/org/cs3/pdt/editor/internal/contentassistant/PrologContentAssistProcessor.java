@@ -65,6 +65,9 @@ public abstract class PrologContentAssistProcessor {
 		int length=0;
 		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin));
 		
+		if (!isPredChar) {
+			return new Prefix(document, offset + 1, "");
+		}
 		while (isPredChar){
 			length++;
 			int test = begin-1;

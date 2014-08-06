@@ -17,10 +17,7 @@ package org.cs3.pdt.console.internal.views;
 import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -694,19 +691,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		return ((DefaultPrologConsoleService) PrologConsolePlugin.getDefault().getPrologConsoleService());
 	}
 
-
-	private void loadHistory(ConsoleHistory history) {
-
-		try {
-			FileInputStream in = new FileInputStream(getHistoryFile());
-			history.loadHistory(in);
-			in.close();
-		} catch (IOException e) {
-			Debug.report(e);
-		}
-
-	}
-
 	private void createActions() {
 		ISharedImages sharedImages = getSite().getWorkbenchWindow().getWorkbench().getSharedImages();
 		cutAction = new Action() {
@@ -1130,31 +1114,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	 */
 	@Override
 	public void beforeShutdown(PrologProcess process, PrologSession session) {
-		ConsoleHistory history = viewer.getHistory();
-		saveHistory(history);
 		disconnect(process);
 	}
 
 	@Override
 	public void onError(PrologProcess process) {
-		ConsoleHistory history = viewer.getHistory();
-		saveHistory(history);
 		disconnect(process);
-
-
-	}
-
-	private void saveHistory(ConsoleHistory history) {
-		if (history == null) {
-			return;
-		}
-		try {
-			FileOutputStream out = new FileOutputStream(getHistoryFile());
-			history.saveHistory(out);
-			out.close();
-		} catch (IOException e) {
-			Debug.report(e);
-		}
 	}
 
 	@Override
@@ -1337,7 +1302,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			viewer.clearOutput();
 			ConsoleHistory history = new ConsoleHistory(PDTConnectorPlugin.getDefault().getPrologProcessRegistry().getKey(process));
 			viewer.setHistory(history);
-			loadHistory(history);
 			viewer.setModel(models.get(process));
 			PrologCompletionProvider completionProvider = new PrologCompletionProvider();
 			completionProvider.setPrologProcess(process);

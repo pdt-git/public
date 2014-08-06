@@ -426,24 +426,6 @@ write_files(RelativePath, Files, Filters, Stream):-
     	)
     ).	
 
-call_term_position(TermPosition, Position) :-
-	(
-		TermPosition = term_position(Start, End, _, _, _);
-		TermPosition = Start-End
-	),
-	format(atom(Position), '~w-~w', [Start, End]).
-
-call_term_position(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity, Position) :-
-	pdt_call_graph:call_term_position(TargetModule, TargetFunctor, TargetArity, SourceModule, SourceFunctor, SourceArity, TermPosition),
-	call_term_position(TermPosition, Position), !.
-
-call_term_position(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity, Position) :-
-	pdt_call_graph:generate_call_info(SourceModule, SourceFunctor, SourceArity, TargetModule, TargetFunctor, TargetArity), !,
-	pdt_call_graph:call_term_position(TargetModule, TargetFunctor, TargetArity, SourceModule, SourceFunctor, SourceArity, TermPosition),
-	call_term_position(TermPosition, Position).
-		
-	
-
 %write_load_edges(Stream):-
 %    forall(load_edge(LoadingFileId,FileId,_,_),
 %    	(	(	fileT(LoadingFileId,_,_),

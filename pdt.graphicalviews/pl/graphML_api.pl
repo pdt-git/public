@@ -167,17 +167,11 @@ write_call_edge(Stream, SourceModule, SourceName, SourceArity, TargetModule, Tar
     write_data(Stream, 'kind', 'call'),
     write_data(Stream, 'frequency', NumberOfCalls),
     write_data(Stream, 'fileName', SourceFile),
-    write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity),
     write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity),
 	close_edge(Stream),
 	fail.
 write_call_edge(_, _, _, _, _, _, _, _).
     
-write_call_location(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity)  :-
-	call_term_position(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, term_position(Start, End, _, _, _)), !,
-    write_data(Stream, 'offset', Start-End), !.
-write_call_location(_, _, _, _, _, _, _).
-
 write_call_metadata(Stream, TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity) :-
 	call_type(TargetModule, TargetName, TargetArity, SourceModule, SourceName, SourceArity, Info),
     write_call_metadata(Stream, Info), !.
