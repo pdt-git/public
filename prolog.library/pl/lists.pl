@@ -18,7 +18,7 @@
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
-    ctc_intersection/3,           % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
+    ctc_intersection/3,       % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
     union_sorted/3,           % (+Set1,+Set2,?Union)! 
     union_order_preserving/3, % (+Set1,+Set2,?Union)!
     remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
@@ -27,8 +27,7 @@
     list_to_disjunction/2,    % (+List,?Disjunction) is det.
     list_to_conjunction/2,    % (+List,?Conjunction) is det.
     pretty_print_list/1,      % (+List)!io 
-    pretty_print_list/2,          % (+List,+Indent)!io 
-    pretty_print_list_body/2,     % (+List,+Indent)
+    pretty_print_list/2,      % (+List,+Indent)!io 
     list_2_comma_separated_list/2, % (+List,-Atom) is det.
     list_2_separated_list/3 % (+List,-Atom) is det.
 ] ).
@@ -36,7 +35,7 @@
 :- module( ctc_lists, [
     nth1_non_unifying/3,      % (Index, +List, Elem) ?+? is nondet, ??? is infinite
     union_and_intersection/4, % (+Set1,+Set2,?Union,?Intersection)! <- identity-based equality
-    ctc_intersection/3,           % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
+    ctc_intersection/3,       % (+Set1,+Set2,       ?Intersection)! <- unification-based equality   
     union_sorted/3,           % (+Set1,+Set2,?Union)! 
     union_order_preserving/3, % (+Set1,+Set2,?Union)!
     remove_duplicates_sorted/2,% (+List,?DuplicateFree)!
@@ -47,7 +46,6 @@
     list_to_conjunction/2,    % (+List,?Conjunction) is det.
     pretty_print_list/1,      % (+List)!io 
     pretty_print_list/2,          % (+List,+Indent)!io 
-    pretty_print_list_body/2,     % (+List,+Indent)
     list_2_comma_separated_list/2, % (+List,-Atom) is det.
     list_2_separated_list/3, % (+List,-Atom) is det.
     finite_length/2
@@ -57,11 +55,12 @@
 :- use_module(library(lists)).
 :- use_module(pdt_support, [pdt_support/1]).
 
-/*
- * Check list membership without unifying.
- * Succeed only upon *identical* terms.
- * Suceed multiply if member multiply in list!!!!
- */
+%% nth1_non_unifying(Index, List, Elem) is nondet
+%
+% Check list membership without unifying.
+% Succeed only upon *identical* terms.
+% Suceed multiply if member multiply in list!!!!
+
 nth1_non_unifying(Index, List, Elem) :-
     nth1_non_unifying__(List, Elem, Index, 1).
     
@@ -74,16 +73,14 @@ nth1_non_unifying__([_|T], Elem, Index, Depth) :-
 
 
 
-/*
- * union_and_intersection(+Set1,+Set2,?Union,?Intersection) is det
- *
- * Determines the union and intersection of two sets represented as
- * dupliate-free lists.
- * Has no side-effects on free variables (free variables are not unified).
- * Arg1 and arg2 are the input sets.
- * Arg3 is their union.
- * Arg4 is their intersection.
- */
+%% union_and_intersection(+Set1,+Set2,?Union,?Intersection) is det
+%
+% Determines the union and intersection of two sets represented as
+% dupliate-free lists.
+% Has no side-effects on free variables (free variables are not unified).
+% Arg1 and arg2 are the input sets.
+% Arg3 is their union.
+% Arg4 is their intersection.
 
 union_and_intersection(S1,S2,U,I) :-
    length(S1,L1),
@@ -143,15 +140,13 @@ inters__identity_based([X|T1],[Y|T2], NewI):-
 %    union_inters__(C,F,G,H).
  
 
-/*
- * union_sorted(+Set1,+Set2,?Union) is det
- *
- * Determines the union of two sets represented as dupliate-free lists.
- * Has no side-effects on free variables (free variables are not unified).
- * The result set is sorted according to the standard order of terms.
- * Arg1 and Arg2 are the input sets. 
- * Arg3 is their union.
- */
+%% union_sorted(+Set1,+Set2,?Union) is det
+%
+% Determines the union of two sets represented as dupliate-free lists.
+% Has no side-effects on free variables (free variables are not unified).
+% The result set is sorted according to the standard order of terms.
+% Arg1 and Arg2 are the input sets. 
+% Arg3 is their union.
  
 union_sorted(Set1,Set2,Set12):- 
     once(union_sorted__(Set1,Set2,Set12)).
@@ -166,16 +161,15 @@ union_sorted__([X|T1],[Y|T2],NewU):-
    ).
 
 
-/*
- * union_order_preserving(+Set1,+Set2,?Union) is det
- *
- * Determines the union of two sets represented as dupliate-free lists.
- * Has no side-effects on free variables (free variables are not unified).
- * Does not change the relative order of terms. If duplicates are
- * encountered, the first occurence is retained.
- * Arg1 and arg2 are the input sets. 
- * Arg3 is their union.
- */
+%% union_order_preserving(+Set1,+Set2,?Union) is det
+%
+% Determines the union of two sets represented as dupliate-free lists.
+% Has no side-effects on free variables (free variables are not unified).
+% Does not change the relative order of terms. If duplicates are
+% encountered, the first occurence is retained.
+% Arg1 and arg2 are the input sets. 
+% Arg3 is their union.
+
 union_order_preserving(S1,S2,Res) :-
    append(S1,S2,S3),
    list_to_set(S3,Res), !.
@@ -191,18 +185,17 @@ remove_duplicates([],[]).
 */
 
 
-/*
- * remove_duplicates_sorted(+List, ?DuplicateFree) is det
- *
- * Arg2 is the duplicate-free version of Arg1. The first occurence
- * of any element of Arg1 is preserved, later ones are deleted.
- * It is assumed that the list in Arg1 is sorted, so any duplicates
- * occur consecutively.
- * Two terms are considered duplicates if they unify. The unification
- * is performed before the removal. So any list of free variables will
- * be collapsed to just one element that is unified with each removed
- * element!
- */
+%% remove_duplicates_sorted(+List, ?DuplicateFree) is det
+%
+% Arg2 is the duplicate-free version of Arg1. The first occurence
+% of any element of Arg1 is preserved, later ones are deleted.
+% It is assumed that the list in Arg1 is sorted, so any duplicates
+% occur consecutively.
+% Two terms are considered duplicates if they unify. The unification
+% is performed before the removal. So any list of free variables will
+% be collapsed to just one element that is unified with each removed
+% element!
+
 remove_duplicates_sorted([], []) .
 remove_duplicates_sorted([First|Rest], [First|UniqueRest]) :-
   remove_duplicates_sorted__(Rest, First, UniqueRest).  
@@ -220,12 +213,11 @@ remove_duplicates_sorted__([First|Rest], Previous, Result ) :-
 
 
 :- if(\+ pdt_support:pdt_support(remove_duplicates)).
-/*
- * remove_duplicates(+List, ?DuplicateFree) is det
- *
- * Arg2 is the duplicate-free version of Arg1. The first occurence
- * of any element of Arg1 is preserved, later ones are deleted.
- */
+%% remove_duplicates(+List, ?DuplicateFree) is det
+%
+% Arg2 is the duplicate-free version of Arg1. The first occurence
+% of any element of Arg1 is preserved, later ones are deleted.
+
 remove_duplicates([First|Rest],[First|NoDup]) :-
    split_unique(Rest,First,Before,After),
    !,
@@ -236,13 +228,12 @@ remove_duplicates([First|Rest],[First|NoDup]) :-
 remove_duplicates([],[]).
 :- endif.
 
-/*
- * split_unique(+List,+Elem,?BeforeNoDups,?AfterNoDups)
- *
- * Arg2 is an element from the list Arg1.
- * Arg3 is the duplicate-free part of Arg1 before Arg2.
- * Arg4 is the duplicate-free part of Arg1 after  Arg2.
- */
+%% split_unique(+List,+Elem,?BeforeNoDups,?AfterNoDups)
+%
+% Arg2 is an element from the list Arg1.
+% Arg3 is the duplicate-free part of Arg1 before Arg2.
+% Arg4 is the duplicate-free part of Arg1 after  Arg2.
+
 split_unique([E|T],E,[],TwithoutE) :-
   remove_duplicates([E|T],[E|TwithoutE]).
 split_unique([H|T],E,[H|Before],After) :-
@@ -257,13 +248,12 @@ flatten_one_level([H|T],Res) :-
 */
 
 
-/*
- * list_sum(+Numbers, ?Total)
- *  - Arg1 = List of numbers (integer or real)
- *  - Arg2 = Sum of the elements of Arg1.
- * 
- * Sum up a list of numbers.
- */ 
+%% list_sum(+Numbers, ?Total)
+%  - Arg1 = List of numbers (integer or real)
+%  - Arg2 = Sum of the elements of Arg1.
+% 
+% Sum up a list of numbers.
+
 list_sum(Numbers,Total) :- list_sum(Numbers,0,Total).
 list_sum([],X,X).
 list_sum([H|T],Temp,Res) :-
@@ -275,15 +265,15 @@ list_sum([H|T],Temp,Res) :-
 %list_sum([1,2],3).
 %list_sum([1,2,3,4,0,3,2,1],16).
 
-/*
- *  Generic list visitor. Traverses any binary encoded list and
- *  executes Pred(X) on all its elements. The functor of the
- *  terms representing binary lists is irrelevant as long as the
- *  head is the first argument and the tail is the second. Stop
- *  is the term representing the end of the sequence.
- */
+%% traverseList(List,Stop,_Pred)
+%  Generic list visitor. Traverses any binary encoded list and
+%  executes Pred(X) on all its elements. The functor of the
+%  terms representing binary lists is irrelevant as long as the
+%  head is the first argument and the tail is the second. Stop
+%  is the term representing the end of the sequence.
+ %
 traverseList(List,Stop,_Pred):-
-    List = Stop,
+    List == Stop,
     !.
 traverseList(List,Stop,Pred):-
     List =.. [_F,Head,Tail],
@@ -291,80 +281,79 @@ traverseList(List,Stop,Pred):-
     call(Pred),
     traverseList(Tail,Stop,Pred).
 
-/*
- * list_to_disjunction(+List,?Disjunction) is det.
- *
- * Arg1 is a List and Arg2 is its representation as a disjunction.
- */
+%% list_to_disjunction(+List,?Disjunction) is det.
+%
+% Arg1 is a List and Arg2 is its representation as a disjunction.
+
 list_to_disjunction([ ],true) :-!.
 list_to_disjunction([A],A   ) :-!.
 list_to_disjunction([A|B],(A;Disj)) :-
   list_to_disjunction(B,Disj).
 
-/*
- * list_to_conjunction(+List,?Conjunction) is det.
- *
- * Arg1 is a List and Arg2 is its representation as a conjunction.
- */
+%% list_to_conjunction(+List,?Conjunction) is det.
+%
+% Arg1 is a List and Arg2 is its representation as a conjunction.
+
 list_to_conjunction([ ],true) :-!.
 list_to_conjunction([A],A   ) :-!.
 list_to_conjunction([A|B],(A,Conj)) :-
   list_to_conjunction(B,Conj).
 
-/*
- * pretty_print_list(+List)
- *  Pretty-print a list, with each element starting on a new line
- *  and fixed two character indentation of each element.
- */
-pretty_print_list([]) :-
-   format('[]~n').
-pretty_print_list([A|B]) :-
-   format('[~n'),
-   pretty_print_list_body__([A|B]),
-   format(']~n').
+%% pretty_print_list(+List) is det
+% 
+%  Pretty-print a list, with each element starting on a new line
+%  and fixed two character indentation of list elements relative 
+%  to the opening and closing list brace.
+%  If the list contains nestes lists, their contents is pretty 
+%  printed recursively.
 
-pretty_print_list_body__([A|B]) :-
-	term_to_atom(A,Aterm),
-	length(B,LB),
-	(	LB=0
-	->	format('  ~a ~n',[Aterm])
-	;	format('  ~a, ~n',[Aterm])
-	),
-	pretty_print_list_body__(B).
-pretty_print_list_body__([]) .
-     
+pretty_print_list(List) :- 
+	pretty_print_list(List, 2) .
 
-/*
- * pretty_print_list(+List, +Indent)
- *  Pretty-print List, with each element starting on a new line.
- *  Indent is the indentation of each element. It is an atom, 
- *  e.g. '   ' for 3 character indentation.
- */
-pretty_print_list(List, Indent) :-
-    atomic_list_concat(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
-    pp_list(List, Formatstring).
+%% pretty_print_list(+List, +Indent)
+%
+%  Pretty-print List, with each element starting on a new line.
+%  Indent is the indentation of each element. It is an integer, 
+%  e.g. 3 for 3 character indentation of list elements relative 
+%  to the opening and closing list brace.
+%  If the list contains nestes lists, their contents is pretty 
+%  printed recursively.
+   
+pretty_print_list(List, Indent) :- pp_list(List, 0, Indent, ' ').
 
-pretty_print_list_body(List, Indent) :-
-    atomic_list_concat(['~t~',Indent,'|'],Formatstring),  % e.g. '~t~8|'  
-    pp_list_body(List, Formatstring).
     
-    
-pp_list([], Indent) :-
-    atom_concat(Indent,'[]~n',Emptylist), 
-    format(Emptylist).
-pp_list([A|B], Indent) :-
-    atomic_list_concat([Indent,'[~n '], Liststart), % 
-    format(Liststart),
-    pp_list_body([A|B], Indent),
-    atom_concat(Indent,']~n',Listend), 
-    format(Listend).   
+pp_list([], Current, _, Komma) :- 
+	write_line_indented(Current,[], Komma ).
+	
+pp_list([A|B], Current, Indent, Komma) :- 
+	write_line_indented(Current,'[', ' '),
+	Next is Current + Indent,
+	pp_list_body([A|B], Next, Indent),
+	write_line_indented(Current,']',Komma).   
           
-pp_list_body([A|B], Indent) :-
-    term_to_atom(A,Aterm),
-    atom_concat(Indent,'~a,~n',Format), 
-    format(Format,[Aterm]),
-    pp_list_body(B, Indent).
-pp_list_body([], _Indent) .
+          
+pp_list_body([A  ], Current, Indent) :- !,
+                                        pp_list_element(A,Current,Indent,' ') .
+pp_list_body([A|B], Current, Indent) :- pp_list_element(A,Current,Indent,','),
+                                        pp_list_body(B, Current, Indent).
+                                        
+pp_list_element(A,Current,Indent,X) :- 
+	(  is_list(A)
+	-> pp_list(A,Current,Indent, X)
+	;  write_line_indented(Current, A, X)
+	) .
+                                         
+                                        
+%% write_line_indented(+Indent, +Term)
+%
+% Write Term on a separate line, indented by Indent spaces.
+
+
+write_line_indented(Indent,What,Separator) :- 
+	atomic_list_concat(['~t~',Indent,'|~w~a~n'],Formatstring), 
+	format(Formatstring,[What,Separator]).
+
+
 
 	
 list_2_comma_separated_list([],'') :- !.
