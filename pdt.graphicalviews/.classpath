@@ -5,5 +5,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.albireo.core_0.0.3.v20081031.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/y.jar"/>
+	<classpathentry kind="lib" path="lib/batik.jar"/>
+	<classpathentry kind="lib" path="lib/ysvg.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

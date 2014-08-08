@@ -92,7 +92,6 @@ public class PDTGraphView extends  JPanel {
 		
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
-		
 	}
 
 	protected void initNavigationMode() {
@@ -100,7 +99,7 @@ public class PDTGraphView extends  JPanel {
 		navigationMode.setDefaultCursor(new Cursor(Cursor.MOVE_CURSOR));
 		navigationMode.setNavigationCursor(new Cursor(Cursor.MOVE_CURSOR));
 	}
-
+	
 	private void initMouseZoomSupport() {
 		wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
 		wheelScroller = new WheelScroller(view);
@@ -133,6 +132,10 @@ public class PDTGraphView extends  JPanel {
 	
 	public GraphModel getGraphModel() {
 		return graphModel;
+	}
+
+	public Graph2DView getView() {
+		return view;
 	}
 	
 	public void recalculateMode() {

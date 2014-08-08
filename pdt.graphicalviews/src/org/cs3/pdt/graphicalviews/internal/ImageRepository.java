@@ -30,6 +30,7 @@ public class ImageRepository {
 	public static final String HELP = "help.gif";
 	public static final String REFRESH = "refresh.gif";
 	public static final String MOVE = "move.png";
+	public static final String SAVE = "save.png";
 	public static final String M = "m.png";
 	public static final String I = "i.png";
 	public static final String P = "p.png";

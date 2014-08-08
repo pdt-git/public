@@ -13,6 +13,8 @@
 
 package org.cs3.pdt.graphicalviews.focusview;
 
+import java.io.IOException;
+
 import javax.swing.JComponent;
 
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -22,6 +24,7 @@ import org.cs3.pdt.graphicalviews.main.PDTGraphView;
 import org.cs3.pdt.graphicalviews.preferences.MainPreferencePage;
 import org.cs3.pdt.graphicalviews.preferences.PredicateLayoutPreferences;
 import org.cs3.pdt.graphicalviews.preferences.PreferenceConstants;
+import org.cs3.pdt.graphicalviews.utils.SvgExtension;
 import org.cs3.pdt.graphicalviews.view.modes.MouseHandler;
 import org.cs3.pdt.graphicalviews.view.modes.OpenInEditorViewMode;
 import org.cs3.prolog.connector.common.Debug;
@@ -45,7 +48,9 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -53,6 +58,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
+
+import y.view.Graph2DView;
 
 
 public abstract class ViewBase extends ViewPart {
@@ -196,6 +203,18 @@ public abstract class ViewBase extends ViewPart {
 				}
 			});
 		
+		toolBarManager.add(new Separator("saveas"));
+		
+
+		toolBarManager.add(new ToolBarAction("Save As", 
+				ImageRepository.getImageDescriptor(ImageRepository.SAVE)) {
+
+				@Override
+				public void performAction() {
+					saveCurrentFocusView();	
+				}
+			});
+		
 		toolBarManager.add(new Separator("preferences"));
 		
 		toolBarManager.add(new ToolBarAction("Preferences", 
@@ -252,6 +271,31 @@ public abstract class ViewBase extends ViewPart {
 		FocusViewControl f = getCurrentFocusView();
 		if (f != null) {
 			f.reload();
+		}
+	}
+	
+	public void saveCurrentFocusView() {
+		try
+		{
+			FocusViewControl f = getCurrentFocusView();
+			if (f != null) {
+				Graph2DView view = f.getPdtGraphView().getView();
+				
+				FileDialog dialog = new FileDialog (getSite().getShell(), SWT.SAVE);
+				dialog.setFilterNames (new String[] { "SVG Files" });
+				dialog.setFilterExtensions (new String[] { "*.svg" });
+				
+				String path = dialog.open();
+			    if (path != null) {
+			        new SvgExtension().Export(view, path);
+			    }
+			}
+		}
+		catch (IOException ex)
+		{
+			MessageBox mb = new MessageBox(getSite().getShell());
+			mb.setMessage("Cannot save the file: " + ex.getMessage());
+			mb.open();
 		}
 	}
 	
