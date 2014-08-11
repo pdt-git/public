@@ -84,6 +84,20 @@ public class OpenInEditorViewMode extends ViewMode {
 					}
 				});
 			} catch (NullPointerException e) {}
+		} else if (dataHolder.isFileNode(node)) {
+			try {
+				final String fileName = dataHolder.getFileNodePathMap().get(node).toString();
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							PDTCommonUtil.selectInEditor(1, fileName, true);
+						} catch (PartInitException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			} catch (NullPointerException e) {}
 		} else if (dataHolder.isPredicate(node)) {
 			try {
 				final String fileName = dataHolder.getFileName(node);
