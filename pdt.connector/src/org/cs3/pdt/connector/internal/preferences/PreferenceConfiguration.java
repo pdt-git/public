@@ -203,11 +203,13 @@ public class PreferenceConfiguration {
 	private static File getInternalPrologDirectory() {
 		try {
 			URL installLocation = FileLocator.resolve(Platform.getInstallLocation().getURL());
-			File eclipseDirectory = new File(installLocation.toURI());
+//			this leads to errors when the path has spaces
+//			File eclipseDirectory = new File(installLocation.toURI());
+			File eclipseDirectory = new File(FileLocator.toFileURL(installLocation).getFile());
 			File prologDirectory = new File(eclipseDirectory.getParentFile(), "prolog");
 			return prologDirectory;
-		} catch (IOException | URISyntaxException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
