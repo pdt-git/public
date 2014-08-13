@@ -483,7 +483,10 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
 %    module_of_file(ContextFile, ContextModule),
     % Backtrack over all predicates defined in File
     % including multifile contributions to other modules:
-    source_file(ModuleHead, ContextFile),
+    (	source_file(ModuleHead, ContextFile)
+    ;	source_file_property(ContextFile, included_in(ParentFile, _)),
+    	source_file(ModuleHead, ParentFile)
+    ),
     pdt_strip_module(ModuleHead,DefiningModule,ModuleLine,Head),
     
     % Predicate properties:
@@ -495,6 +498,10 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
     % predicate, even when they occur in other files
     %defined_in_file(DefiningModule, Functor, Arity, Ref, _, DefiningFile, Line),
     find_definition_in_file(Options, ContextFile, DefiningModule, Functor, Arity, Ref, DefiningFile, Line),
+    (	nonvar(ParentFile)
+    ->	DefiningFile \== ParentFile
+    ;	true
+    ),
     (	DefiningFile == ContextFile
     ->	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% local definition
