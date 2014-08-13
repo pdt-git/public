@@ -33,6 +33,9 @@ public class PDTPredicates {
 	// outline
 	public static final String MODULE_PROPERTY = "module_property";
 	public static final String ENTITY_PROPERTY = "utils4entities::entity_property";
+	
+	// reloading included files
+	public static final String FILE_TO_RELOAD_FOR_INCLUDED_FILE = "pdt_editor_files:file_to_reload_for_included_file";
 
 }
 

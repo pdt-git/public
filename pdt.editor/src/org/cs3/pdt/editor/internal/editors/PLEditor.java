@@ -15,7 +15,9 @@
 package org.cs3.pdt.editor.internal.editors;
 
 import static org.cs3.prolog.connector.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.quoteAtomIfNeeded;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,9 +34,11 @@ import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.service.ConsultListener;
 import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
+import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.PDTPlugin;
+import org.cs3.pdt.editor.PDTPredicates;
 import org.cs3.pdt.editor.internal.ImageRepository;
 import org.cs3.pdt.editor.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.editor.internal.actions.FindPredicateActionDelegate;
@@ -146,15 +150,41 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			}
 			PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", true);
 			
-			IFile currentIFile = getCurrentIFile();
-			if (currentIFile != null) {
-				PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(currentIFile);
+			PrologProcess activePrologProcess = PDTCommonUtil.getActivePrologProcess();
+			if (activePrologProcess.isUp()) {
+				try {
+					List<Map<String, Object>> results = activePrologProcess.queryAll(bT(PDTPredicates.FILE_TO_RELOAD_FOR_INCLUDED_FILE, quoteAtomIfNeeded(getPrologFileName()), "FileToReload"));
+					if (results.isEmpty()) {
+						loadCurrentFile();
+					} else {
+						ArrayList<IFile> filesToReload = new ArrayList<>();
+						try {
+							for (Map<String, Object> result : results) {
+								filesToReload.add(FileUtils.findFileForLocation(result.get("FileToReload").toString()));
+							}
+							PDTConnectorPlugin.getDefault().getPrologProcessService().consultFiles(filesToReload);
+						} catch (IOException e) {
+							loadCurrentFile();
+						}
+					}
+				} catch (PrologProcessException e) {
+					loadCurrentFile();
+				}
 			} else {
-				PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(getPrologFileName());
+				loadCurrentFile();
 			}
 		}
 		
 		PDTCommonPlugin.getDefault().notifyDecorators();
+	}
+	
+	private void loadCurrentFile() {
+		IFile currentIFile = getCurrentIFile();
+		if (currentIFile != null) {
+			PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(currentIFile);
+		} else {
+			PDTConnectorPlugin.getDefault().getPrologProcessService().consultFile(getPrologFileName());
+		}
 	}
 
 	private void addTasks(IFile file, Document document) {
