@@ -141,7 +141,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		
 		if (shouldConsult) {
 			Document document = (Document) getDocumentProvider().getDocument(getEditorInput());
-			if(EXPERIMENTAL_ADD_TASKS){
+			if(EXPERIMENTAL_ADD_TASKS && getEditorInput() instanceof FileEditorInput){
 				addTasks(((FileEditorInput)getEditorInput()).getFile(),document);
 			}
 			PDTCommonPlugin.getDefault().getPreferenceStore().setValue("console.no.focus", true);
@@ -158,23 +158,23 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	}
 
 	private void addTasks(IFile file, Document document) {
-			try {
-				int offset = 0;
-				file.deleteMarkers(IMarker.TASK, true, IResource.DEPTH_ONE);
-				while(offset<document.getLength()){
-					ITypedRegion region = document.getPartition(offset);
-					if(isComment(region)){
-						String content=document.get(offset, region.getLength());
-						addTaskMarker(file, document, offset, content, "TODO");
-						addTaskMarker(file, document, offset, content, "FIXME");
-					}
-					offset = region.getOffset() + region.getLength();
+		try {
+			int offset = 0;
+			file.deleteMarkers(IMarker.TASK, true, IResource.DEPTH_ONE);
+			while(offset<document.getLength()){
+				ITypedRegion region = document.getPartition(offset);
+				if(isComment(region)){
+					String content=document.get(offset, region.getLength());
+					addTaskMarker(file, document, offset, content, "TODO");
+					addTaskMarker(file, document, offset, content, "FIXME");
 				}
-			} catch (BadLocationException e) {
-				Debug.report(e);
-			} catch (CoreException e1) {
-				Debug.report(e1);
+				offset = region.getOffset() + region.getLength();
 			}
+		} catch (BadLocationException e) {
+			Debug.report(e);
+		} catch (CoreException e1) {
+			Debug.report(e1);
+		}
 
 	}
 
