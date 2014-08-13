@@ -686,11 +686,18 @@ find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, p
 find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	atomic(PredicatePrefix),
 	nonvar(EnclosingFile),
-	setof(Module-Name-Arity, EnclosingFile^FileModule^(
-		module_of_file(EnclosingFile, FileModule),
-		declared_in_module(FileModule, Name, Arity, Module),
-		atom_concat(PredicatePrefix, _, Name)
-	), Predicates),
+	setof(
+		Module-Name-Arity,
+		EnclosingFile^FileModule^IncludeLine^File^(
+			(	File = EnclosingFile
+			;	source_file_property(EnclosingFile, included_in(File, IncludeLine))
+			),
+			module_of_file(File, FileModule),
+			declared_in_module(FileModule, Name, Arity, Module),
+			atom_concat(PredicatePrefix, _, Name)
+		),
+		Predicates
+	),
 	member(Module-Name-Arity, Predicates),
 	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 
