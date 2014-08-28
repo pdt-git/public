@@ -76,7 +76,7 @@ loaded_by(LoadedFile, LoadingFile, -1, (initialization)) :-
 
 
 %% find_reference_to(+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList)
-find_reference_to(Term, ExactMatch, Root, Entity, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
+find_reference_to(Term, ExactMatch, Root, EntityAtom, CallerFunctor, CallerArity, EntityFile, Line, PropertyList) :-
 	Term = predicate(From, _, SearchFunctor, Separator, Arity0),
 	(	Separator == (//),
 		nonvar(Arity0)
@@ -113,6 +113,7 @@ find_reference_to(Term, ExactMatch, Root, Entity, CallerFunctor, CallerArity, En
 	->	SearchFunctor = Functor
 	;	once(sub_atom(Functor, _, _, _, SearchFunctor))
 	),
+	entity_to_atom(Entity, EntityAtom),
 	once(member(caller(CallerFunctor/CallerArity), Properties)),
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
@@ -180,13 +181,14 @@ search_entity_name(EntityPart, false, EntityName) :-
 	functor(Entity, EntityName, _),
 	once(sub_atom(EntityName, _, _, _, EntityPart)).
 
-find_entity_definition(SearchString, ExactMatch, Root, File, Line, Entity) :-
+find_entity_definition(SearchString, ExactMatch, Root, File, Line, EntityAtom) :-
 	entity(Entity),
 	functor(Entity, Functor, _),
 	(	ExactMatch == true
 	->	SearchString = Functor
 	;	once(sub_atom(Functor, _, _, _, SearchString))
 	),
+	entity_to_atom(Entity, EntityAtom),
 	entity_property(Entity, _, file(Base, Directory)),
 	atom_concat(Directory, Base, File),
 	(	nonvar(Root)
@@ -196,7 +198,7 @@ find_entity_definition(SearchString, ExactMatch, Root, File, Line, Entity) :-
 	entity_property(Entity, _, lines(Line, _)).
 
 
-find_predicate_definitions(Term, ExactMatch, Root, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
+find_predicate_definitions(Term, ExactMatch, Root, EntityAtom, Functor, Arity, DeclOrDef, FullPath, Line, Properties) :-
 	Term = predicate(Entity, _, SearchFunctor, Separator, SearchArity0),
 	(	Separator == (//),
 		nonvar(SearchArity0)
@@ -211,6 +213,7 @@ find_predicate_definitions(Term, ExactMatch, Root, Entity, Functor, Arity, DeclO
 		once(sub_atom(Functor, _, _, _, SearchFunctor)),
 		Arity = SearchArity
 	),
+	entity_to_atom(Entity, EntityAtom),
 	entity_property(From, _, file(File, Directory)),
 	atom_concat(Directory, File, FullPath),
 	(	nonvar(Root)
@@ -252,7 +255,7 @@ any_predicate_declaration_or_definition(Functor, Arity, Entity, Kind, From, defi
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/
 
-find_categorized_predicate_definitions(Term, EnclFile, ClickedLine, Functor, Arity, DeclOrDef, Entity, FullPath, Line, Properties, Visibility) :-
+find_categorized_predicate_definitions(Term, EnclFile, ClickedLine, Functor, Arity, DeclOrDef, EntityAtom, FullPath, Line, Properties, Visibility) :-
 	source_file_entity(EnclFile, ClickedLine, This),
 	Term = predicate(_, _, Functor, _, Arity),
 	functor(Head, Functor, Arity),
@@ -264,6 +267,7 @@ find_categorized_predicate_definitions(Term, EnclFile, ClickedLine, Functor, Ari
 	% remove invisible items that are found as visible items
 	filter_categorized_definitions(Items0, Items),
 	member(item(Functor, Arity, This, DeclOrDef, Entity, FullPath, Line, Properties, Visibility0), Items),
+	entity_to_atom(Entity, EntityAtom),
 	% construct the actual text label that will be used by the Java side when showing the search results
 	visibility_text(DeclOrDef, Visibility0, Visibility).
 
@@ -406,7 +410,7 @@ find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, 
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
+find_definition_contained_in(FullPath, Options, EntityAtom, EntityLine, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
 	once((	split_file_path:split_file_path(FullPath, Directory, File, _, lgt)
 		;	split_file_path:split_file_path(FullPath, Directory, File, _, logtalk)
 	)),
@@ -417,6 +421,7 @@ find_definition_contained_in(FullPath, Options, Entity, EntityLine, Kind, Functo
 	% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(EntityLine, _)),
+	entity_to_atom(Entity, EntityAtom),
 	(	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
 		% we add a number_of_clauses/1 declaration property just to simplify coding in the Java side
@@ -624,6 +629,21 @@ logtalk_built_in(Name, Arity) :-
 	built_in_method(Name, Arity, _, _).
 logtalk_built_in(Name, Arity) :-
 	built_in_non_terminal(Name, Arity, _, _).
+
+:- private(entity_to_atom/2).
+entity_to_atom(Entity, Entity) :-
+	atomic(Entity),
+	!.
+
+entity_to_atom(Entity, Atom) :-
+	Entity =.. [Functor|Args],
+	args_to_underscores(Args, UnderscoreList),
+	atomic_list_concat([Functor, '('|UnderscoreList], Atom).
+	
+:- private(args_to_underscores/2).
+args_to_underscores([_], ['_)']).
+args_to_underscores([_|T], ['_, '|UT]) :-
+	args_to_underscores(T, UT).
 
                /*************************************
                 * PROLOG ERROR MESSAGE HOOK         *
