@@ -1,4 +1,4 @@
-:- object(graphml_writer, implements(graphp)).
+:- object(graphml_writer, implements(graph_language_protocol)).
 	
 	:- public(set_file_name/1).
 	set_file_name(FileName) :-
@@ -10,8 +10,8 @@
 
 	:- uses( list, [member/2]).
 
- 	:- multifile(diagram(_)::format_object/2).
-	diagram(_)::format_object(graphml, graphml_writer).
+	:- multifile(graph_language_registry::language_object/2).
+	graph_language_registry::language_object(graphml, graphml_writer).
 
 	output_file_name(Name, File) :-
 		(	file_name_(File)
@@ -83,19 +83,25 @@
 		),
 		graphML_api:close_node(Stream).
 
-	node_shape_style_color(prototype, box, filled, beige).
-	node_shape_style_color(instance_or_class, box, filled, yellow).
-	node_shape_style_color(protocol, note, filled, aquamarine).
-	node_shape_style_color(category, component, filled, cyan).
-	node_shape_style_color(module, tab, filled, gainsboro).
-	node_shape_style_color(file, box, filled, turquoise).
+	node_shape_style_color(Kind, Shape, Style, Color) :-
+		node_shape_style_color_(Kind, Shape, Style, Color),
+		!.
+	
+	node_shape_style_color(_, box, filled, white).
+	
+	node_shape_style_color_(prototype, box, filled, beige).
+	node_shape_style_color_(instance_or_class, box, filled, yellow).
+	node_shape_style_color_(protocol, note, filled, aquamarine).
+	node_shape_style_color_(category, component, filled, cyan).
+	node_shape_style_color_(module, tab, filled, gainsboro).
+	node_shape_style_color_(file, box, filled, turquoise).
 
-	node_shape_style_color(external_prototype, box, '"filled,dashed"', beige).
-	node_shape_style_color(external_instance_or_class, box, '"filled,dashed"', yellow).
-	node_shape_style_color(external_protocol, note, '"filled,dashed"', aquamarine).
-	node_shape_style_color(external_category, component, '"filled,dashed"', cyan).
-	node_shape_style_color(external_module, tab, '"filled,dashed"', gainsboro).
-	node_shape_style_color(external_file, box, '"filled,dashed"', turquoise).
+	node_shape_style_color_(external_prototype, box, '"filled,dashed"', beige).
+	node_shape_style_color_(external_instance_or_class, box, '"filled,dashed"', yellow).
+	node_shape_style_color_(external_protocol, note, '"filled,dashed"', aquamarine).
+	node_shape_style_color_(external_category, component, '"filled,dashed"', cyan).
+	node_shape_style_color_(external_module, tab, '"filled,dashed"', gainsboro).
+	node_shape_style_color_(external_file, box, '"filled,dashed"', turquoise).
 
 	edge(Stream, Start, End, Labels, Kind, _Options) :-
 		edge_arrow(Kind, ArrowHead),
@@ -108,18 +114,23 @@
 		graphML_api:write_data(Stream, 'label', Label),
 		graphML_api:close_edge(Stream).
 
-	edge_arrow(extends_object, vee).
-	edge_arrow(extends_protocol, vee).
-	edge_arrow(extends_category, vee).
-	edge_arrow(instantiates_class, normal).
-	edge_arrow(specializes_class, onormal).
-	edge_arrow(implements_protocol, dot).
-	edge_arrow(imports_category, box).
-	edge_arrow(complements_object, obox).
-	edge_arrow(provides_clauses, inv).
-	edge_arrow(calls_predicate, rdiamond).
-	edge_arrow(depends_on_file, normal).
-	edge_arrow(loads_file, normal).
+	edge_arrow(Kind, ArrowHead) :-
+		edge_arrow_(Kind, ArrowHead),
+		!.
+	edge_arrow(_, normal).
+	
+	edge_arrow_(extends_object, vee).
+	edge_arrow_(extends_protocol, vee).
+	edge_arrow_(extends_category, vee).
+	edge_arrow_(instantiates_class, normal).
+	edge_arrow_(specializes_class, onormal).
+	edge_arrow_(implements_protocol, dot).
+	edge_arrow_(imports_category, box).
+	edge_arrow_(complements_object, obox).
+	edge_arrow_(provides_clauses, inv).
+	edge_arrow_(calls_predicate, rdiamond).
+	edge_arrow_(depends_on_file, normal).
+	edge_arrow_(loads_file, normal).
 
 	write_lines([], []).
 	write_lines([Line], ['<![CDATA[', LineAsAtom, ']]>']) :-
