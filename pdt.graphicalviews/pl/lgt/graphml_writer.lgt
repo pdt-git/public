@@ -105,7 +105,7 @@
 		graphML_api:write_data(Stream, 'styles', Styles),
 		write_lines(Labels, Lines),
 		atomic_list_concat(Lines, Label),
-		graphML_api:write_data(Stream, 'edge_label', Label),
+		graphML_api:write_data(Stream, 'label', Label),
 		graphML_api:close_edge(Stream).
 
 	edge_arrow(extends_object, vee).
