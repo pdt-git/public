@@ -46,8 +46,6 @@ final public class PDTConsole {
 	public static final String PREF_CONSOLE_COLOR_BACKGROUND_DISABLED = "pdt.console.colors.background.disabled";
 	
 	// Main
-	public static final String PREF_CONSOLE_HISTORY_FILE = "pdt.console.history.file";
-
 	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";
 
 }

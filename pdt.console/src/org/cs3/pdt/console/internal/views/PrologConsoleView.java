@@ -1015,18 +1015,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		manager.add(debugMonitorAction);
 	}
 
-
-	private File getHistoryFile() {
-		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
-				PDTConsole.PREF_CONSOLE_HISTORY_FILE, null);
-		if (value == null) {
-			throw new NullPointerException("Required property \""
-					+ PDTConsole.PREF_CONSOLE_HISTORY_FILE
-					+ "\" was not specified.");
-		}
-		return new File(value);
-	}
-
 	@Override
 	public void setFocus() {
 		if (viewer == null) {
