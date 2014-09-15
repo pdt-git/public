@@ -6,3 +6,4 @@ Bundle-Version: 3.0.0.qualifier
 Require-Bundle: org.cs3.prolog.connector,
  org.junit
 Export-Package: org.cs3.prolog.test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
