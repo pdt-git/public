@@ -47,7 +47,7 @@
  ).
  
 :- use_module(pdt_support, [pdt_support/1]).
-
+:- use_module(library(lists), [member/2]).
 
 %% hidden_module(M)
 %
@@ -114,8 +114,13 @@ visible_in_module(Module,Name,Arity) :-
 % The above was created by Jan Wielemaker during his visit to our group 
 % in Nov. 2011. It is intended as a better behaved alternative to the
 % strangely inconsistent versions of current_predicate/1 and /2.
-    current_module(Module),
-    Module:current_predicate(Name/Arity).
+	current_module(Module),
+	setof(
+		Name/Arity,
+		Module^Name^Arity^(Module:current_predicate(Name/Arity)),
+		PIs
+	),
+	member(Name/Arity, PIs).
 %  
 % <-- Beware of current_predicate/2: It hides system modules! 
 % Only current_predicate/1 returns ALL modules that see Name/Arity,

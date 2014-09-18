@@ -13,10 +13,8 @@
 
 package org.cs3.pdt.console.internal.preferences;
 
-import java.io.File;
-
-import org.cs3.pdt.connector.PrologContextTracker;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
+import org.cs3.pdt.connector.PrologContextTracker;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -49,10 +47,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	
 	private void initializeDefaultPreferences_Main(IPreferenceStore store){
-		String historyFile = System.getProperty("user.home") + File.separator + ".prolog_console_history";		
-		store.setDefault(PDTConsole.PREF_CONSOLE_HISTORY_FILE,	historyFile);
-			
-		
 		store.setDefault(PDTConsole.PREF_CONTEXT_TRACKERS,	"");
 	}
 	

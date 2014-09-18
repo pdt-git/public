@@ -90,10 +90,6 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Single char mode", backgroundGroup));
 		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "Disabled", backgroundGroup));
 		
-		//The Prolog Console uses this to save its command history.\n
-		//Just leave it empty if you do not want the command history to be persistent.
-		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
-		
 		adjustLayoutForElement(fontGroup);
 		adjustLayoutForElement(colourGroup);
 		adjustLayoutForElement(backgroundGroup);

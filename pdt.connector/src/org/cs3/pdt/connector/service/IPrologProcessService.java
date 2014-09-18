@@ -16,7 +16,7 @@ package org.cs3.pdt.connector.service;
 
 import java.util.List;
 
-import org.cs3.prolog.connector.common.Util;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
 
@@ -31,13 +31,13 @@ import org.eclipse.core.resources.IFile;
  * consult predicate <code>pdt_reload/1</code> is executed by the registered
  * {@link PDTReloadExecutor} with the highest priority. If an executor fails,
  * the next one will be tried out. Utility methods to retrieve file names
- * conforming to prolog syntax can be found in {@link Util}. Registered
+ * conforming to prolog syntax can be found in {@link QueryUtils}. Registered
  * {@link ConsultListener}s are notified before and after executing
  * <code>pdt_reload/1</code>.<br/>
  * This service can be acquired via
  * 
  * <pre>
- * PrologRuntimeUIPlugin.getDefault().getPrologProcessService()
+ * PrologConnectorPlugin.getDefault().getPrologProcessService()
  * </pre>
  * 
  */

@@ -19,6 +19,7 @@
 
 :- use_module(pdt_editor_breakpoints, []).
 :- use_module(pdt_editor_highlighting, []).
+:- use_module(pdt_editor_files, []).
 
 :- ['lgt/loader'].
 

@@ -85,14 +85,22 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 				}
 				// check if file is source_file
 				if (isCurrent(prologFileName)) {
-					decoration.addSuffix(" [consulted]");
+					if (includedFiles.contains(prologFileName)) {
+						decoration.addSuffix(" [included]");
+					} else {
+						decoration.addSuffix(" [consulted]");
+					}
 					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
 						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED), IDecoration.BOTTOM_LEFT);
 					} else {
 						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.PROLOG_FILE_CONSULTED), IDecoration.UNDERLAY);
 					}
 				} else if (isOld(prologFileName)) {
-					decoration.addSuffix(" [consulted]");
+					if (includedFiles.contains(prologFileName)) {
+						decoration.addSuffix(" [included]");
+					} else {
+						decoration.addSuffix(" [consulted]");
+					}
 					if (file.getFileExtension().equalsIgnoreCase("QLF")) {
 						decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.QLF_FILE_CONSULTED_OLD), IDecoration.BOTTOM_LEFT);
 					} else {
@@ -143,6 +151,7 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 
 	private HashSet<String> filesInCurrentState;
 	private HashSet<String> filesInOldState;
+	private HashSet<String> includedFiles;
 	private HashSet<String> directories;
 	private long lastFill = 0;
 	
@@ -165,21 +174,26 @@ public class PDTConsultDecoratorContributor extends BaseLabelProvider implements
 	
 	private void fillSetsIfNeeded() {
 		long now = System.currentTimeMillis();
-		if (filesInCurrentState == null || filesInOldState == null || now - MILLIS_BETWEEN_FILE_STATE_CHECK > lastFill) {
+		if (filesInCurrentState == null || filesInOldState == null || includedFiles == null || now - MILLIS_BETWEEN_FILE_STATE_CHECK > lastFill) {
 			filesInCurrentState = new HashSet<String>();
 			filesInOldState = new HashSet<String>();
+			includedFiles = new HashSet<>();
 			directories = new HashSet<String>();
 			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
 			List<Map<String, Object>> results;
 			try {
-				results = process.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State"));
+				results = process.queryAll(bT(PDTCommonPredicates.PDT_SOURCE_FILE, "File", "State", "LoadingState"));
 				for (Map<String, Object> result: results) {
 					String fileName = result.get("File").toString();
 					String fileState = result.get("State").toString();
+					String loadingState = result.get("LoadingState").toString();
 					if ("current".equals(fileState)) {
 						filesInCurrentState.add(fileName);
 					} else {
 						filesInOldState.add(fileName);
+					}
+					if ("included".equals(loadingState)) {
+						includedFiles.add(fileName);
 					}
 					String parentDir = fileName.substring(0, fileName.lastIndexOf('/'));
 					while (directories.add(parentDir)) {

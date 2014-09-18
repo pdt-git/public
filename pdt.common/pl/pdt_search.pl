@@ -483,7 +483,10 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
 %    module_of_file(ContextFile, ContextModule),
     % Backtrack over all predicates defined in File
     % including multifile contributions to other modules:
-    source_file(ModuleHead, ContextFile),
+    (	source_file(ModuleHead, ContextFile)
+    ;	source_file_property(ContextFile, included_in(ParentFile, _)),
+    	source_file(ModuleHead, ParentFile)
+    ),
     pdt_strip_module(ModuleHead,DefiningModule,ModuleLine,Head),
     
     % Predicate properties:
@@ -495,6 +498,10 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
     % predicate, even when they occur in other files
     %defined_in_file(DefiningModule, Functor, Arity, Ref, _, DefiningFile, Line),
     find_definition_in_file(Options, ContextFile, DefiningModule, Functor, Arity, Ref, DefiningFile, Line),
+    (	nonvar(ParentFile)
+    ->	DefiningFile \== ParentFile
+    ;	true
+    ),
     (	DefiningFile == ContextFile
     ->	(	module_of_file(ContextFile, DefiningModule)%DefiningModule == ContextModule
     	->	% local definition
@@ -679,11 +686,18 @@ find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, p
 find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
 	atomic(PredicatePrefix),
 	nonvar(EnclosingFile),
-	setof(Module-Name-Arity, EnclosingFile^FileModule^(
-		module_of_file(EnclosingFile, FileModule),
-		declared_in_module(FileModule, Name, Arity, Module),
-		atom_concat(PredicatePrefix, _, Name)
-	), Predicates),
+	setof(
+		Module-Name-Arity,
+		EnclosingFile^FileModule^IncludeLine^File^(
+			(	File = EnclosingFile
+			;	source_file_property(EnclosingFile, included_in(File, IncludeLine))
+			),
+			module_of_file(File, FileModule),
+			declared_in_module(FileModule, Name, Arity, Module),
+			atom_concat(PredicatePrefix, _, Name)
+		),
+		Predicates
+	),
 	member(Module-Name-Arity, Predicates),
 	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
 

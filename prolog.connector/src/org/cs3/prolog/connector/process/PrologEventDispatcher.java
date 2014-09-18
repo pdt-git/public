@@ -58,14 +58,14 @@ import org.cs3.prolog.connector.session.PrologSession;
  * currentDispatcher.addPrologEventListener(&quot;pdt_edit_hook&quot;, this);
  * </pre></blockquote>
  * <p>
- * The above code creates a listener for the “pdt_edit_hook” event /
+ * The above code creates a listener for the "pdt_edit_hook" event /
  * notification.
  * 
  * When the related notification is sent by the Prolog side, the
  * {@link PrologEventListener#update(PrologEvent)} method of each registered
  * {@link PrologEventListener} will be called with a parameter of type
  * {@link PrologEvent} that contains the event identifier (
- * <code>“pdt_edit_hook”</code> in this example) and some arbitrary additional
+ * <code>"pdt_edit_hook"</code> in this example) and some arbitrary additional
  * data from the second parameter of the <code>process_notify/2</code> call (see
  * below).
  * 
