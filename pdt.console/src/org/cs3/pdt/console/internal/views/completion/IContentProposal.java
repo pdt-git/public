@@ -60,5 +60,7 @@ public interface IContentProposal {
 	 *         <code>null</code>, then no description will be displayed.
 	 */
 	public String getDescription();
+	
+	public boolean isDeprecated();
 
 }

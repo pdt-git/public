@@ -78,6 +78,7 @@ public class PrologCompletionProvider {
 				"Arity",
 				"Visibility",
 				"Builtin",
+				"IsDeprecated",
 				"ArgNames",
 				"DocKind",
 				"Doc");
@@ -92,6 +93,7 @@ public class PrologCompletionProvider {
 					int arity = Integer.parseInt(result.get("Arity").toString());
 					String visibility = result.get("Visibility").toString();
 					boolean isBuiltin = Boolean.parseBoolean(result.get("Builtin").toString());
+					boolean isDeprecated = Boolean.parseBoolean(result.get("IsDeprecated").toString());
 					Object argNamesValue = result.get("ArgNames");
 					List<String> argNames = null;
 					if (argNamesValue instanceof List<?>) {
@@ -99,7 +101,7 @@ public class PrologCompletionProvider {
 					}
 					String docKind = (String) result.get("DocKind");
 					String doc = (String) result.get("Doc");
-					proposals.add(new PredicateCompletionProposal(resultModule, name, arity, prefix.length, visibility, isBuiltin, argNames, docKind, doc, prefix.startsWithSingleQuote));
+					proposals.add(new PredicateCompletionProposal(resultModule, name, arity, prefix.length, visibility, isBuiltin, isDeprecated, argNames, docKind, doc, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)){
 					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)){

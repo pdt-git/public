@@ -28,4 +28,9 @@ public abstract class ComparableCompletionProposal implements IContentProposal, 
 	
 	public abstract Image getImage(); 
 	
+	@Override
+	public boolean isDeprecated() {
+		return false;
+	}
+	
 }

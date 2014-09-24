@@ -33,26 +33,30 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Shell;
 
 @SuppressWarnings({ "restriction" })
-public class PredicateCompletionProposal extends ComparableTemplateCompletionProposal implements ICompletionProposalExtension5, IInformationControlCreator {
+public class PredicateCompletionProposal extends ComparableTemplateCompletionProposal implements ICompletionProposalExtension5, ICompletionProposalExtension6, IInformationControlCreator {
 
-	public static PredicateCompletionProposal createProposal(IDocument document, int offset, int length, String module, String name, int arity, List<String> argNames, String visibility, boolean isBuiltin, String docKind, String doc) {
+	public static PredicateCompletionProposal createProposal(IDocument document, int offset, int length, String module, String name, int arity, List<String> argNames, String visibility, boolean isBuiltin, boolean isDeprecated, String docKind, String doc) {
 		String pattern = createPattern(name, arity, argNames);
-		String displayString;
+		StyledString displayString;
 		if (module == null) {
-			displayString =  name + "/" + arity;
+			displayString =  new StyledString(name + "/" + arity, isDeprecated ? STRIKETHROUGH : null);
 		} else {
-			displayString =  name + "/" + arity + " - " + module;
+			displayString =  new StyledString(name + "/" + arity + " - " + module, isDeprecated ? STRIKETHROUGH : null);
 		}
 		String signature = name + "/" + arity;
 		Image image = getImage(isBuiltin, visibility);
@@ -120,14 +124,14 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 	}
 
 	private Template indicatorOnly;
-	private String displayString;
+	private StyledString displayString;
 	private String signature;
 	private String docKind;
 	private String doc;
 	
 	private int currentStateMask = -1;
 	
-	public PredicateCompletionProposal(Template template, TemplateContext context, IRegion region, Image image, Template indicatorOnly, String displayString, String signature, String docKind, String doc) {
+	public PredicateCompletionProposal(Template template, TemplateContext context, IRegion region, Image image, Template indicatorOnly, StyledString displayString, String signature, String docKind, String doc) {
 		super(template, context, region, image);
 		this.indicatorOnly = indicatorOnly;
 		this.displayString = displayString;
@@ -200,7 +204,18 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 	
 	@Override
 	public String getDisplayString() {
+		return displayString.getString();
+	}
+
+	@Override
+	public StyledString getStyledDisplayString() {
 		return displayString;
 	}
-	
+
+	private static Styler STRIKETHROUGH = new Styler() {
+		@Override
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.strikeout = true;
+		}
+	};
 }

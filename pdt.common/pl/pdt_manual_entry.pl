@@ -13,7 +13,7 @@
 
 
 :- module( pdt_manual_entry,
-         [ predicate_manual_entry/4    % (_Module,Pred,Arity,Content)
+         [ predicate_manual_entry/5    % (_Module,Pred,Arity,Content)
          ]).
          
 :- if(current_prolog_flag(dialect, swi)).
@@ -39,17 +39,22 @@
                 * GET THE MANUAL ENTRY FOR A PREDICATE *
                 ****************************************/
 
-%% predicate_manual_entry(+Module, +Pred,+Arity,-Content) is det.
+%% predicate_manual_entry(+Module, +Pred,+Arity,-Content, -IsDeprecated) is det.
 %
 %
-predicate_manual_entry(Module, Pred,Arity,Content) :-
+predicate_manual_entry(Module, Pred,Arity,Content, IsDeprecated) :-
     %pldoc:doc_comment(Module:Pred/Arity,_File:_,,Content),
     %TODO: The html code is now available:
-    pldoc_process:doc_comment(Module:Pred/Arity,File:_,_Summary,_Content),
+    pldoc_process:doc_comment(Module:Pred/Arity,File:_,_Summary, Comment),
+	(	atomic(Comment),
+		sub_atom(Comment, _, _, _, '@deprecated')
+	->	IsDeprecated = true
+	;	IsDeprecated = false
+	),
 	gen_html_for_pred_(File,Pred/Arity,Content),
     !.
 	
-predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
+predicate_manual_entry(_Module,_Pred,_Arity,'nodoc', _).
 
 gen_html_for_pred_(FileSpec,Functor/Arity,Html) :-    
 	doc_file_objects(FileSpec, _File, Objects, FileOptions, [public_only(false)]),

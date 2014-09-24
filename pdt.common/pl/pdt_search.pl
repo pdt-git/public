@@ -18,7 +18,7 @@
          , find_primary_definition_visible_in/7  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
          , find_definition_contained_in/9
          , find_definition_contained_in/10
-         , find_completion/12
+         , find_completion/13
          , find_entity_definition/6
          , find_module_reference/9
          , find_alternative_predicates/7
@@ -638,31 +638,33 @@ find_blacklist('$pldoc',4,_).
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
 
-%% find_completion(+Prefix, ?EnclosingFile, ?LineInFile, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -ArgNames, -DocKind, -Doc) is nondet.
+%% find_completion(+Prefix, ?EnclosingFile, ?LineInFile, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -IsDeprecated, -ArgNames, -DocKind, -Doc) is nondet.
 % 
-find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
 	var(Prefix),
 	!,
-	throw(prefix_not_bound(find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc))).
+	throw(prefix_not_bound(find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc))).
 
-find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
 	nonvar(EnclosingFile),
 	!,
 	(	split_file_path(EnclosingFile, _, _, _, lgt)
 	->	current_predicate(logtalk_load/1),
+		IsDeprecated = false,
 		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
-	;	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	;	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc)
 	).
 
-find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
-	(	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
+	(	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc)
 	;	current_predicate(logtalk_load/1),
+		IsDeprecated = false,
 		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
 	).
 
-:- discontiguous(find_completion_/12).
+:- discontiguous(find_completion_/13).
 
-find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
 	!,
 	(	PredicatePrefix \== ''
 	->	setof(
@@ -681,9 +683,9 @@ find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, p
 		)
 	),
 	member(Module-Name-Arity, Predicates),
-	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+	predicate_information(Module, Name, Arity, IsBuiltin, IsDeprecated, Visibility, ArgNames, DocKind, Doc).
 
-find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
 	atomic(PredicatePrefix),
 	nonvar(EnclosingFile),
 	setof(
@@ -699,9 +701,9 @@ find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module,
 		Predicates
 	),
 	member(Module-Name-Arity, Predicates),
-	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+	predicate_information(Module, Name, Arity, IsBuiltin, IsDeprecated, Visibility, ArgNames, DocKind, Doc).
 
-find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc) :-
+find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
 	atomic(PredicatePrefix),
 	var(EnclosingFile),
 	setof(Module-Name-Arity, (
@@ -709,9 +711,9 @@ find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module,
 		atom_concat(PredicatePrefix, _, Name)
 	), Predicates),
 	member(Module-Name-Arity, Predicates),
-	predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc).
+	predicate_information(Module, Name, Arity, IsBuiltin, IsDeprecated, Visibility, ArgNames, DocKind, Doc).
 
-predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocKind, Doc) :-
+predicate_information(Module, Name, Arity, IsBuiltin, IsDeprecated, Visibility, ArgNames, DocKind, Doc) :-
 	functor(Head, Name, Arity),
 	(	predicate_property(Module:Head, built_in)
 	->	IsBuiltin = true
@@ -725,7 +727,7 @@ predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocK
 	),
 	(	predicate_completion_documentation_hook(Module, Name, Arity, ArgNames, DocKind, Doc)
 	->	true
-	;	predicate_manual_entry(Module, Name, Arity, Content),
+	;	predicate_manual_entry(Module, Name, Arity, Content, IsDeprecated),
 		(	Content == nodoc
 		->	DocKind = nodoc
 		;	DocKind = html,
@@ -735,6 +737,10 @@ predicate_information(Module, Name, Arity, IsBuiltin, Visibility, ArgNames, DocK
 			;	ignore(predicate_arg_list(Content, ArgNames))
 			)
 		)
+	),
+	(	var(IsDeprecated)
+	->	IsDeprecated = false
+	;	true
 	).
 
 :- multifile(predicate_completion_documentation_hook/6).
@@ -776,13 +782,13 @@ var_to_arg(Arg, ArgName, Vars) :-
 	V == Var,
 	!.
 
-find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, _, _, _, _, _) :- 
+find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, _, _, _, _, _, _) :- 
 	atomic(ModulePrefix),
 	current_module(Name),
 	atom_concat(ModulePrefix,_,Name).
 
 :- if(current_prolog_flag(dialect, swi)).
-find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _) :- 
+find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _, _) :- 
 	atomic(AtomPrefix),
 	garbage_collect_atoms,
 	'$atom_completions'(AtomPrefix, Atoms),

@@ -126,6 +126,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					"Arity",
 					"Visibility",
 					"Builtin",
+					"IsDeprecated",
 					"ArgNames",
 					"DocKind",
 					"Doc");
@@ -154,7 +155,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					String visibility = result.get("Visibility").toString();
 					
 					boolean isBuiltin = Boolean.parseBoolean(result.get("Builtin").toString());
-					
+
+					boolean isDeprecated = Boolean.parseBoolean(result.get("IsDeprecated").toString());
+
 					String docKind = result.get("DocKind").toString();
 					
 					String doc = null;
@@ -162,7 +165,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						doc = result.get("Doc").toString();
 					}
 					
-					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, docKind, doc));
+					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, isDeprecated, docKind, doc));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)) {
 					proposals.add(new ModuleCompletionProposal(document, name, begin, len));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {

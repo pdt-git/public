@@ -22,7 +22,15 @@ import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.OpenWindowListener;
@@ -35,6 +43,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -46,7 +55,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 
 /**
  * ContentProposalAdapter can be used to attach content proposal behavior to a
@@ -545,7 +553,29 @@ public class ContentProposalAdapter {
 						|| fBrowser.isFocusControl();
 			}
 		}
-
+		
+		private class CompletionLabelProvider extends LabelProvider implements IStyledLabelProvider {
+			@Override
+			public StyledString getStyledText(Object element) {
+				if (!(element instanceof IContentProposal)) {
+					return null;
+				}
+				IContentProposal proposal = (IContentProposal) element;
+				if (proposal.isDeprecated()) {
+					return new StyledString(labelProvider.getText(element), STRIKETHROUGH);
+				} else {
+					return new StyledString(labelProvider.getText(element));
+				}
+			}
+			@Override
+			public Image getImage(Object element) {
+				if (!(element instanceof IContentProposal)) {
+					return null;
+				}
+				return labelProvider.getImage(element);
+			}
+		}
+		
 		/*
 		 * The listener installed on the target control.
 		 */
@@ -560,6 +590,8 @@ public class ContentProposalAdapter {
 		 * The table used to show the list of proposals.
 		 */
 		private Table proposalTable;
+		
+		private TableViewer proposalTableViewer;
 
 		/*
 		 * The proposals to be shown (cached to avoid repeated requests).
@@ -636,16 +668,24 @@ public class ContentProposalAdapter {
 			if (USE_VIRTUAL) {
 				proposalTable = new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL
 						| SWT.VIRTUAL);
-
-				Listener listener = new Listener() {
-					public void handleEvent(Event event) {
-						handleSetData(event);
-					}
-				};
-				proposalTable.addListener(SWT.SetData, listener);
 			} else {
 				proposalTable = new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 			}
+			proposalTableViewer = new TableViewer(proposalTable);
+			proposalTableViewer.setContentProvider(new IStructuredContentProvider() {
+				@Override
+				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+				}
+				@Override
+				public void dispose() {
+				}
+				@Override
+				public Object[] getElements(Object inputElement) {
+					return (Object[]) inputElement;
+				}
+			});
+
+			proposalTableViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(new CompletionLabelProvider()));
 
 			// set the proposals to force population of the table.
 			setProposals(filterProposals(proposals, filterText));
@@ -731,23 +771,26 @@ public class ContentProposalAdapter {
 			});
 		}
 
-		/*
-		 * Handle the set data event. Set the item data of the requested item to
-		 * the corresponding proposal in the proposal cache.
-		 */
-		private void handleSetData(Event event) {
-			TableItem item = (TableItem) event.item;
-			int index = proposalTable.indexOf(item);
-
-			if (0 <= index && index < proposals.length) {
-				IContentProposal current = proposals[index];
-				item.setText(getString(current));
-				item.setImage(getImage(current));
-				item.setData(current);
-			} else {
-				// this should not happen, but does on win32
-			}
-		}
+//		/*
+//		 * Handle the set data event. Set the item data of the requested item to
+//		 * the corresponding proposal in the proposal cache.
+//		 */
+//		private void handleSetData(Event event) {
+//			TableItem item = (TableItem) event.item;
+//			int index = proposalTable.indexOf(item);
+//
+//			if (0 <= index && index < proposals.length) {
+//				IContentProposal current = proposals[index];
+//				item.setText(getString(current));
+//				item.setImage(getImage(current));
+////				if (isStrikeout(current)) {
+////					item.getFont().getFontData()[0]
+////				}
+//				item.setData(current);
+//			} else {
+//				// this should not happen, but does on win32
+//			}
+//		}
 
 		/*
 		 * Caches the specified proposals and repopulates the table if it has
@@ -758,40 +801,41 @@ public class ContentProposalAdapter {
 				newProposals = getEmptyProposalArray();
 			}
 			this.proposals = newProposals;
+			proposalTableViewer.setInput(newProposals);
 
-			// If there is a table
-			if (isValid()) {
-				final int newSize = newProposals.length;
-				if (USE_VIRTUAL) {
-					// Set and clear the virtual table. Data will be
-					// provided in the SWT.SetData event handler.
-					proposalTable.setItemCount(newSize);
-					proposalTable.clearAll();
-				} else {
-					// Populate the table manually
-					proposalTable.setRedraw(false);
-					proposalTable.setItemCount(newSize);
-					TableItem[] items = proposalTable.getItems();
-					for (int i = 0; i < items.length; i++) {
-						TableItem item = items[i];
-						IContentProposal proposal = newProposals[i];
-						item.setText(getString(proposal));
-						item.setImage(getImage(proposal));
-						item.setData(proposal);
-					}
-					proposalTable.setRedraw(true);
-				}
-				// Default to the first selection if there is content.
-				if (newProposals.length > 0) {
-					selectProposal(0);
-				} else {
-					// No selection, close the secondary popup if it was open
-					if (infoPopup != null) {
-						infoPopup.close();
-					}
-
-				}
-			}
+//			// If there is a table
+//			if (isValid()) {
+//				final int newSize = newProposals.length;
+//				if (USE_VIRTUAL) {
+//					// Set and clear the virtual table. Data will be
+//					// provided in the SWT.SetData event handler.
+//					proposalTable.setItemCount(newSize);
+//					proposalTable.clearAll();
+//				} else {
+//					// Populate the table manually
+//					proposalTable.setRedraw(false);
+//					proposalTable.setItemCount(newSize);
+//					TableItem[] items = proposalTable.getItems();
+//					for (int i = 0; i < items.length; i++) {
+//						TableItem item = items[i];
+//						IContentProposal proposal = newProposals[i];
+//						item.setText(getString(proposal));
+//						item.setImage(getImage(proposal));
+//						item.setData(proposal);
+//					}
+//					proposalTable.setRedraw(true);
+//				}
+//				// Default to the first selection if there is content.
+//				if (newProposals.length > 0) {
+//					selectProposal(0);
+//				} else {
+//					// No selection, close the secondary popup if it was open
+//					if (infoPopup != null) {
+//						infoPopup.close();
+//					}
+//
+//				}
+//			}
 		}
 
 		/*
@@ -813,12 +857,12 @@ public class ContentProposalAdapter {
 		 * Get the image for the specified proposal. If there is no image
 		 * available, return null.
 		 */
-		private Image getImage(IContentProposal proposal) {
-			if (proposal == null || labelProvider == null) {
-				return null;
-			}
-			return labelProvider.getImage(proposal);
-		}
+//		private Image getImage(IContentProposal proposal) {
+//			if (proposal == null || labelProvider == null) {
+//				return null;
+//			}
+//			return labelProvider.getImage(proposal);
+//		}
 
 		/*
 		 * Return an empty array. Used so that something always shows in the
@@ -899,6 +943,10 @@ public class ContentProposalAdapter {
 			}
 			popupCloser.installListeners();
 			IContentProposal p = getSelectedProposal();
+			if (p == null && proposals.length > 0) {
+				selectProposal(0);
+				p = getSelectedProposal();
+			}
 			if (p != null) {
 				showProposalDescription();
 			}
@@ -2214,6 +2262,13 @@ public class ContentProposalAdapter {
 			return true;
 		return false;
 	}
+
+	private static final Styler STRIKETHROUGH = new Styler() {
+		@Override
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.strikeout = true;
+		}
+	};
 
 }
 

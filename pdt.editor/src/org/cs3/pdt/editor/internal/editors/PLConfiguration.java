@@ -193,6 +193,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 						return new DefaultInformationControl(parent);
 					}
 				});
+		assistant.enableColoredLabels(true);
 		this.assistant = assistant;
 		return assistant;
 	}

@@ -32,6 +32,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	
 	private String visibility;
 	private boolean isBuiltin;
+	private boolean isDeprecated;
 	
 	private String docKind;
 	private String doc;
@@ -40,10 +41,11 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	
 	private int lastStateMask = -1;
 	
-	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, List<String> argNames, String docKind, String doc, boolean addSingleQuote) {
+	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, boolean isDeprecated, List<String> argNames, String docKind, String doc, boolean addSingleQuote) {
 		super(prefixLength, addSingleQuote);
 		this.visibility = visibility;
 		this.isBuiltin = isBuiltin;
+		this.isDeprecated = isDeprecated;
 		signature = functor + "/" + arity;
 		if (module == null) {
 			label = signature;
@@ -152,6 +154,11 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		} else {
 			return -1;
 		}
+	}
+	
+	@Override
+	public boolean isDeprecated() {
+		return isDeprecated;
 	}
 	
 }
