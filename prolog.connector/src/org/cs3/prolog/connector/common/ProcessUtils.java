@@ -215,7 +215,7 @@ public class ProcessUtils {
 			if (logtalkHome != null) {
 				return new File(logtalkHome, "integration/logtalk_swi.pl").getAbsolutePath();
 			} else {
-				return "";
+				return "$LOGTALKHOME/integration/logtalk_swi.pl";
 			}
 		}
 	}
