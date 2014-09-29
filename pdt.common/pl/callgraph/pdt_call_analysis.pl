@@ -145,7 +145,11 @@ entry_point_predicate(M, F, A) :-
 	(	module_property(M, file(File))
 	*->	module_property(M, exports(ExportList)),
 		member(F/A, ExportList)
-	;	source_file(Head, File),
+	;	source_file(P, File),
+		(	P = _:Head
+		->	true
+		;	P = Head
+		),
 		functor(Head, F, A)
 	).
 
