@@ -35,13 +35,14 @@ import org.cs3.prolog.connector.process.PrologProcessException;
 import org.cs3.prolog.connector.session.PrologSession;
 
 public class SocketSession implements PrologSession {
+	
 	private static final String RESULT_LIST = "ResultList";
 	private SocketClient client;
 	private boolean queryActive;
 	private AbstractPrologProcess process;
 	private int flags;
 	
-	public SocketSession(SocketClient client, AbstractPrologProcess process,int flags) {
+	public SocketSession(SocketClient client, AbstractPrologProcess process, int flags) {
 		this.client = client;
 		this.process = process;
 		this.flags=flags;
@@ -66,23 +67,72 @@ public class SocketSession implements PrologSession {
 		}
 	}
 	
-	public static final int QUERY_ALL_DEFAULT = 0;
-	public static final int QUERY_ALL_AT_ONCE = 1;
-	
 	@Override
-	public List<Map<String, Object>> queryAll(String query) throws PrologException,
-	PrologProcessException {
-		return queryAll(query, QUERY_ALL_AT_ONCE);
+	public List<Map<String, Object>> queryAll(String query) throws PrologException, PrologProcessException {
+		if (queryActive) {
+			throw new PrologProcessException("Cannot start query while another query is active.");
+		}
+		return queryAllImpl(query);
+	}
+
+	@Override
+	public IterableQuery queryIterator(String query) throws PrologException, PrologProcessException {
+		if (queryActive) {
+			throw new PrologProcessException("Cannot start query while another query is active.");
+		}
+		CTermUtil.checkFlags(flags);
+		if (isDisposed()) {
+			throw new IllegalStateException("Session is disposed!");
+		}
+		if (query.length() == 0) {
+			return emptyIterator();
+		}
+		IterableQuery results;
+		try {
+			configureProtocol(flags);
+			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+			client.writeln(SocketCommunicationConstants.QUERY);
+			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+			normalizeQuery(query);
+			results = readResultsIterator();
+		} catch (IOException e) {
+			throw process.error(e);
+		} 
+		return results;
+	}
+
+	private IterableQuery emptyIterator() {
+		return new IterableQuery(this) {
+			@Override
+			public boolean hasNext() {
+				return false;
+			}
+
+			@Override
+			public Map<String, Object> next() {
+				return null;
+			}
+
+			@Override
+			protected Map<String, Object> readFirstResult() throws IOException {
+				return null;
+			}
+
+			@Override
+			protected Map<String, Object> readMore() throws IOException {
+				return null;
+			}
+		};
 	}
 	
-	private List<Map<String, Object>> queryAll(String query, int flag) throws PrologException, PrologProcessException {
-		if (flag == QUERY_ALL_AT_ONCE && ((flags & PrologProcess.CTERMS) == 0)) {
+	private List<Map<String, Object>> queryAllImpl(String query) throws PrologException, PrologProcessException {
+		if ((flags & PrologProcess.CTERMS) == 0) {
 			return queryAllAtOnce(query);
 		} else {
 			return queryAllDefault(query);
 		}
 	}
-
+	
 	private List<Map<String, Object>> queryAllDefault(String query) throws PrologException,
 		PrologProcessException {
 		CTermUtil.checkFlags(flags);
@@ -107,21 +157,40 @@ public class SocketSession implements PrologSession {
 	}
 	
 	private Vector<Map<String, Object>> readResults() throws IOException {
-	Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
-	Map<String, Object> result = read_solution(flags);
-	while (result != null) {
-		results.add(result);
-		result = read_solution(flags);
+		Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
+		Map<String, Object> result = read_solution(flags);
+		while (result != null) {
+			results.add(result);
+			result = read_solution(flags);
+		}
+		return results;
 	}
-	return results;
-}
-	
+
+	private IterableQuery readResultsIterator() throws IOException {
+		queryActive = true;
+		return new IterableQuery(this) {
+			@Override protected Map<String,Object> readFirstResult() throws IOException {
+				return read_solution(flags);
+			}
+			
+			@Override protected Map<String,Object> readMore() throws IOException {
+				client.readUntil(SocketCommunicationConstants.MORE);
+				client.writeln(SocketCommunicationConstants.YES);
+				return read_solution(flags);
+			}
+		};
+	}
+
+	protected void closeIterator() throws IOException {
+		queryActive = false;
+		client.writeln(SocketCommunicationConstants.NO);
+	}
+
 	private List<Map<String, Object>> generateEmptyResults() {
-	List<Map<String, Object>> l = new Vector<Map<String, Object>>();
-	l.add(generateAnEmtpyResult());
-	return l;
-}
-	
+		List<Map<String, Object>> l = new Vector<Map<String, Object>>();
+		l.add(generateAnEmtpyResult());
+		return l;
+	}
 	
 	private List<Map<String, Object>> queryAllAtOnce(String query) throws PrologProcessException {
 		int oldflags = flags;
@@ -214,8 +283,10 @@ public class SocketSession implements PrologSession {
 
 
 	@Override
-	public Map<String, Object> queryOnce(String query) throws PrologException,
-	PrologProcessException {
+	public Map<String, Object> queryOnce(String query) throws PrologException, PrologProcessException {
+		if (queryActive) {
+			throw new PrologProcessException("Cannot start query while another query is active.");
+		}
 		CTermUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");

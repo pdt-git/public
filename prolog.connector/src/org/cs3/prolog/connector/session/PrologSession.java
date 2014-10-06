@@ -17,6 +17,7 @@ package org.cs3.prolog.connector.session;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.prolog.connector.internal.session.socket.IterableQuery;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
@@ -47,6 +48,18 @@ public interface PrologSession extends Disposable {
 	 * @see PrologProcess#queryAll(String...)
 	 */
     public List<Map<String,Object>> queryAll(String query) throws PrologException, PrologProcessException;
+
+    
+    /**
+     * Returns an iterator which iterates over the results of the query. Each result is only computed when requested.
+     * In most cases it's better to use queryAll for better performance. You should only use queryIterator if you can't
+     * use queryAll (e.g. if the query has an infinite number of results).
+     * @param query 
+     * @return the iterator
+     * @throws PrologException 
+     * @throws PrologProcessException 
+     */
+    public IterableQuery queryIterator(String query) throws PrologException, PrologProcessException;
 
 }
 
