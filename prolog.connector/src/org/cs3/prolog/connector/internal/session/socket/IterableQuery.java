@@ -102,6 +102,12 @@ public abstract class IterableQuery implements Iterator<Map<String, Object>> {
 		closed = true;
 		session.closeIterator();
 	}
+	
+	// just to make jenkins happy
+	@Override
+	public void remove() {
+        throw new UnsupportedOperationException("remove");
+    }
 
 	protected abstract Map<String, Object> readFirstResult() throws IOException;
 	protected abstract Map<String, Object> readMore() throws IOException;
