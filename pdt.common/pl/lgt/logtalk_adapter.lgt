@@ -498,10 +498,8 @@ find_completion(SearchEntity::PredicatePrefix, _EnclosingFile, _, predicate, Dec
 %		)
 %	),
 	Entity::predicate_property(Head, declared_in(DeclaringEntity)),
-	(	Entity::predicate_property(Head, info(Info))
-	->	predicate_documentation(Head, info(Info), ArgNames, DocKind, Documentation)
-	;	predicate_documentation(Head, [], ArgNames, DocKind, Documentation)
-	).
+	entity_property(DeclaringEntity, _, declares(Name/Arity, Properties)),
+	predicate_documentation(Head, Properties, ArgNames, DocKind, Documentation).
 
 find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, ArgNames, DocKind, Documentation) :-
 	(	var(SearchEntity)
@@ -521,10 +519,8 @@ find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, Dec
 %		)
 %	),
 	Entity<<predicate_property(Head, declared_in(DeclaringEntity)),
-	(	Entity<<predicate_property(Head, info(Info))
-	->	predicate_documentation(Head, info(Info), ArgNames, DocKind, Documentation)
-	;	predicate_documentation(Head, [], ArgNames, DocKind, Documentation)
-	).
+	entity_property(DeclaringEntity, _, declares(Name/Arity, Properties)),
+	predicate_documentation(Head, Properties, ArgNames, DocKind, Documentation).
 
 find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 	atomic(Prefix),
@@ -607,18 +603,33 @@ predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Document
 	member(info(Info), DeclarationProperties),
 	!,
 	ignore(member(argnames(ArgNames), Info)),
+	findall(
+		m(Invocation, Solutions),
+		member(mode(Invocation, Solutions), DeclarationProperties),
+		Modes
+	),
 	(	member(comment(Comment), Info)
-	->	functor(Head, Functor, Arity),
-		(	var(ArgNames)
-		->	DocHead = Functor/Arity
-		;	DocHead =.. [Functor|ArgNames]
-		),
-		format(atom(Documentation), '~w</br></br>~w', [DocHead, Comment]),
-		DocKind = text
-	;	DocKind = nodoc
-	).
+	->	atom_concat('</br></br>', Comment, CommentDoc)
+	;	CommentDoc = ''
+	),
+	functor(Head, Functor, Arity),
+	(	var(ArgNames)
+	->	DocHead = Functor/Arity
+	;	DocHead =.. [Functor|ArgNames]
+	),
+	modes_doc(Modes, ModesDoc),
+	format(atom(Documentation), '~w~w~w', [DocHead, CommentDoc, ModesDoc]),
+	DocKind = text.
 predicate_documentation(_Head, _DeclarationProperties, _ArgNames, nodoc, _Documentation).	
 
+modes_doc([], '') :- !.
+modes_doc(Modes, Doc) :-
+	modes_doc(Modes, '</br></br>Modes', Doc).
+	
+modes_doc([], Doc, Doc).
+modes_doc([m(Invocation, Solutions)|Modes], Buffer, Doc) :-
+	format(atom(NewBuffer), '~w</br>~w - ~w', [Buffer, Invocation, Solutions]),
+	modes_doc(Modes, NewBuffer, Doc).
 
 :- private(logtalk_built_in/2).
 logtalk_built_in(Name, Arity) :-
