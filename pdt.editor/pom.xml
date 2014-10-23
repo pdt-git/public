@@ -9,6 +9,6 @@
   </parent>
   <groupId>org.cs3.roots</groupId>
   <artifactId>org.cs3.pdt.editor</artifactId>
-  <version>3.0.0.qualifier</version>
+  <version>3.0.1.qualifier</version>
   <packaging>eclipse-plugin</packaging>
 </project>

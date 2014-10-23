@@ -9,7 +9,7 @@
   </parent>
   <groupId>org.cs3.roots</groupId>
   <artifactId>org.cs3.prolog.connector</artifactId>
-  <version>3.0.0.qualifier</version>
+  <version>3.0.1.qualifier</version>
   <packaging>eclipse-plugin</packaging>
   <build>
   <plugins>
@@ -21,7 +21,7 @@
             <configuration>
               <tasks>
                 <property refid="maven.compile.classpath" name="mvn.classpath" />
-                <zip file="target/org.cs3.prolog.connector_3.0.0.jar">
+                <zip file="target/org.cs3.prolog.connector_3.0.1.jar">
                   <zipfileset src="target/${project.build.finalName}.jar">
                     <exclude name="org/cs3/prolog/connector/DefaultSAXPrologProcessRegistry*" />
                     <exclude name="org/cs3/prolog/connector/PrologRuntimePlugin*" />
