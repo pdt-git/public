@@ -208,7 +208,7 @@ public class PreferenceConfiguration {
 			File eclipseDirectory = new File(FileLocator.toFileURL(installLocation).getFile());
 			File prologDirectory = new File(eclipseDirectory.getParentFile(), "prolog");
 			return prologDirectory;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
