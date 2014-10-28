@@ -48,6 +48,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	private void initializeDefaultPreferences_Main(IPreferenceStore store){
 		store.setDefault(PDTConsole.PREF_CONTEXT_TRACKERS,	"");
+		store.setDefault(PDTConsole.PREF_CONSOLE_HISTORY_SIZE, 250);
 	}
 	
 	public String getDefaultContextTrackers() {

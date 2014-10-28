@@ -20,6 +20,7 @@ import org.cs3.pdt.connector.util.preferences.MyBooleanFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyColorFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyFileFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyFontFieldEditor;
+import org.cs3.pdt.connector.util.preferences.MyIntegerFieldEditor;
 import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePage;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
@@ -89,6 +90,8 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, "Normal", backgroundGroup));
 		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Single char mode", backgroundGroup));
 		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "Disabled", backgroundGroup));
+		
+		addField(new MyIntegerFieldEditor(PDTConsole.PREF_CONSOLE_HISTORY_SIZE, "History size", getFieldEditorParent(), 4));
 		
 		adjustLayoutForElement(fontGroup);
 		adjustLayoutForElement(colourGroup);

@@ -14,15 +14,13 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Vector;
 
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.ConsoleModelEvent;
 import org.cs3.pdt.console.ConsoleModelListener;
+import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
@@ -50,8 +48,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
  */
 public class ConsoleHistory implements ConsoleModelListener {
 	
-	private static final int MAX_HISTORY_SIZE = 50;
-
 	private static final String HISTORY_SECTION = "history";
 	
 	private Vector<String> history = new Vector<String>();
@@ -159,9 +155,14 @@ public class ConsoleHistory implements ConsoleModelListener {
 	}
 	
 	private void limitHistory() {
-		while (history.size() > MAX_HISTORY_SIZE) {
+		while (history.size() > getHistorySize()) {
 			history.remove(0);
 		}
+	}
+	
+	private int getHistorySize() {
+		int size = PrologConsolePlugin.getDefault().getPreferenceStore().getInt(PDTConsole.PREF_CONSOLE_HISTORY_SIZE);
+		return (size < 1 ? 1 : size);
 	}
 
 	private IDialogSettings getSettings() {

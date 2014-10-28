@@ -47,6 +47,8 @@ final public class PDTConsole {
 	
 	// Main
 	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";
+	
+	public static final String PREF_CONSOLE_HISTORY_SIZE = "pdt.console.history.size";
 
 }
 
