@@ -15,7 +15,6 @@ package org.cs3.pdt.console.internal;
 
 import static org.cs3.prolog.connector.common.QueryUtils.bT;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
@@ -53,12 +52,7 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		
 		try {
 			String fileList = null;
-			try {
-				fileList = FileUtils.quotedPrologFileNameList(files);
-			} catch (IOException e) {
-				Debug.report(e);
-				return false;
-			}
+			fileList = FileUtils.quotedPrologFileNameList(files);
 			String query = bT(PrologConnectorPredicates.PDT_RELOAD, fileList);
 			return executeQueryOnConsole(process, query);
 		} finally {

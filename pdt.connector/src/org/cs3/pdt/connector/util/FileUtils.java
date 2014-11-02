@@ -154,7 +154,7 @@ public class FileUtils {
 		return QueryUtils.prologFileName(file.getLocation().toFile());
 	}
 
-	public static String quotedPrologFileNameList(Collection<IFile> files) throws IOException {
+	public static String quotedPrologFileNameList(Collection<IFile> files) {
 		boolean first = true;
 		StringBuffer buffer = new StringBuffer("[");
 		for (IFile f : files) {
