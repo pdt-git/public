@@ -54,17 +54,20 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 			String fileList = null;
 			fileList = FileUtils.quotedPrologFileNameList(files);
 			String query = bT(PrologConnectorPredicates.PDT_RELOAD, fileList);
-			return executeQueryOnConsole(process, query);
+			PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+			if (activePrologConsole == null) {
+			}
+			PrologProcess activeConsoleProcess = activePrologConsole.getPrologProcess();
+			if (activeConsoleProcess == null || !activeConsoleProcess.equals(process)) {
+				return false;
+			}
+			return executeQueryOnConsole(activePrologConsole, query);
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	private boolean executeQueryOnConsole(PrologProcess process, String query) {
-		PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-		if (activePrologConsole == null) {
-			return false;
-		}
+	private boolean executeQueryOnConsole(PrologConsole activePrologConsole, String query) {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -84,23 +87,8 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 				}
 			}
 		});
-		PrologProcess activeConsoleProcess = activePrologConsole.getPrologProcess();
-		if (activeConsoleProcess == null || !activeConsoleProcess.equals(process)) {
-			activePrologConsole.setPrologProcess(process);
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-			}
-		}
-		if (!process.isUp()) {
-			try {
-				process.start();
-				activePrologConsole.ensureConnectionForCurrentPrologProcess();
-			} catch (PrologProcessException e) {
-				Debug.report(e);
-				return false;
-			}
-		}
+		activePrologConsole.ensureConnectionForCurrentPrologProcess();
+		
 		ConsoleModel model = activePrologConsole.getModel();
 		model.setLineBuffer(" ");
 		model.commitLineBuffer();
