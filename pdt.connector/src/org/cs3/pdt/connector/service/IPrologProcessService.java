@@ -94,6 +94,18 @@ public interface IPrologProcessService {
 	void consultFile(IFile file, PrologProcess process);
 
 	/**
+	 * Consults a file into the given PrologProcess and prints the given message.
+	 * 
+	 * @param file
+	 *            the file
+	 * @param process
+	 *            the PrologProcess
+	 * @param message
+	 *            the message
+	 */
+	void consultFile(IFile file, PrologProcess process, String message);
+	
+	/**
 	 * Consults a file into the active PrologProcess.
 	 * 
 	 * @param file
@@ -112,6 +124,18 @@ public interface IPrologProcessService {
 	void consultFile(String file, PrologProcess process);
 	
 	/**
+	 * Consults a file into the given PrologProcess and prints the given message.
+	 * 
+	 * @param file
+	 *            the file
+	 * @param process
+	 *            the PrologProcess
+	 * @param message
+	 *            the message
+	 */
+	void consultFile(String file, PrologProcess process, String message);
+	
+	/**
 	 * Consults a list of files into the active PrologProcess.
 	 * 
 	 * @param files
@@ -128,6 +152,18 @@ public interface IPrologProcessService {
 	 *            the PrologProcess
 	 */
 	void consultFiles(List<IFile> files, PrologProcess process);
+	
+	/**
+	 * Consults a list of files into the given PrologProcess and prints the given message.
+	 * 
+	 * @param files
+	 *            the list of files
+	 * @param process
+	 *            the PrologProcess
+	 * @param message
+	 *            the message
+	 */
+	void consultFiles(List<IFile> files, PrologProcess process, String message);
 	
 	/**
 	 * Registers an {@link ActivePrologProcessListener}.
