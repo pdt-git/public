@@ -225,7 +225,7 @@ public class PreferenceConfiguration {
 
 		store.setDefault(Connector.PREF_ADDITIONAL_STARTUP, ProcessUtils.getLogtalkStartupFile());
 		store.setDefault(Connector.PREF_ENVIRONMENT, ProcessUtils.getLogtalkEnvironmentVariables());
-		store.setDefault(Connector.PREF_TIMEOUT, 20000);
+		store.setDefault(Connector.PREF_TIMEOUT, 30000);
 	}
 
 //	public static void initWithYAPPreferences(IPreferenceStore store) {

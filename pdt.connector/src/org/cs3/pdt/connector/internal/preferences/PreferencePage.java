@@ -13,33 +13,14 @@
 
 package org.cs3.pdt.connector.internal.preferences;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.cs3.pdt.connector.PDTConnector;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.registry.PrologProcessRegistry;
-import org.cs3.pdt.connector.util.EclipsePreferenceProvider;
-import org.cs3.pdt.connector.util.preferences.MyBooleanFieldEditor;
-import org.cs3.pdt.connector.util.preferences.MyDirectoryFieldEditor;
-import org.cs3.pdt.connector.util.preferences.MyFileFieldEditor;
-import org.cs3.pdt.connector.util.preferences.MyIntegerFieldEditor;
-import org.cs3.pdt.connector.util.preferences.MyLabelFieldEditor;
-import org.cs3.pdt.connector.util.preferences.MyStringFieldEditor;
-import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePage;
-import org.cs3.prolog.connector.Connector;
 import org.cs3.prolog.connector.common.Debug;
-import org.cs3.prolog.connector.common.ProcessUtils;
-import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.preference.StringFieldEditor;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -52,244 +33,94 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-/**
- * This class represents a preference page that is contributed to the
- * Preferences dialog. By subclassing <samp>FieldEditorPreferencePage</samp>, we
- * can use the field support built into JFace that allows us to create a page
- * that is small and knows how to save, restore and apply itself.
- * <p>
- * This page is used to modify preferences only. They are stored in the
- * preference store that belongs to the main plug-in class. That way,
- * preferences can be accessed directly via the preference store.
- */
-
-public class PreferencePage extends StructuredFieldEditorPreferencePage implements IWorkbenchPreferencePage {
-	
-	
-	private boolean preferencesChanged = false;
-	
-	private MyFileFieldEditor executable;
-	private MyStringFieldEditor invocation;
-	private MyStringFieldEditor commandLineArguments;
-	private MyStringFieldEditor startupFiles;
-	private MyLabelFieldEditor executeablePreviewLabel;
-	private MyStringFieldEditor extraEnvironmentVariables;
-	private MyDirectoryFieldEditor serverLogDir;
-	private MyIntegerFieldEditor timeoutFieldEditor;
-	private MyBooleanFieldEditor hidePrologWindow;
-	
-	private ArrayList<FieldEditor> editors = new ArrayList<FieldEditor>();
+public class PreferencePage extends org.eclipse.jface.preference.PreferencePage implements IWorkbenchPreferencePage {
 
 	private Composite configurationSelector;
 
-	private Combo configurationList;
+	private Table configurationList;
 
 	private Button newConfiguration;
-
+	private Button editConfiguration;
 	private Button deleteConfiguration;
 
+
 	public PreferencePage() {
-		super(GRID);
-		setPreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(PDTConnectorPlugin.getDefault().getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION)));
-		setDescription("Select a predefined configuration or define a new one. Each configuration affects all settings on this page.");
-	}
-
-	/**
-	 * Creates the field editors. Field editors are abstractions of the common
-	 * GUI blocks needed to manipulate various types of preferences. Each field
-	 * editor knows how to save and restore itself.
-	 */
-	@Override
-	public void createFieldEditors() {
-		configurationSelector = createConfigurationSelector(getFieldEditorParent());
-		
-		Group executableGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
-		executableGroup.setText("Executable");
-		
-		invocation = new MyStringFieldEditor(Connector.PREF_INVOCATION, "OS invocation", executableGroup);
-		addField(invocation);
-		
-		// eg. xpce or /usr/bin/xpce
-		executable = new MyFileFieldEditor(Connector.PREF_EXECUTABLE, "Prolog executable", executableGroup);
-		executable.getLabelControl(executableGroup).setToolTipText("Don't enter quotes, they will be added automatically.");
-		addField(executable);
-		
-		commandLineArguments = new MyStringFieldEditor(Connector.PREF_COMMAND_LINE_ARGUMENTS, "Command line arguments", executableGroup);
-		commandLineArguments.getLabelControl(executableGroup).setToolTipText("See SWI-Prolog manual for a list of possible command line arguments.");
-		addField(commandLineArguments);
-		
-		startupFiles = new MyStringFieldEditor(Connector.PREF_ADDITIONAL_STARTUP, "Additional startup files", executableGroup) {
-			@Override
-			protected boolean doCheckState() {
-				String value = getStringValue();
-				String[] files = value.split(",");
-				for (String file : files) {
-					if (file.contains(" ")) {
-						if (!(file.startsWith("\"") && file.endsWith("\""))
-								&& !(file.startsWith("'") && file.endsWith("'"))) {
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-		};
-		startupFiles.setErrorMessage("File paths containing white spaces must be enclosed in double quotes. To enter multiple files, separate them by a comma.");
-		startupFiles.getLabelControl(executableGroup).setToolTipText("Can be multiple files, seperated by commas.\nAdd quotes if needed!\n\nExample: \"c:/my files/dummy.pl\" dummy2.pl");
-
-		addField(startupFiles);
-
-		executeablePreviewLabel = new MyLabelFieldEditor(executableGroup, "Executable preview");
-		addField(executeablePreviewLabel);
-		
-		extraEnvironmentVariables = new MyStringFieldEditor(Connector.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent());
-		addField(extraEnvironmentVariables);
-		
-		serverLogDir = new MyDirectoryFieldEditor(Connector.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
-		addField(serverLogDir);
-		
-		timeoutFieldEditor = new MyIntegerFieldEditor(Connector.PREF_TIMEOUT, "Connect Timeout", getFieldEditorParent());
-		timeoutFieldEditor.getTextControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
-		timeoutFieldEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Milliseconds to wait until connection to a new Prolog Process is established");
-		addField(timeoutFieldEditor);
-
-		// The host the process server is listening on
-		StringFieldEditor host = new MyStringFieldEditor(Connector.PREF_HOST, "Server host", getFieldEditorParent());
-		host.setEnabled(false, getFieldEditorParent());
-		addField(host);
-
-		// The port the process server is listening on
-		IntegerFieldEditor port = new MyIntegerFieldEditor(Connector.PREF_PORT, "Server port", getFieldEditorParent());
-		port.setEnabled(false, getFieldEditorParent());
-		addField(port);
-		
-		hidePrologWindow = new MyBooleanFieldEditor(Connector.PREF_HIDE_PLWIN, "Hide prolog process window (Windows only)", getFieldEditorParent());
-		addField(hidePrologWindow);
-		
-		adjustLayoutForElement(configurationSelector);
-		adjustLayoutForElement(executableGroup);
+		setPreferenceStore(PDTConnectorPlugin.getDefault().getPreferenceStore());
+		setDescription("Select a default Prolog process configurations. There are predefined configurations which can be edited but not deleted. Self defined configurations can be deleted.");
 	}
 
 	@Override
-	protected void initialize() {
-		super.initialize();
-		updateExecuteablePreviewLabelText();
+	protected Control createContents(Composite parent) {
+		configurationSelector = createConfigurationSelector(parent);
 		fillConfigurationList();
-		selectConfiguration(PDTConnectorPlugin.getDefault().getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
+		selectConfiguration(getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
+		return configurationSelector;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */
-	@Override
-	public void init(IWorkbench workbench) {
-	}
-	
-	@Override
-	public void propertyChange(PropertyChangeEvent event) {
-		super.propertyChange(event);
-		
-		String prefName = ((FieldEditor)event.getSource()).getPreferenceName();
-		if (prefName.equals(Connector.PREF_INVOCATION) 
-				|| prefName.equals(Connector.PREF_EXECUTABLE)
-				|| prefName.equals(Connector.PREF_ADDITIONAL_STARTUP)
-				|| prefName.equals(Connector.PREF_COMMAND_LINE_ARGUMENTS)) {
-			
-			updateExecuteablePreviewLabelText();
-		}
-		preferencesChanged = true;
-    }
-	
-	@Override
-	public void addField(FieldEditor editor) {
-		editors.add(editor);
-		super.addField(editor);
-	}
-	
-	private void changePreferenceStore(PreferenceStore store) {
-		setPreferenceStore(store);
-		for (FieldEditor editor : editors) {
-			editor.setPreferenceStore(store);
-			editor.load();
-		}
-		updateExecuteablePreviewLabelText();
-	}
-	
 	@Override
 	public boolean performOk() {
-		PDTConnectorPlugin.getDefault().getPreferenceStore().setValue(PDTConnector.PREF_CONFIGURATION, configurationList.getText());
 		boolean result = super.performOk();
-		try {
-			((PreferenceStore)getPreferenceStore()).save();
-		} catch (Exception e) {
-			Debug.report(e);
-		}
-		if (preferencesChanged) {
-			updatePrologProcessExecutables();	
+		String selectedConfiguration = getSelectedConfiguration();
+		if (selectedConfiguration == null) {
+			Debug.warning("Selected configuration is null!");
+		} else {
+			getPreferenceStore().setValue(PDTConnector.PREF_CONFIGURATION, selectedConfiguration);
 		}
 		return result;
 	}
 	
-	private void updateExecuteablePreviewLabelText() {
-		String newExecutable = ProcessUtils.createExecutable(invocation.getStringValue(), executable.getStringValue(), commandLineArguments.getStringValue(), startupFiles.getStringValue()) + " -g [$ConnectorInitFile]";
-		executeablePreviewLabel.setText(newExecutable);
-	}
-
-	private void updatePrologProcessExecutables() {
-		String configuration = configurationList.getText();
-		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
-		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
-		for (String id : subscriptionIds) {
-			PrologProcess process = registry.getPrologProcess(registry.getSubscription(id).getProcessKey());
-			if (process != null && configuration.equals(process.getAttribute(PDTConnector.CONFIGURATION_ATTRIBUTE))) {   // Sinan & Günter, 24.9.2010
-				process.initOptions(new EclipsePreferenceProvider(PDTConnectorPlugin.getDefault(), configuration));
-			}
-		}
-	}
-	
 	@Override
-	protected void performApply() {
-		performOk();
-		preferencesChanged = false;
-	}
-	
-    @Override
 	protected void performDefaults() {
-    	super.performDefaults();
-//        checkState();
-//        updateApplyButton();
-    }
+		super.performDefaults();
+		selectConfiguration(getPreferenceStore().getDefaultString(PDTConnector.PREF_CONFIGURATION));
+	}
 
 	private Composite createConfigurationSelector(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		container.setLayout(new GridLayout(4, false));
+		container.setLayout(new GridLayout(3, false));
 		
 		Label label = new Label(container, SWT.LEFT);
 		label.setText("Configuration");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		configurationList = new Combo(container, SWT.READ_ONLY);
+		configurationList = new Table(container, SWT.CHECK | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		configurationList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		configurationList.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent evt) {
-				String configuration = configurationList.getText();
-				changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(configuration));
-				deleteConfiguration.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurations().contains(configuration));
+			public void widgetSelected(SelectionEvent event) {
+	            if (event.detail == SWT.CHECK) {
+	            	TableItem item = (TableItem) event.item;
+	                boolean checked = item.getChecked();
+	                if (checked) {
+	                	for (TableItem otherItem : configurationList.getItems()) {
+	                		if (!(otherItem.equals(item))) {
+	                			otherItem.setChecked(false);
+	                		}
+	                	}
+	                } else {
+	                	item.setChecked(true);
+	                }
+	            } else {
+	            	TableItem item = (TableItem) event.item;
+	            	String configuration = item.getText();
+	            	deleteConfiguration.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurations().contains(configuration));
+	            }
 			}
 		});
 		
-		newConfiguration = createButton(container, "New...");
+		Composite buttonContainer = new Composite(container, SWT.NONE);
+		buttonContainer.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		buttonContainer.setLayout(new GridLayout(1, false));
+		
+		newConfiguration = createButton(buttonContainer, "New...");
 		newConfiguration.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				NewConfigurationDialog dialog = new NewConfigurationDialog(newConfiguration.getShell(), PreferenceConfiguration.getInstance().getConfigurations(), PreferenceConfiguration.getInstance().getDefaultConfigurations());
@@ -299,21 +130,35 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 					PreferenceConfiguration.getInstance().addConfiguration(newConfiguration, dialog.getDefaultConfiguration());
 					fillConfigurationList();
 					selectConfiguration(newConfiguration);
-					changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(newConfiguration));
 				}
 			}
 		});
-		deleteConfiguration = createButton(container, "Delete");
+		editConfiguration = createButton(buttonContainer, "Edit...");
+		editConfiguration.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				if (configurationList.getSelectionIndex() == -1) {
+					return;
+				}
+				TableItem item = configurationList.getItem(configurationList.getSelectionIndex());
+				String configuration = item.getText();
+				new EditConfigurationDialog(getShell(), PreferenceConfiguration.getInstance().getPreferenceStore(configuration), configuration).open();
+			}
+		});
+		deleteConfiguration = createButton(buttonContainer, "Delete");
 		deleteConfiguration.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				boolean answer = MessageDialog.openQuestion(deleteConfiguration.getShell(), "Delete configuration", "Do you want to delete the configuration \"" + configurationList.getText() + "\"?");
+				if (configurationList.getSelectionIndex() == -1) {
+					return;
+				}
+				TableItem item = configurationList.getItem(configurationList.getSelectionIndex());
+				String configuration = item.getText();
+				boolean answer = MessageDialog.openQuestion(deleteConfiguration.getShell(), "Delete configuration", "Do you want to delete the configuration \"" + configuration + "\"?");
 				if (answer) {
-					String configuration = configurationList.getText();
 					String defaultId = PreferenceConfiguration.getInstance().getDefaultConfiguration(configuration);
 					PreferenceConfiguration.getInstance().deleteConfiguration(configuration);
 					fillConfigurationList();
 					selectConfiguration(defaultId);
-					changePreferenceStore(PreferenceConfiguration.getInstance().getPreferenceStore(defaultId));
 					PDTConnectorPlugin.getDefault().getPreferenceStore().setValue(PDTConnector.PREF_CONFIGURATION, defaultId);
 				}
 			}
@@ -336,13 +181,25 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 	private void fillConfigurationList() {
 		configurationList.removeAll();
 		for (String configId : PreferenceConfiguration.getInstance().getConfigurations()) {
-			configurationList.add(configId);
+			TableItem item = new TableItem(configurationList, SWT.NONE);
+			item.setText(configId);
 		}
 	}
 	
 	private void selectConfiguration(String configurationId) {
-		configurationList.setText(configurationId);
+		for (TableItem item : configurationList.getItems()) {
+			item.setChecked(configurationId.equals(item.getText()));
+		}
 		deleteConfiguration.setEnabled(!PreferenceConfiguration.getInstance().getDefaultConfigurations().contains(configurationId));
+	}
+	
+	private String getSelectedConfiguration() {
+		for (TableItem item : configurationList.getItems()) {
+			if (item.getChecked()) {
+				return item.getText();
+			}
+		}
+		return null;
 	}
 	
 	private static class NewConfigurationDialog extends Dialog {
@@ -439,6 +296,10 @@ public class PreferencePage extends StructuredFieldEditorPreferencePage implemen
 			return defaultConfiguration;
 		}
 
+	}
+
+	@Override
+	public void init(IWorkbench workbench) {
 	}
 	
 }
