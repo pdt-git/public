@@ -1,10 +1,13 @@
 package org.cs3.pdt.common.internal;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.cs3.pdt.common.PDTCommon;
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.ProcessReconsulter;
+import org.cs3.pdt.common.ProcessReconsulterListener;
 import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
@@ -15,7 +18,9 @@ import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-public class ConsultManager implements ConsultListener, PrologProcessStartListener {
+public class ConsultManager implements ProcessReconsulter, ConsultListener, PrologProcessStartListener {
+	
+	private HashSet<ProcessReconsulterListener> reconsultListeners = new HashSet<ProcessReconsulterListener>();
 
 	@Override
 	public void beforeConsult(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
@@ -87,6 +92,31 @@ public class ConsultManager implements ConsultListener, PrologProcessStartListen
 			if (PDTCommonPlugin.getDefault().isEntryPoint(file)) {
 				entryPointFiles.add(file);
 			}
+		}
+	}
+
+	@Override
+	public void registerListener(ProcessReconsulterListener listener) {
+		synchronized (reconsultListeners) {
+			reconsultListeners.add(listener);
+		}
+	}
+
+	@Override
+	public void unRegisterListener(ProcessReconsulterListener listener) {
+		synchronized (reconsultListeners) {
+			reconsultListeners.remove(listener);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void notifyReconsultListeners(PrologProcess process, String reconsultBehaviour, List<IFile> reconsultedFiles) {
+		HashSet<ProcessReconsulterListener> listenersClone;
+		synchronized (reconsultListeners) {
+			listenersClone = (HashSet<ProcessReconsulterListener>) reconsultListeners.clone();
+		}
+		for (ProcessReconsulterListener listener : listenersClone) {
+			listener.afterReconsult(process, reconsultBehaviour, reconsultedFiles);
 		}
 	}
 
