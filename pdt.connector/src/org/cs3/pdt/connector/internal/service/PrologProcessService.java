@@ -216,12 +216,16 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 	
 	@Override
 	public void consultFiles(final List<IFile> files, final PrologProcess process) {
-		consultFilesInJob(files, process, false);
+		if (!files.isEmpty()) {
+			consultFilesInJob(files, process, false);
+		}
 	}
 	
 	@Override
 	public void consultFilesSilent(List<IFile> files, PrologProcess process) {
-		consultFilesInJob(files, process, true);
+		if (!files.isEmpty()) {
+			consultFilesInJob(files, process, true);
+		}
 	}
 	
 	private void consultFilesInJob(final List<IFile> files, final PrologProcess process, final boolean silent) {
@@ -294,14 +298,16 @@ public class PrologProcessService implements IPrologProcessService, IPrologProce
 			executorsClone = (TreeSet<PDTReloadExecutor>) pdtReloadExecutors.clone();
 		}
 		monitor.beginTask("Execute reload", executorsClone.size());
+		String fileList = FileUtils.quotedPrologFileNameList(files);
+		String query = bT(PrologConnectorPredicates.PDT_RELOAD, fileList);
 		if (silent) {
-			boolean success = defaultReloadExecutor.executePDTReload(process, files, new SubProgressMonitor(monitor, executorsClone.size()));
+			boolean success = defaultReloadExecutor.executePDTReload(process, query, new SubProgressMonitor(monitor, executorsClone.size()));
 			monitor.done();
 			return success;
 		} else {
 			for (PDTReloadExecutor executor : executorsClone) {
 				monitor.subTask("Execute reload");
-				boolean success = executor.executePDTReload(process, files, new SubProgressMonitor(monitor, 1));
+				boolean success = executor.executePDTReload(process, query, new SubProgressMonitor(monitor, 1));
 				if (success) {
 					monitor.done();
 					return true;

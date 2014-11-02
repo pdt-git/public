@@ -14,11 +14,8 @@
 
 package org.cs3.pdt.connector.service;
 
-import java.util.List;
-
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -36,13 +33,13 @@ public interface PDTReloadExecutor {
 	 * @param process
 	 *            the {@link PrologProcess} on which the pdt_reload/1
 	 *            predicate is called to consult the list of files
-	 * @param files
-	 *            a list of files which should be consulted
+	 * @param query
+	 *            the reload query which should be executed
 	 * @param monitor
 	 *            a progress monitor
 	 * @return True if consulting is successful, otherwise false
 	 * @throws PrologProcessException
 	 */
-	boolean executePDTReload(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException;
+	boolean executePDTReload(PrologProcess process, String query, IProgressMonitor monitor) throws PrologProcessException;
 
 }

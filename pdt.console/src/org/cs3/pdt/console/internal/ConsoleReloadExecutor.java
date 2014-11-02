@@ -13,14 +13,8 @@
 
 package org.cs3.pdt.console.internal;
 
-import static org.cs3.prolog.connector.common.QueryUtils.bT;
-
-import java.util.List;
-
 import org.cs3.pdt.common.PDTCommonPlugin;
-import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.connector.service.PDTReloadExecutor;
-import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
@@ -29,7 +23,6 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
@@ -43,17 +36,10 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 	}
 	
 	@Override
-	public boolean executePDTReload(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public boolean executePDTReload(PrologProcess process, String query, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
-		if (files.isEmpty()) {
-			monitor.done();
-			return true;
-		}
 		
 		try {
-			String fileList = null;
-			fileList = FileUtils.quotedPrologFileNameList(files);
-			String query = bT(PrologConnectorPredicates.PDT_RELOAD, fileList);
 			PrologConsole activePrologConsole = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 			if (activePrologConsole == null) {
 			}
