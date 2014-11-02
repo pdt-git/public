@@ -15,6 +15,7 @@
 
 :- module( pdt_reload,
          [ pdt_reload/1                           % Called from ConsultActionDelegate.run()
+         , pdt_reload/2                           % Called from ConsultActionDelegate.run()
 %         , activate_warning_and_error_tracing/0   % Called from PLMarkerUtils.addMarkers()
 %         , deactivate_warning_and_error_tracing/0 % Called from PLMarkerUtils.addMarkers()
          , errors_and_warnings/5                  % Called from PLMarkerUtils.run()
@@ -42,6 +43,14 @@
 % console history and to start the update of the PDT-internal factbase.
 
 % SWI-Prolog list    
+
+pdt_reload(FileOrFiles, Message) :-
+	(	nonvar(Message)
+	->	write(user_error, Message),
+		nl(user_error)
+	;	true
+	),
+	pdt_reload(FileOrFiles).
 
 pdt_reload(FileOrFiles) :-
 	with_mutex('reloadMutex',(
