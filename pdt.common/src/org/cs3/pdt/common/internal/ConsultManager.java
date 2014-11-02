@@ -1,6 +1,5 @@
 package org.cs3.pdt.common.internal;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
 import org.cs3.pdt.connector.service.ConsultListener;
-import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
@@ -26,8 +24,7 @@ public class ConsultManager implements ConsultListener, PrologProcessStartListen
 	@Override
 	public void afterConsult(PrologProcess process, List<IFile> files, List<String> allConsultedFiles, IProgressMonitor monitor) throws PrologProcessException {
 		for (IFile file : files) {
-			String prologFileName = FileUtils.prologFileName(file);
-			addConsultedFile(process, prologFileName);
+			addConsultedFile(process, file);
 		}
 		monitor.done();
 	}
@@ -46,13 +43,11 @@ public class ConsultManager implements ConsultListener, PrologProcessStartListen
 	// TODO: problem with quotes
 	private void reconsultFiles(PrologProcess process, boolean onlyEntryPoints) {
 		Debug.debug("Reconsult files");
-		List<String> consultedFiles = getConsultedFileList(process);
+		List<IFile> consultedFiles = getConsultedFileList(process);
 		if (consultedFiles != null) {
 			synchronized (consultedFiles) {
-				
 				ArrayList<IFile> files = new ArrayList<IFile>();
 				ArrayList<IFile> entryPointFiles = new ArrayList<IFile>();
-				collectFiles(consultedFiles, files);
 				IPrologProcessServiceExtension service = (IPrologProcessServiceExtension) PDTConnectorPlugin.getDefault().getPrologProcessService();
 				if (onlyEntryPoints) {
 					filterEntryPoints(files, entryPointFiles);
@@ -64,41 +59,26 @@ public class ConsultManager implements ConsultListener, PrologProcessStartListen
 		}
 	}
 
-	private List<String> getConsultedFileList(PrologProcess process) {
+	private List<IFile> getConsultedFileList(PrologProcess process) {
 		@SuppressWarnings("unchecked")
-		List<String> consultedFiles = (List<String>) process.getAttribute(PDTCommon.CONSULTED_FILES);
+		List<IFile> consultedFiles = (List<IFile>) process.getAttribute(PDTCommon.CONSULTED_FILES);
 		return consultedFiles;
 	}
 	
-	private void addConsultedFile(PrologProcess process, String fileName) {
-		List<String> consultedFiles = getConsultedFileList(process);
+	private void addConsultedFile(PrologProcess process, IFile file) {
+		List<IFile> consultedFiles = getConsultedFileList(process);
 		if (consultedFiles == null) {
-			consultedFiles = new ArrayList<String>();
+			consultedFiles = new ArrayList<IFile>();
 			process.setAttribute(PDTCommon.CONSULTED_FILES, consultedFiles);
 		}
 		synchronized (consultedFiles) {
 			// only take the last consult of a file
-			if (consultedFiles.remove(fileName)) {
-				Debug.debug("move " + fileName + " to end of consulted files");			
+			if (consultedFiles.remove(file)) {
+				Debug.debug("move " + file + " to end of consulted files");			
 			} else {
-				Debug.debug("add " + fileName + " to consulted files");
+				Debug.debug("add " + file + " to consulted files");
 			}
-			consultedFiles.add(fileName);
-		}
-	}
-	
-	
-	private void collectFiles(List<String> consultedFiles, List<IFile> files) {
-		for (String consultedFile : consultedFiles) {
-			IFile file;
-			try {
-				file = FileUtils.findFileForLocation(consultedFile);
-				if (file != null){
-					files.add(file);
-				}
-			} catch (IOException e) {
-				Debug.report(e);
-			}
+			consultedFiles.add(file);
 		}
 	}
 	
