@@ -143,7 +143,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private final String ERROR_CHAR = "!";
 
 	private Color LastOutputColor = null;
-	private boolean LineFeedOccured = true;
+	private boolean lineFeedOccured = true;
 	private Color defaultFontColor;
 	private Color COLOR_ERROR;
 	private Color COLOR_WARNING;
@@ -760,9 +760,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					LastOutputColor = COLOR_INFO;
 				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_THREESTARS)) {
 					LastOutputColor = COLOR_INFO;
-				} else if (!UpperCaseRow.startsWith("\u0009")
-						// tabChar oder zwei leerzeichen
-						&& !UpperCaseRow.startsWith(PLACEHOLDER_SPACETAB, 0) && LineFeedOccured) {
+				} else if (i != 0 || lineFeedOccured) {
 					// No Color Setting, take default color
 					LastOutputColor = null;
 				}
@@ -785,9 +783,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 			// is needed for long lines which are pushed in multiple parts
 			if (output.endsWith("\n")) {
-				LineFeedOccured = true;
+				lineFeedOccured = true;
 			} else {
-				LineFeedOccured = false;
+				lineFeedOccured = false;
 			}
 
 			startOfInput += output.length();
