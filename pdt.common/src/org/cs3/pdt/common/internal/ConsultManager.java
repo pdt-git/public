@@ -20,6 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public class ConsultManager implements ProcessReconsulter, ConsultListener, PrologProcessStartListener {
 	
+	private static final String ENTRY_POINT_FILES_MESSAGE = "automatic_reconsult(entry_points)";
+	private static final String ALL_FILES_MESSAGE = "automatic_reconsult(all)";
+	
 	private HashSet<ProcessReconsulterListener> reconsultListeners = new HashSet<ProcessReconsulterListener>();
 
 	@Override
@@ -52,16 +55,15 @@ public class ConsultManager implements ProcessReconsulter, ConsultListener, Prol
 		List<IFile> consultedFiles = getConsultedFileList(process);
 		if (consultedFiles != null) {
 			synchronized (consultedFiles) {
-				ArrayList<IFile> files = new ArrayList<IFile>();
 				ArrayList<IFile> entryPointFiles = new ArrayList<IFile>();
 				IPrologProcessService service = PDTConnectorPlugin.getDefault().getPrologProcessService();
 				if (onlyEntryPoints) {
-					filterEntryPoints(files, entryPointFiles);
-					service.consultFiles(entryPointFiles, process);
+					filterEntryPoints(consultedFiles, entryPointFiles);
+					service.consultFiles(entryPointFiles, process, ENTRY_POINT_FILES_MESSAGE);
 					notifyReconsultListeners(process, PDTCommon.RECONSULT_ENTRY, entryPointFiles);
 				} else {
-					service.consultFiles(files, process);
-					notifyReconsultListeners(process, PDTCommon.RECONSULT_ALL, files);
+					service.consultFiles(consultedFiles, process, ALL_FILES_MESSAGE);
+					notifyReconsultListeners(process, PDTCommon.RECONSULT_ALL, consultedFiles);
 				}
 			}
 		}
