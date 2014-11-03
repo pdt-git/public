@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.common.PDTCommon;
+import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.search.PrologSearchPage;
 import org.cs3.pdt.connector.PDTConnector;
@@ -187,13 +188,20 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	}
 
-	private final class RestartAction extends Action {
+	private final class RestartAction extends Action implements IMenuCreator {
+		
+		private RestartAction() {
+			setMenuCreator(this);
+		}
+		
 		@Override
 		public void run() {
+			restart(null);
+		}
+
+		private void restart(final String reconsultStrategy) {
 			try {
-
 				Job j = new Job("Restarting the PrologProcess") {
-
 					@Override
 					public IStatus run(IProgressMonitor monitor) {
 						try {
@@ -211,6 +219,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 									if (!process.isDown()){
 										process.reset();
 										Thread.sleep(1000);
+									}
+									if (reconsultStrategy != null) {
+										process.setAttribute(PDTCommon.PROCESS_SPECIFIC_RECONSULT_STRATEGY, reconsultStrategy);
 									}
 									process.start();
 									Display.getDefault().asyncExec(new Runnable() {
@@ -236,7 +247,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 			} catch (Throwable t) {
 				Debug.report(t);
 			}
-
 		}
 
 		@Override
@@ -251,7 +261,49 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		@Override
 		public String getText() {
-			return "restart";
+			return "Restart";
+		}
+
+		private Menu menu;
+		
+		@Override
+		public void dispose() {
+			if (menu != null) {
+				menu.dispose();
+			}
+		}
+
+		@Override
+		public Menu getMenu(Control parent) {
+			if (menu != null) {
+				menu.dispose();
+			}
+			Menu newMenu = new Menu(parent);
+			String reconsultStrategyPreference = PDTCommonPlugin.getDefault().getPreferenceStore().getString(PDTCommon.PREF_RECONSULT_ON_RESTART);
+			addMenuItem(newMenu, "Restart clean", PDTCommon.RECONSULT_NONE, reconsultStrategyPreference);
+			addMenuItem(newMenu, "Restart and reload entry point files", PDTCommon.RECONSULT_ENTRY, reconsultStrategyPreference);
+			addMenuItem(newMenu, "Restart and reload all files", PDTCommon.RECONSULT_ALL, reconsultStrategyPreference);
+			menu = newMenu;
+			return menu;
+		}
+		
+		private void addMenuItem(Menu newMenu, String text, final String reconsultStrategy, String reconsultStrategyPreference) {
+			MenuItem item = new MenuItem(newMenu, SWT.NONE);
+			item.setText(text);
+			item.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					restart(reconsultStrategy);
+				}
+			});
+			if (reconsultStrategyPreference.equals(reconsultStrategy)) {
+				item.setImage(ImageRepository.getImage(ImageRepository.RESTART));
+			}
+		}
+
+		@Override
+		public Menu getMenu(Menu parent) {
+			return null;
 		}
 	}
 
@@ -481,12 +533,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 		@Override
 		public String getToolTipText() {
-			return "create process";
+			return "Create process";
 		}
 
 		@Override
 		public String getText() {
-			return "create process";
+			return "Create process";
 		}
 
 		@Override

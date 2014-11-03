@@ -39,7 +39,15 @@ public class ConsultManager implements ProcessReconsulter, ConsultListener, Prol
 
 	@Override
 	public void prologProcessStarted(PrologProcess process) {
-		final String reconsultFiles = PDTCommonPlugin.getDefault().getPreferenceValue(PDTCommon.PREF_RECONSULT_ON_RESTART, PDTCommon.RECONSULT_NONE);
+		String reconsultFiles = null;
+		try {
+			reconsultFiles = (String) process.getAttribute(PDTCommon.PROCESS_SPECIFIC_RECONSULT_STRATEGY);
+		} catch (ClassCastException e) {
+		}
+		process.setAttribute(PDTCommon.PROCESS_SPECIFIC_RECONSULT_STRATEGY, null);
+		if (reconsultFiles == null) {
+			reconsultFiles = PDTCommonPlugin.getDefault().getPreferenceValue(PDTCommon.PREF_RECONSULT_ON_RESTART, PDTCommon.RECONSULT_NONE);
+		}
 		
 		if (reconsultFiles.equals(PDTCommon.RECONSULT_NONE)) {
 			getConsultedFileList(process).clear();
