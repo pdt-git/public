@@ -45,5 +45,7 @@ public final class PDTCommon {
 	public static final String PERSPECTIVE_VIEWS_FOLDER = "prolog.perspective.views.folder";
 	
 	public static final String CONSULTED_FILES = "CONSULTED_FILES";
+	
+	public static final String PROCESS_SPECIFIC_RECONSULT_STRATEGY = "process.specific.reconsult.strategy";
 
 }

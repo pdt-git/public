@@ -130,17 +130,16 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private int startOfInput = 0;
 	private boolean enterSendsSemicolon;
 
-	final String PLACEHOLDER_LGT_WARNING = "%         WARNING!";
-	final String PLACEHOLDER_LGT_UNDEFINED = "called but never defined";
-	
-	final String PLACEHOLDER_WARNING = "WARNING";
-	final String PLACEHOLDER_ERROR = "ERROR";
-	final String PLACEHOLDER_DEBUG = "DEBUG";
-	final String PLACEHOLDER_INFO = "INFO";
-	final String PLACEHOLDER_SPACETAB = "  ";
-	final String PLACEHOLDER_THREESTARS = "***";
-	private final String WARNING_CHAR = "*";
-	private final String ERROR_CHAR = "!";
+	private static final String PLACEHOLDER_WARNING = "WARNING";
+	private static final String PLACEHOLDER_ERROR = "ERROR";
+	private static final String PLACEHOLDER_DEBUG = "DEBUG";
+	private static final String PLACEHOLDER_INFO = "INFO";
+	private static final String WARNING_CHAR = "*";
+	private static final String WARNING_CHARS = "***";
+	private static final String ERROR_CHAR = "!";
+	private static final String ERROR_CHARS = "!!!";
+	private static final String DEBUG_CHARS = "???";
+	private static final String INFO_CHARS = "~~~";
 
 	private Color LastOutputColor = null;
 	private boolean lineFeedOccured = true;
@@ -708,21 +707,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		if (line.startsWith(" " + start, 0)) {
 			return true;
 		}
-		if (Boolean.valueOf(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "true")).booleanValue()) {
-			if (line.startsWith(PLACEHOLDER_THREESTARS + start, 0)) {
-				return true;
-			}
-			if (line.startsWith(PLACEHOLDER_THREESTARS + " " + start, 0)) {
-				return true;
-			}
-			if (line.startsWith(" " + PLACEHOLDER_THREESTARS + start, 0)) {
-				return true;
-			}
-			if (line.startsWith(" " + PLACEHOLDER_THREESTARS + " " + start, 0)) {
-				return true;
-			}
-
-		}
 		return false;
 	}
 
@@ -746,19 +730,13 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				row = Rows[i];
 				// Get the Color-Information
 				String UpperCaseRow = row.toUpperCase();
-				if (lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING) &&
-						row.contains(PLACEHOLDER_LGT_UNDEFINED)) {
-					LastOutputColor = COLOR_DEBUG;
-				} else if (lineStartsWith(UpperCaseRow, WARNING_CHAR) || lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
-						lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING)) {
+				if (lineStartsWith(UpperCaseRow, WARNING_CHAR) || lineStartsWith(UpperCaseRow, WARNING_CHARS) || lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING)) {
 					LastOutputColor = COLOR_WARNING;
-				} else if (lineStartsWith(UpperCaseRow, ERROR_CHAR) ||lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
+				} else if (lineStartsWith(UpperCaseRow, ERROR_CHAR) || lineStartsWith(UpperCaseRow, ERROR_CHARS) || lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
 					LastOutputColor = COLOR_ERROR;
-				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_DEBUG)) {
+				} else if (lineStartsWith(UpperCaseRow, DEBUG_CHARS) || lineStartsWith(UpperCaseRow, PLACEHOLDER_DEBUG)) {
 					LastOutputColor = COLOR_DEBUG;
-				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_INFO)) {
-					LastOutputColor = COLOR_INFO;
-				} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_THREESTARS)) {
+				} else if (lineStartsWith(UpperCaseRow, INFO_CHARS) || lineStartsWith(UpperCaseRow, PLACEHOLDER_INFO)) {
 					LastOutputColor = COLOR_INFO;
 				} else if (i != 0 || lineFeedOccured) {
 					// No Color Setting, take default color

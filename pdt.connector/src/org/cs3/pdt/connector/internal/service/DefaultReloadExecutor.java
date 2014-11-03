@@ -13,16 +13,9 @@
 
 package org.cs3.pdt.connector.internal.service;
 
-import static org.cs3.prolog.connector.common.QueryUtils.bT;
-
-import java.util.List;
-
-import org.cs3.pdt.connector.PrologConnectorPredicates;
 import org.cs3.pdt.connector.service.PDTReloadExecutor;
-import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 public class DefaultReloadExecutor implements PDTReloadExecutor {
@@ -33,17 +26,10 @@ public class DefaultReloadExecutor implements PDTReloadExecutor {
 	}
 
 	@Override
-	public boolean executePDTReload(PrologProcess process, List<IFile> files, IProgressMonitor monitor) throws PrologProcessException {
+	public boolean executePDTReload(PrologProcess process, String query, IProgressMonitor monitor) throws PrologProcessException {
 		monitor.beginTask("", 1);
-		if (files.isEmpty()) {
-			monitor.done();
-			return true;
-		}
-		
-		String fileList = null;
 		try {
-			fileList = FileUtils.quotedPrologFileNameList(files);
-			process.queryOnce(bT(PrologConnectorPredicates.PDT_RELOAD, fileList));
+			process.queryOnce(query);
 		} finally {
 			monitor.done();
 		}

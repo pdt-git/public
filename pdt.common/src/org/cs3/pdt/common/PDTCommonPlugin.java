@@ -61,6 +61,8 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 	
 	private EntryPointChangeListener entryPointChangeListener;
 	
+	private ConsultManager consultManager;
+	
 	public PDTCommonPlugin() {
 		super();
 		plugin = this;
@@ -132,7 +134,7 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		for (String key : registry.getRegisteredKeys()) {
 			registry.getPrologProcess(key).addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
 		}
-		ConsultManager consultManager = new ConsultManager();
+		consultManager = new ConsultManager();
 		registerProcessStartListener(consultManager);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(consultManager);
 		entryPointChangeListener = new EntryPointChangeListener();
@@ -272,6 +274,10 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 		for (PrologProcessStartListener listener : listeners) {
 			listener.prologProcessStarted(process);
 		}
+	}
+	
+	public ProcessReconsulter getProcessReconsulter() {
+		return consultManager;
 	}
 
 }

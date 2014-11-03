@@ -6,7 +6,6 @@ Bundle-SymbolicName: org.cs3.pdt.connector;singleton:=true
 Bundle-Version: 3.0.1.qualifier
 Bundle-Activator: org.cs3.pdt.connector.PDTConnectorPlugin
 Export-Package: org.cs3.pdt.connector,
- org.cs3.pdt.connector.internal.service.ext;x-friends:="org.cs3.pdt.common",
  org.cs3.pdt.connector.load,
  org.cs3.pdt.connector.registry,
  org.cs3.pdt.connector.service,

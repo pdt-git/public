@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PDTCommonUtil;
+import org.cs3.pdt.common.ProcessReconsulterListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.pdt.connector.service.ConsultListener;
@@ -49,12 +50,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook, ActivePrologProcessListener, ConsultListener {
+public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook, ActivePrologProcessListener, ConsultListener, ProcessReconsulterListener {
 
 	private static final String ADD_BREAKPOINT = "add_breakpoint";
 	private static final String REMOVE_BREAKPOINT = "remove_breakpoint";
@@ -85,6 +87,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 		checkForProcess();
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
+		PDTCommonPlugin.getDefault().getProcessReconsulter().registerListener(this);
 	}
 
 	private void checkForProcess() {
@@ -443,40 +446,6 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 
 	@Override
 	public void afterInit(final PrologProcess process) throws PrologProcessException {
-		shouldUpdateMarkers = true;
-		if (markerBackup == null || markerBackup.isEmpty()) {
-			markerBackup = null;
-			return;
-		}
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				waitForDispatcherSubjectActive();
-				StringBuffer buf = new StringBuffer();
-				boolean first = true;
-				for (MarkerBackup m : markerBackup) {
-					// TODO: Debug here, timing issues
-					if (first) {
-						first = false;
-					} else {
-						buf.append(", ");
-					}
-					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileName(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
-				}
-				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
-//				PrologProcess process = PDTCommonUtil.getActivePrologProcess();
-				try {
-					process.queryOnce(buf.toString());
-				} catch (PrologProcessException e) {
-					Debug.report(e);
-				}
-				
-				// disable logging of deleted ids
-				markerBackup = null;
-				shouldUpdateMarkers = true;
-			}
-		});
-		t.start();
 	}
 
 	@Override
@@ -544,6 +513,51 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 			updateMarkers();
 		}
 		monitor.done();
+	}
+
+	@Override
+	public void afterReconsult(final PrologProcess process, String reconsultBehaviour, List<IFile> reconsultedFiles) {
+		if (!process.equals(currentProcess)) {
+			return;
+		}
+		shouldUpdateMarkers = true;
+		if (markerBackup == null || markerBackup.isEmpty()) {
+			markerBackup = null;
+			return;
+		}
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				waitForDispatcherSubjectActive();
+				StringBuffer buf = new StringBuffer();
+				boolean first = true;
+				for (MarkerBackup m : markerBackup) {
+					// TODO: Debug here, timing issues
+					if (first) {
+						first = false;
+					} else {
+						buf.append(", ");
+					}
+					buf.append(bT(PDTPredicates.PDT_SET_BREAKPOINT, FileUtils.prologFileNameQuoted(m.getFile()), m.getLineNumber(), m.getOffset(), "_"));
+				}
+				Debug.debug("Resetting breakpoints after restart: " + buf.toString());
+//				PrologProcess process = PDTCommonUtil.getActivePrologProcess();
+				try {
+					process.queryOnce(buf.toString());
+				} catch (PrologProcessException e) {
+					Debug.report(e);
+				}
+				
+				// disable logging of deleted ids
+				markerBackup = null;
+				shouldUpdateMarkers = true;
+			}
+		};
+		if (reconsultedFiles == null || reconsultedFiles.isEmpty()) {
+			runAsJob("Recreate breakpoints", null, r);
+		} else {
+			runAsJob("Recreate breakpoints", new MultiRule(reconsultedFiles.toArray(new IFile[reconsultedFiles.size()])), r);
+		}
 	}
 
 }

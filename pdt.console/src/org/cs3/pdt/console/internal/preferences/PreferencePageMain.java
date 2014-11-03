@@ -16,7 +16,6 @@ package org.cs3.pdt.console.internal.preferences;
 import java.io.File;
 import java.io.IOException;
 
-import org.cs3.pdt.connector.util.preferences.MyBooleanFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyColorFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyFileFieldEditor;
 import org.cs3.pdt.connector.util.preferences.MyFontFieldEditor;
@@ -25,7 +24,6 @@ import org.cs3.pdt.connector.util.preferences.StructuredFieldEditorPreferencePag
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.prolog.connector.common.Debug;
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -50,7 +48,6 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 	private ColorFieldEditor cfe_warn;
 	private ColorFieldEditor cfe_info;
 	private ColorFieldEditor cfe_dbg;
-	private BooleanFieldEditor bfe_inter_start;
 	
 	public PreferencePageMain() {
 		super(GRID);
@@ -72,24 +69,21 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		Group colourGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		colourGroup.setText("Colour output line starting with ...");
 		
-		cfe_error = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_ERROR, "ERROR", colourGroup);
-		cfe_warn = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_WARNING, "WARNING", colourGroup);
-		cfe_info = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_INFO, "INFO", colourGroup);
-		cfe_dbg = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_DEBUG, "DEBUG", colourGroup);
-		bfe_inter_start = new MyBooleanFieldEditor(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "Treat '***' as 'INFO'", colourGroup);
+		cfe_error = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_ERROR, "!!! or ERROR", colourGroup);
+		cfe_warn = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_WARNING, "*** or WARNING", colourGroup);
+		cfe_info = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_INFO, "~~~ or INFO", colourGroup);
+		cfe_dbg = new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_DEBUG, "??? or DEBUG", colourGroup);
 		
 		addField(cfe_error);
 		addField(cfe_warn);
 		addField(cfe_info);
 		addField(cfe_dbg);
-		addField(bfe_inter_start);
-		
 		
 		Group backgroundGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		backgroundGroup.setText("Console background colors");
-		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, "Normal", backgroundGroup));
-		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Single char mode", backgroundGroup));
-		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "Disabled", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, "No running query", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Running query, waiting for user input", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "No Prolog Process connected to the Console", backgroundGroup));
 		
 		addField(new MyIntegerFieldEditor(PDTConsole.PREF_CONSOLE_HISTORY_SIZE, "History size", getFieldEditorParent(), 4));
 		

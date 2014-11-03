@@ -20,7 +20,7 @@
 :- use_module(pdt_search, []).
 
 :- use_module(source_files, []).
-
+:- use_module(pdt_common_reload_hook, []).
 
 :- ['lgt/loader'].
 
