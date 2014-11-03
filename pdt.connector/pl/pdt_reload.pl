@@ -44,9 +44,18 @@
 
 % SWI-Prolog list    
 
-pdt_reload(FileOrFiles, Message) :-
-	(	nonvar(Message)
-	->	write(user_error, Message),
+:- multifile(reload_message/2).
+
+pdt_reload(FileOrFiles, MessageTerm) :-
+	(	nonvar(MessageTerm)
+	->	(	atomic(MessageTerm)
+		->	Message = MessageTerm
+		;	(	reload_message(MessageTerm, Message)
+			->	true
+			;	Message = MessageTerm
+			)
+		),
+		write(user_error, Message),
 		nl(user_error)
 	;	true
 	),
