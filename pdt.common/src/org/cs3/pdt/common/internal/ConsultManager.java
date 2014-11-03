@@ -40,6 +40,7 @@ public class ConsultManager implements ProcessReconsulter, ConsultListener, Prol
 		
 		if (reconsultFiles.equals(PDTCommon.RECONSULT_NONE)) {
 			getConsultedFileList(process).clear();
+			notifyReconsultListeners(process, PDTCommon.RECONSULT_NONE, null);
 		} else {
 			reconsultFiles(process, reconsultFiles.equals(PDTCommon.RECONSULT_ENTRY));
 		}
@@ -57,8 +58,10 @@ public class ConsultManager implements ProcessReconsulter, ConsultListener, Prol
 				if (onlyEntryPoints) {
 					filterEntryPoints(files, entryPointFiles);
 					service.consultFilesSilent(entryPointFiles, process);
+					notifyReconsultListeners(process, PDTCommon.RECONSULT_ENTRY, entryPointFiles);
 				} else {
 					service.consultFilesSilent(files, process);
+					notifyReconsultListeners(process, PDTCommon.RECONSULT_ALL, files);
 				}
 			}
 		}
