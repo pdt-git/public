@@ -83,8 +83,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_INFO, color_info.getRGB());
 		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_DEBUG, color_dbg.getRGB());
 
-		store.setDefault(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, true);
-
 		Color backgroundNormal = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
 		Color backgroundSingleCharMode = Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 		Color backgroundDisabled = Display.getDefault().getSystemColor(SWT.COLOR_GRAY);

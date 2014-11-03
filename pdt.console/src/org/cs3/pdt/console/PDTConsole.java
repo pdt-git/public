@@ -39,8 +39,6 @@ final public class PDTConsole {
 
 	public static final String PREF_CONSOLE_COLOR_DEBUG = "pdt.console.colors.debug";
 
-	public static final String PREF_CONSOLE_COLORS_THREESTARS = "pdt.console.colors_threestars";
-
 	public static final String PREF_CONSOLE_COLOR_BACKGROUND_NORMAL = "pdt.console.colors.background.normal";
 	public static final String PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE = "pdt.console.colors.background.singlecharmode";
 	public static final String PREF_CONSOLE_COLOR_BACKGROUND_DISABLED = "pdt.console.colors.background.disabled";
