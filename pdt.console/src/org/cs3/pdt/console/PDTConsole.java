@@ -48,6 +48,8 @@ final public class PDTConsole {
 	
 	public static final String PREF_CONSOLE_HISTORY_SIZE = "pdt.console.history.size";
 
+	public static final String PREFERNCE_PAGE_ID = "org.cs3.pdt.console.preferences.PreferencePageMain";
+
 }
 
 

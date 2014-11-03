@@ -103,6 +103,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
@@ -874,18 +875,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		configAction = new Action("Console preferences", ImageRepository.getImageDescriptor(ImageRepository.PREFERENCES)) {
 			@Override
 			public void run() {
-				PreferenceManager mgr = new PreferenceManager();
-				
-				IPreferencePage page = new PreferencePageMain();
-				page.setTitle("PDT Console");
-				
-				IPreferenceNode node = new PreferenceNode("PreferencePage", page);
-				mgr.addToRoot(node);
-
-				PreferenceDialog dialog = new PreferenceDialog(getSite().getShell(), mgr);
-				dialog.create();
-				dialog.setMessage(page.getTitle());
-				dialog.open();
+				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(getSite().getShell(), PDTConsole.PREFERNCE_PAGE_ID, null, null);
+				if (dialog != null) {
+					dialog.open();
+				}
 			}
 		};
 	}
