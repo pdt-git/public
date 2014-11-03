@@ -87,9 +87,9 @@ public class PreferencePageMain extends StructuredFieldEditorPreferencePage impl
 		
 		Group backgroundGroup = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_OUT);
 		backgroundGroup.setText("Console background colors");
-		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, "Normal", backgroundGroup));
-		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Single char mode", backgroundGroup));
-		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "Disabled", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_NORMAL, "No running query", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_SINGLE_CHAR_MODE, "Running query, waiting for user input", backgroundGroup));
+		addField(new MyColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_BACKGROUND_DISABLED, "No Prolog Process connected to the Console", backgroundGroup));
 		
 		addField(new MyIntegerFieldEditor(PDTConsole.PREF_CONSOLE_HISTORY_SIZE, "History size", getFieldEditorParent(), 4));
 		
