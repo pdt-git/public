@@ -10,8 +10,8 @@ import org.cs3.pdt.common.ProcessReconsulter;
 import org.cs3.pdt.common.ProcessReconsulterListener;
 import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.internal.service.ext.IPrologProcessServiceExtension;
 import org.cs3.pdt.connector.service.ConsultListener;
+import org.cs3.pdt.connector.service.IPrologProcessService;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
@@ -54,13 +54,13 @@ public class ConsultManager implements ProcessReconsulter, ConsultListener, Prol
 			synchronized (consultedFiles) {
 				ArrayList<IFile> files = new ArrayList<IFile>();
 				ArrayList<IFile> entryPointFiles = new ArrayList<IFile>();
-				IPrologProcessServiceExtension service = (IPrologProcessServiceExtension) PDTConnectorPlugin.getDefault().getPrologProcessService();
+				IPrologProcessService service = PDTConnectorPlugin.getDefault().getPrologProcessService();
 				if (onlyEntryPoints) {
 					filterEntryPoints(files, entryPointFiles);
-					service.consultFilesSilent(entryPointFiles, process);
+					service.consultFiles(entryPointFiles, process);
 					notifyReconsultListeners(process, PDTCommon.RECONSULT_ENTRY, entryPointFiles);
 				} else {
-					service.consultFilesSilent(files, process);
+					service.consultFiles(files, process);
 					notifyReconsultListeners(process, PDTCommon.RECONSULT_ALL, files);
 				}
 			}
