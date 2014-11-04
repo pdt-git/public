@@ -14,6 +14,10 @@
 
 package org.cs3.prolog.connector.process;
 
+import static org.cs3.prolog.connector.common.QueryUtils.bT;
+import static org.cs3.prolog.connector.common.QueryUtils.prologFileNameQuoted;
+import static org.cs3.prolog.connector.common.QueryUtils.quoteAtom;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -115,12 +119,6 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 			@Override
 			public void onInit(PrologProcess process, PrologSession initSession) throws PrologException, PrologProcessException {				
-				try {
-					String query = QueryUtils.bT("use_module", QueryUtils.prologFileNameQuoted(getObserveFile()));
-					initSession.queryOnce(query);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
 			}
 
 			@Override
@@ -252,9 +250,15 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 		}
 		PrologSession s = process.getSession(PrologProcess.NONE);
 		try {
-			String query = "process_observe('" + session.getProcessorThreadAlias() + "',"
-			+ subject + ","+QueryUtils.quoteAtom(subject) +")";
-			s.queryOnce(query);
+			StringBuilder query = new StringBuilder();
+			try {
+				query.append(bT("use_module", prologFileNameQuoted(getObserveFile())));
+				query.append(",");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			query.append(bT("process_observe", quoteAtom(session.getProcessorThreadAlias()), subject, quoteAtom(subject)));
+			s.queryOnce(query.toString());
 			synchronized (subjects) {
 				subjects.add(subject);
 			}
