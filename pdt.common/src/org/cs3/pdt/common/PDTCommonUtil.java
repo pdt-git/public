@@ -441,6 +441,10 @@ public class PDTCommonUtil {
 		return PDTConnectorPlugin.getDefault().getPrologProcessService().getActivePrologProcess();
 	}
 	
+	public static boolean hasActivePrologProcess() {
+		return PDTConnectorPlugin.getDefault().getPrologProcessService().hasActivePrologProcess();
+	}
+	
 	private static final HashSet<String> PROLOG_FILE_EXTENSIONS = new HashSet<String>();
 
 	static {

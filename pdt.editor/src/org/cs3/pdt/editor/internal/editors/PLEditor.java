@@ -303,9 +303,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);
-
-			breakpointHandler = PDTBreakpointHandler.getInstance();
-
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -388,7 +385,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				int currentLine = getVerticalRuler().getLineOfLastMouseButtonActivity() + 1;
 				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
 				int currentOffset = UIUtils.physicalToLogicalOffset(doc, getCurrentLineOffsetSkippingWhiteSpaces(currentLine));
-				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
+				PDTBreakpointHandler.getInstance().toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		});
 		
@@ -686,13 +683,13 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				Document doc = (Document) getDocumentProvider().getDocument(getEditorInput());
 				int currentOffset = UIUtils.physicalToLogicalOffset(doc, getCurrentLineOffset(currentLine));
 
-				breakpointHandler.toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
+				PDTBreakpointHandler.getInstance().toogleBreakpoint(getCurrentIFile(), currentLine, currentOffset);
 			}
 		};
 		Action removeBreakpointsAction = new Action("Remove all breakpoints") {
 			@Override
 			public void run() {
-				breakpointHandler.removeBreakpointFactsForFile(getPrologFileName());
+				PDTBreakpointHandler.getInstance().removeBreakpointFactsForFile(getPrologFileName());
 			}
 		};
 
@@ -1267,8 +1264,6 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	public static final int VAR_KIND_ANONYMOUS = 0;
 	public static final int VAR_KIND_SINGLETON = 1;
 	public static final int VAR_KIND_NORMAL = 2;
-
-	private PDTBreakpointHandler breakpointHandler;
 
 	/**
 	 * @param a

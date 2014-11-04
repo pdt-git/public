@@ -66,7 +66,7 @@ public class EntryPointChangeListener implements IResourceChangeListener {
 							return true;
 						}
 					});
-					if (changedEntryPoints.b) {
+					if (changedEntryPoints.b && PDTCommonUtil.hasActivePrologProcess()) {
 						PDTCommonUtil.updateEntryPointsInProcess(PDTCommonUtil.getActivePrologProcess());
 					}
 				} catch (CoreException | PrologProcessException e) {

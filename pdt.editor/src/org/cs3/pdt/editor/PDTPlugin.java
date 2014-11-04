@@ -106,8 +106,10 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			CurrentProcessListener processListener = new CurrentProcessListener();
 			prologProcessService.registerActivePrologProcessListener(processListener);
 			PDTCommonPlugin.getDefault().registerProcessStartListener(processListener);
-			processListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
 			prologProcessService.registerConsultListener(new EditorConsultListener());
+			if (prologProcessService.hasActivePrologProcess()) {
+				processListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
+			}
 		} catch (Throwable t) {
 			Debug.report(t);
 		}

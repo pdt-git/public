@@ -54,7 +54,7 @@ public class PrologProcessService implements IPrologProcessService {
 		registerPDTReloadExecutor(defaultReloadExecutor);
 	}
 	
-	private PrologProcess activePrologProcess = getDefaultPrologProcess();
+	private PrologProcess activePrologProcess;
 	
 	private static final ISchedulingRule activeProcessChangedRule = new ISchedulingRule() {
 		@Override
@@ -67,6 +67,11 @@ public class PrologProcessService implements IPrologProcessService {
 			return this == rule;
 		}
 	};
+	
+	@Override
+	public boolean hasActivePrologProcess() {
+		return activePrologProcess != null;
+	}
 	
 	@Override
 	public PrologProcess getActivePrologProcess() {

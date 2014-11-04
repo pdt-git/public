@@ -189,6 +189,13 @@ public interface IPrologProcessService {
 	PrologProcess getActivePrologProcess();
 
 	/**
+	 * Checks if an active PrologProcess is set.
+	 * 
+	 * @return True if an active PrologProcess is set, false otherwise.
+	 */
+	boolean hasActivePrologProcess();
+	
+	/**
 	 * Sets the active PrologProcess.
 	 * 
 	 * @param process
