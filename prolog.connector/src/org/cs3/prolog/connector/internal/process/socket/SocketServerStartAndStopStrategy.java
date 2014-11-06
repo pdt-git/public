@@ -99,7 +99,6 @@ private static JackTheProcessRipper processRipper;
 	private Process startSocketServer(SocketPrologProcess socketProcess) {
 		File lockFile = Util.getLockFile();
 		socketProcess.setLockFile(lockFile);
-		Util.addTempFile(lockFile);
 		File errorLogFile = Util.getLockFile();
 		socketProcess.setErrorLogFile(errorLogFile);
 		Util.addTempFile(errorLogFile);
