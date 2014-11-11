@@ -17,6 +17,8 @@
 
 
  :- use_module('logging.pl', []).       % <- THIS BE FIRST!
+
+:- use_module(compatibility, []).
   
  :- consult(compatiblitySWI).
   

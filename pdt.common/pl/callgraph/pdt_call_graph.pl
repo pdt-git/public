@@ -16,6 +16,9 @@
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(library(lists)).
+:- use_module(pdt_prolog_library(compatibility), [
+	pdt_source_file/2
+]).
 
 pdt_walk_code(Options) :-
 	ensure_call_graph_generated,
@@ -148,8 +151,8 @@ pdt_reload:pdt_reload_listener(_Files) :-
 	->	true
 	;	setof(Module:Name/Arity, Head^File^(
 			(	pdt_reload:reloaded_file(File),
-				source_file(Head, File),
-				pi_of_head(Head, Module, Name, Arity)
+				pdt_source_file(Module:Head, File),
+				functor(Head, Name, Arity)
 			;	retract(predicate_to_clear(Module, Name, Arity))
 			)
 		), Predicates),
@@ -162,16 +165,13 @@ pdt_reload:pdt_reload_listener(_Files) :-
 :- dynamic(user:message_hook/3).
 user:message_hook(load_file(start(_, file(_, File))),_,_) :-
 	\+ first_run,
-	source_file(Head, File),
-	pi_of_head(Head, Module, Name, Arity),
+	pdt_source_file(Module:Head, File),
+	functor(Head, Name, Arity),
 	\+ predicate_to_clear(Module, Name, Arity),
 	assertz(predicate_to_clear(Module, Name, Arity)),
 	fail.
 
 pi_of_head(Module:Head, Module, Name, Arity) :-
-	!,
-	functor(Head, Name, Arity).
-pi_of_head(Head, user, Name, Arity) :-
 	functor(Head, Name, Arity).
 
 :- dynamic(predicate_to_clear/3).

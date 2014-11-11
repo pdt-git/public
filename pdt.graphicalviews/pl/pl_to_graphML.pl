@@ -29,6 +29,9 @@
 :- use_module( prolog_connector_pl(split_file_path), [
 	split_file_path/5 % (File,Folder,FileName,BaseName,Extension)
 ]).
+:- use_module(pdt_prolog_library(compatibility), [
+	pdt_source_file/2
+]).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -244,11 +247,7 @@ file_exports(FilePath, module, ExportedStaticPredicates, ExportedDynamicPredicat
 file_exports(FilePath, non_module_file, StaticPredicates, DynamicPredicates) :-
 	findall(
 		N/A,
-		(	source_file(PI, FilePath),
-			(	PI = M:H
-			->	M == user
-			;	PI = H
-			),
+		(	pdt_source_file(user:H, FilePath),
 			functor(H, N, A),
 			\+ atom_concat('$', _, N)
 		;	loaded_by(LoadedFile, FilePath, _, _),

@@ -26,17 +26,14 @@
 :- use_module(library(lists)).
 :- use_module(pdt_prolog_library(utils4modules_visibility)).
 :- use_module(pdt_common_pl('callgraph/pdt_call_graph')).
+:- use_module(pdt_prolog_library(compatibility), [
+	pdt_source_file/2
+]).
 
 predicate_in_file(File, Module, Name, Arity) :-
-	source_file(Head, File),
-	pi_of_head(Head, Module, Name, Arity),
+	pdt_source_file(Module:Head, File),
+	functor(Head, Name, Arity),
 	\+ find_blacklist(Name, Arity, Module).
-
-pi_of_head(Module:Head, Module, Name, Arity) :-
-	!,
-	functor(Head, Name, Arity).
-pi_of_head(Head, user, Name, Arity) :-
-	functor(Head, Name, Arity).
 
 find_blacklist('$load_context_module',2,_).
 find_blacklist('$load_context_module',3,_).

@@ -46,6 +46,9 @@
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
 :- use_module(library(prolog_clause)).
+:- use_module(pdt_prolog_library(compatibility), [
+	pdt_source_file/2
+]).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -483,11 +486,14 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
 %    module_of_file(ContextFile, ContextModule),
     % Backtrack over all predicates defined in File
     % including multifile contributions to other modules:
-    (	source_file(ModuleHead, ContextFile)
+    (	pdt_source_file(DefiningModule:Head, ContextFile)
     ;	source_file_property(ContextFile, included_in(ParentFile, _)),
-    	source_file(ModuleHead, ParentFile)
+    	pdt_source_file(DefiningModule:Head, ParentFile)
     ),
-    pdt_strip_module(ModuleHead,DefiningModule,ModuleLine,Head),
+    (	module_property(DefiningModule, line_count(ModuleLine))
+    ->	true
+    ;	ModuleLine = 1
+    ),
     
     % Predicate properties:
     functor(Head, Functor, Arity),
@@ -553,11 +559,7 @@ find_lines(Head, File, Line, Ref) :-
 	predicate_property(Head, number_of_clauses(N)), 
 	N > 1000,
 	!,
-	(	Head = user:Head2
-	->	true
-	;	Head = Head2
-	),
-	findall(F, (source_file(F), source_file(X, F), X = Head2), Files),
+	findall(F, (source_file(F), pdt_source_file(Head, F)), Files),
 	Line = 1,
 	Ref = [],
 	member(File, Files).
@@ -602,22 +604,6 @@ first_argument_of_clause(Ref, first_argument(Arg)) :-
 		)
 	).
 
-% pdt_strip_module(+ModuleHead,?Module,-ModuleLine,?Head) is det
-% pdt_strip_module(-ModuleHead,?Module,-ModuleLine,+Head) is det
-%
-% If a predicate is defined in a proper module, 
-% ModuleLine is the line of the module declaration.
-% Otherwise, it is implicitly defined in "user" at line 1.
-%
-% Unlike the strip_module/3 of SWI-Prolog it does not add the module
-% in which it is called if the ModuleHead has no module prefix.
-pdt_strip_module(user:Head,user,1,Head) :- !.
-pdt_strip_module(Module:Head,Module,Line,Head) :- 
-     atom(Module),                               % If we are in a proper module
-     !,
-     module_property(Module, line_count(Line)).  % ... get its line number
-pdt_strip_module(Head,user,1,Head).              
-	
 % TODO: Reconcile the above with utils4modules_visibility.pl::module_of_file/2   
 
 %% find_blacklist(?Functor, ?Arity, ?Module) is nondet.

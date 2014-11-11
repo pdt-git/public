@@ -22,6 +22,9 @@
 :- use_module(pdt_common_pl(pdt_entry_points)).
 :- use_module(pdt_common_pl(properties)).
 :- use_module(library(prolog_clause)).
+:- use_module(pdt_prolog_library(compatibility), [
+	pdt_source_file/2
+]).
 
 :- dynamic(result/4).
 
@@ -145,11 +148,7 @@ entry_point_predicate(M, F, A) :-
 	(	module_property(M, file(File))
 	*->	module_property(M, exports(ExportList)),
 		member(F/A, ExportList)
-	;	source_file(P, File),
-		(	P = _:Head
-		->	true
-		;	P = Head
-		),
+	;	pdt_source_file(M:Head, File),
 		functor(Head, F, A)
 	).
 
