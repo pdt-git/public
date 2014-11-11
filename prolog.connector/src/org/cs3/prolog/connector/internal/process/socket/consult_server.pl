@@ -136,8 +136,7 @@ accept_loop(ServerSocket):-
 	),
 	debug(consult_server(shutdown), 'signaling main to shutdown... ~n',[]),
 	thread_signal(main,do_shutdown),
-	debug(consult_server(shutdown), 'shutdown signal send, exit current thread. ~n',[]),
-	thread_exit(0).
+	debug(consult_server(shutdown), 'shutdown signal send, exit current thread. ~n',[]).
 
 
 accept_loop_impl(ServerSocket) :-
@@ -195,8 +194,7 @@ handle_client(InStream, OutStream):-
 			)				
 		),
 	!,		
-	debug(consult_server(handler),'Thread exiting...~n',[]),
-	thread_exit(0).    
+	debug(consult_server(handler),'Thread exiting...~n',[]).    
 	
 handle_client_impl(InStream, OutStream):-
     repeat,
