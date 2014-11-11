@@ -9,7 +9,7 @@
   </parent>
   <groupId>org.cs3.roots</groupId>
   <artifactId>org.cs3.pdt.graphicalviews</artifactId>
-  <version>3.0.1.qualifier</version>
+  <version>3.0.2.qualifier</version>
   <packaging>eclipse-plugin</packaging>
   <build>
   <plugins>
