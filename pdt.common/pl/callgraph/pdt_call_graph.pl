@@ -30,7 +30,8 @@ ensure_call_graph_generated :-
 		!,
 		generate_call_graph,
 		retractall(first_run)
-	)).
+	)),
+	!.
 ensure_call_graph_generated.
 
 %% calls(CalleeModule, CalleeName, CalleeArity, CallerModule, CallerName, CallerArity, NumberOfCalls)
