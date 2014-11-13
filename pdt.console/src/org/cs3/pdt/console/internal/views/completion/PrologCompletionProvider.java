@@ -44,7 +44,13 @@ public class PrologCompletionProvider {
 //			return EMPTY_COMPLETION_PROPOSAL;
 //		}
 //		String prefix = split[split.length - 1];
+		
+		// Line is empty
 		if (line.isEmpty()) {
+			return EMPTY_COMPLETION_PROPOSAL;
+		}
+		// Can't calculate a proposal if the position is the beginning of the line
+		if (pos < 1){
 			return EMPTY_COMPLETION_PROPOSAL;
 		}
 		
