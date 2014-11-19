@@ -23,12 +23,13 @@ pdt_source_file(PI, File) :-
 
 :- else.
 
-pdt_source_file(PI, File) :-
-	nonvar(PI),
+pdt_source_file(M:Head, File) :-
+	nonvar(M),
+	nonvar(Head),
 	!,
-	(	PI = user:Head
+	(	M == user
 	->	source_file(Head, File)
-	;	source_file(PI, File)
+	;	source_file(M:Head, File)
 	).
 
 pdt_source_file(PI, File) :-
