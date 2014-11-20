@@ -434,6 +434,10 @@ walk_called(M:G, _, term_position(_,_,_,_,[MPos,Pos]), OTerm) :- !,
 	->  walk_called(G, M, Pos, OTerm)
 	;   undecided(M, MPos, OTerm)
 	).
+walk_called(_G, M, term_position(_,_,_,_,[MPos,_Pos]), OTerm) :-
+	var(M),
+	!,
+	undecided(M, MPos, OTerm).
 walk_called((A,B), M, term_position(_,_,_,_,[PA,PB]), OTerm) :- !,
 	walk_called(A, M, PA, OTerm),
 	walk_called(B, M, PB, OTerm).
