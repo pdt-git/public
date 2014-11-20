@@ -3,12 +3,12 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Navigator
 Bundle-SymbolicName: org.cs3.pdt.navigator;singleton:=true
-Bundle-Version: 3.0.2.qualifier
+Bundle-Version: 3.0.3.qualifier
 Bundle-Activator: org.cs3.pdt.navigator.PDTNavigatorPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.cs3.pdt.common;bundle-version="[3.0.2,4.0.0)"
+ org.cs3.pdt.common;bundle-version="[3.0.3,4.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.cs3.pdt.navigator

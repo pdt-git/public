@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Prolog Connector Interface
 Bundle-SymbolicName: org.cs3.prolog.connector;singleton:=true
-Bundle-Version: 3.0.2.qualifier
+Bundle-Version: 3.0.3.qualifier
 Bundle-ClassPath: .
 Export-Package: org.cs3.prolog.connector,
  org.cs3.prolog.connector.common,
