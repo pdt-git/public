@@ -499,7 +499,7 @@ find_completion(SearchEntity::PredicatePrefix, _EnclosingFile, _, predicate, Dec
 %	),
 	Entity::predicate_property(Head, declared_in(DeclaringEntity)),
 	entity_property(DeclaringEntity, _, declares(Name/Arity, Properties)),
-	predicate_documentation(Head, Properties, ArgNames, DocKind, Documentation).
+	predicate_documentation(Entity, Head, Properties, ArgNames, DocKind, Documentation).
 
 find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, DeclaringEntity, Name, Arity, Visibility, false, ArgNames, DocKind, Documentation) :-
 	(	var(SearchEntity)
@@ -520,7 +520,7 @@ find_completion(SearchEntity<<PredicatePrefix, _EnclosingFile, _, predicate, Dec
 %	),
 	Entity<<predicate_property(Head, declared_in(DeclaringEntity)),
 	entity_property(DeclaringEntity, _, declares(Name/Arity, Properties)),
-	predicate_documentation(Head, Properties, ArgNames, DocKind, Documentation).
+	predicate_documentation(Entity, Head, Properties, ArgNames, DocKind, Documentation).
 
 find_completion(Prefix, _, _, module, _, Entity, _, _, _, _, _, _) :-
 	atomic(Prefix),
@@ -551,7 +551,7 @@ find_completion(Prefix, EnclosingFile, Line, predicate, Entity, Name, Arity, Sco
 	atom_concat(Prefix, _, Name),
 	memberchk(scope(Scope), Properties),
 	functor(Head, Name, Arity),
-	predicate_documentation(Head, Properties, ArgNames, DocKind, Documentation).
+	predicate_documentation(Entity, Head, Properties, ArgNames, DocKind, Documentation).
 
 find_completion(PrefixTerm, EnclosingFile, Line, predicate, DeclaringEntity, Name, Arity, Scope, false, ArgNames, DocKind, Documentation) :-
 	nonvar(EnclosingFile),
@@ -563,7 +563,7 @@ find_completion(PrefixTerm, EnclosingFile, Line, predicate, DeclaringEntity, Nam
 	atom_concat(Prefix, _, Name),
 	decode(NewTerm, Entity, DeclaringEntity, _, _, _, DeclarationProperties, declaration, _),
 	memberchk(scope(Scope), Properties),
-	predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Documentation).
+	predicate_documentation(Entity, Head, DeclarationProperties, ArgNames, DocKind, Documentation).
 
 :- private(possibly_visible_predicate/5).
 possibly_visible_predicate(Entity, Filter, Name, Arity, Properties) :-
@@ -598,8 +598,8 @@ prefix_term_exchange(::Prefix, Term, Prefix, ::Term).
 prefix_term_exchange(^^Prefix, Term, Prefix, ^^Term).
 prefix_term_exchange(:Prefix, Term, Prefix, :Term).
 
-:- private(predicate_documentation/5).
-predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Documentation) :-
+:- private(predicate_documentation/6).
+predicate_documentation(_Entity, Head, DeclarationProperties, ArgNames, DocKind, Documentation) :-
 	member(info(Info), DeclarationProperties),
 	!,
 	ignore(member(argnames(ArgNames), Info)),
@@ -620,7 +620,14 @@ predicate_documentation(Head, DeclarationProperties, ArgNames, DocKind, Document
 	modes_doc(Modes, ModesDoc),
 	format(atom(Documentation), '~w~w~w', [DocHead, CommentDoc, ModesDoc]),
 	DocKind = text.
-predicate_documentation(_Head, _DeclarationProperties, _ArgNames, nodoc, _Documentation).	
+predicate_documentation(Entity, Head, _DeclarationProperties, ArgNames, DocKind, Documentation) :-
+	functor(Head, Name, Arity),
+	predicate_completion_documentation_hook(Entity, Name, Arity, ArgNames, DocKind, Documentation),
+	!.
+predicate_documentation(_Entity, _Head, _DeclarationProperties, _ArgNames, nodoc, _Documentation).	
+
+:- public(predicate_completion_documentation_hook/6).
+:- multifile(predicate_completion_documentation_hook/6).
 
 modes_doc([], '') :- !.
 modes_doc(Modes, Doc) :-
