@@ -13,8 +13,6 @@
 
 package org.cs3.pdt.common.internal;
 
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.PlatformUI;
@@ -42,16 +40,7 @@ public class PrologPerspective implements IPerspectiveFactory {
 	public void defineLayout(IPageLayout layout) {
 		String editorArea = layout.getEditorArea();
 
-//		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, (float) 0.2, editorArea);
-//		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
-//		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float) 0.8, editorArea);
-		
-//		layout.addView(PrologConsoleView.HOOK_ID, IPageLayout.BOTTOM, (float) 0.65, editorArea);
-		IFolderLayout bottomFolder = layout.createFolder(CONSOLE_FOLDER, IPageLayout.BOTTOM, 0.65f, editorArea);
-		bottomFolder.addView(IPageLayout.ID_PROBLEM_VIEW);
-		bottomFolder.addView(NewSearchUI.SEARCH_VIEW_ID);
-//		layout.addView(NewSearchUI.SEARCH_VIEW_ID, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
-//		IFolderLayout viewsFolder =
+		layout.createFolder(CONSOLE_FOLDER, IPageLayout.BOTTOM, 0.65f, editorArea);
 		layout.createFolder(VIEWS_FOLDER, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
 		
 		IViewRegistry viewRegistry = PlatformUI.getWorkbench().getViewRegistry();
@@ -60,7 +49,6 @@ public class PrologPerspective implements IPerspectiveFactory {
 		} else {
 			layout.addView(IPageLayout.ID_PROJECT_EXPLORER, IPageLayout.LEFT, 0.2f, editorArea);
 		}
-//		layout.addView(JavaUI.ID_PACKAGES, IPageLayout.LEFT, 0.2f, editorArea);
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, 0.8f, editorArea);
 	}
 	
