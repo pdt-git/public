@@ -109,6 +109,42 @@ public class ConsoleHistory implements ConsoleModelListener {
 		}
 	}
 
+	public void previousCompletion(String prefix) {
+		if(model==null||history.isEmpty()||pointer<=0){
+			return;
+		}
+		String current = model.getLineBuffer();
+		if(lastLine==null){	//eq to pointer==history.size()		
+			lastLine=current;			
+		}
+		int newPos = pointer - 1;
+		while (newPos >= 0 && !history.get(newPos).startsWith(prefix)) {
+			newPos--;
+		}
+		if (newPos >= 0) {
+			pointer = newPos;
+			model.setLineBuffer(history.get(pointer));
+		}
+	}
+	
+	public void nextCompletion(String prefix) {
+		if(model==null||history.isEmpty()||pointer<=0){
+			return;
+		}
+		String current = model.getLineBuffer();
+		if(lastLine==null){	//eq to pointer==history.size()		
+			lastLine=current;			
+		}
+		int newPos = pointer + 1;
+		while (newPos < history.size() && !history.get(newPos).startsWith(prefix)) {
+			newPos++;
+		}
+		if (newPos < history.size()) {
+			pointer = newPos;
+			model.setLineBuffer(history.get(pointer));
+		}
+	}
+	
 	@Override
 	public void onCommit(ConsoleModelEvent e) {		
 		lastLine=null;
@@ -175,7 +211,7 @@ public class ConsoleHistory implements ConsoleModelListener {
 		}
 		return section;
 	}
-	
+
 }
 
 

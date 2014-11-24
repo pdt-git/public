@@ -893,6 +893,20 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					}
 					event.doit = false;
 					break;
+				case SWT.KEYPAD_9:
+					if (isNumLock(keyMask, keyCode, keyChar)) {
+						break;
+					}
+				case SWT.PAGE_UP:
+					event.doit = false;
+					break;
+				case SWT.KEYPAD_3:
+					if (isNumLock(keyMask, keyCode, keyChar)) {
+						break;
+					}
+				case SWT.PAGE_DOWN:
+					event.doit = false;
+					break;
 
 //				case ' ':
 //					if ((keyMask & SWT.CTRL) != 0) {
@@ -1026,6 +1040,40 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					break;
 				}
 				history.next();
+				break;
+			case SWT.KEYPAD_9:
+				if (isNumLock(keyMask, keyCode, keyChar)) {
+					break;
+				}
+			case SWT.PAGE_UP:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
+				try {
+					String prefix = null;
+					int caretOffset = getCaretOffset();
+					prefix = control.getText(startOfInput, caretOffset - 1);
+					history.previousCompletion(prefix);
+					control.setCaretOffset(caretOffset);
+				} catch (Exception e2) {
+				}
+				break;
+			case SWT.KEYPAD_3:
+				if (isNumLock(keyMask, keyCode, keyChar)) {
+					break;
+				}
+			case SWT.PAGE_DOWN:
+				if (contentProposalAdapter.isProposalPopupOpen()) {
+					break;
+				}
+				try {
+					String prefix = null;
+					int caretOffset = getCaretOffset();
+					prefix = control.getText(startOfInput, caretOffset - 1);
+					history.nextCompletion(prefix);
+					control.setCaretOffset(caretOffset);
+				} catch (Exception e2) {
+				}
 				break;
 			case SWT.TAB:
 				break;
