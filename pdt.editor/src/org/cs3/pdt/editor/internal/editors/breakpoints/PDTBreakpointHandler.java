@@ -84,7 +84,6 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 	}
 
 	private PDTBreakpointHandler() {
-		checkForProcess();
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(this);
 		PDTCommonPlugin.getDefault().getProcessReconsulter().registerListener(this);

@@ -25,6 +25,7 @@ import org.cs3.pdt.connector.util.ErrorMessageProvider;
 import org.cs3.pdt.editor.internal.editors.ColorManager;
 import org.cs3.pdt.editor.internal.editors.CurrentProcessListener;
 import org.cs3.pdt.editor.internal.editors.EditorConsultListener;
+import org.cs3.pdt.editor.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
@@ -110,6 +111,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup, ISelectionP
 			if (prologProcessService.hasActivePrologProcess()) {
 				processListener.activePrologProcessChanged(prologProcessService.getActivePrologProcess());
 			}
+			PDTBreakpointHandler.getInstance();
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
