@@ -429,15 +429,21 @@ walk_called_by_body(no_positions, Body, Module, OTerm) :-
 walk_called(Var, _, TermPos, OTerm) :-
 	var(Var), !,				% Incomplete analysis
 	undecided(Var, TermPos, OTerm).
-walk_called(M:G, _, term_position(_,_,_,_,[MPos,Pos]), OTerm) :- !,
+walk_called(M:G, M0, term_position(_,_,_,_,[MPos,Pos]), OTerm) :- !,
 	(   nonvar(M)
 	->  walk_called(G, M, Pos, OTerm)
-	;   undecided(M, MPos, OTerm)
+	;	(	handle_context_module(G, M, M0, Pos, OTerm)
+		*->	true
+		;	undecided(M, MPos, OTerm)
+		)
 	).
-walk_called(_G, M, term_position(_,_,_,_,[MPos,_Pos]), OTerm) :-
+walk_called(G, M, TermPos, OTerm) :-
 	var(M),
 	!,
-	undecided(M, MPos, OTerm).
+	(	handle_context_module(G, M, _, TermPos, OTerm)
+	*->	true
+	;	undecided(M, TermPos, OTerm)
+	).
 walk_called((A,B), M, term_position(_,_,_,_,[PA,PB]), OTerm) :- !,
 	walk_called(A, M, PA, OTerm),
 	walk_called(B, M, PB, OTerm).
@@ -483,7 +489,20 @@ walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
 	register_possible_meta_clause(ClauseRef),
-	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm).
+	(	walk_option_caller(OTerm, CallerModule:CallerGoal),
+		predicate_property(CallerModule:CallerGoal, transparent),
+		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_)),
+		predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
+		walk_meta_call(1, Head, Meta, ImportingModule, ArgPosList, OTerm),
+		fail
+	;	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm)
+	).
+walk_called(context_module(M), _, _, OTerm) :-
+	walk_option_caller(OTerm, Caller),
+	predicate_property(Caller, transparent),
+	\+ predicate_property(Caller, meta_predicate(_)),
+	!,
+	put_attr(M, codewalk, is_context_module).
 walk_called(Goal, Module, _, _) :-
 	nonvar(Module),
 	is_defined(Module:Goal), !.
@@ -502,6 +521,19 @@ is_defined(Module:Goal) :-
 	current_predicate(Module:N/A),
 	!.
 :- endif.
+
+handle_context_module(G, M, M0, TermPosition, OTerm) :-
+	get_attr(M, codewalk, V),
+	V == is_context_module,
+	(	nonvar(M0)
+	->	walk_called(G, M0, TermPosition, OTerm)
+	;	walk_option_caller(OTerm, CallerModule:CallerGoal),
+		(	predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
+			walk_called(G, ImportingModule, TermPosition, OTerm),
+			fail
+		;	walk_called(G, CallerModule, TermPosition, OTerm)
+		)
+	).
 
 %%	undecided(+Variable, +TermPos, +OTerm)
 
