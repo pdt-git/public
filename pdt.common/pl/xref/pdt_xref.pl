@@ -163,12 +163,9 @@ perform_search(_Functor, _Arity, _SearchMod, _ExactMatch).
 search_predicate_indicator(SearchModule0, SearchFunctor0, SearchArity, true, SearchModule, SearchFunctor, SearchArity, IsAlias) :-
 	nonvar(SearchArity),
 	!,
-	(	declared_in_module(SearchModule0, SearchFunctor0, SearchArity, SearchModule0)
-	*->	(	SearchModule0 = SearchModule,
-			SearchFunctor0 = SearchFunctor
-		;	possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
-			IsAlias = SearchModule0:SearchFunctor0/SearchArity
-		)
+	(	declared_in_module(SearchModule0, SearchFunctor0, SearchArity, SearchModule0),
+		possible_alias(SearchModule0, SearchFunctor0, SearchArity, SearchModule, SearchFunctor),
+		IsAlias = SearchModule0:SearchFunctor0/SearchArity
 	;	SearchModule0 = SearchModule,
 		SearchFunctor0 = SearchFunctor
 	).
