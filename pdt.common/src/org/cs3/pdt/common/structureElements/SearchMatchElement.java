@@ -53,7 +53,15 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 			return null;
 		}
 		StyledString str = new StyledString();
-		str.append(matches.get(0).getStyledString());
+		boolean first = true;
+		for (PrologMatch match : matches) {
+			if (first) {
+				first = false;
+			} else {
+				str.append(" | ");
+			}
+			str.append(match.getStyledString());
+		}
 		if (matches.size() > 1) {
 			str.append(" (", StyledString.COUNTER_STYLER);
 			str.append(Integer.toString(matches.size()), StyledString.COUNTER_STYLER);
