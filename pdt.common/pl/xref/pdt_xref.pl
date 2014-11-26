@@ -109,20 +109,20 @@ find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile,
 	->	format(atom(Position), '~w-~w', [Start, End])
 	;	Position = Line
 	),
-%	format(atom(ReferencingGoalAsAtom), '~w', [ReferencingGoal]),
-	[line(Line)|PropertyList0] = PropertyList1,
-	(	functor(ReferencingGoal, N, A),
-		declared_in_module(M0, N, A, M)
-	->	(	Separator == (//)
-		->	format(atom(Called), '~w//~w', [N, Arity0])
-		;	format(atom(Called), '~w/~w', [N, A])
-		),
-		CalledProperty = label(Called),
-		(	M \== RefModule
-		->	format(atom(Prefix), '~w:', [M]),
-			PrefixProperty = prefix(Prefix)
-		;	true
-		)
+	PropertyList1 = [line(Line)|PropertyList0],
+	functor(ReferencingGoal, N, A),
+	(	declared_in_module(M0, N, A, M)
+	->	true
+	;	M0 = M
+	),
+	(	Separator == (//)
+	->	format(atom(Called), '~w//~w', [N, Arity0])
+	;	format(atom(Called), '~w/~w', [N, A])
+	),
+	CalledProperty = label(Called),
+	(	M \== RefModule
+	->	format(atom(Prefix), '~w:', [M]),
+		PrefixProperty = prefix(Prefix)
 	;	true
 	),
 	(	nonvar(Alias)
