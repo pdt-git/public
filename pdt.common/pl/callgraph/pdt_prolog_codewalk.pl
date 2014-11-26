@@ -102,6 +102,7 @@ source file is passed into _Where.
 :- predicate_options(pdt_prolog_walk_code/1, 1,
 		     [ undefined(oneof([ignore,error,trace])),
 		       autoload(boolean),
+		       clauses(list),
 		       module(atom),
 		       module_class(oneof([default,user,system,
 					   library,test,development])),
@@ -121,6 +122,7 @@ source file is passed into _Where.
 		    module_class:oneof([default,user,system,
 					library,test,development])=default,
 		    infer_meta_predicates:oneof([false,true,all])=true,
+		    clauses:list,           % Walk only these clauses
 		    trace_reference:any=(-),
 		    on_trace:callable,		% Call-back on trace hits
 		    new_meta_specs:callable,
@@ -164,6 +166,10 @@ source file is passed into _Where.
 %	  * module(+Module)
 %	  Only process the given module
 %
+%	  * clauses(+ListOfClauseReferences)
+%	  Only process the given clauses. Can be used to find clauses
+%	  quickly using source(false) and then process only interesting
+%	  clauses with source information.
 %	  * module_class(+ModuleClass)
 %	  Limit processing to modules of this class. See
 %	  module_property/2 for details on module classes.  Default
@@ -211,8 +217,18 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	statistics(cputime, CPU0),
 	make_walk_option(Options, OTerm, _),
 	walk_option_call_kind(OTerm, call),
-	(	walk_option_predicates(Predicates, OTerm),
+	(	walk_option_clauses(OTerm, Clauses),
+		nonvar(Clauses)
+	->	walk_clauses(Clauses, OTerm)
+	;	walk_option_predicates(Predicates, OTerm),
 		nonvar(Predicates)
+	->	forall((
+			member(Module:Name/Arity, Predicates),
+			functor(Head, Name, Arity),
+			\+ predicate_property(Module:Head, imported_from(_))
+		), (
+			walk_called_by_pred(Module:Name/Arity, OTerm)
+		))
 	;	forall(( walk_option_module(OTerm, M),
 		         current_module(M),
 		         scan_module(M, OTerm)
@@ -243,6 +259,23 @@ pdt_prolog_walk_code(Iteration, Options) :-
 
 is_meta(on_trace).
 
+%%	walk_clauses(Clauses, +OTerm) is det.
+%
+%	Walk the given clauses.
+
+walk_clauses(Clauses, OTerm) :-
+	must_be(list, Clauses),
+	forall(member(ClauseRef, Clauses),
+	       ( user:clause(CHead, Body, ClauseRef),
+		 (   CHead = Module:Head
+		 ->  true
+		 ;   Module = user,
+		     Head = CHead
+		 ),
+		 walk_option_clause(OTerm, ClauseRef),
+		 walk_option_caller(OTerm, Module:Head),
+		 walk_called_by_body(Body, Module, OTerm)
+	       )).
 
 scan_module(M, OTerm) :-
 	walk_option_module_class(OTerm, Class),
