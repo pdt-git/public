@@ -527,7 +527,8 @@ walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	register_possible_meta_clause(ClauseRef),
 	(	walk_option_caller(OTerm, CallerModule:CallerGoal),
 		predicate_property(CallerModule:CallerGoal, transparent),
-		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_))
+		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_)),
+		\+ walk_option_is_transparent_meta_call(OTerm, true)
 	->	set_is_transparent_meta_call_of_walk_option(true, OTerm, NewOTerm),
 		(	predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
 			walk_meta_call(1, Head, Meta, ImportingModule, ArgPosList, NewOTerm),
