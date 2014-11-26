@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -157,7 +158,21 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				}
 			} else {
 				if (!"lgt".equals(file.getFileExtension())) {
-					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES, QueryUtils.quoteAtom(FileUtils.prologFileName(file)), QueryUtils.quoteAtom(goal.getTermString()), "RefModule", "RefName", "RefArity", "RefFile", "RefLine"));
+					IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+					int start = UIUtils.physicalToLogicalOffset(document, goal.getStart());
+					int end = UIUtils.physicalToLogicalOffset(document, goal.getEnd());
+					final List<Map<String, Object>> result = session.queryAll(bT(PDTCommonPredicates.FIND_ALTERNATIVE_PREDICATES,
+							QueryUtils.quoteAtom(FileUtils.prologFileName(file)),
+							Integer.toString(goal.getLine()),
+							Integer.toString(start),
+							Integer.toString(end),
+							QueryUtils.quoteAtom(goal.getTermString()),
+							"ResultKind",
+							"RefModule",
+							"RefName",
+							"RefArity",
+							"RefFile",
+							"RefLine"));
 					if (result.isEmpty()) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),
@@ -218,16 +233,11 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		// goal.setModule(referencedModule);
 		// }
 		// In der Klasse DefinitionsSearchQuery funktioniert es aber!
-
-		String module = "_";
-		if (goal.getModule() != null) {
-			module = QueryUtils.quoteAtomIfNeeded(goal.getModule());
-		}
-
+		
 		String term = goal.getTermString();
 		String quotedTerm = QueryUtils.quoteAtom(term);
 
-		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, QueryUtils.quoteAtom(enclFile), goal.getLine(), quotedTerm, module, "File", "Line", "ResultKind");
+		String query = bT(PDTCommonPredicates.FIND_PRIMARY_DEFINITION_VISIBLE_IN, QueryUtils.quoteAtom(enclFile), goal.getLine(), quotedTerm, "File", "Line", "ResultKind");
 		Debug.info("open declaration: " + query);
 		Map<String, Object> clause = session.queryOnce(query);
 		if (clause == null) {
