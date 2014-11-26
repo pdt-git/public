@@ -580,10 +580,8 @@ undefined(Goal, TermPos, OTerm) :-
 	->  Why = trace
 	;   Why = undefined
 	),
-	\+ \+ (
-		set_call_kind_of_walk_option(undefined, OTerm),
-		print_reference(Goal, TermPos, Why, OTerm)
-	).
+	set_call_kind_of_walk_option(undefined, OTerm, NewOTerm),
+	print_reference(Goal, TermPos, Why, NewOTerm).
 
 %%	not_callable(+Goal, +TermPos, +OTerm)
 %
@@ -750,29 +748,21 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	(   integer(AS)
 	->  arg(I, Meta, MA),
 	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
-	    	walk_called(Goal, M, ArgPosEx, OTerm)
-	    )
+    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm, NewOTerm),
+    	walk_called(Goal, M, ArgPosEx, NewOTerm)
 	;   AS == (^)
 	->  arg(I, Meta, MA),
 	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
-	    	walk_called(Goal, MG, ArgPosEx, OTerm)
-	    )
+    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm, NewOTerm),
+    	walk_called(Goal, MG, ArgPosEx, NewOTerm)
 	;   AS == (//)
 	->  arg(I, Meta, DCG),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
-		    walk_dcg_body(DCG, M, ArgPos, OTerm)
-		)
+    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm, NewOTerm),
+	    walk_dcg_body(DCG, M, ArgPos, NewOTerm)
 	;   AS == database
 	->	arg(I, Meta, MA),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(database(Meta, I), OTerm),
-			walk_called(MA, M, ArgPos, OTerm)
-		)
+    	set_call_kind_of_walk_option(database(Meta, I), OTerm, NewOTerm),
+		walk_called(MA, M, ArgPos, NewOTerm)
 	;	arg(I, Meta, Arg),
 		atomic(Arg),
 		(   AS = has_arity(_,_)
@@ -781,10 +771,8 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 		)
 	->	(	functor_arity_for(AS, Arg, Functor, Arity)
 		->	extend(Functor, Arity, Goal, ArgPos, ArgPosEx, OTerm),
-		    \+ \+ (
-		    	set_call_kind_of_walk_option(metacall(Meta, I, AS), OTerm),
-				walk_called(Goal, M, ArgPosEx, OTerm)
-			)
+	    	set_call_kind_of_walk_option(metacall(Meta, I, AS), OTerm, NewOTerm),
+			walk_called(Goal, M, ArgPosEx, NewOTerm)
 		;	true
 		)
 	;	true
