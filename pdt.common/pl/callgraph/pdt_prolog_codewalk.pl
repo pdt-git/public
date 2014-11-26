@@ -132,7 +132,8 @@ source file is passed into _Where.
 		    initialization,		% Initialization source
 		    undecided,			% Error to throw error
 		    evaluate:boolean, 		% Do partial evaluation
-		    call_kind).
+		    call_kind,
+		    is_transparent_meta_call:boolean=false).
 
 :- thread_local
 	multifile_predicate/3.		% Name, Arity, Module
@@ -491,10 +492,13 @@ walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	register_possible_meta_clause(ClauseRef),
 	(	walk_option_caller(OTerm, CallerModule:CallerGoal),
 		predicate_property(CallerModule:CallerGoal, transparent),
-		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_)),
-		predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
-		walk_meta_call(1, Head, Meta, ImportingModule, ArgPosList, OTerm),
-		fail
+		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_))
+	->	set_is_transparent_meta_call_of_walk_option(true, OTerm, NewOTerm),
+		(	predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
+			walk_meta_call(1, Head, Meta, ImportingModule, ArgPosList, NewOTerm),
+			fail
+		;	walk_meta_call(1, Head, Meta, Module, ArgPosList, NewOTerm)
+		)
 	;	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm)
 	).
 walk_called(context_module(M), _, _, OTerm) :-
@@ -564,7 +568,11 @@ evaluate(A=B, _) :-
 %	The analysis trapped a definitely undefined predicate.
 
 undefined(_, _, OTerm) :-
-	walk_option_undefined(OTerm, ignore), !.
+	walk_option_undefined(OTerm, ignore),
+	!.
+undefined(_, _, OTerm) :-
+	walk_option_is_transparent_meta_call(OTerm, true),
+	!.
 undefined(Goal, _, _) :-
 	predicate_property(Goal, autoload(_)), !.
 undefined(Goal, TermPos, OTerm) :-
