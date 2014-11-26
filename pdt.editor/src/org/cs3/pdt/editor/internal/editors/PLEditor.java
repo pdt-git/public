@@ -400,7 +400,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	private void createInspectionMenu() {
 		
 		addAction(new FindPredicateActionDelegate(this),
-				"Open Primary Definition or Declaration", COMMAND_OPEN_PRIMARY_DEFINITION);
+				FindPredicateActionDelegate.NAME, COMMAND_OPEN_PRIMARY_DEFINITION);
 //				"org.eclipse.pdt.ui.open.primary.definition");
 //				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 

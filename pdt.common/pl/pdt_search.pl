@@ -49,6 +49,12 @@
 :- use_module(pdt_prolog_library(compatibility), [
 	pdt_source_file/2
 ]).
+:- use_module('callgraph/pdt_call_graph', [
+	ensure_call_graph_generated/0
+]).
+:- use_module('callgraph/pdt_prolog_codewalk', [
+	pdt_prolog_walk_code/1
+]).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
@@ -426,18 +432,56 @@ primary_location(Locations,_,File,FirstLine) :-
 find_alternative_predicates(EnclFile, Line, Start, End, TermString, ResultKind, RefModule, RefName, RefArity, RefFile, RefLine) :-
 	retrieve_term_from_atom(EnclFile, TermString, Term),
 	extract_name_arity(Term,Module, Head,_Name,_Arity),
-	(	var(Module)
-	->	once(module_of_file(EnclFile,FileModule)),
-		dwim_predicate(FileModule:Head, RefModule:RefHead)
-	;	dwim_predicate(Module:Head, RefModule:RefHead)
-	),
-	functor(RefHead, RefName, RefArity),
-	(	predicate_property(RefModule:RefHead, file(RefFile)),
-		predicate_property(RefModule:RefHead, line_count(RefLine))
-	->	true
-	;	RefFile = foreign,
-		RefLine = -1
+	(	find_module_transparent_related_alternative_predicates(EnclFile, Line, Start, End, Term, Alternatives)
+	->	ResultKind = transparent,
+		member(a(RefModule, RefName, RefArity, RefFile, RefLine), Alternatives)
+	;	ResultKind = dwim,
+		(	var(Module)
+		->	once(module_of_file(EnclFile,FileModule)),
+			dwim_predicate(FileModule:Head, RefModule:RefHead)
+		;	dwim_predicate(Module:Head, RefModule:RefHead)
+		),
+		functor(RefHead, RefName, RefArity),
+		(	predicate_property(RefModule:RefHead, file(RefFile)),
+			predicate_property(RefModule:RefHead, line_count(RefLine))
+		->	true
+		;	RefFile = foreign,
+			RefLine = -1
+		)
 	).
+
+find_module_transparent_related_alternative_predicates(EnclFile, Line, Start, End, Term, Alternatives) :-
+	'$clause_from_source'(EnclFile, Line, ClauseRef),
+	clause_property(ClauseRef, predicate(SrcModule:SrcName/SrcArity)),
+	functor(SrcHead, SrcName, SrcArity),
+	predicate_property(SrcModule:SrcHead, transparent),
+	\+ predicate_property(SrcModule:SrcHead, meta_predicate(_)),
+	ensure_call_graph_generated,
+	(	Term = _:_
+	->	RefTerm = Term
+	;	RefTerm = _:Term
+	),
+	retractall(alternative(_, _, _, _, _)),
+	pdt_prolog_walk_code([clauses([ClauseRef]), trace_reference(RefTerm), reiterate(false), on_trace(pdt_search:assert_alternative(Start, End))]),
+	findall(a(Module, Name, Arity, File, Line2), retract(alternative(Module, Name, Arity, File, Line2)), Alternatives),
+	!,
+	Alternatives \== [].
+	
+:- dynamic(alternative/5).
+assert_alternative(GivenStart, GivenEnd, Module0:Goal, _Caller, clause_term_position(_Ref, TermPosition), metacall(_, _)) :-
+	(	TermPosition = term_position(Start, End, _, _, _)
+	;	TermPosition = Start-End
+	),
+	GivenStart =< Start,
+	End =< GivenEnd,
+	functor(Goal, Name, Arity),
+	declared_in_module(Module0, Name, Arity, Module),
+	predicate_property(Module:Goal, file(File)),
+	predicate_property(Module:Goal, line_count(Line)),
+	!,
+	assertz(alternative(Module, Name, Arity, File, Line)).
+assert_alternative(_, _, _, _, _, _).
+
 :- else.
 find_alternative_predicates(_EnclFile, _Line, _Start, _End, _TermString, _ResultKind, _RefModule, _RefName, _RefArity, _RefFile, _RefLine) :-
 	fail.

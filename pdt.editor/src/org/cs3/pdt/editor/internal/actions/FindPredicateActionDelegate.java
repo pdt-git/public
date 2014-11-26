@@ -45,6 +45,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -60,6 +62,14 @@ import org.eclipse.ui.texteditor.TextEditorAction;
  * @see IWorkbenchWindowActionDelegate
  */
 public class FindPredicateActionDelegate extends TextEditorAction {
+	
+	private static final String MESSAGE_EXTERNAL_PREDICATE = "There is no Prolog source code for this predicate (only compiled external language code).";
+
+	private static final String MESSAGE_DYNAMIC_PREDICATE = "There is no Prolog source code for this dynamic predicate.";
+
+	private static final String MESSAGE_UNDEFINED_PREDICATE = "The selected predicate is not defined.";
+
+	public static final String NAME = "Open Primary Definition or Declaration";
 	
 	private ITextEditor editor;
 
@@ -145,14 +155,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					if (RESULT_KIND_DYNAMIC.equals(res.resultKind)) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),
-								"Dynamic predicate declared in user",
-								"There is no Prolog source code for this predicate.");
+								NAME,//"Dynamic predicate declared in user",
+								MESSAGE_DYNAMIC_PREDICATE);
 						return;
 					} else if (RESULT_KIND_FOREIGN.equals(res.resultKind)) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),
-								"External language predicate",
-								"There is no Prolog source code for this predicate (only compiled external language code).");
+								NAME,//"External language predicate",
+								MESSAGE_EXTERNAL_PREDICATE);
 						return;
 					}
 				}
@@ -176,14 +186,44 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					if (result.isEmpty()) {
 						UIUtils.displayMessageDialog(
 								editor.getSite().getShell(),
-								"Undefined predicate",
-								"The selected predicate is not defined.");
+								NAME,//"Undefined predicate",
+								MESSAGE_UNDEFINED_PREDICATE);
 						return;
+					} else if ("transparent".equals(result.get(0).get("ResultKind"))) {
+						if (result.size() == 1) {
+							final String fileName = (String) result.get(0).get("RefFile");
+							final int line;
+							try {
+								line = Integer.parseInt((String) result.get(0).get("RefLine"));
+								editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
+									@Override
+									public void run() {
+										try {
+											PDTCommonUtil.selectInEditor(line, fileName, true);
+										} catch (PartInitException e) {
+											Debug.report(e);
+										}
+									}
+								});
+							} catch (NumberFormatException e) {
+							}
+						} else {
+							editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), result, "The selected predicate " + goal.getSignature() + " has multiple targets.\n" +
+											"Select a target and press OK to open it in an editor.");
+									alternativeDialog.setBlockOnOpen(false);
+									alternativeDialog.open();
+								}
+							});
+						}
 					} else {
 						editor.getEditorSite().getShell().getDisplay().asyncExec(new Runnable() {
 							@Override
 							public void run() {
-								AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), goal, result);
+								AlternativeDialog alternativeDialog = new AlternativeDialog(editor.getEditorSite().getShell(), result, "The selected predicate " + goal.getSignature() + " was not found. A list of similar predicates is listed below.\n" +
+										"Select a predicate and press OK to open it in an editor.");
 								alternativeDialog.setBlockOnOpen(false);
 								alternativeDialog.open();
 							}
@@ -192,8 +232,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				} else {
 					UIUtils.displayMessageDialog(
 							editor.getSite().getShell(),
-							"Undefined predicate",
-							"The selected predicate is not defined.");
+							NAME,//"Undefined predicate",
+							MESSAGE_UNDEFINED_PREDICATE);
 					return;
 				}
 			}
@@ -260,13 +300,13 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 		private List<Map<String, Object>> alternatives;
 		private org.eclipse.swt.widgets.List list;
-		private Goal goal;
+		private String description;
 
-		protected AlternativeDialog(Shell parentShell, Goal goal, List<Map<String, Object>> alternatives) {
+		protected AlternativeDialog(Shell parentShell, List<Map<String, Object>> alternatives, String description) {
 			super(parentShell);
 			setShellStyle(getShellStyle() | SWT.RESIZE);
 			this.alternatives = alternatives;
-			this.goal = goal;
+			this.description = description;
 		}
 		
 		@Override
@@ -274,8 +314,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			Composite composite = (Composite) super.createDialogArea(parent);
 			
 			Label label = new Label(composite, SWT.WRAP);
-			label.setText("The selected predicate " + goal.getSignature() + " was not found. A list of similar predicates is listed below.\n" +
-					"Select a predicate and press OK to jump to it.");
+			label.setText(description);
 			
 		    GridData gridData = new GridData();
 		    gridData.grabExcessHorizontalSpace = true;
@@ -284,11 +323,19 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		    
 		    label.setLayoutData(gridData);
 			
-			list = new org.eclipse.swt.widgets.List(composite, SWT.NONE);
+			list = new org.eclipse.swt.widgets.List(composite, SWT.BORDER);
 			for (Map<String, Object> alternative : alternatives) {
 				list.add(getTextForPred(alternative));
 			}
 			list.setSelection(0);
+			list.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseDoubleClick(MouseEvent e) {
+					if (list.getSelectionIndex() >= 0) {
+						AlternativeDialog.this.okPressed();
+					}
+				}
+			});
 			
 		    gridData = new GridData();
 		    gridData.grabExcessHorizontalSpace = true;
@@ -322,7 +369,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		@Override
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			newShell.setText("Undefined predicate");
+			newShell.setText(NAME);
 		}
 		
 		@Override
