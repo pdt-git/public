@@ -210,11 +210,14 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	statistics(cputime, CPU0),
 	make_walk_option(Options, OTerm, _),
 	walk_option_call_kind(OTerm, call),
-	forall(( walk_option_module(OTerm, M),
-		 current_module(M),
-		 scan_module(M, OTerm)
-	       ),
-	       find_walk_from_module(M, OTerm)),
+	(	walk_option_predicates(Predicates, OTerm),
+		nonvar(Predicates)
+	;	forall(( walk_option_module(OTerm, M),
+		         current_module(M),
+		         scan_module(M, OTerm)
+		       ),
+		       find_walk_from_module(M, OTerm))
+	),
 	walk_from_multifile(OTerm),
 	walk_from_initialization(OTerm),
 	infer_new_meta_predicates(New, OTerm),
@@ -282,8 +285,7 @@ walk_from_initialization(_OTerm).
 
 find_walk_from_module(M, OTerm) :-
 	debug(autoload, 'Analysing module ~q', [M]),
-	walk_option_predicates(OTerm, Predicates),
-	forall(predicate_in_module(M, Predicates, PI),
+	forall(predicate_in_module(M, PI),
 	       walk_called_by_pred(M:PI, OTerm)).
 
 walk_called_by_pred(Module:Name/Arity, _) :-
@@ -932,16 +934,7 @@ variants([H|T], V, List) :-
 %
 %	True if PI is a predicate locally defined in Module.
 
-predicate_in_module(Module, Predicates, PI) :-
-	is_list(Predicates),
-	!,
-	member(Module:PI, Predicates),
-	current_predicate(Module:PI),
-	PI = Name/Arity,
-	functor(Head, Name, Arity),
-	\+ predicate_property(Module:Head, imported_from(_)).
-
-predicate_in_module(Module, _Predicates, PI) :-
+predicate_in_module(Module, PI) :-
 	current_predicate(Module:PI),
 	PI = Name/Arity,
 	functor(Head, Name, Arity),
