@@ -220,7 +220,7 @@ pdt_prolog_walk_code(Iteration, Options) :-
 	(	walk_option_clauses(OTerm, Clauses),
 		nonvar(Clauses)
 	->	walk_clauses(Clauses, OTerm)
-	;	walk_option_predicates(Predicates, OTerm),
+	;	walk_option_predicates(OTerm, Predicates),
 		nonvar(Predicates)
 	->	forall((
 			member(Module:Name/Arity, Predicates),
