@@ -519,23 +519,28 @@ walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	    is_defined(Module:Meta)
 	;   true
 	),
+	% PDT Extension:
 	(   extended_meta_predicate(Module:Meta, Head)
-	;   predicate_property(Module:Meta, meta_predicate(Head))
 	;   inferred_meta(Module:Meta, Head)
+	;   predicate_property(Module:Meta, meta_predicate(Head))
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
 	register_possible_meta_clause(ClauseRef),
-	(	walk_option_caller(OTerm, CallerModule:CallerGoal),
+	(	% PDT Extension:
+	    walk_option_caller(OTerm, CallerModule:CallerGoal),
 		predicate_property(CallerModule:CallerGoal, transparent),
 		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_)),
 		\+ walk_option_is_transparent_meta_call(OTerm, true)
-	->	set_is_transparent_meta_call_of_walk_option(true, OTerm, NewOTerm),
+	->	% PDT: Meta-call in module transparent predicates
+	    set_is_transparent_meta_call_of_walk_option(true, OTerm, NewOTerm),
 		(	predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
 			walk_meta_call(1, Head, Meta, ImportingModule, ArgPosList, NewOTerm),
 			fail
 		;	walk_meta_call(1, Head, Meta, Module, ArgPosList, NewOTerm)
 		)
-	;	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm)
+	;	% Meta-call in non-transparent predicate or 
+	    % nested meta-call in transparent predicate:
+	    walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm)
 	).
 walk_called(context_module(M), _, _, OTerm) :-
 	walk_option_caller(OTerm, Caller),
@@ -562,6 +567,12 @@ is_defined(Module:Goal) :-
 	!.
 :- endif.
 
+%% handle_context_module(+G, -M, +M0, ?TermPosition, +OTerm)
+%
+% M:G is the goal whose module qualifier is a free variable
+% M0 is the currently visited context module
+%
+% Bind M to 
 handle_context_module(G, M, M0, TermPosition, OTerm) :-
 	get_attr(M, codewalk, V),
 	V == is_context_module,
