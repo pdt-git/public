@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.connector.common.QueryUtils;
@@ -45,7 +46,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 	}
 	
 	public ReferencesSearchQueryDirect(Goal goal) {
-		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
+		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 100), true);
 		setSearchType("References to");
 		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
 		line = goal.getLine();
