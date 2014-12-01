@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IFile;
@@ -32,7 +33,7 @@ public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 	private int line;
 	
 	public ContextAwareDefinitionsSearchQuery(Goal goal) {
-		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
+		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 100), true);
 		setSearchType("Definitions and declarations of");
 		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
 		line = goal.getLine();
