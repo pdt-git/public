@@ -486,9 +486,9 @@ public class PDTCommonUtil {
 			return null;
 		}
 		if (maxLength < 25 || text.length() <= maxLength) {
-			return text.replace("\n", " ").replace("\r", "").replace("\t", " ");
+			return text.replace("\n", " ").replace("\r", "").replace("\t", "");
 		}
-		return (text.substring(0, maxLength - 15) + " ... " + text.substring(text.length() - 10)).replace("\n", " ").replace("\r", "").replace("\t", " ");
+		return (text.substring(0, maxLength - 15) + " ... " + text.substring(text.length() - 10)).replace("\n", " ").replace("\r", "").replace("\t", "");
 	}
 
 }
