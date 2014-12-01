@@ -28,8 +28,7 @@
 
 :- dynamic(result/4).
 
-assert_result(QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
-	QGoal = _:Goal,
+assert_result(Goal, _, clause_term_position(Ref, TermPosition), Kind) :-
     (	result(Goal, Ref, TermPosition, Kind)
     ->	true
     ;	assertz(result(Goal, Ref, TermPosition, Kind))
@@ -54,7 +53,13 @@ find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, Unde
 	),
 	clause_property(Ref, predicate(Module:Name/Arity)),
 	clause_property(Ref, line_count(Line)),
-	properties_for_predicate(Module,Name,Arity,PropertyList),
+	properties_for_predicate(Module,Name,Arity,PropertyList0),
+	(	Goal = M:_,
+		M \== Module
+	->	format(atom(Prefix), '~w:', [M]),
+		PropertyList = [prefix(Prefix)|PropertyList0]
+	;	PropertyList = PropertyList0
+	),
 	functor(Goal, UndefName, UndefArity),
 	format(atom(GoalAsAtom), '~w', [Goal]).
 
