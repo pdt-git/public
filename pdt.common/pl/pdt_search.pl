@@ -324,9 +324,9 @@ find_primary_definition_visible_in_(_EnclFile,_SelectedLine,Term,MainFile,FirstL
 	atom_concat(Directory, FileName, MainFile),
 	!.
     	
-find_primary_definition_visible_in_(EnclFile,_SelectedLine,Term,MainFile,FirstLine,ResultKind) :-
+find_primary_definition_visible_in_(EnclFile,SelectedLine,Term,MainFile,FirstLine,ResultKind) :-
     extract_name_arity(Term, Module,_Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,Term,Module,Name,Arity,MainFile,FirstLine,ResultKind).
+    find_primary_definition_visible_in__(EnclFile,SelectedLine,Term,Module,Name,Arity,MainFile,FirstLine,ResultKind).
 
 extract_name_arity(Term,Module,Head,Name,Arity) :-
 	(	var(Term) 
@@ -349,11 +349,21 @@ extract_name_arity(Term,Module,Head,Name,Arity) :-
 
 % Now the second argument is a real term that is 
 %  a) a file loading directive:     
-find_primary_definition_visible_in__(EnclFile,Term,_,_,_,File,Line,single):-
+find_primary_definition_visible_in__(EnclFile,_SelectedLine,Term,_,_,_,File,Line,single):-
     find_file(EnclFile,Term,File,Line).
 
-%  b) a literal (call or clause head):    
-find_primary_definition_visible_in__(EnclFile,_Term,ReferencedModule,Name,Arity,MainFile,FirstLine,ResultKind) :-
+%  b) a literal (call or clause head):
+% use the alternative lookup for transparent predicates to be able to find all possible targets    
+find_primary_definition_visible_in__(EnclFile,SelectedLine,_,_,_,_,_,_,_) :-
+	'$clause_from_source'(EnclFile, SelectedLine, ClauseRef),
+	clause_property(ClauseRef, predicate(SrcModule:SrcName/SrcArity)),
+	functor(SrcHead, SrcName, SrcArity),
+	predicate_property(SrcModule:SrcHead, transparent),
+	\+ predicate_property(SrcModule:SrcHead, meta_predicate(_)),
+	!,
+	fail.
+
+find_primary_definition_visible_in__(EnclFile,_SelectedLine,_Term,ReferencedModule,Name,Arity,MainFile,FirstLine,ResultKind) :-
 	find_definition_visible_in(EnclFile,ReferencedModule,Name,Arity,DefiningModule,Locations),
 	(	Locations = [_,_|_]
 	->	ResultKind = (multifile)
