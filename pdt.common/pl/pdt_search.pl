@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 :- module( pdt_search,
-         [ find_predicate_reference/9                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
+         [ find_predicate_reference/11                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
          , find_categorized_predicate_definitions/11       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
          , find_predicate_definitions/10
          , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
@@ -58,12 +58,25 @@
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
-%% find_predicate_reference(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
+%% find_predicate_reference(Term, ExactMatch, Root, EnclFile, LineInEnclFile, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 
-find_predicate_reference(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+find_predicate_reference(Term, ExactMatch, Root, _EnclFile, _LineInEnclFile, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	current_predicate(logtalk_load/1),
 	logtalk_adapter::find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
-find_predicate_reference(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+find_predicate_reference(Term0, ExactMatch, Root, EnclFile, _LineInEnclFile, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
+	(	nonvar(EnclFile),
+		Term0 = predicate(M, S0, F, S1, A),
+		var(M)
+	->	once(module_of_file(EnclFile, FileModule)),
+		(	nonvar(F),
+			nonvar(A),
+			functor(H, F, A),
+			predicate_property(FileModule:H, imported_from(ImportedModule))
+		->	Term = predicate(ImportedModule, S0, F, S1, A)
+		;	Term = predicate(FileModule, S0, F, S1, A)
+		)
+	;	Term = Term0
+	),
 	find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
 
         /***********************************************************************
