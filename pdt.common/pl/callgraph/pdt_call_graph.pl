@@ -27,6 +27,16 @@ pdt_walk_code(Options) :-
 :- dynamic(first_run/0).
 first_run.
 
+reset :-
+	with_mutex(pdt_call_graph, (
+		(	first_run
+		->	true
+		;	assertz(first_run),
+			retractall(calls_(_, _, _, _, _, _, _, _, _)),
+			retractall(calls_multifile_(_, _, _, _, _, _, _, _))
+		)
+	)).
+
 ensure_call_graph_generated :-
 	with_mutex(pdt_call_graph, (
 		first_run,
