@@ -80,8 +80,8 @@ public class PLAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy impl
 		String line;
 		try {
 			line = d.get(info.getOffset(), info.getLength());
-			String removedWS =line.replaceAll(" ", "");
-			return removedWS.endsWith(":-");
+			String removedWS = line.trim();
+			return removedWS.endsWith(":-") || removedWS.endsWith("-->");
 		} catch (BadLocationException e) {
 			Debug.report(e);
 		}
