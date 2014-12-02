@@ -19,7 +19,6 @@ import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.MultiLineRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
-import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 
 public class PLPartitionScanner extends RuleBasedPartitionScanner {
@@ -41,9 +40,9 @@ public class PLPartitionScanner extends RuleBasedPartitionScanner {
 
 		rules[0] = new EndOfLineRule("%", plComment);
 		rules[1] = new MultiLineRule("/*", "*/", plMultiComment);
-		rules[2] = new SingleLineRule("\"", "\"", plDoubleQuotedString, '\\');
+		rules[2] = new MultiLineRule("\"", "\"", plDoubleQuotedString, '\\');
 		// Add a rule for single quotes
-		rules[3] = new SingleLineRule("'", "'", plSingleQuotedString, '\\'); // The escape character is not correct. Putting ' in there fails rule parsing.
+		rules[3] = new MultiLineRule("'", "'", plSingleQuotedString, '\\'); // The escape character is not correct. Putting ' in there fails rule parsing.
 		// Add generic whitespace rule.
 //        rules[2] = new PredicateRule(plPredicate);
 
