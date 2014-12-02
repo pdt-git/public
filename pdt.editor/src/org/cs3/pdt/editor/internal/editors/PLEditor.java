@@ -1347,18 +1347,17 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	private TextSelection getVariableAtOffset(IDocument document, int offset)
 			throws BadLocationException {
 		int begin = offset;
-		if (!ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin))
+		if (offset == document.getLength() || !ParserUtils.isVarChar(document.getChar(begin))
 				&& begin > 0) {
 			begin--;
 		}
-		while (ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin))
+		while (ParserUtils.isVarChar(document.getChar(begin))
 				&& begin > 0)
 			begin--;
 		if (begin < offset)
 			begin++;
 		int end = offset;
-		while (ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(end))
-				&& begin > 0)
+		while (end < document.getLength() && ParserUtils.isVarChar(document.getChar(end)) && begin > 0)
 			end++;
 		int length = end - begin;
 		// String pos = document.get(begin, length);
