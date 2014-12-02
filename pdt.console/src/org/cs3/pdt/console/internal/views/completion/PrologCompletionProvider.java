@@ -142,7 +142,7 @@ public class PrologCompletionProvider {
 		if (c == '\'') {
 			return new Prefix(offset, "", false);
 		}
-		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
+		boolean isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
 		
 		if (!isPredChar) {
 			return new Prefix(offset + 1, "", false);
@@ -156,7 +156,7 @@ public class PrologCompletionProvider {
 				if (c == '\'') {
 					return new Prefix(begin - 1, line.substring(begin, begin + length), true);
 				}
-				isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(c);
+				isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
 				if(!isPredChar){
 					break;
 				}
@@ -195,7 +195,7 @@ public class PrologCompletionProvider {
 	private String retrievePrefixedModule(String line, int begin) {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && ParserUtils.isNonQualifiedPredicateNameChar(line.charAt(moduleBegin)))
+		while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(line.charAt(moduleBegin)))
 			moduleBegin--;
 		String moduleName = line.substring(moduleBegin + 1, moduleEnd);
 //		if(!Util.isVarPrefix(moduleName)){
