@@ -63,7 +63,8 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 		int begin=offset;
 		int length=0;
-		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin));
+		char c = document.getChar(begin);
+		boolean isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
 		
 		if (!isPredChar) {
 			return new Prefix(document, offset + 1, "");
@@ -72,7 +73,7 @@ public abstract class PrologContentAssistProcessor {
 			length++;
 			int test = begin-1;
 			if(test >=0){
-				isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(test));
+				isPredChar = ParserUtils.isNonQuotedPredicateNameChar(document.getChar(test));
 				if(!isPredChar){
 					break;
 				}
@@ -119,7 +120,7 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(moduleBegin)))
+		while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(document.getChar(moduleBegin)))
 			moduleBegin--;
 		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
 		return moduleName;

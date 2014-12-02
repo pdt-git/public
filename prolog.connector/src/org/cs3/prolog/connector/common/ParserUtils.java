@@ -88,6 +88,14 @@ public class ParserUtils {
 		if (c == '_' || c == ':')  return true;
 		return false;
 	}
+	
+	public static boolean isNonQuotedPredicateNameChar(char c) {
+		if (c >= 'a' && c <= 'z') return true;
+		if (c >= '0' && c <= '9') return true;
+		if (c >= 'A' && c <= 'Z') return true;
+		if (c == '_')  return true;
+		return false;
+	}
 
 	/**
 	 * Checks if c is a character that may be contained in a Prolog predicate
