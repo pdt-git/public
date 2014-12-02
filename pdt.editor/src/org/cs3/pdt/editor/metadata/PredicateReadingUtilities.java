@@ -115,27 +115,38 @@ public class PredicateReadingUtilities {
 
 	// Set by findBeginOfPredicateName() and findEndOfPredicateName().
 	// Used by isPredicateNameChar():
-	private static boolean predicate_name_is_enclosed_in_quotes = false;
+//	private static boolean predicate_name_is_enclosed_in_quotes = false;
 	
 	public static int findBeginOfPredicateName(IDocument document, int begin)
 			throws BadLocationException {
 		int start = begin;
-		while (start >= 0 && ParserUtils.isPredicateNameChar(document.getChar(start))) {
-			start--; // scan left until first non-predicate-name  char
+		ITypedRegion partition = document.getPartition(begin);
+		boolean predicateNameIsEnclosedInQuotes = (partition != null && PLPartitionScanner.PL_SINGLE_QUOTED_STRING.equals(partition.getType()));
+		if (predicateNameIsEnclosedInQuotes) {
+			return partition.getOffset();
+		} else {
+			while (start >= 0 && ParserUtils.isNormalPredicateNameChar(document.getChar(start))) {
+				start--; // scan left until first non-predicate-name  char
+			}
+			return start + 1;
 		}
-		start++; // start is now the position of the first predicate char
-		if (document.getChar(start) == '\'') {
-			predicate_name_is_enclosed_in_quotes = true;
-			// start++; // quotes are not part of the name
-		}
-		return start;
+
+//		while (start >= 0 && ParserUtils.isPredicateNameChar(document.getChar(start))) {
+//			start--; // scan left until first non-predicate-name  char
+//		}
+//		start++; // start is now the position of the first predicate char
+//		if (document.getChar(start) == '\'') {
+//			predicate_name_is_enclosed_in_quotes = true;
+//			// start++; // quotes are not part of the name
+//		}
+//		return start;
 	}
 
 	public static int findEndOfPredicateName(IDocument document, int end)
 			throws BadLocationException {
 		ITypedRegion partition = document.getPartition(end);
-		predicate_name_is_enclosed_in_quotes = (partition != null && PLPartitionScanner.PL_SINGLE_QUOTED_STRING.equals(partition.getType()));
-		if (predicate_name_is_enclosed_in_quotes) {
+		boolean predicateNameIsEnclosedInQuotes = (partition != null && PLPartitionScanner.PL_SINGLE_QUOTED_STRING.equals(partition.getType()));
+		if (predicateNameIsEnclosedInQuotes) {
 //			// Accept any character up to the next simple quote:
 //			while ( document.getChar(end)!='\'' 
 //					&& end < document.getLength() ) {
@@ -143,8 +154,6 @@ public class PredicateReadingUtilities {
 //			}
 //			// Include the terminal quote
 //			end++;
-			// Reset flag for next predicate name reading
-			predicate_name_is_enclosed_in_quotes = false;
 			return partition.getOffset() + partition.getLength();
 		} else {
 			// Do not accept special characters that may only occur within quotes:
