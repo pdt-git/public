@@ -84,32 +84,29 @@ public class QueryUtils {
 	/**
 	 * Converts an Iterable to a Prolog list like "[ , , ]"
 	 * 
-	 * @param listToString
+	 * @param elements
 	 *            Iterable or subclass of Iterable
 	 * @return elements of the Iterable wrapped in "[]" and separated by ","
 	 */
-	public static String listToArgList(Iterable<?> listToString) {
-		
-		String listString = null;
-		StringBuffer puffer = new StringBuffer();
-		puffer.append("[");
-		
-		if(listToString == null) {
-			return puffer.append("]").toString();
+	public static String listToArgList(Iterable<?> elements) {
+		if (elements == null) {
+			return "[]";
 		} 
 		
-		for (Object unknown:listToString) {
-			puffer.append(unknown);
-			puffer.append(",");
-		}
-		puffer.replace(puffer.length()-1, puffer.length(), "]");
-		listString = puffer.toString();
+		StringBuilder buf = new StringBuilder();
+		buf.append('[');
 		
-		if(listString == null) {
-			//TODO: error correction
+		boolean first = true;
+		for (Object element : elements) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(',');
+			}
+			buf.append(element);
 		}
-		
-		return listString;
+		buf.append(']');
+		return buf.toString();
 	}
 	
 	/**
