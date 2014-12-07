@@ -100,34 +100,25 @@ find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile,
 	->	format(atom(Position), '~w-~w', [Start, End])
 	;	Position = Line
 	),
-	PropertyList1 = [line(Line)|PropertyList0],
 	functor(ReferencingGoal, N, A),
 	(	declared_in_module(M0, N, A, M)
 	->	true
 	;	M0 = M
 	),
 	(	Separator == (//)
-	->	format(atom(Called), '~w//~w', [N, Arity0])
-	;	format(atom(Called), '~w/~w', [N, A])
+	->	format(atom(Label), '~w//~w', [N, Arity0])
+	;	format(atom(Label), '~w/~w', [N, A])
 	),
-	CalledProperty = label(Called),
+	PropertyList1 = [label(Label),line(Line)|PropertyList0],
 	(	M \== RefModule
 	->	format(atom(Prefix), '~w:', [M]),
-		PrefixProperty = prefix(Prefix)
-	;	true
+		PropertyList2 = [prefix(Prefix)|PropertyList1]
+	;	PropertyList2 = PropertyList1
 	),
 	(	nonvar(Alias)
 	->	format(atom(AliasAtom), ' [alias for ~w]', [Alias]),
-		PropertyList2 = [suffix(AliasAtom)|PropertyList1]
-	;	PropertyList2 = PropertyList1
-	),
-	(	nonvar(PrefixProperty)
-	->	PropertyList3 = [PrefixProperty|PropertyList2]
-	;	PropertyList3 = PropertyList2
-	),
-	(	nonvar(CalledProperty)
-	->	PropertyList = [CalledProperty|PropertyList3]
-	;	PropertyList = PropertyList3
+		PropertyList = [suffix(AliasAtom)|PropertyList2]
+	;	PropertyList = PropertyList2
 	).
 
 perform_search(Functor, Arity, Module, ExactMatch) :-
