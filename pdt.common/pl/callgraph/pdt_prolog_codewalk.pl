@@ -597,9 +597,9 @@ evaluate(A=B, _) :-
 undefined(_, _, OTerm) :-
 	walk_option_undefined(OTerm, ignore),
 	!.
-undefined(_, _, OTerm) :-
-	walk_option_is_transparent_meta_call(OTerm, true),
-	!.
+%undefined(_, _, OTerm) :-
+%	walk_option_is_transparent_meta_call(OTerm, true),
+%	!.
 undefined(Goal, _, _) :-
 	predicate_property(Goal, autoload(_)), !.
 undefined(Goal, TermPos, OTerm) :-
@@ -607,7 +607,8 @@ undefined(Goal, TermPos, OTerm) :-
 	->  Why = trace
 	;   Why = undefined
 	),
-	set_call_kind_of_walk_option(undefined, OTerm, NewOTerm),
+	walk_option_call_kind(OTerm, CallKind),
+	set_call_kind_of_walk_option(undefined(CallKind), OTerm, NewOTerm),
 	print_reference(Goal, TermPos, Why, NewOTerm).
 
 %%	not_callable(+Goal, +TermPos, +OTerm)
