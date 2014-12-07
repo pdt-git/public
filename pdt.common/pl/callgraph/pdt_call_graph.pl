@@ -27,6 +27,16 @@ pdt_walk_code(Options) :-
 :- dynamic(first_run/0).
 first_run.
 
+reset :-
+	with_mutex(pdt_call_graph, (
+		(	first_run
+		->	true
+		;	assertz(first_run),
+			retractall(calls_(_, _, _, _, _, _, _, _, _)),
+			retractall(calls_multifile_(_, _, _, _, _, _, _, _))
+		)
+	)).
+
 ensure_call_graph_generated :-
 	with_mutex(pdt_call_graph, (
 		first_run,
@@ -149,9 +159,14 @@ assert_multifile_edge(M1,F1,N1, M2,F2,N2, File) :-
 pdt_reload:pdt_reload_listener(_Files) :-
 	(	first_run
 	->	true
-	;	setof(Module:Name/Arity, Head^File^(
+	;	setof(Module:Name/Arity, Head^File^FileModule^(
 			(	pdt_reload:reloaded_file(File),
-				pdt_source_file(Module:Head, File),
+				(	pdt_source_file(Module:Head, File)
+				;	module_property(FileModule, file(File)),
+					predicate_property(FileModule:Head, imported_from(Module)),
+					predicate_property(Module:Head, transparent),
+					\+ predicate_property(Module:Head, meta_predicate(_))
+				),
 				functor(Head, Name, Arity)
 			;	retract(predicate_to_clear(Module, Name, Arity))
 			)
@@ -165,7 +180,12 @@ pdt_reload:pdt_reload_listener(_Files) :-
 :- dynamic(user:message_hook/3).
 user:message_hook(load_file(start(_, file(_, File))),_,_) :-
 	\+ first_run,
-	pdt_source_file(Module:Head, File),
+	(	pdt_source_file(Module:Head, File)
+	;	module_property(FileModule, file(File)),
+		predicate_property(FileModule:Head, imported_from(Module)),
+		predicate_property(Module:Head, transparent),
+		\+ predicate_property(Module:Head, meta_predicate(_))
+	),
 	functor(Head, Name, Arity),
 	\+ predicate_to_clear(Module, Name, Arity),
 	assertz(predicate_to_clear(Module, Name, Arity)),

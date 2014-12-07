@@ -63,7 +63,8 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 		int begin=offset;
 		int length=0;
-		boolean isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin));
+		char c = document.getChar(begin);
+		boolean isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
 		
 		if (!isPredChar) {
 			return new Prefix(document, offset + 1, "");
@@ -72,7 +73,7 @@ public abstract class PrologContentAssistProcessor {
 			length++;
 			int test = begin-1;
 			if(test >=0){
-				isPredChar = ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(test));
+				isPredChar = ParserUtils.isNonQuotedPredicateNameChar(document.getChar(test));
 				if(!isPredChar){
 					break;
 				}
@@ -119,7 +120,7 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 		int moduleEnd = begin;
 		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(moduleBegin)))
+		while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(document.getChar(moduleBegin)))
 			moduleBegin--;
 		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
 		return moduleName;
@@ -135,36 +136,37 @@ public abstract class PrologContentAssistProcessor {
 	
 			Prefix pre = calculatePrefix(document,documentOffset);
 			
-			String splittingOperator = findSplittingOperator(document, pre.begin - 1);
-	
-			String module = null;
-			if (splittingOperator != null) {
-				module = retrievePrefixedModule(document, pre.begin - splittingOperator.length());
-			}
-			String searchPrefix;
-			String searchPrefixForDefault = null;
-			
 			ArrayList<ComparableTemplateCompletionProposal> proposals = new ArrayList<ComparableTemplateCompletionProposal>();
-			if (module == null || module.equals("")) {
-				if (pre.prefix.equals("")) {
-					return null;
-				}
+			if (ParserUtils.isVarPrefix(pre.prefix)) {
 				addVariableProposals(document, pre.begin, pre.length, pre.prefix, proposals);
-				if (splittingOperator != null) {
-					searchPrefix = splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
-				} else {
-					searchPrefix = QueryUtils.quoteAtomIfNeeded(pre.prefix);
-					searchPrefixForDefault = pre.prefix;
-				}
 			} else {
-				if (ParserUtils.isVarPrefix(module)){
-					module = "_";
-				} else {
-					module = QueryUtils.quoteAtomIfNeeded(module);
+				String splittingOperator = findSplittingOperator(document, pre.begin - 1);
+				
+				String module = null;
+				if (splittingOperator != null) {
+					module = retrievePrefixedModule(document, pre.begin - splittingOperator.length());
 				}
-				searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
-			}
-			if (!ParserUtils.isVarPrefix(pre.prefix)) {
+				String searchPrefix;
+				String searchPrefixForDefault = null;
+				
+				if (module == null || module.equals("")) {
+					if (pre.prefix.equals("")) {
+						return null;
+					}
+					if (splittingOperator != null) {
+						searchPrefix = splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
+					} else {
+						searchPrefix = QueryUtils.quoteAtomIfNeeded(pre.prefix);
+						searchPrefixForDefault = pre.prefix;
+					}
+				} else {
+					if (ParserUtils.isVarPrefix(module)){
+						module = "_";
+					} else {
+						module = QueryUtils.quoteAtomIfNeeded(module);
+					}
+					searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
+				}
 				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, searchPrefixForDefault, proposals);
 			}
 	

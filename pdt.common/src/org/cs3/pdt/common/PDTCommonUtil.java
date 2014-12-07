@@ -480,5 +480,15 @@ public class PDTCommonUtil {
 		}
 
 	}
+	
+	public static String cropText(String text, int maxLength) {
+		if (text == null) {
+			return null;
+		}
+		if (maxLength < 25 || text.length() <= maxLength) {
+			return text.replace("\n", " ").replace("\r", "").replace("\t", "");
+		}
+		return (text.substring(0, maxLength - 15) + " ... " + text.substring(text.length() - 10)).replace("\n", " ").replace("\r", "").replace("\t", "");
+	}
 
 }

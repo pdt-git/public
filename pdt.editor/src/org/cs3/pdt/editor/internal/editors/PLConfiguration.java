@@ -140,6 +140,11 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
 
+		ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager
+				.getColor(colorManager.getStringColor())));
+		reconciler.setDamager(ndr, PLPartitionScanner.PL_DOUBLE_QUOTED_STRING);
+		reconciler.setRepairer(ndr, PLPartitionScanner.PL_DOUBLE_QUOTED_STRING);
+		
 		return reconciler;
 	}
 

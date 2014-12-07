@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.structureElements.PrologMatch;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -31,8 +33,8 @@ import org.eclipse.core.resources.IFile;
  */
 public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
-//	private String filePath;
-//	private int line = -1;
+	private String filePath;
+	private int line = -1;
 	
 	public ReferencesSearchQueryDirect(String goal, String searchGoalLabel, boolean isExactMatch) {
 		super(goal, searchGoalLabel, isExactMatch);
@@ -44,12 +46,11 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 	}
 	
 	public ReferencesSearchQueryDirect(Goal goal) {
-		super(PDTSearchQuery.toPredicateGoal(goal), goal.getTermString(), true);
+		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 100), true);
 		setSearchType("References to");
-//		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
-//		line = goal.getLine();
+		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
+		line = goal.getLine();
 	}
-
 
 	@Override
 	protected String buildSearchQuery() {
@@ -57,6 +58,8 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 				getGoal(),
 				Boolean.toString(isExactMatch()),
 				getProjectPath() == null ? "_" : getProjectPath(),
+				filePath == null ? "_" : filePath,
+				line == -1 ? "_" : Integer.toString(line),
 				"RefModule",
 				"RefName",
 				"RefArity",

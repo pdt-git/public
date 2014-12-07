@@ -37,6 +37,7 @@ import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.ParserUtils;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.PrologException;
 import org.cs3.prolog.connector.process.PrologProcessException;
@@ -290,7 +291,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	
 	protected static String toPredicateGoal(Goal goal) {
 		return bT(SearchConstants.PREDICATE_GOAL_FUNCTOR,
-				goal.getModule() != null ? QueryUtils.quoteAtomIfNeeded(goal.getModule()) : "_",
+				(goal.getModule() != null && !ParserUtils.isVarPrefix(goal.getModule())) ? QueryUtils.quoteAtomIfNeeded(goal.getModule()) : "_",
 				"_",
 				QueryUtils.quoteAtomIfNeeded(goal.getFunctor()),
 				"_",

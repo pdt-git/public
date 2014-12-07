@@ -468,18 +468,17 @@ walk_called(Var, _, TermPos, OTerm) :-
 walk_called(M:G, M0, term_position(_,_,_,_,[MPos,Pos]), OTerm) :- !,
 	(   nonvar(M)
 	->  walk_called(G, M, Pos, OTerm)
-	;	(	handle_context_module(G, M, M0, Pos, OTerm)
-		*->	true
+	;	(	nonvar(M0),
+			get_attr(M, codewalk, V),
+			V == is_context_module
+		->	walk_called(G, M0, Pos, OTerm)
 		;	undecided(M, MPos, OTerm)
 		)
 	).
-walk_called(G, M, TermPos, OTerm) :-
+walk_called(_G, M, TermPos, OTerm) :-
 	var(M),
 	!,
-	(	handle_context_module(G, M, _, TermPos, OTerm)
-	*->	true
-	;	undecided(M, TermPos, OTerm)
-	).
+	undecided(M, TermPos, OTerm).
 walk_called((A,B), M, term_position(_,_,_,_,[PA,PB]), OTerm) :- !,
 	walk_called(A, M, PA, OTerm),
 	walk_called(B, M, PB, OTerm).
@@ -566,25 +565,6 @@ is_defined(Module:Goal) :-
 	current_predicate(Module:N/A),
 	!.
 :- endif.
-
-%% handle_context_module(+G, -M, +M0, ?TermPosition, +OTerm)
-%
-% M:G is the goal whose module qualifier is a free variable
-% M0 is the currently visited context module
-%
-% Bind M to 
-handle_context_module(G, M, M0, TermPosition, OTerm) :-
-	get_attr(M, codewalk, V),
-	V == is_context_module,
-	(	nonvar(M0)
-	->	walk_called(G, M0, TermPosition, OTerm)
-	;	walk_option_caller(OTerm, CallerModule:CallerGoal),
-		(	predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
-			walk_called(G, ImportingModule, TermPosition, OTerm),
-			fail
-		;	walk_called(G, CallerModule, TermPosition, OTerm)
-		)
-	).
 
 %%	undecided(+Variable, +TermPos, +OTerm)
 

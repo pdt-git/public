@@ -1143,12 +1143,12 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 					l = region.getOffset();
 				else {
 					if (PLEditor.predicateDelimiter(document, l)) {
-						proposal = processProposal(singletonOccurs,
+						proposal = processProposal(document, singletonOccurs,
 								nonSingletonOccurs, locationList, var, l, true,
 								proposal);
 						break;
 					}
-					proposal = processProposal(singletonOccurs,
+					proposal = processProposal(document, singletonOccurs,
 							nonSingletonOccurs, locationList, var, l, true,
 							proposal);
 				}
@@ -1158,18 +1158,19 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 			// searching downwards
 			l = begin = var.getOffset() + var.getLength();
 			proposal = null;
+			// FIXME: ab, dec 14: this does not collect the occurrence at the end of the document
 			while (l < document.getLength()) {
 				ITypedRegion region = document.getPartition(l);
 				if (isComment(region)) {
 					l = region.getOffset() + region.getLength();
 				} else {
 					if (PLEditor.predicateDelimiter(document, l)) {
-						proposal = processProposal(singletonOccurs,
+						proposal = processProposal(document, singletonOccurs,
 								nonSingletonOccurs, locationList, var, l,
 								false, proposal);
 						break;
 					}
-					proposal = processProposal(singletonOccurs,
+					proposal = processProposal(document, singletonOccurs,
 							nonSingletonOccurs, locationList, var, l, false,
 							proposal);
 				}
@@ -1216,12 +1217,12 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		return locationList;
 	}
 
-	private String processProposal(
+	private String processProposal(IDocument document,
 			Map<String, List<OccurrenceLocation>> singletonOccurs,
 			Map<String, List<OccurrenceLocation>> nonSingletonOccurs,
 			ArrayList<OccurrenceLocation> locationList, TextSelection var,
 			int l, boolean up, String proposal) throws BadLocationException {
-		char c = getSourceViewer().getDocument().getChar(l);
+		char c = document.getChar(l);
 
 		if (ParserUtils.isVarChar(c)) {
 			if (proposal == null)
@@ -1347,18 +1348,17 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	private TextSelection getVariableAtOffset(IDocument document, int offset)
 			throws BadLocationException {
 		int begin = offset;
-		if (!ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin))
+		if (offset == document.getLength() || !ParserUtils.isVarChar(document.getChar(begin))
 				&& begin > 0) {
 			begin--;
 		}
-		while (ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(begin))
+		while (ParserUtils.isVarChar(document.getChar(begin))
 				&& begin > 0)
 			begin--;
 		if (begin < offset)
 			begin++;
 		int end = offset;
-		while (ParserUtils.isNonQualifiedPredicateNameChar(document.getChar(end))
-				&& begin > 0)
+		while (end < document.getLength() && ParserUtils.isVarChar(document.getChar(end)) && begin > 0)
 			end++;
 		int length = end - begin;
 		// String pos = document.get(begin, length);
