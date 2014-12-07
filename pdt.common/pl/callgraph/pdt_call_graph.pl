@@ -118,9 +118,6 @@ generate_call_graph_new_meta_specs(MetaSpecs) :-
 	;	true
 	).
 	
-assert_edge(M1:Callee, M2:Caller, ClauseInfo) :-
-	assert_edge(M1:Callee, M2:Caller, ClauseInfo, _).
-
 assert_edge(M1:Callee, M2:Caller, clause(Ref), Info) :-
 	assert_edge(M1:Callee, M2:Caller, clause_term_position(Ref, undefined), Info).
 	

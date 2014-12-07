@@ -36,8 +36,6 @@ find_unique( Goal ) :-
     
 :- dynamic(result/5).
 
-assert_result(IsAlias, QGoal, Caller, Location) :-
-	assert_result(IsAlias, QGoal, Caller, Location, _).
 assert_result(IsAlias, QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
     QGoal = _:_Goal,
     assertz(result(IsAlias, QGoal, Ref, TermPosition, Kind)),
@@ -53,13 +51,6 @@ assert_result(IsAlias, QGoal, _, clause(Ref), Kind) :-
     !.
 
 assert_result(_,_,_,_,_).
-
-assert_result(IsAlias, QGoal-clause_term_position(Ref, TermPosition)) :-
-	QGoal = _:_Goal,
-	assertz(result(IsAlias, QGoal, Ref, TermPosition, [])),
-	!.
-
-assert_result(_,_). 
 
 %% find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
