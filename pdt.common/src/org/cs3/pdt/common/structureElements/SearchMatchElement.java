@@ -104,7 +104,7 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 
 	@Override
 	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
-		matches.addAll(matches);
+		matches.addAll(this.matches);
 	}
 
 }
