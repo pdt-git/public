@@ -46,7 +46,7 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 	}
 	
 	public ReferencesSearchQueryDirect(Goal goal) {
-		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 100), true);
+		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 50), true);
 		setSearchType("References to");
 		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
 		line = goal.getLine();

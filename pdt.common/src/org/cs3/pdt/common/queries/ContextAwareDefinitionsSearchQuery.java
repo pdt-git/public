@@ -33,7 +33,7 @@ public class ContextAwareDefinitionsSearchQuery extends PDTSearchQuery {
 	private int line;
 	
 	public ContextAwareDefinitionsSearchQuery(Goal goal) {
-		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 100), true);
+		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 50), true);
 		setSearchType("Definitions and declarations of");
 		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
 		line = goal.getLine();
