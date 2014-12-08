@@ -155,7 +155,11 @@ user:message_hook(Term, Level,Lines) :-
 		warning_and_error_tracing,
 		(	Term = error(_, file(File, Line, _, _))
 		->	true
-		;	prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
+		;	prolog_load_context(term_position, TermPosition),
+			(	TermPosition = '$stream_position'(_,Line,_,_,_)
+			->	true
+			;	TermPosition = '$stream_position'(_,Line,_,_)
+			),
 			prolog_load_context(source, File)
 		),
 		assertz(traced_messages(swi, Level, Line,Lines, File)),
