@@ -30,7 +30,7 @@ public class ModuleCompletionProposal extends ComparableCompletionProposal {
 	@Override
 	public String getContent(int stateMask) {
 		if (content == null) {
-			content = (module + (addSingleQuote ? "'" : "")).substring(prefixLength);
+			content = (module + (addSingleQuote ? "'" : ""));
 		}
 		return content;
 	}

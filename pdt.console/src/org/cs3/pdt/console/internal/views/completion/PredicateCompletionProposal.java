@@ -52,8 +52,8 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		} else {
 			label = signature + " - " + module;
 		}
-		term = (functor + (addSingleQuote ? "'" : "") + getArglist(arity, argNames)).substring(prefixLength);
-		indicator = (functor + (addSingleQuote ? "'" : "") + "/" + arity).substring(prefixLength);
+		term = (functor + (addSingleQuote ? "'" : "") + getArglist(arity, argNames));
+		indicator = (functor + (addSingleQuote ? "'" : "") + "/" + arity);
 		this.functor = functor + (addSingleQuote ? "'" : "");
 		this.docKind = docKind;
 		this.doc = doc;
@@ -65,7 +65,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		if ((stateMask & SWT.CTRL) != 0) {
 			return indicator;
 		} else if ((stateMask & SWT.SHIFT) != 0) {
-			return functor.substring(prefixLength);
+			return functor;
 		} else {
 			return term;
 		}

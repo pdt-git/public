@@ -26,9 +26,8 @@ import org.cs3.pdt.console.internal.views.completion.ConsoleCompletionLabelProvi
 import org.cs3.pdt.console.internal.views.completion.ContentProposalAdapter;
 import org.cs3.pdt.console.internal.views.completion.IContentProposal;
 import org.cs3.pdt.console.internal.views.completion.IContentProposalProvider;
-import org.cs3.pdt.console.internal.views.completion.IControlContentAdapter;
-import org.cs3.pdt.console.internal.views.completion.IControlContentAdapter2;
 import org.cs3.pdt.console.internal.views.completion.PrologCompletionProvider;
+import org.cs3.pdt.console.internal.views.completion.StyledTextContentAdapter;
 import org.cs3.prolog.connector.common.Debug;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -61,7 +60,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -270,6 +268,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				new ProposalProvider(),
 				new KeyStroke[]{KeyStroke.getInstance(SWT.CTRL, ' '), KeyStroke.getInstance(SWT.TAB)},
 				null);
+		contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 		contentProposalAdapter.setPopupSize(new Point(300, 200));
 		contentProposalAdapter.setLabelProvider(new ConsoleCompletionLabelProvider());
 
@@ -1261,74 +1260,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 	
-	private class StyledTextContentAdapter implements IControlContentAdapter,IControlContentAdapter2 {
-		
-		@Override
-		public String getControlContents(Control control) {
-			return ((StyledText)control).getText();
-		}
-
-		@Override
-		public int getCursorPosition(Control control) {
-			return ((StyledText)control).getCaretOffset();
-		}
-
-		@Override
-		public Rectangle getInsertionBounds(Control control) {
-			StyledText text= (StyledText)control;
-			Point caretOrigin= text.getLocationAtOffset(text.getCaretOffset());
-			return new Rectangle(caretOrigin.x + text.getClientArea().x, caretOrigin.y + text.getClientArea().y + 3, 1, text.getLineHeight());
-		}
-
-		@Override
-		public void insertControlContents(Control control, String contents, int cursorPosition) {
-			StyledText text= ((StyledText)control);
-			text.insert(contents);
-			cursorPosition= Math.min(cursorPosition, contents.length());
-			text.setCaretOffset(text.getCaretOffset() + cursorPosition);
-		}
-
-		@Override
-		public void setControlContents(Control control, String term, int cursorPosition) {
-			
-			String text = ((StyledText)control).getText();
-			
-			final String after = text.substring(((StyledText)control).getCaretOffset(), text.length());
-			text = text.substring(0, ((StyledText)control).getCaretOffset());
-			
-			// We just add the maximum ammount matched from the term
-			for (int i = term.length(); i > 0; i--) {
-				final String subterm = term.substring(0,i);
-				if (text.endsWith(subterm)) {
-					term = term.substring(i,term.length());
-					break;
-				}
-			}
-			
-			final StringBuffer buf = new StringBuffer();
-			buf.append(text);
-			buf.append(term);
-			final int len = buf.length();
-			buf.append(after);
-			((StyledText)control).setText(buf.toString());
-			((StyledText)control).setCaretOffset(len);
-		}
-
-		@Override
-		public void setCursorPosition(Control control, int index) {
-			((StyledText)control).setCaretOffset(index);
-		}
-
-		@Override
-		public Point getSelection(Control control) {
-			return ((StyledText)control).getSelection();
-		}
-
-		@Override
-		public void setSelection(Control control, Point range) {
-			((StyledText)control).setSelection(range);
-		}
-	}
 	private class ProposalProvider implements IContentProposalProvider {
 
 		@Override

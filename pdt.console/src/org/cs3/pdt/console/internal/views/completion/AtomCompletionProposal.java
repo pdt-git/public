@@ -30,7 +30,7 @@ public class AtomCompletionProposal extends ComparableCompletionProposal {
 	@Override
 	public String getContent(int stateMask) {
 		if (content == null) {
-			content = (atom + (addSingleQuote ? "'" : "")).substring(prefixLength);
+			content = (atom + (addSingleQuote ? "'" : ""));
 		}
 		return content;
 	}

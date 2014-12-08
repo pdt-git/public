@@ -31,7 +31,7 @@ public interface IContentProposal {
 	 * 
 	 * @return the String content represented by this proposal.
 	 */
-	public String getContent(int stateMask);
+	String getContent(int stateMask);
 
 	/**
 	 * Return the integer position within the contents that the cursor should be
@@ -42,7 +42,7 @@ public interface IContentProposal {
 	 *         of the cursor position is from 0..N where N is the number of
 	 *         characters in the contents.
 	 */
-	public int getCursorPosition();
+	int getCursorPosition();
 
 	/**
 	 * Return the label used to describe this proposal.
@@ -51,7 +51,7 @@ public interface IContentProposal {
 	 *         <code>null</code>, then the content will be displayed as the
 	 *         label.
 	 */
-	public String getLabel();
+	String getLabel();
 
 	/**
 	 * Return a description that describes this proposal.
@@ -59,8 +59,10 @@ public interface IContentProposal {
 	 * @return the String label used to further the proposal. If
 	 *         <code>null</code>, then no description will be displayed.
 	 */
-	public String getDescription();
+	String getDescription();
 	
-	public boolean isDeprecated();
+	boolean isDeprecated();
+
+	int getPrefixLength();
 
 }
