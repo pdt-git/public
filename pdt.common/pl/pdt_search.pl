@@ -50,10 +50,8 @@
 	pdt_source_file/2
 ]).
 :- use_module('callgraph/pdt_call_graph', [
-	ensure_call_graph_generated/0
-]).
-:- use_module('callgraph/pdt_prolog_codewalk', [
-	pdt_prolog_walk_code/1
+	ensure_call_graph_generated/0,
+	pdt_walk_code/1
 ]).
 
 :- op(600, xfy, ::).   % Logtalk message sending operator
@@ -485,7 +483,7 @@ find_module_transparent_related_alternative_predicates(EnclFile, Line, Start, En
 	;	RefTerm = _:Term
 	),
 	retractall(alternative(_, _, _, _, _)),
-	pdt_prolog_walk_code([clauses([ClauseRef]), trace_reference(RefTerm), reiterate(false), on_trace(pdt_search:assert_alternative(Start, End))]),
+	pdt_walk_code([clauses([ClauseRef]), trace_reference(RefTerm), reiterate(false), on_trace(pdt_search:assert_alternative(Start, End))]),
 	findall(a(Module, Name, Arity, File, Line2), retract(alternative(Module, Name, Arity, File, Line2)), Alternatives),
 	!,
 	Alternatives \== [].
