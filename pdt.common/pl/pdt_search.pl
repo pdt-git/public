@@ -722,7 +722,7 @@ find_completion_(SpecifiedModule:PredicatePrefix, _EnclosingFile, _LineInFile, p
 			Module-Name-Arity,
 			SpecifiedModule^(
 				declared_in_module(SpecifiedModule, Name, Arity, Module),
-				atom_concat(PredicatePrefix, _, Name)
+				is_case_insensitive_prefix_of(PredicatePrefix, Name)
 			),
 			Predicates
 		)
@@ -747,7 +747,7 @@ find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module,
 			),
 			module_of_file(File, FileModule),
 			declared_in_module(FileModule, Name, Arity, Module),
-			atom_concat(PredicatePrefix, _, Name)
+			is_case_insensitive_prefix_of(PredicatePrefix, Name)
 		),
 		Predicates
 	),
@@ -759,7 +759,7 @@ find_completion_(PredicatePrefix, EnclosingFile, _LineInFile, predicate, Module,
 	var(EnclosingFile),
 	setof(Module-Name-Arity, (
 		declared_in_module(user, Name, Arity, Module),
-		atom_concat(PredicatePrefix, _, Name)
+		is_case_insensitive_prefix_of(PredicatePrefix, Name)
 	), Predicates),
 	member(Module-Name-Arity, Predicates),
 	predicate_information(Module, Name, Arity, IsBuiltin, IsDeprecated, Visibility, ArgNames, DocKind, Doc).
@@ -836,7 +836,7 @@ var_to_arg(Arg, ArgName, Vars) :-
 find_completion_(ModulePrefix, _EnclosingFile, _LineInFile, module, _, Name, _, _, _, _, _, _, _) :- 
 	atomic(ModulePrefix),
 	current_module(Name),
-	atom_concat(ModulePrefix,_,Name).
+	is_case_insensitive_prefix_of(ModulePrefix,Name).
 
 :- if(current_prolog_flag(dialect, swi)).
 find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _, _, _, _, _) :- 
@@ -849,6 +849,11 @@ find_completion_(AtomPrefix, _EnclosingFile, _LineInFile, atom, _, Atom, _, _, _
 %	Atom \= AtomPrefix,
 	\+ current_predicate(Atom/_Arity).
 :- endif.
+
+is_case_insensitive_prefix_of(Prefix, Name) :-
+	downcase_atom(Prefix, PrefixDowncase),
+	downcase_atom(Name, NameDowncase),
+	atom_concat(PrefixDowncase, _, NameDowncase).
 
 %% find_entity_definition(SearchString, ExactMatch, Root, File, Line, Entity)
 

@@ -1991,12 +1991,10 @@ public class ContentProposalAdapter {
 	private void proposalAccepted(IContentProposal proposal, int stateMask) {
 		switch (proposalAcceptanceStyle) {
 		case (PROPOSAL_REPLACE):
-			setControlContent(proposal.getContent(stateMask), proposal
-					.getCursorPosition());
+			replaceControlContent(proposal.getContent(stateMask), proposal.getPrefixLength(), proposal.getCursorPosition());
 			break;
 		case (PROPOSAL_INSERT):
-			insertControlContent(proposal.getContent(stateMask), proposal
-					.getCursorPosition());
+			insertControlContent(proposal.getContent(stateMask), proposal.getCursorPosition());
 			break;
 		default:
 			// do nothing. Typically a listener is installed to handle this in
@@ -2012,12 +2010,11 @@ public class ContentProposalAdapter {
 	 * Set the text content of the control to the specified text, setting the
 	 * cursorPosition at the desired location within the new contents.
 	 */
-	private void setControlContent(String text, int cursorPosition) {
+	private void replaceControlContent(String text, int prefixLength, int cursorPosition) {
 		if (isValid()) {
 			// should already be false, but just in case.
 			watchModify = false;
-			controlContentAdapter.setControlContents(control, text,
-					cursorPosition);
+			controlContentAdapter.replaceControlContents(control, text, prefixLength, cursorPosition);
 		}
 	}
 

@@ -33,4 +33,9 @@ public abstract class ComparableCompletionProposal implements IContentProposal, 
 		return false;
 	}
 	
+	@Override
+	public int getPrefixLength() {
+		return prefixLength;
+	}
+	
 }

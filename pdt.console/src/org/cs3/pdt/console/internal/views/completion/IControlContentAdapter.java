@@ -30,12 +30,13 @@ public interface IControlContentAdapter {
 	 *            the control whose contents are to be set (replaced).
 	 * @param contents
 	 *            the String specifying the new control content.
-	 * @param cursorPosition
+	 * @param prefixLength
+	 * @param cursorPosition 
 	 *            the zero-based index representing the desired cursor position
 	 *            in the control's contents after the contents are set.
 	 */
-	public void setControlContents(Control control, String contents,
-			int cursorPosition);
+	public void replaceControlContents(Control control, String contents,
+			int prefixLength, int cursorPosition);
 
 	/**
 	 * Insert the specified contents into the control's current contents. Must
