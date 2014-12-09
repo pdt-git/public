@@ -29,12 +29,13 @@
                 *************************************/
 
 :- use_module(split_file_path).
-%:- use_module(library(make)).
-
 :- use_module(library(lists)).
 :- use_module(library(memfile)).
 :- use_module(library(debug)).
-
+:- if(current_prolog_flag(dialect, swi)).
+% SWI-Prolog
+:- use_module(library(make), []).
+:- endif.
 :- op(600, xfy, ::).   % Logtalk message sending operator
 
 %% pdt_reload(+File) is det.
@@ -85,7 +86,6 @@ pdt_reload__(File):-
 
 :- if(current_prolog_flag(dialect, swi)).
 % SWI-Prolog
-:- use_module(library(make)).
 pdt_reload__(File):-
 	debug(pdt_reload, 'pdt_reload(~w)', [File]),
 	
