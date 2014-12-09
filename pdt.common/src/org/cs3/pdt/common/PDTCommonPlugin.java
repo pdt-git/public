@@ -23,9 +23,6 @@ import org.cs3.pdt.common.internal.ConsultManager;
 import org.cs3.pdt.common.internal.EntryPointChangeListener;
 import org.cs3.pdt.common.internal.PDTProperties;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
-import org.cs3.pdt.connector.registry.PrologProcessRegistry;
-import org.cs3.pdt.connector.registry.PrologProcessRegistryEvent;
-import org.cs3.pdt.connector.registry.PrologProcessRegistryListener;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
@@ -56,7 +53,6 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 	public static final String PLUGIN_ID = "org.cs3.pdt.common";
 	
 	public static final String LIFE_CYCLE_HOOK_ID = "org.cs3.pdt.common.lifecycle.hook";
-	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private LifeCycleHook lifeCycleHook;
 	
 	private EntryPointChangeListener entryPointChangeListener;
@@ -120,20 +116,6 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 				PDTCommonPlugin.this.notifyProcessStartHooks(process);
 			}
 		};
-		PrologProcessRegistry registry = PDTConnectorPlugin.getDefault().getPrologProcessRegistry();
-		registry.addPrologProcessRegistryListener(new PrologProcessRegistryListener() {
-			@Override public void subscriptionRemoved(PrologProcessRegistryEvent e) {}
-			@Override public void subscriptionAdded(PrologProcessRegistryEvent e) {}
-			@Override public void processRemoved(PrologProcessRegistryEvent e) {}
-			
-			@Override
-			public void processAdded(PrologProcessRegistryEvent e) {
-				e.process.addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
-			}
-		});
-		for (String key : registry.getRegisteredKeys()) {
-			registry.getPrologProcess(key).addLifeCycleHook(lifeCycleHook, LIFE_CYCLE_HOOK_ID, EMPTY_STRING_ARRAY);
-		}
 		consultManager = new ConsultManager();
 		registerProcessStartListener(consultManager);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerConsultListener(consultManager);
@@ -278,6 +260,10 @@ public class PDTCommonPlugin extends AbstractUIPlugin implements BundleActivator
 	
 	public ProcessReconsulter getProcessReconsulter() {
 		return consultManager;
+	}
+	
+	LifeCycleHook getLifeCycleHook() {
+		return lifeCycleHook;
 	}
 
 }
