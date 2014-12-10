@@ -60,8 +60,13 @@ public class PrologCompletionProvider {
 		String module = null;
 		if (splittingOperator != null) {
 			module = retrievePrefixedModule(line, prefix.begin - splittingOperator.length());
+		} else if (prefix.prefix.isEmpty()) {
+			return EMPTY_COMPLETION_PROPOSAL;
 		}
 		if (module == null || module.isEmpty()) {
+			if (prefix.prefix.isEmpty()) {
+				return EMPTY_COMPLETION_PROPOSAL;
+			}
 			searchPrefix = QueryUtils.quoteAtomIfNeeded(prefix.prefix);
 		} else {
 			if (ParserUtils.isVarPrefix(module)){
