@@ -15,13 +15,12 @@
          [ find_predicate_reference/11                  % (+Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?PropertyList)
          , find_categorized_predicate_definitions/11       % (+EnclFile,+SelectionLine, +Term, -Functor, -Arity, -This, -DeclOrDef, -DefiningEntity, -FullPath, -Line, -Properties,-Visibility,+ExactMatch)
          , find_predicate_definitions/10
-         , find_primary_definition_visible_in/6  % (EnclFile,TermString,ReferencedModule,MainFile,FirstLine,MultifileResult)
+         , find_primary_definition_visible_in/9
          , find_definition_contained_in/9
          , find_definition_contained_in/10
          , find_completion/13
          , find_entity_definition/6
          , find_module_reference/9
-         , find_alternative_predicates/11
          , loaded_file/1
          , loaded_by/4
          ]).
@@ -289,7 +288,7 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/ 
 
-%% find_primary_definition_visible_in(+EnclFile,+SelectedLine,+TermString,?MainFile,?FirstLine,?ResultKind)
+%% find_primary_definition_visible_in(+File, +Line, +OffsetStart, +OffsetEnd, +TermString, -TargetKind, -TargetFile, -TargetLine, -TargetLabel)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity 
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either 
@@ -301,26 +300,29 @@ visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
 % 
 % ResultKind is one of: single, multifile, foreign, dynamic
         
-find_primary_definition_visible_in(EnclFile,SelectedLine,TermString,MainFile,FirstLine,ResultKind) :-
-	retrieve_term_from_atom(EnclFile, TermString, Term),
-	find_primary_definition_visible_in_(EnclFile,SelectedLine,Term,MainFile,FirstLine,ResultKind).
+find_primary_definition_visible_in(File, Line, OffsetStart, OffsetEnd, TermString, TargetKind, TargetFile, TargetLine, TargetLabel) :-
+	retrieve_term_from_atom(File, TermString, Term),
+	nonvar(Term),
+	find_primary_definition_visible_in_(File, Line, OffsetStart, OffsetEnd, Term, TargetKind, TargetFile, TargetLine, TargetLabel).
 
-retrieve_term_from_atom(EnclFile, TermString, Term) :-
-	(	module_property(Module, file(EnclFile))
+retrieve_term_from_atom(File, TermString, Term) :-
+	(	module_property(Module, file(File))
 	->	atom_concat(TermString, '.', TermStringWithDot),
 		open_chars_stream(TermStringWithDot, Stream),
 		read_term(Stream, Term, [module(Module)])
 	;	atom_to_term(TermString, Term, _)
 	).
 
-find_primary_definition_visible_in_(EnclFile, SelectedLine,Term,MainFile,FirstLine,single) :-
-    split_file_path(EnclFile, _Directory,_FileName,_,lgt),
+% Logtalk file
+find_primary_definition_visible_in_(File, Line, _OffsetStart, _OffsetEnd, Term, single, TargetFile, TargetLine, _TargetLabel) :-
+    split_file_path(File, _Directory, _FileName, _, lgt),
     !,
     current_predicate(logtalk_load/1),
-    logtalk_adapter::find_primary_definition_visible_in(EnclFile, SelectedLine,Term,_Functor,_Arity,MainFile,FirstLine).
+    logtalk_adapter::find_primary_definition_visible_in(File, Line, Term, _Functor, _Arity, TargetFile, TargetLine),
+    !.
 
-% The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in_(_EnclFile,_SelectedLine,Term,MainFile,FirstLine,single) :-
+% Logtalk message in non-Logtalk file
+find_primary_definition_visible_in_(_File, _Line, _OffsetStart, _OffsetEnd, Term, single, TargetFile, TargetLine, _TargetLabel) :-
 	Term = Obj::Call,
 	!,
     current_predicate(logtalk_load/1),
@@ -330,64 +332,70 @@ find_primary_definition_visible_in_(_EnclFile,_SelectedLine,Term,MainFile,FirstL
 	(	object_property(Obj, defines(Name/Arity, Properties))
 	;	object_property(Obj, declares(Name/Arity, Properties))
 	),
-	memberchk(line_count(FirstLine), Properties),
+	memberchk(line_count(TargetLine), Properties),
 	object_property(Obj, file(FileName, Directory)),
-	atom_concat(Directory, FileName, MainFile),
+	atom_concat(Directory, FileName, TargetFile),
 	!.
-    	
-find_primary_definition_visible_in_(EnclFile,SelectedLine,Term,MainFile,FirstLine,ResultKind) :-
-    extract_name_arity(Term, Module,_Head,Name,Arity),
-    find_primary_definition_visible_in__(EnclFile,SelectedLine,Term,Module,Name,Arity,MainFile,FirstLine,ResultKind).
 
-extract_name_arity(Term,Module,Head,Name,Arity) :-
-	(	var(Term) 
-	->	throw( 'Cannot display the definition of a variable. Please select a predicate name.' )
-	;	true
-	),
-	% Special treatment of Name/Arity terms:
-	(	Term = Module:Name/Arity
-	->	true
-	;	(	Term = Name/Arity
-		->	true
-		;	(	Term = Module:Term2
-			->	functor(Term2, Name, Arity)
-			;	functor(Term,Name,Arity)
-			)
-		)
-	),
-	% Create most general head
-	functor(Head,Name,Arity).
+% file specification/loading directive
+find_primary_definition_visible_in_(File, _Line, _OffsetStart, _OffsetEnd, Term, single, TargetFile, TargetLine, _TargetLabel) :-
+	find_file(File, Term, TargetFile, TargetLine),
+	!.
 
-% Now the second argument is a real term that is 
-%  a) a file loading directive:     
-find_primary_definition_visible_in__(EnclFile,_SelectedLine,Term,_,_,_,File,Line,single):-
-    find_file(EnclFile,Term,File,Line).
-
-%  b) a literal (call or clause head):
-% use the alternative lookup for transparent predicates to be able to find all possible targets    
-find_primary_definition_visible_in__(EnclFile,SelectedLine,_,_,_,_,_,_,_) :-
-	'$clause_from_source'(EnclFile, SelectedLine, ClauseRef),
+% metacall in a transparent predicate
+find_primary_definition_visible_in_(File, Line, OffsetStart, OffsetEnd, Term, transparent, TargetFile, TargetLine, TargetLabel) :-
+	'$clause_from_source'(File, Line, ClauseRef),
 	clause_property(ClauseRef, predicate(SrcModule:SrcName/SrcArity)),
 	functor(SrcHead, SrcName, SrcArity),
 	predicate_property(SrcModule:SrcHead, transparent),
 	\+ predicate_property(SrcModule:SrcHead, meta_predicate(_)),
+	(	Term = _:_
+	->	RefTerm = Term
+	;	RefTerm = _:Term
+	),
+	retractall(alternative(_, _, _, _, _)),
+	pdt_walk_code([clauses([ClauseRef]), trace_reference(RefTerm), reiterate(false), on_trace(pdt_search:assert_alternative(OffsetStart, OffsetEnd))]),
+	findall(a(Module, Name, Arity, File2, Line2), retract(alternative(Module, Name, Arity, File2, Line2)), Alternatives),
+	Alternatives \== [],
 	!,
-	fail.
+	member(a(RefModule, RefName, RefArity, TargetFile, TargetLine), Alternatives),
+	format(atom(TargetLabel), '~w:~w/~w', [RefModule, RefName, RefArity]).
 
-find_primary_definition_visible_in__(EnclFile,_SelectedLine,_Term,ReferencedModule,Name,Arity,MainFile,FirstLine,ResultKind) :-
-	find_definition_visible_in(EnclFile,ReferencedModule,Name,Arity,DefiningModule,Locations),
+% any other term
+find_primary_definition_visible_in_(File, _Line, _OffsetStart, _OffsetEnd, Term, TargetKind, TargetFile, TargetLine, TargetLabel) :-
+	extract_name_arity(Term, Module, _Head, Name, Arity),
+	find_definition_visible_in(File, Module, Name, Arity, _DefiningModule, Locations),
 	(	Locations = [_,_|_]
-	->	ResultKind = (multifile)
+	->	TargetKind = (multifile)
 	;	Locations = [Location],
 		(	Location = (dynamic)-_ ->
-			ResultKind = (dynamic)
+			TargetKind = (dynamic)
 		; 	Location = foreign-_ -> 
-			ResultKind = foreign
-		; 	ResultKind = single
+			TargetKind = foreign
+		; 	TargetKind = single
 		)
 	),
-	primary_location(Locations,DefiningModule,MainFile,FirstLine).
+	!,
+	member(TargetFile-[location(TargetLine, _)|_], Locations),
+	format(atom(TargetLabel), '~w:~w', [TargetFile, TargetLine]).
 
+:- if(current_prolog_flag(dialect, swi)).
+find_primary_definition_visible_in_(File, _Line, _OffsetStart, _OffsetEnd, Term, dwim, TargetFile, TargetLine, TargetLabel) :-
+	extract_name_arity(Term, Module, Head, _Name, _Arity),
+	(	var(Module)
+	->	once(module_of_file(File,FileModule)),
+		dwim_predicate(FileModule:Head, RefModule:RefHead)
+	;	dwim_predicate(Module:Head, RefModule:RefHead)
+	),
+	functor(RefHead, RefName, RefArity),
+	(	predicate_property(RefModule:RefHead, file(TargetFile)),
+		predicate_property(RefModule:RefHead, line_count(TargetLine))
+	->	true
+	;	TargetFile = foreign,
+		TargetLine = -1
+	),
+	format(atom(TargetLabel), '~w:~w/~w', [RefModule, RefName, RefArity]).
+:- endif.
 
 % If Term is a loading directive, find the related file,
 % eventually interpreting a FileSPec that contains an alias
@@ -411,82 +419,6 @@ extract_file_spec(reexport(FileSpec),FileSpec) :- !.
 extract_file_spec(reexport(FileSpec,_),FileSpec) :- !.
 extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
-    
-find_definition_visible_in(EnclFile,ReferencedModule,Name,Arity,DefiningModule,Locations) :-
-	module_of_file(EnclFile,FileModule),
-	(	atom(ReferencedModule)
-	->	true                            % Explicit module reference
-	;	ReferencedModule = FileModule   % Implicit module reference
-	),
-	(	defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
-	->	defined_in_files(DefiningModule,Name,Arity,Locations0),
-		(	Locations0 == []
-		->	declared_in_file(DefiningModule, Name, Arity, Locations)
-		;	Locations0 = Locations
-		)
-	;	declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
-		defined_in_files(DeclaringModule,Name,Arity,Locations0),
-		(	Locations0 == []
-		->	declared_in_file(DefiningModule, Name, Arity, Locations)
-		;	Locations0 = Locations
-		)
-	).
-
-primary_location(Locations,DefiningModule,File,FirstLine) :-
-    member(File-Lines,Locations),
-    module_of_file(File,DefiningModule),
-    !,
-    Lines = [location(FirstLine, _Ref)|_].
-primary_location(Locations,_,File,FirstLine) :-
-    findall( NrOfClauses-File-FirstLine,
-             ( member(File-Lines,Locations),
-               length(Lines,NrOfClauses),
-               Lines=[location(FirstLine, _Ref)|_]
-             ),
-             All
-    ),
-    sort(All, Sorted),
-    Sorted = [ NrOfClauses-File-FirstLine |_ ].
-    
-
-:- if(current_prolog_flag(dialect, swi)).
-find_alternative_predicates(EnclFile, Line, Start, End, TermString, ResultKind, RefModule, RefName, RefArity, RefFile, RefLine) :-
-	retrieve_term_from_atom(EnclFile, TermString, Term),
-	extract_name_arity(Term,Module, Head,_Name,_Arity),
-	(	find_module_transparent_related_alternative_predicates(EnclFile, Line, Start, End, Term, Alternatives)
-	->	ResultKind = transparent,
-		member(a(RefModule, RefName, RefArity, RefFile, RefLine), Alternatives)
-	;	ResultKind = dwim,
-		(	var(Module)
-		->	once(module_of_file(EnclFile,FileModule)),
-			dwim_predicate(FileModule:Head, RefModule:RefHead)
-		;	dwim_predicate(Module:Head, RefModule:RefHead)
-		),
-		functor(RefHead, RefName, RefArity),
-		(	predicate_property(RefModule:RefHead, file(RefFile)),
-			predicate_property(RefModule:RefHead, line_count(RefLine))
-		->	true
-		;	RefFile = foreign,
-			RefLine = -1
-		)
-	).
-
-find_module_transparent_related_alternative_predicates(EnclFile, Line, Start, End, Term, Alternatives) :-
-	'$clause_from_source'(EnclFile, Line, ClauseRef),
-	clause_property(ClauseRef, predicate(SrcModule:SrcName/SrcArity)),
-	functor(SrcHead, SrcName, SrcArity),
-	predicate_property(SrcModule:SrcHead, transparent),
-	\+ predicate_property(SrcModule:SrcHead, meta_predicate(_)),
-	ensure_call_graph_generated,
-	(	Term = _:_
-	->	RefTerm = Term
-	;	RefTerm = _:Term
-	),
-	retractall(alternative(_, _, _, _, _)),
-	pdt_walk_code([clauses([ClauseRef]), trace_reference(RefTerm), reiterate(false), on_trace(pdt_search:assert_alternative(Start, End))]),
-	findall(a(Module, Name, Arity, File, Line2), retract(alternative(Module, Name, Arity, File, Line2)), Alternatives),
-	!,
-	Alternatives \== [].
 	
 :- dynamic(alternative/5).
 assert_alternative(GivenStart, GivenEnd, Module0:Goal, _Caller, clause_term_position(_Ref, TermPosition), metacall(_, _)) :-
@@ -503,10 +435,35 @@ assert_alternative(GivenStart, GivenEnd, Module0:Goal, _Caller, clause_term_posi
 	assertz(alternative(Module, Name, Arity, File, Line)).
 assert_alternative(_, _, _, _, _, _).
 
-:- else.
-find_alternative_predicates(_EnclFile, _Line, _Start, _End, _TermString, _ResultKind, _RefModule, _RefName, _RefArity, _RefFile, _RefLine) :-
-	fail.
-:- endif.
+extract_name_arity(Term,Module,Head,Name,Arity) :-
+	% Special treatment of Name/Arity terms:
+	(	Term = Module:Name/Arity
+	->	true
+	;	(	Term = Name/Arity
+		->	true
+		;	(	Term = Module:Term2
+			->	functor(Term2, Name, Arity)
+			;	functor(Term,Name,Arity)
+			)
+		)
+	),
+	% Create most general head
+	functor(Head,Name,Arity).
+
+
+find_definition_visible_in(EnclFile,ReferencedModule,Name,Arity,DefiningModule,Locations) :-
+	module_of_file(EnclFile,FileModule),
+	(	atom(ReferencedModule)
+	->	true                            % Explicit module reference
+	;	ReferencedModule = FileModule   % Implicit module reference
+	),
+	declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+	defined_in_files(DeclaringModule,Name,Arity,Locations0),
+	(	Locations0 == []
+	->	declared_in_file(DefiningModule, Name, Arity, Locations)
+	;	Locations0 = Locations
+	).
+
 
         /***********************************************************************
          * Find Definitions in File                                            *
