@@ -58,7 +58,7 @@ public class ModuleDefinitionsSearchQuery extends PDTSearchQuery {
 			return null;
 		}
 
-		SearchModuleElement moduleElement = new SearchModuleElement(null, module, null);
+		SearchModuleElement moduleElement = new SearchModuleElement(null, module, null, file);
 		ModuleMatch match = new ModuleMatch(moduleElement, module, file, line);
 		moduleElement.setMatch(match);
 

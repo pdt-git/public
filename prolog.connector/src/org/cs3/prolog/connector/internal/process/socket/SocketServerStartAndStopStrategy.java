@@ -54,10 +54,10 @@ private static JackTheProcessRipper processRipper;
 			"    collect_pdt_startup_error_messages,\n" +
 			"    (Level == error; Level == warning),\n" + 
 			"    prolog_load_context(term_position, T),\n" +
-			"    (   T = '$stream_position'(_,Line,_,_,_)" +
-			"    ->  true" +
-			"    ;   T = '$stream_position'(_,Line,_,_)" +
-			"    )," +
+			"    (   T = '$stream_position'(_,Line,_,_,_)\n" +
+			"    ->  true\n" +
+			"    ;   T = '$stream_position'(_,Line,_,_)\n" +
+			"    ),\n" +
 			"    prolog_load_context(source, File),\n" +
 			"    with_output_to(atom(Msg0), (current_output(O), print_message_lines(O, '', Lines))),\n" +
 			"    format(atom(Msg), 'Location: ~w:~w~nMessage: ~w', [File, Line, Msg0]),\n" +

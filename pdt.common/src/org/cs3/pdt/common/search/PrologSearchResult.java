@@ -23,7 +23,6 @@ import org.cs3.pdt.common.queries.PDTSearchQuery;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
-import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.eclipse.core.resources.IFile;
@@ -157,8 +156,6 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	public IFile getFile(Object element) {
 		if (element instanceof IFile){
 			return (IFile) element;
-		} else if (element instanceof SearchFileTreeElement) {
-			return ((SearchFileTreeElement) element).getFile();
 		} else if (element instanceof SearchMatchElement){
 			return ((SearchMatchElement) element).getFile();
 		} else if (element instanceof PrologMatch) {
@@ -199,10 +196,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			PrologMatch prologMatch = (PrologMatch) match;
 			String module = prologMatch.getModule();
 			String visibility = prologMatch.getVisibility();
-			String signature = module + visibility;
+			String signature = getSignature(prologMatch.getModule(), prologMatch.getVisibility(), prologMatch.getFile());
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement == null) {
-				searchModuleElement = new SearchModuleElement(this, module, visibility);
+				searchModuleElement = new SearchModuleElement(this, module, visibility, prologMatch.getFile());
 				modules.put(signature, searchModuleElement);
 			}
 			searchModuleElement.addMatch(prologMatch);
@@ -210,10 +207,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			PredicateMatch predicateMatch = (PredicateMatch) match;
 			String module = predicateMatch.getModule();
 			String visibility = predicateMatch.getVisibility();
-			String signature = module + visibility;
+			String signature = getSignature(predicateMatch.getModule(), predicateMatch.getVisibility(), null);
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement == null) {
-				searchModuleElement = new SearchModuleElement(this, module, visibility);
+				searchModuleElement = new SearchModuleElement(this, module, visibility, null);
 				modules.put(signature, searchModuleElement);
 			}
 			searchModuleElement.addMatch(predicateMatch);
@@ -248,7 +245,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private void removeMatchFromResult(Match match) {
 		if (match instanceof PrologMatch) {
 			PrologMatch prologMatch = (PrologMatch) match;
-			String signature = prologMatch.getModule() + prologMatch.getVisibility();
+			String signature = getSignature(prologMatch.getModule(), prologMatch.getVisibility(), prologMatch.getFile());
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement != null) {
 				searchModuleElement.removeMatch(prologMatch);
@@ -258,7 +255,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			}
 		} else if (match instanceof PredicateMatch) {
 			PredicateMatch predicateMatch = (PredicateMatch) match;
-			String signature = predicateMatch.getModule() + predicateMatch.getVisibility();
+			String signature = getSignature(predicateMatch.getModule(), predicateMatch.getVisibility(), null);
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement != null) {
 				searchModuleElement.removeMatch(predicateMatch);
@@ -270,6 +267,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			ModuleMatch moduleMatch = (ModuleMatch) match;
 			modules.remove(moduleMatch.getModule());
 		}
+	}
+	
+	private String getSignature(String module, String visibility, IFile file) {
+		return module + "#" + visibility + "#" + (file != null ? file.getFullPath() : "");
 	}
 
 }

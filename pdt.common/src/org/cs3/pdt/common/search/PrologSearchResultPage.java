@@ -23,7 +23,6 @@ import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
-import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.pdt.connector.util.UIUtils;
@@ -102,8 +101,6 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 						m = ((SearchModuleElement) firstElement).getMatch();
 					} else if (firstElement instanceof SearchPredicateElement) {
 						m = ((SearchPredicateElement) firstElement).getFirstOccurrence();
-					} else if (firstElement instanceof SearchFileTreeElement) {
-						m = ((SearchFileTreeElement) firstElement).getFirstMatch();
 					}
 					if (m != null) {
 						final Match match = m;

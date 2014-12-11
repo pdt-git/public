@@ -16,7 +16,6 @@ package org.cs3.pdt.common.search;
 import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.pdt.common.metadata.PrologElement;
 import org.cs3.pdt.common.structureElements.PrologTreeElement;
-import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
@@ -34,16 +33,12 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 	@Override
 	public StyledString getStyledText(Object element) {
 		if (element instanceof SearchModuleElement) {
-			return new StyledString(((SearchModuleElement) element).getLabel());
+			SearchModuleElement searchModuleElement = (SearchModuleElement) element;
+			return getStyledTextWithCount(searchModuleElement.getStyledString(), searchModuleElement.computeContainedMatches());
 		} else if (element instanceof SearchPredicateElement){
 			SearchPredicateElement pe = ((SearchPredicateElement) element);
 			String label = pe.getLabel();
 			int count = pe.computeContainedMatches();
-			return getStyledTextWithCount(label, count);
-		} else if (element instanceof SearchFileTreeElement){
-			SearchFileTreeElement fileTreeElement = ((SearchFileTreeElement) element);
-			String label = fileTreeElement.getLabel();
-			int count = fileTreeElement.computeContainedMatches();
 			return getStyledTextWithCount(label, count);
 		} else if (element instanceof SearchMatchElement) {
 			return ((SearchMatchElement) element).getStyledString();
@@ -52,7 +47,10 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 	}
 	
 	private StyledString getStyledTextWithCount(String label, int count) {
-		StyledString str = new StyledString(label);
+		return getStyledTextWithCount(new StyledString(label), count);
+	}
+	
+	private StyledString getStyledTextWithCount(StyledString str, int count) {
 		str.append(" (", StyledString.COUNTER_STYLER);
 		str.append(Integer.toString(count), StyledString.COUNTER_STYLER);
 		str.append(" match", StyledString.COUNTER_STYLER);
@@ -69,15 +67,10 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 			return ImageRepository.getImage(ImageRepository.FILE);
 		} else if (element instanceof SearchMatchElement) {
 			return ImageRepository.getImage(ImageRepository.SEARCH_MATCH);
-//			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
-//			return setCategoryImage(sharedImagaes);
 		} else if(element instanceof SearchModuleElement){
-			//return ImageRepository.getImage(ImageRepository.PE_MODULE);
 			return ImageRepository.getImage(ImageRepository.ENTITY);
 		} else if(element instanceof SearchPredicateElement){
 			return setPredicateImage(element);
-		} else if(element instanceof SearchFileTreeElement){
-			return ImageRepository.getImage(ImageRepository.PROLOG_FILE_TRANSPARENT);
 		} 
 		return null;
 	}
