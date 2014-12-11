@@ -17,25 +17,38 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.StyledString;
 
 public class SearchModuleElement implements PrologSearchTreeElement, Comparable<SearchModuleElement> {
 	
+	private String moduleAndVisibiltyLabel;
 	private String label;
 	private int visibilityCode;
 	private String name;
 	private Object parent;
+	private IFile file;
 	
 	private TreeMap<String, SearchPredicateElement> predForSignature = new TreeMap<String, SearchPredicateElement>();
 	private ModuleMatch match;
 	
-	public SearchModuleElement(Object parent, String name, String visibility) {
+	public SearchModuleElement(Object parent, String name, String visibility, IFile file) {
 		this.parent = parent;
 		this.name = name;
-		if (visibility == null || visibility.isEmpty()) {
-			label = name;
-		} else {
-			label = name + " (" + visibility + ")";
+		this.file = file;
+		
+		StringBuilder buf = new StringBuilder(name);
+		if (visibility != null && !visibility.isEmpty()) {
+			buf.append(" (");
+			buf.append(visibility);
+			buf.append(')');
 		}
+		moduleAndVisibiltyLabel = buf.toString();
+		if (file != null) {
+			buf.append(" - ");
+			buf.append(file.getName());
+		}
+		label = buf.toString();
+		
 		if ("invisible".equalsIgnoreCase(visibility)) {
 			visibilityCode = 1; 
 		} else if ("sub".equalsIgnoreCase(visibility) || "descendant".equalsIgnoreCase(visibility)) {
@@ -50,6 +63,15 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	@Override
 	public String getLabel() {
 		return label;
+	}
+
+	public StyledString getStyledString() {
+		StyledString str = new StyledString(moduleAndVisibiltyLabel);
+		if (file != null) {
+			str.append(' ');
+			str.append(file.getName(), StyledString.DECORATIONS_STYLER);
+		}
+		return str;
 	}
 	
 	public String getName() {
@@ -71,8 +93,23 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 		int visibilityDifference = o.visibilityCode - this.visibilityCode;
 		if (visibilityDifference != 0) {
 			return visibilityDifference;
+		}
+		int nameDifference = name.compareTo(o.getName());
+		if (nameDifference != 0) {
+			return nameDifference;
+		}
+		if (file == null) {
+			if (o.file == null) {
+				return 0;
+			} else {
+				return 1;
+			}
 		} else {
-			return name.compareTo(o.getName());
+			if (o.file == null) {
+				return -1;
+			} else {
+				return (file.getName().compareTo(o.file.getName()));
+			}
 		}
 	}
 
@@ -143,11 +180,7 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	}
 	
 	public IFile getFile() {
-		if (match == null) {
-			return null;
-		} else {
-			return match.getFile();
-		}
+		return file;
 	}
 
 	public void setMatch(ModuleMatch match) {
@@ -169,8 +202,10 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 
 	@Override
 	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
-		for (SearchPredicateElement element : predForSignature.values()) {
-			element.collectContainedMatches(file, matches);
+		if (file.equals(this.file)) {
+			for (SearchPredicateElement element : predForSignature.values()) {
+				element.collectContainedMatches(file, matches);
+			}
 		}
 	}
 

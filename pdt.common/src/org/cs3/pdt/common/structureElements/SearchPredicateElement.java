@@ -28,7 +28,7 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 
 	private static final long serialVersionUID = 8822257720982382862L;
 	
-	private LinkedHashMap<IFile, SearchFileTreeElement> fileToFileTreeElement = new LinkedHashMap<IFile, SearchFileTreeElement>();
+	private LinkedHashMap<String, SearchMatchElement> matchesToSearchElements = new LinkedHashMap<String, SearchMatchElement>();
 	private Object parent;
 
 	private ArrayList<PredicateMatch> matches;
@@ -45,12 +45,12 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 	
 	@Override
 	public boolean hasChildren() {
-		return !fileToFileTreeElement.values().isEmpty();
+		return !matchesToSearchElements.values().isEmpty();
 	}
 
 	@Override
 	public Object[] getChildren() {
-		return fileToFileTreeElement.values().toArray();
+		return matchesToSearchElements.values().toArray();
 	}
 	
 	@Override
@@ -59,34 +59,44 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 	}
 	
 	public PrologMatch getFirstOccurrence() {
-		if (fileToFileTreeElement.values().isEmpty()) {
-			return null;
-		} else {
-			for (SearchFileTreeElement e : fileToFileTreeElement.values()) {
-				return e.getFirstMatch();
-			}
+		if (matchesToSearchElements.isEmpty()) {
 			return null;
 		}
+		PrologMatch firstMatch = null;
+		int firstLine = Integer.MAX_VALUE;
+		for (SearchMatchElement element : matchesToSearchElements.values()) {
+			PrologMatch occurence = element.getMatch();
+			int line = occurence.getLine();
+			if (firstMatch == null) {
+				firstMatch = occurence;
+				firstLine = line;
+			} else if (line < firstLine) {
+				firstLine = line;
+				firstMatch = occurence;
+			}
+		}
+		return firstMatch;
 	}
 	
 	public void removeMatch(PrologMatch match) {
-		IFile file = match.getFile();
-		if (fileToFileTreeElement.containsKey(file)) {
-			SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(file);
-			fileTreeElement.removeMatch(match);
-			if (!fileTreeElement.hasChildren()) {
-				fileToFileTreeElement.remove(file);
+		String signature = match.getSignature();
+		SearchMatchElement searchMatchElement = matchesToSearchElements.get(signature);
+		if (searchMatchElement != null) {
+			searchMatchElement.removeMatch(match);
+			if (searchMatchElement.computeContainedMatches() <= 0) {
+				matchesToSearchElements.remove(signature);
 			}
 		}
 	}
 
 	public void addMatch(PrologMatch match) {
-		SearchFileTreeElement fileTreeElement = fileToFileTreeElement.get(match.getFile());
-		if (fileTreeElement == null) {
-			fileTreeElement = new SearchFileTreeElement(this, match.getFile());
-			fileToFileTreeElement.put(fileTreeElement.getFile(), fileTreeElement);
+		SearchMatchElement searchMatchElement = matchesToSearchElements.get(match.getSignature());
+		if (searchMatchElement == null) {
+			searchMatchElement = (SearchMatchElement) match.getElement();
+			searchMatchElement.setParent(this);
+			matchesToSearchElements.put(match.getSignature(), searchMatchElement);
 		}
-		fileTreeElement.addMatch(match);
+		searchMatchElement.addMatch(match);
 	}
 
 	@Override
@@ -122,8 +132,11 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 
 	@Override
 	public int computeContainedMatches() {
+		if (hasMatches()) {
+			return matches.size();
+		}
 		int count = 0;
-		for (SearchFileTreeElement element : fileToFileTreeElement.values()) {
+		for (SearchMatchElement element : matchesToSearchElements.values()) {
 			count += element.computeContainedMatches();
 		}
 		return count;
@@ -131,7 +144,7 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 
 	@Override
 	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
-		for (SearchFileTreeElement element : fileToFileTreeElement.values()) {
+		for (SearchMatchElement element : matchesToSearchElements.values()) {
 			element.collectContainedMatches(file, matches);
 		}
 	}

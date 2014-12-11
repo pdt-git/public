@@ -13,7 +13,7 @@
 
 package org.cs3.pdt.common.search;
 
-import org.cs3.pdt.common.structureElements.SearchFileTreeElement;
+import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
@@ -27,9 +27,9 @@ public class DecoratingPrologSearchLabelProvider extends DecoratingStyledCellLab
 	
 	@Override
 	public String getToolTipText(Object element) {
-		if (element instanceof SearchFileTreeElement) {
-			SearchFileTreeElement fileTreeElement = (SearchFileTreeElement) element;
-			IFile file = fileTreeElement.getFile();
+		if (element instanceof SearchModuleElement) {
+			SearchModuleElement moduleElement = (SearchModuleElement) element;
+			IFile file = moduleElement.getFile();
 			if (ExternalPrologFilesProjectUtils.isExternalFile(file)) {
 				return file.getRawLocation().toOSString();
 			} else {
