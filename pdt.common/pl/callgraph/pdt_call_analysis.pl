@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_analysis, [find_undefined_call/10, find_dead_predicate/9, find_undeclared_meta_predicate/10]).
+:- module(pdt_call_analysis, [find_undefined_call/11, find_dead_predicate/9, find_undeclared_meta_predicate/10]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(pdt_call_graph).
@@ -52,8 +52,8 @@ assert_result(M:Goal, Caller, clause_term_position(Ref, TermPosition), Kind) :-
 	!.
 assert_result(_,_,_,_).
 
-%% find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, UndefArity, PropertyList) 
-find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, UndefArity, [line(Line)|PropertyList]) :-
+%% find_undefined_call(Root, IncludeSomeExecutionContext, Module, Name, Arity, File, Start, End, UndefName, UndefArity, PropertyList) 
+find_undefined_call(Root, IncludeSomeExecutionContext, Module, Name, Arity, File, Start, End, UndefName, UndefArity, [line(Line)|PropertyList]) :-
 	retractall(result(_, _, _, _)),
 	retractall(result_transparent(_, _, _, _, _)),
 	pdt_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
@@ -81,6 +81,19 @@ find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, Unde
 		)
 	;	nonvar(Ms),
 		sort(Ms, SortedMs),
+		(	IncludeSomeExecutionContext \== true
+		->	functor(Head, Name, Arity),
+			setof(TM,
+				Module^Head^(
+					(	TM = Module
+					;	predicate_property(TM:Head, imported_from(Module))
+					)
+				),
+				TargetModules
+			),
+			TargetModules == SortedMs
+		;	true
+		),
 		atomic_list_concat(SortedMs, ', ', ModuleList),
 		format(atom(TransparentTargetsAtom), ' in execution context ~w (context dependend)', [ModuleList]),
 		PropertyList = [suffix(TransparentTargetsAtom)|PropertyList0]
