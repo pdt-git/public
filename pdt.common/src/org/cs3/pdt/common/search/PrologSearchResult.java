@@ -54,7 +54,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	 */
 	public PrologSearchResult(PDTSearchQuery query, String searchGoalLabel) {
 		this.query = query;
-		this.searchGoalLabel = searchGoalLabel;
+		this.setSearchGoalLabel(searchGoalLabel);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public final String getLabel() {		
 		return searchType + " "
-		       + searchGoalLabel
+		       + getSearchGoalLabel()
 		       + " \u2013 "
 		       + getMatchCount() 
 		       + " matches in active Prolog Console";
@@ -271,6 +271,20 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	
 	private String getSignature(String module, String visibility, IFile file) {
 		return module + "#" + visibility + "#" + (file != null ? file.getFullPath() : "");
+	}
+
+	/**
+	 * @return the searchGoalLabel
+	 */
+	public String getSearchGoalLabel() {
+		return searchGoalLabel;
+	}
+
+	/**
+	 * @param searchGoalLabel the searchGoalLabel to set
+	 */
+	public void setSearchGoalLabel(String searchGoalLabel) {
+		this.searchGoalLabel = searchGoalLabel;
 	}
 
 }
