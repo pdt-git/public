@@ -141,7 +141,7 @@ find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile,
 			Ms
 		),
 		atomic_list_concat(Ms, ', ', ModuleList),
-		format(atom(TransparentTargetsAtom), ' in module(s) ~w (transparent)', [ModuleList])
+		format(atom(TransparentTargetsAtom), ' in execution context ~w (context dependend)', [ModuleList])
 	),
 	(	Separator == (//)
 	->	format(atom(Label), '~w//~w', [N, Arity0])

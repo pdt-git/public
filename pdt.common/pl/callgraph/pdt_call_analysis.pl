@@ -82,7 +82,7 @@ find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, Unde
 	;	nonvar(Ms),
 		sort(Ms, SortedMs),
 		atomic_list_concat(SortedMs, ', ', ModuleList),
-		format(atom(TransparentTargetsAtom), ' in module(s) ~w (transparent)', [ModuleList]),
+		format(atom(TransparentTargetsAtom), ' in execution context ~w (context dependend)', [ModuleList]),
 		PropertyList = [suffix(TransparentTargetsAtom)|PropertyList0]
 	),
 	functor(Goal, UndefName, UndefArity).
