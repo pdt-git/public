@@ -12,7 +12,7 @@
  * 
  ****************************************************************************/
 
-:- module(pdt_call_analysis, [find_undefined_call/10, find_dead_predicate/9, find_undeclared_meta_predicate/10]).
+:- module(pdt_call_analysis, [find_undefined_call/11, find_dead_predicate/9, find_undeclared_meta_predicate/10]).
 
 :- use_module(pdt_prolog_codewalk).
 :- use_module(pdt_call_graph).
@@ -27,21 +27,40 @@
 ]).
 
 :- dynamic(result/4).
+:- dynamic(result_transparent/5).
 
-assert_result(Goal, _, clause_term_position(Ref, TermPosition), Kind) :-
-    (	result(Goal, Ref, TermPosition, Kind)
-    ->	true
-    ;	assertz(result(Goal, Ref, TermPosition, Kind))
-    ),
-    !.
+assert_result(M:Goal, Caller, clause_term_position(Ref, TermPosition), Kind) :-
+	(	predicate_property(Caller, transparent),
+		\+ predicate_property(Caller, meta_predicate(_)),
+		Kind = undefined(NestedKind),
+		(	NestedKind = metacall(_, _)
+		;	NestedKind = database(_, _)
+		)
+	->	(	retract(result_transparent(Goal, Ref, TermPosition, Kind, Modules))
+		->	(	member(M, Modules)
+			->	NewModules = Modules
+			;	NewModules = [M|Modules]
+			)
+		;	NewModules = [M]
+		),
+		assertz(result_transparent(Goal, Ref, TermPosition, Kind, NewModules))
+	;	(	result(M:Goal, Ref, TermPosition, Kind)
+		->	true
+		;	assertz(result(M:Goal, Ref, TermPosition, Kind))
+		)
+	),
+	!.
 assert_result(_,_,_,_).
 
-%% find_undefined_call(Root, Module, Name, Arity, File, Start, End, PropertyList) 
-find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, UndefArity, [clause_line(Line),goal(GoalAsAtom)|PropertyList]) :-
+%% find_undefined_call(Root, IncludeSomeExecutionContext, Module, Name, Arity, File, Start, End, UndefName, UndefArity, PropertyList) 
+find_undefined_call(Root, IncludeSomeExecutionContext, Module, Name, Arity, File, Start, End, UndefName, UndefArity, [line(Line)|PropertyList]) :-
 	retractall(result(_, _, _, _)),
+	retractall(result_transparent(_, _, _, _, _)),
 	pdt_walk_code([undefined(trace), on_trace(pdt_call_analysis:assert_result)]),
 	!,
-	retract(result(Goal, Ref, TermPosition, _Kind)),
+	(	retract(result(M:Goal, Ref, TermPosition, _Kind))
+	;	retract(result_transparent(Goal, Ref, TermPosition, _Kind, Ms))
+	),
 	(	TermPosition = term_position(Start, End, _, _, _)
 	->	true
 	;	TermPosition = Start-End
@@ -54,14 +73,33 @@ find_undefined_call(Root, Module, Name, Arity, File, Start, End, UndefName, Unde
 	clause_property(Ref, predicate(Module:Name/Arity)),
 	clause_property(Ref, line_count(Line)),
 	properties_for_predicate(Module,Name,Arity,PropertyList0),
-	(	Goal = M:_,
-		M \== Module
-	->	format(atom(Prefix), '~w:', [M]),
-		PropertyList = [prefix(Prefix)|PropertyList0]
-	;	PropertyList = PropertyList0
+	(	nonvar(M)
+	->	(	M \== Module
+		->	format(atom(Prefix), '~w:', [M]),
+			PropertyList = [prefix(Prefix)|PropertyList0]
+		;	PropertyList = PropertyList0
+		)
+	;	nonvar(Ms),
+		sort(Ms, SortedMs),
+		(	IncludeSomeExecutionContext \== true
+		->	functor(Head, Name, Arity),
+			setof(TM,
+				Module^Head^(
+					(	TM = Module
+					;	predicate_property(TM:Head, imported_from(Module))
+					)
+				),
+				TargetModules
+			),
+			TargetModules == SortedMs
+		;	true
+		),
+		atomic_list_concat(SortedMs, ', ', ModuleList),
+		format(atom(TransparentTargetsAtom), ' in execution context ~w (context dependend)', [ModuleList]),
+		PropertyList = [suffix(TransparentTargetsAtom)|PropertyList0]
 	),
-	functor(Goal, UndefName, UndefArity),
-	format(atom(GoalAsAtom), '~w', [Goal]).
+	functor(Goal, UndefName, UndefArity).
+%	format(atom(GoalAsAtom), '~w', [Goal]).
 
 %% find_dead_predicate(Root, Module, Functor, Arity, File, HeadLocation, ClauseStart, ClauseEnd, PropertyList) 
 %

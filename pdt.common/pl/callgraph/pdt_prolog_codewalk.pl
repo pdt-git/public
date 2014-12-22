@@ -134,7 +134,8 @@ source file is passed into _Where.
 		    initialization,		% Initialization source
 		    undecided,			% Error to throw error
 		    evaluate:boolean, 		% Do partial evaluation
-		    call_kind).
+		    call_kind,
+		    is_transparent_meta_call:boolean=false).
 
 :- thread_local
 	multifile_predicate/3.		% Name, Arity, Module
@@ -464,15 +465,20 @@ walk_called_by_body(no_positions, Body, Module, OTerm) :-
 walk_called(Var, _, TermPos, OTerm) :-
 	var(Var), !,				% Incomplete analysis
 	undecided(Var, TermPos, OTerm).
-walk_called(M:G, _, term_position(_,_,_,_,[MPos,Pos]), OTerm) :- !,
+walk_called(M:G, M0, term_position(_,_,_,_,[MPos,Pos]), OTerm) :- !,
 	(   nonvar(M)
 	->  walk_called(G, M, Pos, OTerm)
-	;   undecided(M, MPos, OTerm)
+	;	(	nonvar(M0),
+			get_attr(M, codewalk, V),
+			V == is_context_module
+		->	walk_called(G, M0, Pos, OTerm)
+		;	undecided(M, MPos, OTerm)
+		)
 	).
-walk_called(_G, M, term_position(_,_,_,_,[MPos,_Pos]), OTerm) :-
+walk_called(_G, M, TermPos, OTerm) :-
 	var(M),
 	!,
-	undecided(M, MPos, OTerm).
+	undecided(M, TermPos, OTerm).
 walk_called((A,B), M, term_position(_,_,_,_,[PA,PB]), OTerm) :- !,
 	walk_called(A, M, PA, OTerm),
 	walk_called(B, M, PB, OTerm).
@@ -512,13 +518,35 @@ walk_called(Meta, Module, term_position(_,_,_,_,ArgPosList), OTerm) :-
 	    is_defined(Module:Meta)
 	;   true
 	),
+	% PDT Extension:
 	(   extended_meta_predicate(Module:Meta, Head)
-	;   predicate_property(Module:Meta, meta_predicate(Head))
 	;   inferred_meta(Module:Meta, Head)
+	;   predicate_property(Module:Meta, meta_predicate(Head))
 	), !,
 	walk_option_clause(OTerm, ClauseRef),
 	register_possible_meta_clause(ClauseRef),
-	walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm).
+	(	% PDT Extension:
+	    walk_option_caller(OTerm, CallerModule:CallerGoal),
+		predicate_property(CallerModule:CallerGoal, transparent),
+		\+ predicate_property(CallerModule:CallerGoal, meta_predicate(_)),
+		\+ walk_option_is_transparent_meta_call(OTerm, true)
+	->	% PDT: Meta-call in module transparent predicates
+	    set_is_transparent_meta_call_of_walk_option(true, OTerm, NewOTerm),
+		(	predicate_property(ImportingModule:CallerGoal, imported_from(CallerModule)),
+			walk_meta_call(1, Head, Meta, ImportingModule, ArgPosList, NewOTerm),
+			fail
+		;	walk_meta_call(1, Head, Meta, Module, ArgPosList, NewOTerm)
+		)
+	;	% Meta-call in non-transparent predicate or 
+	    % nested meta-call in transparent predicate:
+	    walk_meta_call(1, Head, Meta, Module, ArgPosList, OTerm)
+	).
+walk_called(context_module(M), _, _, OTerm) :-
+	walk_option_caller(OTerm, Caller),
+	predicate_property(Caller, transparent),
+	\+ predicate_property(Caller, meta_predicate(_)),
+	!,
+	put_attr(M, codewalk, is_context_module).
 walk_called(Goal, Module, _, _) :-
 	nonvar(Module),
 	is_defined(Module:Goal), !.
@@ -567,7 +595,11 @@ evaluate(A=B, _) :-
 %	The analysis trapped a definitely undefined predicate.
 
 undefined(_, _, OTerm) :-
-	walk_option_undefined(OTerm, ignore), !.
+	walk_option_undefined(OTerm, ignore),
+	!.
+%undefined(_, _, OTerm) :-
+%	walk_option_is_transparent_meta_call(OTerm, true),
+%	!.
 undefined(Goal, _, _) :-
 	predicate_property(Goal, autoload(_)), !.
 undefined(Goal, TermPos, OTerm) :-
@@ -575,10 +607,9 @@ undefined(Goal, TermPos, OTerm) :-
 	->  Why = trace
 	;   Why = undefined
 	),
-	\+ \+ (
-		set_call_kind_of_walk_option(undefined, OTerm),
-		print_reference(Goal, TermPos, Why, OTerm)
-	).
+	walk_option_call_kind(OTerm, CallKind),
+	set_call_kind_of_walk_option(undefined(CallKind), OTerm, NewOTerm),
+	print_reference(Goal, TermPos, Why, NewOTerm).
 
 %%	not_callable(+Goal, +TermPos, +OTerm)
 %
@@ -745,29 +776,21 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 	(   integer(AS)
 	->  arg(I, Meta, MA),
 	    extend(MA, AS, Goal, ArgPos, ArgPosEx, OTerm),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
-	    	walk_called(Goal, M, ArgPosEx, OTerm)
-	    )
+    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm, NewOTerm),
+    	walk_called(Goal, M, ArgPosEx, NewOTerm)
 	;   AS == (^)
 	->  arg(I, Meta, MA),
 	    remove_quantifier(MA, Goal, ArgPos, ArgPosEx, M, MG, OTerm),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
-	    	walk_called(Goal, MG, ArgPosEx, OTerm)
-	    )
+    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm, NewOTerm),
+    	walk_called(Goal, MG, ArgPosEx, NewOTerm)
 	;   AS == (//)
 	->  arg(I, Meta, DCG),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm),
-		    walk_dcg_body(DCG, M, ArgPos, OTerm)
-		)
+    	set_call_kind_of_walk_option(metacall(Meta, I), OTerm, NewOTerm),
+	    walk_dcg_body(DCG, M, ArgPos, NewOTerm)
 	;   AS == database
 	->	arg(I, Meta, MA),
-	    \+ \+ (
-	    	set_call_kind_of_walk_option(database(Meta, I), OTerm),
-			walk_called(MA, M, ArgPos, OTerm)
-		)
+    	set_call_kind_of_walk_option(database(Meta, I), OTerm, NewOTerm),
+		walk_called(MA, M, ArgPos, NewOTerm)
 	;	arg(I, Meta, Arg),
 		atomic(Arg),
 		(   AS = has_arity(_,_)
@@ -776,10 +799,8 @@ walk_meta_call_arg(AS, I, Meta, M, ArgPos, OTerm) :-
 		)
 	->	(	functor_arity_for(AS, Arg, Functor, Arity)
 		->	extend(Functor, Arity, Goal, ArgPos, ArgPosEx, OTerm),
-		    \+ \+ (
-		    	set_call_kind_of_walk_option(metacall(Meta, I, AS), OTerm),
-				walk_called(Goal, M, ArgPosEx, OTerm)
-			)
+	    	set_call_kind_of_walk_option(metacall(Meta, I, AS), OTerm, NewOTerm),
+			walk_called(Goal, M, ArgPosEx, NewOTerm)
 		;	true
 		)
 	;	true

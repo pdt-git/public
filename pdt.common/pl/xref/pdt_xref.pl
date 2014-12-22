@@ -35,20 +35,35 @@ find_unique( Goal ) :-
     member(Goal, Set).
     
 :- dynamic(result/5).
+:- dynamic(result_transparent/6).
 
-assert_result(IsAlias, QGoal, _, clause_term_position(Ref, TermPosition), Kind) :-
-    QGoal = _:_Goal,
-    assertz(result(IsAlias, QGoal, Ref, TermPosition, Kind)),
-    !.
+assert_result(IsAlias, QGoal, Caller, clause_term_position(Ref, TermPosition), Kind) :-
+	QGoal = M:Goal,
+	(	predicate_property(Caller, transparent),
+		\+ predicate_property(Caller, meta_predicate(_)),
+		(	Kind = metacall(_, _)
+		;	Kind = database(_, _)
+		)
+	->	(	retract(result_transparent(IsAlias, Goal, Ref, TermPosition, Kind, Modules))
+		->	(	member(M, Modules)
+			->	NewModules = Modules
+			;	NewModules = [M|Modules]
+			)
+		;	NewModules = [M]
+		),
+		assertz(result_transparent(IsAlias, Goal, Ref, TermPosition, Kind, NewModules))
+	;	assertz(result(IsAlias, QGoal, Ref, TermPosition, Kind))
+	),
+	!.
 assert_result(IsAlias, QGoal, _, file_term_position(File, TermPosition), Kind) :-
-    QGoal = _:_Goal,
-    assertz(result(IsAlias, QGoal, File, TermPosition, Kind)),
-    !.
+	QGoal = _:_Goal,
+	assertz(result(IsAlias, QGoal, File, TermPosition, Kind)),
+	!.
 
 assert_result(IsAlias, QGoal, _, clause(Ref), Kind) :-
-    QGoal = _:_Goal,
-    assertz(result(IsAlias, QGoal, Ref, no_term_position, Kind)),
-    !.
+	QGoal = _:_Goal,
+	assertz(result(IsAlias, QGoal, Ref, no_term_position, Kind)),
+	!.
 
 assert_result(_,_,_,_,_).
 
@@ -61,11 +76,18 @@ find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile,
 	;	Arity = Arity0
 	),
 	!,
+	(	var(Functor),
+		var(SearchMod)
+	->	fail
+	;	true
+	),
 	retractall(result(_, _, _, _, _)),
-	(	var(Functor), var(SearchMod) -> !, fail ; true),
+	retractall(result_transparent(_, _, _, _, _, _)),
 	perform_search(Functor, Arity, SearchMod, ExactMatch),
 	!,
-	retract(result(Alias, M0:ReferencingGoal, ClauseRefOrFile, Termposition, _)),
+	(	retract(result(Alias, M0:ReferencingGoal, ClauseRefOrFile, Termposition, _))
+	;	retract(result_transparent(Alias, ReferencingGoal, ClauseRefOrFile, Termposition, _, M0s))
+	),
 	(	atom(ClauseRefOrFile)
 	->	RefFile = ClauseRefOrFile,
 		(	nonvar(Root)
@@ -101,23 +123,47 @@ find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile,
 	;	Position = Line
 	),
 	functor(ReferencingGoal, N, A),
-	(	declared_in_module(M0, N, A, M)
-	->	true
-	;	M0 = M
+	(	nonvar(M0)
+	->	(	declared_in_module(M0, N, A, M)
+		->	true
+		;	M0 = M
+		)
+	;	nonvar(M0s),
+		setof(
+			M2,
+			M1^N^A^M0s^(	
+				member(M1, M0s),
+				(	declared_in_module(M1, N, A, M2)
+				->	true
+				;	M2 = M1
+				)
+			),
+			Ms
+		),
+		atomic_list_concat(Ms, ', ', ModuleList),
+		format(atom(TransparentTargetsAtom), ' in execution context ~w (context dependend)', [ModuleList])
 	),
 	(	Separator == (//)
 	->	format(atom(Label), '~w//~w', [N, Arity0])
 	;	format(atom(Label), '~w/~w', [N, A])
 	),
 	PropertyList1 = [label(Label),line(Line)|PropertyList0],
-	(	M \== RefModule
+	(	nonvar(M),
+		M \== RefModule
 	->	format(atom(Prefix), '~w:', [M]),
 		PropertyList2 = [prefix(Prefix)|PropertyList1]
 	;	PropertyList2 = PropertyList1
 	),
 	(	nonvar(Alias)
 	->	format(atom(AliasAtom), ' [alias for ~w]', [Alias]),
-		PropertyList = [suffix(AliasAtom)|PropertyList2]
+		(	nonvar(TransparentTargetsAtom)
+		->	atom_concat(TransparentTargetsAtom, AliasAtom, Suffix)
+		;	Suffix = AliasAtom
+		)
+	;	Suffix = TransparentTargetsAtom
+	),
+	(	nonvar(Suffix)
+	->	PropertyList = [suffix(Suffix)|PropertyList2]
 	;	PropertyList = PropertyList2
 	).
 
