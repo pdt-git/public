@@ -92,7 +92,8 @@ empty_module(Module) :-
     ;  empty_module__(Module), !           % checking mode
     ). 
     
-    
+% A module is empty if all its predicates are imported
+% (put differently: none of its predicates is not imported).    
 empty_module__(M) :-                       % generator skips system Modules :-(
     current_predicate(M:_/_),
     \+ ( current_predicate(M:N/A),
@@ -239,7 +240,10 @@ declared_in_module(Module,Name,Arity,DeclaringModule) :-
  
 %% declared_in_module(?Module,+Head,?DeclaringModule) is nondet.
 %
-% does not generate!
+% Unlike 
+%   declared_in_module(Module,Name,Arity,DeclaringModule),
+%   functor(Head,Name,Arity) 
+% this call does not generate, it assumes Head is instantiated!
 %
 declared_in_module(Module,Head,DeclaringModule) :-   
     (  predicate_property(Module:Head, imported_from(M)) % imported
@@ -249,24 +253,44 @@ declared_in_module(Module,Head,DeclaringModule) :-
     functor(Head,Name,Arity), 
     visible_in_module(Module,Name,Arity). % Name/arity is visible in Module   
     
-% Defined = There is at least one clause in the declaring module.
-% Then the declaring module is also a defining module.
-% Note that the clause(es) in the module can come from different files.
+%% defined_in_module(?Module,+Head) is nondet.
+%
+% There is at least one clause for Head that is physically
+% contained in Module (not just visible by import). 
+% The clause(es) in the module can come from different files
+% (because of multifile predicates).
 
 defined_in_module(Module,Head) :- 
     functor(Head,Name,Arity),
     defined_in_module(Module,Name,Arity).
 
-%% defined_in_module(Module,Name,Arity) is nondet.
+%% defined_in_module(?Module,?Name,?Arity) is nondet.
 %
+% There is at least one clause for Name/Arity that is physically
+% contained in Module (not just visible by import). 
+% The clause(es) in the module can come from different files
+% (because of multifile predicates).
+
 defined_in_module(Module,Name,Arity) :- % <<< deleted 1 argument
     defined_in_module(Module,Name,Arity,Module).
 
+%% defined_in_module(?ReferencedModule,?Name,?Arity,?DefiningModule) is nondet.
+%
+% The predicate Name/Arity visible in ReferencedModule is defined in 
+% DefiningModule. That is, there is at least one clause for Name/Arity 
+% that is physically contained in DefiningModule (not just visible by import). 
+% The clause(es) in DefiningModule can come from different files
+% (because of multifile predicates).
 defined_in_module(ReferencedModule,Name,Arity,DefiningModule) :- 
     declared_in_module(ReferencedModule,Name,Arity,DefiningModule),
     functor(Head,Name,Arity),
     \+ predicate_property(DefiningModule:Head, imported(_)).
 
+%% list_module(+Module)
+% List all predicates DEFINED in Module.
+list_module(Module) :-
+    nonvar(Module), 
+    forall( defined_in_module(Module,F,A), listing(Module:F/A) ).
  
 %% declared_but_undefined(-Module,-Name,-Arity,?DeclaringModule) is nondet
 % 
@@ -281,7 +305,7 @@ declared_but_undefined(Module,Name,Arity) :- % <<< deleted 1 argument
 
 %% referenced_but_undeclared(?Module,?Name,?Arity) is nondet
 % 
-% Succeed if the predicate Name/Arity is called in Module is but not 
+% Succeed if the predicate Name/Arity is called in Module but is not 
 % visible there. 
 referenced_but_undeclared(Module,Name,Arity) :-
     predicate_property(Module:Head,undefined),
@@ -294,15 +318,15 @@ referenced_but_undeclared(Module,Name,Arity) :-
 %  that define Module:Name/Arity.
  
 defined_in_file(Module,Name,Arity, N,File,Line) :-
+	defined_in_file(Module,Name,Arity, _Ref, N,File,Line).
+
+defined_in_file(Module,Name,Arity, Ref, N,File,Line) :-
     declared_in_module(Module,Name,Arity,Module),
     functor(Head,Name,Arity),
     nth_clause(Module:Head,N,Ref),
     clause_property(Ref,file(File)),      
     clause_property(Ref,line_count(Line)).
-%    ( module_property(M, file(F))
-%    -> DDDeclaringModule=M
-%    ;  DDDeclaringModule=unknown
-%    ).
+
 >>>>>>> 92defde0ffaad6ef7bd1d65d2c68e72011c7c32c
 
 %% declared_in_file(?Module, Head, ?File, ?Line) is nondet
