@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cs3.pdt.analysis.AnalysisPredicates;
 import org.cs3.pdt.analysis.PDTAnalysis;
@@ -114,23 +115,19 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 	}
 
 	public void clearResults(PrologFactbase factbase) {
-		List<IAnalysis> analyses = factbase.getAnalyses();
-		for (IAnalysis analysis : analyses) {
-			doClearResults(analysis);
-		}
-		try {
-			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDTAnalysis.MARKER_TYPE, false, IResource.DEPTH_INFINITE);
-			for (IMarker marker : markers) {
-				try {
-					marker.delete();
-				} catch (CoreException e) {
-					Debug.report(e);
+		synchronized (results) {
+			Set<String> analysisNames = results.keySet();
+			for (String analysisName : analysisNames) {
+				List<IResultElement> resultList = getResultList(analysisName);
+				synchronized (resultList) {
+					for (IResultElement resultElement : resultList) {
+						deleteResultMarkers(resultElement);
+					}
+					resultList.clear();
 				}
 			}
-		} catch (CoreException e) {
-			Debug.report(e);
 		}
-		fireResultsUpdated(factbase, analyses);
+		fireResultsUpdated(factbase, factbase.getAnalyses());
 	}
 
 	public void clearResults(PrologFactbase factbase, IAnalysis analysis) {
