@@ -118,6 +118,18 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 		for (IAnalysis analysis : analyses) {
 			doClearResults(analysis);
 		}
+		try {
+			IMarker[] markers = ResourcesPlugin.getWorkspace().getRoot().findMarkers(PDTAnalysis.MARKER_TYPE, false, IResource.DEPTH_INFINITE);
+			for (IMarker marker : markers) {
+				try {
+					marker.delete();
+				} catch (CoreException e) {
+					Debug.report(e);
+				}
+			}
+		} catch (CoreException e) {
+			Debug.report(e);
+		}
 		fireResultsUpdated(factbase, analyses);
 	}
 
