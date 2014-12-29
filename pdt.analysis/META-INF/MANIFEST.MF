@@ -12,3 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.text
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Export-Package: org.cs3.pdt.analysis,
+ org.cs3.pdt.analysis.model,
+ org.cs3.pdt.analysis.model.prolog,
+ org.cs3.pdt.analysis.views,
+ org.cs3.pdt.analysis.views.prolog
