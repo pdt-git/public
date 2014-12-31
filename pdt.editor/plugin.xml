@@ -3,12 +3,6 @@
 <plugin>
 
  
-	<extension
-         point="org.eclipse.ui.views">
-      <category
-            name="Prolog"
-            id="org.cs3.pdt"/>
-   </extension>
  <extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
@@ -121,6 +115,12 @@
          description="Commands for the Prolog Editor"
          id="org.cs3.pdt.editing"
          name="Prolog Editing"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Open Call Hierarchy"
+         id="org.eclipse.pdt.ui.open.call.hierarchy"
+         name="Open Call Hierarchy">
+   </command>
 </extension>
 <extension
       point="org.eclipse.ui.bindings">
@@ -167,6 +167,12 @@
          contextId="org.cs3.pdt.editor.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+G">
+   </key>
+   <key
+         commandId="org.eclipse.pdt.ui.open.call.hierarchy"
+         contextId="org.cs3.pdt.editor.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+ALT+H">
    </key>
          
 </extension>

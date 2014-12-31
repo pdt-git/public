@@ -260,4 +260,18 @@
            class="org.cs3.pdt.common.CommonRegistryHoook">
      </registryHook>
   </extension>
+  <extension
+        point="org.eclipse.ui.views">
+     <view
+           category="org.cs3.pdt"
+           class="org.cs3.pdt.common.callhierachy.CallHierarchyView"
+           icon="icons/call_hierarchy.gif"
+           id="org.cs3.pdt.common.callhierarchy"
+           name="Prolog Call Hierarchy"
+           restorable="true">
+     </view>
+      <category
+            name="Prolog"
+            id="org.cs3.pdt"/>
+  </extension>
 </plugin>
