@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
@@ -127,7 +128,7 @@ public class LocationProvider {
 							from = edge.getSource();
 							to = edge.getTarget();
 						}
-						List<Map<String, Object>> results = process.queryAll(bT("pdt_call_hierarchy:find_call_location",
+						List<Map<String, Object>> results = process.queryAll(bT(PDTCommonPredicates.FIND_CALL_LOCATION,
 								quoteAtom(from.getModule()),
 								quoteAtom(from.getName()),
 								from.getArity(),

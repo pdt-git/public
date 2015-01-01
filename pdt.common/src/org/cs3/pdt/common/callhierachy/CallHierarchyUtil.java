@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.common.PDTCommonPlugin;
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.prolog.connector.common.Debug;
@@ -126,7 +127,7 @@ public class CallHierarchyUtil {
 	
 	private static Predicate internalCreatePredicate(String moduleOrFile, String name, String arity) throws PrologProcessException {
 		PrologProcess process = PDTCommonUtil.getActivePrologProcess();
-		Map<String, Object> queryResult = process.queryOnce(bT("pdt_call_hierarchy:find_predicate_declaration_and_visibility", moduleOrFile, quoteAtom(name), arity, "DefiningModule", "Visibilty"));
+		Map<String, Object> queryResult = process.queryOnce(bT(PDTCommonPredicates.FIND_PREDICATE_DECLARATION_AND_VISIBILITY, moduleOrFile, quoteAtom(name), arity, "DefiningModule", "Visibilty"));
 		if (queryResult == null) {
 			return null;
 		}

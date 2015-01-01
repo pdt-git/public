@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
@@ -87,9 +88,9 @@ public class DeferredWorkbenchAdapter implements IDeferredWorkbenchAdapter {
 				try {
 					String predicateName;
 					if (mode == CallHierarchyView.CALLER_MODE) {
-						predicateName = "pdt_call_hierarchy:find_caller";
+						predicateName = PDTCommonPredicates.FIND_CALLER;
 					} else {
-						predicateName = "pdt_call_hierarchy:find_callee";
+						predicateName = PDTCommonPredicates.FIND_CALLEE;
 					}
 					List<Map<String, Object>> results = process.queryAll(bT(predicateName, 
 							quoteAtom(source.getModule()),

@@ -45,6 +45,12 @@ public class PDTCommonPredicates {
 	// meta predicate search
 	public static final String FIND_UNDECLARED_META_PREDICATE = "pdt_call_analysis:find_undeclared_meta_predicate";
 	
+	// call hierarchy
+	public static final String FIND_PREDICATE_DECLARATION_AND_VISIBILITY = "pdt_call_hierarchy:find_predicate_declaration_and_visibility";
+	public static final String FIND_CALLER = "pdt_call_hierarchy:find_caller";
+	public static final String FIND_CALLEE = "pdt_call_hierarchy:find_callee";
+	public static final String FIND_CALL_LOCATION = "pdt_call_hierarchy:find_call_location";
+	
 }
 
 
