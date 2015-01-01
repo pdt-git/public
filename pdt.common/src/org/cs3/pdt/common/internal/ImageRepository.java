@@ -46,6 +46,8 @@ public class ImageRepository {
 	public static final String CH_REFRESH = "refresh.gif";
 	public static final String CH_CALLERS = "ch_callers.gif";
 	public static final String CH_CALLEES = "ch_callees.gif";
+	public static final String CH_SCOPE_WORKSPACE = "workspace_obj.gif";
+	public static final String CH_SCOPE_PROJECT = "prj_obj.gif";
 	public static final String CH_HISTORY_LIST = "history_list.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {

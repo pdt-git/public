@@ -14,13 +14,19 @@
 package org.cs3.pdt.common.callhierachy;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cs3.pdt.common.internal.ImageRepository;
+import org.cs3.pdt.connector.util.ExternalPrologFilesProjectUtils;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcessException;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IToolBarManager;
@@ -34,6 +40,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -43,6 +50,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -56,14 +64,128 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Sash;
+import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.part.ViewPart;
 
 public class CallHierarchyView extends ViewPart {
+	
+	private class ScopeAction extends Action implements IMenuCreator {
+		
+		private ScopeAction() {
+			setText(null);
+			setToolTipText("Select Scope");
+			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CH_SCOPE_WORKSPACE));
+			setMenuCreator(this);
+		}
+		
+		@Override
+		public void run() {
+			if (scope != null) {
+				askAndSelectProjectScope();
+			}
+		}
+
+		private Menu menu;
+		
+		@Override
+		public void dispose() {
+			if (menu != null) {
+				menu.dispose();
+			}
+		}
+		
+		@Override
+		public Menu getMenu(Control parent) {
+			if (menu != null) {
+				menu.dispose();
+			}
+			Menu newMenu = new Menu(parent);
+			MenuItem setWorkspaceScope = new MenuItem(newMenu, SWT.PUSH);
+			setWorkspaceScope.setText("Workspace");
+			setWorkspaceScope.setImage(ImageRepository.getImage(ImageRepository.CH_SCOPE_WORKSPACE));
+			setWorkspaceScope.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					setScope(null);
+					setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CH_SCOPE_WORKSPACE));
+				}
+			});
+			MenuItem setProjectScope = new MenuItem(newMenu, SWT.PUSH);
+			setProjectScope.setText("Project...");
+			setProjectScope.setImage(ImageRepository.getImage(ImageRepository.CH_SCOPE_PROJECT));
+			setProjectScope.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					askAndSelectProjectScope();
+				}
+			});
+			menu = newMenu;
+			return menu;
+		}
+
+		@Override
+		public Menu getMenu(Menu parent) {
+			return null;
+		}
+
+		void askAndSelectProjectScope() {
+			ListDialog dialog = new ListDialog(getSite().getShell());
+			dialog.setTitle("Prolog Call Hierarchy");
+			dialog.setMessage("Select Project Scope");
+			dialog.setHelpAvailable(false);
+			dialog.setContentProvider(new ArrayContentProvider());
+			dialog.setLabelProvider(new LabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof IProject) {
+						return ((IProject) element).getName();
+					}
+					return super.getText(element);
+				}
+				@Override
+				public Image getImage(Object element) {
+					return null;
+				}
+			});
+			dialog.setInput(getProjects());
+			int result = dialog.open();
+			if (result == Window.OK) {
+				Object[] selectedProjects = dialog.getResult();
+				if (selectedProjects.length == 1 && selectedProjects[0] instanceof IProject) {
+					setScope((IProject) selectedProjects[0]);
+					setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CH_SCOPE_PROJECT));
+				}
+			}
+		}
+
+		private ArrayList<IProject> getProjects() {
+			ArrayList<IProject> projects = new ArrayList<>();
+			IProject externalPrologFiles = null;
+			try {
+				externalPrologFiles = ExternalPrologFilesProjectUtils.getExternalPrologFilesProject();
+			} catch (CoreException e) {
+				Debug.report(e);
+			}
+	    	for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+	    		if (project.isAccessible() && (!(externalPrologFiles.isAccessible() && project.equals(externalPrologFiles)))) {
+	    			projects.add(project);
+	    		}
+	    	}
+	    	Collections.sort(projects, new Comparator<IProject>() {
+				@Override
+				public int compare(IProject o1, IProject o2) {
+					return String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName());
+				}
+			});
+			return projects;
+		}
+	}
 	
 	private class HistoryAction extends Action implements IMenuCreator {
 		
 		private HistoryAction() {
 			setText(null);
+			setToolTipText("Select Root From History");
 			setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CH_HISTORY_LIST));
 			setMenuCreator(this);
 		}
@@ -76,6 +198,7 @@ public class CallHierarchyView extends ViewPart {
 				menu.dispose();
 			}
 		}
+		
 		@Override
 		public Menu getMenu(Control parent) {
 			if (menu != null) {
@@ -111,6 +234,7 @@ public class CallHierarchyView extends ViewPart {
 			});
 			item.setSelection(predicate.equals(root));
 		}
+		
 		@Override
 		public Menu getMenu(Menu parent) {
 			return null;
@@ -136,12 +260,15 @@ public class CallHierarchyView extends ViewPart {
 	private Action callerAction;
 	private Action calleeAction;
 	private Action historyAction;
+	private Action scopeAction;
 	
 	private List<Predicate> history;
 
 	private int mode = -1;
 	
 	private Predicate root;
+	
+	private IProject scope;
 	
 	private DeferredWorkbenchAdapter deferredWorkbenchAdapter = new DeferredWorkbenchAdapter();
 	
@@ -164,7 +291,7 @@ public class CallHierarchyView extends ViewPart {
 		
 		initToolbar();
 		
-		initMode();
+		init();
 		
 		history = CallHierarchyUtil.loadHistory();
 	}
@@ -284,7 +411,7 @@ public class CallHierarchyView extends ViewPart {
 	private void initToolbar() {
 		IToolBarManager toolBarManager = getViewSite().getActionBars().getToolBarManager();
 		
-		setRootAction = new Action("Set root predicate") {
+		setRootAction = new Action("Set Root Predicate") {
 			private final Pattern p = Pattern.compile("([^:]+):([^:/]+)/(\\d+)");
 			@Override
 			public void run() {
@@ -351,11 +478,14 @@ public class CallHierarchyView extends ViewPart {
 		calleeAction.setToolTipText(calleeAction.getText());
 		toolBarManager.add(calleeAction);
 		
+		scopeAction = new ScopeAction();
+		toolBarManager.add(scopeAction);
+		
 		historyAction = new HistoryAction();
 		toolBarManager.add(historyAction);
 	}
 
-	private void initMode() {
+	private void init() {
 		int mode;
 		try {
 			mode = CallHierarchyUtil.getSettings().getInt(MODE_PREFERENCE);
@@ -390,13 +520,36 @@ public class CallHierarchyView extends ViewPart {
 		}
 	}
 	
+	private void setScope(IProject scope) {
+		if (this.scope == null && scope == null
+				|| this.scope != null && this.scope.equals(scope)) {
+			return;
+		}
+		this.scope = scope;
+		
+		deferredWorkbenchAdapter.setScope(scope);
+		locationProvider.setScope(scope);
+		
+		updateLabel();
+		refresh();
+	}
+	
 	private void updateLabel() {
 		if (root != null) {
+			StringBuilder buf = new StringBuilder();
 			if (mode == CALLER_MODE) {
-				setContentDescription("Predicates calling " + root.getLabel());
+				buf.append("Predicates calling ");
 			} else {
-				setContentDescription("Calls of " + root.getLabel());
+				buf.append("Calls of ");
 			}
+			buf.append(root.getLabel());
+			buf.append(" \u2013 in ");
+			if (scope != null) {
+				buf.append(scope.getName());
+			} else {
+				buf.append("Workspace");
+			}
+			setContentDescription(buf.toString());
 		} else {
 			setContentDescription("Select a root predicate to display its call hierarchy");
 		}

@@ -24,7 +24,9 @@ import java.util.Map;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.PrologProcess;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -46,6 +48,8 @@ public class DeferredWorkbenchAdapter implements IDeferredWorkbenchAdapter {
 	};
 	
 	private int mode;
+
+	private IProject scope;
 
 	@Override
 	public Object[] getChildren(Object o) {
@@ -96,7 +100,7 @@ public class DeferredWorkbenchAdapter implements IDeferredWorkbenchAdapter {
 							quoteAtom(source.getModule()),
 							quoteAtom(source.getName()),
 							source.getArity(),
-							"_",
+							scope != null ? QueryUtils.prologFileNameQuoted(scope.getLocation().toFile()) : "_",
 							"TargetModule",
 							"TargetName",
 							"TargetArity",
@@ -143,6 +147,10 @@ public class DeferredWorkbenchAdapter implements IDeferredWorkbenchAdapter {
 
 	public void setMode(int mode) {
 		this.mode = mode;
+	}
+	
+	public void setScope(IProject scope) {
+		this.scope = scope;
 	}
 
 }

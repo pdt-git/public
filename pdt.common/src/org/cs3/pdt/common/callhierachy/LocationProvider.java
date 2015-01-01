@@ -27,8 +27,10 @@ import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.util.FileUtils;
 import org.cs3.pdt.connector.util.UIUtils;
 import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,6 +49,8 @@ public class LocationProvider {
 	private int mode;
 
 	private TableViewer locationTableViewer;
+
+	private IProject scope;
 
 	public LocationProvider(TableViewer locationTableViewer) {
 		this.locationTableViewer = locationTableViewer;
@@ -135,7 +139,7 @@ public class LocationProvider {
 								quoteAtom(to.getModule()),
 								quoteAtom(to.getName()),
 								to.getArity(),
-								"_",
+								scope != null ? QueryUtils.prologFileNameQuoted(scope.getLocation().toFile()) : "_",
 								"File",
 								"Position"));
 						for (Map<String,Object> result : results) {
@@ -187,6 +191,10 @@ public class LocationProvider {
 
 	public void setMode(int mode) {
 		this.mode = mode;
+	}
+	
+	public void setScope(IProject scope) {
+		this.scope = scope;
 	}
 
 }
