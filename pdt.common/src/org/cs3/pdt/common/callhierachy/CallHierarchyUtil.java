@@ -126,7 +126,7 @@ public class CallHierarchyUtil {
 	
 	private static Predicate internalCreatePredicate(String moduleOrFile, String name, String arity) throws PrologProcessException {
 		PrologProcess process = PDTCommonUtil.getActivePrologProcess();
-		Map<String, Object> queryResult = process.queryOnce(bT("pdt_call_hierarchy:predicate_visibility_for_input", moduleOrFile, quoteAtom(name), arity, "DefiningModule", "Visibilty"));
+		Map<String, Object> queryResult = process.queryOnce(bT("pdt_call_hierarchy:find_predicate_declaration_and_visibility", moduleOrFile, quoteAtom(name), arity, "DefiningModule", "Visibilty"));
 		if (queryResult == null) {
 			return null;
 		}

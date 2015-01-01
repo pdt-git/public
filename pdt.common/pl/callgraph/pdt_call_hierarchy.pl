@@ -13,8 +13,7 @@
  ****************************************************************************/
 
 :- module(pdt_call_hierarchy, [
-	predicate_visibility_for_input/5,
-	predicate_visibility/5,
+	find_predicate_declaration_and_visibility/5,
 	find_caller/9,
 	find_callee/9,
 	find_call_location/9
@@ -31,41 +30,44 @@
 	pdt_walk_code/1
 ]).
 
-%% predicate_visibility_for_input(ModuleOrFile, Name, Arity, DeclaringModule, Visibility)
-predicate_visibility_for_input(ModuleOrFile, Name, Arity, DeclaringModule, Visibility) :-
+%% find_predicate_declaration_and_visibility(ModuleOrFile, Name, Arity, DeclaringModule, Visibility)
+find_predicate_declaration_and_visibility(ModuleOrFile, Name, Arity, DeclaringModule, Visibility) :-
 	(	ModuleOrFile = module(Module)
 	->	true
 	;	ModuleOrFile = file(File),
 		source_file(File),
 		once(module_of_file(File, Module))
 	),
-	predicate_visibility(Module, Name, Arity, DeclaringModule, Visibility).
-
-%% predicate_visibility(Module, Name, Arity, DeclaringModule, Visibility)
-predicate_visibility(Module, Name, Arity, DeclaringModule, Visibility) :-
 	(	declared_in_module(Module, Name, Arity, DeclaringModule)
+	->	true
+	;	DeclaringModule = Module
+	),
+	predicate_visibility(DeclaringModule, Name, Arity, Visibility).
+
+%% predicate_visibility(Module, Name, Arity, Visibility)
+predicate_visibility(Module, Name, Arity, Visibility) :-
+	(	visible_in_module(Module, Name, Arity)
 	->	(	(	Module == user
 			;	functor(Head, Name, Arity),
-				predicate_property(DeclaringModule:Head, exported)
+				predicate_property(Module:Head, exported)
 			)
 		->	Visibility = exported
 		;	Visibility = non_exported
 		)
-	;	DeclaringModule = Module,
-		Visibility = undefined
+	;	Visibility = undefined
 	).
 
 %% find_caller(Module, Name, Arity, Root, CallerModule, CallerName, CallerArity, Count, Visibility)
 find_caller(Module, Name, Arity, _Root, CallerModule, CallerName, CallerArity, Count, Visibility) :-
 	ensure_call_graph_generated,
 	calls(Module, Name, Arity, CallerModule, CallerName, CallerArity, Count),
-	predicate_visibility(CallerModule, CallerName, CallerArity, _, Visibility).
+	predicate_visibility(CallerModule, CallerName, CallerArity, Visibility).
 	
 %% find_callee(Module, Name, Arity, Root, CalleeModule, CalleeName, CalleeArity, Count, Visibility)
 find_callee(Module, Name, Arity, _Root, CalleeModule, CalleeName, CalleeArity, Count, Visibility) :-
 	ensure_call_graph_generated,
 	calls(CalleeModule, CalleeName, CalleeArity, Module, Name, Arity, Count),
-	predicate_visibility(CalleeModule, CalleeName, CalleeArity, _, Visibility).
+	predicate_visibility(CalleeModule, CalleeName, CalleeArity, Visibility).
  
 %% find_call_location(CallerModule, CallerName, CallerArity, CalleeModule, CalleeName, CalleeArity, Root, File, Location)
 find_call_location(CallerModule, CallerName, CallerArity, CalleeModule, CalleeName, CalleeArity, Root, File, Location) :-
