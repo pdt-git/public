@@ -21,13 +21,19 @@
 
 :- use_module(pdt_prolog_library(utils4modules_visibility), [
 	declared_in_module/4,
+	visible_in_module/3,
 	module_of_file/2
 ]).
 
 :- use_module(pdt_call_graph, [
 	ensure_call_graph_generated/0,
 	calls/7,
+	calls_multifile/8,
 	pdt_walk_code/1
+]).
+
+:- use_module(library(lists), [
+	sum_list/2
 ]).
 
 %% find_predicate_declaration_and_visibility(ModuleOrFile, Name, Arity, DeclaringModule, Visibility)
@@ -58,15 +64,50 @@ predicate_visibility(Module, Name, Arity, Visibility) :-
 	).
 
 %% find_caller(Module, Name, Arity, Root, CallerModule, CallerName, CallerArity, Count, Visibility)
-find_caller(Module, Name, Arity, _Root, CallerModule, CallerName, CallerArity, Count, Visibility) :-
+find_caller(Module, Name, Arity, Root, CallerModule, CallerName, CallerArity, Count, Visibility) :-
 	ensure_call_graph_generated,
-	calls(Module, Name, Arity, CallerModule, CallerName, CallerArity, Count),
+	(	var(Root)
+	->	calls(Module, Name, Arity, CallerModule, CallerName, CallerArity, Count)
+	;	(	functor(Head, Name, Arity),	
+			predicate_property(Module:Head, multifile)
+		->	bagof(
+				NumberOfCalls,
+				Module^Name^Arity^File^(	
+					calls_multifile(Module, Name, Arity, CallerModule, CallerName, CallerArity, File, NumberOfCalls),
+					atom_concat(Root, _, File)
+				),
+				Counts
+			),
+			sum_list(Counts, Count)
+		;	calls(Module, Name, Arity, CallerModule, CallerName, CallerArity, Count),
+			functor(CallerHead, CallerName, CallerArity),
+			predicate_property(CallerModule:CallerHead, file(File)),
+			atom_concat(Root, _, File)
+		)
+	),
 	predicate_visibility(CallerModule, CallerName, CallerArity, Visibility).
 	
 %% find_callee(Module, Name, Arity, Root, CalleeModule, CalleeName, CalleeArity, Count, Visibility)
-find_callee(Module, Name, Arity, _Root, CalleeModule, CalleeName, CalleeArity, Count, Visibility) :-
+find_callee(Module, Name, Arity, Root, CalleeModule, CalleeName, CalleeArity, Count, Visibility) :-
 	ensure_call_graph_generated,
-	calls(CalleeModule, CalleeName, CalleeArity, Module, Name, Arity, Count),
+	(	var(Root)
+	->	calls(CalleeModule, CalleeName, CalleeArity, Module, Name, Arity, Count)
+	;	functor(Head, Name, Arity),
+		(	predicate_property(Module:Head, multifile)
+		->	bagof(
+				NumberOfCalls,
+				Module^Name^Arity^File^(	
+					calls_multifile(CalleeModule, CalleeName, CalleeArity, Module, Name, Arity, File, NumberOfCalls),
+					atom_concat(Root, _, File)
+				),
+				Counts
+			),
+			sum_list(Counts, Count)
+		;	predicate_property(Module:Head, file(File)),
+			atom_concat(Root, _, File),
+			calls(CalleeModule, CalleeName, CalleeArity, Module, Name, Arity, Count)
+		)
+	),
 	predicate_visibility(CalleeModule, CalleeName, CalleeArity, Visibility).
  
 %% find_call_location(CallerModule, CallerName, CallerArity, CalleeModule, CalleeName, CalleeArity, Root, File, Location)
