@@ -59,7 +59,7 @@ public class ResultGroup implements IResultElement {
 
 	@Override
 	public int compareTo(IResultElement o) {
-		return analysisName.compareTo(o.getAnalysisName());
+		return String.CASE_INSENSITIVE_ORDER.compare(analysisName, o.getAnalysisName());
 	}
 
 }

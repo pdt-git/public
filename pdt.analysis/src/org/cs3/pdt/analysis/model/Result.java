@@ -88,12 +88,12 @@ public class Result implements IResult {
 
 	@Override
 	public int compareTo(IResultElement o) {
-		int c = analysisName.compareTo(o.getAnalysisName());
+		int c = String.CASE_INSENSITIVE_ORDER.compare(analysisName, o.getAnalysisName());
 		if (c != 0) {
 			return c;
 		}
 		if (o instanceof IResult) {
-			c = file.getName().compareTo(((IResult) o).getResource().getName());
+			c = String.CASE_INSENSITIVE_ORDER.compare(file.getName(), ((IResult) o).getResource().getName());
 			if (c != 0) {
 				return c;
 			}

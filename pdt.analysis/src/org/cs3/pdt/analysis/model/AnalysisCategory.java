@@ -60,7 +60,7 @@ public class AnalysisCategory implements IAnalysisCategory {
 
 	@Override
 	public int compareTo(IAnalysisCategory o) {
-		return getName().compareTo(o.getName());
+		return String.CASE_INSENSITIVE_ORDER.compare(getName(), o.getName());
 	}
 	
 	public void addAnalysis(IAnalysis analysis) {
