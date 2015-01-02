@@ -30,6 +30,7 @@ import org.cs3.pdt.analysis.model.IFactbase;
 import org.cs3.pdt.analysis.model.IResult;
 import org.cs3.pdt.analysis.model.IResultElement;
 import org.cs3.pdt.analysis.model.Result;
+import org.cs3.pdt.analysis.model.ResultList;
 import org.cs3.pdt.common.PDTCommonPlugin;
 import org.cs3.pdt.common.PrologProcessStartListener;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
@@ -69,7 +70,7 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 		initializeFromMarkers();
 	}
 	
-	private HashMap<String, List<IResultElement>> results = new HashMap<>();
+	private HashMap<String, ResultList> results = new HashMap<>();
 	
 	private HashMap<String, PrologFactbase> factbases = new HashMap<>();
 	
@@ -89,18 +90,18 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 	}
 
 	public List<IResultElement> getResults(IAnalysis analysis) {
-		List<IResultElement> resultList = getResultList(analysis.getName());
+		ResultList resultList = getResultList(analysis.getName());
 		synchronized (resultList) {
-			return new ArrayList<>(resultList);
+			return resultList.getResults();
 		}
 	}
 
-	private List<IResultElement> getResultList(String name) {
-		List<IResultElement> resultList;
+	private ResultList getResultList(String name) {
+		ResultList resultList;
 		synchronized (results) {
 			resultList = results.get(name);
 			if (resultList == null) {
-				resultList = new ArrayList<>();
+				resultList = new ResultList(name);
 				results.put(name, resultList);
 			}
 		}
@@ -108,9 +109,9 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 	}
 
 	public int getNumberOfResults(IAnalysis analysis) {
-		List<IResultElement> resultList = getResultList(analysis.getName());
+		ResultList resultList = getResultList(analysis.getName());
 		synchronized (resultList) {
-			return resultList.size();
+			return resultList.getNumberOfResults();
 		}
 	}
 
@@ -118,12 +119,12 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 		synchronized (results) {
 			Set<String> analysisNames = results.keySet();
 			for (String analysisName : analysisNames) {
-				List<IResultElement> resultList = getResultList(analysisName);
+				ResultList resultList = getResultList(analysisName);
 				synchronized (resultList) {
-					for (IResultElement resultElement : resultList) {
+					for (IResultElement resultElement : resultList.getResults()) {
 						deleteResultMarkers(resultElement);
 					}
-					resultList.clear();
+					resultList.clearResults();
 				}
 			}
 		}
@@ -145,12 +146,12 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 	}
 	
 	private void doClearResults(IAnalysis analysis) {
-		List<IResultElement> resultList = getResultList(analysis.getName());
+		ResultList resultList = getResultList(analysis.getName());
 		synchronized (resultList) {
-			for (IResultElement resultElement : resultList) {
+			for (IResultElement resultElement : resultList.getResults()) {
 				deleteResultMarkers(resultElement);
 			}
-			resultList.clear();
+			resultList.clearResults();
 		}
 	}
 	
@@ -212,7 +213,7 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 				monitor.subTask(" : " + analysisName + " : Processing results");
 				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
 				subMonitor.beginTask("Processing results", results.size());
-				List<IResultElement> resultList = getResultList(analysisName);
+				ResultList resultList = getResultList(analysisName);
 				synchronized (resultList) {
 					for (Map<String, Object> result : results) {
 						try {
@@ -247,8 +248,8 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 							MarkerUtilities.setCharEnd(marker, end);
 							MarkerUtilities.setLineNumber(marker, line);
 							r.setMarker(marker);
-							resultList.add(r);
-						} catch (Exception e) {
+							resultList.addResult(r);
+						} catch (Exception e){
 							Debug.report(e);
 						}
 						subMonitor.worked(1);
@@ -277,10 +278,10 @@ public class PrologResultModel extends AbstractResultModel implements ConsultLis
 							if (analysisName == null || description == null || severityValue == -1 || !(resource instanceof IFile)) {
 								continue;
 							}
-							List<IResultElement> resultList = getResultList(analysisName);
+							ResultList resultList = getResultList(analysisName);
 							Result result = new Result(analysisName, description, PDTAnalysis.getSeverityText(severityValue), (IFile) resource, null);
 							result.setMarker(marker);
-							resultList.add(result);
+							resultList.addResult(result);
 						}
 					} catch (Exception e) {
 						Debug.report(e);
