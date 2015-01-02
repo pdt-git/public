@@ -13,14 +13,14 @@
  ****************************************************************************/
 package org.cs3.pdt.analysis.model;
 
-import java.util.ArrayList;
+import java.util.TreeSet;
 
 public class ResultGroup implements IResultElement {
 	
 	private String analysisName;
 	private String description;
 	private IResultElement parent;
-	private ArrayList<IResultElement> children = new ArrayList<>();
+	private TreeSet<IResultElement> children = new TreeSet<>();
 
 	public ResultGroup(String analysisName, String description, IResultElement parent) {
 		this.analysisName = analysisName;
