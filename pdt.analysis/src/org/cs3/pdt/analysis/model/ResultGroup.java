@@ -15,7 +15,7 @@ package org.cs3.pdt.analysis.model;
 
 import java.util.TreeSet;
 
-public class ResultGroup implements IResultElement {
+public class ResultGroup implements IResultElementGroup {
 	
 	private String analysisName;
 	private String description;
@@ -59,7 +59,14 @@ public class ResultGroup implements IResultElement {
 
 	@Override
 	public int compareTo(IResultElement o) {
-		return String.CASE_INSENSITIVE_ORDER.compare(analysisName, o.getAnalysisName());
+		int c = String.CASE_INSENSITIVE_ORDER.compare(analysisName, o.getAnalysisName());
+		if (c != 0) {
+			return c;
+		}
+		if (o instanceof IResultElementGroup) {
+			return String.CASE_INSENSITIVE_ORDER.compare(description, o.getDescription());
+		}
+		return 0;
 	}
 
 }
