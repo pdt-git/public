@@ -14,6 +14,7 @@
 package org.cs3.pdt.analysis.views;
 
 import org.cs3.pdt.analysis.model.IResult;
+import org.cs3.pdt.analysis.model.IResultElement;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 
 public class ResultTableLocationColumnLabelProvider extends ColumnLabelProvider {
@@ -22,6 +23,9 @@ public class ResultTableLocationColumnLabelProvider extends ColumnLabelProvider 
 	public String getText(Object element) {
 		if (element instanceof IResult) {
 			return "Line: " + Integer.toString(((IResult) element).getLine() + 1);
+		}
+		if (element instanceof IResultElement) {
+			return "";
 		}
 		return super.getText(element);
 	}

@@ -18,6 +18,8 @@ import org.cs3.pdt.analysis.model.IResult;
 import org.cs3.pdt.analysis.model.IResultElement;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 public class ResultTableDescriptionColumnLabelProvider extends ColumnLabelProvider {
 	
@@ -42,7 +44,7 @@ public class ResultTableDescriptionColumnLabelProvider extends ColumnLabelProvid
 				return ImageRepository.getImage(ImageRepository.ICON_MARKER_ERROR);
 			}
 		} else if (element instanceof IResultElement && ((IResultElement) element).hasChildren()) {
-			return null;
+			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 		}
 		return super.getImage(element);
 	}
