@@ -69,9 +69,12 @@ public abstract class AbstractAnalysisView extends ViewPart {
 	private CheckboxTreeViewer analysisTreeViewer;
 	private TreeViewer resultTreeViewer;
 	
+	private TreeViewerColumn[] analysisTreeViewerColumns;
+	private TreeViewerColumn[] resultTreeViewerColumns;
+	
 	private AnalysisTableContentProvider analysisContentProvider;
 	private ResultTableContentProvider resultContentProvider;
-
+	
 	public AbstractAnalysisView(){
 	}
 	
@@ -85,6 +88,14 @@ public abstract class AbstractAnalysisView extends ViewPart {
 
 	protected TreeViewer getResultTreeViewer() {
 		return resultTreeViewer;
+	}
+
+	protected TreeViewerColumn[] getAnalysisTreeViewerColumns() {
+		return analysisTreeViewerColumns;
+	}
+
+	protected TreeViewerColumn[] getResultTreeViewerColumns() {
+		return resultTreeViewerColumns;
 	}
 
 	protected AnalysisTableContentProvider getAnalysisContentProvider() {
@@ -250,24 +261,24 @@ public abstract class AbstractAnalysisView extends ViewPart {
 		treeViewer.setContentProvider(resultContentProvider);
 		treeViewer.setInput(new Object());
 
-		TreeViewerColumn[] columns = new TreeViewerColumn[3];
+		resultTreeViewerColumns = new TreeViewerColumn[3];
 
-		for (int i = 0; i < columns.length; i++) {
-			columns[i] = new TreeViewerColumn(treeViewer, SWT.NONE);
-			columns[i].getColumn().setMoveable(true);
+		for (int i = 0; i < resultTreeViewerColumns.length; i++) {
+			resultTreeViewerColumns[i] = new TreeViewerColumn(treeViewer, SWT.NONE);
+			resultTreeViewerColumns[i].getColumn().setMoveable(true);
 		}
 
-		columns[0].getColumn().setWidth(300);
-		columns[0].getColumn().setText("Description");
-		columns[0].setLabelProvider(new ResultTableDescriptionColumnLabelProvider());
+		resultTreeViewerColumns[0].getColumn().setWidth(300);
+		resultTreeViewerColumns[0].getColumn().setText("Description");
+		resultTreeViewerColumns[0].setLabelProvider(new ResultTableDescriptionColumnLabelProvider());
 		
-		columns[1].getColumn().setWidth(150);
-		columns[1].getColumn().setText("Resource");
-		columns[1].setLabelProvider(new ResultTableResourceColumnLabelProvider());
+		resultTreeViewerColumns[1].getColumn().setWidth(150);
+		resultTreeViewerColumns[1].getColumn().setText("Resource");
+		resultTreeViewerColumns[1].setLabelProvider(new ResultTableResourceColumnLabelProvider());
 		
-		columns[2].getColumn().setWidth(100);
-		columns[2].getColumn().setText("Location");
-		columns[2].setLabelProvider(new ResultTableLocationColumnLabelProvider());
+		resultTreeViewerColumns[2].getColumn().setWidth(100);
+		resultTreeViewerColumns[2].getColumn().setText("Location");
+		resultTreeViewerColumns[2].setLabelProvider(new ResultTableLocationColumnLabelProvider());
 		
 		return treeViewer;
 	}
@@ -382,24 +393,24 @@ public abstract class AbstractAnalysisView extends ViewPart {
 		treeViewer.setContentProvider(analysisContentProvider);
 		treeViewer.setInput(new Object());
 		
-		TreeViewerColumn[] columns = new TreeViewerColumn[3];
+		analysisTreeViewerColumns = new TreeViewerColumn[3];
 		
-		for (int i = 0; i < columns.length; i++) {
-			columns[i] = new TreeViewerColumn(treeViewer, SWT.NONE);
-			columns[i].getColumn().setMoveable(true);
+		for (int i = 0; i < analysisTreeViewerColumns.length; i++) {
+			analysisTreeViewerColumns[i] = new TreeViewerColumn(treeViewer, SWT.NONE);
+			analysisTreeViewerColumns[i].getColumn().setMoveable(true);
 		}
 		
-		columns[0].getColumn().setWidth(200);
-		columns[0].getColumn().setText("Name");
-		columns[0].setLabelProvider(new AnalysisTableNameColumnLabelProvider());
+		analysisTreeViewerColumns[0].getColumn().setWidth(200);
+		analysisTreeViewerColumns[0].getColumn().setText("Name");
+		analysisTreeViewerColumns[0].setLabelProvider(new AnalysisTableNameColumnLabelProvider());
 		
-		columns[1].getColumn().setWidth(300);
-		columns[1].getColumn().setText("Description");
-		columns[1].setLabelProvider(new AnalysisTableDescriptionColumnLabelProvider());
+		analysisTreeViewerColumns[1].getColumn().setWidth(300);
+		analysisTreeViewerColumns[1].getColumn().setText("Description");
+		analysisTreeViewerColumns[1].setLabelProvider(new AnalysisTableDescriptionColumnLabelProvider());
 		
-		columns[2].getColumn().setWidth(100);
-		columns[2].getColumn().setText("# Results");
-		columns[2].setLabelProvider(new AnalysisTableCountColumnLabelProvider());
+		analysisTreeViewerColumns[2].getColumn().setWidth(100);
+		analysisTreeViewerColumns[2].getColumn().setText("# Results");
+		analysisTreeViewerColumns[2].setLabelProvider(new AnalysisTableCountColumnLabelProvider());
 		
 		return treeViewer;
 	}
