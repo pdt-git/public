@@ -15,14 +15,13 @@ package org.cs3.pdt.analysis.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 public class AnalysisCategory implements IAnalysisCategory {
 
 	private String name;
 	private String description;
 	private IFactbase factbase;
-	private TreeSet<IAnalysis> analyses = new TreeSet<>();
+	private ArrayList<IAnalysis> analyses = new ArrayList<>();
 
 	public AnalysisCategory(String name, String description, IFactbase factbase) {
 		this.name = name;
@@ -60,7 +59,7 @@ public class AnalysisCategory implements IAnalysisCategory {
 
 	@Override
 	public int compareTo(IAnalysisCategory o) {
-		return String.CASE_INSENSITIVE_ORDER.compare(getName(), o.getName());
+		return getName().compareTo(o.getName());
 	}
 	
 	public void addAnalysis(IAnalysis analysis) {

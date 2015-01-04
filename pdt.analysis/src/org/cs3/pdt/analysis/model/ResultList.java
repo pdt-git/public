@@ -16,13 +16,12 @@ package org.cs3.pdt.analysis.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeSet;
 
 public class ResultList {
 	
 	private String analysisName;
 	
-	private TreeSet<IResultElement> results = new TreeSet<>();
+	private ArrayList<IResultElement> results = new ArrayList<>();
 	
 	private HashMap<String, IResultElementGroup> groups = new HashMap<>();
 

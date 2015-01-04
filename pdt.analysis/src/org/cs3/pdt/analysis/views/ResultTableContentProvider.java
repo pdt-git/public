@@ -14,8 +14,8 @@
 package org.cs3.pdt.analysis.views;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.cs3.pdt.analysis.model.IAnalysis;
 import org.cs3.pdt.analysis.model.IFactbase;
@@ -31,7 +31,7 @@ public class ResultTableContentProvider implements ITreeContentProvider, IResult
 	
 	private IResultModel resultModel;
 	
-	private TreeSet<IResultElement> results = new TreeSet<>();
+	private ArrayList<IResultElement> results = new ArrayList<>();
 
 	private Viewer viewer;
 
@@ -65,6 +65,7 @@ public class ResultTableContentProvider implements ITreeContentProvider, IResult
 			for (IAnalysis analysis : currentAnalyses) {
 				results.addAll(currentFactbase.getResults(analysis));
 			}
+			Collections.sort(results);
 		}
 	}
 
@@ -88,7 +89,9 @@ public class ResultTableContentProvider implements ITreeContentProvider, IResult
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IResultElement) {
-			return ((IResultElement) parentElement).getChildren();
+			List<IResultElement> children = ((IResultElement) parentElement).getChildren();
+			Collections.sort(children);
+			return children.toArray();
 		}
 		return EMPTY_ARRAY;
 	}

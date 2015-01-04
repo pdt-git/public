@@ -69,7 +69,7 @@ public class Analysis implements IAnalysis {
 
 	@Override
 	public int compareTo(IAnalysis o) {
-		return String.CASE_INSENSITIVE_ORDER.compare(getName(), o.getName());
+		return getName().compareTo(o.getName());
 	}
 
 }

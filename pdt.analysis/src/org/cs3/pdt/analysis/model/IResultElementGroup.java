@@ -15,4 +15,6 @@ package org.cs3.pdt.analysis.model;
 
 public interface IResultElementGroup extends IResultElement {
 
+	String getIdentifier();
+
 }

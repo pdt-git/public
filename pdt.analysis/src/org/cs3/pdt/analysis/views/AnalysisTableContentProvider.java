@@ -13,6 +13,7 @@
  ****************************************************************************/
 package org.cs3.pdt.analysis.views;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cs3.pdt.analysis.model.IAnalysis;
@@ -68,14 +69,18 @@ public class AnalysisTableContentProvider implements ITreeContentProvider, IResu
 		if (currentFactbase == null) {
 			return EMPTY_ARRAY;
 		}
-		return currentFactbase.getCategories().toArray();
+		List<IAnalysisCategory> categories = currentFactbase.getCategories();
+		Collections.sort(categories);
+		return categories.toArray();
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IAnalysisCategory) {
 			IAnalysisCategory category = (IAnalysisCategory) parentElement;
-			return category.getAnalyses().toArray();
+			List<IAnalysis> analyses = category.getAnalyses();
+			Collections.sort(analyses);
+			return analyses.toArray();
 		}
 		return EMPTY_ARRAY;
 	}

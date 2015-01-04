@@ -14,6 +14,7 @@
 package org.cs3.pdt.analysis.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -21,6 +22,8 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class Result implements IResult {
 
+	public static final int RESULT_PRIORITY = 0;
+	
 	private String analysisName;
 	private String description;
 	private String severity;
@@ -49,8 +52,8 @@ public class Result implements IResult {
 		return description;
 	}
 	@Override
-	public IResultElement[] getChildren() {
-		return children.toArray(new IResultElement[children.size()]);
+	public List<IResultElement> getChildren() {
+		return new ArrayList<>(children);
 	}
 
 	@Override
@@ -88,18 +91,23 @@ public class Result implements IResult {
 
 	@Override
 	public int compareTo(IResultElement o) {
-		int c = String.CASE_INSENSITIVE_ORDER.compare(analysisName, o.getAnalysisName());
+		int c = analysisName.compareTo(o.getAnalysisName());
 		if (c != 0) {
 			return c;
 		}
 		if (o instanceof IResult) {
-			c = String.CASE_INSENSITIVE_ORDER.compare(file.getName(), ((IResult) o).getResource().getName());
+			c = file.getName().compareTo(((IResult) o).getResource().getName());
 			if (c != 0) {
 				return c;
 			}
 			return getLine() - ((IResult) o).getLine();
 		}
-		return 0;
+		return getPriority() - o.getPriority();
+	}
+
+	@Override
+	public int getPriority() {
+		return RESULT_PRIORITY;
 	}
 
 	@Override

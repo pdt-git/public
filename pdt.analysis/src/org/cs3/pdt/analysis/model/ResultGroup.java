@@ -13,17 +13,22 @@
  ****************************************************************************/
 package org.cs3.pdt.analysis.model;
 
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResultGroup implements IResultElementGroup {
 	
+	public static final int RESULT_GROUP_PRIORITY = 16;
+	
 	private String analysisName;
+	private String identifier;
 	private String description;
 	private IResultElement parent;
-	private TreeSet<IResultElement> children = new TreeSet<>();
+	private ArrayList<IResultElement> children = new ArrayList<>();
 
-	public ResultGroup(String analysisName, String description, IResultElement parent) {
+	public ResultGroup(String analysisName, String identifier, String description, IResultElement parent) {
 		this.analysisName = analysisName;
+		this.identifier = identifier;
 		this.description = description;
 		this.parent = parent;
 	}
@@ -31,6 +36,11 @@ public class ResultGroup implements IResultElementGroup {
 	@Override
 	public String getAnalysisName() {
 		return analysisName;
+	}
+	
+	@Override
+	public String getIdentifier() {
+		return identifier;
 	}
 
 	@Override
@@ -44,8 +54,8 @@ public class ResultGroup implements IResultElementGroup {
 	}
 
 	@Override
-	public IResultElement[] getChildren() {
-		return children.toArray(new IResultElement[children.size()]);
+	public List<IResultElement> getChildren() {
+		return new ArrayList<>(children);
 	}
 
 	@Override
@@ -59,14 +69,19 @@ public class ResultGroup implements IResultElementGroup {
 
 	@Override
 	public int compareTo(IResultElement o) {
-		int c = String.CASE_INSENSITIVE_ORDER.compare(analysisName, o.getAnalysisName());
+		int c = analysisName.compareTo(o.getAnalysisName());
 		if (c != 0) {
 			return c;
 		}
 		if (o instanceof IResultElementGroup) {
-			return String.CASE_INSENSITIVE_ORDER.compare(description, o.getDescription());
+			return identifier.compareTo(((IResultElementGroup) o).getIdentifier());
 		}
-		return 0;
+		return getPriority() - o.getPriority();
+	}
+
+	@Override
+	public int getPriority() {
+		return RESULT_GROUP_PRIORITY;
 	}
 
 }

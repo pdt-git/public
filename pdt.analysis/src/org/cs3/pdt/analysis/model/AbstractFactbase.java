@@ -15,14 +15,13 @@ package org.cs3.pdt.analysis.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 public abstract class AbstractFactbase implements IFactbase {
 	
 	private String name;
 
-	protected TreeSet<IAnalysisCategory> categories = new TreeSet<>();
-	protected TreeSet<IAnalysis> analyses = new TreeSet<>();
+	protected ArrayList<IAnalysisCategory> categories = new ArrayList<>();
+	protected ArrayList<IAnalysis> analyses = new ArrayList<>();
 
 	public AbstractFactbase(String name) {
 		this.name = name;

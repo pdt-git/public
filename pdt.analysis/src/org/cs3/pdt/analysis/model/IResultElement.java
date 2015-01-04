@@ -13,16 +13,20 @@
  ****************************************************************************/
 package org.cs3.pdt.analysis.model;
 
+import java.util.List;
+
 public interface IResultElement extends Comparable<IResultElement> {
 	
 	String getAnalysisName();
 	
 	String getDescription();
 	
-	IResultElement[] getChildren();
+	List<IResultElement> getChildren();
 	
 	boolean hasChildren();
 	
 	IResultElement getParent();
+	
+	int getPriority();
 
 }
