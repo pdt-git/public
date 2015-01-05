@@ -17,10 +17,10 @@ import static org.cs3.prolog.connector.common.QueryUtils.bT;
 import static org.cs3.prolog.connector.common.QueryUtils.quoteAtom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Display;
 
 public class LocationProvider {
 
-	private HashMap<PredicateEdge, TreeSet<Location>> cachedLocations = new HashMap<>();
+	private HashMap<PredicateEdge, List<Location>> cachedLocations = new HashMap<>();
 
 	private int mode;
 
@@ -61,11 +61,11 @@ public class LocationProvider {
 			locationTableViewer.setInput(new ArrayList<Location>());
 		} else {
 			synchronized (cachedLocations) {
-				TreeSet<Location> locations = cachedLocations.get(edge);
+				List<Location> locations = cachedLocations.get(edge);
 				if (locations != null) {
 					locationTableViewer.setInput(locations);
 				} else {
-					final TreeSet<Location> newLocations = new TreeSet<>();
+					final List<Location> newLocations = new ArrayList<>();
 					Job j = getLocationFillJob(edge, newLocations);
 					j.addJobChangeListener(new JobChangeAdapter() {
 						@Override
@@ -89,14 +89,14 @@ public class LocationProvider {
 			return;
 		} 
 		synchronized (cachedLocations) {
-			TreeSet<Location> locations = cachedLocations.get(edge);
+			List<Location> locations = cachedLocations.get(edge);
 			if (locations != null) {
 				if (locations.size() > 0) {
-					CallHierarchyUtil.selectLocationInEditor(locations.first());
+					CallHierarchyUtil.selectLocationInEditor(locations.get(0));
 				}
 				locationTableViewer.setInput(locations);
 			} else {
-				final TreeSet<Location> newLocations = new TreeSet<>();
+				final ArrayList<Location> newLocations = new ArrayList<>();
 				Job j = getLocationFillJob(edge, newLocations);
 				j.addJobChangeListener(new JobChangeAdapter() {
 					@Override
@@ -105,7 +105,7 @@ public class LocationProvider {
 							@Override
 							public void run() {
 								if (newLocations.size() > 0) {
-									CallHierarchyUtil.selectLocationInEditor(newLocations.first());
+									CallHierarchyUtil.selectLocationInEditor(newLocations.get(0));
 								}
 							}
 						});
@@ -116,7 +116,7 @@ public class LocationProvider {
 		}
 	}
 	
-	private Job getLocationFillJob(final PredicateEdge edge, final TreeSet<Location> newLocations) {
+	private Job getLocationFillJob(final PredicateEdge edge, final List<Location> newLocations) {
 		Job j = new Job("Search call locations") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -171,6 +171,7 @@ public class LocationProvider {
 								Debug.report(e);
 							}
 						}
+						Collections.sort(newLocations);
 						cachedLocations.put(edge, newLocations);
 					} catch (Exception e) {
 						Debug.report(e);
