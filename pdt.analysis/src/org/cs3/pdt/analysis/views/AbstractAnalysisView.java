@@ -338,6 +338,7 @@ public abstract class AbstractAnalysisView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setEnabledOnAll(true);
+				analysisCheckStateChanged();
 			}
 		});
 
@@ -348,6 +349,7 @@ public abstract class AbstractAnalysisView extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setEnabledOnAll(false);
+				analysisCheckStateChanged();
 			}
 		});
 		
