@@ -391,8 +391,8 @@ clause_not_from_development(Module:Head, Body, Ref, OTerm) :-
 walk_called_by_body(True, _, _) :-
 	True == true, !.		% quickly deal with facts
 walk_called_by_body(Body, Module, OTerm) :-
-	set_undecided_of_walk_option(error, OTerm, OTerm1),
-	set_evaluate_of_walk_option(false, OTerm1, OTerm2),
+%	set_undecided_of_walk_option(error, OTerm, OTerm1),
+	set_evaluate_of_walk_option(false, OTerm, OTerm2),
 	catch(walk_called(Body, Module, _TermPos, OTerm2),
 	      missing(Missing),
 	      walk_called_by_body(Missing, Body, Module, OTerm)), !.
