@@ -298,10 +298,17 @@ scan_module_class(library).
 
 :- if(current_prolog_flag(dialect, swi)).
 walk_from_initialization(OTerm) :-
+	walk_option_predicates(OTerm, Predicates),
+	var(Predicates),
+	walk_option_clauses(OTerm, Clauses),
+	var(Clauses),
+	!,
 	walk_option_caller(OTerm, '<initialization>'),
 	forall('$init_goal'(_File, Goal, SourceLocation),
 	       ( walk_option_initialization(OTerm, SourceLocation),
 		 walk_from_initialization(Goal, OTerm))).
+
+walk_from_initialization(_OTerm).
 
 walk_from_initialization(M:Goal, OTerm) :-
 	scan_module(M, OTerm), !,
@@ -384,8 +391,8 @@ clause_not_from_development(Module:Head, Body, Ref, OTerm) :-
 walk_called_by_body(True, _, _) :-
 	True == true, !.		% quickly deal with facts
 walk_called_by_body(Body, Module, OTerm) :-
-	set_undecided_of_walk_option(error, OTerm, OTerm1),
-	set_evaluate_of_walk_option(false, OTerm1, OTerm2),
+%	set_undecided_of_walk_option(error, OTerm, OTerm1),
+	set_evaluate_of_walk_option(false, OTerm, OTerm2),
 	catch(walk_called(Body, Module, _TermPos, OTerm2),
 	      missing(Missing),
 	      walk_called_by_body(Missing, Body, Module, OTerm)), !.
