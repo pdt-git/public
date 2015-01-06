@@ -100,25 +100,32 @@ public class CallHierarchyView extends ViewPart {
 				menu.dispose();
 			}
 			Menu newMenu = new Menu(parent);
-			MenuItem setWorkspaceScope = new MenuItem(newMenu, SWT.PUSH);
+			final MenuItem setWorkspaceScope = new MenuItem(newMenu, SWT.RADIO);
 			setWorkspaceScope.setText("Workspace");
 			setWorkspaceScope.setImage(ImageRepository.getImage(ImageRepository.CH_SCOPE_WORKSPACE));
+			setWorkspaceScope.setSelection(scope == null);
 			setWorkspaceScope.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					setScope(null);
-					setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CH_SCOPE_WORKSPACE));
+					if (setWorkspaceScope.getSelection()) {
+						setScope(null);
+						setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CH_SCOPE_WORKSPACE));
+					}
 				}
 			});
-			MenuItem setProjectScope = new MenuItem(newMenu, SWT.PUSH);
+			final MenuItem setProjectScope = new MenuItem(newMenu, SWT.RADIO);
 			setProjectScope.setText("Project...");
 			setProjectScope.setImage(ImageRepository.getImage(ImageRepository.CH_SCOPE_PROJECT));
+			setProjectScope.setSelection(scope != null);
 			setProjectScope.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					askAndSelectProjectScope();
+					if (setProjectScope.getSelection()) {
+						askAndSelectProjectScope();
+					}
 				}
 			});
+			
 			menu = newMenu;
 			return menu;
 		}
@@ -342,6 +349,10 @@ public class CallHierarchyView extends ViewPart {
 		
 		TableViewerColumn iconColumn = new TableViewerColumn(locationTableViewer, SWT.NONE);
 		iconColumn.getColumn().setWidth(30);
+		
+		TableViewerColumn lineColumn = new TableViewerColumn(locationTableViewer, SWT.NONE);
+		lineColumn.getColumn().setWidth(50);
+		lineColumn.getColumn().setText("Line");
 		
 		TableViewerColumn callColumn = new TableViewerColumn(locationTableViewer, SWT.NONE);
 		callColumn.getColumn().setWidth(400);

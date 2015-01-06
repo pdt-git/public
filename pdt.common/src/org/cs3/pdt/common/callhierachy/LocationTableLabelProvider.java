@@ -21,7 +21,8 @@ import org.eclipse.swt.graphics.Image;
 public class LocationTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 	
 	private static final int ICON_COLUMN = 0;
-	private static final int CALL_COLUMN = 1;
+	private static final int LINE_COLUMN = 1;
+	private static final int CALL_COLUMN = 2;
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
@@ -33,8 +34,13 @@ public class LocationTableLabelProvider extends LabelProvider implements ITableL
 
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
-		if (element instanceof Location && columnIndex == CALL_COLUMN) {
-			return ((Location) element).getText();
+		if (element instanceof Location) {
+			switch (columnIndex) {
+			case LINE_COLUMN:
+				return Integer.toString(((Location) element).getLine());
+			case CALL_COLUMN:
+				return ((Location) element).getText();
+			}
 		}
 		return null;
 	}
