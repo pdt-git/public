@@ -298,10 +298,17 @@ scan_module_class(library).
 
 :- if(current_prolog_flag(dialect, swi)).
 walk_from_initialization(OTerm) :-
+	walk_option_predicates(OTerm, Predicates),
+	var(Predicates),
+	walk_option_clauses(OTerm, Clauses),
+	var(Clauses),
+	!,
 	walk_option_caller(OTerm, '<initialization>'),
 	forall('$init_goal'(_File, Goal, SourceLocation),
 	       ( walk_option_initialization(OTerm, SourceLocation),
 		 walk_from_initialization(Goal, OTerm))).
+
+walk_from_initialization(_OTerm).
 
 walk_from_initialization(M:Goal, OTerm) :-
 	scan_module(M, OTerm), !,
