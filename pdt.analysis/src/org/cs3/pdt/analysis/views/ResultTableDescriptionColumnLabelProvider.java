@@ -14,6 +14,7 @@
 package org.cs3.pdt.analysis.views;
 
 import org.cs3.pdt.analysis.ImageRepository;
+import org.cs3.pdt.analysis.PDTAnalysis;
 import org.cs3.pdt.analysis.model.IResult;
 import org.cs3.pdt.analysis.model.IResultElement;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -36,11 +37,11 @@ public class ResultTableDescriptionColumnLabelProvider extends ColumnLabelProvid
 		if (element instanceof IResult) {
 			IResult result = (IResult) element;
 			switch (result.getSeverity()) {
-			case "info":
+			case PDTAnalysis.SEVERITY_INFO:
 				return ImageRepository.getImage(ImageRepository.ICON_MARKER_INFO);
-			case "warning":
+			case PDTAnalysis.SEVERITY_WARNING:
 				return ImageRepository.getImage(ImageRepository.ICON_MARKER_WARNING);
-			case "error":
+			case PDTAnalysis.SEVERITY_ERROR:
 				return ImageRepository.getImage(ImageRepository.ICON_MARKER_ERROR);
 			}
 		} else if (element instanceof IResultElement && ((IResultElement) element).hasChildren()) {
