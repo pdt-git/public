@@ -64,7 +64,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Sash;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
+import org.eclipse.ui.ide.IDE.SharedImages;
 import org.eclipse.ui.part.ViewPart;
 
 public class CallHierarchyView extends ViewPart {
@@ -151,7 +153,7 @@ public class CallHierarchyView extends ViewPart {
 				}
 				@Override
 				public Image getImage(Object element) {
-					return null;
+					return PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_OBJ_PROJECT);
 				}
 			});
 			dialog.setInput(getProjects());
