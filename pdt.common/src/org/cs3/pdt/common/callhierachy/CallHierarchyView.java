@@ -553,7 +553,7 @@ public class CallHierarchyView extends ViewPart {
 			if (mode == CALLER_MODE) {
 				buf.append("Predicates calling ");
 			} else {
-				buf.append("Calls of ");
+				buf.append("Predicates called by ");
 			}
 			buf.append(root.getLabel());
 			buf.append(" \u2013 in ");
