@@ -13,38 +13,37 @@
 
 :- object(logtalk_reload_adapter).
 
-:- if(current_logtalk_flag(version, version(3, _, _))).
-	:- multifile(logtalk::message_hook/4).
-	:- dynamic(logtalk::message_hook/4).
+:- multifile(logtalk::message_hook/4).
+:- dynamic(logtalk::message_hook/4).
 
-	logtalk::message_hook(Term, Kind, core, Tokens) :-
-	    with_mutex('reloadMutex', (
-			{pdt_reload:warning_and_error_tracing},
-			(	arg(2, Term, StartLine-_EndLine) ->
-				true
-			;	logtalk_load_context(term_position, StartLine-_EndLine)
-			),
-			logtalk_load_context(source, Path),
-			functor(Kind, Level, _),
-			{pdt_reload:assertz(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
-			{pdt_reload:trace_reload(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
-		%	assertz(user:am(_Term, Level,Lines)),
-			fail
-		)).
-	
-	logtalk::message_hook(loading_file(FullPath, _Options), _, core, _) :-
-		with_mutex('reloadMutex', (
-			{pdt_reload:warning_and_error_tracing},
-			{pdt_reload:assertz(reloaded_file__(FullPath))},
-			fail
-		)).
+logtalk::message_hook(Term, Kind, core, Tokens) :-
+    with_mutex('reloadMutex', (
+		{pdt_reload:warning_and_error_tracing},
+		(	arg(2, Term, StartLine-_EndLine) ->
+			true
+		;	logtalk_load_context(term_position, StartLine-_EndLine)
+		),
+		logtalk_load_context(source, Path),
+		functor(Kind, Level, _),
+		{pdt_reload:assertz(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
+		{pdt_reload:trace_reload(traced_messages(logtalk, Level, StartLine, Tokens, Path))},
+	%	assertz(user:am(_Term, Level,Lines)),
+		fail
+	)).
 
-	logtalk::message_hook(reloading_file(FullPath, _Options), _, core, _) :-
-		with_mutex('reloadMutex', (
-			{pdt_reload:warning_and_error_tracing},
-			{pdt_reload:assertz(reloaded_file__(FullPath))},
-			fail
-		)).
+logtalk::message_hook(loading_file(FullPath, _Options), _, core, _) :-
+	with_mutex('reloadMutex', (
+		{pdt_reload:warning_and_error_tracing},
+		{pdt_reload:assertz(reloaded_file__(FullPath))},
+		fail
+	)).
+
+logtalk::message_hook(reloading_file(FullPath, _Options), _, core, _) :-
+	with_mutex('reloadMutex', (
+		{pdt_reload:warning_and_error_tracing},
+		{pdt_reload:assertz(reloaded_file__(FullPath))},
+		fail
+	)).
 
 %	logtalk::message_hook(_Term, _Kind, _Component, _Tokens) :-
 %		nonvar(Term),
@@ -59,8 +58,6 @@
 %		),
 %		fail.
 
-:- endif.
-
                /*************************************
                 * PDT RELOAD                        *
                 *************************************/
@@ -70,39 +67,18 @@
 %
 % wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
 
-:- if(current_logtalk_flag(version, version(3, _, _))).
-	pdt_reload(FullPath) :-
-		write(FullPath), nl,
-		% ensure that the argument is a path to a Logtalk source file
-		(	sub_atom(FullPath, _, 4, 0, '.lgt') ->
-			true
-		;	sub_atom(FullPath, _, 8, 0, '.logtalk')
-		),
-		(	logtalk::loaded_file_property(FullPath, flags(Flags)) ->
-			% we're reloading a source file; use the same explicit flags as before
-			logtalk_load(FullPath, Flags)
-		;	% first time; assume only implicit compilation options
-			logtalk_load(FullPath)
-		).
-:- else.
-	% Logtalk
-	pdt_reload(FullPath) :-
-		write(FullPath), nl,
-		split_file_path:split_file_path(FullPath, Directory, File, BaseName, lgt),
-		setup_call_cleanup(
-			working_directory(Current, Directory),     % SWI-Prolog
-			logtalk_reload(Directory, File, BaseName),
-			working_directory(_, Current)              % SWI-Prolog
-	   ).
-
-	:- private(logtalk_reload/3).
-	logtalk_reload(Directory, File, BaseName) :-
-		(	logtalk::loaded_file(File, Directory, Flags) ->
-			% we're reloading a source file; use the same explicit flags as before
-			logtalk_load(BaseName, Flags)
-		;	% first time; assume only implicit compilation options
-			logtalk_load(BaseName)
-		).
-:- endif.
+pdt_reload(FullPath) :-
+	write(FullPath), nl,
+	% ensure that the argument is a path to a Logtalk source file
+	(	sub_atom(FullPath, _, 4, 0, '.lgt') ->
+		true
+	;	sub_atom(FullPath, _, 8, 0, '.logtalk')
+	),
+	(	logtalk::loaded_file_property(FullPath, flags(Flags)) ->
+		% we're reloading a source file; use the same explicit flags as before
+		logtalk_load(FullPath, Flags)
+	;	% first time; assume only implicit compilation options
+		logtalk_load(FullPath)
+	).
 
 :- end_object.
