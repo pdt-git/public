@@ -34,8 +34,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.MultiLineRule;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
-import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
@@ -92,18 +92,20 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		IToken wordToken        = tokenFor(manager.getDefaultColor());
 
         // Create rules for syntax highlighting of ...
-		IRule[] rules = new IRule[5];		
+		IRule[] rules = new IRule[6];		
         // - variables:
 		rules[0] = new VarRule(variableToken);
 		// - double quotes:
-		rules[1] = new SingleLineRule("\"", "\"", stringToken, '\\');
+		rules[1] = new MultiLineRule("\"", "\"", stringToken, '\\');
 		// - single quotes:
-		rules[2] = new SingleLineRule("'", "'", stringToken, '\\');
+		rules[2] = new MultiLineRule("'", "'", stringToken, '\\');
 		// - whitespace:
 		rules[3] = new WhitespaceRule(new PLWhitespaceDetector());
 		// - special words: 
 		rules[4] = new WordRule(new WordDetector(), wordToken);
 		addWordsTo((WordRule)rules[4]);
+		
+		rules[5] = new CharacterCodeRule(wordToken);
 
 		// Activate the defined rules.
 		setRules(rules);

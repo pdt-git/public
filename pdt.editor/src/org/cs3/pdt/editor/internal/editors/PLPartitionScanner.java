@@ -27,6 +27,7 @@ public class PLPartitionScanner extends RuleBasedPartitionScanner {
 	public final static String PL_MULTI_COMMENT = "__pl_multi_line_comment";
 	public final static String PL_SINGLE_QUOTED_STRING = "__pl__single_quoted_stringt";
 	public final static String PL_DOUBLE_QUOTED_STRING = "__pl__double_quoted_stringt";
+	public static final String PL_CHARACTER_CODE = "__pl__character_code";
 
 	public PLPartitionScanner() {
 
@@ -34,9 +35,10 @@ public class PLPartitionScanner extends RuleBasedPartitionScanner {
 		IToken plMultiComment = new Token(PL_MULTI_COMMENT);
 		IToken plSingleQuotedString = new Token(PL_SINGLE_QUOTED_STRING);
 		IToken plDoubleQuotedString = new Token(PL_DOUBLE_QUOTED_STRING);
+		IToken characterCode = new Token(PL_CHARACTER_CODE);
 		//IToken plPredicate = new Token(PL_DEFAULT);
 		
-		IPredicateRule[] rules = new IPredicateRule[4];
+		IPredicateRule[] rules = new IPredicateRule[5];
 
 		rules[0] = new EndOfLineRule("%", plComment);
 		rules[1] = new MultiLineRule("/*", "*/", plMultiComment);
@@ -45,6 +47,7 @@ public class PLPartitionScanner extends RuleBasedPartitionScanner {
 		rules[3] = new MultiLineRule("'", "'", plSingleQuotedString, '\\'); // The escape character is not correct. Putting ' in there fails rule parsing.
 		// Add generic whitespace rule.
 //        rules[2] = new PredicateRule(plPredicate);
+		rules[4] = new CharacterCodeRule(characterCode);
 
 		setPredicateRules(rules);
 	}
