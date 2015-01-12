@@ -215,7 +215,7 @@ public class PLMarkerUtils {
 			if (file == null || !file.exists()){
 				return null;
 			}
-			file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+			file.deleteMarkers(IMarker.PROBLEM, false, IResource.DEPTH_INFINITE);
 			fileNameToIFiles.put(fileName, file);
 			return file;
 		}

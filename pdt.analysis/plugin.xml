@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="Prolog Analyses"
+            icon="icons/control.gif"
+            category="org.cs3.pdt"
+            class="org.cs3.pdt.analysis.views.prolog.AnalysisView"
+            id="org.cs3.pdt.analysis.views.AnalysisView">
+      </view>
+   </extension>
+   <extension
+         point="org.cs3.pdt.connector.bootstrapContribution">
+      <fileContribution
+            id="pdt.analysis.fileContribution"
+            path="pl/load.pl">
+      </fileContribution>
+   </extension>
+   <extension
+         id="org.cs3.pdt.analysis.marker"
+         name="Prolog Analysis Marker"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="org.cs3.pdt.analysis.marker"
+            colorPreferenceKey="org.cs3.pdt.analysis.marker.color"
+            highlightPreferenceKey="org.cs3.pdt.analysis.marker"
+            includeOnPreferencePage="true"
+            label="Prolog Analysis Marker"
+            overviewRulerPreferenceKey="org.cs3.pdt.analysis.marker.overviewRuler"
+            overviewRulerPreferenceValue="true"
+            textPreferenceKey="org.cs3.pdt.analysis.marker"
+            verticalRulerPreferenceKey="org.cs3.pdt.analysis.marker.verticalRuler">
+      </specification>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerType="org.cs3.pdt.analysis.marker"
+            name="org.cs3.pdt.analysis.marker"
+            super="org.eclipse.ui.workbench.texteditor.warning">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.cs3.pdt.perspective">
+         <viewShortcut
+               id="org.cs3.pdt.analysis.views.AnalysisView">
+         </viewShortcut>
+      </perspectiveExtension>
+   </extension>
+
+</plugin>
