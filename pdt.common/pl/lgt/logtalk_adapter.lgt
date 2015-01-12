@@ -25,7 +25,7 @@
 	find_entity_definition/6,
 	find_predicate_definitions/10, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_categorized_predicate_definitions/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
-	find_primary_definition_visible_in/8, % (EnclFile,ClickedLine,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
+	find_primary_definition_visible_in/7, % (EnclFile,ClickedLine,TermString,Name,Arity,MainFile,FirstLine)#
 	find_definition_contained_in/10,
 	get_pred/7,
 	find_pred/8,
@@ -334,7 +334,7 @@ visibility_text(definition, invisible,	'Invisible') :- !.
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/
 
-%% find_primary_definition_visible_in(+EnclFile,+ClickedLine,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
+%% find_primary_definition_visible_in(+EnclFile,+ClickedLine,+Name,+Arity,?MainFile,?FirstLine)
 %
 % Find first line of first clause in the *primary* file defining the predicate Name/Arity
 % visible in ReferencedModule. In case of multifile predicates, the primary file is either
@@ -344,7 +344,7 @@ visibility_text(definition, invisible,	'Invisible') :- !.
 % Used for the open declaration action in
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
-find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, _, FullPath, Line) :-
+find_primary_definition_visible_in(EnclFile, ClickedLine, Term, Functor, Arity, FullPath, Line) :-
 	source_file_entity(EnclFile, ClickedLine, This),
 	search_term_to_predicate_indicator(Term, Functor/Arity),
 	(	decode(Term, This, Entity, _Kind, _Template, Location, Properties, definition, Visibility)

@@ -285,10 +285,7 @@ defined_in_file(Module,Name,Arity, Ref, N,File,Line) :-
     nth_clause(Module:Head,N,Ref),
     clause_property(Ref,file(File)),      
     clause_property(Ref,line_count(Line)).
-%    ( module_property(M, file(F))
-%    -> DDDeclaringModule=M
-%    ;  DDDeclaringModule=unknown
-%    ).
+
 
 %% declared_in_file(?Module, Head, ?File, ?Line) is nondet
 %

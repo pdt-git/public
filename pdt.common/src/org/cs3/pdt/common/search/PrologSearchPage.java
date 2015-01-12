@@ -201,6 +201,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     private ArrayList<Button> limitToRadioButtons = new ArrayList<>();
     private ArrayList<Button> scopeRadioButtons = new ArrayList<>();
     private Button exactMatchCheckBox;
+	private Button includeSomeExecutionContextCheckBox;
     private Button createMarkersCheckBox;
 	private Label explainingLabel;
 	private Combo projectSelector;
@@ -237,7 +238,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
             	searchQuery = new ModuleDefinitionsSearchQuery(QueryUtils.quoteAtom(data.pattern), data.pattern, data.isExactMatch());
             }
         } else if (searchFor == UNDEFINED_CALL) {
-        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers());
+        	searchQuery = new UndefinedCallsSearchQuery(data.isCreateMarkers(), includeSomeExecutionContextCheckBox.getSelection());
         } else if (searchFor == DEAD_PREDICATE) {
         	searchQuery = new DeadPredicatesSearchQuery(data.isCreateMarkers());
         } else if (searchFor == META_PREDICATE) {
@@ -390,6 +391,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		for (Button limitToButton : limitToRadioButtons) {
 			limitToButton.setEnabled(doPatternSearch);
 		}
+		includeSomeExecutionContextCheckBox.setEnabled(searchFor == UNDEFINED_CALL);
 		createMarkersCheckBox.setEnabled(!doPatternSearch);
 	}
 
@@ -567,6 +569,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
     	Button undefinedCallButton = createButton(parent, SWT.RADIO, "Undefined Call", UNDEFINED_CALL, false);
 		searchForRadioButtons.add(undefinedCallButton);
 		undefinedCallButton.addSelectionListener(searchForSelectionListener);
+		
+		includeSomeExecutionContextCheckBox = createButton(parent, SWT.CHECK, "Include calls undefined only in some execution contexts (modules)", -1, false);
+		((GridData) includeSomeExecutionContextCheckBox.getLayoutData()).horizontalIndent = 20;
     	
 		Button deadPredicateButton = createButton(parent, SWT.RADIO, "Dead Predicate", DEAD_PREDICATE, false);
 		searchForRadioButtons.add(deadPredicateButton);

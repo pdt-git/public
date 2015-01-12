@@ -23,8 +23,11 @@ import java.util.Vector;
 import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
+import org.cs3.pdt.common.search.PrologSearchResult;
 import org.cs3.pdt.common.structureElements.PrologMatch;
+import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
+import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -33,8 +36,7 @@ import org.eclipse.core.resources.IFile;
  */
 public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
-	private String filePath;
-	private int line = -1;
+	private String updatedContextDependentGoal;
 	
 	public ReferencesSearchQueryDirect(String goal, String searchGoalLabel, boolean isExactMatch) {
 		super(goal, searchGoalLabel, isExactMatch);
@@ -48,18 +50,46 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 	public ReferencesSearchQueryDirect(Goal goal) {
 		super(PDTSearchQuery.toPredicateGoal(goal), PDTCommonUtil.cropText(goal.getTermString(), 50), true);
 		setSearchType("References to");
-		filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
-		line = goal.getLine();
+		String filePath = QueryUtils.quoteAtomIfNeeded(goal.getFilePath());
+		int line = goal.getLine();
+		updateContextDependentGoal(filePath, line, goal);
+	}
+
+	private void updateContextDependentGoal(String filePath, int line, Goal editorGoal) {
+		String query = bT(PDTCommonPredicates.UPDATE_PREDICATE_REFERENCE_SEARCH_TERM_TO_CONTEXT,
+				getGoal(),
+				filePath == null ? "_" : filePath,
+				line == -1 ? "_" : Integer.toString(line),
+				"NewModule",
+				"NewGoal");
+		try {
+			PrologProcess process = PDTCommonUtil.getActivePrologProcess();
+			Map<String, Object> result = process.queryOnce(query);
+			updatedContextDependentGoal = (String) result.get("NewGoal");
+			String newModule = (String) result.get("NewModule");
+			if (newModule != null) {
+				PrologSearchResult prologSearchResult = (PrologSearchResult) getSearchResult();
+				String newLabel;
+				String editorTermString = editorGoal.getTermString();
+				String editorModule = editorGoal.getModule();
+				if (editorModule == null) {
+					newLabel = newModule + ":" + editorTermString;
+				} else {
+					newLabel = newModule + ":" + editorTermString.substring(editorTermString.indexOf(editorModule) + editorModule.length() + 1);
+				}
+				prologSearchResult.setSearchGoalLabel(PDTCommonUtil.cropText(newLabel, 50));
+			}
+		} catch (Exception e) {
+			Debug.report(e);
+		}
 	}
 
 	@Override
 	protected String buildSearchQuery() {
 		String query = bT(PDTCommonPredicates.FIND_PREDICATE_REFERENCE,
-				getGoal(),
+				updatedContextDependentGoal != null ? updatedContextDependentGoal : getGoal(),
 				Boolean.toString(isExactMatch()),
 				getProjectPath() == null ? "_" : getProjectPath(),
-				filePath == null ? "_" : filePath,
-				line == -1 ? "_" : Integer.toString(line),
 				"RefModule",
 				"RefName",
 				"RefArity",

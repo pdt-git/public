@@ -58,7 +58,7 @@ predicate_with_property(Property, FileName, Name) :-
 	;	Property = meta_predicate(_)
 	),
 	source_file_entity(FileName, _, Entity),
-	possibly_visible_predicate(Entity, _NonPrivate, Name, _Arity, Property).
+	possibly_visible_predicate(Entity, _NonPrivate, Name, _Arity, Property, []).
 
 :- private(logtalk_built_in/2).
 
@@ -72,8 +72,8 @@ logtalk_built_in(Name, Arity) :-
 	built_in_non_terminal(Name, Arity, _, _).
 
 
-:- private(possibly_visible_predicate/5).
-possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
+:- private(possibly_visible_predicate/6).
+possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property, _VisitedAncestors) :-
 	entity_property(Entity, _, declares(Name/Arity, Properties)),
 	memberchk(Property, Properties),
 	(	NonPrivate == true
@@ -83,20 +83,21 @@ possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
 		)
 	;	true
 	).
-possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
+possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property, _VisitedAncestors) :-
 	NonPrivate \== true,
 	entity_property(Entity, _, calls(Object::Name/Arity, _)),
 	functor(Head, Name, Arity),
 	catch(Object::predicate_property(Head, Property), _, fail).
-possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property) :-
+possibly_visible_predicate(Entity, NonPrivate, Name, Arity, Property, _VisitedAncestors) :-
 	NonPrivate \== true,
 	entity_property(Entity, _, calls(Module:Name/Arity, _)),
 	nonvar(Module),
 	functor(Head, Name, Arity),
 	catch(user::predicate_property(Module:Head, Property), _, fail).
-possibly_visible_predicate(Entity, _NonPrivate, Name, Arity, Property) :-
+possibly_visible_predicate(Entity, _NonPrivate, Name, Arity, Property, VisitedAncestors) :-
 	parent_entity(Entity, ParentEntity),
-	possibly_visible_predicate(ParentEntity, true, Name, Arity, Property).
+	\+ memberchk(ParentEntity, VisitedAncestors),
+	possibly_visible_predicate(ParentEntity, true, Name, Arity, Property, [ParentEntity|VisitedAncestors]).
 
 :- private(parent_entity/2).
 parent_entity(Entity, ParentEntity) :- extends_object(Entity, ParentEntity).

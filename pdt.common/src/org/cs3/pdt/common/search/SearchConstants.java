@@ -16,10 +16,12 @@ package org.cs3.pdt.common.search;
 
 public final class SearchConstants {
 
-	//	private static final String RESULT_KIND_SINGLE = "single";
+	public static final String RESULT_KIND_SINGLE = "single";
 	public static final String RESULT_KIND_MULTIFILE = "multifile";
 	public static final String RESULT_KIND_FOREIGN = "foreign";
 	public static final String RESULT_KIND_DYNAMIC = "dynamic";
+	public static final String RESULT_KIND_TRANSPARENT = "transparent";
+	public static final String RESULT_KIND_DWIM = "dwim";
 	
 	public static final String VISIBILITY_PUBLIC = "public";
 	public static final String VISIBILITY_PROTECTED = "protected";

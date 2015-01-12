@@ -21,6 +21,9 @@ public class EntryPointChangeListener implements IResourceChangeListener {
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
+		if (event.getDelta() == null) {
+			return;
+		}
 		int kind = event.getDelta().getKind();
 		if ((kind == IResourceDelta.ADDED || kind == IResourceDelta.CHANGED)) {
 			for (IResourceDelta deltaChild : event.getDelta().getAffectedChildren()) {

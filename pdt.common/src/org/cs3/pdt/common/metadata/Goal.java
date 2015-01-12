@@ -18,30 +18,18 @@ public class Goal extends PrologElement {
 
 	private static final long serialVersionUID = 1L;
 	private String termString;
-	
-	private boolean exactMatch;
+	private int start;
+	private int end;
 
 	public Goal(String file, String module, String elementName, int arity, String termString) {
-		this(file, 0,  module,  elementName,  arity,  termString, true);
-	}
-	
-	public Goal(String file, String module, String elementName, int arity, String termString, boolean exactMatch) {
-		this(file, 0,  module,  elementName,  arity,  termString, exactMatch);
+		this(file, 0, 0, 0, module, elementName, arity, termString);
 	}
 
-	public Goal(String file, int line, String module, String elementName, int arity, String termString) {
-		this(file, line, module, elementName, arity, termString, true);
-	}
-	
-	public Goal(String file, int line, String module, String elementName, int arity, String termString, boolean exactMatch) {
+	public Goal(String file, int line, int start, int end, String module, String elementName, int arity, String termString) {
 		super(file, line, module, elementName, arity);
 		this.termString = termString;
-		this.exactMatch = exactMatch;
-	}
-		
-
-	public void setModule(String module) {
-		this.contextModule=module;
+		this.start = start;
+		this.end = end;
 	}
 	
 	public String getTermString() {
@@ -52,8 +40,12 @@ public class Goal extends PrologElement {
 		}
 	}
 
-	public boolean isExactMatch() {
-		return exactMatch;
+	public int getStart() {
+		return start;
+	}
+
+	public int getEnd() {
+		return end;
 	}
 
 }

@@ -35,8 +35,11 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 	
 	private static final String ATTRIBUTE = "pdt.undefined.call";
 	
-	public UndefinedCallsSearchQuery(boolean createMarkers) {
+	private boolean includeSomeExecutionContext;
+	
+	public UndefinedCallsSearchQuery(boolean createMarkers, boolean includeSomeExecutionContext) {
 		super(createMarkers, ATTRIBUTE, ATTRIBUTE);
+		this.includeSomeExecutionContext = includeSomeExecutionContext;
 	}
 
 	@Override
@@ -53,6 +56,7 @@ public class UndefinedCallsSearchQuery extends MarkerCreatingSearchQuery {
 	protected String buildSearchQuery() {
 		return bT(PDTCommonPredicates.FIND_UNDEFINED_CALL,
 				getProjectPath() == null ? "_" : getProjectPath(),
+				Boolean.toString(includeSomeExecutionContext),
 				"Module",
 				"Name",
 				"Arity",

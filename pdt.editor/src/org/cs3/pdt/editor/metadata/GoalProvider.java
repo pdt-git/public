@@ -103,7 +103,7 @@ public class GoalProvider {
 		String term = document.get(start, endOfTerm - start);
 		int line = document.getLineOfOffset(offset) +1;
 
-		return new Goal(file, line, module, functor, arity, term);
+		return new Goal(file, line, start, endOfTerm, module, functor, arity, term);
 
 	}
 

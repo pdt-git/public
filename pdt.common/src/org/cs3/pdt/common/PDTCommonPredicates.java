@@ -23,6 +23,7 @@ public class PDTCommonPredicates {
 	
 	// search
 	public static final String FIND_PREDICATE_REFERENCE = "pdt_search:find_predicate_reference";
+	public static final String UPDATE_PREDICATE_REFERENCE_SEARCH_TERM_TO_CONTEXT = "pdt_search:update_predicate_reference_search_term_to_context";
 	public static final String FIND_PREDICATE_DEFINITIONS = "pdt_search:find_predicate_definitions";
 	public static final String FIND_CATEGORIZED_PREDICATE_DEFINITIONS = "pdt_search:find_categorized_predicate_definitions";
 	public static final String FIND_PRIMARY_DEFINITION_VISIBLE_IN = "pdt_search:find_primary_definition_visible_in";
