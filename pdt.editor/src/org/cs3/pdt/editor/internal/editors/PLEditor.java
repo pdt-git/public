@@ -43,6 +43,7 @@ import org.cs3.pdt.editor.internal.ImageRepository;
 import org.cs3.pdt.editor.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.editor.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.editor.internal.actions.FindReferencesActionDelegate;
+import org.cs3.pdt.editor.internal.actions.OpenCallHierarchyActionDelegte;
 import org.cs3.pdt.editor.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.editor.internal.editors.breakpoints.PDTBreakpointHandler;
 import org.cs3.pdt.editor.internal.views.lightweightOutline.NonNaturePrologOutline;
@@ -118,6 +119,8 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 	public static final String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
 	public static final String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
+	
+	public static final String COMMAND_OPEN_CALL_HIERARCHY = "org.eclipse.pdt.ui.open.call.hierarchy";
 	
 	private ColorManager colorManager;
 
@@ -414,6 +417,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 //				"org.cs3.pdt.editor.find.references");
 //				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
 
+		addAction(new OpenCallHierarchyActionDelegte(this), "Open Call Hierarchy", COMMAND_OPEN_CALL_HIERARCHY);
 		// addAction(menuMgr, new SpyPointActionDelegate(this),
 		// "Toggle Spy Point", SEP_PDT_INSPECT,
 		// "org.eclipse.debug.ui.commands.ToggleBreakpoint");
@@ -512,6 +516,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 		menu.insertAfter(COMMAND_OPEN_PRIMARY_DEFINITION, getAction(COMMAND_FIND_ALL_DEFINITIONS));
 		menu.insertAfter(COMMAND_FIND_ALL_DEFINITIONS, getAction(COMMAND_FIND_REFERENCES));
 		menu.insertAfter(COMMAND_FIND_REFERENCES, getAction(COMMAND_SHOW_QUICK_OUTLINE));
+		menu.insertAfter(COMMAND_FIND_REFERENCES, getAction(COMMAND_OPEN_CALL_HIERARCHY));
 		
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, COMMAND_TOGGLE_COMMENTS);
 		

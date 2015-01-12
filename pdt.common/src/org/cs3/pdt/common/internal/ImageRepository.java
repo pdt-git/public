@@ -30,6 +30,8 @@ public class ImageRepository {
     public static final String PE_PRIVATE = "private_co.gif";
     public static final String PE_LOCAL = "variable.gif";
     public static final String PE_INVISIBLE = "invisible.gif";
+    
+    public static final String PE_UNDEFINED = "ihigh_obj.gif";
 
     public static final String FILE = "prolog_file.gif";
     public static final String PROLOG_FILE_TRANSPARENT = "prolog_file_transparent.png";
@@ -39,6 +41,14 @@ public class ImageRepository {
     public static final String ENTITY = "package_obj.gif";
     
 	public static final String SEARCH_MATCH = "searchm_obj.gif";
+	
+	public static final String CH_ROOT = "class_hi.gif";
+	public static final String CH_REFRESH = "refresh.gif";
+	public static final String CH_CALLERS = "ch_callers.gif";
+	public static final String CH_CALLEES = "ch_callees.gif";
+	public static final String CH_SCOPE_WORKSPACE = "workspace_obj.gif";
+	public static final String CH_SCOPE_PROJECT = "prj_obj.gif";
+	public static final String CH_HISTORY_LIST = "history_list.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PDTCommonPlugin.getDefault().getBundle().getEntry("/icons/" + icon);

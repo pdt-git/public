@@ -13,6 +13,7 @@
 
 package org.cs3.pdt.common.internal;
 
+import org.cs3.pdt.common.callhierachy.CallHierarchyView;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.PlatformUI;
@@ -28,6 +29,7 @@ public class PrologPerspective implements IPerspectiveFactory {
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		defineActions(layout);
+		defineViewShortCuts(layout);
 		defineLayout(layout);
 	}
 
@@ -37,6 +39,10 @@ public class PrologPerspective implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("pdt.module.wizard");
 	}
 
+	private void defineViewShortCuts(IPageLayout layout) {
+		layout.addShowViewShortcut(CallHierarchyView.ID);
+	}
+	
 	public void defineLayout(IPageLayout layout) {
 		String editorArea = layout.getEditorArea();
 
