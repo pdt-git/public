@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -58,6 +59,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
@@ -114,7 +116,7 @@ public abstract class AbstractAnalysisView extends ViewPart {
 		compLeft.setLayout(new GridLayout(1, false));
 		Composite compRight = new Composite(parent, SWT.NONE);
 		compRight.setLayout(new GridLayout(1, false));
-		createSelector(compLeft);
+		createControllerArea(compLeft);
 		analysisTreeViewer = createAnalysisTreeViewer(compLeft);
 		
 		Label resultLabel = new Label(compRight, SWT.NONE);
@@ -122,9 +124,6 @@ public abstract class AbstractAnalysisView extends ViewPart {
 
 		resultTreeViewer = createResultTreeViewer(compRight);
 		initSashFormData(parent, compLeft, sash, compRight);
-		
-		createToolbarActions();
-
 	}
 
 	private void initSashFormData(final Composite parent, Composite compLeft, final Sash sash, Composite compRight) {
@@ -165,10 +164,26 @@ public abstract class AbstractAnalysisView extends ViewPart {
 		compRight.setLayoutData(button2Data);
 	}
 	
+	protected Control createControllerArea(Composite parent) {
+		Composite controllerArea = new Composite(parent, SWT.NONE);
+	    controllerArea.setLayout(new GridLayout(2, false));
+	    controllerArea.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    
+	    Control selector = createSelector(controllerArea);
+	    selector.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
+		ToolBar controllerToolBar = new ToolBar(controllerArea, SWT.HORIZONTAL);
+		controllerToolBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		ToolBarManager controllerToolBarManager = new ToolBarManager(controllerToolBar);
+	    createToolbarActions(controllerToolBarManager);
+	    controllerToolBarManager.update(true);
+		
+	    return controllerArea;
+	}
+	
 	protected abstract Control createSelector(Composite parent);
 	
-	private void createToolbarActions() {
-		IToolBarManager toolBarManager = getViewSite().getActionBars().getToolBarManager();
+	protected void createToolbarActions(IToolBarManager toolBarManager) {
 		toolBarManager.add(new Action(){
 			@Override
 			public void run(){
