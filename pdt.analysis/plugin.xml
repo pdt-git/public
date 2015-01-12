@@ -52,5 +52,14 @@
             super="org.eclipse.ui.workbench.texteditor.warning">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.cs3.pdt.perspective">
+         <viewShortcut
+               id="org.cs3.pdt.analysis.views.AnalysisView">
+         </viewShortcut>
+      </perspectiveExtension>
+   </extension>
 
 </plugin>
