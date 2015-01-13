@@ -41,7 +41,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 	
 	private int lastStateMask = -1;
 	
-	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, boolean isDeprecated, List<String> argNames, String docKind, String doc, boolean addSingleQuote) {
+	public PredicateCompletionProposal(String module, String functor, int arity, int prefixLength, String visibility, boolean isBuiltin, boolean isDeprecated, List<String> argNames, String docKind, String doc, boolean addSingleQuote, boolean needsQuotes) {
 		super(prefixLength, addSingleQuote);
 		this.visibility = visibility;
 		this.isBuiltin = isBuiltin;
@@ -52,11 +52,21 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal {
 		} else {
 			label = signature + " - " + module;
 		}
-		term = (functor + (addSingleQuote ? "'" : "") + getArglist(arity, argNames));
-		indicator = (functor + (addSingleQuote ? "'" : "") + "/" + arity);
-		this.functor = functor + (addSingleQuote ? "'" : "");
+		term = getFunctor(functor, addSingleQuote, needsQuotes) + getArglist(arity, argNames);
+		indicator = getFunctor(functor, addSingleQuote, needsQuotes) + "/" + arity;
+		this.functor = getFunctor(functor, addSingleQuote, needsQuotes);
 		this.docKind = docKind;
 		this.doc = doc;
+	}
+	
+	private String getFunctor(String functor, boolean addSingleQuote, boolean needsQuotes) {
+		if (addSingleQuote) {
+			return functor + "'";
+		} else if (needsQuotes) {
+			return "'" + functor + "'";
+		} else {
+			return functor;
+		}
 	}
 	
 	@Override

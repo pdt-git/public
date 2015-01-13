@@ -19,7 +19,7 @@
          , find_primary_definition_visible_in/9
          , find_definition_contained_in/9
          , find_definition_contained_in/10
-         , find_completion/13
+         , find_completion/14
          , find_entity_definition/6
          , find_module_reference/9
          , loaded_file/1
@@ -669,14 +669,14 @@ find_blacklist('$pldoc',4,_).
                 * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
                 ***********************************************/
 
-%% find_completion(+Prefix, ?EnclosingFile, ?LineInFile, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -IsDeprecated, -ArgNames, -DocKind, -Doc) is nondet.
+%% find_completion(+Prefix, ?EnclosingFile, ?LineInFile, -Kind, -Entity, -Name, -Arity, -Visibility, -IsBuiltin, -IsDeprecated, -ArgNames, -DocKind, -Doc, -NeedsQuotes) is nondet.
 % 
-find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc, NeedsQuotes) :-
 	var(Prefix),
 	!,
-	throw(prefix_not_bound(find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc))).
+	throw(prefix_not_bound(find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc, NeedsQuotes))).
 
-find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc, NeedsQuotes) :-
 	nonvar(EnclosingFile),
 	!,
 	(	split_file_path(EnclosingFile, _, _, _, lgt)
@@ -684,13 +684,24 @@ find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Vi
 		IsDeprecated = false,
 		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
 	;	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc)
-	).
+	),
+	needs_quotes(Name, NeedsQuotes).
 
-find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc) :-
+find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc, NeedsQuotes) :-
 	(	find_completion_(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, IsDeprecated, ArgNames, DocKind, Doc)
 	;	current_predicate(logtalk_load/1),
 		IsDeprecated = false,
 		logtalk_adapter::find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Visibility, IsBuiltin, ArgNames, DocKind, Doc)
+	),
+	needs_quotes(Name, NeedsQuotes).
+
+needs_quotes(Value, NeedsQuotes) :-
+	with_output_to(atom(A), writeq(Value)),
+	(	atom_length(Value, VL),
+		atom_length(A, AL),
+		AL > VL
+	->	NeedsQuotes = true
+	;	NeedsQuotes = false
 	).
 
 :- discontiguous(find_completion_/13).

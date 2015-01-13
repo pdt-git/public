@@ -20,21 +20,25 @@ import org.eclipse.swt.graphics.Image;
 public class ModuleCompletionProposal extends ComparableCompletionProposal {
 	
 	private String module;
-	private String content;
+	private boolean needsQuotes;
 	
-	public ModuleCompletionProposal(String module, int prefixLength, boolean addSingleQuote) {
+	public ModuleCompletionProposal(String module, int prefixLength, boolean addSingleQuote, boolean needsQuotes) {
 		super(prefixLength, addSingleQuote);
 		this.module = module;
+		this.needsQuotes = needsQuotes;
 	}
 	
 	@Override
 	public String getContent(int stateMask) {
-		if (content == null) {
-			content = (module + (addSingleQuote ? "'" : ""));
+		if (addSingleQuote) {
+			return module + "'";
+		} else if (needsQuotes) {
+			return "'" + module + "'";
+		} else {
+			return module;
 		}
-		return content;
 	}
-
+	
 	@Override
 	public int getCursorPosition() {
 		return getContent(-1).length();

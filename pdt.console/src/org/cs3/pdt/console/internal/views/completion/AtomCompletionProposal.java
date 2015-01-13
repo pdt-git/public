@@ -20,19 +20,23 @@ import org.eclipse.swt.graphics.Image;
 public class AtomCompletionProposal extends ComparableCompletionProposal {
 	
 	private String atom;
-	private String content;
+	private boolean needsQuotes;
 	
-	public AtomCompletionProposal(String atom, int prefixLength, boolean addSingleQuote) {
+	public AtomCompletionProposal(String atom, int prefixLength, boolean addSingleQuote, boolean needsQuotes) {
 		super(prefixLength, addSingleQuote);
 		this.atom = atom;
+		this.needsQuotes = needsQuotes;
 	}
 	
 	@Override
 	public String getContent(int stateMask) {
-		if (content == null) {
-			content = (atom + (addSingleQuote ? "'" : ""));
+		if (addSingleQuote) {
+			return atom + "'";
+		} else if (needsQuotes) {
+			return "'" + atom + "'";
+		} else {
+			return atom;
 		}
-		return content;
 	}
 
 	@Override

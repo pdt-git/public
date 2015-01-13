@@ -92,13 +92,15 @@ public class PrologCompletionProvider {
 				"IsDeprecated",
 				"ArgNames",
 				"DocKind",
-				"Doc");
+				"Doc",
+				"NeedsQuotes");
 		List<Map<String, Object>> results;
 		try {
 			results = process.queryAll(query);
 			for (Map<String,Object> result : results) {
 				String kind = result.get("Kind").toString();
 				String name = result.get("Name").toString();
+				boolean needsQuotes = Boolean.parseBoolean((String) result.get("NeedsQuotes"));
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
 					String resultModule = result.get("Module").toString();
 					int arity = Integer.parseInt(result.get("Arity").toString());
@@ -112,11 +114,11 @@ public class PrologCompletionProvider {
 					}
 					String docKind = (String) result.get("DocKind");
 					String doc = (String) result.get("Doc");
-					proposals.add(new PredicateCompletionProposal(resultModule, name, arity, prefix.length, visibility, isBuiltin, isDeprecated, argNames, docKind, doc, prefix.startsWithSingleQuote));
+					proposals.add(new PredicateCompletionProposal(resultModule, name, arity, prefix.length, visibility, isBuiltin, isDeprecated, argNames, docKind, doc, prefix.startsWithSingleQuote, needsQuotes));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)){
-					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
+					proposals.add(new ModuleCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote, needsQuotes));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)){
-					proposals.add(new AtomCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote));
+					proposals.add(new AtomCompletionProposal(name, prefix.length, prefix.startsWithSingleQuote, needsQuotes));
 				}
 			}
 		} catch (PrologProcessException e) {

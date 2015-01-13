@@ -112,12 +112,15 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					"IsDeprecated",
 					"ArgNames",
 					"DocKind",
-					"Doc");
+					"Doc",
+					"NeedsQuotes");
 			List<Map<String, Object>> results = session.queryAll(query);
 			Debug.info("find predicates with prefix: " + query);
 			for (Map<String, Object> result : results) {
 				String kind = result.get("Kind").toString();
 				String name = (String) result.get("Name");
+				
+				boolean needsQuotes = Boolean.parseBoolean((String) result.get("NeedsQuotes"));
 				
 				if (SearchConstants.COMPLETION_KIND_PREDICATE.equals(kind)) {
 					
@@ -148,11 +151,11 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						doc = result.get("Doc").toString();
 					}
 					
-					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, isDeprecated, docKind, doc, startsWithSingleQuote));
+					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, isDeprecated, docKind, doc, startsWithSingleQuote || needsQuotes));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)) {
-					proposals.add(new ModuleCompletionProposal(document, name, begin, len, startsWithSingleQuote));
+					proposals.add(new ModuleCompletionProposal(document, name, begin, len, startsWithSingleQuote || needsQuotes));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {
-					proposals.add(new AtomCompletionProposal(document, name, begin, len, startsWithSingleQuote));
+					proposals.add(new AtomCompletionProposal(document, name, begin, len, startsWithSingleQuote || needsQuotes));
 				}
 			}
 			if (searchPrefixForDefault != null) {
