@@ -62,12 +62,15 @@
 	graph_style_margin_color(rlibrary, rounded, 10, snow3).
 	graph_style_margin_color(libraries, rounded, 10, snow3).
 	graph_style_margin_color(library, rounded, 10, snow2).
+	graph_style_margin_color(rdirectory, rounded, 10, snow3).
+	graph_style_margin_color(directories, rounded, 10, snow3).
+	graph_style_margin_color(directory, rounded, 10, snow2).
 	graph_style_margin_color(files, rounded, 10, snow2).
 	graph_style_margin_color(file, rounded, 10, snow).
 	graph_style_margin_color(external, rounded, 10, white).
 	graph_style_margin_color(entity, rounded, 10, snow).
 
-	node(Stream, Identifier, Label, Contents, Kind, _Options) :-
+	node(Stream, Identifier, Label, _Caption, Contents, Kind, _Options) :-
 		node_shape_style_color(Kind, Shape, Style, Color),
 		graphML_api:open_node(Stream, Identifier),
 		graphML_api:write_data(Stream, 'id', Identifier),
@@ -89,15 +92,21 @@
 	
 	node_shape_style_color(_, box, filled, white).
 	
+	% entities belonging to the file or library being documented
 	node_shape_style_color_(prototype, box, filled, beige).
-	node_shape_style_color_(instance_or_class, box, filled, yellow).
+	node_shape_style_color_(class, box, filled, yellow).
+	node_shape_style_color_(instance, box, filled, yellow).
+	node_shape_style_color_(instance_and_class, box, filled, yellow).
 	node_shape_style_color_(protocol, note, filled, aquamarine).
 	node_shape_style_color_(category, component, filled, cyan).
 	node_shape_style_color_(module, tab, filled, gainsboro).
 	node_shape_style_color_(file, box, filled, turquoise).
 
+	% external entities to the file or library being documented
 	node_shape_style_color_(external_prototype, box, '"filled,dashed"', beige).
-	node_shape_style_color_(external_instance_or_class, box, '"filled,dashed"', yellow).
+	node_shape_style_color_(external_class, box, '"filled,dashed"', yellow).
+	node_shape_style_color_(external_instance, box, '"filled,dashed"', yellow).
+	node_shape_style_color_(external_instance_and_class, box, '"filled,dashed"', yellow).
 	node_shape_style_color_(external_protocol, note, '"filled,dashed"', aquamarine).
 	node_shape_style_color_(external_category, component, '"filled,dashed"', cyan).
 	node_shape_style_color_(external_module, tab, '"filled,dashed"', gainsboro).
@@ -119,6 +128,7 @@
 		!.
 	edge_arrow(_, normal).
 	
+	% entity relations
 	edge_arrow_(extends_object, vee).
 	edge_arrow_(extends_protocol, vee).
 	edge_arrow_(extends_category, vee).
@@ -127,8 +137,11 @@
 	edge_arrow_(implements_protocol, dot).
 	edge_arrow_(imports_category, box).
 	edge_arrow_(complements_object, obox).
+	% multifile predicates
 	edge_arrow_(provides_clauses, inv).
+	% cross-referencing predicate calls
 	edge_arrow_(calls_predicate, rdiamond).
+	% file relations
 	edge_arrow_(depends_on_file, normal).
 	edge_arrow_(loads_file, normal).
 
