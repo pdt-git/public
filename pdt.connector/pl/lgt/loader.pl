@@ -20,12 +20,18 @@ logtalk_library_path(prolog_connector_pl_lgt, Library) :-
 	atom_concat(Directory, '/', Library).
 
 load_lgt_reload_adapter :-
-    (current_predicate(user:logtalk_load/1)
-    -> set_logtalk_flag(code_prefix, '.'), set_logtalk_flag(optimize, off), set_prolog_flag(optimise, off),
-       logtalk_load([
+	(	current_predicate(user:logtalk_load/1)
+	->	set_logtalk_flag(code_prefix, '.'),
+		set_logtalk_flag(optimize, off),
+		set_prolog_flag(optimise, off),
+		(	current_prolog_flag(logtalk_source_location_data, _)
+		->	set_prolog_flag(logtalk_source_location_data, true)
+		;	true
+		),
+		logtalk_load([
 			prolog_connector_pl_lgt(logtalk_reload_adapter)
-       ])
-	;  true
+		])
+	;	true
 	).
 	
 :- initialization( load_lgt_reload_adapter ). 
