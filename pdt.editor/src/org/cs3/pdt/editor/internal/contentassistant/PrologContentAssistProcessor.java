@@ -44,36 +44,45 @@ public abstract class PrologContentAssistProcessor {
 		int begin;
 		int length;
 		String prefix;
+		boolean startsWithSingleQuote;
 				
-		Prefix(IDocument document, int begin, String prefix) {
-			this.begin=begin;
-			this.prefix=prefix;
-			this.length=prefix.length();
+		Prefix(int begin, String prefix, boolean startsWithSingleQuote) {
+			this.begin = begin;
+			this.prefix = prefix;
+			this.length = prefix.length();
+			this.startsWithSingleQuote = startsWithSingleQuote;
 		}
 	}
 		
 	protected abstract void addPredicateProposals(IDocument document, int begin,
-			int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals)
+			int len, boolean startsWithSingleQuote, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals)
 			throws PrologProcessException, CoreException;
 
 	protected abstract void addVariableProposals(IDocument document, int begin,
 			int len, String prefix, List<ComparableTemplateCompletionProposal> proposals) throws BadLocationException, PrologProcessException, CoreException;
 
-	private Prefix calculatePrefix(IDocument document, int offset)
-			throws BadLocationException {
+	private Prefix calculatePrefix(IDocument document, int offset) throws BadLocationException {
+		
 		int begin=offset;
 		int length=0;
 		char c = document.getChar(begin);
+		if (c == '\'') {
+			return new Prefix(offset, "", false);
+		}
 		boolean isWhiteSpace = Character.isWhitespace(c);
 		
-		if (isWhiteSpace) {
-			return new Prefix(document, offset + 1, "");
+		if (c == ':' || isWhiteSpace) {
+			return new Prefix(offset + 1, "", false);
 		}
 		while (!isWhiteSpace){
 			length++;
 			int test = begin - 1;
 			if (test >= 0) {
-				isWhiteSpace = Character.isWhitespace(document.getChar(test));
+				c = document.getChar(test);
+				if (c == '\'') {
+					return new Prefix(begin - 1, document.get(begin, length), true);
+				}
+				isWhiteSpace = Character.isWhitespace(c);
 				if(isWhiteSpace){
 					break;
 				}
@@ -84,7 +93,7 @@ public abstract class PrologContentAssistProcessor {
 		}
 		String pre = document.get(begin, length);
 		
-		Prefix prefix = new Prefix(document, begin, pre);
+		Prefix prefix = new Prefix(begin, pre, false);
 		return prefix;
 	}
 
@@ -199,7 +208,7 @@ public abstract class PrologContentAssistProcessor {
 					}
 					searchPrefix = module + splittingOperator + QueryUtils.quoteAtomIfNeeded(pre.prefix);
 				}
-				addPredicateProposals(document, pre.begin, pre.length, searchPrefix, searchPrefixForDefault, proposals);
+				addPredicateProposals(document, pre.begin, pre.length, pre.startsWithSingleQuote, searchPrefix, searchPrefixForDefault, proposals);
 			}
 	
 			if (proposals.size() == 0)

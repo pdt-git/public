@@ -50,8 +50,8 @@ import org.eclipse.swt.widgets.Shell;
 @SuppressWarnings({ "restriction" })
 public class PredicateCompletionProposal extends ComparableTemplateCompletionProposal implements ICompletionProposalExtension5, ICompletionProposalExtension6, IInformationControlCreator {
 
-	public static PredicateCompletionProposal createProposal(IDocument document, int offset, int length, String module, String name, int arity, List<String> argNames, String visibility, boolean isBuiltin, boolean isDeprecated, String docKind, String doc) {
-		String pattern = createPattern(name, arity, argNames);
+	public static PredicateCompletionProposal createProposal(IDocument document, int offset, int length, String module, String name, int arity, List<String> argNames, String visibility, boolean isBuiltin, boolean isDeprecated, String docKind, String doc, boolean addQuote) {
+		String pattern = createPattern(name, arity, argNames, addQuote);
 		StyledString displayString;
 		if (module == null) {
 			displayString =  new StyledString(name + "/" + arity, isDeprecated ? STRIKETHROUGH : null);
@@ -67,15 +67,26 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		return new PredicateCompletionProposal(termTemplate, documentTemplateContext, region, image, indicatorTemplate, displayString, signature, docKind, doc);
 	}
 	
-	private static String createPattern(String name, int arity, List<String> argNames) {
+	private static String createPattern(String name, int arity, List<String> argNames, boolean addQuote) {
 		if (arity <= 0) {
-			return name;
+			if (addQuote) {
+				return "'" + name + "'";
+			} else {
+				return name;
+			}
 		}
 		boolean createArglist = Boolean.parseBoolean(PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_COMPLETE_ARGLIST, "true"));
 		if (!createArglist) {
 			return name;
 		}
-		StringBuilder buf = new StringBuilder(name.replace("$", "$$"));
+		StringBuilder buf = new StringBuilder();
+		if (addQuote) {
+			buf.append('\'');
+		}
+		buf.append(name.replace("$", "$$"));
+		if (addQuote) {
+			buf.append('\'');
+		}
 		buf.append("(");
 		if (argNames == null) {
 			for (int i = 0; i < arity; i++) {

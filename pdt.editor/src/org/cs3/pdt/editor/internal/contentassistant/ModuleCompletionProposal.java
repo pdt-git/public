@@ -19,8 +19,8 @@ import org.eclipse.jface.text.IDocument;
 
 public class ModuleCompletionProposal extends ComparableTemplateCompletionProposal {
 
-	public ModuleCompletionProposal(IDocument document, String module, int offset, int length) {
-		super(document, module, "", module, offset, length, ImageRepository.getImage(ImageRepository.PACKAGE));
+	public ModuleCompletionProposal(IDocument document, String module, int offset, int length, boolean addQuote) {
+		super(document, module, "", createPattern(module, addQuote), offset, length, ImageRepository.getImage(ImageRepository.PACKAGE));
 	}
 
 	@Override
@@ -28,4 +28,11 @@ public class ModuleCompletionProposal extends ComparableTemplateCompletionPropos
 		return PRIORITY_1;
 	}
 	
-}
+	private static String createPattern(String module, boolean addQuote) {
+		if (addQuote) {
+			return "'" + module.replace("$", "$$") + "'";
+		} else {
+			return module.replace("$", "$$");
+		}
+	}
+	}

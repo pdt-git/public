@@ -92,7 +92,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void addPredicateProposals(IDocument document, int begin, int len, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals) throws PrologProcessException,
+	protected void addPredicateProposals(IDocument document, int begin, int len, boolean startsWithSingleQuote, String prefix, String searchPrefixForDefault, List<ComparableTemplateCompletionProposal> proposals) throws PrologProcessException,
 			CoreException {
 
 		PrologSession session = null;
@@ -148,11 +148,11 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						doc = result.get("Doc").toString();
 					}
 					
-					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, isDeprecated, docKind, doc));
+					proposals.add(PredicateCompletionProposal.createProposal(document, begin, len, module, name, arity, argNames, visibility, isBuiltin, isDeprecated, docKind, doc, startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_MODULE.equals(kind)) {
-					proposals.add(new ModuleCompletionProposal(document, name, begin, len));
+					proposals.add(new ModuleCompletionProposal(document, name, begin, len, startsWithSingleQuote));
 				} else if (SearchConstants.COMPLETION_KIND_ATOM.equals(kind)) {
-					proposals.add(new AtomCompletionProposal(document, name, begin, len));
+					proposals.add(new AtomCompletionProposal(document, name, begin, len, startsWithSingleQuote));
 				}
 			}
 			if (searchPrefixForDefault != null) {

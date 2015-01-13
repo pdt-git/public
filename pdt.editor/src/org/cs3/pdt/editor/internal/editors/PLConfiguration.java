@@ -163,41 +163,39 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		if (assistant != null)
 			return assistant;
 		ContentAssistant assistant = null;
-		
-			assistant = new ContentAssistant();
-			assistant.setContentAssistProcessor(
-					new NaivPrologContentAssistProcessor(){
-						@Override
-						protected IFile getFile() {
-							if(editor==null){
-								return null;
-							}
-							IEditorInput input = editor.getEditorInput();
-							if(input==null){
-								return null;
-							}
-							if(!(input instanceof IFileEditorInput)){
-								return null;
-							}
-							IFileEditorInput input2 = (IFileEditorInput)input;
-							IFile file = input2.getFile();
-							return file;
-						}},
-					IDocument.DEFAULT_CONTENT_TYPE);
-		
-			
+
+		assistant = new ContentAssistant();
+		NaivPrologContentAssistProcessor processor = new NaivPrologContentAssistProcessor() {
+			@Override
+			protected IFile getFile() {
+				if (editor == null) {
+					return null;
+				}
+				IEditorInput input = editor.getEditorInput();
+				if (input == null) {
+					return null;
+				}
+				if (!(input instanceof IFileEditorInput)) {
+					return null;
+				}
+				IFileEditorInput input2 = (IFileEditorInput) input;
+				IFile file = input2.getFile();
+				return file;
+			}
+		};
+		assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+		assistant.setContentAssistProcessor(processor, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
+
 		assistant.enableAutoActivation(true);
 		assistant.setAutoActivationDelay(500);
 		assistant.install(sourceViewer);
-		assistant
-				.setInformationControlCreator(new IInformationControlCreator() {
-					@Override
-					public IInformationControl createInformationControl(
-							Shell parent) {
+		assistant.setInformationControlCreator(new IInformationControlCreator() {
+			@Override
+			public IInformationControl createInformationControl(Shell parent) {
 
-						return new DefaultInformationControl(parent);
-					}
-				});
+				return new DefaultInformationControl(parent);
+			}
+		});
 		assistant.enableColoredLabels(true);
 		this.assistant = assistant;
 		return assistant;

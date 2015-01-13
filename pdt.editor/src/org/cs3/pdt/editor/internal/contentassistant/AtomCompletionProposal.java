@@ -19,13 +19,21 @@ import org.eclipse.jface.text.IDocument;
 
 public class AtomCompletionProposal extends ComparableTemplateCompletionProposal {
 
-	public AtomCompletionProposal(IDocument document, String atom, int offset, int length) {
-		super(document, atom, "", atom, offset, length, ImageRepository.getImage(ImageRepository.PE_ATOM));
+	public AtomCompletionProposal(IDocument document, String atom, int offset, int length, boolean addQuote) {
+		super(document, atom, "", createPattern(atom, addQuote), offset, length, ImageRepository.getImage(ImageRepository.PE_ATOM));
 	}
 
 	@Override
 	protected int getPriority() {
 		return PRIORITY_0;
+	}
+	
+	private static String createPattern(String atom, boolean addQuote) {
+		if (addQuote) {
+			return "'" + atom.replace("$", "$$") + "'";
+		} else {
+			return atom.replace("$", "$$");
+		}
 	}
 	
 }

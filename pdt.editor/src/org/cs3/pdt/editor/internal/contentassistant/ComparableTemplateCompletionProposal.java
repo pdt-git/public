@@ -33,7 +33,7 @@ public abstract class ComparableTemplateCompletionProposal extends TemplatePropo
 	protected static final int PRIORITY_2 = 2;
 	
 	public ComparableTemplateCompletionProposal(IDocument document, String name, String description, String pattern, int offset, int length, Image image) {
-		super(new Template(name, description, contextTypeId, pattern.replace("$", "$$"), true), new DocumentTemplateContext(new TemplateContextType(contextTypeId), document, offset, length), new Region(offset, length), image);
+		super(new Template(name, description, contextTypeId, pattern, true), new DocumentTemplateContext(new TemplateContextType(contextTypeId), document, offset, length), new Region(offset, length), image);
 	}
 
 	public ComparableTemplateCompletionProposal(Template template, TemplateContext context, IRegion region, Image image) {

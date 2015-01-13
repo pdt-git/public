@@ -149,7 +149,7 @@ public class PrologCompletionProvider {
 		}
 		boolean isWhiteSpace = Character.isWhitespace(c);
 		
-		if (isWhiteSpace) {
+		if (c == ':' || isWhiteSpace) {
 			return new Prefix(offset + 1, "", false);
 		}
 		
