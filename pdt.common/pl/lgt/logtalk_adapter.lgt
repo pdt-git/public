@@ -414,10 +414,7 @@ find_definition_contained_in(FullPath, Options, EntityAtom, EntityLine, Kind, Fu
 	once((	split_file_path:split_file_path(FullPath, Directory, File, _, lgt)
 		;	split_file_path:split_file_path(FullPath, Directory, File, _, logtalk)
 	)),
-	(	current_logtalk_flag(version, version(3, _, _)) ->
-		logtalk::loaded_file(FullPath)
-	;	logtalk::loaded_file(File, Directory)
-	),
+	logtalk::loaded_file(FullPath),
 	% if this fails we should alert the user that the file is not loaded!
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(EntityLine, _)),

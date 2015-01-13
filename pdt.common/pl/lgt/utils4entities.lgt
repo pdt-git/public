@@ -70,11 +70,6 @@ call_and_report_contex_entity(Goal) :-
 % get_entity_data(+atom, +atom, +integer, ?entity_identifier, ?atom, -list)
 
 get_entity_data(File, Directory, Line, Entity, Kind, Properties) :-
-	(	current_logtalk_flag(version, version(3, _, _)) ->
-		logtalk::loaded_file_property(FullPath, basename(File)),
-		logtalk::loaded_file_property(FullPath, directory(Directory))
-	;	logtalk::loaded_file(File, Directory)
-	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(Begin, End)),
 	Begin =< Line, End >= Line,
@@ -114,10 +109,7 @@ source_file_entity(FullPath, Line, Entity) :-
 	once((	split_file_path:split_file_path(FullPath, Directory, File, _, lgt)
 		;	split_file_path:split_file_path(FullPath, Directory, File, _, logtalk)
 	)),
-	(	current_logtalk_flag(version, version(3, _, _)) ->
-		logtalk::loaded_file(FullPath)
-	;	logtalk::loaded_file(File, Directory)
-	),
+	logtalk::loaded_file(FullPath),
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(Begin, End)),
 	Begin =< Line, End >= Line.
@@ -126,10 +118,7 @@ source_file_entity(FullPath, Line, Entity) :-
 	once((	split_file_path:split_file_path(FullPath, Directory, File, _, lgt)
 		;	split_file_path:split_file_path(FullPath, Directory, File, _, logtalk)
 	)),
-	(	current_logtalk_flag(version, version(3, _, _)) ->
-		logtalk::loaded_file(FullPath)
-	;	logtalk::loaded_file(File, Directory)
-	),
+	logtalk::loaded_file(FullPath),
 	entity_property(Entity, Kind, file(File, Directory)),
 	entity_property(Entity, Kind, lines(Line, _)).
 
@@ -236,11 +225,6 @@ defined_in_file(Entity, Functor, Arity, 1, Path, Line) :-
 	atom_concat(Directory, File, Path),
 	list::memberchk(line_count(Line), Properties).
 defined_in_file(Entity, Functor, Arity, 1, Path, Line) :-
-	(	current_logtalk_flag(version, version(3, _, _)) ->
-		logtalk::loaded_file_property(FullPath, basename(File)),
-		logtalk::loaded_file_property(FullPath, directory(Directory))
-	;	logtalk::loaded_file(File, Directory)
-	),
 	entity_property(Entity, _Kind, file(File, Directory)),
 	atom_concat(Directory, File, Path),
 	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
@@ -265,7 +249,7 @@ declared_in_file(Entity, Name, Arity, [Path-[Line]]) :-
     entity_property(Entity, _Kind, declares(Name/Arity, Properties)),
     (  entity_property(Entity, _Kind, file(File, Directory))
     ->  atom_concat(Directory, File, Path),
-        ( list::memberchk(line_count(Line), Properties)            % Line of the scope directive
+        ( list::memberchk(line_count(Line), Properties)      % Line of the scope directive
         -> true
         ;  Line = 0                                          % Implicit dynamic declaration
         )                                                    % via an assert. No line number.
