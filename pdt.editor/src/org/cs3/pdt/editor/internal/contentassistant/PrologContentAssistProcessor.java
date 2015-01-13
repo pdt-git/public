@@ -64,27 +64,27 @@ public abstract class PrologContentAssistProcessor {
 		int begin=offset;
 		int length=0;
 		char c = document.getChar(begin);
-		boolean isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
+		boolean isWhiteSpace = Character.isWhitespace(c);
 		
-		if (!isPredChar) {
+		if (isWhiteSpace) {
 			return new Prefix(document, offset + 1, "");
 		}
-		while (isPredChar){
+		while (!isWhiteSpace){
 			length++;
-			int test = begin-1;
-			if(test >=0){
-				isPredChar = ParserUtils.isNonQuotedPredicateNameChar(document.getChar(test));
-				if(!isPredChar){
+			int test = begin - 1;
+			if (test >= 0) {
+				isWhiteSpace = Character.isWhitespace(document.getChar(test));
+				if(isWhiteSpace){
 					break;
 				}
 			} else {
 				break;
 			}
-			begin=test;
+			begin = test;
 		}
 		String pre = document.get(begin, length);
 		
-		Prefix prefix = new Prefix(document,begin,pre);
+		Prefix prefix = new Prefix(document, begin, pre);
 		return prefix;
 	}
 
@@ -116,15 +116,47 @@ public abstract class PrologContentAssistProcessor {
 		return null;
 	}
 	
-	private String retrievePrefixedModule(IDocument document, int begin)
-			throws BadLocationException {
-		int moduleEnd = begin;
-		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(document.getChar(moduleBegin)))
-			moduleBegin--;
-		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
-		return moduleName;
-	}
+//	private String retrievePrefixedModule(IDocument document, int begin)
+//			throws BadLocationException {
+//		int moduleEnd = begin;
+//		int moduleBegin = begin - 1;
+//		while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(document.getChar(moduleBegin)))
+//			moduleBegin--;
+//		String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
+//		return moduleName;
+//	}
+    
+    private String retrievePrefixedModule(IDocument document, int begin) throws BadLocationException {
+        int moduleEnd = begin;
+        int moduleBegin = begin - 1;
+        char firstChar = document.getChar(moduleBegin);
+        if (firstChar == '\'') {
+            return retrieveQualifiedPrefixedModule(document, moduleBegin);
+        }
+        while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(document.getChar(moduleBegin))) {
+            moduleBegin--;
+        }
+        String moduleName = document.get(moduleBegin + 1, moduleEnd - moduleBegin - 1);
+        return moduleName;
+    }
+    
+    private String retrieveQualifiedPrefixedModule(IDocument document, int begin) throws BadLocationException {
+        int moduleEnd = begin + 1;
+        int moduleBegin = begin - 1;
+        while (moduleBegin >= 0) {
+        	char c = document.getChar(moduleBegin);
+        	if (c == '\'') {
+        		if (moduleBegin > 0 && (document.getChar(moduleBegin - 1) == '\\' || document.getChar(moduleBegin - 1) == '\'')) {
+        			moduleBegin--;
+        		} else {
+        			return document.get(moduleBegin, moduleEnd - moduleBegin);
+        		}
+        	}
+        	moduleBegin--;
+        }
+        return null;
+    }
+    
 
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 	

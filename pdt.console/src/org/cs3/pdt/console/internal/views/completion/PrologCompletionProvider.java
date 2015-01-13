@@ -141,34 +141,34 @@ public class PrologCompletionProvider {
 	}
 		
 	private Prefix calculatePrefix(String line, int offset) {
-		int begin=offset;
-		int length=0;
+		int begin = offset;
+		int length = 0;
 		char c = line.charAt(begin);
 		if (c == '\'') {
 			return new Prefix(offset, "", false);
 		}
-		boolean isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
+		boolean isWhiteSpace = Character.isWhitespace(c);
 		
-		if (!isPredChar) {
+		if (isWhiteSpace) {
 			return new Prefix(offset + 1, "", false);
 		}
 		
-		while (isPredChar){
+		while (!isWhiteSpace){
 			length++;
-			int test = begin-1;
-			if(test >=0){
+			int test = begin - 1;
+			if(test >= 0){
 				c = line.charAt(test);
 				if (c == '\'') {
 					return new Prefix(begin - 1, line.substring(begin, begin + length), true);
 				}
-				isPredChar = ParserUtils.isNonQuotedPredicateNameChar(c);
-				if(!isPredChar){
+				isWhiteSpace = Character.isWhitespace(c);
+				if (isWhiteSpace) {
 					break;
 				}
 			} else {
 				break;
 			}
-			begin=test;
+			begin = test;
 		}
 		return new Prefix(begin, line.substring(begin, begin + length), false);
 	}
@@ -196,19 +196,34 @@ public class PrologCompletionProvider {
 		}
 		return null;
 	}
-	
-	private String retrievePrefixedModule(String line, int begin) {
-		int moduleEnd = begin;
-		int moduleBegin = begin - 1;
-		while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(line.charAt(moduleBegin)))
-			moduleBegin--;
-		String moduleName = line.substring(moduleBegin + 1, moduleEnd);
-//		if(!Util.isVarPrefix(moduleName)){
-			return moduleName;
-//		} else {
-//			return "_";
-//		}
-	}
+    
+    private String retrievePrefixedModule(String line, int begin) {
+        int moduleEnd = begin;
+        int moduleBegin = begin - 1;
+        char firstChar = line.charAt(moduleBegin);
+        if (firstChar == '\'') {
+            return retrieveQualifiedPrefixedModule(line, moduleBegin);
+        }
+        while (moduleBegin >= 0 && ParserUtils.isNonQuotedPredicateNameChar(line.charAt(moduleBegin))) {
+            moduleBegin--;
+        }
+        String moduleName = line.substring(moduleBegin + 1, moduleEnd);
+        return moduleName;
+    }
+    
+    private String retrieveQualifiedPrefixedModule(String line, int begin) {
+        int moduleEnd = begin + 1;
+        int moduleBegin = begin - 1;
+        while (moduleBegin >= 0) {
+        	char c = line.charAt(moduleBegin);
+        	if (c == '\'') {
+        		return line.substring(moduleBegin, moduleEnd);
+        	}
+        	moduleBegin--;
+        }
+        return null;
+    }
+    
 	public void setPrologProcess(PrologProcess process) {
 		this.process = process;
 	}

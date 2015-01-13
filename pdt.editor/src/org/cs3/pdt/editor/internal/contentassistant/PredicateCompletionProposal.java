@@ -75,7 +75,7 @@ public class PredicateCompletionProposal extends ComparableTemplateCompletionPro
 		if (!createArglist) {
 			return name;
 		}
-		StringBuilder buf = new StringBuilder(name);
+		StringBuilder buf = new StringBuilder(name.replace("$", "$$"));
 		buf.append("(");
 		if (argNames == null) {
 			for (int i = 0; i < arity; i++) {
