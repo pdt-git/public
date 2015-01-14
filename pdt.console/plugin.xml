@@ -88,31 +88,4 @@
              path="pl/">
        </fileSearchPathContribution>
     </extension>
-    <extension
-          point="org.eclipse.ui.perspectiveExtensions">
-       <perspectiveExtension
-             targetID="org.cs3.pdt.perspective">
-          <view
-                id="org.cs3.pdt.console.internal.views.PrologConsoleView"
-                minimized="false"
-                relationship="stack"
-                relative="prolog.perspective.console.folder">
-          </view>
-          <view
-                id="org.eclipse.ui.views.ProblemView"
-                minimized="false"
-                relationship="stack"
-                relative="org.cs3.pdt.console.internal.views.PrologConsoleView">
-          </view>
-          <view
-                id="org.eclipse.search.ui.views.SearchView"
-                minimized="false"
-                relationship="stack"
-                relative="org.cs3.pdt.console.internal.views.PrologConsoleView">
-          </view>
-          <viewShortcut
-                id="org.cs3.pdt.console.internal.views.PrologConsoleView">
-          </viewShortcut>
-       </perspectiveExtension>
-    </extension>
  </plugin>

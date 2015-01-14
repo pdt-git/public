@@ -14,6 +14,8 @@
 package org.cs3.pdt.common.internal;
 
 import org.cs3.pdt.common.callhierachy.CallHierarchyView;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.PlatformUI;
@@ -21,6 +23,7 @@ import org.eclipse.ui.views.IViewRegistry;
 
 public class PrologPerspective implements IPerspectiveFactory {
 	
+	private static final String CONSOLE_VIEW_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 	public static final String CONSOLE_FOLDER = "prolog.perspective.console.folder";
 	public static final String VIEWS_FOLDER = "prolog.perspective.views.folder";
 	
@@ -41,12 +44,18 @@ public class PrologPerspective implements IPerspectiveFactory {
 
 	private void defineViewShortCuts(IPageLayout layout) {
 		layout.addShowViewShortcut(CallHierarchyView.ID);
+		layout.addShowViewShortcut(CONSOLE_VIEW_ID);
 	}
 	
 	public void defineLayout(IPageLayout layout) {
 		String editorArea = layout.getEditorArea();
 
-		layout.createFolder(CONSOLE_FOLDER, IPageLayout.BOTTOM, 0.65f, editorArea);
+		IFolderLayout consoleFolder = layout.createFolder(CONSOLE_FOLDER, IPageLayout.BOTTOM, 0.65f, editorArea);
+		
+		consoleFolder.addView(CONSOLE_VIEW_ID);
+		consoleFolder.addView(IPageLayout.ID_PROBLEM_VIEW);
+		consoleFolder.addView(NewSearchUI.SEARCH_VIEW_ID);
+		
 		layout.createFolder(VIEWS_FOLDER, IPageLayout.RIGHT, 0.5f, CONSOLE_FOLDER);
 		
 		IViewRegistry viewRegistry = PlatformUI.getWorkbench().getViewRegistry();
