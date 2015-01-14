@@ -696,11 +696,14 @@ find_completion(Prefix, EnclosingFile, LineInFile, Kind, Entity, Name, Arity, Vi
 	needs_quotes(Name, NeedsQuotes).
 
 needs_quotes(Value, NeedsQuotes) :-
-	with_output_to(atom(A), writeq(Value)),
-	(	atom_length(Value, VL),
-		atom_length(A, AL),
-		AL > VL
-	->	NeedsQuotes = true
+	(	atom(Value)
+	->	with_output_to(atom(A), writeq(Value)),
+		(	atom_length(Value, VL),
+			atom_length(A, AL),
+			AL > VL
+		->	NeedsQuotes = true
+		;	NeedsQuotes = false
+		)
 	;	NeedsQuotes = false
 	).
 
