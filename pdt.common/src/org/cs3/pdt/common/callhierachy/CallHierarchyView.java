@@ -573,7 +573,7 @@ public class CallHierarchyView extends ViewPart {
 			history.remove(root);
 			history.add(root);
 			if (history.size() > CallHierarchyUtil.MAX_HISTORY_SIZE) {
-				history.remove(root);
+				history.remove(0);
 			}
 			CallHierarchyUtil.saveHistory(history);
 		}
