@@ -69,12 +69,12 @@ public abstract class PrologContentAssistProcessor {
 		if (c == '\'') {
 			return new Prefix(offset, "", false);
 		}
-		boolean isWhiteSpace = Character.isWhitespace(c);
+		boolean isPredicateChar = ParserUtils.isPredicateNameChar(c);
 		
-		if (c == ':' || isWhiteSpace) {
+		if (c == ':' || isPredicateChar) {
 			return new Prefix(offset + 1, "", false);
 		}
-		while (!isWhiteSpace){
+		while (isPredicateChar){
 			length++;
 			int test = begin - 1;
 			if (test >= 0) {
@@ -82,8 +82,8 @@ public abstract class PrologContentAssistProcessor {
 				if (c == '\'') {
 					return new Prefix(begin - 1, document.get(begin, length), true);
 				}
-				isWhiteSpace = Character.isWhitespace(c);
-				if(isWhiteSpace){
+				isPredicateChar = ParserUtils.isPredicateNameChar(c);
+				if (c == ':' || !isPredicateChar){
 					break;
 				}
 			} else {
