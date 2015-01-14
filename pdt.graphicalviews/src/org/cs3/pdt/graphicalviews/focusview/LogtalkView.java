@@ -49,11 +49,12 @@ public class LogtalkView extends ViewBase {
 
 	public enum InputType {
 		PROJECT(ImageRepository.INPUT_TYPE_PROJECT, "Project"),
-		LIBRARY(ImageRepository.INPUT_TYPE_LIBRARY, "Library"),
-		RECURSIVE_LIBRARY(ImageRepository.INPUT_TYPE_RECURSIVE_LIBRARY, "Recursive Library");
+		LIBRARY(ImageRepository.INPUT_TYPE_LIBRARY, "Library", "Library..."),
+		RECURSIVE_LIBRARY(ImageRepository.INPUT_TYPE_RECURSIVE_LIBRARY, "Recursive Library", "Recursive Library...");
 		
 		private final String icon;
 		private final String label;
+		private final String menuItemLabel;
 		
 		public Image getImage() {
 			return ImageRepository.getImage(icon);
@@ -67,9 +68,18 @@ public class LogtalkView extends ViewBase {
 			return label;
 		}
 		
+		public String getMenuItemLabel() {
+			return menuItemLabel;
+		}
+		
 		private InputType(String icon, String label){
+			this(icon, label, label);
+		}
+		
+		private InputType(String icon, String label, String menuItemLabel){
 			this.icon = icon;
 			this.label = label;
+			this.menuItemLabel = menuItemLabel;
 		}
 	}
 	
@@ -157,7 +167,7 @@ public class LogtalkView extends ViewBase {
 			
 			private void createMenuItem(final Menu menu, final InputType inputType) {
 				final MenuItem item = new MenuItem(menu, SWT.RADIO);
-				item.setText(inputType.getLabel());
+				item.setText(inputType.getMenuItemLabel());
 				item.setImage(inputType.getImage());
 				item.setSelection(getInputType() == inputType);
 				item.addSelectionListener(new SelectionAdapter() {
