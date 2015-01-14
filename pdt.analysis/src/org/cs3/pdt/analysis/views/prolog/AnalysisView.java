@@ -23,10 +23,12 @@ import org.cs3.pdt.analysis.model.IResultModel;
 import org.cs3.pdt.analysis.model.prolog.PrologFactbase;
 import org.cs3.pdt.analysis.model.prolog.PrologResultModel;
 import org.cs3.pdt.analysis.views.AbstractAnalysisView;
+import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.connector.PDTConnectorPlugin;
 import org.cs3.pdt.connector.service.ActivePrologProcessListener;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -36,6 +38,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.progress.UIJob;
 
 public class AnalysisView extends AbstractAnalysisView implements ActivePrologProcessListener {
 
@@ -51,6 +54,19 @@ public class AnalysisView extends AbstractAnalysisView implements ActivePrologPr
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		PDTConnectorPlugin.getDefault().getPrologProcessService().registerActivePrologProcessListener(this);
+		UIJob j = new UIJob("Initialize Prolog Analyses View") {
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				PrologProcess process = PDTCommonUtil.getActivePrologProcess();
+				String factbaseName = PDTConnectorPlugin.getDefault().getPrologProcessRegistry().getKey(process);
+				selector.setSelectedProcessName(factbaseName);
+				processSelected(factbaseName);
+				return Status.OK_STATUS;
+			}
+		};
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.setDisplay(getViewSite().getShell().getDisplay());
+		j.schedule();
 	}
 	
 	@Override
