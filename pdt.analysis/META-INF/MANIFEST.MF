@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Prolog Analyses
 Bundle-SymbolicName: org.cs3.pdt.analysis;singleton:=true
@@ -6,7 +7,7 @@ Bundle-Version: 3.0.3.qualifier
 Bundle-Activator: org.cs3.pdt.analysis.PDTAnalysisPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.cs3.pdt.common;bundle-version="3.0.3",
+ org.cs3.pdt.common;bundle-version="[3.0.3,4.0.0)",
  org.eclipse.core.resources,
  org.eclipse.ui.editors,
  org.eclipse.text
