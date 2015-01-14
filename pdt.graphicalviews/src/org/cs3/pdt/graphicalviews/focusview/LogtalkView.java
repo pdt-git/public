@@ -45,7 +45,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 public class LogtalkView extends ViewBase {
 	
-	private static final String VIEW_NAME = "Logtalk Graph";
+	private static final String VIEW_NAME = "Logtalk Diagrams";
 
 	public enum InputType {
 		PROJECT(ImageRepository.INPUT_TYPE_PROJECT, "Project"),

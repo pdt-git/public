@@ -29,7 +29,7 @@
             category="org.cs3.pdt"
             class="org.cs3.pdt.graphicalviews.focusview.LogtalkView"
             id="pdt.view.logtalk.entity"
-            name="Logtalk Graph">
+            name="Logtalk Diagrams">
       </view>
    </extension>
    <extension
