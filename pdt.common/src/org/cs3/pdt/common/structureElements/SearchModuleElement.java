@@ -193,6 +193,9 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 
 	@Override
 	public int computeContainedMatches() {
+		if (match != null) {
+			return 1;
+		}
 		int count = 0;
 		for (SearchPredicateElement element : predForSignature.values()) {
 			count += element.computeContainedMatches();
