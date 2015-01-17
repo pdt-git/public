@@ -21,7 +21,7 @@
          , find_definition_contained_in/10
          , find_completion/14
          , find_entity_definition/6
-         , find_module_reference/9
+         , find_module_reference/10
          , loaded_file/1
          , loaded_by/4
          ]).
@@ -46,6 +46,9 @@
 :- use_module(library(charsio)). 
 :- use_module(library(lists)). 
 :- use_module(library(prolog_clause)).
+:- use_module(library(prolog_source), [
+	read_source_term_at_location/3
+]).
 :- use_module(pdt_prolog_library(compatibility), [
 	pdt_source_file/2
 ]).
@@ -873,23 +876,45 @@ find_module_definition(SearchModule, ExactMatch, Root, File, Line, Module) :-
 	module_property(Module, line_count(Line)).
 	
 
-%% find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList)
+%% find_module_reference(Module, ExactMatch, Root, Kind, File, Line, ReferencingModule, RefName, RefArity, PropertyList)
 
-find_module_reference(Module, ExactMatch, Root, File, Line, system, load_files, 2, [show_line(true)|PropertyList]) :-
-	once(properties_for_predicate(system, load_files, 2, PropertyList)),
-	find_use_module(Module, ExactMatch, _, _, File, Line),
+find_module_reference(Module, ExactMatch, Root, directive, File, Location, LoadingModule, _, _, [line(Line), label(Label)]) :-
+	find_use_module(Module, ExactMatch, _, LoadingModule, File, Line, OptionList),
 	(	nonvar(Root)
 	->	sub_atom(File, 0, _, _, Root)
 	;	true
+	),
+	format(atom(Label), ':- load_files(~w, ~w).', [Module, OptionList]),
+	(	read_term_position_at_location(File, Line, LoadingModule, Location)
+	->	true
+	;	Location = Line
 	).
 
-find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+find_module_reference(Module, ExactMatch, Root, call, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	search_module_name(Module, ExactMatch, SearchModule),
 	find_reference_to(predicate(SearchModule, _, _, _, _), ExactMatch, Root, ReferencingModule, RefName, RefArity, File, Line, PropertyList).
 
-find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+find_module_reference(Module, ExactMatch, Root, Kind, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_entity_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
+	logtalk_adapter::find_entity_reference(Module, ExactMatch, Root, Kind, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
+
+read_term_position_at_location(File, Line, Module, Location) :-
+	catch(open(File, read, In), _, fail),
+	set_stream(In, newline(detect)),
+	call_cleanup(
+	    read_source_term_at_location(
+			In,
+			_Clause,
+			[	line(Line),
+				module(Module),
+				subterm_positions(TermPos)
+			]
+		),
+		close(In)
+	),
+	TermPos = term_position(Start, End, _, _, _),
+	format(atom(Location), '~w-~w', [Start, End]),
+	!.
 
 search_module_name(Module, true, Module) :- !.
 search_module_name(ModulePart, false, Module) :-
@@ -918,14 +943,14 @@ loaded_by(LoadedFile, LoadingFile, Line, Directive) :-
 	;  Directive = consult
 	).
 	
-find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line) :-
+find_use_module(ModuleOrPart, ExactMatch, ModuleFile, LoadingModule, File, Line, OptionList) :-
 	(	ExactMatch == true
 	->	ModuleOrPart = Module
 	;	current_module(Module),
 		once(sub_atom(Module, _, _, _, ModuleOrPart))
 	),
 	module_property(Module, file(ModuleFile)),
-	source_file_property(ModuleFile, load_context(LoadingModule, File:Line, _OptionList)).
+	source_file_property(ModuleFile, load_context(LoadingModule, File:Line, OptionList)).
 %	member(if(not_loaded), OptionList),
 %	member(must_be_module(true), OptionList).
 	

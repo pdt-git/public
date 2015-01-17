@@ -31,8 +31,10 @@ import org.cs3.pdt.common.search.PrologSearchResult;
 import org.cs3.pdt.common.search.SearchConstants;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologDefinitionMatch;
+import org.cs3.pdt.common.structureElements.DirectiveMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.PrologReferenceMatch;
+import org.cs3.pdt.common.structureElements.SearchDirectiveElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.pdt.connector.util.FileUtils;
@@ -67,6 +69,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 	private PrologSearchResult result;
 	private LinkedHashMap<String, SearchMatchElement> matchElements = new LinkedHashMap<String, SearchMatchElement>();
 	private LinkedHashMap<String, SearchPredicateElement> predicateElements = new LinkedHashMap<String, SearchPredicateElement>();
+	private LinkedHashMap<String, SearchDirectiveElement> directiveElements = new LinkedHashMap<>();
 	private IProject project;
 	private String projectPath;
 
@@ -178,6 +181,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		Match match;
 		matchElements.clear();
 		predicateElements.clear();
+		directiveElements.clear();
 		monitor.beginTask("", clauses.size());
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
@@ -252,7 +256,29 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 		PredicateMatch match = new PredicateMatch(searchPredicateElement, visibility, definingModule, functor, arity, properties, declOrDef);
 		return match;
 	}
+	
+	protected DirectiveMatch createUniqueMatch(String module, IFile file, int offset, int length, List<String> properties) {
+		String directiveSignature = module + "#" + file + offset + "#" + length;
+		SearchDirectiveElement searchDirectiveElement = directiveElements.get(directiveSignature);
+		if (searchDirectiveElement == null) {
+			searchDirectiveElement = new SearchDirectiveElement();
+			directiveElements.put(directiveSignature, searchDirectiveElement);
+		}
+		DirectiveMatch match = new DirectiveMatch(searchDirectiveElement, module, properties, file, offset, length, directiveSignature);
+		return match;
+	}
 
+	protected DirectiveMatch createUniqueMatch(String module, IFile file, int line, List<String> properties) {
+		String directiveSignature = module + "#" + file + line;
+		SearchDirectiveElement searchDirectiveElement = directiveElements.get(directiveSignature);
+		if (searchDirectiveElement == null) {
+			searchDirectiveElement = new SearchDirectiveElement();
+			directiveElements.put(directiveSignature, searchDirectiveElement);
+		}
+		DirectiveMatch match = new DirectiveMatch(searchDirectiveElement, module, properties, file, line, directiveSignature);
+		return match;
+	}
+	
 	@Override
 	public String getLabel() {
 		return "Prolog Query: " + searchGoalLabel;

@@ -20,9 +20,12 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 import org.cs3.pdt.common.queries.PDTSearchQuery;
+import org.cs3.pdt.common.structureElements.AbstractPrologMatch;
+import org.cs3.pdt.common.structureElements.DirectiveMatch;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
 import org.cs3.pdt.common.structureElements.PrologMatch;
+import org.cs3.pdt.common.structureElements.SearchDirectiveElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.eclipse.core.resources.IFile;
@@ -102,9 +105,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
-		if (ei instanceof IFileEditorInput && match instanceof PrologMatch) {
+		if (ei instanceof IFileEditorInput && match instanceof AbstractPrologMatch) {
 			FileEditorInput fi = (FileEditorInput) ei;
-			IFile fileForMatch = ((PrologMatch)match).getFile();
+			IFile fileForMatch = ((AbstractPrologMatch) match).getFile();
 			return (fileForMatch != null && fileForMatch.equals(fi.getFile()));
 		}
 		return false;
@@ -140,7 +143,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 	
 	private Match[] computeContainedMatches(IFile file) {
-		ArrayList<PrologMatch> result = new ArrayList<PrologMatch>();
+		ArrayList<Match> result = new ArrayList<>();
 		for (SearchModuleElement module : modules.values()) {
 			module.collectContainedMatches(file, result);
 		}
@@ -158,8 +161,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			return (IFile) element;
 		} else if (element instanceof SearchMatchElement){
 			return ((SearchMatchElement) element).getFile();
-		} else if (element instanceof PrologMatch) {
-			return ((PrologMatch) element).getFile();
+		} else if (element instanceof SearchDirectiveElement){
+			return ((SearchDirectiveElement) element).getFile();
+		} else if (element instanceof AbstractPrologMatch) {
+			return ((AbstractPrologMatch) element).getFile();
 		} else {
 			return null;
 		}
@@ -207,7 +212,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			PredicateMatch predicateMatch = (PredicateMatch) match;
 			String module = predicateMatch.getModule();
 			String visibility = predicateMatch.getVisibility();
-			String signature = getSignature(predicateMatch.getModule(), predicateMatch.getVisibility(), null);
+			String signature = getSignature(module, visibility, null);
 			SearchModuleElement searchModuleElement = modules.get(signature);
 			if (searchModuleElement == null) {
 				searchModuleElement = new SearchModuleElement(this, module, visibility, null);
@@ -219,6 +224,15 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			SearchModuleElement element = (SearchModuleElement) moduleMatch.getElement();
 			element.setParent(this);
 			modules.put(moduleMatch.getModule(), element);
+		} else if (match instanceof DirectiveMatch) {
+			DirectiveMatch directiveMatch = (DirectiveMatch) match;
+			String signature = getSignature(directiveMatch.getModule(), "", directiveMatch.getFile());
+			SearchModuleElement searchModuleElement = modules.get(signature);
+			if (searchModuleElement == null) {
+				searchModuleElement = new SearchModuleElement(this, directiveMatch.getModule(), "", directiveMatch.getFile());
+				modules.put(signature, searchModuleElement);
+			}
+			searchModuleElement.addMatch(directiveMatch);
 		}
 	}
 	
@@ -266,11 +280,21 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		} else if (match instanceof ModuleMatch) {
 			ModuleMatch moduleMatch = (ModuleMatch) match;
 			modules.remove(moduleMatch.getModule());
+		} else if (match instanceof DirectiveMatch) {
+			DirectiveMatch directiveMatch = (DirectiveMatch) match;
+			String signature = getSignature(directiveMatch.getModule(), "definition", directiveMatch.getFile());
+			SearchModuleElement searchModuleElement = modules.get(signature);
+			if (searchModuleElement != null) {
+				searchModuleElement.removeMatch(directiveMatch);
+				if (!searchModuleElement.hasChildren()) {
+					modules.remove(signature);
+				}
+			}
 		}
 	}
 	
 	private String getSignature(String module, String visibility, IFile file) {
-		return module + "#" + visibility + "#" + (file != null ? file.getFullPath() : "");
+		return module + "#" + (visibility != null ? visibility : "") + "#" + (file != null ? file.getFullPath() : "");
 	}
 
 	/**

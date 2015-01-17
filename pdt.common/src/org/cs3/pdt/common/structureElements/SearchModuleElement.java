@@ -18,6 +18,7 @@ import java.util.TreeMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.search.ui.text.Match;
 
 public class SearchModuleElement implements PrologSearchTreeElement, Comparable<SearchModuleElement> {
 	
@@ -28,7 +29,8 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	private Object parent;
 	private IFile file;
 	
-	private TreeMap<String, SearchPredicateElement> predForSignature = new TreeMap<String, SearchPredicateElement>();
+	private TreeMap<String, SearchDirectiveElement> directives = new TreeMap<>();
+	private TreeMap<String, SearchPredicateElement> predForSignature = new TreeMap<>();
 	private ModuleMatch match;
 	
 	public SearchModuleElement(Object parent, String name, String visibility, IFile file) {
@@ -80,12 +82,17 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	
 	@Override
 	public Object[] getChildren() {
-		return predForSignature.values().toArray();
+		Object[] children = new Object[directives.size() + predForSignature.size()];
+		Object[] directiveChildren = directives.values().toArray();
+		Object[] predicateChildren = predForSignature.values().toArray();
+		System.arraycopy(directiveChildren, 0, children, 0, directiveChildren.length);
+		System.arraycopy(predicateChildren, 0, children, directiveChildren.length, predicateChildren.length);
+		return children;
 	}
 
 	@Override
 	public boolean hasChildren() {
-		return !predForSignature.isEmpty();
+		return !predForSignature.isEmpty() || !directives.isEmpty();
 	}
 
 	@Override
@@ -161,6 +168,26 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	private String getSignatureForMatch(PredicateMatch match) {
 		return match.getName() + match.getArity();
 	}
+
+	public void removeMatch(DirectiveMatch directiveMatch) {
+		String signature = directiveMatch.getSignature();
+		SearchDirectiveElement searchDirectiveElement = directives.get(signature);
+		searchDirectiveElement.removeMatch(directiveMatch);
+		if (!searchDirectiveElement.hasMatches()) {
+			directives.remove(signature);
+		}
+	}
+
+	public void addMatch(DirectiveMatch directiveMatch) {
+		String signature = directiveMatch.getSignature();
+		SearchDirectiveElement searchDirectiveElement = directives.get(signature);
+		if (searchDirectiveElement == null) {
+			searchDirectiveElement = (SearchDirectiveElement) directiveMatch.getElement();
+			searchDirectiveElement.setParent(this);
+			directives.put(signature, searchDirectiveElement);
+		}
+		searchDirectiveElement.addMatch(directiveMatch);
+	}
 	
 	@Override
 	public Object getParent() {
@@ -197,6 +224,9 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 			return 1;
 		}
 		int count = 0;
+		for (SearchDirectiveElement element : directives.values()) {
+			count += element.computeContainedMatches();
+		}
 		for (SearchPredicateElement element : predForSignature.values()) {
 			count += element.computeContainedMatches();
 		}
@@ -204,8 +234,11 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	}
 
 	@Override
-	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
+	public void collectContainedMatches(IFile file, ArrayList<Match> matches) {
 		if (file.equals(this.file)) {
+			for (SearchDirectiveElement element : directives.values()) {
+				element.collectContainedMatches(file, matches);
+			}
 			for (SearchPredicateElement element : predForSignature.values()) {
 				element.collectContainedMatches(file, matches);
 			}

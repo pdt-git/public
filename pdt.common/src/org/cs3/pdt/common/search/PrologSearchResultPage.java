@@ -20,9 +20,9 @@ package org.cs3.pdt.common.search;
 
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.internal.ImageRepository;
+import org.cs3.pdt.common.structureElements.AbstractPrologMatch;
 import org.cs3.pdt.common.structureElements.ModuleMatch;
 import org.cs3.pdt.common.structureElements.PredicateMatch;
-import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
 import org.cs3.pdt.connector.util.UIUtils;
@@ -163,8 +163,8 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	
 	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		if (match instanceof PrologMatch) {
-			PrologMatch prologMatch = (PrologMatch)match;
+		if (match instanceof AbstractPrologMatch) {
+			AbstractPrologMatch prologMatch = (AbstractPrologMatch) match;
 			if (prologMatch.isLineLocation()) {
 				PDTCommonUtil.selectInEditor(prologMatch.getLine(), prologMatch.getFile(), activate);
 			} else {

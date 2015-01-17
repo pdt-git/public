@@ -20,6 +20,7 @@ import java.util.Vector;
 
 import org.cs3.pdt.common.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.search.ui.text.Match;
 
 /**
  * used in prolog searches to represent a predicate.
@@ -143,7 +144,7 @@ public class SearchPredicateElement extends Predicate implements PrologSearchTre
 	}
 
 	@Override
-	public void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches) {
+	public void collectContainedMatches(IFile file, ArrayList<Match> matches) {
 		for (SearchMatchElement element : matchesToSearchElements.values()) {
 			element.collectContainedMatches(file, matches);
 		}

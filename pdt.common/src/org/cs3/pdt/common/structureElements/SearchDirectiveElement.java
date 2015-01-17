@@ -1,16 +1,16 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
+ * Author: Andreas Becker (among others)
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
+ * Copyright (C): 2015, CS Dept. III, University of Bonn
  * 
- * All rights reserved. This program is  made available under the terms
+ * All rights reserved. This program is made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  * 
  ****************************************************************************/
-
 package org.cs3.pdt.common.structureElements;
 
 import java.util.ArrayList;
@@ -19,13 +19,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.search.ui.text.Match;
 
-public class SearchMatchElement implements PrologSearchTreeElement {
+public class SearchDirectiveElement implements PrologSearchTreeElement {
 
-	private ArrayList<PrologMatch> matches = new ArrayList<PrologMatch>();
+	private ArrayList<DirectiveMatch> matches = new ArrayList<>();
 	private Object parent;
-	
-	public SearchMatchElement() {
-	}
 	
 	public void setParent(Object parent) {
 		this.parent = parent;
@@ -55,7 +52,7 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 		}
 		StyledString str = new StyledString();
 		boolean first = true;
-		for (PrologMatch match : matches) {
+		for (DirectiveMatch match : matches) {
 			if (first) {
 				first = false;
 			} else {
@@ -71,12 +68,16 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 		return str;
 	}
 
-	public void removeMatch(PrologMatch match) {
+	public void removeMatch(DirectiveMatch match) {
 		matches.remove(match);
 	}
 
-	public void addMatch(PrologMatch match) {
+	public void addMatch(DirectiveMatch match) {
 		matches.add(match);
+	}
+
+	public boolean hasMatches() {
+		return !matches.isEmpty();
 	}
 
 	@Override
@@ -96,18 +97,9 @@ public class SearchMatchElement implements PrologSearchTreeElement {
 		return matches.size();
 	}
 
-	public PrologMatch getMatch() {
-		if (matches.isEmpty()) {
-			return null;
-		}
-		return matches.get(0);
-	}
-
 	@Override
 	public void collectContainedMatches(IFile file, ArrayList<Match> matches) {
 		matches.addAll(this.matches);
 	}
 
 }
-
-

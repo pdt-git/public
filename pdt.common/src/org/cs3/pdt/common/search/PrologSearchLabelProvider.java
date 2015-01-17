@@ -16,6 +16,7 @@ package org.cs3.pdt.common.search;
 import org.cs3.pdt.common.internal.ImageRepository;
 import org.cs3.pdt.common.metadata.PrologElement;
 import org.cs3.pdt.common.structureElements.PrologTreeElement;
+import org.cs3.pdt.common.structureElements.SearchDirectiveElement;
 import org.cs3.pdt.common.structureElements.SearchMatchElement;
 import org.cs3.pdt.common.structureElements.SearchModuleElement;
 import org.cs3.pdt.common.structureElements.SearchPredicateElement;
@@ -42,6 +43,8 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 			return getStyledTextWithCount(label, count);
 		} else if (element instanceof SearchMatchElement) {
 			return ((SearchMatchElement) element).getStyledString();
+		} if (element instanceof SearchDirectiveElement) {
+			return ((SearchDirectiveElement) element).getStyledString();
 		}
 		return new StyledString(getText(element));
 	}
@@ -65,7 +68,7 @@ public class PrologSearchLabelProvider extends LabelProvider implements IStyledL
 	public Image getImage(Object element) {
 		if (element instanceof IFile) {
 			return ImageRepository.getImage(ImageRepository.FILE);
-		} else if (element instanceof SearchMatchElement) {
+		} else if (element instanceof SearchMatchElement || element instanceof SearchDirectiveElement) {
 			return ImageRepository.getImage(ImageRepository.SEARCH_MATCH);
 		} else if(element instanceof SearchModuleElement){
 			return ImageRepository.getImage(ImageRepository.ENTITY);

@@ -16,12 +16,13 @@ package org.cs3.pdt.common.structureElements;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.search.ui.text.Match;
 
-public interface PrologSearchTreeElement extends PrologTreeElement{
+public interface PrologSearchTreeElement extends PrologTreeElement {
 	
 	int computeContainedMatches();
 	
-	void collectContainedMatches(IFile file, ArrayList<PrologMatch> matches);
+	void collectContainedMatches(IFile file, ArrayList<Match> matches);
 	
 }
 
