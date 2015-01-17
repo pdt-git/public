@@ -71,7 +71,7 @@ public abstract class PrologContentAssistProcessor {
 		}
 		boolean isPredicateChar = ParserUtils.isPredicateNameChar(c);
 		
-		if (c == ':' || isPredicateChar) {
+		if (c == ':' || !isPredicateChar) {
 			return new Prefix(offset + 1, "", false);
 		}
 		while (isPredicateChar){
