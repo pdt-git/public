@@ -21,7 +21,7 @@
 :- public([
 	loaded_by/4,	% ?SourceFile, ?ParentSourceFile, -Line, -Directive
 	find_reference_to/9, %+Functor,+Arity,DefFile, DefModule,+ExactMatch,RefModule,RefName,RefArity,RefFile,Position,NthClause,Kind,?PropertyList
-	find_entity_reference/10,
+	find_entity_reference/9,
 	find_entity_definition/6,
 	find_predicate_definitions/10, % (Term, ExactMatch, Entity, Functor, Arity, DeclOrDef, FullPath, Line, Properties)
 	find_categorized_predicate_definitions/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line)
@@ -171,7 +171,7 @@ find_reference_to(Term, ExactMatch, Root, EntityAtom, CallerFunctor, CallerArity
 	format(atom(Label), '~w (in clause starting at line ~w)', [Called, Line]),
 	PropertyList = [line(Line), label(Label)|PropertyList0].
 
-find_entity_reference(Entity, ExactMatch, Root, call, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
+find_entity_reference(Entity, ExactMatch, Root, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
 	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, Root, RefEntity, RefName, RefArity, File, Line, PropertyList).
 

@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.common.PDTCommonPredicates;
-import org.cs3.pdt.common.search.SearchConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.search.ui.text.Match;
 
@@ -43,7 +42,6 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 				getGoal(),
 				Boolean.toString(isExactMatch()),
 				getProjectPath() == null ? "_" : getProjectPath(),
-				"Kind",
 				"RefFile",
 				"RefLine",
 				"RefModule",
@@ -53,10 +51,10 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 		return query;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Match constructPrologMatchForAResult(Map<String, Object> m) throws IOException {
 		String module = m.get("RefModule").toString();
-		String kind = (String) m.get("Kind");
 		
 		List<String> properties = null;
 		Object prop = m.get("PropertyList");
@@ -73,9 +71,8 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 		
 		Match match = null;
 		
-		switch (kind) {
-		case SearchConstants.REFERENCE_KIND_CALL:
-			String name = m.get("RefName").toString();
+		String name = (String) m.get("RefName");
+		if (name != null) {
 			int arity = Integer.parseInt(m.get("RefArity").toString());
 			if (offsetOrLine.indexOf("-") >= 0) {
 				String[] positions = offsetOrLine.split("-");
@@ -86,8 +83,7 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 				int line = Integer.parseInt(offsetOrLine);
 				match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, line, properties, null, "definition");
 			}
-			break;
-		case SearchConstants.REFERENCE_KIND_DIRECTIVE:
+		} else {
 			if (offsetOrLine.indexOf("-") >= 0) {
 				String[] positions = offsetOrLine.split("-");
 				int offset = Integer.parseInt(positions[0]);

@@ -38,9 +38,6 @@ public final class SearchConstants {
 	public static final String COMPLETION_DOC_KIND_FILE = "file";
 	public static final String COMPLETION_DOC_KIND_LGT_HELP_FILE = "lgt_help_file";
 	
-	public static final String REFERENCE_KIND_CALL = "call";
-	public static final String REFERENCE_KIND_DIRECTIVE = "directive";
-	
 	// search goals
 	public static final String PREDICATE_GOAL_FUNCTOR = "predicate";
 	

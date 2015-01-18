@@ -21,7 +21,7 @@
          , find_definition_contained_in/10
          , find_completion/14
          , find_entity_definition/6
-         , find_module_reference/10
+         , find_module_reference/9
          , loaded_file/1
          , loaded_by/4
          ]).
@@ -876,9 +876,9 @@ find_module_definition(SearchModule, ExactMatch, Root, File, Line, Module) :-
 	module_property(Module, line_count(Line)).
 	
 
-%% find_module_reference(Module, ExactMatch, Root, Kind, File, Line, ReferencingModule, RefName, RefArity, PropertyList)
+%% find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList)
 
-find_module_reference(Module, ExactMatch, Root, directive, File, Location, LoadingModule, _, _, [line(Line), label(Label)]) :-
+find_module_reference(Module, ExactMatch, Root, File, Location, LoadingModule, _, _, [line(Line), label(Label)]) :-
 	find_use_module(Module, ExactMatch, _, LoadingModule, File, Line, OptionList),
 	(	nonvar(Root)
 	->	sub_atom(File, 0, _, _, Root)
@@ -890,13 +890,13 @@ find_module_reference(Module, ExactMatch, Root, directive, File, Location, Loadi
 	;	Location = Line
 	).
 
-find_module_reference(Module, ExactMatch, Root, call, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	search_module_name(Module, ExactMatch, SearchModule),
 	find_reference_to(predicate(SearchModule, _, _, _, _), ExactMatch, Root, ReferencingModule, RefName, RefArity, File, Line, PropertyList).
 
-find_module_reference(Module, ExactMatch, Root, Kind, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_entity_reference(Module, ExactMatch, Root, Kind, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
+	logtalk_adapter::find_entity_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
 
 read_term_position_at_location(File, Line, Module, Location) :-
 	catch(open(File, read, In), _, fail),
