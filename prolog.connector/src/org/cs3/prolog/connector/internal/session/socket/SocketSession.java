@@ -126,11 +126,11 @@ public class SocketSession implements PrologSession {
 	}
 	
 	private List<Map<String, Object>> queryAllImpl(String query) throws PrologException, PrologProcessException {
-		if ((flags & PrologProcess.CTERMS) == 0) {
-			return queryAllAtOnce(query);
-		} else {
+//		if ((flags & PrologProcess.CTERMS) == 0) {
+//			return queryAllAtOnce(query);
+//		} else {
 			return queryAllDefault(query);
-		}
+//		}
 	}
 	
 	private List<Map<String, Object>> queryAllDefault(String query) throws PrologException,
