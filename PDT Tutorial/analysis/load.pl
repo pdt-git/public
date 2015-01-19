@@ -3,7 +3,7 @@
  * 
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
- * Copyright (C): 2013, CS Dept. III, University of Bonn
+ * Copyright (C): 2014, CS Dept. III, University of Bonn
  * 
  * All rights reserved. This program is  made available under the terms
  * of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,8 +11,4 @@
  * 
  ****************************************************************************/
 
-:- ['completion/load'].
-:- ['outline/load'].
-:- ['search/load'].
-:- use_module('callgraph/call_graph_examples').
-:- ['analysis/load'].
+:- use_module(analysis_example).
