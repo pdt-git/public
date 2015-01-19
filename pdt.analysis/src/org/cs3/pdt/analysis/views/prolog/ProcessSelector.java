@@ -24,7 +24,7 @@ public class ProcessSelector extends Composite implements PrologProcessRegistryL
 		
 		GridData horizontalFillData = new GridData(GridData.FILL_HORIZONTAL);
 		horizontalFillData.grabExcessHorizontalSpace = true;
-		horizontalFillData.minimumWidth = 85;
+		horizontalFillData.minimumWidth = 120;
 		
 		setLayout(new FillLayout(SWT.VERTICAL));
 		
