@@ -30,6 +30,9 @@ public class DecoratingPrologSearchLabelProvider extends DecoratingStyledCellLab
 		if (element instanceof SearchModuleElement) {
 			SearchModuleElement moduleElement = (SearchModuleElement) element;
 			IFile file = moduleElement.getFile();
+			if (file == null) {
+				return null;
+			}
 			if (ExternalPrologFilesProjectUtils.isExternalFile(file)) {
 				return file.getRawLocation().toOSString();
 			} else {
