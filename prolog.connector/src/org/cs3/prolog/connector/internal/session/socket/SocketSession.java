@@ -126,11 +126,11 @@ public class SocketSession implements PrologSession {
 	}
 	
 	private List<Map<String, Object>> queryAllImpl(String query) throws PrologException, PrologProcessException {
-//		if ((flags & PrologProcess.CTERMS) == 0) {
-//			return queryAllAtOnce(query);
-//		} else {
+		if ((flags & PrologProcess.CTERMS) == 0) {
+			return queryAllAtOnce(query);
+		} else {
 			return queryAllDefault(query);
-//		}
+		}
 	}
 	
 	private List<Map<String, Object>> queryAllDefault(String query) throws PrologException,
@@ -260,19 +260,34 @@ public class SocketSession implements PrologSession {
 		if (query.startsWith("'") && query.endsWith("'")) {
 			return query;
 		} else {
-			StringBuffer buf = new StringBuffer("\'");
-			int backSlashCounter = 0;
+			StringBuilder buf = new StringBuilder("\'");
 			for (int i = 0; i < query.length(); i++) {
 				char c = query.charAt(i);
-				if (c == '\\') {
-					backSlashCounter++;
-				} else if (c == '\'') {
-					if (backSlashCounter % 2 == 0) {
-						buf.append('\\');
-					}
-					backSlashCounter = 0;
-				} else {
-					backSlashCounter = 0;
+				switch (c) {
+				case '\b':
+					buf.append("\\b");
+					continue;
+				case '\t':
+					buf.append("\\t");
+					continue;
+				case '\n':
+					buf.append("\\n");
+					continue;
+				case '\f':
+					buf.append("\\f");
+					continue;
+				case '\r':
+					buf.append("\\r");
+					continue;
+				case '\"':
+					buf.append("\\\"");
+					continue;
+				case '\'':
+					buf.append("\\\'");
+					continue;
+				case '\\':
+					buf.append("\\\\");
+					continue;
 				}
 				buf.append(c);
 			}
