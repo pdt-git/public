@@ -33,23 +33,61 @@
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
-            annotationType="org.cs3.pdt.analysis.marker"
-            colorPreferenceKey="org.cs3.pdt.analysis.marker.color"
-            highlightPreferenceKey="org.cs3.pdt.analysis.marker"
+            annotationType="org.cs3.pdt.analysis.marker.info"
+            colorPreferenceKey="org.cs3.pdt.analysis.marker.info.color"
+            highlightPreferenceKey="org.cs3.pdt.analysis.marker.info.highlight"
             includeOnPreferencePage="true"
-            label="Prolog Analysis Marker"
-            overviewRulerPreferenceKey="org.cs3.pdt.analysis.marker.overviewRuler"
+            label="Prolog Analysis Info Marker"
+            overviewRulerPreferenceKey="org.cs3.pdt.analysis.marker.info.overviewRuler"
             overviewRulerPreferenceValue="true"
-            textPreferenceKey="org.cs3.pdt.analysis.marker"
-            verticalRulerPreferenceKey="org.cs3.pdt.analysis.marker.verticalRuler">
+            symbolicIcon="info"
+            textPreferenceKey="org.cs3.pdt.analysis.marker.info.text"
+            verticalRulerPreferenceKey="org.cs3.pdt.analysis.marker.info.verticalRuler">
+      </specification>
+      <specification
+            annotationType="org.cs3.pdt.analysis.marker.warning"
+            colorPreferenceKey="org.cs3.pdt.analysis.marker.warning.color"
+            highlightPreferenceKey="org.cs3.pdt.analysis.marker.warning.highlight"
+            includeOnPreferencePage="true"
+            label="Prolog Analysis Warning Marker"
+            overviewRulerPreferenceKey="org.cs3.pdt.analysis.marker.warning.overviewRuler"
+            overviewRulerPreferenceValue="true"
+            symbolicIcon="warning"
+            textPreferenceKey="org.cs3.pdt.analysis.marker.warning.text"
+            verticalRulerPreferenceKey="org.cs3.pdt.analysis.marker.warning.verticalRuler">
+      </specification>
+      <specification
+            annotationType="org.cs3.pdt.analysis.marker.error"
+            colorPreferenceKey="org.cs3.pdt.analysis.marker.error.color"
+            highlightPreferenceKey="org.cs3.pdt.analysis.marker.error.highlight"
+            includeOnPreferencePage="true"
+            label="Prolog Analysis Error Marker"
+            overviewRulerPreferenceKey="org.cs3.pdt.analysis.marker.error.overviewRuler"
+            overviewRulerPreferenceValue="true"
+            symbolicIcon="error"
+            textPreferenceKey="org.cs3.pdt.analysis.marker.error.text"
+            verticalRulerPreferenceKey="org.cs3.pdt.analysis.marker.error.verticalRuler">
       </specification>
    </extension>
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
+            markerSeverity="0"
             markerType="org.cs3.pdt.analysis.marker"
-            name="org.cs3.pdt.analysis.marker"
+            name="org.cs3.pdt.analysis.marker.info"
+            super="org.eclipse.ui.workbench.texteditor.info">
+      </type>
+      <type
+            markerSeverity="1"
+            markerType="org.cs3.pdt.analysis.marker"
+            name="org.cs3.pdt.analysis.marker.warning"
             super="org.eclipse.ui.workbench.texteditor.warning">
+      </type>
+      <type
+            markerSeverity="2"
+            markerType="org.cs3.pdt.analysis.marker"
+            name="org.cs3.pdt.analysis.marker.error"
+            super="org.eclipse.ui.workbench.texteditor.error">
       </type>
    </extension>
    <extension
