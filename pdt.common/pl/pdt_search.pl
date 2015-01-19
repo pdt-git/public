@@ -897,9 +897,14 @@ find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, R
 	search_module_name(Module, ExactMatch, SearchModule),
 	find_reference_to(predicate(SearchModule, _, _, _, _), ExactMatch, Root, ReferencingModule, RefName, RefArity, File, Line, PropertyList).
 
-find_module_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList) :-
+find_module_reference(Module, ExactMatch, Root, File, Location, ReferencingModule, RefName, RefArity, PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_entity_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList).
+	logtalk_adapter::find_entity_reference(Module, ExactMatch, Root, File, Line, ReferencingModule, RefName, RefArity, PropertyList),
+	(	var(RefName),
+		read_term_position_at_location(File, Line, user, Location)
+	->	true
+	;	Location = Line
+	).
 
 read_term_position_at_location(File, Line, Module, Location) :-
 	catch(open(File, read, In), _, fail),

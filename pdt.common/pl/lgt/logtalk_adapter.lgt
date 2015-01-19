@@ -173,7 +173,30 @@ find_reference_to(Term, ExactMatch, Root, EntityAtom, CallerFunctor, CallerArity
 
 find_entity_reference(Entity, ExactMatch, Root, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
-	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, Root, RefEntity, RefName, RefArity, File, Line, PropertyList).
+	(	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, Root, RefEntity, RefName, RefArity, File, Line, PropertyList)
+	;	(	extends_protocol(RefEntity, SearchEntity),
+			atom_concat('extends protocol ', SearchEntity, Label)
+		;	extends_category(RefEntity, SearchEntity),
+			atom_concat('extends category ', SearchEntity, Label)
+		;	extends_object(RefEntity, SearchEntity),
+			atom_concat('extends object ', SearchEntity, Label)
+		;	implements_protocol(RefEntity, SearchEntity),
+			atom_concat('implements protocol ', SearchEntity, Label)
+		;	imports_category(RefEntity, SearchEntity),
+			atom_concat('imports category ', SearchEntity, Label)
+		;	instantiates_class(RefEntity, SearchEntity),
+			atom_concat('instantiates class ', SearchEntity, Label)
+		;	specializes_class(RefEntity, SearchEntity),
+			atom_concat('specializes class ', SearchEntity, Label)
+		),
+		entity_property(RefEntity, _, file(File)),
+		(	nonvar(Root) ->
+			sub_atom(File, 0, _, _, Root)
+		;	true
+		),
+		entity_property(RefEntity, _, lines(Line,_)),
+		PropertyList = [line(Line), label(Label)]
+	).
 
 search_entity_name(Entity, true, Entity) :- !.
 search_entity_name(EntityPart, false, EntityName) :-
