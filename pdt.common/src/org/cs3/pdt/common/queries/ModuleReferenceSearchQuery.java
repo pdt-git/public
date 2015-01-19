@@ -72,8 +72,14 @@ public class ModuleReferenceSearchQuery extends PDTSearchQuery {
 		Match match = null;
 		
 		String name = (String) m.get("RefName");
-		if (name != null) {
-			int arity = Integer.parseInt(m.get("RefArity").toString());
+		int arity = -1;
+		try {
+			// if RefArity is not bound queryAllAtOnce returns a generated variable name as value instead of null
+			// thus the check for null cannot be used, instead it is checked for a positive integer value 
+			arity = Integer.parseInt(m.get("RefArity").toString());
+		} catch (Exception e) {
+		}
+		if (name != null && arity >= 0) {
 			if (offsetOrLine.indexOf("-") >= 0) {
 				String[] positions = offsetOrLine.split("-");
 				int offset = Integer.parseInt(positions[0]);
