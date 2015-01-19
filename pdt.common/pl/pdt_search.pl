@@ -642,7 +642,10 @@ first_argument_of_clause(Ref, first_argument(Arg)) :-
 	compound(Head),
 	arg(1, Head, FirstArg),
 	(	var(FirstArg)
-	->	clause_info(Ref, _, _, Varnames), 
+	->	clause_property(Ref, file(File)),
+		size_file(File, Size),
+		Size =< 102400,
+		clause_info(Ref, _, _, Varnames), 
 		arg(1, Varnames, FirstVarName),
 		Arg = FirstVarName
 	;	functor(FirstArg, F, N),
