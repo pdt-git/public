@@ -44,7 +44,7 @@ public class DirectiveMatch extends AbstractPrologMatch {
 	}
 
 	@Override
-	protected StyledString createLabel() {
+	public void createLabel() {
 		StyledString str = new StyledString();
 		String text = "";
 		int line = getLine();
@@ -82,7 +82,7 @@ public class DirectiveMatch extends AbstractPrologMatch {
 		if (suffix != null && !suffix.isEmpty()) {
 			str.append(Util.unquoteAtom(suffix), StyledString.DECORATIONS_STYLER);
 		}
-		return str;
+		label = str;
 	}
 
 }

@@ -35,7 +35,7 @@ public abstract class AbstractPrologMatch extends Match {
 	private boolean isLineLocation= false;
 	private String signature;
 	
-	private StyledString label;
+	protected StyledString label;
 
 	private Boolean conversionSuccessful;
 	private IDocument document;
@@ -48,7 +48,6 @@ public abstract class AbstractPrologMatch extends Match {
 		isLineLocation = true;
 		this.signature = signature;
 		initDocument();
-		label = createLabel();
 	}
 	
 	public AbstractPrologMatch(Object element, List<String> properties, IFile file, int offset, int length, String signature) {
@@ -60,7 +59,6 @@ public abstract class AbstractPrologMatch extends Match {
 		initDocument();
 		convertOffsetAndLength(offset, offset + length);
 		parseLineFromProperties();
-		label = createLabel();
 	}
 	
 	protected void convertOffsetAndLength(int offset, int end) {
@@ -86,7 +84,7 @@ public abstract class AbstractPrologMatch extends Match {
 		}
 	}
 	
-	protected StyledString createLabel() {
+	public void createLabel() {
 		StyledString str;
 		String labelProperty = PDTCommonUtil.getProperty(SearchConstants.PROPERTY_LABEL, properties);
 		if (labelProperty != null) {
@@ -94,7 +92,7 @@ public abstract class AbstractPrologMatch extends Match {
 		} else {
 			str = new StyledString("");
 		}
-		return str;
+		label = str;
 	}
 	
 	private void conversionFailed() {

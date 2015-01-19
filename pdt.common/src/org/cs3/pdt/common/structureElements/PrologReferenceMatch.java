@@ -37,7 +37,7 @@ public class PrologReferenceMatch extends PrologMatch {
 	}
 	
 	@Override
-	protected StyledString createLabel() {
+	public void createLabel() {
 		StyledString str = new StyledString();
 		String text = "";
 		int line = getLine();
@@ -74,7 +74,7 @@ public class PrologReferenceMatch extends PrologMatch {
 		if (suffix != null && !suffix.isEmpty()) {
 			str.append(Util.unquoteAtom(suffix), StyledString.DECORATIONS_STYLER);
 		}
-		return str;
+		label = str;
 	}
 
 }

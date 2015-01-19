@@ -220,6 +220,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			match = new PrologMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, line, declOrDef, signature);
 			break;
 		}
+		match.createLabel();
 		return match;
 	}
 
@@ -243,6 +244,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			match = new PrologMatch(searchMatchElement, visibility, definingModule, functor, arity, properties, file, offset, length, declOrDef, signature);
 			break;
 		}
+		match.createLabel();
 		return match;
 	}
 	
@@ -265,6 +267,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			directiveElements.put(directiveSignature, searchDirectiveElement);
 		}
 		DirectiveMatch match = new DirectiveMatch(searchDirectiveElement, module, properties, file, offset, length, directiveSignature);
+		match.createLabel();
 		return match;
 	}
 
@@ -276,6 +279,7 @@ public abstract class PDTSearchQuery implements ISearchQuery {
 			directiveElements.put(directiveSignature, searchDirectiveElement);
 		}
 		DirectiveMatch match = new DirectiveMatch(searchDirectiveElement, module, properties, file, line, directiveSignature);
+		match.createLabel();
 		return match;
 	}
 	

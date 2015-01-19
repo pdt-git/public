@@ -32,7 +32,7 @@ public class PrologDefinitionMatch extends PrologMatch {
 	}
 	
 	@Override
-	protected StyledString createLabel() {
+	public void createLabel() {
 		StyledString str;
 		if (isLineLocation()) {
 			StringBuilder buf = new StringBuilder("Line ");
@@ -51,7 +51,7 @@ public class PrologDefinitionMatch extends PrologMatch {
 			str = new StyledString(getLine() + ": ", StyledString.QUALIFIER_STYLER);
 			str.append(text);
 		}
-		return str;
+		label = str;
 	}
 
 }
