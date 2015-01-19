@@ -380,7 +380,7 @@ public class CallHierarchyView extends ViewPart {
 		
 		locationTableViewer.setInput(new ArrayList<Location>());
 		
-		locationProvider = new LocationProvider(locationTableViewer);
+		locationProvider = new LocationProvider(locationTableViewer, callTreeViewer);
 	}
 	
 	private void initSashFormData(final Composite parent, Composite compLeft, final Sash sash, Composite compRight) {
