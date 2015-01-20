@@ -188,6 +188,8 @@ find_entity_reference(Entity, ExactMatch, Root, File, Line, RefEntity, RefName, 
 			atom_concat('instantiates class ', SearchEntity, Label)
 		;	specializes_class(RefEntity, SearchEntity),
 			atom_concat('specializes class ', SearchEntity, Label)
+		;	complements_object(RefEntity, SearchEntity),
+			atom_concat('complements object ', SearchEntity, Label)
 		),
 		entity_property(RefEntity, _, file(File)),
 		(	nonvar(Root) ->
