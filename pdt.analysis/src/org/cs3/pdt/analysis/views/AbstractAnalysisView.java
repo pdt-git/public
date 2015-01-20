@@ -32,6 +32,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -40,6 +41,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -428,6 +430,8 @@ public abstract class AbstractAnalysisView extends ViewPart {
 		analysisTreeViewerColumns[2].getColumn().setWidth(100);
 		analysisTreeViewerColumns[2].getColumn().setText("# Results");
 		analysisTreeViewerColumns[2].setLabelProvider(new AnalysisTableCountColumnLabelProvider());
+		
+		ColumnViewerToolTipSupport.enableFor(treeViewer, ToolTip.NO_RECREATE);
 		
 		return treeViewer;
 	}
