@@ -198,6 +198,16 @@ find_entity_reference(Entity, ExactMatch, Root, File, Line, RefEntity, RefName, 
 		),
 		entity_property(RefEntity, _, lines(Line,_)),
 		PropertyList = [line(Line), label(Label)]
+	;	entity_property(RefEntity, _, alias(_, Properties)),
+		memberchk(from(SearchEntity), Properties),
+		memberchk(line_count(Line), Properties),
+		atom_concat('alias from ', SearchEntity, Label),
+		entity_property(RefEntity, _, file(File)),
+		(	nonvar(Root) ->
+			sub_atom(File, 0, _, _, Root)
+		;	true
+		),
+		PropertyList = [line(Line), label(Label)]
 	).
 
 search_entity_name(Entity, true, Entity) :- !.
