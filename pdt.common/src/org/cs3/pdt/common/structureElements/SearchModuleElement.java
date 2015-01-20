@@ -14,6 +14,7 @@
 package org.cs3.pdt.common.structureElements;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IFile;
@@ -29,7 +30,7 @@ public class SearchModuleElement implements PrologSearchTreeElement, Comparable<
 	private Object parent;
 	private IFile file;
 	
-	private TreeMap<String, SearchDirectiveElement> directives = new TreeMap<>();
+	private LinkedHashMap<String, SearchDirectiveElement> directives = new LinkedHashMap<>();
 	private TreeMap<String, SearchPredicateElement> predForSignature = new TreeMap<>();
 	private ModuleMatch match;
 	
