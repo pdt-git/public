@@ -174,40 +174,42 @@ find_reference_to(Term, ExactMatch, Root, EntityAtom, CallerFunctor, CallerArity
 find_entity_reference(Entity, ExactMatch, Root, File, Line, RefEntity, RefName, RefArity, PropertyList) :-
 	search_entity_name(Entity, ExactMatch, SearchEntity),
 	(	find_reference_to(predicate(SearchEntity, _, _, _, _), ExactMatch, Root, RefEntity, RefName, RefArity, File, Line, PropertyList)
-	;	(	extends_protocol(RefEntity, SearchEntity),
+	;	(	extends_protocol(RefEntity0, SearchEntity),
 			atom_concat('extends protocol ', SearchEntity, Label)
-		;	extends_category(RefEntity, SearchEntity),
+		;	extends_category(RefEntity0, SearchEntity),
 			atom_concat('extends category ', SearchEntity, Label)
-		;	extends_object(RefEntity, SearchEntity),
+		;	extends_object(RefEntity0, SearchEntity),
 			atom_concat('extends object ', SearchEntity, Label)
-		;	implements_protocol(RefEntity, SearchEntity),
+		;	implements_protocol(RefEntity0, SearchEntity),
 			atom_concat('implements protocol ', SearchEntity, Label)
-		;	imports_category(RefEntity, SearchEntity),
+		;	imports_category(RefEntity0, SearchEntity),
 			atom_concat('imports category ', SearchEntity, Label)
-		;	instantiates_class(RefEntity, SearchEntity),
+		;	instantiates_class(RefEntity0, SearchEntity),
 			atom_concat('instantiates class ', SearchEntity, Label)
-		;	specializes_class(RefEntity, SearchEntity),
+		;	specializes_class(RefEntity0, SearchEntity),
 			atom_concat('specializes class ', SearchEntity, Label)
-		;	complements_object(RefEntity, SearchEntity),
+		;	complements_object(RefEntity0, SearchEntity),
 			atom_concat('complements object ', SearchEntity, Label)
 		),
-		entity_property(RefEntity, _, file(File)),
+		entity_property(RefEntity0, _, file(File)),
 		(	nonvar(Root) ->
 			sub_atom(File, 0, _, _, Root)
 		;	true
 		),
-		entity_property(RefEntity, _, lines(Line,_)),
-		PropertyList = [line(Line), label(Label)]
-	;	entity_property(RefEntity, _, alias(_, Properties)),
+		entity_property(RefEntity0, _, lines(Line,_)),
+		PropertyList = [line(Line), label(Label)],
+		entity_to_atom(RefEntity0, RefEntity)
+	;	entity_property(RefEntity0, _, alias(_, Properties)),
 		memberchk(from(SearchEntity), Properties),
 		memberchk(line_count(Line), Properties),
 		atom_concat('alias from ', SearchEntity, Label),
-		entity_property(RefEntity, _, file(File)),
+		entity_property(RefEntity0, _, file(File)),
 		(	nonvar(Root) ->
 			sub_atom(File, 0, _, _, Root)
 		;	true
 		),
-		PropertyList = [line(Line), label(Label)]
+		PropertyList = [line(Line), label(Label)],
+		entity_to_atom(RefEntity0, RefEntity)
 	).
 
 search_entity_name(Entity, true, Entity) :- !.
