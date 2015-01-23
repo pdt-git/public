@@ -80,7 +80,12 @@
 %% find_predicate_reference(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 find_predicate_reference(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	current_predicate(logtalk_load/1),
-	logtalk_adapter::find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
+	logtalk_adapter::find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Line, PropertyList),
+	(	var(RefName),
+		read_term_position_at_location(RefFile, Line, user, Position)
+	->	true
+	;	Position = Line
+	).
 find_predicate_reference(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
 	find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList).
 
