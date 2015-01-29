@@ -70,9 +70,11 @@ public class PDTOutlineQuery {
 	
 	private static String getOptions() {
 		StringBuffer buf = new StringBuffer("[multifile(");
-		buf.append(PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_OUTLINESHOW_MULTIFILE));
+		buf.append(Boolean.toString(PDTPlugin.getDefault().getPreferenceStore().getBoolean(PDT.PREF_OUTLINESHOW_MULTIFILE)));
 		buf.append("), all_clauses(");
 		buf.append(PDTPlugin.getDefault().getPreferenceStore().getString(PDT.PREF_OUTLINE_SHOW_ALL_CLAUSES));
+		buf.append("), first_arg_size_limit(");
+		buf.append(Integer.toString(PDTPlugin.getDefault().getPreferenceStore().getInt(PDT.PREF_OUTLINE_FIRST_ARGUMENT_VARIABLE_FILE_SIZE) * 1024));
 		buf.append(")]");
 		return buf.toString();
 	}

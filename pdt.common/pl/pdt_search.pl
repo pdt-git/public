@@ -525,7 +525,7 @@ find_definition_visible_in(EnclFile,ReferencedModule,Name,Arity,DefiningModule,L
 % Called from PDTOutlineQuery.java
 
 find_definition_contained_in(File, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
-	find_definition_contained_in(File, [multifile(true), all_clauses(true)], Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
+	find_definition_contained_in(File, [multifile(true), all_clauses(true), first_arg_size_limit(102400)], Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
 
 find_definition_contained_in(File, Options, Entity, EntityLine, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
@@ -575,7 +575,7 @@ find_definition_contained_in(ContextFile, Options, DefiningModule, ModuleLine, m
     		PropertyList1 = [remote(DefiningModule), defining_file(DefiningFile) | PropertyList0]
     	)
     ),
-    (	first_argument_of_clause(Ref, FirstArg)
+    (	first_argument_of_clause(Ref, Options, FirstArg)
     ->	PropertyList = [FirstArg|PropertyList1]
     ;	PropertyList = PropertyList1
     ).
@@ -642,14 +642,18 @@ walk_clauses(Head, N) :-
 	walk_clauses(Head, N2).
 walk_clauses(_, _).
 
-first_argument_of_clause(Ref, first_argument(Arg)) :-
+first_argument_of_clause(Ref, Options, first_argument(Arg)) :-
 	catch(clause(_:Head, _, Ref), _, fail),
 	compound(Head),
 	arg(1, Head, FirstArg),
 	(	var(FirstArg)
 	->	clause_property(Ref, file(File)),
+		(	memberchk(first_arg_size_limit(Limit), Options)
+		->	true
+		;	Limit = 102400
+		),
 		size_file(File, Size),
-		Size =< 102400,
+		Size =< Limit,
 		clause_info(Ref, _, _, Varnames), 
 		arg(1, Varnames, FirstVarName),
 		Arg = FirstVarName
