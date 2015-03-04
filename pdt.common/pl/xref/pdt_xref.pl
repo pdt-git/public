@@ -69,13 +69,18 @@ assert_result(_,_,_,_,_).
 
 %% find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList)
 find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile, Position, PropertyList) :-
-	Term = predicate(SearchMod, _, Functor, Separator, Arity0),
-	(	Separator == (//),
-		nonvar(Arity0)
-	->	Arity is Arity0 + 2
-	;	Arity = Arity0
+	(	Term = predicate(SearchMod, _, Functor, Separator, Arity0)
+	->	(	Separator == (//),
+			nonvar(Arity0)
+		->	Arity is Arity0 + 2
+		;	Arity = Arity0
+		)
+	;	Term = goal(SearchGoal),
+		nonvar(SearchGoal),
+		SearchGoal = SearchMod:H,
+		callable(H),
+		functor(H, Functor, Arity)
 	),
-	!,
 	(	var(Functor),
 		var(SearchMod)
 	->	fail
@@ -83,7 +88,10 @@ find_reference_to(Term, ExactMatch, Root, RefModule, RefName, RefArity, RefFile,
 	),
 	retractall(result(_, _, _, _, _)),
 	retractall(result_transparent(_, _, _, _, _, _)),
-	perform_search(Functor, Arity, SearchMod, ExactMatch),
+	(	var(SearchGoal)
+	->	perform_search(Functor, Arity, SearchMod, ExactMatch)
+	;	perform_search_for_goal(SearchMod, Functor, Arity, SearchGoal)
+	),
 	!,
 	(	retract(result(Alias, M0:ReferencingGoal, ClauseRefOrFile, Termposition, _))
 	;	retract(result_transparent(Alias, ReferencingGoal, ClauseRefOrFile, Termposition, _, M0s))
@@ -250,6 +258,10 @@ possible_alias(Module, Name, Arity, ImportingModule, AliasName) :-
 	source_file_property(File, load_context(ImportingModule, _Position, Options)),
 	memberchk(imports(Imports), Options),
 	memberchk(Name/Arity as AliasName, Imports).
+
+perform_search_for_goal(SearchModule, SearchFunctor, SearchArity, SearchGoal) :-
+	collect_candidates(SearchModule, SearchFunctor, SearchArity, Candidates),
+	pdt_walk_code([trace_reference(SearchGoal), predicates(Candidates), on_trace(pdt_xref:assert_result(_))]).
 
 collect_candidates(SearchModule, SearchFunctor, SearchArity, Candidates) :-
 	ensure_call_graph_generated,

@@ -41,6 +41,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDT.PREF_CONSULT_ON_SAVE, true);
 		store.setDefault(PDT.PREF_OUTLINESHOW_MULTIFILE, true);
 		store.setDefault(PDT.PREF_OUTLINE_SHOW_ALL_CLAUSES, "true");
+		store.setDefault(PDT.PREF_OUTLINE_FIRST_ARGUMENT_VARIABLE_FILE_SIZE, 100);
 		
 		// Editor Color preferences
 		initializeDefaultPreferences_FontAndColor(store);		

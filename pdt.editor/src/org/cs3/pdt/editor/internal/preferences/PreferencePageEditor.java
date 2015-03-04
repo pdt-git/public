@@ -17,6 +17,7 @@ import org.cs3.pdt.editor.PDT;
 import org.cs3.pdt.editor.PDTPlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -55,6 +56,8 @@ public class PreferencePageEditor extends FieldEditorPreferencePage implements I
 		addField(new BooleanFieldEditor(PDT.PREF_OUTLINESHOW_MULTIFILE, "Show multifile contributions in the Outline", getFieldEditorParent()));
 
 		addField(new RadioGroupFieldEditor(PDT.PREF_OUTLINE_SHOW_ALL_CLAUSES, "Number of clauses per predicate listed in the Outline", 2, new String[][]{{"1", "false"}, {"All", "true"}}, getFieldEditorParent(), true));
+		
+		addField(new IntegerFieldEditor(PDT.PREF_OUTLINE_FIRST_ARGUMENT_VARIABLE_FILE_SIZE, "Do not compute the variable name of the first argument of clauses in files larger than (in kB)", getFieldEditorParent()));
 
 //		// A comma separated list of filter ids that should be activated at startup
 //		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline",

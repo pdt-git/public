@@ -61,7 +61,14 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage 
 	protected Control createContents(Composite parent) {
 		configurationSelector = createConfigurationSelector(parent);
 		fillConfigurationList();
-		selectConfiguration(getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION));
+		String configurationId = getPreferenceStore().getString(PDTConnector.PREF_CONFIGURATION);
+		selectConfiguration(configurationId);
+		for (TableItem item : configurationList.getItems()) {
+			if (configurationId.equals(item.getText())) {
+				configurationList.setSelection(item);
+				break;
+			}
+		}
 		return configurationSelector;
 	}
 

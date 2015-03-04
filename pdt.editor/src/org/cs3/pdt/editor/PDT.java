@@ -62,6 +62,8 @@ public final class PDT {
 	
 	public static final String PREF_OUTLINE_SHOW_ALL_CLAUSES = "pdt.show.all.clauses";
 	
+	public static final String PREF_OUTLINE_FIRST_ARGUMENT_VARIABLE_FILE_SIZE = "pdt.show.first.argument.variable.file.size";
+	
 }
 
 

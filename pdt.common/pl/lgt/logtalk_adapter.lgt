@@ -108,13 +108,20 @@ find_reference_to(Term, ExactMatch, Root, EntityAtom, CallerFunctor, CallerArity
 		entity_property(Entity, _, calls(Functor/Arity, Properties)),
 		From = Entity,
 		Kind = logtalk(local)
+	;	nonvar(SearchFunctor),
+		(	entity_property(Entity, _, alias(Functor/Arity, Properties))
+		;	entity_property(Entity, _, alias(_, Properties)),
+			memberchk(for(Functor/Arity), Properties)
+		),
+		From = Entity,
+		Kind = logtalk(local)
 	),
 	(	ExactMatch == true
 	->	SearchFunctor = Functor
 	;	once(sub_atom(Functor, _, _, _, SearchFunctor))
 	),
 	entity_to_atom(Entity, EntityAtom),
-	once(member(caller(CallerFunctor/CallerArity), Properties)),
+	ignore(member(caller(CallerFunctor/CallerArity), Properties)),
 	once(member(line_count(Line), Properties)),
 	entity_property(Entity, _, file(EntityBase, EntityDirectory)),
 	atom_concat(EntityDirectory, EntityBase, EntityFile),

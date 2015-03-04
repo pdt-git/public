@@ -24,11 +24,11 @@ import org.cs3.pdt.common.PDTCommonPredicates;
 import org.cs3.pdt.common.PDTCommonUtil;
 import org.cs3.pdt.common.metadata.Goal;
 import org.cs3.pdt.common.search.PrologSearchResult;
-import org.cs3.pdt.common.structureElements.PrologMatch;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.search.ui.text.Match;
 
 /**
  * @author gk
@@ -101,12 +101,9 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
-	throws IOException {
+	protected Match constructPrologMatchForAResult(Map<String, Object> m) throws IOException {
 
 		String module = m.get("RefModule").toString();
-		String name = m.get("RefName").toString();
-		int arity = Integer.parseInt(m.get("RefArity").toString());
 		
 		List<String> properties = null;
 		Object prop = m.get("PropertyList");
@@ -121,16 +118,36 @@ public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 		
 		String offsetOrLine = m.get("RefLine").toString();
 		
-		PrologMatch match = null;
+		Match match = null;
 		
-		if (offsetOrLine.indexOf("-") >= 0) {
-			String[] positions = offsetOrLine.split("-");
-			int offset = Integer.parseInt(positions[0]);
-			int length = Integer.parseInt(positions[1]) - offset;
-			match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, offset, length, properties, null, "definition");
+		String name = (String) m.get("RefName");
+		int arity = -1;
+		try {
+			// if RefArity is not bound queryAllAtOnce returns a generated variable name as value instead of null
+			// thus the check for null cannot be used, instead it is checked for a positive integer value 
+			arity = Integer.parseInt(m.get("RefArity").toString());
+		} catch (Exception e) {
+		}
+		if (name != null && arity >= 0) {
+			if (offsetOrLine.indexOf("-") >= 0) {
+				String[] positions = offsetOrLine.split("-");
+				int offset = Integer.parseInt(positions[0]);
+				int length = Integer.parseInt(positions[1]) - offset;
+				match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, offset, length, properties, null, "definition");
+			} else {
+				int line = Integer.parseInt(offsetOrLine);
+				match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, line, properties, null, "definition");
+			}
 		} else {
-			int line = Integer.parseInt(offsetOrLine);
-			match = createUniqueMatch(PROLOG_MATCH_KIND_REFERENCE, module, name, arity, file, line, properties, null, "definition");
+			if (offsetOrLine.indexOf("-") >= 0) {
+				String[] positions = offsetOrLine.split("-");
+				int offset = Integer.parseInt(positions[0]);
+				int length = Integer.parseInt(positions[1]) - offset;
+				match = createUniqueMatch(module, file, offset, length, properties);
+			} else {
+				int line = Integer.parseInt(offsetOrLine);
+				match = createUniqueMatch(module, file, line, properties);
+			}
 		}
 		return match;
 	}
