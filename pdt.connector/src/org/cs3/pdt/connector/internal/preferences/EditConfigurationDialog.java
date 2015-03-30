@@ -148,6 +148,7 @@ public class EditConfigurationDialog extends TrayDialog implements IPreferencePa
 	@Override
 	protected Control createContents(final Composite parent) {
 		Control control = super.createContents(parent);
+		page.createControl(pageContainer);
 		update();
 		return control;
 	}
@@ -215,7 +216,6 @@ public class EditConfigurationDialog extends TrayDialog implements IPreferencePa
 		GridData pageContainerData = new GridData(GridData.FILL_BOTH);
 		pageContainerData.horizontalIndent = IDialogConstants.HORIZONTAL_MARGIN;
 		pageContainer.setLayoutData(pageContainerData);
-		page.createControl(pageContainer);
 		// Build the separator line
 		Label bottomSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		bottomSeparator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
