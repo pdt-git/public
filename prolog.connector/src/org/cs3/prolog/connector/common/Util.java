@@ -482,7 +482,7 @@ public class Util {
 	private static int appendUnescapedOctalCharSpec(String image, int i,
 			StringBuffer sb) {
 		String val = "";
-		int j = i + 2;
+		int j = i + 1;
 		while (j < image.length() && j < i + 4 && isOctDigit(image.charAt(j))) {
 			val += image.charAt(j);
 			j++;
