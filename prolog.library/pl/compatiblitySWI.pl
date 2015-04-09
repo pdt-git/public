@@ -367,8 +367,10 @@ get_single_char(A) :-
  */
 :- if(pdt_support:pdt_support(tty_control)).
 disable_tty_control :- 
-  current_prolog_flag(windows,_T) -> 
-  set_prolog_flag(tty_control,false). 
+	(	current_prolog_flag(windows, _)
+	->	set_prolog_flag(tty_control, false)
+	;	true
+	). 
 
 :- disable_tty_control.
 :- endif.
