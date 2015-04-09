@@ -3,14 +3,14 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Graphical Views
 Bundle-SymbolicName: org.cs3.pdt.graphicalviews;singleton:=true
-Bundle-Version: 3.1.1.qualifier
+Bundle-Version: 3.1.2.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui.forms,
  org.eclipse.jface.text,
  org.eclipse.ui.ide,
- org.cs3.pdt.common;bundle-version="[3.1.1,4.0.0)"
+ org.cs3.pdt.common;bundle-version="[3.1.2,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/org.eclipse.albireo.core_0.0.3.v20081031.jar,

@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Connector
 Bundle-SymbolicName: org.cs3.pdt.connector;singleton:=true
-Bundle-Version: 3.1.1.qualifier
+Bundle-Version: 3.1.2.qualifier
 Bundle-Activator: org.cs3.pdt.connector.PDTConnectorPlugin
 Export-Package: org.cs3.pdt.connector,
  org.cs3.pdt.connector.load,
@@ -15,7 +15,7 @@ Export-Package: org.cs3.pdt.connector,
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.core.resources,
- org.cs3.prolog.connector;bundle-version="[3.1.1,4.0.0)";visibility:=reexport,
+ org.cs3.prolog.connector;bundle-version="[3.1.2,4.0.0)";visibility:=reexport,
  org.eclipse.core.filesystem,
  org.eclipse.jface.text,
  org.eclipse.ui.ide,
