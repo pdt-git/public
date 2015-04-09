@@ -25,6 +25,7 @@ import org.cs3.pdt.graphicalviews.preferences.PreferenceConstants;
 import org.cs3.pdt.graphicalviews.view.modes.MouseHandler;
 import org.cs3.pdt.graphicalviews.view.modes.OpenInEditorViewMode;
 import org.cs3.prolog.connector.common.Debug;
+import org.cs3.prolog.connector.common.Util;
 import org.eclipse.albireo.core.SwingControl;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,11 +39,16 @@ import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
+import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -73,6 +79,10 @@ public abstract class ViewBase extends ViewPart {
 	
 	@Override
 	public void createPartControl(final Composite parent) {
+		if (Util.isMacOS()) {
+			createNotSupportedLabel(parent);
+			return;
+		}
 		try {
 			FormLayout layout = new FormLayout();
 			parent.setLayout(layout);
@@ -102,6 +112,39 @@ public abstract class ViewBase extends ViewPart {
 		} catch (Throwable e) {
 			Debug.report(e);
 		}
+	}
+	
+	private void createNotSupportedLabel(Composite parent) {
+		try {
+			Composite container = new Composite(parent, SWT.NONE);
+			
+			container.setLayout(new FillLayout());
+			
+			Label label = new Label(container, SWT.BORDER | SWT.CENTER);
+			label.setFont(makeBold(label.getFont()));
+			label.setText("This view is not supported on Mac OS");
+			
+			GridData gridData = new GridData();
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.grabExcessVerticalSpace = true;
+			gridData.verticalAlignment = GridData.FILL;
+			
+			container.setLayoutData(gridData);
+			
+			viewContainer = container;
+		} catch (Throwable e) {
+			Debug.report(e);
+		}
+	}
+
+	private Font makeBold(Font font) {
+		FontRegistry fontRegistry = new FontRegistry();
+		FontData fontData = font.getFontData()[0];
+
+		fontData.setStyle(SWT.BOLD);
+		fontRegistry.put("pdt_dummy", new FontData[]{fontData} );
+		return fontRegistry.get("pdt_dummy");
 	}
 
 	private String getCurrentFilePath() {
@@ -311,7 +354,9 @@ public abstract class ViewBase extends ViewPart {
 	
 	@Override
 	public void dispose() {
-		focusViewCoordinator.dispose();
+		if (focusViewCoordinator != null) {
+			focusViewCoordinator.dispose();
+		}
 		super.dispose();
 	}
 	
