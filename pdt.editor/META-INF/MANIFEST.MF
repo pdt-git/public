@@ -29,3 +29,4 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.common;bundle-version="[3.1.2,4.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: http://sewiki.iai.uni-bonn.de/research/pdt/docs

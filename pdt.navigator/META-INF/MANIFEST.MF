@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
-Bundle-Name: PDT Navigator
+Bundle-Name: PDT Navigator Extensions
 Bundle-SymbolicName: org.cs3.pdt.navigator;singleton:=true
 Bundle-Version: 3.1.2.qualifier
 Bundle-Activator: org.cs3.pdt.navigator.PDTNavigatorPlugin
@@ -12,3 +12,4 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.cs3.pdt.navigator
+Bundle-Vendor: http://sewiki.iai.uni-bonn.de/research/pdt/docs

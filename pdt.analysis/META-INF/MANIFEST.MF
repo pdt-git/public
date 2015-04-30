@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
-Bundle-Name: Prolog Analyses
+Bundle-Name: PDT Prolog Analyses
 Bundle-SymbolicName: org.cs3.pdt.analysis;singleton:=true
 Bundle-Version: 3.1.2.qualifier
 Bundle-Activator: org.cs3.pdt.analysis.PDTAnalysisPlugin
@@ -18,3 +18,4 @@ Export-Package: org.cs3.pdt.analysis,
  org.cs3.pdt.analysis.model.prolog,
  org.cs3.pdt.analysis.views,
  org.cs3.pdt.analysis.views.prolog
+Bundle-Vendor: http://sewiki.iai.uni-bonn.de/research/pdt/docs
