@@ -44,8 +44,8 @@ public class BracketLabel extends CroppingLabelBase {
 				lines[i] = part1[i];
 				lines[pl + i + cl] = part2[i];
 			}
+			
 		}
-		
 		if (cl == 1) {
 			int leftLength = sumLengths(part1);
 			leftPart = leftPart.substring(leftLength);
@@ -64,11 +64,16 @@ public class BracketLabel extends CroppingLabelBase {
 			lines[pl] += "..." + centerLine[0].substring(1);
 		}
 		else {
-			String l = lines[pl - 1]; 
-			lines[pl - 1] = l.substring(0, l.length() - 1) + "...";
+			if (pl > 0) {
+				String l = lines[pl - 1]; 
+				lines[pl - 1] = l.substring(0, l.length() - 1) + "...";
+				
+				lines[pl] = "..." + lines[pl].substring(1);
+			}
 			
-			lines[pl] = "..." + lines[pl].substring(1);
 		}
+		
+		
 	}
 
 	private int sumLengths(String[] list) {
