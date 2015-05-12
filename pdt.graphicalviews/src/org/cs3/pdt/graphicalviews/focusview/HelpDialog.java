@@ -40,22 +40,26 @@ public class HelpDialog extends ApplicationWindow {
 		 * Icon Legend
 		 */
 		
-		Group predicateGroup = createGroup(masterComposite, "Predicates", 4);
+		Group predicateGroup = createGroup(masterComposite, "Predicates", 5);
 		addLegendIcon(predicateGroup, "pred_normal_exported.png");
 		addLegendIcon(predicateGroup, "pred_meta_exported.png");
 		addLegendIcon(predicateGroup, "pred_dynamic_exported.png");
+		addLegendIcon(predicateGroup, "pred_modtrans_exported.png");
 		addLegendLabel(predicateGroup, "Exported predicates");
 		addLegendIcon(predicateGroup, "pred_normal_local.png");
 		addLegendIcon(predicateGroup, "pred_meta_local.png");
 		addLegendIcon(predicateGroup, "pred_dynamic_local.png");
+		addLegendIcon(predicateGroup, "pred_modtrans_local.png");
 		addLegendLabel(predicateGroup, "Local predicates\n(not exported)");
 		addLegendIcon(predicateGroup, "pred_normal_dead.png");
 		addLegendIcon(predicateGroup, "pred_meta_dead.png");
 		addLegendIcon(predicateGroup, "pred_dynamic_dead.png");
+		addLegendIcon(predicateGroup, "pred_modtrans_dead.png");
 		addLegendLabel(predicateGroup, "Dead predicates\n(local and uncalled)");
 		addLegendLabel(predicateGroup, "Normal predicate");
 		addLegendLabel(predicateGroup, "Meta predicate");
 		addLegendLabel(predicateGroup, "Dynamic predicate");
+		addLegendLabel(predicateGroup, "Module-transparent\npredicate");
 		addLegendLabel(predicateGroup, "");
 		
 		Group callGroup = createGroup(masterComposite, "Calls", 4);
