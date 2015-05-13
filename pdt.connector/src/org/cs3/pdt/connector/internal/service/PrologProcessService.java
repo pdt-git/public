@@ -73,6 +73,10 @@ public class PrologProcessService implements IPrologProcessService {
 		return activePrologProcess != null;
 	}
 	
+	PrologProcess getProcess() {
+		return activePrologProcess;
+	}
+	
 	@Override
 	public PrologProcess getActivePrologProcess() {
 		if (activePrologProcess == null) {

@@ -25,6 +25,9 @@
      <registryHook
            class="org.cs3.pdt.connector.internal.PDTRegistryHook">
      </registryHook>
+     <registryHook
+           class="org.cs3.pdt.connector.internal.service.ServiceRegistryHook">
+     </registryHook>
   </extension> 
      <extension
              point="org.cs3.pdt.connector.bootstrapContribution">

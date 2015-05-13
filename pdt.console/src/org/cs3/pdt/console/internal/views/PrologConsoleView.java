@@ -46,7 +46,6 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.loadfile.GenerateLoadFileWizard;
-import org.cs3.pdt.console.internal.preferences.PreferencePageMain;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.console.internal.views.completion.PrologCompletionProvider;
 import org.cs3.prolog.connector.common.Debug;
@@ -71,11 +70,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceNode;
-import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
-import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.search.ui.NewSearchUI;
@@ -347,7 +342,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 										}
 										registry.removePrologProcess(currentKey);
 										getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
-										PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(null);
 									}
 
 								}
