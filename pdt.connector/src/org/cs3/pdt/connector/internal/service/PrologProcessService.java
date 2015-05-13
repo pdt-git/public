@@ -113,7 +113,11 @@ public class PrologProcessService implements IPrologProcessService {
 				monitor.beginTask("Active PrologProcess changed: notify listeners", listenersClone.size());
 				
 				for (ActivePrologProcessListener listener : listenersClone) {
-					listener.activePrologProcessChanged(process);
+					try {
+						listener.activePrologProcessChanged(process);
+					} catch (Exception e) {
+						Debug.report(e);
+					}
 					monitor.worked(1);
 				}
 				monitor.done();
@@ -249,7 +253,7 @@ public class PrologProcessService implements IPrologProcessService {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					consultFilesImpl(files, process, monitor, message);
-				} catch (PrologProcessException e) {
+				} catch (Exception e) {
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
 				} finally {
@@ -273,11 +277,20 @@ public class PrologProcessService implements IPrologProcessService {
 		
 		for (ConsultListener listener : consultListenersClone) {
 			monitor.subTask("Notify Listener");
-			listener.beforeConsult(process, files, new SubProgressMonitor(monitor, 1));
+			try {
+				listener.beforeConsult(process, files, new SubProgressMonitor(monitor, 1));
+			} catch (Exception e) {
+				Debug.report(e);
+			}
 		}
 		
 		monitor.subTask("Execute reload");
-		boolean success = executeReload(process, files, new SubProgressMonitor(monitor, consultListenersClone.size()), message);
+		boolean success = false;
+		try {
+			success = executeReload(process, files, new SubProgressMonitor(monitor, consultListenersClone.size()), message);
+		} catch (Exception e) {
+			Debug.report(e);
+		}
 		
 		if (success) {
 			monitor.subTask("Collect all consulted files");
@@ -285,7 +298,11 @@ public class PrologProcessService implements IPrologProcessService {
 			
 			for (ConsultListener listener : consultListenersClone) {
 				monitor.subTask("Notify Listener");
-				listener.afterConsult(process, files, allConsultedFiles, new SubProgressMonitor(monitor, 1));
+				try {
+					listener.afterConsult(process, files, allConsultedFiles, new SubProgressMonitor(monitor, 1));
+				} catch (Exception e) {
+					Debug.report(e);
+				}
 			}
 		}
 		monitor.done();
