@@ -646,6 +646,23 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			ui_appendOutput(e.getOutput());
 		}
 	}
+	
+	public void appendOutput(final String output) {
+		if (control == null || control.isDisposed()) {
+			return;
+		}
+		Display display = control.getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					appendOutput(output);
+				}
+			});
+		} else {
+			ui_appendOutput(output);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)

@@ -53,6 +53,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.process.PrologProcessStartException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -1175,12 +1176,17 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		currentProcess = newProcess;
 		if (currentProcess != null) {
 			addHooks(currentProcess);
+			String errorMessage = null;
 			try {
 				connect(currentProcess);
 			} catch (PrologProcessException e) {
 				Debug.report(e);
+				errorMessage = getNestedStartErrorMessage(e);
 			}
 			reconfigureViewer(currentProcess);
+			if (errorMessage != null) {
+				viewer.appendOutput(errorMessage);
+			}
 			getDefaultPrologConsoleService().fireActivePrologProcessChanged(this);
 			if (updateActiveProcess) {
 				PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(currentProcess);
@@ -1248,10 +1254,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 
 		PrologSession session = process.getSession(PrologProcess.NONE);
-//		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimeUIPlugin.getDefault()
-//				.getLibraryManager(), session,
-//				new String[] { PDTConsole.PL_LIBRARY });
-
 
 		Map<String,?> result = null;
 		try {
@@ -1279,6 +1281,26 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		int port = Integer.parseInt(result.get("Port").toString());
 		model.setPort(port);
 		model.connect();
+	}
+	
+	private String getNestedStartErrorMessage(PrologProcessException e) {
+		Throwable cause = e.getCause();
+		if (cause != null) {
+			if (cause instanceof PrologProcessException) {
+				return getNestedStartErrorMessage((PrologProcessException) cause);
+			} else if (cause instanceof PrologProcessStartException) {
+				String message = cause.getMessage();
+				StringBuilder buf = new StringBuilder('\n');
+				for (String line : message.split("\n")) {
+					buf.append("! ");
+					buf.append(line);
+					buf.append('\n');
+				}
+				buf.append('\n');
+				return buf.toString();
+			}
+		}
+		return null;
 	}
 
 	private void disconnect(PrologProcess process) {
