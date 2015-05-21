@@ -1181,7 +1181,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				connect(currentProcess);
 			} catch (PrologProcessException e) {
 				Debug.report(e);
-				errorMessage = getNestedStartErrorMessage(e);
+				String message = e.getMessage();
+				StringBuilder buf = new StringBuilder('\n');
+				for (String line : message.split("\n")) {
+					buf.append("! ");
+					buf.append(line);
+					buf.append('\n');
+				}
+				buf.append('\n');
+				errorMessage = buf.toString();
 			}
 			reconfigureViewer(currentProcess);
 			if (errorMessage != null) {
@@ -1281,26 +1289,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		int port = Integer.parseInt(result.get("Port").toString());
 		model.setPort(port);
 		model.connect();
-	}
-	
-	private String getNestedStartErrorMessage(PrologProcessException e) {
-		Throwable cause = e.getCause();
-		if (cause != null) {
-			if (cause instanceof PrologProcessException) {
-				return getNestedStartErrorMessage((PrologProcessException) cause);
-			} else if (cause instanceof PrologProcessStartException) {
-				String message = cause.getMessage();
-				StringBuilder buf = new StringBuilder('\n');
-				for (String line : message.split("\n")) {
-					buf.append("! ");
-					buf.append(line);
-					buf.append('\n');
-				}
-				buf.append('\n');
-				return buf.toString();
-			}
-		}
-		return null;
 	}
 
 	private void disconnect(PrologProcess process) {
