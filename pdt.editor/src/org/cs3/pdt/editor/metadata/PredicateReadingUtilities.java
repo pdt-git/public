@@ -103,9 +103,6 @@ public class PredicateReadingUtilities {
 			case '\\':
 				end = end + 2;
 				break;
-			case '"':
-				throw new RuntimeException(
-						"This point should never been reached");
 			default:
 				end++;
 			}
