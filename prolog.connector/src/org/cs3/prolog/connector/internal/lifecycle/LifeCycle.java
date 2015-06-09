@@ -118,7 +118,7 @@ public abstract class LifeCycle {
 		if (Thread.currentThread() == workThread
 				|| Thread.currentThread() == transitionThread) {
 			throw new IllegalMonitorStateException(
-					"cannot call this from transition or work queue.");
+					"Invalid thread access. Cannot call 'waitUntilUp' from transition or work queue.");
 		}
 
 		while (getError() == null && !isUp()) {
@@ -138,7 +138,7 @@ public abstract class LifeCycle {
 		if (Thread.currentThread() == workThread
 				|| Thread.currentThread() == transitionThread) {
 			throw new IllegalMonitorStateException(
-					"cannot call this from transition or work queue.");
+					"Invalid thread access. Cannot call 'waitUntilDown' from transition or work queue.");
 		}
 		while ((ignoreErrors||getError() == null) && !isDown()) {
 			this.wait(1000);
@@ -158,7 +158,7 @@ public abstract class LifeCycle {
 		if (Thread.currentThread() == workThread
 				|| Thread.currentThread() == transitionThread) {
 			throw new IllegalMonitorStateException(
-					"cannot call this from transition or work queue.");
+					"Invalid thread access. Cannot call 'waitUntilError' from transition or work queue.");
 		}
 		getError();
 		while ((getError()) == null) {

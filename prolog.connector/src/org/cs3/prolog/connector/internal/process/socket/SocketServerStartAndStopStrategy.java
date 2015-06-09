@@ -247,7 +247,7 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			writeInitialisationToTempFile(socketProcess, port, tmpFile);
 		} catch (IOException e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 		String[] args = buildArguments(socketProcess, tmpFile);
 		return args;
@@ -310,7 +310,7 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			socketProcess.setPort(port);
 		} catch (IOException e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 		return port;
 	}
@@ -336,7 +336,7 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			stopSocketServer(socketProcess);
 		} catch (Throwable e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 	

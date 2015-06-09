@@ -100,7 +100,7 @@ public class JackTheProcessRipper extends Thread {
 	public void markForDeletion(long processId) throws InterruptedException{
 		if (shuttingDown) {
 			throw new IllegalStateException(
-			"you cannot register processes for deletion during shutdown");
+			"Java is shutting down. Processes cannot be registered for termination anymore.");
 		}
 		toBeDestroyed.put(processId);
 	}

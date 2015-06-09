@@ -139,7 +139,7 @@ public class Debug {
 	 */
 	static public void setDebugLevel(int level) {
 		if (level < LEVEL_NONE || level > LEVEL_DEBUG)
-			throw new IllegalArgumentException("Bad LEVEL");
+			throw new IllegalArgumentException("Invalid debug level: " + level);
 		debugLevel = level;
 	}
 
@@ -209,7 +209,7 @@ public class Debug {
 
 	private static void setOutputStream(PrintStream out) {
 		if (out == null)
-			throw new IllegalArgumentException("pdt: output stream is null");
+			throw new IllegalArgumentException("Output stream is null");
 		Debug.out = out;
 		out.println(PREFIX_OUTPUT + "----------------------------------");
 		out.println(PREFIX_OUTPUT + new Date());
@@ -234,7 +234,7 @@ public class Debug {
 			prefix = "INFO";
 			break;
 		default:
-			throw new IllegalStateException(PREFIX_OUTPUT + "Bad level value");
+			throw new IllegalStateException(PREFIX_OUTPUT + "Invalid debug level: " + level);
 		}
 		Thread currentThread = Thread.currentThread();
 		String nameOfCurrentThread = currentThread.getName();

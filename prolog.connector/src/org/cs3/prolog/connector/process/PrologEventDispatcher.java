@@ -386,7 +386,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 			InputStream resourceAsStream;
 			resourceAsStream = PrologEventDispatcher.class.getResourceAsStream("process_observe.pl");
 			if (resourceAsStream == null) {
-				throw new RuntimeException("Cannot find process_observe.pl!");
+				throw new RuntimeException("Cannot find process_observe.pl");
 			}
 			observeFile = new File(tempDir, "process_observe.pl");
 			if (observeFile.exists()) {

@@ -368,7 +368,7 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 			try {
 				return getSession_internal(flags);
 			} catch (Throwable t) {
-				throw new PrologProcessException("Failed to obtain session", t);
+				throw new PrologProcessException("Failed to obtain session. The Prolog process cannot be accessed.", t);
 			}
 
 		}
@@ -549,7 +549,7 @@ public abstract class AbstractPrologProcess implements PrologProcess {
 			try {
 				return getAsyncSession_internal(flags);
 			} catch (Throwable t) {
-				throw new PrologProcessException("Failed to obtain session", t);
+				throw new PrologProcessException("Failed to obtain session. The Prolog process cannot be accessed.", t);
 			}
 		}
 	}

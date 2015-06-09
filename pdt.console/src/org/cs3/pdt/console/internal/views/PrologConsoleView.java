@@ -1108,7 +1108,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				Debug.info("starting server failed, which may mean that it is actualy running already.");
 				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
 				if(result==null){
-					throw new RuntimeException("No Server running.");
+					throw new RuntimeException("Failed to connect with the Prolog process.");
 				}
 			}
 
@@ -1274,7 +1274,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
 			}
 			if (result == null) {
-				throw new RuntimeException("could not install console server");
+				throw new RuntimeException("Failed to connect the Prolog Console to the Prolog process");
 			}
 		} 
 		catch (Exception e) {
