@@ -128,7 +128,7 @@ public class FileUtils {
 			try {
 				return ExternalPrologFilesProjectUtils.linkFile(path);
 			} catch (CoreException e) {
-				throw new IllegalArgumentException("Not in Workspace: " + path);
+				throw new IllegalArgumentException(e);
 			}
 		}
 		if (files.length > 1) {

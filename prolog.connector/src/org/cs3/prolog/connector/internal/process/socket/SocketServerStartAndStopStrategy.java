@@ -39,10 +39,12 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.common.Util;
 import org.cs3.prolog.connector.internal.process.ServerStartAndStopStrategy;
 import org.cs3.prolog.connector.process.PrologProcess;
+import org.cs3.prolog.connector.process.PrologProcessStartException;
 import org.cs3.prolog.connector.process.StartupStrategy;
 
 public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrategy {
-private static JackTheProcessRipper processRipper;
+
+	private static JackTheProcessRipper processRipper;
 	
 	private static final String STARTUP_ERROR_LOG_PROLOG_CODE = 
 			":- multifile message_hook/3.\n" +
@@ -79,6 +81,9 @@ private static JackTheProcessRipper processRipper;
 			"    with_output_to(atom(Msg), (current_output(S), logtalk::print_message_tokens(S, '', Tokens))),\n" +
 			"    user::assertz(pdt_startup_error_message(Msg)),\n" +
 			"    fail)).\n";
+
+	private static final String INVALID_PATH_TO_THE_PROLOG_EXECUTABLE = "Failed to start the Prolog process.\nThe path to the Prolog executable is invalid.";
+	private static final String TIMEOUT_EXCEEDED = "Failed to connect to the Prolog process.\nTimeout exceeded.";
 
 	public SocketServerStartAndStopStrategy() {
 		processRipper=JackTheProcessRipper.getInstance();
@@ -186,7 +191,7 @@ private static JackTheProcessRipper processRipper;
 					if (errorLogFileContent != null) {
 						Debug.error("Prolog errors during initialization:\n" + errorLogFileContent);
 					}
-					throw new RuntimeException("Timeout exceeded while waiting for peer to come up.");
+					throw new PrologProcessStartException(TIMEOUT_EXCEEDED);
 				}
 				Thread.sleep(50);
 			} catch (InterruptedException e1) {
@@ -194,7 +199,7 @@ private static JackTheProcessRipper processRipper;
 			}
 			try {
 				if (process.exitValue() != 0) {
-					throw new RuntimeException("Failed to start server. Process exited with err code " + process.exitValue());
+					throw new RuntimeException("Failed to start the Prolog process. Process exited with error code " + process.exitValue());
 				}
 			} catch (IllegalThreadStateException e) {
 				; // nothing. the process is still coming up.
@@ -242,16 +247,21 @@ private static JackTheProcessRipper processRipper;
 			writeInitialisationToTempFile(socketProcess, port, tmpFile);
 		} catch (IOException e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 		String[] args = buildArguments(socketProcess, tmpFile);
 		return args;
 	}
 
 	private static String[] getCommands(SocketPrologProcess socketProcess) {
+		String executablePath = socketProcess.getExecutablePath();
+		if (executablePath == null || executablePath.isEmpty() || !new File(executablePath).exists()) {
+			Debug.error(INVALID_PATH_TO_THE_PROLOG_EXECUTABLE);
+			throw new PrologProcessStartException(INVALID_PATH_TO_THE_PROLOG_EXECUTABLE);
+		}
 		String executable = ProcessUtils.createExecutable(
 				socketProcess.getOSInvocation(),
-				socketProcess.getExecutablePath(),
+				executablePath,
 				socketProcess.getCommandLineArguments(),
 				socketProcess.getAdditionalStartupFile());
 		String[] command = Util.split(executable, " ");
@@ -300,7 +310,7 @@ private static JackTheProcessRipper processRipper;
 			socketProcess.setPort(port);
 		} catch (IOException e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 		return port;
 	}
@@ -326,7 +336,7 @@ private static JackTheProcessRipper processRipper;
 			stopSocketServer(socketProcess);
 		} catch (Throwable e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 	

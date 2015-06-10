@@ -44,7 +44,7 @@ public class CTermUtil {
 			throw new IllegalArgumentException("cannot combine CTERMS and UNTQUOTE_ATOMS");
 		}
 		if(Util.flagsSet(flags, PrologProcess.CTERMS | PrologProcess.PROCESS_LISTS)){
-			throw new IllegalArgumentException("cannot combine CTERMS and PROCESS_LISTS (yet)");
+			throw new IllegalArgumentException("cannot combine CTERMS and PROCESS_LISTS");
 		}
 	}
 	

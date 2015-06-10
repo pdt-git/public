@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
  * Contains utility methods to determine default settings.
  */
 public class ProcessUtils {
+	
+	private static final String EMPTY_STRING = "";
 
 	public static String guessEnvironmentVariables() {
 		if (Util.isMacOS()) {
@@ -99,7 +101,7 @@ public class ProcessUtils {
 						"which " + unixCommandLineExecutables, appendPath);
 	
 				if (process == null)
-					return null;
+					return EMPTY_STRING;
 	
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						process.getInputStream()));
@@ -108,11 +110,11 @@ public class ProcessUtils {
 				if (path != null && !path.startsWith("no " + unixCommandLineExecutables)) {
 					return path;
 				}
-			return unixCommandLineExecutables;
+			return EMPTY_STRING;
 	
 		} catch (IOException e) {
 	
-			return unixCommandLineExecutables;
+			return EMPTY_STRING;
 		}
 	}
 
@@ -148,14 +150,14 @@ public class ProcessUtils {
 					"cmd.exe /c echo %PATH%");
 	
 			if (process == null)
-				return executables;
+				return EMPTY_STRING;
 	
 			BufferedReader br = new BufferedReader(new InputStreamReader(
 					process.getInputStream()));
 			path = br.readLine();
 	
 			if (path == null)
-				return executables;
+				return EMPTY_STRING;
 	
 			// TODO just search in case of executable was not found.
 			String[] paths = Util.split(path, ";");
@@ -172,13 +174,13 @@ public class ProcessUtils {
 			}
 
 			if(plwin== null){
-				return executables;
+				return EMPTY_STRING;
 			}
 			return plwin;
 
 		} catch (IOException e) {
 
-			return executables;
+			return EMPTY_STRING;
 		}
 	}
 

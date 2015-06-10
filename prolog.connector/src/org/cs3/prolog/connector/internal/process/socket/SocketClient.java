@@ -195,7 +195,7 @@ public class SocketClient {
 
 	private void exceptionIfNoSocketThere() {
 		if (socket == null) {
-			throw new IllegalStateException("Socket is closed, go away. ");
+			throw new IllegalStateException("Prolog session is already closed. It cannot be used for queries anymore.");
 		}
 	}
 

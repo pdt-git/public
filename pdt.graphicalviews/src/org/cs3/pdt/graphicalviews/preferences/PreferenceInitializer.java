@@ -137,7 +137,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 			templates = new Hashtable<String,String[][]>();
 		
 		if (name.length() == 0 || templates.containsKey(name)) {
-			throw new IllegalArgumentException("Template name should be non-empty and unique");
+			throw new IllegalArgumentException("Template name must be non-empty and unique");
 		}
 		
 		String[][] newPreferences = getCurrentPreferences(store);

@@ -116,7 +116,7 @@ public class Connector {
 			InputStream resourceAsStream;
 			resourceAsStream = SocketPrologProcess.class.getResourceAsStream(CONSULT_SERVER_PL);
 			if (resourceAsStream == null) {
-				throw new RuntimeException("Cannot find " + CONSULT_SERVER_PL + "!");
+				throw new RuntimeException("Cannot find " + CONSULT_SERVER_PL);
 			}
 			consultServerFile = new File(tempDir, CONSULT_SERVER_PL);
 			if (consultServerFile.exists()) {

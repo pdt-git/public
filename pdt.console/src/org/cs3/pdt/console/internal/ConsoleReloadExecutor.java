@@ -77,7 +77,12 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		
 		ConsoleModel model = activePrologConsole.getModel();
 		model.setLineBuffer(" ");
-		model.commitLineBuffer();
+		try {
+			model.commitLineBuffer();
+		} catch (Exception e) {
+			Debug.report(e);
+			return false;
+		}
 		if (query.endsWith(".")) {
 			model.setLineBuffer(query);
 		} else {

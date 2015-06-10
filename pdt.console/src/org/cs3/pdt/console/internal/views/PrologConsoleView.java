@@ -53,6 +53,7 @@ import org.cs3.prolog.connector.common.QueryUtils;
 import org.cs3.prolog.connector.process.LifeCycleHook;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
+import org.cs3.prolog.connector.process.PrologProcessStartException;
 import org.cs3.prolog.connector.session.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -1107,7 +1108,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				Debug.info("starting server failed, which may mean that it is actualy running already.");
 				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
 				if(result==null){
-					throw new RuntimeException("No Server running.");
+					throw new RuntimeException("Failed to connect with the Prolog process.");
 				}
 			}
 
@@ -1175,12 +1176,25 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		currentProcess = newProcess;
 		if (currentProcess != null) {
 			addHooks(currentProcess);
+			String errorMessage = null;
 			try {
 				connect(currentProcess);
 			} catch (PrologProcessException e) {
 				Debug.report(e);
+				String message = e.getMessage();
+				StringBuilder buf = new StringBuilder('\n');
+				for (String line : message.split("\n")) {
+					buf.append("! ");
+					buf.append(line);
+					buf.append('\n');
+				}
+				buf.append('\n');
+				errorMessage = buf.toString();
 			}
 			reconfigureViewer(currentProcess);
+			if (errorMessage != null) {
+				viewer.appendOutput(errorMessage);
+			}
 			getDefaultPrologConsoleService().fireActivePrologProcessChanged(this);
 			if (updateActiveProcess) {
 				PDTConnectorPlugin.getDefault().getPrologProcessService().setActivePrologProcess(currentProcess);
@@ -1248,10 +1262,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}
 
 		PrologSession session = process.getSession(PrologProcess.NONE);
-//		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimeUIPlugin.getDefault()
-//				.getLibraryManager(), session,
-//				new String[] { PDTConsole.PL_LIBRARY });
-
 
 		Map<String,?> result = null;
 		try {
@@ -1264,7 +1274,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 				result = session.queryOnce(bT(PDTConsolePredicates.PDT_CURRENT_CONSOLE_SERVER, "Port"));
 			}
 			if (result == null) {
-				throw new RuntimeException("could not install console server");
+				throw new RuntimeException("Failed to connect the Prolog Console to the Prolog process");
 			}
 		} 
 		catch (Exception e) {

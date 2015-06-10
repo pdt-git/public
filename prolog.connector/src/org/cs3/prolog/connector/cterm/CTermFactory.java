@@ -51,7 +51,7 @@ public class CTermFactory {
 			parser.Start();
 		} catch (Throwable e) {
 			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 		return create(parser.getASTRoot());
 	}
