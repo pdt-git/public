@@ -165,9 +165,9 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	@Override
-	synchronized public void commitLineBuffer() {
+	synchronized public void commitLineBuffer() throws SingleCharModeException {
 		if (singleCharMode)
-			throw new IllegalStateException("Tried to execute a query (e.g. consulting a file) while console is waiting for user input.");
+			throw new SingleCharModeException("Tried to execute a query (e.g. consulting a file) while console is waiting for user input. Terminate the current query with <enter> or use ';' for more results.");
 
 		if (!isConnected()) {
 			connect();
@@ -240,11 +240,12 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	/**
 	 * precondition: we are in single char mode postcondition: we are in line
 	 * mode.
+	 * @throws SingleCharModeException 
 	 */
 	@Override
-	public void putSingleChar(char c) {
+	public void putSingleChar(char c) throws SingleCharModeException {
 		if (!singleCharMode) {
-			throw new IllegalStateException("Put a single character while not waiting for user input");
+			throw new SingleCharModeException("Not waiting for user input");
 		}
 
 		synchronized (this) {

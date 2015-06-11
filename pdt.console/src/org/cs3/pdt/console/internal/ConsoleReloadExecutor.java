@@ -20,11 +20,13 @@ import org.cs3.pdt.console.ConsoleModel;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.console.internal.views.SingleCharModeException;
 import org.cs3.prolog.connector.common.Debug;
 import org.cs3.prolog.connector.process.PrologProcess;
 import org.cs3.prolog.connector.process.PrologProcessException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 
@@ -79,8 +81,14 @@ public class ConsoleReloadExecutor implements PDTReloadExecutor {
 		model.setLineBuffer(" ");
 		try {
 			model.commitLineBuffer();
-		} catch (Exception e) {
-			Debug.report(e);
+		} catch (SingleCharModeException e) {
+			final Shell shell = UIUtils.getActiveShell();
+			shell.getDisplay().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					UIUtils.displayMessageDialog(shell, "Prolog Console", "Consult operation has been performed in the background, without Console feedback, since the Prolog Console is waiting for user input. \nIf you are not interested in more results terminate the query by typing <return>.");
+				}
+			});
 			return false;
 		}
 		if (query.endsWith(".")) {

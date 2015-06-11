@@ -16,6 +16,8 @@ package org.cs3.pdt.console;
 
 import java.io.IOException;
 
+import org.cs3.pdt.console.internal.views.SingleCharModeException;
+
 /**
  * Abstract model of a console.
  * 
@@ -46,8 +48,9 @@ public interface ConsoleModel {
 
 	/**
 	 * commit the current content of the linebuffer (i.e. "press enter").	 
+	 * @throws SingleCharModeException 
 	 */
-	abstract public void commitLineBuffer();
+	abstract public void commitLineBuffer() throws SingleCharModeException;
 
 	/**
 	 * Register a ConsoleModelListerner with this console.
@@ -68,8 +71,9 @@ public interface ConsoleModel {
 	 * char mode, although some implementations might allow it, this should generaly throw some kind
 	 * of runtime exception.  
 	 * @param c
+	 * @throws SingleCharModeException 
 	 */
-	abstract public void putSingleChar(char c);
+	abstract public void putSingleChar(char c) throws SingleCharModeException;
 
 	/**
 	 * @return true if and only if the console is currently in single char mode.
