@@ -27,6 +27,7 @@ import java.util.Set;
 import org.cs3.pdt.connector.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.connector.internal.preferences.PreferenceConfiguration;
 import org.cs3.pdt.connector.internal.service.PrologProcessService;
+import org.cs3.pdt.connector.internal.service.ServiceRegistryHook;
 import org.cs3.pdt.connector.load.BootstrapPrologContribution;
 import org.cs3.pdt.connector.load.BootstrapPrologContributionAlias;
 import org.cs3.pdt.connector.load.BootstrapPrologContributionFile;
@@ -224,6 +225,7 @@ public class PDTConnectorPlugin extends AbstractUIPlugin implements IStartup {
 		
 		try {
 			PrologProcessRegistry registry = getPrologProcessRegistry();
+			registry.removePrologProcessRegistryListener(ServiceRegistryHook.listener);
 			Set<String> keys = new HashSet<String>(registry.getRegisteredKeys()); // clone this. see
 			// PDT-194
 			Iterator<String> it = keys.iterator();

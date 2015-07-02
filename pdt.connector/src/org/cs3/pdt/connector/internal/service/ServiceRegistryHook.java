@@ -20,10 +20,12 @@ import org.cs3.pdt.connector.registry.PrologProcessRegistryListener;
 import org.cs3.pdt.connector.registry.RegistryHook;
 
 public class ServiceRegistryHook implements RegistryHook {
+	
+	public static PrologProcessRegistryListener listener;
 
 	@Override
 	public void addSubscriptions(PrologProcessRegistry registry) {
-		registry.addPrologProcessRegistryListener(new PrologProcessRegistryListener() {
+		listener = new PrologProcessRegistryListener() {
 			
 			@Override
 			public void subscriptionRemoved(PrologProcessRegistryEvent e) {
@@ -43,7 +45,8 @@ public class ServiceRegistryHook implements RegistryHook {
 			@Override
 			public void processAdded(PrologProcessRegistryEvent e) {
 			}
-		});
+		};
+		registry.addPrologProcessRegistryListener(listener);
 	}
 
 }
