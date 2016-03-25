@@ -19,6 +19,7 @@
 :- module(logging, [
 	ctc_warning/2,
 	ctc_error/2,
+	log_on_stdout/1,
 	log_on_stdout/2,
 	do_if_logging_enabled/1
 ]).
@@ -72,6 +73,9 @@ disable_logging :-
  * Only call a goal (that produces console output) if logging is enabled.
  * Indended for use with 'listing' and friends.
  */
+ 
+:- meta_predicate( do_if_logging_enabled(0) ).
+ 
 do_if_logging_enabled(Goal) :-
    (
    	(clause(loggingEnabled,_),check_logging_module)
