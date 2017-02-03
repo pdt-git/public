@@ -220,7 +220,7 @@ public class PLEditor extends TextEditor implements ConsultListener, ActiveProlo
 				linebreakOffset = content.length()-1;
 			}
 			String lineString = content.substring(todoOffset, linebreakOffset);
-			HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
+			HashMap<String, Object> attributes = new HashMap<String, Object>();
 			attributes.put(IMarker.LINE_NUMBER, document.getLineOfOffset(offset+todoOffset));
 			attributes.put(IMarker.CHAR_START, offset+todoOffset);
 			attributes.put(IMarker.CHAR_END, offset+linebreakOffset);

@@ -212,7 +212,7 @@ public class PDTBreakpointHandler implements PrologEventListener, LifeCycleHook,
 
 			@Override
 			public void run() {
-				HashMap<String, Comparable<?>> attributes = new HashMap<String, Comparable<?>>();
+				HashMap<String, Object> attributes = new HashMap<String, Object>();
 				attributes.put(IMarker.LINE_NUMBER, line);
 				attributes.put(IMarker.MESSAGE, "Prolog Breakpoint: line[" + line + "]");
 				attributes.put(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
