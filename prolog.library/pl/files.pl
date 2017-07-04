@@ -16,6 +16,7 @@
      export_goal_output/2,            % (File,Goal)
                                         % <-- OBSOLETE, use with_output_to_file/2 instead
      with_output_to_file/2,           % (File,Goal)
+     with_output_to_file/3,           % (File,Mode,Goal)
      with_output_to_folder/2,         % (+Folder,+Call)           FileName=Functor+Time
      with_output_to_folder/3,         % (+Folder,-FileName,+Call) FileName=Functor+Time
      report_to_file_ctc/1,            % (CallLiteral) As above but in CTC_HOME directory 
