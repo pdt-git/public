@@ -307,6 +307,7 @@ call_local_pred_of_entity(Entity, Head) :-
  * Call Head in Entity regardless whether Head is locally defined or
  * imported from another module.
  */
+:- meta_predicate(call_in_entity(*,0)).
 call_in_entity(Entity,Goal) :-
    ( nonvar(Entity)
    -> Entity::Goal
