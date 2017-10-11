@@ -1,7 +1,7 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
- * Author: Günter Kniesel (among others)
+ * Author: Gï¿½nter Kniesel (among others)
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
  * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
@@ -37,7 +37,7 @@ count_facts(Goal, Nr) :-
                                     
 count_success(Goal, Times) :-    
         Counter = counter(0),       
-        (   catch(Goal,_,fail),                   
+        (   catch(Goal,_,fail),     % turn exceptions into failures                   
                  arg(1, Counter, N0),    
                  N is N0 + 1,            
                  nb_setarg(1, Counter, N),   
@@ -45,41 +45,47 @@ count_success(Goal, Times) :-
         ;   arg(1, Counter, Times)  
         ).        
   
-:- module_transparent count/2.
+:- meta_predicate count(0, -).     
 
 count(Goal, _) :-
 	nb_setval(successcounter, 0),
-    catch(Goal,_Any,fail),     % turn exceptions into failures
-    nb_getval(successcounter, N),
-    N2 is N + 1,
-    nb_setval(successcounter,N2),
-    fail.
-    
-count(_, N) :-
-	nb_getval(successcounter, N).
+    (	catch(Goal,_Any,fail),     % turn exceptions into failures
+    		nb_getval(successcounter, N),
+    		N2 is N + 1,
+    		nb_setval(successcounter, N2),
+    	fail
+	;	nb_getval(successcounter, N)
+	).
   
 %count(Goal, _) :-
 %  flag(successcounter,_,0),
-%  catch(Goal,_Any,fail),     % turn exceptions into failures
-%    flag(successcounter,N,N+1),
-%  fail.
-%count(_, N) :-
-%  flag(successcounter,N,N).
+%  (	catch(Goal,_Any,fail),     % turn exceptions into failures
+%    		flag(successcounter,N,N+1),
+%  		fail
+%  ; flag(successcounter,N,N)
+%  ).
 
 
 :- module_transparent count_and_print/2.
 
 count_and_print(Goal, _) :-
-  nb_setval(successcounter,0),
-  catch(Goal,_Any,fail),     % turn exceptions into failures
-    nb_getval(successcounter,N),
-    N2 is N + 1,
-    nb_setval(successcounter,N2),
-    format('~w.~n', [Goal]),
-  fail.
-count_and_print(_, N) :-
-  nb_getval(successcounter,N).
+	nb_setval(successcounter,0),
+	(	catch(Goal,_Any,fail),     % turn exceptions into failures
+  			nb_getval(successcounter,N),
+    		N2 is N + 1,
+    		nb_setval(successcounter,N2),
+    		format('~w.~n', [Goal]),
+		fail
+    ; 	nb_getval(successcounter,N)
+    ).
   
+/* ***************************************************************
+   Findall-based counting. 
+   ***************************************************************
+   Inappropriate for large factbases but useful for counting
+   but useful for counting without duplicates -- which is 
+   currently not supported by count/2, count_facts/2 above.
+*/  
   
 :- module_transparent count_unique/2.
 
@@ -105,13 +111,6 @@ N = 100636 ;
 */
 
 
-/* ***************************************************************
-   Findall-based counting. 
-   ***************************************************************
-   Inappropriate for large factbases but useful for counting
-   but useful for counting without duplicates -- which is 
-   currently not supported by count/2, count_facts/2 above.
-*/
 
 /* *
  * count_all_and_unique(+Goal,Nall,Nunique)

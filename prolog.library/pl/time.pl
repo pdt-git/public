@@ -61,15 +61,22 @@ time(Goal0,time(UsedInf, UsedTime, Wall, Lips)) :-
  *   - reportRuntime(ForWhat,CPUMilisSinceLast)
  */
    
-
+%% performance(+Goal, ?Time, ?CountAll)
+%
+%  Measure milliseconds spent finding all results of a Goal and 
+%  count the number of results (including duplicates) and the  
+%  number of performed inferences.
 performance(Goal, Time, CountAll, Inferences) :-
 	ctc_time(count(Goal, CountAll), Time, Inferences).
 	
-/*
- * Measure milliseconds to find and count all results of a Goal.
- */ 
+%% performance(+Goal, ?Time, ?CountAll)
+%
+%  Measure milliseconds spent finding all results of a Goal and 
+%  count the number of results (including duplicates).
 performance(Goal, Time, CountAll) :- 
   ctc_time(count(Goal, CountAll), Time).
+
+
 
 /*
  * Measure time to find and count all results of a Goal and
