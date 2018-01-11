@@ -63,7 +63,8 @@ public class AnalysisCategory implements IAnalysisCategory {
 	}
 	
 	public void addAnalysis(IAnalysis analysis) {
-		analyses.add(analysis);
+		if (!analyses.contains(analysis))  // gk: added check to
+			analyses.add(analysis);        // avoid duplicate entries
 	}
 
 	@Override
