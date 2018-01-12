@@ -316,6 +316,7 @@ public class SocketSession implements PrologSession {
 				client.writeln(SocketCommunicationConstants.QUERY);
 				client.readUntil(SocketCommunicationConstants.GIVE_TERM);
 				normalizeQuery(query);
+				System.out.println("QUERY: " + query);
 				solution = read_solution(flags);
 				tryFinishReading();
 			} catch (IOException e) {
