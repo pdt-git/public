@@ -34,7 +34,8 @@ public class ResultList {
 	}
 
 	public void addResult(IResultElement resultElement) {
-		results.add(resultElement);
+		if(!results.contains(resultElement))
+			results.add(resultElement);
 	}
 	
 	public List<IResultElement> getResults() {

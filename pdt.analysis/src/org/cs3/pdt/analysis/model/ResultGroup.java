@@ -64,7 +64,8 @@ public class ResultGroup implements IResultElementGroup {
 	}
 	
 	public void addChild(IResultElement element) {
-		children.add(element);
+		if(!children.contains(element))
+			children.add(element);
 	}
 
 	@Override
