@@ -14,12 +14,14 @@
 
 package org.cs3.prolog.connector.session;
 
+import java.io.Closeable;
+
 /**
  * A simple Interface to support disposing of a session and checking if a
  * session has been disposed.
  *
  */
-public interface Disposable {
+public interface Disposable extends Closeable {
 
     /**
      * Disposes the session. Any further call (except of further dispose calls
