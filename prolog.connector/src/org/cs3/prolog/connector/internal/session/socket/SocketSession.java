@@ -47,6 +47,11 @@ public class SocketSession implements PrologSession {
 		this.process = process;
 		this.flags=flags;
 	}
+	
+	@Override
+	public void close() {
+		dispose();
+	}
 
 	/*
 	 * (non-Javadoc)
