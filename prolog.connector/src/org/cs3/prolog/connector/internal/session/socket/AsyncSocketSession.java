@@ -569,14 +569,17 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			throw process.error(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
-		}finally{
-			if(controlSession!=null){
+		} finally{
+			if (controlSession != null){
 				controlSession.dispose();
 			}
-		}
-		
+		}	
 	}
-
+	
+	@Override
+	public void close() {
+		dispose();
+	}
 	
 	@Override
 	public void dispose() {
@@ -593,7 +596,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			process.error(e);
 		} finally {
 			client = null;
-			disposing=false;
+			disposing = false;
 		}
 	}
 	
