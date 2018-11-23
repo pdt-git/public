@@ -47,14 +47,14 @@ count_success(Goal, Times) :-
   
 :- meta_predicate count(0, -).     
 
-count(Goal, _) :-
+count(Goal, Result) :-
 	nb_setval(successcounter, 0),
     (	catch(Goal,_Any,fail),     % turn exceptions into failures
     		nb_getval(successcounter, N),
     		N2 is N + 1,
     		nb_setval(successcounter, N2),
     	fail
-	;	nb_getval(successcounter, N)
+	;	nb_getval(successcounter, Result)
 	).
   
 %count(Goal, _) :-
