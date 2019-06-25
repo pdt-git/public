@@ -16,6 +16,7 @@
 	built_in/1,
 	repeat_n_times/2,
 	repeat_n_times_loop/2,
+	backtrack_at_most_n_times/2, % (Goal,N) 
 	all/1,
 	prolog_iteration_via_backtracking/1,
 	has_property/3,
