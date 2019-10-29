@@ -15,8 +15,9 @@
      consult_if_not_yet/2,            % (File, Head)
      export_goal_output/2,            % (File,Goal)
                                         % <-- OBSOLETE, use with_output_to_file/2 instead
-     with_output_to_file/2,           % (File,Goal)
-     with_output_to_file/3,           % (File,Mode,Goal)
+     with_output_to_file/2,           % (File,Goal)       Mode = write
+     with_output_to_file/3,           % (File,Mode,Goal)  Encoding = utf8
+     with_output_to_file/4,           % (File,Mode,Goal,Encoding)
      with_output_to_folder/2,         % (+Folder,+Call)           FileName=Functor+Time
      with_output_to_folder/3,         % (+Folder,-FileName,+Call) FileName=Functor+Time
      report_to_file_ctc/1,            % (CallLiteral) As above but in CTC_HOME directory 
@@ -208,11 +209,17 @@ export_all_results(File, Goal) :-
 :- module_transparent with_output_to_file/3.
 
 with_output_to_file(File,Mode,Goal) :- 
-   setup_call_cleanup( open(File, Mode, Stream),     % setup
+   with_output_to_file(File,Mode,Goal,utf8).
+
+:- module_transparent with_output_to_file/4.
+
+with_output_to_file(File,Mode,Goal,Encoding) :- 
+   setup_call_cleanup( (open(File, Mode, Stream),     
+   					   	set_stream(Stream, encoding(Encoding))
+   					    ), % setup
                        with_output_to(Stream,Goal),  % call
                        close(Stream)                 % cleanup
    ).
-
 
 % -- OBSOLETE, use with_output_to_file/3 instead:
 :- module_transparent with_output_to_file/2, export_goal_output/2.
