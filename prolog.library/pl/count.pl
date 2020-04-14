@@ -33,38 +33,23 @@
 count_facts(Goal, Nr) :-
   predicate_property(Goal, number_of_clauses(Nr)).
 
-:- meta_predicate count_success(0, -).     
-                                    
-count_success(Goal, Times) :-    
-        Counter = counter(0),       
-        (   catch(Goal,_,fail),     % turn exceptions into failures                   
-                 arg(1, Counter, N0),    
-                 N is N0 + 1,            
-                 nb_setarg(1, Counter, N),   
-            fail                    
-        ;   arg(1, Counter, Times)  
-        ).        
-  
-:- meta_predicate count(0, -).     
+:- meta_predicate count(0, -).   
+count(Goal, Times) :- count_successes(Goal, Times).
 
-count(Goal, Result) :-
+:- meta_predicate count_success(0, -).   
+count_success(Goal, Times) :- count_successes(Goal, Times).
+   
+:- meta_predicate count_successes(0, -).                                    
+count_successes(Goal, Times) :-    
 	nb_setval(successcounter, 0),
     (	catch(Goal,_Any,fail),     % turn exceptions into failures
     		nb_getval(successcounter, N),
     		N2 is N + 1,
     		nb_setval(successcounter, N2),
     	fail
-	;	nb_getval(successcounter, Result)
+	;	nb_getval(successcounter, Times)
 	).
   
-%count(Goal, _) :-
-%  flag(successcounter,_,0),
-%  (	catch(Goal,_Any,fail),     % turn exceptions into failures
-%    		flag(successcounter,N,N+1),
-%  		fail
-%  ; flag(successcounter,N,N)
-%  ).
-
 
 :- module_transparent count_and_print/2.
 
