@@ -1,15 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <units size='1'>
-  <unit id='Prolog Development Tool (PDT)' version='1.0.0.613cyHh--773733A5A557E'>
+  <unit id='Prolog Development Tool (PDT)' version='1.0.0.613cyHh--773733A5A5ACE'>
     <properties size='2'>
       <property name='org.eclipse.equinox.p2.name' value='Prolog Development Tool (PDT)'/>
       <property name='org.eclipse.equinox.p2.type.category' value='true'/>
     </properties>
     <provides size='1'>
-      <provided namespace='org.eclipse.equinox.p2.iu' name='Prolog Development Tool (PDT)' version='1.0.0.613cyHh--773733A5A557E'/>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='Prolog Development Tool (PDT)' version='1.0.0.613cyHh--773733A5A5ACE'/>
     </provides>
     <requires size='1'>
-      <required namespace='org.eclipse.equinox.p2.iu' name='PDTFeature.feature.group' range='[3.1.2.202004141126,3.1.2.202004141126]'/>
+      <required namespace='org.eclipse.equinox.p2.iu' name='PDTFeature.feature.group' range='[3.1.2.202004141456,3.1.2.202004141456]'/>
     </requires>
     <touchpoint id='null' version='0.0.0'/>
   </unit>
