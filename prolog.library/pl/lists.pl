@@ -1,7 +1,7 @@
 /*****************************************************************************
  * This file is part of the Prolog Development Tool (PDT)
  * 
- * Author: Günter Kniesel (among others)
+ * Author: Gï¿½nter Kniesel (among others)
  * WWW: http://sewiki.iai.uni-bonn.de/research/pdt/start
  * Mail: pdt@lists.iai.uni-bonn.de
  * Copyright (C): 2004-2012, CS Dept. III, University of Bonn
@@ -354,7 +354,7 @@ pp_list_element(A,Current,Indent,X) :-
 
 
 write_line_indented(Indent,What,Separator) :- 
-	atomic_list_concat(['~t~',Indent,'|~w~a~n'],Formatstring), 
+	atomic_list_concat(['~t~',Indent,'|~q~a~n'],Formatstring), 
 	format(Formatstring,[What,Separator]).
 
 
