@@ -18,6 +18,9 @@
      with_output_to_file/2,           % (File,Goal)       Mode = write
      with_output_to_file/3,           % (File,Mode,Goal)  Encoding = utf8
      with_output_to_file/4,           % (File,Mode,Goal,Encoding)
+     record_stout_in_file/4,          % (+FullFilePath,+OutPreGoal,+Goal,+OutPostGoal)
+     record_stout_in_file/2,          % (+FullFilePath,+Goal)
+     
      with_output_to_folder/2,         % (+Folder,+Call)           FileName=Functor+Time
      with_output_to_folder/3,         % (+Folder,-FileName,+Call) FileName=Functor+Time
      report_to_file_ctc/1,            % (CallLiteral) As above but in CTC_HOME directory 
@@ -221,11 +224,33 @@ with_output_to_file(File,Mode,Goal,Encoding) :-
                        close(Stream)                 % cleanup
    ).
 
-% -- OBSOLETE, use with_output_to_file/3 instead:
 :- module_transparent with_output_to_file/2, export_goal_output/2.
 with_output_to_file(File,Goal) :-  with_output_to_file(File,write,Goal).
 export_goal_output(File,Goal)  :-  with_output_to_file(File,write,Goal).
 
+
+
+% record_stout_in_file(+FullFilePath,+Goal)
+%
+% Run a Goal that writes to stout or other Stream and
+% additionally record the output in File. File is an
+% absolute file path.
+:- meta_predicate(record_stout_in_file(+,0)). 
+record_stout_in_file(File,OutGoal) :-
+	record_stout_in_file(File,true,true,Goal).
+
+% record_stout_in_file(+FullFilePath,+OutPreGoal,+Goal,+OutPostGoal)
+%
+%:- public(record_stout_in_file/4). % (File,OutPreGoal,Goal,OutPostGoal)
+:- meta_predicate(record_stout_in_file(+,0,0,0)). 
+record_stout_in_file(File,OutPreGoal,Goal,OutPostGoal) :-
+	call(OutPreGoal), % <- must write to stdout without other side-effects
+	ctc_util_files:with_output_to_file(File,append,OutPreGoal),  % replicates pre output in File
+	call(Goal),
+	ctc_util_files:with_output_to_file(File,append,OutPostGoal), % replicates post output in File
+	call(OutPostGoal). % <- must write to stdout without other side-effects
+	
+	
    
 % Portable implementation of the above predicate
 % (without SWI-specific "with_otput_to"):
@@ -271,20 +296,22 @@ create_timestamp_2(TimeStampAtom) :-
     format(atom(TimeStampAtom), '~a.~a.~a ~a:~a:~d', [D,M,Y,H,Mn,Seconds]).
     
 /*
- * Determine the absolute path to the root directory of the current 
- * workspace ASSUNIMG that this file is three levels deeper:
- *  --> WorkspaceDirPath/ProjectDir/FileDir/thisfile
+ * Determine the absolute path to the root directory of the PDT
+ * repository, ASSUMIMG that this file is three levels deeper:
+ *  --> PDTRepoDirPath/prolog.library/pl/files.pl
  */                                    
-workspace_root(WorkspaceDirPath) :-
-    file_search_path('worspace_root', WorkspaceDirPath),
+pdt_repository_root(WorkspaceDirPath) :-
+    file_search_path('pdt_repository_root', WorkspaceDirPath),
     !.
-workspace_root(WorkspaceDirPath) :-
-    source_file(workspace_root(_), CurrentFile),    % get absolute path of current file
-    file_directory_name(CurrentFile, FileDirPath),  % get path to its containing directory
-    file_base_name(FileDirPath, FileDir),           % get name of containing directory 
-    concat(ProjectDirPath, FileDir, FileDirPath),   % get path to its containing project
-    file_base_name(ProjectDirPath, ProjectDir),     % get name of containing project
-    concat(WorkspaceDirPath, ProjectDir, ProjectDirPath), % get path of its containing worksapace
-    assert(file_search_path('worspace_root', WorkspaceDirPath)).
-
+pdt_repository_root(WorkspaceDirPath) :-
+	% get absolute path of current file
+    source_file(pdt_repository_root(_), CurrentFile),
+    % get the Workspace directory by removing the 
+    % Filename,FileDirectory and ProjectDirectory 
+	atomic_list_concat(L,'/',CurrentFile), 
+	reverse(L,[_FileName,_FileDir,_ProjDir|WorkspaceDirListRev]),
+	reverse(WorkspaceDirListRev,WorkspaceDirList), 
+	atomic_list_concat(WorkspaceDirList,'/',WorkspaceDirPath),
+	% remember it as 'workspace_root' alias
+	assert(file_search_path('pdt_repository_root', WorkspaceDirPath)).
 
