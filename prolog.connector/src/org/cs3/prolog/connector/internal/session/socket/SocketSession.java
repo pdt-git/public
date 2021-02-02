@@ -153,8 +153,15 @@ public class SocketSession implements PrologSession {
 			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
 			client.writeln(SocketCommunicationConstants.QUERY_ALL);
 			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+			  System.out.println("QUERYALL:  " + query);
 			normalizeQuery(query);
 			results = readResults();
+			  try { 
+				if (results == null)
+					System.out.println("ANSWERS: null");
+				else System.out.println("ANSWERS: " + results.toString());
+			  } catch(Exception e) {
+			  }
 		} catch (IOException e) {
 			throw process.error(e);
 		} 
@@ -321,8 +328,14 @@ public class SocketSession implements PrologSession {
 				client.writeln(SocketCommunicationConstants.QUERY);
 				client.readUntil(SocketCommunicationConstants.GIVE_TERM);
 				normalizeQuery(query);
-				System.out.println("QUERY: " + query);
+				  System.out.println("QUERY: " + query);
 				solution = read_solution(flags);
+				  try { 
+					if (solution == null)
+						System.out.println("ANSWER: null");
+					else System.out.println("ANSWER: " + solution.toString());
+				  } catch(Exception e) {
+				  }
 				tryFinishReading();
 			} catch (IOException e) {
 				throw process.error(e);
